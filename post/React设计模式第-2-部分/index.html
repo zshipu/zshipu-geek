@@ -6,20 +6,20 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>React设计模式（第 1 部分） | 知识铺的博客</title>
-    <meta property="og:title" content="React设计模式（第 1 部分） - 知识铺的博客">
+    <title>React设计模式（第 2 部分） | 知识铺的博客</title>
+    <meta property="og:title" content="React设计模式（第 2 部分） - 知识铺的博客">
     <meta property="og:type" content="article">
         
-    <meta property="article:published_time" content='2021-01-25T22:00:25&#43;08:00'>
+    <meta property="article:published_time" content='2021-01-25T22:04:18&#43;08:00'>
         
         
-    <meta property="article:modified_time" content='2021-01-25T22:00:25&#43;08:00'>
+    <meta property="article:modified_time" content='2021-01-25T22:04:18&#43;08:00'>
         
     <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
-    <meta name="description" content="React设计模式（第 1 部分）">
+    <meta name="description" content="React设计模式（第 2 部分）">
         <meta name="author" content="知识铺">
         
-    <meta property="og:url" content="https://geek.zshipu.com/post/React%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%AC%AC-1-%E9%83%A8%E5%88%86/">
+    <meta property="og:url" content="https://geek.zshipu.com/post/React%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%AC%AC-2-%E9%83%A8%E5%88%86/">
     <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
 
     <link rel="stylesheet" href='/css/normalize.css'>
@@ -147,8 +147,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="post-toc-content">
         <nav id="TableOfContents">
   <ul>
-    <li><a href="#render-propsfont-_mstmutation1-_msthash289653-_msttexthash12365275渲染道具font"><a href="#render-props"></a><!-- raw HTML omitted -->渲染道具<!-- raw HTML omitted --></a></li>
-    <li><a href="#hoc-higherorder-componentsfont-_mstmutation1-_msthash304044-_msttexthash20859137hoc---高阶组件font"><a href="#hoc-higherorder-components"></a><!-- raw HTML omitted -->HOC - 高阶组件<!-- raw HTML omitted --></a></li>
+    <li><a href="#contextfont-_mstmutation1-_msthash289653-_msttexthash6936761上下文font"><a href="#context"></a><!-- raw HTML omitted -->上下文<!-- raw HTML omitted --></a>
+      <ul>
+        <li><a href="#a-few-tips-on-context-syntaxfont-_mstmutation1-_msthash304642-_msttexthash50026977有关上下文语法的一些提示font"><a href="#a-few-tips-on-context-syntax"></a><!-- raw HTML omitted -->有关上下文语法的一些提示<!-- raw HTML omitted --></a></li>
+      </ul>
+    </li>
+    <li><a href="#presentational-and-container-componentsfont-_mstmutation1-_msthash306241-_msttexthash23041928演示和容器组件font"><a href="#presentational-and-container-components"></a><!-- raw HTML omitted -->演示和容器组件<!-- raw HTML omitted --></a></li>
+    <li><a href="#compound-componentsfont-_mstmutation1-_msthash306215-_msttexthash9978683复合成分font"><a href="#compound-components"></a><!-- raw HTML omitted -->复合成分<!-- raw HTML omitted --></a></li>
   </ul>
 </nav>
     </div>
@@ -182,7 +187,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </script>
     <article class="post">
         <header>
-            <h1 class="post-title">React设计模式（第 1 部分）</h1>
+            <h1 class="post-title">React设计模式（第 2 部分）</h1>
         </header>
         <date class="post-meta meta-date">
             2021年1月25日
@@ -196,135 +201,237 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            <p><!-- raw HTML omitted -->**注：**有些模式侧重于状态管理概念，但我们可以避免和其他第三方状态管理工具，因为它们与本文的主题无关。<!-- raw HTML omitted --><code>Redux,``````Mobx</code></p>
-<h2 id="render-propsfont-_mstmutation1-_msthash289653-_msttexthash12365275渲染道具font"><a href="#render-props"></a><!-- raw HTML omitted -->渲染道具<!-- raw HTML omitted --></h2>
-<p>响应文档<a href="https://zshipu.com/t?url=https://reactjs.org/docs/render-props.html">比比皆是</a>：</p>
+            <p><!-- raw HTML omitted -->这一次，我们将讨论模式、模式和模式。<!-- raw HTML omitted --><code>Context``````Presentational and Container Components``````Compound Components</code></p>
+<h2 id="contextfont-_mstmutation1-_msthash289653-_msttexthash6936761上下文font"><a href="#context"></a><!-- raw HTML omitted -->上下文<!-- raw HTML omitted --></h2>
+<p>根据React<a href="https://zshipu.com/t?url=https://reactjs.org/docs/context.html">文档</a>：</p>
 <blockquote>
-<p>术语&quot;呈现道具&quot;是指使用其值为函数的 prop 在 React 组件之间共享代码的技术。</p>
+<p>上下文提供了一种通过组件树传递数据的方法，而无需在每个级别手动传递道具。</p>
 </blockquote>
-<p><!-- raw HTML omitted -->简单地说，<strong>它只是一个函数值的道具。函数是需要呈现的组件</strong>。也许你已经看到了：<!-- raw HTML omitted --><code>React Router</code></p>
-<p><!-- raw HTML omitted -->&lt;Route
-path='/about'
-render={(props) =&gt; (
-&lt;About {&hellip;props} isLoad={true} /&gt;
-)}
-/&gt;<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted --><!-- raw HTML omitted -->Enter fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --> <!-- raw HTML omitted --><!-- raw HTML omitted -->Exit fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --></p>
-<p>此模式的主要目的是<strong>更新同级组件的道具</strong>。它使组件更可重用，并帮助我们更容易<a href="https://zshipu.com/t?url=https://en.wikipedia.org/wiki/Separation_of_concerns">实现&quot;关注点</a>分离&quot;。</p>
-<p>让我们以以下方案为例：</p>
-<ul>
-<li><!-- raw HTML omitted -->我们需要开发一个组件。<!-- raw HTML omitted --><code>Form</code></li>
-<li><!-- raw HTML omitted -->里面我们有 和 。<!-- raw HTML omitted --><code>From``````p``````input</code></li>
-<li><!-- raw HTML omitted -->是用户的输入。<!-- raw HTML omitted --><code>input</code></li>
-<li><!-- raw HTML omitted -->显示了用户写入的。<!-- raw HTML omitted --><code>p</code></li>
-</ul>
-<p><!-- raw HTML omitted -->我们可以简单地创建类似的东西：<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->import React, { useState } from &ldquo;react&rdquo;;
-export default function Input(props) {
-return (
-&lt;&gt;
-<!-- raw HTML omitted -->
-&lt;/&gt;
-);
-}</p>
-<p>export default function Form() {
-const [value, setValue] = useState(&quot;&quot;);
-return (
-<!-- raw HTML omitted -->
-&lt;Input onChange={e =&gt; setValue(e.target.value)}/&gt;
-<!-- raw HTML omitted -->{value}<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-);
-}<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted --><!-- raw HTML omitted -->Enter fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --> <!-- raw HTML omitted --><!-- raw HTML omitted -->Exit fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --></p>
-<p>此方法存在两个问题：</p>
-<p><!-- raw HTML omitted -->1. 在这种情况下，我们不使用&quot;关注点&quot;概念，因为 应控制 和 而不是 。<!-- raw HTML omitted --><code>Input``````Value``````Form</code></p>
-<p>2. 我们的组件不太可重复使用和灵活。</p>
-<p><!-- raw HTML omitted -->我们可以重构代码并使用<strong>渲染道具</strong>，像这样：<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->import React, { useState } from &ldquo;react&rdquo;;</p>
-<p>function Input(props) {
-const [value, setValue] = useState(&quot;&quot;);
-return (
-&lt;&gt;
-&lt;input
-type=&ldquo;text&rdquo;
-value={value}
-onChange={(e) =&gt; setValue(e.target.value)}
-/&gt;
-{props.render &amp;&amp; props.render(value)}
-&lt;/&gt;
-);
-}</p>
-<p>export default function Form() {
-return (
-<!-- raw HTML omitted -->
-&lt;Input render={(value) =&gt; <!-- raw HTML omitted -->{value}<!-- raw HTML omitted -->} /&gt;
-<!-- raw HTML omitted -->
-);
-}<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted --><!-- raw HTML omitted -->Enter fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --> <!-- raw HTML omitted --><!-- raw HTML omitted -->Exit fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->这样，组件控制值，并且它更可重用（相同的功能可以使用不同的元素实现）。<!-- raw HTML omitted --><code>Input</code></p>
-<h2 id="hoc-higherorder-componentsfont-_mstmutation1-_msthash304044-_msttexthash20859137hoc---高阶组件font"><a href="#hoc-higherorder-components"></a><!-- raw HTML omitted -->HOC - 高阶组件<!-- raw HTML omitted --></h2>
-<p><code>Higher-Order Components</code><!-- raw HTML omitted -->基本上是一个函数，该函数接收组件作为参数，并返回具有特定业务逻辑的新组件。你可能在 &ldquo;Redux&rdquo; 中看到了这一点：<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->export default connect(mapStateToProps , mapDispatchToProps)(From);<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted --><!-- raw HTML omitted -->Enter fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --> <!-- raw HTML omitted --><!-- raw HTML omitted -->Exit fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->使用 ，您可以编写单独的功能到应用的公域（全局）功能，并在项目中的衍射组件上重用它。<!-- raw HTML omitted --><code>Higher-Order Components</code></p>
-<p>让我们采取另一个场景：</p>
-<ul>
-<li><!-- raw HTML omitted -->我们需要开发两个组件。<!-- raw HTML omitted --><code>menu</code></li>
-<li><!-- raw HTML omitted -->在第一个组件中，我们有一个需要阻止菜单单击事件。<!-- raw HTML omitted --><code>button</code></li>
-<li><!-- raw HTML omitted -->第二个组件也是 ，但这次我们需要_处理菜单_单击事件。<!-- raw HTML omitted --><code>button</code></li>
-</ul>
-<p>问题是我们需要两<strong>种菜单-一种是具有停止<code>传播能力的菜单，</code>另一种是没有停止的菜单。</strong></p>
-<p><!-- raw HTML omitted -->我们可以这样使用：<!-- raw HTML omitted --><code>Higher-Order Components</code></p>
-<p><!-- raw HTML omitted -->import React from &ldquo;react&rdquo;;
-import &ldquo;./style.css&rdquo;;</p>
-<p>function stopPropagation(WrappedComponent) {
-return function(){
-const handleClick = event =&gt; {
-event.stopPropagation();
-WrappedComponent.handleClick()
+<p><!-- raw HTML omitted -->简单地说，如果您有一个需要通过多个组件级别的全局状态，可以使用 。例如：如果您有一个会影响所有组件的组件，将简化该过程。<!-- raw HTML omitted --><code>Context``````theme``````Context</code></p>
+<p><!-- raw HTML omitted -->**注意。**使用时有一个潜在的障碍需要牢记：它可以降低组件的可重用性。数据将在作用域中可用，因此不能在 外部使用它。我找到了一个很棒的<a href="https://zshipu.com/t?url=https://www.youtube.com/watch?v=3XaXKiXtNjw&amp;ab_channel=ReactTraining">视频</a>来解释这个问题， 并告诉你如何避免 &ldquo;道具钻探&rdquo; 。<!-- raw HTML omitted --><code>Context``````Context``````Provider``````Provider</code></p>
+<p><!-- raw HTML omitted -->让我们看一个上下文在行动的示例：<!-- raw HTML omitted --></p>
+<p><!-- raw HTML omitted -->import React, { useContext, createContext } from &ldquo;react&rdquo;;
+import &ldquo;./styles.css&rdquo;;
+let data = {
+title: &ldquo;Welcome&rdquo;
 };
-return <!-- raw HTML omitted -->;
-}
-}</p>
-<p>function Button(props){
-const handleClick = () =&gt; console.log(&ldquo;button clicked!&quot;);
-Button.handleClick = handleClick;
-return &lt;button onClick={props.onClick || handleClick}&gt;Click Me<!-- raw HTML omitted -->;
-}</p>
-<p>function Menu(props) {
-const openMenu = () =&gt; console.log(&ldquo;menu opened!&quot;);
+const Context = createContext();</p>
+<p>export default function App() {
 return (
+&lt;Context.Provider value={data}&gt;
 <!-- raw HTML omitted -->
-<!-- raw HTML omitted -->Menu<!-- raw HTML omitted -->
-{props.children}
 <!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+&lt;/Context.Provider&gt;
 );
 }</p>
-<p>export default function App() {
-const ButtonPropagation = stopPropagation(Button);
+<p>const Card = () =&gt; {
 return (
 <!-- raw HTML omitted -->
 <!-- raw HTML omitted -->
 <!-- raw HTML omitted -->
+);
+};</p>
+<p>const CardItem = () =&gt; {
+return (
 <!-- raw HTML omitted -->
 <!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+);
+};</p>
+<p>const Title = () =&gt; {
+const data = useContext(Context);
+return <!-- raw HTML omitted -->{data.title}<!-- raw HTML omitted -->;
+};<!-- raw HTML omitted --></p>
+<p><!-- raw HTML omitted --><!-- raw HTML omitted -->Enter fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --> <!-- raw HTML omitted --><!-- raw HTML omitted -->Exit fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --></p>
+<p><!-- raw HTML omitted -->正如我们在这个（基本）示例中看到的，我们有三个级别的组件，并且我们只使用最后一个级别的 。这样，我们不需要把道具传递给所有级别。<!-- raw HTML omitted --><code>data.title</code></p>
+<h3 id="a-few-tips-on-context-syntaxfont-_mstmutation1-_msthash304642-_msttexthash50026977有关上下文语法的一些提示font"><a href="#a-few-tips-on-context-syntax"></a><!-- raw HTML omitted -->有关上下文语法的一些提示<!-- raw HTML omitted --></h3>
+<p>使用上下文时，我总是应用此语法。然而，当我再次写的时候，我发现一些事情：</p>
+<ul>
+<li><!-- raw HTML omitted -->在&quot;静态数据&quot;（如示例）中，我们实际上不需要 。我们可以自己履行这一职能：<!-- raw HTML omitted --><code>Provider</code></li>
+</ul>
+<p><!-- raw HTML omitted -->let data = {
+title: &ldquo;Welcome&rdquo;
+};
+const Context = createContext(data);</p>
+<p>export default function App() {
+return (
 <!-- raw HTML omitted -->
 <!-- raw HTML omitted -->
 <!-- raw HTML omitted -->
 );
 }<!-- raw HTML omitted --></p>
 <p><!-- raw HTML omitted --><!-- raw HTML omitted -->Enter fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --> <!-- raw HTML omitted --><!-- raw HTML omitted -->Exit fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --></p>
-<p><a href="https://zshipu.com/t?url=https://stackblitz.com/edit/react-hfen5s?file=src/App.js">链接到演示</a></p>
-<p>让我们分析一下此代码：</p>
+<p><!-- raw HTML omitted -->在比例的另一端，我们可以使用 而不是 ， 像这样：<!-- raw HTML omitted --><code>Customer``````useContext</code></p>
+<p><!-- raw HTML omitted -->const Title = () =&gt; {
+return (&lt;Context.Consumer&gt;
+{(data) =&gt; <!-- raw HTML omitted -->{data.title}<!-- raw HTML omitted -->}
+&lt;/Context.Consumer&gt;);
+};<!-- raw HTML omitted --></p>
+<p><!-- raw HTML omitted --><!-- raw HTML omitted -->Enter fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --> <!-- raw HTML omitted --><!-- raw HTML omitted -->Exit fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --></p>
+<h2 id="presentational-and-container-componentsfont-_mstmutation1-_msthash306241-_msttexthash23041928演示和容器组件font"><a href="#presentational-and-container-components"></a><!-- raw HTML omitted -->演示和容器组件<!-- raw HTML omitted --></h2>
+<p><!-- raw HTML omitted -->这些组件（也称为 ）是最著名的React模式之一。React 文档中没有引用它们，但 Dan Abramov 的文章<a href="https://zshipu.com/t?url=https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0">提供了</a>出色的指南。<!-- raw HTML omitted --><code>Smart And Dumb Components</code></p>
+<p><!-- raw HTML omitted -->简单地说，请参阅业务逻辑组件与 UI 视图的分离。<!-- raw HTML omitted --><code>Presentational And Container Components</code></p>
+<p>让我们看看另一个场景：</p>
 <ul>
-<li><!-- raw HTML omitted -->组件读取我们提到的两个。<!-- raw HTML omitted --><code>App``````Menus</code></li>
-<li><!-- raw HTML omitted -->组件读取标题和子（本例中为 ）。<!-- raw HTML omitted --><code>Menu``````Button</code></li>
-<li><code>Button</code><!-- raw HTML omitted -->具有具有单击事件的按钮元素。 * 我们需要使用导出此函数（在类组件中，您可以使用 。<!-- raw HTML omitted --><code>**handleClick``````Button.handleClick= handleClick``````static</code></li>
-<li><!-- raw HTML omitted --><strong><code>止损推进</code>是高阶组件</strong>。它接收一个组件（在我们的情况下），并发送回具有新能力的组件（在我们的情况下）。<!-- raw HTML omitted --><code>Button``````stopPropagation</code></li>
+<li><!-- raw HTML omitted -->我们需要构建一个组件。<!-- raw HTML omitted --><code>Card</code></li>
+<li><!-- raw HTML omitted -->在卡内，我们还有三个其他组件： 和 。<!-- raw HTML omitted --><code>Title``````Image``````Button</code></li>
+<li>单击后，该按钮将更改图片。</li>
 </ul>
-<p><!-- raw HTML omitted -->这是使用 的简单示例。我们可以使用，不需要在不同的组件上再次重写。更重要的是，我们可以创建其他&quot;按钮&quot;HOC，如防止防御和队列点击。<!-- raw HTML omitted --><code>Higher-Order Components``````stopPropagation</code></p>
+<p><!-- raw HTML omitted -->在开始处理组件之前，让我们创建两个文件夹：&ldquo;演示&quot;和&quot;容器&rdquo;。现在，让我们构建三个组件：<!-- raw HTML omitted --><code>Presentational</code></p>
+<p><strong>标题.js ：</strong></p>
+<p><!-- raw HTML omitted -->import React from &ldquo;react&rdquo;;
+export default function Title(props) {
+const { children, &hellip;attributes } = props;
+return &lt;h1 {&hellip;attributes}&gt;{children}<!-- raw HTML omitted -->;
+}<!-- raw HTML omitted --></p>
+<p><!-- raw HTML omitted --><!-- raw HTML omitted -->Enter fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --> <!-- raw HTML omitted --><!-- raw HTML omitted -->Exit fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --></p>
+<p><strong>图片.js ：</strong></p>
+<p><!-- raw HTML omitted -->import React from &ldquo;react&rdquo;;
+export default function Image(props) {
+const { src, alt } = props || {};
+return <!-- raw HTML omitted -->;
+}<!-- raw HTML omitted --></p>
+<p><!-- raw HTML omitted --><!-- raw HTML omitted -->Enter fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --> <!-- raw HTML omitted --><!-- raw HTML omitted -->Exit fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --></p>
+<p><strong>按钮.js ：</strong></p>
+<p><!-- raw HTML omitted -->import React from &ldquo;react&rdquo;;
+export default function Button(props) {
+const { children, &hellip;attributes } = props;
+return &lt;button {&hellip;attributes}&gt;{children}<!-- raw HTML omitted -->;
+}<!-- raw HTML omitted --></p>
+<p><!-- raw HTML omitted --><!-- raw HTML omitted -->Enter fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --> <!-- raw HTML omitted --><!-- raw HTML omitted -->Exit fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --></p>
+<p><!-- raw HTML omitted -->最后，我们可以在容器文件夹组件中生成，称为 。<!-- raw HTML omitted --><code>Card</code></p>
+<p><strong>卡.js ：</strong></p>
+<p><!-- raw HTML omitted -->import React, { useEffect, useState } from &ldquo;react&rdquo;;
+import Title from &ldquo;../Presentational/Title&rdquo;;
+import Image from &ldquo;../Presentational/Image&rdquo;;
+import Button from &ldquo;../Presentational/Button&rdquo;;</p>
+<p>export default function Card() {
+const [card, setCard] = useState({});
+const [srcIndex, setSrcIndex] = useState(0);</p>
+<p>useEffect(() =&gt; {
+setCard({
+title: &ldquo;Card Title&rdquo;,
+image: {
+imagesArray: [
+&ldquo;https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTh87QN4DkF7s92IFSfm7b7S4IR6kTdzIlhbw&amp;usqp=CAU&rdquo;,
+&ldquo;https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjFnHdaH1i1m_xOaJfXTyq4anRFwRyCg1p1Q&amp;usqp=CAU&rdquo;
+],
+alt: &ldquo;card image&rdquo;
+}
+});
+}, []);
+const { image } = card;
+const changeImage = () =&gt;
+setSrcIndex((index) =&gt;
+index &lt; image.imagesArray.length - 1 ? index + 1 : index - 1
+);
+return (
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->{card.title &amp;&amp; card.title}<!-- raw HTML omitted -->
+&lt;Image
+src={image &amp;&amp; image.imagesArray[srcIndex]}
+alt={image &amp;&amp; image.alt}
+/&gt;
+<!-- raw HTML omitted -->Change Picture<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+);
+}<!-- raw HTML omitted --></p>
+<p><!-- raw HTML omitted --><!-- raw HTML omitted -->Enter fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --> <!-- raw HTML omitted --><!-- raw HTML omitted -->Exit fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --></p>
+<p>如果您想查看完整的代码，请在此处<a href="https://zshipu.com/t?url=https://codesandbox.io/s/presentational-and-container-component-example-9df6h">查看</a>。</p>
+<p><!-- raw HTML omitted -->**注意！**你们很多人可能想知道为什么需要分成不同的组件。你可以把它们写在里面，对吗？<!-- raw HTML omitted --><code>Card</code></p>
+<p><!-- raw HTML omitted -->当我们分离组件时，我们可以在任何地方重用它们。但更重要的是，实现其他模式（如 或 ）要容易得多。<!-- raw HTML omitted --><code>HOC``````Render Props</code></p>
+<h2 id="compound-componentsfont-_mstmutation1-_msthash306215-_msttexthash9978683复合成分font"><a href="#compound-components"></a><!-- raw HTML omitted -->复合成分<!-- raw HTML omitted --></h2>
+<p>在我看来，这是最复杂的模式之一，要理解，但我会尽量简单地解释它。</p>
+<p><!-- raw HTML omitted -->当我们谈论 时，最简单的方法是思考和使用HTML。您可以将它们视为具有基本功能的一组组件。有些状态是全局（如在模式中）或从容器（如模式）管理的。<!-- raw HTML omitted --><code>Compound Components``````select``````option``````context``````presentational and container</code></p>
+<p>**<code>复合成分</code>**是这两者的混合体。这几乎就像他们每个人都有自己的状态， 他们从内部管理他们。</p>
+<p>让我们看看下一个场景：</p>
+<ul>
+<li><!-- raw HTML omitted -->我们需要开发和组件。<!-- raw HTML omitted --><code>Select``````Option</code></li>
+<li><!-- raw HTML omitted -->我们希望生动，不同的颜色。<!-- raw HTML omitted --><code>Option</code></li>
+<li><!-- raw HTML omitted -->颜色会影响颜色。<!-- raw HTML omitted --><code>Option``````Select</code></li>
+</ul>
+<p>让我们看看示例：</p>
+<p><strong>应用程序.js</strong></p>
+<p><!-- raw HTML omitted -->import React from &ldquo;react&rdquo;;
+import &ldquo;./styles.css&rdquo;;
+import Select from &ldquo;./Select&rdquo;;
+import Option from &ldquo;./Option&rdquo;;</p>
+<p>export default function App() {
+return (
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+&lt;Option.Blue&gt;option 1&lt;/Option.Blue&gt;
+&lt;Option.Red&gt;option 2&lt;/Option.Red&gt;
+<!-- raw HTML omitted -->option 3<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+);
+}<!-- raw HTML omitted --></p>
+<p><!-- raw HTML omitted --><!-- raw HTML omitted -->Enter fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --> <!-- raw HTML omitted --><!-- raw HTML omitted -->Exit fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --></p>
+<ul>
+<li><!-- raw HTML omitted -->渲染 和 组件。<!-- raw HTML omitted --><code>App``````Select``````Option</code></li>
+<li><code>Option.Blue</code><!-- raw HTML omitted -->是&quot;颜色组件&quot;。<!-- raw HTML omitted --><code>Option.Red</code></li>
+</ul>
+<p><strong>选项.js</strong></p>
+<p><!-- raw HTML omitted -->sdsdimport React, { useEffect } from &ldquo;react&rdquo;;</p>
+<p>function Option(props) {
+const { children, style, value, setStyle } = props;
+useEffect(() =&gt; {
+if (setStyle) setStyle({ backgroundColor: style.backgroundColor });
+}, [setStyle, style]);
+return (
+<!-- raw HTML omitted -->
+{children}
+<!-- raw HTML omitted -->
+);
+}</p>
+<p>Option.Blue = function (props) {
+props.style.backgroundColor = &ldquo;blue&rdquo;;
+return Option(props);
+};</p>
+<p>Option.Red = function (props) {
+props.style.backgroundColor = &ldquo;red&rdquo;;
+return Option(props);
+};
+export default Option;<!-- raw HTML omitted --></p>
+<p><!-- raw HTML omitted --><!-- raw HTML omitted -->Enter fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --> <!-- raw HTML omitted --><!-- raw HTML omitted -->Exit fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --></p>
+<ul>
+<li><!-- raw HTML omitted -->在这里，您可以看到 和 的实现。显而易见，我们渲染组件，只需向道具添加属性。<!-- raw HTML omitted --><code>Option.Blue``````Option.Red``````Option</code></li>
+<li><!-- raw HTML omitted -->来自 。它用于将所选颜色更改为所选选项的颜色。<!-- raw HTML omitted --><code>setStyle``````Select</code></li>
+</ul>
+<p><strong>选择.js</strong></p>
+<p><!-- raw HTML omitted -->import React, { useState } from &ldquo;react&rdquo;;</p>
+<p>export default function Select(props) {
+const { children } = props;
+const [style, setStyle] = useState({});</p>
+<p>const findOptionActive = (e) =&gt; {
+const index = e.target.value * 1;
+const optionStyle = { &hellip;e.nativeEvent.target[index].style };
+if (optionStyle) setStyle({ backgroundColor: optionStyle.backgroundColor });
+};</p>
+<p>const childrenWithProps = React.Children.map(children, (child, index) =&gt; {
+return React.cloneElement(child, {
+&hellip;child.props,
+value: index,
+setStyle:
+index === 0 &amp;&amp; Object.keys(style).length === 0 ? setStyle : null,
+style: { backgroundColor: &ldquo;white&rdquo; }
+});
+});</p>
+<p>return (
+<!-- raw HTML omitted -->
+{childrenWithProps}
+<!-- raw HTML omitted -->
+);
+}<!-- raw HTML omitted --></p>
+<p><!-- raw HTML omitted --><!-- raw HTML omitted -->Enter fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --> <!-- raw HTML omitted --><!-- raw HTML omitted -->Exit fullscreen mode<!-- raw HTML omitted --><!-- raw HTML omitted --></p>
+<ul>
+<li><!-- raw HTML omitted -->现在，我们有一个具有 属性的 select 函数。<!-- raw HTML omitted --><code>onChange``````style</code></li>
+<li><code>findOptionActive</code><!-- raw HTML omitted -->获取选项的样式并相应地更改选择的样式，<!-- raw HTML omitted --></li>
+<li><!-- raw HTML omitted -->魔法真的发生在.通常，当收到时，我们无法访问儿童道具 - 但在的帮助下，我们能做到。正如你所看到的，我们可以通过 ， 和 作为道具.<!-- raw HTML omitted --><code>childrenWithProps``````Select``````children``````React.Children``````React.cloneElement``````value``````setStyle``````style</code></li>
+</ul>
+<p>要获取完整<a href="https://zshipu.com/t?url=https://codesandbox.io/s/compound-components-xw3b2?file=/src/App.js">代码，</a>请单击此处。</p>
 
         </div>
 
@@ -332,7 +439,7 @@ return (
 <div class="post-archive">
     <ul class="post-copyright">
         <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
-        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/React%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%AC%AC-1-%E9%83%A8%E5%88%86/">https://geek.zshipu.com/post/React%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%AC%AC-1-%E9%83%A8%E5%88%86/</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/React%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%AC%AC-2-%E9%83%A8%E5%88%86/">https://geek.zshipu.com/post/React%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%AC%AC-2-%E9%83%A8%E5%88%86/</a></li>
         <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
         <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
     </ul>
@@ -347,6 +454,8 @@ return (
     <h2>See Also</h2>
     <ul class="listing">
         
+        <li><a href="/post/React%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%AC%AC-1-%E9%83%A8%E5%88%86/">React设计模式（第 1 部分）</a></li>
+        
         <li><a href="/post/2021-%E5%B9%B4%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BA%94%E7%94%A8%E6%A1%86%E6%9E%B6%E5%B0%86%E9%80%89%E4%BB%80%E4%B9%88/">2021 年跨平台应用框架将选什么</a></li>
         
         <li><a href="/post/Go%E8%A7%84%E8%8C%83Uber-Go-%E8%AF%AD%E8%A8%80%E7%BC%96%E7%A0%81%E8%A7%84%E8%8C%83/">Go规范：Uber Go 语言编码规范</a></li>
@@ -354,8 +463,6 @@ return (
         <li><a href="/post/Go%E5%AE%9E%E6%88%98Go%E8%AF%AD%E8%A8%80%E5%AE%9E%E6%88%98%E7%AC%94%E8%AE%B0/">Go实战：Go语言实战笔记</a></li>
         
         <li><a href="/post/%E7%A8%8B%E5%BA%8F%E5%91%98%E8%AF%BB%E4%B9%A6%E7%B3%BB%E5%88%97%E6%8E%A8%E8%8D%90%E4%B9%A6%E4%B8%80/">程序员：读书系列推荐书一</a></li>
-        
-        <li><a href="/post/Go%E6%B1%87%E6%80%BB-2%E6%9C%80%E4%BC%98%E7%A7%80%E7%9A%84Go%E5%8D%9A%E5%AE%A2/">Go汇总 2：最优秀的Go博客</a></li>
         
     </ul>
 </div>
