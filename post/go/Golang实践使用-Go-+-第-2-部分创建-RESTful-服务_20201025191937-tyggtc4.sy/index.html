@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Golang实践：使用 Go &#43; 第 2 部分创建 RESTful 服务 | 知识铺的博客</title>
+    <meta property="og:title" content="Golang实践：使用 Go &#43; 第 2 部分创建 RESTful 服务 - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2020-10-13T22:35:06&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2020-10-13T22:35:06&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="Golang实践：使用 Go &#43; 第 2 部分创建 RESTful 服务">
+        <meta name="author" content="知识铺">
+        
+    <meta property="og:url" content="https://geek.zshipu.com/post/go/Golang%E5%AE%9E%E8%B7%B5%E4%BD%BF%E7%94%A8-Go-&#43;-%E7%AC%AC-2-%E9%83%A8%E5%88%86%E5%88%9B%E5%BB%BA-RESTful-%E6%9C%8D%E5%8A%A1_20201025191937-tyggtc4.sy/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+<ul>
+<li><a href="#font-mstmutation-1-msthash-29328-msttexthash-34002657-什么是-restful-服务-font"><font _mstmutation="1" _msthash="29328" _msttexthash="34002657">什么是 RESTful 服务？</font></a></li>
+<li><a href="#font-mstmutation-1-msthash-34411-msttexthash-29193541-文件结构如何-font"><font _mstmutation="1" _msthash="34411" _msttexthash="29193541">文件结构如何？</font></a></li>
+<li><a href="#font-mstmutation-1-msthash-32955-msttexthash-41634892-产品处理程序和数据存储-font"><font _mstmutation="1" _msthash="32955" _msttexthash="41634892">产品处理程序和数据存储</font></a></li>
+<li><a href="#font-mstmutation-1-msthash-23777-msttexthash-19841588-检索产品-获取-font"><font _mstmutation="1" _msthash="23777" _msttexthash="19841588">检索产品 + 获取</font></a></li>
+<li><a href="#font-mstmutation-1-msthash-33579-msttexthash-13596141-添加新产品-post-font"><font _mstmutation="1" _msthash="33579" _msttexthash="13596141">添加新产品 + POST</font></a></li>
+<li><a href="#font-mstmutation-1-msthash-28535-msttexthash-18319717-更新现有产品-put-font"><font _mstmutation="1" _msthash="28535" _msttexthash="18319717">更新现有产品 + PUT</font></a></li>
+</ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Golang实践：使用 Go &#43; 第 2 部分创建 RESTful 服务</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2020年10月13日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            
+
+<h1 id="font-mstmutation-1-msthash-29328-msttexthash-34002657-什么是-restful-服务-font"><font _mstmutation="1" _msthash="29328" _msttexthash="34002657">什么是 RESTful 服务？</font></h1>
+
+<p><font _mstmutation="1" _msthash="34281" _msttexthash="1971112091">REST 是一种用于设计 Web 服务的体系结构方法。REST API 是围绕_资源_设计的，资源是客户端可以访问的任何类型的对象、数据或服务。资源具有标识符_，_它是唯一标识该资源的 URI。例如，特定客户订单的 URI 可能是：</font></p>
+
+<p><a href="https://zshipu.com/t?url=https://adventure-works.com/orders/1">https://adventure-works.com/orders/1</a></p>
+
+<p><font _mstmutation="1" _msthash="29432" _msttexthash="1031287868">客户端通过交换资源表示形式_与服务_交互。许多 Web API 使用 JSON（当然不需要它）作为交换格式。例如，对上面列出的 URI 的 GET 请求可能会返回此响应正文：</font></p>
+
+<p><code>{&quot;orderId&quot;:1,&quot;orderValue&quot;:99.90,&quot;productId&quot;:1,&quot;quantity&quot;:1}</code></p>
+
+<p><font _mstmutation="1" _msthash="33826" _msttexthash="381965597">HTTP 协议定义了几种为请求分配语义意义的方法。大多数 RESTful Web API 使用的常见 HTTP 方法包括：</font></p>
+
+<ul>
+<li><font _mstmutation="1" _msthash="22919" _msttexthash="345303088"><strong>GET</strong>在指定的 URI 中检索资源的表示形式。响应消息的正文包含请求资源的详细信息。</font></li>
+<li><font _mstmutation="1" _msthash="29497" _msttexthash="704191813"><strong>POST</strong>在指定的 URI 上创建新资源。请求消息的正文提供新资源的详细信息。请注意，POST 还可用于触发实际不创建资源的操作。</font></li>
+<li><font _mstmutation="1" _msthash="34021" _msttexthash="307301176"><strong>PUT</strong>在指定的 URI 上创建或替换资源。请求消息的正文指定要创建或更新的资源。</font></li>
+<li><font _mstmutation="1" _msthash="35061" _msttexthash="241479823"><strong>PATCH</strong>执行资源的部分更新。请求正文指定要应用于资源的更改集。</font></li>
+<li><font _mstmutation="1" _msthash="34190" _msttexthash="50225617"><strong>删除</strong>删除指定 URI 中的资源。</font></li>
+</ul>
+
+<p><font _mstmutation="1" _msthash="38454" _msttexthash="1236853618">我们可以使用 GraphQL 或 gRPC 体系结构来构建我们的微服务结构。那我们为什么不呢？嗯， REST 相对易于实现。在未来的博客中，我将研究用上述一些技术重新设计后端。</font></p>
+
+<h1 id="font-mstmutation-1-msthash-34411-msttexthash-29193541-文件结构如何-font"><font _mstmutation="1" _msthash="34411" _msttexthash="29193541">文件结构如何？</font></h1>
+
+<p><font _mstmutation="1" _msthash="26988" _msttexthash="3474171961">在上一个博客中，我们添加了两个名为&rdquo;你好&rdquo;和&rdquo;再见&rdquo;的新处理程序。我们不再需要这些了， 所以我们删除了它们。相反，我们创建一个名为<strong>产品的新处理程序</strong>。我们将通过此处理程序执行 CRUD 操作。由于我们正在创建一个咖啡店，我们需要一个数据存储，存储我们的产品。<strong>Product.go</strong>将存储要存储的产品字段作为 go 结构。</font></p>
+
+<p><img src="https://miro.medium.com/max/46/1*kxSW-aPMWwR4GvxbbwjaEg.png?q=20" alt="Image for post" /></p>
+
+<p><img src="https://miro.medium.com/max/243/1*kxSW-aPMWwR4GvxbbwjaEg.png" alt="Image for post" /></p>
+
+<noscript>![Image for post](https://miro.medium.com/max/486/1*kxSW-aPMWwR4GvxbbwjaEg.png)</noscript>
+
+<h1 id="font-mstmutation-1-msthash-32955-msttexthash-41634892-产品处理程序和数据存储-font"><font _mstmutation="1" _msthash="32955" _msttexthash="41634892">产品处理程序和数据存储</font></h1>
+
+<p><font _mstmutation="1" _msthash="43979" _msttexthash="5716906039">让我们先看看我们的处理程序。我们首先检查 API 请求的 HTTP 谓词，即：GET、POST 和 PUT。我们还对产品结构<strong>编写</strong>方法。这些可以通过 p.MethodName 调用。这有助于抽象我们的逻辑和可再用性。如果您查看代码的基本结构，将看到一些函数编程的原则。<strong>Golang</strong>不是一<strong>种</strong>功能语言，但有很多功能<strong>使我们能够在开发</strong>中应用功能原则，使我们的代码更加优雅、简洁、可维护、更易于理解和测试。</font></p>
+
+<p>package handlersimport (
+&ldquo;log&rdquo;
+&ldquo;net/http&rdquo;
+&ldquo;regexp&rdquo;
+&ldquo;strconv&rdquo;&ldquo;github.com/nandangrover/go-microservices/data&rdquo;
+)//Products structure that holds a logger
+type Products struct {
+l *log.Logger
+}// NewProducts function return the pointer to Products structure
+func NewProducts(l *log.Logger) *Products {
+return &amp;Products{l}
+}func (p *Products) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+if r.Method == http.MethodGet {
+p.getProducts(rw, r)
+return
+}
+if r.Method == http.MethodPost {
+p.addProduct(rw, r)
+return
+}
+if r.Method == http.MethodPut {
+// expect the id in the URI
+regex := regexp.MustCompile(<code>/([0-9]+)</code>)
+group := regex.FindAllStringSubmatch(r.URL.Path, -1)if len(group) != 1 || len(group[0]) != 2 {
+http.Error(rw, &ldquo;Invalid URI&rdquo;, http.StatusBadRequest)
+return
+}idString := group[0][1]
+// Ignore the error for now
+id, _ := strconv.Atoi(idString)p.updateProducts(id, rw, r)
+}
+// catch all other http verb with 405
+rw.WriteHeader(http.StatusMethodNotAllowed)
+}func (p *Products) getProducts(rw http.ResponseWriter, r *http.Request) {
+p.l.Println(&ldquo;Handle GET products&rdquo;)listOfProducts := data.GetProducts()
+// Use encoder as it is marginally faster than json.marshal. It&rsquo;s important when we use multiple threads
+// d, err := json.Marshal(listOfProducts)
+err := listOfProducts.ToJSON(rw)
+if err != nil {
+http.Error(rw, &ldquo;Unable to marshal json&rdquo;, http.StatusInternalServerError)
+}
+}func (p *Products) addProduct(rw http.ResponseWriter, r *http.Request) {
+p.l.Println(&ldquo;Handle POST product&rdquo;)prod := &amp;data.Product{}
+// The reason why we use a buffer reader is so that we don&rsquo;t have to allocate all the memory instantly to a slice or something like that,
+err := prod.FromJSON(r.Body)
+if err != nil {
+http.Error(rw, &ldquo;Unable to unmarshal json&rdquo;, http.StatusBadRequest)
+}
+// p.l.Printf(&ldquo;Prod %#v&rdquo;, prod)
+data.AddProduct(prod)
+}func (p *Products) updateProducts(id int, rw http.ResponseWriter, r *http.Request) {
+p.l.Println(&ldquo;Handle Put product&rdquo;)prod := &amp;data.Product{}
+// The reason why we use a buffer reader is so that we don&rsquo;t have to allocate all the memory instantly to a slice or something like that,
+err := prod.FromJSON(r.Body)
+if err != nil {
+http.Error(rw, &ldquo;Unable to unmarshal json&rdquo;, http.StatusBadRequest)
+}err = data.UpdateProduct(id, prod)
+if err == data.ErrProductNotFound {
+http.Error(rw, &ldquo;Product not found&rdquo;, http.StatusNotFound)
+return
+}if err != nil {
+http.Error(rw, &ldquo;Product not found&rdquo;, http.StatusInternalServerError)
+return
+}}</p>
+
+<p><font _mstmutation="1" _msthash="39832" _msttexthash="655781061"><strong>我们</strong>产品的数据存储定义了每个咖啡店产品的结构。我们需要导出产品，因此产品结构中的每个键都需要有一个大写第一字符。</font></p>
+
+<p><font _mstmutation="1" _msthash="22386" _msttexthash="1494353250">我们还在此文件中存储一些帮助程序实用程序方法，如 ToJSON 和 FromJSON。这些方法有助于将我们的产品结构转换为 JSON，反之亦然。抽象在这里是绝对可能的，但我们将在下一个博客中多看一下。</font></p>
+
+<p><font _mstmutation="1" _msthash="27612" _msttexthash="742656265">最后，我们还有我们的<strong>可变产品列表</strong>，它存储了对产品结构的引用的一部分。在切片中，我们添加了一些虚拟数据，可用于执行 CRUD 操作。</font></p>
+
+<p>package dataimport (
+&ldquo;encoding/json&rdquo;
+&ldquo;fmt&rdquo;
+&ldquo;io&rdquo;
+&ldquo;time&rdquo;
+)//Product defines the structure for an API product
+//Since encoding/json is a package residing outside our package we need to uppercase the first character of the fields inside the structure
+//To get nice json field names we can add struct tags though. This will output the key name as the tag name
+type Product struct {
+ID          int     <code>json:&quot;id&quot;</code>
+Name        string  <code>json:&quot;name&quot;</code>
+Description string  <code>json:&quot;description&quot;</code>
+Price       float32 <code>json:&quot;price&quot;</code>
+SKU         string  <code>json:&quot;sku&quot;</code>
+CreatedOn   string  <code>json:&quot;-&quot;</code>
+UpdatedOn   string  <code>json:&quot;-&quot;</code>
+DeletedOn   string  <code>json:&quot;-&quot;</code>
+}// Products is a type defining slice of struct Product
+type Products []*Product// ToJSON is a Method on type Products (slice of Product), used to covert structure to JSON
+func (p *Products) ToJSON(w io.Writer) error {
+// NewEncoder requires an io.Reader. http.ResponseWriter is the same thing
+encoder := json.NewEncoder(w)
+return encoder.Encode(p)
+}// FromJSON is a Method on type Products (slice of Product)
+func (p *Product) FromJSON(r io.Reader) error {
+decoder := json.NewDecoder&reg;
+return decoder.Decode(p)
+}//GetProducts - Return the product list
+func GetProducts() Products {
+return productList
+}//AddProduct - Add the product to our struct Product
+func AddProduct(p *Product) {
+p.ID = getNextID()
+productList = append(productList, p)
+}//UpdateProduct - Updates the product to our struct Product
+func UpdateProduct(id int, p *Product) error {
+_, pos, err := findProduct(id)
+if err != nil {
+return err
+}p.ID = id
+productList[pos] = preturn nil
+}func findProduct(id int) (*Product, int, error) {
+for i, p := range productList {
+if p.ID == id {
+return p, i, nil
+}
+}
+return nil, -1, ErrProductNotFound
+}// ErrProductNotFound is the Standard Product not found error structure
+var ErrProductNotFound = fmt.Errorf(&ldquo;Product not found&rdquo;)// Increments the Product ID by one
+func getNextID() int {
+lastProduct := productList[len(productList)-1]
+return lastProduct.ID + 1
+}var productList = []*Product{
+&amp;Product{
+ID:          1,
+Description: &ldquo;Latte&rdquo;,
+Name:        &ldquo;Milky coffee&rdquo;,
+SKU:         &ldquo;abc323&rdquo;,
+Price:       200,
+UpdatedOn:   time.Now().UTC().String(),
+CreatedOn:   time.Now().UTC().String(),
+},
+&amp;Product{
+ID:          2,
+Description: &ldquo;Expresso&rdquo;,
+Name:        &ldquo;Strong coffee&rdquo;,
+SKU:         &ldquo;errfer&rdquo;,
+Price:       150,
+UpdatedOn:   time.Now().UTC().String(),
+CreatedOn:   time.Now().UTC().String(),
+},
+}</p>
+
+<h1 id="font-mstmutation-1-msthash-23777-msttexthash-19841588-检索产品-获取-font"><font _mstmutation="1" _msthash="23777" _msttexthash="19841588">检索产品 + 获取</font></h1>
+
+<p><font _mstmutation="1" _msthash="28236" _msttexthash="295669699">要检索我们的产品，我们可以通过基于 Unix 的终端以这样的方式发送请求：</font></p>
+
+<p>curl -v localhost:9090 | jq</p>
+
+<blockquote>
+<p><font _mstmutation="1" _msthash="29367" _msttexthash="32866067">jq 有助于格式化响应。</font></p>
+</blockquote>
+
+<p><font _mstmutation="1" _msthash="23595" _msttexthash="890288425">产品.go 处理程序在此请求下激活。在 ServeHTTP 方法中，我们写了一个 if 条件，用于检查使用 http 请求的 HTTP 谓词。方法获取，本质上是字符串&rdquo;GET&rdquo;。</font></p>
+
+<p>if r.Method == http.MethodGet {
+p.getProducts(rw, r)
+return
+}</p>
+
+<p><font _mstmutation="1" _msthash="39416" _msttexthash="2325191349"><strong>getproducts（）</strong>方法是 GET 请求的。我们将 HTTP 响应编写器发送到此方法。此方法反过来从我们的数据存储<strong>中获取</strong>产品列表切片。由于它是一个切片，我们将其转换为 JSON，使用我们的 ToJSON 实用程序方法，该方法在结构产品的类型上定义。</font></p>
+
+<p>func (p *Products) getProducts(rw http.ResponseWriter, r *http.Request) {
+p.l.Println(&ldquo;Handle GET products&rdquo;)listOfProducts := data.GetProducts()
+// Use encoder as it is marginally faster than json.marshal. It&rsquo;s important when we use multiple threads
+// d, err := json.Marshal(listOfProducts)
+err := listOfProducts.ToJSON(rw)
+if err != nil {
+http.Error(rw, &ldquo;Unable to marshal json&rdquo;, http.StatusInternalServerError)
+}
+}</p>
+
+<p><font _mstmutation="1" _msthash="28054" _msttexthash="9877518755">编码将 v 的 JSON 编码写入流，后跟一个新行字符。我们本可以用<strong>json 的元帅</strong>在这里，但我们没有。编码器和解码器将结构写入流切片或从流切片读取数据并将其转换为结构。在内部，它也实现封送方法。唯一的区别是，如果你想玩字符串或字节使用封送，如果任何数据，你想读取或写入一些编写器接口（如我们的响应编写器），使用编码和解码。这反过来也更快。我们不会注意到单个 API 调用有任何速度差异，但使用编码器而不是 Marshal 可以更好地处理数千个同时进行的 API 调用。您可以在此处阅读有关编码/json 包<a href="https://zshipu.com/t?url=https://golang.org/pkg/encoding/json/#Encoder">的更多内容</a>。</font></p>
+
+<p>// ToJSON is a Method on type Products (slice of Product), used to covert structure to JSON
+func (p *Products) ToJSON(w io.Writer) error {
+// NewEncoder requires an io.Reader. http.ResponseWriter is the same thing
+encoder := json.NewEncoder(w)
+return encoder.Encode(p)
+}</p>
+
+<p><font _mstmutation="1" _msthash="35048" _msttexthash="280691177">因此，此编码器将我们的响应写入响应编写器。API 调用的最终输出有点像：</font></p>
+
+<p>[
+{
+&ldquo;id&rdquo;: 1,
+&ldquo;name&rdquo;: &ldquo;Milky coffee&rdquo;,
+&ldquo;description&rdquo;: &ldquo;Latte&rdquo;,
+&ldquo;price&rdquo;: 200,
+&ldquo;sku&rdquo;: &ldquo;abc323&rdquo;
+},
+{
+&ldquo;id&rdquo;: 2,
+&ldquo;name&rdquo;: &ldquo;Strong coffee&rdquo;,
+&ldquo;description&rdquo;: &ldquo;Expresso&rdquo;,
+&ldquo;price&rdquo;: 150,
+&ldquo;sku&rdquo;: &ldquo;errfer&rdquo;
+}
+]</p>
+
+<h1 id="font-mstmutation-1-msthash-33579-msttexthash-13596141-添加新产品-post-font"><font _mstmutation="1" _msthash="33579" _msttexthash="13596141">添加新产品 + POST</font></h1>
+
+<p><font _mstmutation="1" _msthash="23517" _msttexthash="267359261">要添加新产品，我们可以通过基于 Unix 的终端以这样的方式发送请求：</font></p>
+
+<p>curl -v localhost:9090 -XPOST -d {&ldquo;name&rdquo;: &ldquo;Tea&rdquo;, &ldquo;description&rdquo;: &ldquo;Cuppa Tea&rdquo;, &ldquo;price&rdquo;: 10}</p>
+
+<p><font _mstmutation="1" _msthash="23725" _msttexthash="806933088">添加产品的结构类似于获取产品。我们遵循相同的数据传输流程：到数据存储的处理程序。处理程序识别 HTTP 谓词并调用适当的方法，即<strong>addProduct</strong>。</font></p>
+
+<p><font _mstmutation="1" _msthash="33644" _msttexthash="1430170313">此方法反过来创建对我们的产品结构的引用，该结构定义了我们的产品结构。请求正文中接收的 JSON 数据将发送到实用程序方法 FromJSON，以解码为我们定义的结构（即产品）的结构化引用。</font></p>
+
+<p>func (p *Products) addProduct(rw http.ResponseWriter, r *http.Request) {
+p.l.Println(&ldquo;Handle POST product&rdquo;)prod := &amp;data.Product{}
+// The reason why we use a buffer reader is so that we don&rsquo;t have to allocate all the memory instantly to a slice or something like that,
+err := prod.FromJSON(r.Body)
+if err != nil {
+http.Error(rw, &ldquo;Unable to unmarshal json&rdquo;, http.StatusBadRequest)
+}
+// p.l.Printf(&ldquo;Prod %#v&rdquo;, prod)
+data.AddProduct(prod)
+}</p>
+
+<p><font _mstmutation="1" _msthash="29705" _msttexthash="613383173">现在，我们已将产品存储为结构产品的参考，我们将它追加到<strong>我们的产品列表切片中</strong>，该切片用作我们的临时数据库存储。</font></p>
+
+<p>func AddProduct(p *Product) {
+p.ID = getNextID()
+productList = append(productList, p)
+}</p>
+
+<p><font _mstmutation="1" _msthash="28886" _msttexthash="782232490">为我们的产品生成一个新的 ID，并附加到我们的切片。如果我们向我们的产品 API 发送 GET 请求，我们将看到现在列出的 3 种产品，而不是 2 个。</font></p>
+
+<p>[
+{
+&ldquo;id&rdquo;: 1,
+&ldquo;name&rdquo;: &ldquo;Milky coffee&rdquo;,
+&ldquo;description&rdquo;: &ldquo;Latte&rdquo;,
+&ldquo;price&rdquo;: 200,
+&ldquo;sku&rdquo;: &ldquo;abc323&rdquo;
+},
+{
+&ldquo;id&rdquo;: 2,
+&ldquo;name&rdquo;: &ldquo;Strong coffee&rdquo;,
+&ldquo;description&rdquo;: &ldquo;Expresso&rdquo;,
+&ldquo;price&rdquo;: 150,
+&ldquo;sku&rdquo;: &ldquo;errfer&rdquo;
+},{
+&ldquo;id&rdquo;: 3,
+&ldquo;name&rdquo;: &ldquo;Tea&rdquo;,
+&ldquo;description&rdquo;: &ldquo;Cuppa Tea&rdquo;,
+&ldquo;price&rdquo;: 10
+}
+]</p>
+
+<h1 id="font-mstmutation-1-msthash-28535-msttexthash-18319717-更新现有产品-put-font"><font _mstmutation="1" _msthash="28535" _msttexthash="18319717">更新现有产品 + PUT</font></h1>
+
+<p><font _mstmutation="1" _msthash="28093" _msttexthash="281818355">要更新现有产品，我们可以通过基于 Unix 的终端以这样的方式发送请求：</font></p>
+
+<p>curl -v localhost:<sup>9090</sup>&frasl;<sub>2</sub> -XPUT -d {&ldquo;name&rdquo;: &ldquo;Frappuccino&rdquo;, &ldquo;description&rdquo;: &ldquo;Cuppa frappuccino&rdquo;, &ldquo;price&rdquo;: 100}</p>
+
+<p><font _mstmutation="1" _msthash="31902" _msttexthash="891551752">更新产品的结构类似于获取产品。我们遵循相同的数据传输流程：到数据存储的处理程序。处理程序识别 HTTP 谓词并调用适当的方法，即<strong>更新产品</strong>。</font></p>
+
+<p><font _mstmutation="1" _msthash="24024" _msttexthash="580421517">PUT 请求比简单的 POST 或 GET 更难解析，因为我们必须从 URI 中提取请求的 ID。我们如何做到这一点？我们使用一些 regexp 。</font></p>
+
+<p><font _mstmutation="1" _msthash="27313" _msttexthash="3149617757">由于我们的 ID 是一个数字，我们编写一个 regexp 来搜索一组数字 （0+9），这些数字可以重复，由 + 标记表示。在运行 FindAllStringSubmatch 时，如果我们获得成功的匹配，匹配字符串将驻留在多维数组中。我们从索引 {0}{1} 中提取必要的组。我将留给您来找出为什么索引位于 {1} 而不是 {0}中。</font></p>
+
+<p><font _mstmutation="1" _msthash="30017" _msttexthash="387511956">Regexp 真的很有趣， 在很多方面都很有帮助。您可以在此处阅读有关 Golang 标准库提供的方法<a href="https://zshipu.com/t?url=https://golang.org/pkg/regexp/">。</a></font></p>
+
+<p>if r.Method == http.MethodPut {
+// expect the id in the URI
+regex := regexp.MustCompile(<code>/([0-9]+)</code>)
+group := regex.FindAllStringSubmatch(r.URL.Path, -1)if len(group) != 1 || len(group[0]) != 2 {
+http.Error(rw, &ldquo;Invalid URI&rdquo;, http.StatusBadRequest)
+return
+}idString := group[0][1]
+// Ignore the error for now
+id, _ := strconv.Atoi(idString)p.updateProducts(id, rw, r)
+}</p>
+
+<p><font _mstmutation="1" _msthash="34905" _msttexthash="283836826">现在，我们有我们需要更新的产品 ID，我们可以从请求正文中提取更新的信息。</font></p>
+
+<p><font _mstmutation="1" _msthash="28730" _msttexthash="530932675">我们将从身体中解码为指向数据存储内产品的结构参考。此步骤类似于 POST 请求。接下来<strong>将调用</strong>数据存储中的 UpdateProduct 方法。</font></p>
+
+<p>func (p *Products) updateProducts(id int, rw http.ResponseWriter, r *http.Request) {
+p.l.Println(&ldquo;Handle Put product&rdquo;)prod := &amp;data.Product{}
+// The reason why we use a buffer reader is so that we don&rsquo;t have to allocate all the memory instantly to a slice or something like that,
+err := prod.FromJSON(r.Body)
+if err != nil {
+http.Error(rw, &ldquo;Unable to unmarshal json&rdquo;, http.StatusBadRequest)
+}err = data.UpdateProduct(id, prod)
+if err == data.ErrProductNotFound {
+http.Error(rw, &ldquo;Product not found&rdquo;, http.StatusNotFound)
+return
+}if err != nil {
+http.Error(rw, &ldquo;Product not found&rdquo;, http.StatusInternalServerError)
+return
+}}</p>
+
+<p><font _mstmutation="1" _msthash="29120" _msttexthash="4319252613">要更新我们的产品，我们需要先找到它。我们有 URI 的 ID 是件好事，因为这是我们产品的唯一唯一标识符。为此，我们通过遍听产品<strong>列表切片</strong>并返回产品参考、切片中的索引和错误（如果找到产品为零）。。我们使用此索引（pos 是此索引的变量名称），将引用替换为请求正文中收到的 JSON（显然它现在解码为对产品结构的引用）。</font></p>
+
+<p>//UpdateProduct - Updates the product to our struct Product
+func UpdateProduct(id int, p *Product) error {
+_, pos, err := findProduct(id)
+if err != nil {
+return err
+}p.ID = id
+productList[pos] = preturn nil
+}func findProduct(id int) (*Product, int, error) {
+for i, p := range productList {
+if p.ID == id {
+return p, i, nil
+}
+}
+return nil, -1, ErrProductNotFound
+}</p>
+
+<p><font _mstmutation="1" _msthash="28821" _msttexthash="428141844">索引 2 中的产品现在应该已更新。如果我们向产品 API 发送 GET 请求，我们将看到第二个产品更新为新值。</font></p>
+
+<p>[
+{
+&ldquo;id&rdquo;: 1,
+&ldquo;name&rdquo;: &ldquo;Milky coffee&rdquo;,
+&ldquo;description&rdquo;: &ldquo;Latte&rdquo;,
+&ldquo;price&rdquo;: 200,
+&ldquo;sku&rdquo;: &ldquo;abc323&rdquo;
+},
+{
+&ldquo;id&rdquo;: 2,
+&ldquo;name&rdquo;: &ldquo;Frappuccino&rdquo;,
+&ldquo;description&rdquo;: &ldquo;Cuppa Frappuccino&rdquo;,
+&ldquo;price&rdquo;: 100,
+&ldquo;sku&rdquo;: &ldquo;errfer&rdquo;
+},{
+&ldquo;id&rdquo;: 3,
+&ldquo;name&rdquo;: &ldquo;Tea&rdquo;,
+&ldquo;description&rdquo;: &ldquo;Cuppa Tea&rdquo;,
+&ldquo;price&rdquo;: 10
+}
+]</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/go/Golang%E5%AE%9E%E8%B7%B5%E4%BD%BF%E7%94%A8-Go-&#43;-%E7%AC%AC-2-%E9%83%A8%E5%88%86%E5%88%9B%E5%BB%BA-RESTful-%E6%9C%8D%E5%8A%A1_20201025191937-tyggtc4.sy/">https://geek.zshipu.com/post/go/Golang%E5%AE%9E%E8%B7%B5%E4%BD%BF%E7%94%A8-Go-&#43;-%E7%AC%AC-2-%E9%83%A8%E5%88%86%E5%88%9B%E5%BB%BA-RESTful-%E6%9C%8D%E5%8A%A1_20201025191937-tyggtc4.sy/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/go/Golang%E5%AE%9E%E8%B7%B5%E4%BD%BF%E7%94%A8-Go-&#43;-%E7%AC%AC-2-%E9%83%A8%E5%88%86%E5%88%9B%E5%BB%BA-RESTful-%E6%9C%8D%E5%8A%A1/">Golang实践：使用 Go &#43; 第 2 部分创建 RESTful 服务</a></li>
+        
+        <li><a href="/post/go/Golang%E5%AE%9E%E8%B7%B5%E4%BD%BF%E7%94%A8-Go&#43;-%E7%AC%AC-1-%E9%83%A8%E5%88%86%E5%88%9B%E5%BB%BA%E5%BE%AE%E6%9C%8D%E5%8A%A1/">Golang实践：使用 Go&#43; 第 1 部分创建微服务</a></li>
+        
+        <li><a href="/post/go/Golang%E5%AE%9E%E8%B7%B5%E4%BD%BF%E7%94%A8-Go&#43;-%E7%AC%AC-1-%E9%83%A8%E5%88%86%E5%88%9B%E5%BB%BA%E5%BE%AE%E6%9C%8D%E5%8A%A1_20201025191937-kxxfdkp.sy/">Golang实践：使用 Go&#43; 第 1 部分创建微服务</a></li>
+        
+        <li><a href="/post/go/Golang%E5%AE%9E%E8%B7%B5Golang%E7%9A%84-3-%E4%B8%AA%E9%99%B7%E9%98%B1/">Golang实践：Golang的 3 个陷阱</a></li>
+        
+        <li><a href="/post/go/Golang%E5%AE%9E%E8%B7%B5Golang%E7%9A%84-3-%E4%B8%AA%E9%99%B7%E9%98%B1_20201025191937-l5xlcfk.sy/">Golang实践：Golang的 3 个陷阱</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/golang'>golang</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/%E6%A0%B7%E5%BC%8F%E4%B8%AD%E7%9A%84-Web-%E7%BB%84%E4%BB%B6/" title="样式中的 Web 组件">样式中的 Web 组件</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/python/Python-%E7%A8%8B%E5%BA%8F%E4%BB%A5%E6%9F%A5%E6%89%BE%E4%B8%A4%E4%B8%AA%E5%88%97%E8%A1%A8%E7%9A%84%E4%BA%A4%E9%9B%86/" title="Python 程序以查找两个列表的交集">Python 程序以查找两个列表的交集</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/java/%E4%BD%BF%E7%94%A8Java%E6%89%BE%E5%88%B0%E4%B8%A4%E4%B8%AA%E9%93%BE%E6%8E%A5%E5%88%97%E8%A1%A8%E7%9A%84%E4%BA%A4%E5%8F%89%E7%82%B9/" title="使用Java找到两个链接列表的交叉点">使用Java找到两个链接列表的交叉点</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/ux/UX-%E8%AE%BE%E8%AE%A1%E5%A6%82%E4%BD%95%E5%BC%80%E5%A7%8B%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="UX 设计：如何开始（完整指南）">UX 设计：如何开始（完整指南）</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/linux/Vim-2021-%E5%9C%A8-Vim-%E4%B8%AD%E6%B7%BB%E5%8A%A0%E4%B8%8A%E4%B8%8B%E6%96%87%E8%8F%9C%E5%8D%95/" title="Vim 2021： 在 Vim 中添加上下文菜单">Vim 2021： 在 Vim 中添加上下文菜单</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/linux/SSH-%E9%85%8D%E7%BD%AE/" title="SSH - 配置">SSH - 配置</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/news/10-%E5%88%86%E9%92%9F%E5%86%85%E5%AD%A6%E5%88%B0%E7%9A%84%E4%B8%9C%E8%A5%BF%E8%BF%99%E5%B0%86%E5%AF%B9%E6%82%A8%E7%9A%84%E7%BC%96%E7%A8%8B%E7%94%9F%E6%B6%AF%E7%9A%84%E5%85%B6%E4%BD%99%E9%83%A8%E5%88%86%E6%9C%89%E7%94%A8/" title="10 分钟内学到的东西，这将对您的编程生涯的其余部分有用">10 分钟内学到的东西，这将对您的编程生涯的其余部分有用</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/java/JUnit-4%E5%92%8C5%E6%B3%A8%E9%87%8A%E6%AF%8F%E4%B8%AA%E5%BC%80%E5%8F%91%E4%BA%BA%E5%91%98%E5%BA%94%E8%AF%A5%E7%9F%A5%E9%81%93/" title="JUnit 4和5注释每个开发人员应该知道">JUnit 4和5注释每个开发人员应该知道</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/java/%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BD%A0%E5%BA%94%E8%AF%A5%E5%85%88%E5%AD%A6%E4%B9%A0-JavaScript-%E5%8E%9F%E7%90%86-%E4%B8%8D%E6%98%AF%E6%9C%80%E7%83%AD%E9%97%A8%E7%9A%84%E6%A1%86%E6%9E%B6/" title="为什么你应该先学习 JavaScript 原理 （不是最热门的框架）">为什么你应该先学习 JavaScript 原理 （不是最热门的框架）</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/web/%E7%BD%91%E7%BB%9C%E6%B5%8F%E8%A7%88%E5%99%A8%E5%BC%95%E6%93%8E%E6%A6%82%E8%BF%B0-%E5%88%9D%E5%AD%A6%E8%80%85/" title="网络浏览器引擎概述 ： 初学者">网络浏览器引擎概述 ： 初学者</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/Golang/">Golang (6)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="">Java</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
