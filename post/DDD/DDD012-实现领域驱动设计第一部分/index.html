@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>DDD012-实现领域驱动设计：第一部分 | 知识铺的博客</title>
+    <meta property="og:title" content="DDD012-实现领域驱动设计：第一部分 - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2021-09-24T23:27:42&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2021-09-24T23:27:42&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="DDD012-实现领域驱动设计：第一部分">
+        <meta name="author" content="知识铺">
+        
+    <meta property="og:url" content="https://geek.zshipu.com/post/DDD/DDD012-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+<ul>
+<li><a href="#简单代码">简单代码！</a>
+<ul>
+<li><a href="#什么是域驱动设计">什么是域驱动设计？</a></li>
+<li><a href="#oop-solid">OOP &amp; SOLID</a></li>
+<li><a href="#ddd-层-清洁架构">DDD 层 = 清洁架构</a></li>
+<li><a href="#核心构建块">核心构建块</a></li>
+<li><a href="#领域层构建块">领域层构建块</a></li>
+<li><a href="#应用层构建块">应用层构建块</a></li>
+<li><a href="#实施-大局">实施：大局</a>
+<ul>
+<li><a href="#net-解决方案的分层">.NET 解决方案的分层</a></li>
+<li><a href="#领域层">领域层</a></li>
+<li><a href="#应用层">应用层</a></li>
+<li><a href="#演示层">演示层</a></li>
+<li><a href="#远程服务层">远程服务层</a></li>
+<li><a href="#基础设施层">基础设施层</a></li>
+<li><a href="#解决方案中项目的依赖性">解决方案中项目的依赖性</a></li>
+</ul></li>
+<li><a href="#基于-ddd-的应用程序的执行流">基于 DDD 的应用程序的执行流</a>
+<ul>
+<li><a href="#数据库提供商-orm-独立性">数据库提供商 / ORM 独立性</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">DDD012-实现领域驱动设计：第一部分</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年9月24日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            
+
+<h1 id="简单代码">简单代码！</h1>
+
+<p>踢足球很简单，但踢简单的足球是最难的。- 约翰 · 克鲁伊夫</p>
+
+<p>如果我们把这个著名的名言作为编程，我们可以说：</p>
+
+<p>编写代码非常简单，但编写简单的代码是最
+难的事情。</p>
+
+<h2 id="什么是域驱动设计">什么是域驱动设计？</h2>
+
+<p>域驱动设计 （DDD） 是将实现与
+不断发展的模型连接起来，满足复杂需求的软件开发方法;</p>
+
+<p>DDD 适用于复杂的领域和大规模应用，而不是简单的 CRUD 应用程序。</p>
+
+<p>它侧重于核心域逻辑，而不是基础架构细节。它有助于构建灵活、模块化和可维护的代码库。</p>
+
+<h2 id="oop-solid">OOP &amp; SOLID</h2>
+
+<p>实现 DDD 高度依赖于对象导向
+编程 （OOP） 和固态原则。</p>
+
+<p>实际上，它实施并扩展了这些原则。因此，对 OOP 和 SOLID 的良好理解对您帮助
+很大，同时真正实现 DDD。</p>
+
+<h2 id="ddd-层-清洁架构">DDD 层 = 清洁架构</h2>
+
+<p>基于域
+的解决方案有四个基本层。</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--vT8Jymsu--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/irqyc0dznw8igamysj6p.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109242328362.png" alt="image" /></a></p>
+
+<p>业务逻辑分为两层，领域层和
+应用层，同时包含不同类型的
+业务逻辑：</p>
+
+<ul>
+<li>域层实现领域/系统的核心、用例独立业务逻辑。</li>
+<li>应用层根据领域实施应用程序的使用案例。使用案例可视为用户界面 （UI） 上的用户交互。</li>
+<li>演示层包含应用程序的 UI 元素（页面、组件）。</li>
+<li>基础设施层通过实施对第三方库和系统的抽象和集成来支持其他层。</li>
+</ul>
+
+<p>相同的分层可以显示为下面的图表，称为清洁架构，有时洋葱架构：</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--raQo-u04--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/450vmau8umxq67sxp78d.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109242329616.png" alt="image" /></a></p>
+
+<h2 id="核心构建块">核心构建块</h2>
+
+<p>DDD 主要关注域和应用层，而忽略演示文稿和基础架构。它们被视为详细信息，业务层不应依赖于它们。</p>
+
+<p>这并不意味着演示文稿和基础架构层并不重要。</p>
+
+<p>它们非常重要。UI 框架和数据库提供商有自己的规则和最佳实践，您需要了解和应用这些规则和最佳实践。但是，这些不在 DDD 主题中。</p>
+
+<p>本节介绍了域和应用层的基本构建基块。</p>
+
+<h2 id="领域层构建块">领域层构建块</h2>
+
+<p>• 实体：实体是具有自身属性（状态、数据）和方法的对象，它们执行在这些属性上执行的业务逻辑。实体由其唯一标识符 （Id） 表示。具有不同 Id 的两个实体对象被视为不同的实体。</p>
+
+<p>• 值对象：值对象是另一种由其属性而不是唯一 ID 标识的域对象。这意味着具有相同属性的两个值对象被视为同一对象。值对象通常以不可变的身份实现，并且大多比实体简单得多。</p>
+
+<p>• 聚合和聚合根：聚合是由聚合根对象结合在一起的对象（实体和值对象）集群。聚合根是具有某些额外职责的实体的特定类型。</p>
+
+<p>• 存储库（接口）：存储库是域和应用层用于访问数据
+持久性系统（数据库）的类似集合的界面。它从业务代码中隐藏了 DBMS 的复杂性。域层包含存储库的界面 s。</p>
+
+<p>• 域服务：域服务是执行域核心业务规则的无国籍服务。实现依赖于
+多个聚合（实体）类型或某些外部服务的域逻辑是有用的。</p>
+
+<p>• 规范：规范用于定义实体和其他业务对象的命名、可重复使用和可组合过滤器。</p>
+
+<p>• 域事件：域事件是当域特定事件发生时以松散耦合的方式通知其他服务的一种方式。</p>
+
+<h2 id="应用层构建块">应用层构建块</h2>
+
+<p>• 申请服务：应用程序服务是实现应用程序使用
+案例的无国籍服务。应用程序服务通常获取并返回 DTO。它由演示层使用。它使用并协调域对象以实现使用案例。使用案例通常被视为工作单位。</p>
+
+<p>• 数据传输对象 （DTO）：DTO 是一个简单的对象，没有任何业务逻辑用于在应用程序和演示层之间传输状态（数据）。</p>
+
+<p>• 工作单位（UOW）：工作单位是一项原子工作，应作为交易单位进行。UOW 内部的所有操作都应在成功时承诺，或在失败时回滚。</p>
+
+<h2 id="实施-大局">实施：大局</h2>
+
+<h3 id="net-解决方案的分层">.NET 解决方案的分层</h3>
+
+<p>下图显示了使用<a href="https://docs.abp.io/en/abp/latest/Startup-Templates/Application">ABP 的应用程序启动模板创建的</a>视觉工作室解决方案：</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--kxgC7wiW--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/17pk6iydsy2ynw6rgzov.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109242329935.png" alt="image" /></a></p>
+
+<h3 id="领域层">领域层</h3>
+
+<p>领域层分为两个项目：</p>
+
+<ul>
+<li>问题跟踪.领域是包含之前引入的所有构建基块（实体、值对象、领域服务、规范、存储库接口等）的基本域层。</li>
+</ul>
+
+<p>• 问题跟踪.领域共享是一个薄项目，包含属于域层的某些类型，但与所有其他层共享。例如，它可能包含一些与域对象相关的常数和内含物，但需要由其他层重复使用。</p>
+
+<h3 id="应用层">应用层</h3>
+
+<p>应用层也分为两个项目：</p>
+
+<ul>
+<li>问题跟踪.应用程序.合同包含这些接口使用的应用程序服务接口和 DTO。此项目可由客户申请（包括 UI）共享。</li>
+<li>问题跟踪.应用程序是实现合同项目中
+定义的界面的基本应用层。</li>
+</ul>
+
+<h3 id="演示层">演示层</h3>
+
+<ul>
+<li>问题跟踪.Web 是本示例的核心 MVC / 剃刀页面应用程序的 ASP.NET。这是唯一可执行的应用程序，为应用程序和 API 提供服务。</li>
+</ul>
+
+<h3 id="远程服务层">远程服务层</h3>
+
+<ul>
+<li>问题跟踪.httpapi 项目包含解决方案定义的 HTTP API。如果可用，它通常包含 MVC 控制器和相关型号。因此，您在本项目中编写 HTTP API。</li>
+<li>当您
+有需要消耗 HTTP API 的 C#应用程序时，问题跟踪.Httpappi.客户端项目是有用的。一旦客户应用程序引用此项目，它可以直接注入和使用应用程序服务。这可以通过 ABP 框架的动态 C# 客户端 API 代理系统的帮助实现。</li>
+</ul>
+
+<h3 id="基础设施层">基础设施层</h3>
+
+<p>在 DDD 实施中，您可能有一个
+单一的基础设施项目来实现所有抽象和集成，或者您可能为每个依赖项有不同的项目。</p>
+
+<p>我们建议采取平衡的办法：为
+主要基础设施依赖性（如实体框架核心）
+创建单独的项目，并为其他基础设施创建共同基础设施项目。</p>
+
+<p>ABP 的启动解决方案有两个实体
+框架核心集成项目;</p>
+
+<p>• 问题跟踪.实体框架核心是 EF 核心的基本集成包。您的应用程序的 DbContext、数据库映射、存储库的实现和其他 EF 核心相关内容都位于此处。</p>
+
+<p>• 问题跟踪.实体框架工作核心.DbM移民是一个管理代码第一数据库迁移的特殊项目。此项目中有一个单独的 DbContext 来跟踪迁移。您通常不会经常接触此项目，只是需要创建新的数据库迁移或添加具有某些数据库表的应用程序模块，并且自然需要创建新的数据库迁移。</p>
+
+<p>还有一个项目，问题跟踪.DbMigrator，这是一个简单的控制台应用程序，迁移数据库模式和种子的初始数据，当你执行它。</p>
+
+<p>它是一个有用的实用程序应用程序，您可以将其用于开发和生产环境中。</p>
+
+<h3 id="解决方案中项目的依赖性">解决方案中项目的依赖性</h3>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--55pY2DTv--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/6zaci8cj7ec87j1wxs4e.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109242329759.png" alt="image" /></a></p>
+
+<h2 id="基于-ddd-的应用程序的执行流">基于 DDD 的应用程序的执行流</h2>
+
+<p>下图显示了基于 DDD 模式开发的 Web 应用的典型请求流。</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--APSipIiy--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ls87tb7edzwth6u4g7c1.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109242329608.png" alt="image" /></a></p>
+
+<p>• 请求通常从 UI 上的用户交互（一个使用案例）开始，该交互会导致 HTTP 请求到服务器。</p>
+
+<p>• 演示层（或分布式服务层中的 Razor Page 处理器）处理请求，并在此阶段执行一些交叉问题（授权、验证、异常处理等）。
+控制器/Page 注入相关的应用程序服务界面，并通过发送和接收 DTO 来调用其方法。</p>
+
+<p>• 应用服务使用域对象（实体、存储库接口、域服务等）实现使用案例。应用层实现一些交叉问题（授权、验证等）。应用服务方法应是工作单位。这意味着它应该是原子的。</p>
+
+<p>ABP 框架会自动和常规地实现大多数交叉问题，您通常不需要为它们编写代码。</p>
+
+<h3 id="数据库提供商-orm-独立性">数据库提供商 / ORM 独立性</h3>
+
+<p>域和应用程序层应为 ORM/DB 提供商不可知论。</p>
+
+<p>它们应该仅取决于存储库接口，存储库界面不使用任何 ORM 特定对象。</p>
+
+<p>在这里，这一原则的主要原因：</p>
+
+<ol>
+<li>要使您的域/应用程序基础架构独立，因为基础架构将来可能会发生变化，或者您以后可能需要支持第二个数据库类型。</li>
+<li>要通过隐藏存储库背后的基础架构详细信息
+，使您的域名/应用程序专注于业务代码。</li>
+<li>使您的自动测试更容易，因为在这种情况下，你可以嘲笑回购。</li>
+</ol>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/DDD/DDD012-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86/">https://geek.zshipu.com/post/DDD/DDD012-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/DDD/DDD011-%E5%AD%90%E5%9F%9F%E5%92%8C%E8%BE%B9%E7%95%8C%E4%B8%8A%E4%B8%8B%E6%96%87/">DDD011-子域和边界上下文</a></li>
+        
+        <li><a href="/post/DDD/DDD010-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%AE%9E%E4%BD%93%E4%BB%B7%E5%80%BC%E5%AF%B9%E8%B1%A1%E4%BB%A5%E5%8F%8A%E5%A6%82%E4%BD%95%E5%8C%BA%E5%88%86%E5%AE%83%E4%BB%AC/">DDD010-领域驱动设计：实体、价值对象以及如何区分它们</a></li>
+        
+        <li><a href="/post/DDD/DDD009-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1-DDD-%E7%9A%84%E4%BB%8B%E7%BB%8D/">DDD009-领域驱动设计 （DDD） 的介绍</a></li>
+        
+        <li><a href="/post/DDD/DDD008-%E7%AC%AC-1-%E9%83%A8%E5%88%86%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1/">DDD008-第 1 部分：领域驱动设计</a></li>
+        
+        <li><a href="/post/DDD/DDD007-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%85%A5%E9%97%A8%E5%BB%BA%E6%A8%A1%E8%BF%87%E7%A8%8B/">DDD007-领域动设计入门建模过程</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/DDD'>DDD</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD012-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86/" title="DDD012-实现领域驱动设计：第一部分">DDD012-实现领域驱动设计：第一部分</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD011-%E5%AD%90%E5%9F%9F%E5%92%8C%E8%BE%B9%E7%95%8C%E4%B8%8A%E4%B8%8B%E6%96%87/" title="DDD011-子域和边界上下文">DDD011-子域和边界上下文</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD010-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%AE%9E%E4%BD%93%E4%BB%B7%E5%80%BC%E5%AF%B9%E8%B1%A1%E4%BB%A5%E5%8F%8A%E5%A6%82%E4%BD%95%E5%8C%BA%E5%88%86%E5%AE%83%E4%BB%AC/" title="DDD010-领域驱动设计：实体、价值对象以及如何区分它们">DDD010-领域驱动设计：实体、价值对象以及如何区分它们</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD009-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1-DDD-%E7%9A%84%E4%BB%8B%E7%BB%8D/" title="DDD009-领域驱动设计 （DDD） 的介绍">DDD009-领域驱动设计 （DDD） 的介绍</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD008-%E7%AC%AC-1-%E9%83%A8%E5%88%86%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1/" title="DDD008-第 1 部分：领域驱动设计">DDD008-第 1 部分：领域驱动设计</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD007-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%85%A5%E9%97%A8%E5%BB%BA%E6%A8%A1%E8%BF%87%E7%A8%8B/" title="DDD007-领域动设计入门建模过程">DDD007-领域动设计入门建模过程</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD006-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E6%9E%B6%E6%9E%84%E5%9B%BE/" title="DDD006-领域驱动架构图">DDD006-领域驱动架构图</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/typora/Typora&#43;PicGo%E8%87%AA%E5%8A%A8%E4%B8%8A%E4%BC%A0%E5%9B%BE%E7%89%87%E5%88%B0Github%E5%9B%BE%E5%BA%8A/" title="Typora&#43;PicGo自动上传图片到Github图床">Typora&#43;PicGo自动上传图片到Github图床</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD005-%E6%9E%84%E5%BB%BA%E5%9F%9F%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%BE%AE%E6%9C%8D%E5%8A%A1/" title="DDD005-构建域驱动的微服务">DDD005-构建域驱动的微服务</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD004-%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%88%9D%E5%AD%A6%E8%80%85%E6%8C%87%E5%8D%97/" title="DDD004-域驱动设计初学者指南">DDD004-域驱动设计初学者指南</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/Golang/">Golang (6)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="">java</a>
+    
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%96%87%E6%91%98/">文摘</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
