@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>DDD014-实现领域驱动设计：第三部分 | 知识铺的博客</title>
+    <meta property="og:title" content="DDD014-实现领域驱动设计：第三部分 - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2021-09-25T12:27:42&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2021-09-25T12:27:42&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="DDD014-实现领域驱动设计：第三部分">
+        <meta name="author" content="知识铺">
+        
+    <meta property="og:url" content="https://geek.zshipu.com/post/DDD/DDD014-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#需要外部服务的实体中的业务逻辑">需要外部服务的实体中的业务逻辑</a>
+<ul>
+<li><a href="#存储-库">存储 库</a>
+<ul>
+<li><a href="#规格">规格</a></li>
+<li><a href="#与存储库一起使用">与存储库一起使用</a></li>
+<li><a href="#与默认存储库">与默认存储库</a></li>
+<li><a href="#结合规格">结合规格</a></li>
+</ul></li>
+<li><a href="#域服务">域服务</a></li>
+<li><a href="#数据传输对象">数据传输对象</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">DDD014-实现领域驱动设计：第三部分</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年9月25日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            
+
+<h2 id="需要外部服务的实体中的业务逻辑">需要外部服务的实体中的业务逻辑</h2>
+
+<p>当业务逻辑仅使用该实体的属性时，只需在实体方法中实施业务规则就很简单。</p>
+
+<p>如果业务逻辑要求查询数据库或使用应从依赖性注入系统解决的任何外部服务，该怎么办？</p>
+
+<p><strong>记住：实体不能注入服务！</strong></p>
+
+<p>实现这种商业逻辑有两种常见方法：</p>
+
+<ul>
+<li>在实体方法上实现业务逻辑，并获取外部依赖作为该方法的参数。</li>
+<li>创建域服务。</li>
+</ul>
+
+<p>稍后将解释域服务。但是，现在让我们看看如何在实体类中实现它。</p>
+
+<p><strong>示例：业务规则：不能同时向用户分配超过 3 个未发行问题</strong></p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--Jz25aHsf--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/7b0misvijlzutn4zjaaf.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251242226.png" alt="image" /></a></p>
+
+<ul>
+<li>分配的&rdquo;已分配的&rdquo;属性设置器为私有。因此，唯一的方法来改变它使用分配到同位素和清洁分配方法。</li>
+<li>分配到酶获得一个应用使用者实体。实际上，它只使用用户。Id， 这样你就可以得到一个 Guid 值， 像用户 Id 。但是，这种方式可确保 Guid 值是现有用户的 Id，而不是随机的 Guid 值。</li>
+<li>IUserSue 服务是一种任意服务，用于为用户获取未发行计数。代码部分（称为分配 Async）有责任解决 IUser 问题服务并在此处传递。</li>
+<li>如果业务规则不符合，分配 AsingAsync 会抛出例外。</li>
+<li>最后，如果一切正确，则设置分配的&rdquo;已分配的&rdquo;属性&rdquo;。</li>
+</ul>
+
+<p>当您想向用户分配问题时，此方法完全保证了应用业务逻辑。但是，它存在一些问题：</p>
+
+<ul>
+<li>它使实体类取决于使实体变得复杂的外部服务。</li>
+<li>很难使用该实体。现在使用实体的代码需要注入 IUserSue 服务并传递给分配到模拟方法。</li>
+</ul>
+
+<h3 id="存储-库">存储 库</h3>
+
+<p>存储库是一个类似于集合的界面，由域名和应用层用于访问数据持久性系统（数据库）来读取和编写业务对象（通常是聚合物）。</p>
+
+<p>共同存储库原则是：</p>
+
+<ul>
+<li>定义域层中的存储库界面（因为它在域和应用层中使用），在基础结构层中实现（启动模板中的实体帧工作核心项目）。</li>
+<li>不在存储库中包含业务逻辑。</li>
+<li>存储库界面应是数据库提供商 / ORM 独立。例如，不要从存储库方法返回 DbSet。DbSet 是 EF 核心提供的对象。</li>
+<li>为聚合根创建存储库，而不是为所有实体创建存储库。因为，应通过聚合根访问子收集实体（聚合）。</li>
+</ul>
+
+<p><strong>不在存储库中包含域逻辑</strong></p>
+
+<p>虽然此规则在开始时似乎很明显，但很容易将业务逻辑泄漏到存储库中。</p>
+
+<p><strong>示例：从存储库获取非活动问题</strong></p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--7THuv6G0--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/9w07ijbmv11tqsm9jzc2.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251243504.png" alt="image" /></a></p>
+
+<p>IIsue 存储扩展了标准 I 存储&lt;&hellip;通过添加&rdquo;获取激活问题&rdquo;方法&gt;界面。此存储库适用于此类问题类：</p>
+
+<p>让我们查看实现以了解它：</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--IR456m_b--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/rnjb18wwg1uboway2qr5.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251243447.png" alt="image" /></a></p>
+
+<p>（用于实施 EF 核心。请参阅 EF 核心集成文档，了解如何使用 EF 核心创建自定义存储库。</p>
+
+<p>当我们检查 GetInActiveSuesAsync 实施时，我们看到一条定义在活动中问题的业务规则：问题应是公开的，分配给任何人，创建于 30 多天前，在过去 30 天内不予置评。</p>
+
+<p>这是隐藏在存储库方法中的业务规则的隐含定义。当我们需要重复使用此业务逻辑时，问题就会发生。</p>
+
+<p>例如，假设我们要在问题实体上添加 bool IsInActive（）方法。这样，当我们有问题实体时，我们可以检查活动性。</p>
+
+<p>让我们查看实施情况：</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--Wq0TPgAs--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ppgchfp1hkzq96jgvq4i.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251243432.png" alt="image" /></a></p>
+
+<p>我们必须复制/粘贴/修改代码。如果活动性的定义发生变化怎么办？我们不应忘记更新这两
+个地方。这是商业逻辑的重复，这是相当危险的。</p>
+
+<p>解决这个问题的一个好办法就是规范模式！</p>
+
+<h4 id="规格">规格</h4>
+
+<p>规范是一个命名的、可重复使用的、可组合的和可测试的类，可根据业务规则过滤域对象。ABP 框架提供了必要的基础架构，以便轻松创建规范类，并在应用代码中使用它们。</p>
+
+<p>让我们将在活动中的问题筛选器作为规范类实现：</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--FH7ov5dm--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/w4r6k86wzohmctpu4pkd.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251244528.png" alt="image" /></a></p>
+
+<p>规范基础类通过定义表示体简化以创建规范类。刚把表情从仓库里移了出来现在，我们可以在问题实体和 EfCore 问题存储类中重新使用不活动问题指定。</p>
+
+<p>在实体中使用</p>
+
+<p>规范类提供了一种 Is 满意方法，如果给定对象（实体）满足规范，则返回真实。我们可以重写问题。</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--hOEcp6OS--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/6l5r85vzsba3frzhvdt9.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251244553.png" alt="image" /></a></p>
+
+<p>刚刚创建了一个新的实例的不激活问题规格，并使用其 Is 满意的方法来重复使用由规范定义的表达式。</p>
+
+<h4 id="与存储库一起使用">与存储库一起使用</h4>
+
+<p>首先，从存储库界面开始：</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--J15gvybA--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/50vfielyv2o5aivnnnw6.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251244406.png" alt="image" /></a></p>
+
+<p>通过使用规范对象将&rdquo;获取激活问题&rdquo;单重命名为&rdquo;简单获取问题酶&rdquo;。由于规范（过滤器）已移出存储库，我们不再需要创建不同的方法来获取不同条件的问题（如 GetAssigns 问题 （&hellip;），GetLocked 问题 （&hellip;）</p>
+
+<p>存储库的更新实施可以是这样的：</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--qyPg2SfP--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/1wdusqprthwutr7u1e6i.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251244921.png" alt="image" /></a></p>
+
+<p>由于 ToExpress（）方法返回一个表达，它可以直接传递到&rdquo;在哪里&rdquo;方法来过滤实体。</p>
+
+<p>最后，我们可以将任何规范实例传递给 GetSuesasync 方法：</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--dyB8qH6r--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/f1mrj0wz7m3hvu27g7ko.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251244024.png" alt="image" /></a></p>
+
+<h4 id="与默认存储库">与默认存储库</h4>
+
+<p>实际上，您不必创建自定义存储库即可使用规范。</p>
+
+<p>标准 I 存储库已扩展了可查询，因此您可以在它上使用标准的 LINQ 扩展方法：</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--bdoZKwIQ--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/01e6dq2hnfwt8l8w8pyx.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251244856.png" alt="image" /></a></p>
+
+<p>AsyncExecuter 是 ABP 框架提供的实用工具，用于使用异步 LINQ 扩展方法（如此处的 ToListAsync），而无需依赖 EF 核心 NuGet 包。</p>
+
+<h4 id="结合规格">结合规格</h4>
+
+<p>《规范》的一个强大方面是可组合的。</p>
+
+<p>假设我们有另一个规范，只有当问题处于里程碑中时，才会返回真实：</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--WXFgjmgc--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/pglafxq91iuuecbzmlmx.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251244272.png" alt="image" /></a></p>
+
+<p>此规范是参数化的，与非活动问题指定不同。我们可以将这两个规格结合起来，在特定的里程碑中列出非活动性问题：</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--cNXnobb8--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/njexp10xp3xitqjneydn.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251244825.png" alt="image" /></a></p>
+
+<p>上表使用 And 扩展方法组合规格。有更多的组合方法可用，如或（&hellip;）和和不（&hellip;）。</p>
+
+<h3 id="域服务">域服务</h3>
+
+<p>域服务实现域逻辑，其中：</p>
+
+<ul>
+<li>取决于服务和存储库。</li>
+<li>需要处理多个聚合体，因此逻辑无法正确地与任何聚合体配合。</li>
+</ul>
+
+<p>域服务与域对象配合用。他们的方法可以获取和返回实体，值对象，原始类型。等。</p>
+
+<p>但是，它们不会获得/返回 DTO。DTO 是应用层的一部分。</p>
+
+<p><strong>示例：将问题分配给用户</strong></p>
+
+<p>请记住问题实体中如何执行问题分配：</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--5CVJQmfT--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/p7k1kbwrgpa6wt22ustt.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251244631.png" alt="image" /></a></p>
+
+<p>在这里，我们将将此逻辑移动到域服务。</p>
+
+<p>首先，更改问题类：</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--SNimynQ_--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/cxjg4iii8ysuid0k0pvm.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251244143.png" alt="image" /></a></p>
+
+<ul>
+<li>删除了分配相关方法。</li>
+<li>将分配的UserId属性设置器从私有更改为内部设置，以便从域服务设置它。</li>
+</ul>
+
+<p>下一步是创建名为&rdquo;问题管理器&rdquo;的域名服务，该服务已分配给给定用户。</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--nftg-usk--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/yzbvkqiris7o08tvfv3x.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251244327.png" alt="image" /></a></p>
+
+<p>问题管理器可以注入任何服务依赖性，并用于查询打开的问题指望用户。</p>
+
+<p>此设计的唯一问题是问题。 分配使用现在开放设置出类。但是，它不公开。</p>
+
+<p>它是内部的，仅在同一组件（问题跟踪.Domain 项目中）内才可能更改此示例解决方案。我们认为这是合理的</p>
+
+<ul>
+<li>域层开发人员已经了解域规则，他们使用问题管理器。</li>
+<li>应用程序层开发人员已经强制使用问题管理器，因为它们不直接设置它</li>
+</ul>
+
+<p>虽然两种方法之间存在权衡，但我们更喜欢在业务逻辑需要与外部服务配合时创建域服务。</p>
+
+<p><strong>示例：将问题分配给用户</strong></p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--e6O7d1KO--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/00n5hdkchnzsvwjiinjg.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251245964.png" alt="image" /></a></p>
+
+<p>应用服务方法通常有三个步骤，
+这些步骤在此处实施：</p>
+
+<ul>
+<li>从数据库获取相关域对象以实现使用案例。</li>
+<li>使用域对象（域服务、实体等）执行实际操作。</li>
+<li>更新数据库中已更改的实体。</li>
+</ul>
+
+<h3 id="数据传输对象">数据传输对象</h3>
+
+<p>DTO 是用于在应用层和演示层之间传输状态（数据）的简单对象。</p>
+
+<p>因此，应用程序服务方法获取并返回 DTO。</p>
+
+<p><strong>常见的 DTO 原则和最佳实践</strong></p>
+
+<ul>
+<li>DTO 应按其性质进行序列化。因为，大多数时候它是通过网络传输的。因此，它应该有一个无参数（空）构造器。</li>
+<li>不应包含任何业务逻辑。</li>
+<li>切勿继承或提及实体。</li>
+</ul>
+
+<p>输入 DTO（这些被传递到应用服务方法）的性质与输出 DTO（这些从应用服务方法返回）不同。因此，他们将受到不同的对待。</p>
+
+<p>输入 DTO 最佳实践</p>
+
+<p>不要为输入 DTO 定义未使用的属性</p>
+
+<p>仅定义使用案例所需的属性！否则，客户使用应用服务方法会让人感到困惑。您当然可以定义可选属性，但当客户端提供它们时，它们应该会影响使用案例的工作原理。</p>
+
+<p>这条规则似乎没有必要首先。谁将定义一种方法未使用的参数（输入 DTO 属性）？但它发生，尤其是当你试图重复使用输入D托。</p>
+
+<p>不要重复使用输入 DTO</p>
+
+<p>为每个用例定义专用输入 DTO（应用服务方法）。否则，在某些情况下不使用某些属性，这违反了上述规则：不要使用</p>
+
+<p>定义未使用的属性用于输入 DTO。</p>
+
+<p>有时，对于两个用例重复使用相同的 DTO 类似乎很有吸引力，因为它们几乎相同。即使他们现在一样，他们可能会变得不同的时候，你会来到同样的问题。代码重复比耦合使用案例更适合使用。</p>
+
+<p>重复使用输入 DTO 的另一种方法是
+相互继承 DTO。虽然这在一些罕见情况下是有用的，但大多数时候，它带您到同一点。</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--RTDyhBQT--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/of6cps5nyj37p6pfg0lv.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251245503.png" alt="image" /></a></p>
+
+<p>IUserAppService 使用用户 Dto 作为所有方法（使用案例）中的输入 DTO。用户Dto 定义如下：</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--QFK2fBQA--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/0ouurgz4ga35ih1ereaj.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251245001.png" alt="image" /></a></p>
+
+<p>此示例：</p>
+
+<ul>
+<li>由于服务器确定 ID，因此&rdquo;创建&rdquo;中不使用 ID。</li>
+<li>密码不在&rdquo;更新&rdquo;中使用，因为我们有另一种方法。</li>
+<li>创建时间永远不会使用，因为我们不能允许客户发送创建时间。它应设置在服务器中。</li>
+</ul>
+
+<p>真正的实现可以是这样的：</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--a-tmNEuN--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/q8lbzt0vggw97qh8foo9.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251245273.png" alt="image" /></a></p>
+
+<p>使用给定的输入 DTO 类：</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--9AbR-eVA--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/3qv39o58wf8c5qfibytj.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251245287.png" alt="image" /></a></p>
+
+<p>输入 DTO 验证逻辑</p>
+
+<ul>
+<li>仅在 DTO 内部实施正式验证。使用数据注释验证属性或实施 IValidab 对象进行正式验证。</li>
+<li>不要执行域验证。例如，不要尝试检查 DTO 中唯一的用户名约束。</li>
+</ul>
+
+<p>示例：使用数据注释属性</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s---SgCpu-P--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/u9ag3x2q5chshavrfo84.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251245032.png" alt="image" /></a></p>
+
+<p>ABP 框架自动验证输入 DTO，抛出 Abp 验证例外，并在输入无效的情况下将 HTTP 状态 400 返回给客户。</p>
+
+<p><strong>输出 DTO 最佳实践</strong></p>
+
+<ul>
+<li>保持输出 DTO 计数最小。尽可能重复使用（例外：不要将输入 DTO 重用为输出 DTO）。</li>
+<li>输出 DTO 可以包含比客户端代码中使用的更多的属性。</li>
+<li>从创建和更新方法返回实体 DTO。</li>
+</ul>
+
+<p>示例：从不同方法返回不同的 DTO</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--SGgPOebc--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/kpksezv4t53cj2300bgj.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251245671.png" alt="image" /></a></p>
+
+<p>上面的示例代码返回每个
+方法的不同 DTO 类型。正如您所猜到的，查询数据、将实体
+映射到 DTO 将有很多代码重复。</p>
+
+<p>以上 IUser 应用服务可简化：</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--d_VyUlcI--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/kyz54wbict5gwd0qrc1q.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251245279.png" alt="image" /></a></p>
+
+<p>单输出 DTO：</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--DhfzBiYC--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/xbt6udkz4j2f2nen91g8.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251245488.png" alt="image" /></a></p>
+
+<ul>
+<li>删除 Getuser 名邮件和 Getroles， 因为 Get 方法已经返回了必要的信息。</li>
+<li>获取列表现在返回相同的获取。</li>
+<li>创建和更新还返回相同的用户数据。</li>
+</ul>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/DDD/DDD014-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86/">https://geek.zshipu.com/post/DDD/DDD014-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/DDD/DDD015-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86/">DDD014-实现领域驱动设计：第三部分</a></li>
+        
+        <li><a href="/post/DDD/DDD013-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86/">DDD013-实现领域驱动设计：第二部分</a></li>
+        
+        <li><a href="/post/DDD/DDD012-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86/">DDD012-实现领域驱动设计：第一部分</a></li>
+        
+        <li><a href="/post/DDD/DDD011-%E5%AD%90%E5%9F%9F%E5%92%8C%E8%BE%B9%E7%95%8C%E4%B8%8A%E4%B8%8B%E6%96%87/">DDD011-子域和边界上下文</a></li>
+        
+        <li><a href="/post/DDD/DDD010-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%AE%9E%E4%BD%93%E4%BB%B7%E5%80%BC%E5%AF%B9%E8%B1%A1%E4%BB%A5%E5%8F%8A%E5%A6%82%E4%BD%95%E5%8C%BA%E5%88%86%E5%AE%83%E4%BB%AC/">DDD010-领域驱动设计：实体、价值对象以及如何区分它们</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/DDD'>DDD</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD014-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86/" title="DDD014-实现领域驱动设计：第三部分">DDD014-实现领域驱动设计：第三部分</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD015-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86/" title="DDD014-实现领域驱动设计：第三部分">DDD014-实现领域驱动设计：第三部分</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD013-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86/" title="DDD013-实现领域驱动设计：第二部分">DDD013-实现领域驱动设计：第二部分</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD012-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86/" title="DDD012-实现领域驱动设计：第一部分">DDD012-实现领域驱动设计：第一部分</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD011-%E5%AD%90%E5%9F%9F%E5%92%8C%E8%BE%B9%E7%95%8C%E4%B8%8A%E4%B8%8B%E6%96%87/" title="DDD011-子域和边界上下文">DDD011-子域和边界上下文</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD010-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%AE%9E%E4%BD%93%E4%BB%B7%E5%80%BC%E5%AF%B9%E8%B1%A1%E4%BB%A5%E5%8F%8A%E5%A6%82%E4%BD%95%E5%8C%BA%E5%88%86%E5%AE%83%E4%BB%AC/" title="DDD010-领域驱动设计：实体、价值对象以及如何区分它们">DDD010-领域驱动设计：实体、价值对象以及如何区分它们</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD009-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1-DDD-%E7%9A%84%E4%BB%8B%E7%BB%8D/" title="DDD009-领域驱动设计 （DDD） 的介绍">DDD009-领域驱动设计 （DDD） 的介绍</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD008-%E7%AC%AC-1-%E9%83%A8%E5%88%86%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1/" title="DDD008-第 1 部分：领域驱动设计">DDD008-第 1 部分：领域驱动设计</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD007-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%85%A5%E9%97%A8%E5%BB%BA%E6%A8%A1%E8%BF%87%E7%A8%8B/" title="DDD007-领域动设计入门建模过程">DDD007-领域动设计入门建模过程</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD006-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E6%9E%B6%E6%9E%84%E5%9B%BE/" title="DDD006-领域驱动架构图">DDD006-领域驱动架构图</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/Golang/">Golang (6)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="">java</a>
+    
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%96%87%E6%91%98/">文摘</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
