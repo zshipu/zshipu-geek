@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Go中使用爬虫框架 | 知识铺的博客</title>
+    <meta property="og:title" content="Go中使用爬虫框架 - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2021-09-26T20:03:10&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2021-09-26T20:03:10&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="Go中使用爬虫框架">
+        <meta name="author" content="知识铺">
+        
+    <meta property="og:url" content="https://geek.zshipu.com/post/crawler/Go%E4%B8%AD%E4%BD%BF%E7%94%A8%E7%88%AC%E8%99%AB%E6%A1%86%E6%9E%B6/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#简介">简介</a></li>
+<li><a href="#项目安装与示例执行">项目安装与示例执行</a></li>
+<li><a href="#展示一个简单爬虫示例">展示一个简单爬虫示例</a></li>
+<li><a href="#模块介绍">模块介绍</a>
+<ul>
+<li><a href="#spider">Spider</a></li>
+<li><a href="#downloader">Downloader</a></li>
+<li><a href="#pageprocesser">PageProcesser</a></li>
+<li><a href="#page">Page</a></li>
+<li><a href="#scheduler">Scheduler</a></li>
+<li><a href="#pipeline">Pipeline</a></li>
+<li><a href="#request">Request</a></li>
+</ul></li>
+<li><a href="#相关包以及推荐工具包">相关包以及推荐工具包</a></li>
+</ul></li>
+</ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Go中使用爬虫框架</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年9月26日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            
+
+<h2 id="简介">简介</h2>
+
+<p>本项目基于golang开发，是一个开放的垂直领域的爬虫框架，框架中将各个功能模块区分开，方便使用者重新实现子模块，进而构建自己垂直方方向的爬虫。</p>
+
+<p>本项目将爬虫的各个功能流程区分成Spider模块（主控），Downloader模块（下载器），PageProcesser模块（页面分析），Scheduler模块（任务队列），Pipeline模块（结果输出）；</p>
+
+<p><strong>执行过程简述</strong>：</p>
+
+<ol>
+<li>Spider模块从Scheduler模块中获取包含待抓取url的Request对象，启动一个协程，一个协程执行一次爬取过程，此处我们把协程也看成Spider，Spider把Request对象传入Downloader，Downloader下载该Request对象中url所对应的页面或者其他类型的数据，生成Page对象；</li>
+<li>Spider调用PageProcesser模块解析Page对象中的页面数据，并存入Page对象中的PageItems中（以Key-Value对的形式保存），同时存入解析结果中的待抓取链接，Spider会将待抓取链接存入Scheduler模块中的Request队列中；</li>
+<li>Spider调用Pipeline模块输出Page中的PageItems的结果;</li>
+<li>执行步骤1，直至Scheduler中所有链接被处理完成，则Spider被挂起等待下一个待抓取链接或者终止。</li>
+</ol>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20210926201628268.png" alt="image-20210926201628268" /></p>
+
+<p>执行过程相应的Spider核心代码，代码代表一次爬取过程：</p>
+
+<pre><code>// core processer
+func (this *Spider) pageProcess(req *request.Request) {
+    // Get Page
+    p := this.pDownloader.Download(req)
+    if p == nil {
+        return
+    }
+
+    // Parse Page
+    this.pPageProcesser.Process(p)
+    for _, req := range p.GetTargetRequests() {
+        this.addRequest(req)
+    }
+
+    // Output
+    if !p.GetSkip() {
+        for _, pip := range this.pPiplelines {
+            pip.Process(p.GetPageItems(), this)
+        }
+    }
+
+    this.sleep()
+}
+</code></pre>
+
+<h2 id="项目安装与示例执行">项目安装与示例执行</h2>
+
+<ul>
+<li><p>安装本包和依赖包</p>
+
+<pre><code>go get github.com/hu17889/go_spider/...
+go get github.com/PuerkitoBio/goquery
+go get github.com/bitly/go-simplejson
+go get golang.org/x/net/html/charset
+</code></pre></li>
+</ul>
+
+<p><strong>示例执行：</strong></p>
+
+<ul>
+<li>编译：<code>go install github.com/hu17889/go_spider/example/github_repo_page_processor</code></li>
+<li>执行：<code>./bin/github_repo_page_processor</code></li>
+</ul>
+
+<h2 id="展示一个简单爬虫示例">展示一个简单爬虫示例</h2>
+
+<p>示例的功能是爬取<a href="https://github.com/hu17889?tab=repositories下面的项目以及项目详情页的相关信息，并将内容输出到标准输出。">https://github.com/hu17889?tab=repositories下面的项目以及项目详情页的相关信息，并将内容输出到标准输出。</a></p>
+
+<p>一般在自己的爬虫main包中需要实现爬虫创建，初始化，以及PageProcesser模块的继承实现。可以实现自己的子模块或者使用项目中已经存在的子模块，通过Spider对象中相应的Set或者Add函数将模块引入爬虫。本项目支持<strong>链式调用</strong>。</p>
+
+<pre><code>spider.NewSpider(NewMyPageProcesser(), &quot;TaskName&quot;).                // 创建PageProcesser和Spider，设置任务名称
+    AddUrl(&quot;https://github.com/hu17889?tab=repositories&quot;, &quot;html&quot;). // 加入初始爬取链接，需要设置爬取结果类型，方便找到相应的解析器
+    AddPipeline(pipeline.NewPipelineConsole()).                    // 引入PipelineConsole输入结果到标准输出
+    SetThreadnum(3).                                               // 设置爬取参数：并发个数
+    Run()                                                          // 开始执行
+</code></pre>
+
+<ul>
+<li>更多示例可参看<a href="https://github.com/hu17889/go_spider/tree/master/example">examples</a>。</li>
+<li>具体模块的说明见<a href="https://github.com/hu17889/go_spider/wiki/中文文档#模块">模块说明</a></li>
+</ul>
+
+<p>完整代码如下：</p>
+
+<pre><code>//
+package main
+
+/*
+Packages must be imported:
+    &quot;core/common/page&quot;
+    &quot;core/spider&quot;
+Pckages may be imported:
+    &quot;core/pipeline&quot;: scawler result persistent;
+    &quot;github.com/PuerkitoBio/goquery&quot;: html dom parser.
+*/
+import (
+    &quot;github.com/PuerkitoBio/goquery&quot;
+    &quot;github.com/hu17889/go_spider/core/common/page&quot;
+    &quot;github.com/hu17889/go_spider/core/pipeline&quot;
+    &quot;github.com/hu17889/go_spider/core/spider&quot;
+    &quot;strings&quot;
+)
+
+type MyPageProcesser struct {
+}
+
+func NewMyPageProcesser() *MyPageProcesser {
+    return &amp;MyPageProcesser{}
+}
+
+// Parse html dom here and record the parse result that we want to Page.
+// Package goquery (http://godoc.org/github.com/PuerkitoBio/goquery) is used to parse html.
+func (this *MyPageProcesser) Process(p *page.Page) {
+    query := p.GetHtmlParser()
+    var urls []string
+    query.Find(&quot;h3[class='wb-break-all'] a&quot;).Each(func(i int, s *goquery.Selection) {
+        href, _ := s.Attr(&quot;href&quot;)
+        urls = append(urls, &quot;http://github.com/&quot;+href)
+    })
+    // these urls will be saved and crawed by other coroutines.
+    p.AddTargetRequests(urls, &quot;html&quot;)
+
+    name := query.Find(&quot;.author a&quot;).Text()
+    name = strings.Trim(name, &quot; \t\n&quot;)
+    repository := query.Find(&quot;strong[itemprop='name'] a&quot;).Text()
+    repository = strings.Trim(repository, &quot; \t\n&quot;)
+    //readme, _ := query.Find(&quot;#readme&quot;).Html()
+    if name == &quot;&quot; {
+        p.SetSkip(true)
+    }
+    // the entity we want to save by Pipeline
+    p.AddField(&quot;author&quot;, name)
+    p.AddField(&quot;project&quot;, repository)
+    //p.AddField(&quot;readme&quot;, readme)
+}
+
+func (this *MyPageProcesser) Finish() {
+}
+
+func main() {
+    // spider input:
+    //  PageProcesser ;
+    //  task name used in Pipeline for record;
+    spider.NewSpider(NewMyPageProcesser(), &quot;TaskName&quot;).
+        AddUrl(&quot;https://github.com/hu17889?tab=repositories&quot;, &quot;html&quot;). // start url, html is the responce type (&quot;html&quot; or &quot;json&quot;)
+        AddPipeline(pipeline.NewPipelineConsole()).                    // print result on screen
+        SetThreadnum(3).                                               // crawl request by three Coroutines
+        Run()
+}
+</code></pre>
+
+<h2 id="模块介绍">模块介绍</h2>
+
+<h3 id="spider">Spider</h3>
+
+<p>用户一般无需自己实现。</p>
+
+<p><strong>功能</strong>：完成爬虫初始化，如加入各个默认子模块，管理并发，调度其他模块以及相关参数设置。</p>
+
+<p><strong>重要方法</strong>：</p>
+
+<ul>
+<li>爬取启动方法：Get，GetAll，Run</li>
+<li>添加抓取链接: AddUrl, AddUrls, AddRequest, AddRequests</li>
+<li>主模块选择方法：AddPipeline，SetScheduler，SetDownloader</li>
+<li>参数设置：SetExitWhenComplete，SetThreadnum（设置爬虫并发数），SetSleepTime（设置爬取后的挂起时间）</li>
+<li>监控方法：OpenFileLog，OpenFileLogDefault（打开日志文件，使用<a href="https://github.com/hu17889/go_spider/tree/master/core/common/mlog">mlog</a>包进行记录日志），CloseFileLog，OpenStrace（打开跟踪，打印了爬虫执行信息到stderr），CloseStrace</li>
+</ul>
+
+<h3 id="downloader">Downloader</h3>
+
+<p>用户可选择自己实现。</p>
+
+<p><strong>功能</strong>：Spider从Scheduler的Request队列中获取包含待抓取url的Request对象，传入Downloader，Downloader下载该Request对象中的url所对应的页面或者其他类型的数据，现在支持（html，json，jsonp，text）几种结果类型，生成Page对象，同时找到下载结果所对应的解析go包并生成解析器存入Page对象中，如html是<a href="https://github.com/PuerkitoBio/goquery">goquery包</a>，json数据是<a href="https://github.com/bitly/go-simplejson/blob/master/simplejson.go">simplejson包</a>，jsonp数据会转成json数据，text是只存储了返回的原始字符串。</p>
+
+<p><strong>重要方法</strong></p>
+
+<ul>
+<li>Download 下载方法，返回包含下载内容（数据，header，cookies，request信息）的Page对象。</li>
+</ul>
+
+<h3 id="pageprocesser">PageProcesser</h3>
+
+<p>用户必须实现此模块。</p>
+
+<p><strong>功能</strong>：这个模块主要做页面解析，用户需要在此处获取有用数据和下一步爬取的链接。PageProcesser的前后实现步骤如下：Spider调用PageProcesser模块解析页面中的数据，并存入Page对象中的PageItems对象中（以Key-Value对的形式保存），同时存入解析结果中的待抓取链接，Spider会将待抓取链接存入Scheduler模块中的Request队列中；所以用户可以根据自己的需求进行个性化实现爬虫解析功能。</p>
+
+<p><strong>重要方法</strong></p>
+
+<ul>
+<li>Process，爬取对象解析</li>
+</ul>
+
+<h3 id="page">Page</h3>
+
+<p>用户无需实现此模块。</p>
+
+<p><strong>功能</strong>：记录当前爬取对象的各种信息。</p>
+
+<p><strong>重要方法</strong></p>
+
+<ul>
+<li>获取爬取结果内容：GetJson，GetHtmlParser，GetBodyStr（原始内容）</li>
+<li>获取爬取对象信息：GetRequest，GetCookies，GetHeader</li>
+<li>爬取状态：IsSucc（是否爬取成功from Download模块），Errormsg（爬取错误信息from Download模块）</li>
+<li>影响输出和后续爬取过程的方法：SetSkip，GetSkip（此次爬取结果不存储），AddTargetRequest，AddTargetRequests（设置待爬取链接），AddTargetRequestWithParams, AddTargetRequestsWithParams，AddField（保存解析内容的KV对）</li>
+</ul>
+
+<h3 id="scheduler">Scheduler</h3>
+
+<p>用户一般无需自己实现。</p>
+
+<p><strong>功能</strong>：Scheduler实际上是一个Request对象队列，用来保存尚未被爬取的页面链接和相应的信息，当前队列是缓存到内存中（QueueScheduler），后续会增加基于Redis的队列，解决Spider异常失败后未爬取链接丢失问题；</p>
+
+<h3 id="pipeline">Pipeline</h3>
+
+<p>用户可以选择自己实现。</p>
+
+<p><strong>功能</strong>：此模块主要完成数据的输出与持久化。在PageProcesser模块中可用数据被存入了Page对象中的PageItems对象中，此处会获取PageItems的结果并按照自己的要求输出。已有的样例有：PipelineConsole（输出到标准输出），PipelineFile（输出到文件中）</p>
+
+<h3 id="request">Request</h3>
+
+<p><strong>功能</strong>: 包含一次请求的各种设置，如url，header，cookies等；</p>
+
+<h2 id="相关包以及推荐工具包">相关包以及推荐工具包</h2>
+
+<p><strong>存储</strong></p>
+
+<ul>
+<li><a href="https://github.com/go-sql-driver/mysql">mysql包 mysql</a>;</li>
+<li><a href="https://github.com/garyburd/redigo">redis包 redigo</a></li>
+</ul>
+
+<p><strong>数据解析</strong></p>
+
+<ul>
+<li><a href="https://github.com/PuerkitoBio/goquery">html解析包 goquery</a></li>
+<li><a href="https://github.com/bitly/go-simplejson">json解析包 go-simplejson</a></li>
+<li><a href="https://gowalker.org/golang.org/x/text/encoding">字符串编码转换 encoding</a></li>
+</ul>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/crawler/Go%E4%B8%AD%E4%BD%BF%E7%94%A8%E7%88%AC%E8%99%AB%E6%A1%86%E6%9E%B6/">https://geek.zshipu.com/post/crawler/Go%E4%B8%AD%E4%BD%BF%E7%94%A8%E7%88%AC%E8%99%AB%E6%A1%86%E6%9E%B6/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/DDD/DDD015-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86/">DDD015-实现领域驱动设计：第四部分</a></li>
+        
+        <li><a href="/post/DDD/DDD014-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86/">DDD014-实现领域驱动设计：第三部分</a></li>
+        
+        <li><a href="/post/DDD/DDD013-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86/">DDD013-实现领域驱动设计：第二部分</a></li>
+        
+        <li><a href="/post/DDD/DDD012-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86/">DDD012-实现领域驱动设计：第一部分</a></li>
+        
+        <li><a href="/post/DDD/DDD011-%E5%AD%90%E5%9F%9F%E5%92%8C%E8%BE%B9%E7%95%8C%E4%B8%8A%E4%B8%8B%E6%96%87/">DDD011-子域和边界上下文</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E7%88%AC%E8%99%AB'>爬虫</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/crawler/Go%E4%B8%AD%E4%BD%BF%E7%94%A8%E7%88%AC%E8%99%AB%E6%A1%86%E6%9E%B6/" title="Go中使用爬虫框架">Go中使用爬虫框架</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD015-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86/" title="DDD015-实现领域驱动设计：第四部分">DDD015-实现领域驱动设计：第四部分</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD014-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86/" title="DDD014-实现领域驱动设计：第三部分">DDD014-实现领域驱动设计：第三部分</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD013-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86/" title="DDD013-实现领域驱动设计：第二部分">DDD013-实现领域驱动设计：第二部分</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD012-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86/" title="DDD012-实现领域驱动设计：第一部分">DDD012-实现领域驱动设计：第一部分</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD011-%E5%AD%90%E5%9F%9F%E5%92%8C%E8%BE%B9%E7%95%8C%E4%B8%8A%E4%B8%8B%E6%96%87/" title="DDD011-子域和边界上下文">DDD011-子域和边界上下文</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD010-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%AE%9E%E4%BD%93%E4%BB%B7%E5%80%BC%E5%AF%B9%E8%B1%A1%E4%BB%A5%E5%8F%8A%E5%A6%82%E4%BD%95%E5%8C%BA%E5%88%86%E5%AE%83%E4%BB%AC/" title="DDD010-领域驱动设计：实体、价值对象以及如何区分它们">DDD010-领域驱动设计：实体、价值对象以及如何区分它们</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD009-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1-DDD-%E7%9A%84%E4%BB%8B%E7%BB%8D/" title="DDD009-领域驱动设计 （DDD） 的介绍">DDD009-领域驱动设计 （DDD） 的介绍</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD008-%E7%AC%AC-1-%E9%83%A8%E5%88%86%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1/" title="DDD008-第 1 部分：领域驱动设计">DDD008-第 1 部分：领域驱动设计</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD007-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%85%A5%E9%97%A8%E5%BB%BA%E6%A8%A1%E8%BF%87%E7%A8%8B/" title="DDD007-领域动设计入门建模过程">DDD007-领域动设计入门建模过程</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/Golang/">Golang (6)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="">java</a>
+    
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%96%87%E6%91%98/">文摘</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%88%AC%E8%99%AB/">爬虫</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
