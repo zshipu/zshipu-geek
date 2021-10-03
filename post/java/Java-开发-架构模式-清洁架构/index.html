@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Java 开发 架构模式 清洁架构 | 知识铺的博客</title>
+    <meta property="og:title" content="Java 开发 架构模式 清洁架构 - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2021-10-02T11:33:33&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2021-10-02T11:33:33&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="Java 开发 架构模式 清洁架构">
+        <meta name="author" content="知识铺">
+        
+    <meta property="og:url" content="https://geek.zshipu.com/post/java/Java-%E5%BC%80%E5%8F%91-%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F-%E6%B8%85%E6%B4%81%E6%9E%B6%E6%9E%84/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#依赖规则">依赖规则</a></li>
+<li><a href="#实体"><em>实体</em></a></li>
+<li><a href="#使用案例">使用案例</a></li>
+<li><a href="#接口适配器">接口适配器</a></li>
+<li><a href="#框架和驱动程序">框架和驱动程序。</a></li>
+<li><a href="#只有四个圆圈">只有四个圆圈？</a></li>
+<li><a href="#跨越边界">跨越边界。</a></li>
+<li><a href="#什么数据跨越了界限">什么数据跨越了界限。</a></li>
+<li><a href="#结论">结论</a></li>
+</ul></li>
+</ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Java 开发 架构模式 清洁架构</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年10月2日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110021133649.jpg" alt="img" /></p>
+
+<p>虽然这些架构的细节都有些不同，但它们非常相似。它们都有相同的目标，即解耦。它们都通过将软件划分为层来实现这种分离。每个层至少有一层用于业务规则，另一层用于接口。</p>
+
+<p>这些架构中的每一个都产生以下系统：</p>
+
+<ol>
+<li>独立于框架。架构并不依赖于一些充满功能的软件库的存在。这允许您使用工具等框架，而不必将系统塞进其有限的约束中。</li>
+<li>可测试。无需UI、数据库、Web Server 或任何其他外部元素即可测试业务规则。</li>
+<li>独立于 UI。UI 可以轻松更改，而无需更改系统的其他部分。例如，Web UI 可以替换为控制台 UI，而无需更改业务规则。</li>
+<li>独立于数据库。您可以换出甲骨文或 SQL 服务器，换成蒙古、大表、沙发或其他东西。您的业务规则不受数据库约束。</li>
+<li>独立于任何外部机构。事实上，你的商业规则根本不了解外部世界。</li>
+</ol>
+
+<p>本文顶部的图表是将所有这些架构集成到单个可操作构想中的尝试。</p>
+
+<h2 id="依赖规则">依赖规则</h2>
+
+<p>同心圆表示软件的不同区域。一般来说，你走得越远，软件就越高。外圈是机制。内圈是政策。</p>
+
+<p>使这个架构起作用的首要规则是*依赖规则*。此规则说源*代码依赖只能**指向内。*内圈里什么也不知道外圈里的东西。特别是，外圈中声明的某物的名称不得由内圈中的代码提及。这包括，功能，类。变量，或任何其他命名的软件实体。</p>
+
+<p>同样，外圈中使用的数据格式不应由内圈使用，特别是如果这些格式是由外圈中的框架生成的。我们不希望外圈中的任何东西影响内圈。</p>
+
+<h2 id="实体"><em>实体</em></h2>
+
+<p>实体概括了*企业范围*的业务规则。实体可以是具有方法的对象，也可以是一组数据结构和功能。只要实体可以被企业中的许多不同的应用程序使用，这并不重要。</p>
+
+<p>如果您没有企业，并且只是编写单个应用程序，则这些实体是应用程序的业务对象。它们概括了最笼统和最高级别的规则。当外部变化时，它们变化的可能性最小。例如，您不会期望这些对象受到页面导航或安全性更改的影响。任何特定应用程序的任何操作更改都不应影响实体层。</p>
+
+<h2 id="使用案例">使用案例</h2>
+
+<p>此层中的软件包含*应用程序特定*的业务规则。它封装并实施系统的所有使用案例。这些使用案例协调了数据流向实体，并指示这些实体使用其*企业范围的业务*规则来实现使用案例的目标。</p>
+
+<p>我们预计此层的变化不会影响实体。我们也不期望此层受到数据库、UI 或任何常见框架等外部性变化的影响。这一层与此类问题隔离开来。</p>
+
+<p>不过*，我们*预计应用程序操作的更改*将*影响使用案例，从而影响此层中的软件。如果用例的详细信息发生变化，则此层中的某些代码肯定会受到影响。</p>
+
+<h2 id="接口适配器">接口适配器</h2>
+
+<p>此层中的软件是一组适配器，可将数据从最方便的使用案例和实体格式转换为对数据库或 Web 等外部机构最方便的格式。例如，正是这一层将完全包含 GUI 的 MVC 架构。演示者、视图和控制器都属于此处。这些模型可能只是从控制器传递到使用案例的数据结构，然后从使用案例传回演示者和视图。</p>
+
+<p>同样，数据也从实体和使用案例最方便的形式转换为最方便使用任何持久性框架的形式。即数据库。这个圈子的内在代码不应该知道任何关于数据库。如果数据库是 SQL 数据库，则所有 SQL 应限制在此层，特别是与数据库有关此层的部分。</p>
+
+<p>此外，此层中还有任何其他必要的适配器，用于将数据从某些外部形式（如外部服务）转换为使用案例和实体使用的内部表单。</p>
+
+<h2 id="框架和驱动程序">框架和驱动程序。</h2>
+
+<p>最外层通常由数据库、Web 框架等框架和工具组成。通常，除了向内与下一个圆圈通信的胶水代码外，您不会在此层中编写太多代码。</p>
+
+<p>此层是所有详细信息的去处。网络是一个细节。数据库是一个细节。我们把这些东西放在外面，在那里它们不会造成什么伤害。</p>
+
+<h2 id="只有四个圆圈">只有四个圆圈？</h2>
+
+<p>不，圆圈是示意图。你可能会发现，你需要的不仅仅是这四个。没有规则说你必须总是只有这四个。但是，*依赖规则*始终适用。源代码依赖性总是指向内。当您向内移动时，抽象水平会增加。最外层的圆是低层混凝土细节。当您向内移动时，软件变得更加抽象，并封装了更高级别的政策。内圈最一般。</p>
+
+<h2 id="跨越边界">跨越边界。</h2>
+
+<p>在图表的右下角，是我们如何跨越圆界的一个例子。它显示控制器和演示者与下一层中的使用案例进行通信。注意控制流。它从控制器开始，通过使用案例移动，然后最终在演示者中执行。还要注意源代码依赖性。他们每个人都指向内向使用案例。</p>
+
+<p>我们通常使用<a href="http://en.wikipedia.org/wiki/Dependency_inversion_principle">依赖反转原则</a>来解决这一明显的矛盾。例如，在 Java 等语言中，我们会安排界面和继承关系，以便源代码依赖性反对在边界的正确点进行控制。</p>
+
+<p>例如，考虑使用案例需要呼叫演示者。但是，此呼叫不得直接，因为这将违反*依赖规则*：内圈不能提及外圈中的名称。因此，我们有使用案例调用界面（此处显示为使用案例输出端口），并让外圈中的演示者实现它。</p>
+
+<p>同样的技术用于跨越架构中的所有边界。我们利用动态多态性创建源代码依赖性，反对控制流，以便无论控制流向哪个方向，我们都能遵守*依赖规则*。</p>
+
+<h2 id="什么数据跨越了界限">什么数据跨越了界限。</h2>
+
+<p>通常跨越边界的数据是简单的数据结构。如果您愿意，您可以使用基本结构或简单的数据传输对象。或者数据可以简单地作为函数调用中的参数。或者你可以把它打包成哈沙普， 或者把它构造成一个物体。重要的是，孤立、简单的数据结构会跨越边界。我们不想欺骗和通过*实体*或数据库行。我们不希望数据结构有任何违反依赖*规则的依赖性*。</p>
+
+<p>例如，许多数据库框架会返回一个方便的数据格式来响应查询。我们可以称之为行结构。我们不想将行结构向内穿过边界。这将违反*依赖规则*，因为它会迫使一个内圈了解一个外圈。</p>
+
+<p>因此，当我们将数据传递到边界时，它总是以最方便的形式进入内圈。</p>
+
+<h2 id="结论">结论</h2>
+
+<p>遵守这些简单的规则并不难，并会节省你很多头痛的未来。通过将软件分离成层，并符合*依赖规则*，您将创建一个内在可测试的系统，并具有所有意味着的好处。当系统的任何外部部分过时时（如数据库或 Web 框架）时，您可以以最小的大惊小怪来替换这些过时的元素。</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/java/Java-%E5%BC%80%E5%8F%91-%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F-%E6%B8%85%E6%B4%81%E6%9E%B6%E6%9E%84/">https://geek.zshipu.com/post/java/Java-%E5%BC%80%E5%8F%91-%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F-%E6%B8%85%E6%B4%81%E6%9E%B6%E6%9E%84/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/java/Java-%E5%BC%80%E5%8F%91-%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F-%E4%BB%8E%E5%88%86%E5%B1%82%E6%9E%B6%E6%9E%84%E6%B4%8B%E8%91%B1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%85%AD%E8%BE%B9%E5%BD%A2%E6%9E%B6%E6%9E%84/">Java 开发 架构模式 从分层架构、洋葱架构到六边形架构</a></li>
+        
+        <li><a href="/post/machinelearning/%E5%90%B4%E6%81%A9%E8%BE%BE%E7%9A%84-CS229%E7%9A%84%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/">吴恩达的 CS229的数学基础（线性代数）</a></li>
+        
+        <li><a href="/post/machinelearning/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80-01%E6%A6%82%E7%8E%87%E7%BB%9F%E8%AE%A1%E5%9F%BA%E7%A1%80%E8%AF%BE/">机器学习数学基础-01概率统计基础课程</a></li>
+        
+        <li><a href="/post/crawler/%E5%85%B3%E9%94%AE%E8%AF%8D%E5%BA%93-Go-%E8%AF%AD%E8%A8%80%E9%AB%98%E6%95%88%E5%88%86%E8%AF%8D-%E6%94%AF%E6%8C%81%E8%8B%B1%E6%96%87%E4%B8%AD%E6%96%87%E6%97%A5%E6%96%87%E7%AD%89/">关键词库-Go 语言高效分词, 支持英文、中文、日文等</a></li>
+        
+        <li><a href="/post/crawler/%E5%85%B3%E9%94%AE%E8%AF%8D%E5%BA%93-%E6%9C%AC%E5%9C%B0sqllite%E5%AD%98%E5%82%A8/">关键词库-本地sqllit存储</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E6%9E%B6%E6%9E%84'>架构</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/java/Java-%E5%BC%80%E5%8F%91-%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F-%E6%B8%85%E6%B4%81%E6%9E%B6%E6%9E%84/" title="Java 开发 架构模式 清洁架构">Java 开发 架构模式 清洁架构</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/java/Java-%E5%BC%80%E5%8F%91-%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F-%E4%BB%8E%E5%88%86%E5%B1%82%E6%9E%B6%E6%9E%84%E6%B4%8B%E8%91%B1%E6%9E%B6%E6%9E%84%E5%88%B0%E5%85%AD%E8%BE%B9%E5%BD%A2%E6%9E%B6%E6%9E%84/" title="Java 开发 架构模式 从分层架构、洋葱架构到六边形架构">Java 开发 架构模式 从分层架构、洋葱架构到六边形架构</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/machinelearning/%E5%90%B4%E6%81%A9%E8%BE%BE%E7%9A%84-CS229%E7%9A%84%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/" title="吴恩达的 CS229的数学基础（线性代数）">吴恩达的 CS229的数学基础（线性代数）</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/machinelearning/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80-01%E6%A6%82%E7%8E%87%E7%BB%9F%E8%AE%A1%E5%9F%BA%E7%A1%80%E8%AF%BE/" title="机器学习数学基础-01概率统计基础课程">机器学习数学基础-01概率统计基础课程</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/crawler/%E5%85%B3%E9%94%AE%E8%AF%8D%E5%BA%93-Go-%E8%AF%AD%E8%A8%80%E9%AB%98%E6%95%88%E5%88%86%E8%AF%8D-%E6%94%AF%E6%8C%81%E8%8B%B1%E6%96%87%E4%B8%AD%E6%96%87%E6%97%A5%E6%96%87%E7%AD%89/" title="关键词库-Go 语言高效分词, 支持英文、中文、日文等">关键词库-Go 语言高效分词, 支持英文、中文、日文等</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/crawler/%E5%85%B3%E9%94%AE%E8%AF%8D%E5%BA%93-%E6%9C%AC%E5%9C%B0sqllite%E5%AD%98%E5%82%A8/" title="关键词库-本地sqllit存储">关键词库-本地sqllit存储</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/crawler/%E5%85%B3%E9%94%AE%E8%AF%8D%E5%BA%93-Go%E4%B8%AD%E4%BD%BF%E7%94%A8%E7%88%AC%E8%99%AB%E6%A1%86%E6%9E%B6/" title="关键词库-Go中使用爬虫框架">关键词库-Go中使用爬虫框架</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD015-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86/" title="DDD015-实现领域驱动设计：第四部分">DDD015-实现领域驱动设计：第四部分</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD014-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86/" title="DDD014-实现领域驱动设计：第三部分">DDD014-实现领域驱动设计：第三部分</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD013-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86/" title="DDD013-实现领域驱动设计：第二部分">DDD013-实现领域驱动设计：第二部分</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/Golang/">Golang (6)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="">java</a>
+    
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%88%86%E8%AF%8D/">分词</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%96%87%E6%91%98/">文摘</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%88%AC%E8%99%AB/">爬虫</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
