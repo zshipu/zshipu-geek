@@ -146,21 +146,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li><a href="#使用">使用：</a></li>
-</ul></li>
-</ul></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
     </div>
 </div>
@@ -214,78 +206,73 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            
-
-<ul>
-<li><p>寻找下一个数字，例如输入345，输出354
-&gt;思路：从最右边位和上一位对比，如果大，就往前移，移动完，尾数排序，从大到小，保证次大
+            <ul>
+<li>寻找下一个数字，例如输入345，输出354</li>
+</ul>
+<blockquote>
+<p>思路：从最右边位和上一位对比，如果大，就往前移，移动完，尾数排序，从大到小，保证次大
 -代码</p>
-
-<pre><code>//字符串逆序
+</blockquote>
+<pre tabindex="0"><code>//字符串逆序
 NSString *reverseStr(NSString *str){
-NSMutableString *string=[[NSMutableString alloc] init];
-for(int i=0;i&lt;str.length;i++){
-    [string appendString:[str substringWithRange:NSMakeRange(str.length-1-i, 1)]];
-}
-return string;
+    NSMutableString *string=[[NSMutableString alloc] init];
+    for(int i=0;i&lt;str.length;i++){
+        [string appendString:[str substringWithRange:NSMakeRange(str.length-1-i, 1)]];
+    }
+    return string;
 }
 
 //字符串分成数组
 NSMutableArray *separateStringToArray(NSString *str){
-NSMutableArray *marr = [NSMutableArray array];
-for (NSInteger i = 0; i &lt; str.length; i++) {
-    [marr addObject:[str substringWithRange:NSMakeRange(i, 1)]];
-}
-return marr;
+    NSMutableArray *marr = [NSMutableArray array];
+    for (NSInteger i = 0; i &lt; str.length; i++) {
+        [marr addObject:[str substringWithRange:NSMakeRange(i, 1)]];
+    }
+    return marr;
 }
 
 
 NSString *findNextLargerNum(NSString *oriNum){
 
 
-NSMutableString *finalStr = [NSMutableString string];
+    NSMutableString *finalStr = [NSMutableString string];
 
 
-NSMutableArray *marr = separateStringToArray(oriNum);
-for (NSInteger i = marr.count - 1; i &gt; 0; i--) {
-    NSNumber *lastNum = [marr objectAtIndex:i];
-    NSNumber *preNum = [marr objectAtIndex:i-1];
-    if (lastNum.integerValue &gt; preNum.integerValue) {
-        //截取字符串
-        NSString *rightStr = reverseStr([oriNum substringWithRange:NSMakeRange(i, oriNum.length - i)]);
-        NSString *leftStr = [oriNum substringWithRange:NSMakeRange(0,i)];
-        //第i-1位截取出来
-        NSString *leftCompareStr = [oriNum substringWithRange:NSMakeRange(i-1, 1)];
-        //和右边逐个对比
-        for (int j = 0; j &lt; rightStr.length; j++) {
-            NSString *rightCompareStr = [rightStr substringWithRange:NSMakeRange(j, 1)];
-            if (leftCompareStr.integerValue &lt; rightCompareStr.integerValue) {
-                NSMutableArray *finalArr = separateStringToArray([NSString stringWithFormat:@&quot;%@%@&quot;,leftStr,rightStr]);
-                NSInteger leftIndex = [finalArr indexOfObject:leftCompareStr];
-                NSInteger rightIndex = [finalArr indexOfObject:rightCompareStr];
-                [finalArr exchangeObjectAtIndex:leftIndex withObjectAtIndex:rightIndex];
-                for (NSString *str in finalArr) {
-                    [finalStr appendString:str];
+    NSMutableArray *marr = separateStringToArray(oriNum);
+    for (NSInteger i = marr.count - 1; i &gt; 0; i--) {
+        NSNumber *lastNum = [marr objectAtIndex:i];
+        NSNumber *preNum = [marr objectAtIndex:i-1];
+        if (lastNum.integerValue &gt; preNum.integerValue) {
+            //截取字符串
+            NSString *rightStr = reverseStr([oriNum substringWithRange:NSMakeRange(i, oriNum.length - i)]);
+            NSString *leftStr = [oriNum substringWithRange:NSMakeRange(0,i)];
+            //第i-1位截取出来
+            NSString *leftCompareStr = [oriNum substringWithRange:NSMakeRange(i-1, 1)];
+            //和右边逐个对比
+            for (int j = 0; j &lt; rightStr.length; j++) {
+                NSString *rightCompareStr = [rightStr substringWithRange:NSMakeRange(j, 1)];
+                if (leftCompareStr.integerValue &lt; rightCompareStr.integerValue) {
+                    NSMutableArray *finalArr = separateStringToArray([NSString stringWithFormat:@&quot;%@%@&quot;,leftStr,rightStr]);
+                    NSInteger leftIndex = [finalArr indexOfObject:leftCompareStr];
+                    NSInteger rightIndex = [finalArr indexOfObject:rightCompareStr];
+                    [finalArr exchangeObjectAtIndex:leftIndex withObjectAtIndex:rightIndex];
+                    for (NSString *str in finalArr) {
+                        [finalStr appendString:str];
+                    }
+                    break;
                 }
-                break;
             }
         }
     }
+
+    return finalStr.length?finalStr:oriNum;
 }
-
-return finalStr.length?finalStr:oriNum;
-}
-</code></pre></li>
-</ul>
-
-<h5 id="使用">使用：</h5>
-
-<pre><code>NSString *str = findNextLargerNum(@&quot;8976&quot;);
+</code></pre><h5 id="使用">使用：</h5>
+<pre tabindex="0"><code>NSString *str = findNextLargerNum(@&quot;8976&quot;);
 NSLog(@&quot;======%@&quot;,str);
 //打印结果
 ======9678
 </code></pre>
-
         </div>
 
         
@@ -404,6 +391,18 @@ NSLog(@&quot;======%@&quot;,str);
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD.1-%E7%B4%A7%E7%BC%A9%E7%9F%A5%E8%AF%86/" title="DDD.1 - 紧缩知识">DDD.1 - 紧缩知识</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD018-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/" title="DDD018-领领域驱动设计基础概念">DDD018-领领域驱动设计基础概念</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD017-%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%AE%83%E6%98%AF%E4%BB%80%E4%B9%88-%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E5%AE%83/" title="DDD017-领域驱动设计它是什么何使用它">DDD017-领域驱动设计它是什么何使用它</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/DDD/DDD016-%E5%9C%A8%E5%BC%80%E5%8F%91%E8%BD%AF%E4%BB%B6%E4%B8%AD%E5%BA%94%E7%94%A8%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1/" title="DDD016-在开发软件中应用领域驱动设计">DDD016-在开发软件中应用领域驱动设计</a>
     </li>
     
@@ -429,18 +428,6 @@ NSLog(@&quot;======%@&quot;,str);
     
     <li>
         <a href="https://geek.zshipu.com/post/crawler/%E5%85%B3%E9%94%AE%E8%AF%8D%E5%BA%93-%E6%9C%AC%E5%9C%B0sqllite%E5%AD%98%E5%82%A8/" title="关键词库-本地sqllit存储">关键词库-本地sqllit存储</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/crawler/%E5%85%B3%E9%94%AE%E8%AF%8D%E5%BA%93-Go%E4%B8%AD%E4%BD%BF%E7%94%A8%E7%88%AC%E8%99%AB%E6%A1%86%E6%9E%B6/" title="关键词库-Go中使用爬虫框架">关键词库-Go中使用爬虫框架</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/DDD/DDD015-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86/" title="DDD015-实现领域驱动设计：第四部分">DDD015-实现领域驱动设计：第四部分</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/DDD/DDD014-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86/" title="DDD014-实现领域驱动设计：第三部分">DDD014-实现领域驱动设计：第三部分</a>
     </li>
     
 </ul>
@@ -502,7 +489,7 @@ NSLog(@&quot;======%@&quot;,str);
     
     <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
     
-    <a href="">Java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
     

@@ -146,24 +146,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li><a href="#迁移到项目中的-go-模块">迁移到项目中的 Go 模块</a></li>
-<li><a href="#使用依赖关系管理器">使用依赖关系管理器</a></li>
-<li><a href="#没有依赖项管理器">没有依赖项管理器</a></li>
-<li><a href="#在模块模式下进行测试">在模块模式下进行测试</a></li>
-<li><a href="#发布版本">发布版本</a></li>
-<li><a href="#导入和规范化模块路径">导入和规范化模块路径</a></li>
-<li><a href="#结论">结论</a></li>
-</ul></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
     </div>
 </div>
@@ -210,123 +199,91 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            
-
-<p><font _mstmutation="1" _msthash="291590" _msttexthash="2124701813">Go 项目使用各种依赖项管理策略。<a href="https://zshipu.com/t?url=https://golang.org/cmd/go/#hdr-Vendor_Directories">dep</a>和滑翔<a href="https://zshipu.com/t?url=https://github.com/golang/dep">等</a><a href="https://zshipu.com/t?url=https://github.com/Masterminds/glide">供应商工具</a>很受欢迎，但它们在行为上存在很大差异，而且并不总是很好地协同工作。某些项目将其整个 GOPATH 目录存储在单个 Git 存储库中。其他人只是依赖并期望在 GOPATH 中安装相当新版本的依赖项。</font><code>go get</code></p>
-
-<p><font _mstmutation="1" _msthash="291889" _msttexthash="651587872">Go 的模块系统在 Go 1.11 中引入，它提供了命令中内置的官方依赖管理解决方案。本文介绍将项目转换为模块的工具和技术。</font><code>go</code></p>
-
-<p><font _mstmutation="1" _msthash="292188" _msttexthash="1041440205">请注意：如果项目已在 v2.0.0 或更高版本标记，则需要在添加文件时更新模块路径。我们将解释如何在不中断您的用户在将来的一篇文章中，重点是 v2 和以后。</font><code>go.mod</code></p>
-
+            <p><!-- raw HTML omitted -->Go 项目使用各种依赖项管理策略。<a href="https://zshipu.com/t?url=https://golang.org/cmd/go/#hdr-Vendor_Directories">dep</a>和滑翔<a href="https://zshipu.com/t?url=https://github.com/golang/dep">等</a><a href="https://zshipu.com/t?url=https://github.com/Masterminds/glide">供应商工具</a>很受欢迎，但它们在行为上存在很大差异，而且并不总是很好地协同工作。某些项目将其整个 GOPATH 目录存储在单个 Git 存储库中。其他人只是依赖并期望在 GOPATH 中安装相当新版本的依赖项。<!-- raw HTML omitted --><code>go get</code></p>
+<p><!-- raw HTML omitted -->Go 的模块系统在 Go 1.11 中引入，它提供了命令中内置的官方依赖管理解决方案。本文介绍将项目转换为模块的工具和技术。<!-- raw HTML omitted --><code>go</code></p>
+<p><!-- raw HTML omitted -->请注意：如果项目已在 v2.0.0 或更高版本标记，则需要在添加文件时更新模块路径。我们将解释如何在不中断您的用户在将来的一篇文章中，重点是 v2 和以后。<!-- raw HTML omitted --><code>go.mod</code></p>
 <h4 id="迁移到项目中的-go-模块">迁移到项目中的 Go 模块</h4>
-
 <p>在开始过渡到 Go 模块时，项目可能为三种状态之一：</p>
-
 <ul>
 <li>一个全新的 Go 项目。</li>
 <li>具有非模块依赖管理器的已建立的 Go 项目。</li>
 <li>没有任何依赖项管理器的已建立的 Go 项目。</li>
 </ul>
-
-<p>第一个案例在&rdquo;使用<a href="https://zshipu.com/t?url=https://blog.golang.org/using-go-modules">Go 模块&rdquo;中介绍</a>;我们将在这篇文章中讨论后两个。</p>
-
+<p>第一个案例在&quot;使用<a href="https://zshipu.com/t?url=https://blog.golang.org/using-go-modules">Go 模块&quot;中介绍</a>;我们将在这篇文章中讨论后两个。</p>
 <h4 id="使用依赖关系管理器">使用依赖关系管理器</h4>
-
 <p>若要转换已使用依赖项管理工具的项目，请运行以下命令：</p>
-
-<p><code>$ git clone <a href="https://github.com/my/project">https://github.com/my/project</a>
+<p><!-- raw HTML omitted -->$ git clone <a href="https://github.com/my/project">https://github.com/my/project</a>
 [&hellip;]
 $ cd project
 $ cat Godeps/Godeps.json
 {
-    &ldquo;ImportPath&rdquo;: &ldquo;github.com/my/project&rdquo;,
-    &ldquo;GoVersion&rdquo;: &ldquo;go1.12&rdquo;,
-    &ldquo;GodepVersion&rdquo;: &ldquo;v80&rdquo;,
-    &ldquo;Deps&rdquo;: [
-        {
-            &ldquo;ImportPath&rdquo;: &ldquo;rsc.io/binaryregexp&rdquo;,
-            &ldquo;Comment&rdquo;: &ldquo;v0.2.0-1-g545cabd&rdquo;,
-            &ldquo;Rev&rdquo;: &ldquo;545cabda89ca36b48b8e681a30d9d769a30b3074&rdquo;
-        },
-        {
-            &ldquo;ImportPath&rdquo;: &ldquo;rsc.io/binaryregexp/syntax&rdquo;,
-            &ldquo;Comment&rdquo;: &ldquo;v0.2.0-1-g545cabd&rdquo;,
-            &ldquo;Rev&rdquo;: &ldquo;545cabda89ca36b48b8e681a30d9d769a30b3074&rdquo;
-        }
-    ]
+&ldquo;ImportPath&rdquo;: &ldquo;github.com/my/project&rdquo;,
+&ldquo;GoVersion&rdquo;: &ldquo;go1.12&rdquo;,
+&ldquo;GodepVersion&rdquo;: &ldquo;v80&rdquo;,
+&ldquo;Deps&rdquo;: [
+{
+&ldquo;ImportPath&rdquo;: &ldquo;rsc.io/binaryregexp&rdquo;,
+&ldquo;Comment&rdquo;: &ldquo;v0.2.0-1-g545cabd&rdquo;,
+&ldquo;Rev&rdquo;: &ldquo;545cabda89ca36b48b8e681a30d9d769a30b3074&rdquo;
+},
+{
+&ldquo;ImportPath&rdquo;: &ldquo;rsc.io/binaryregexp/syntax&rdquo;,
+&ldquo;Comment&rdquo;: &ldquo;v0.2.0-1-g545cabd&rdquo;,
+&ldquo;Rev&rdquo;: &ldquo;545cabda89ca36b48b8e681a30d9d769a30b3074&rdquo;
+}
+]
 }
 $ go mod init github.com/my/project
 go: creating new go.mod: module github.com/my/project
 go: copying requirements from Godeps/Godeps.json
 $ cat go.mod
 module github.com/my/project</p>
-
 <p>go 1.12</p>
-
 <p>require rsc.io/binaryregexp v0.2.1-0.20190524193500-545cabda89ca
-$</code></p>
-
-<pre><code class="language-go">
-&lt;font _mstmutation=&quot;1&quot; _msthash=&quot;307255&quot; _msttexthash=&quot;977207946&quot;&gt;这是暂停和运行以及继续运行的好去点。以后的步骤可能会修改您的文件，因此，如果您喜欢采用迭代方法，这是最接近预模块依赖项规范的文件。&lt;/font&gt;```go build ./...``````go test ./...``````go.mod``````go.mod```
-
-&lt;code&gt;$ go mod tidy
+$<!-- raw HTML omitted --></p>
+<p><code>go mod init</code><!-- raw HTML omitted -->创建一个新的 go.mod 文件，并自动从 导入依赖项，或从<a href="https://zshipu.com/t?url=https://go.googlesource.com/go/+/362625209b6cd2bc059b6b0a67712ddebab312d9/src/cmd/go/internal/modconv/modconv.go#9">中导入许多其他受支持的格式</a>。参数是模块路径，即可能找到模块的位置。<!-- raw HTML omitted --><code>Godeps.json``````Gopkg.lock``````go mod init</code></p>
+<p><!-- raw HTML omitted -->这是暂停和运行以及继续运行的好去点。以后的步骤可能会修改您的文件，因此，如果您喜欢采用迭代方法，这是最接近预模块依赖项规范的文件。<!-- raw HTML omitted --><code>go build ./...``````go test ./...``````go.mod``````go.mod</code></p>
+<p><!-- raw HTML omitted -->$ go mod tidy
 go: downloading rsc.io/binaryregexp v0.2.1-0.20190524193500-545cabda89ca
 go: extracting rsc.io/binaryregexp v0.2.1-0.20190524193500-545cabda89ca
 $ cat go.sum
 rsc.io/binaryregexp v0.2.1-0.20190524193500-545cabda89ca h1:FKXXXJ6G2bFoVe7hX3kEX6Izxw5ZKRH57DFBJmHCbkU=
 rsc.io/binaryregexp v0.2.1-0.20190524193500-545cabda89ca/go.mod h1:qTv7/COck+e2FymRvadv62gMdZztPaShugOCi3I+8D8=
-$&lt;/code&gt; 
-
-</code></pre>
-
-<p>go mod tidy<code>&lt;font _mstmutation=&quot;1&quot; _msthash=&quot;307879&quot; _msttexthash=&quot;2592516199&quot;&gt;查找模块中由包传输导入的所有包。它为任何已知模块未提供的包添加新的模块要求，并删除对不提供任何导入包的模块的要求。如果模块提供的包仅由尚未迁移到模块的项目导入，则模块要求将用注释标记。在将文件提交到版本控制之前运行始终是一种好的做法。&lt;/font&gt;</code>// indirect<code>go mod tidy</code>go.mod```</p>
-
+$<!-- raw HTML omitted --></p>
+<p><code>go mod tidy</code><!-- raw HTML omitted -->查找模块中由包传输导入的所有包。它为任何已知模块未提供的包添加新的模块要求，并删除对不提供任何导入包的模块的要求。如果模块提供的包仅由尚未迁移到模块的项目导入，则模块要求将用注释标记。在将文件提交到版本控制之前运行始终是一种好的做法。<!-- raw HTML omitted --><code>// indirect``````go mod tidy``````go.mod</code></p>
 <p>让我们通过确保代码生成和测试通过：</p>
-
-<p><code>$ go build ./&hellip;
+<p><!-- raw HTML omitted -->$ go build ./&hellip;
 $ go test ./&hellip;
 [&hellip;]
-$</code></p>
-
-<p><font _mstmutation="1" _msthash="305994" _msttexthash="3468825620">请注意，其他依赖项管理器可能在单个包或整个存储库（不是模块）级别指定依赖项，并且通常不识别依赖项文件中指定的要求。因此，您可能不会获得与以前完全相同的每个包版本，并且存在升级过去中断更改的风险。因此，对生成的依赖项进行审核时遵循上述命令非常重要。为此，请运行</font><code>go.mod</code></p>
-
-<p><code>$ go list -m all
+$<!-- raw HTML omitted --></p>
+<p><!-- raw HTML omitted -->请注意，其他依赖项管理器可能在单个包或整个存储库（不是模块）级别指定依赖项，并且通常不识别依赖项文件中指定的要求。因此，您可能不会获得与以前完全相同的每个包版本，并且存在升级过去中断更改的风险。因此，对生成的依赖项进行审核时遵循上述命令非常重要。为此，请运行<!-- raw HTML omitted --><code>go.mod</code></p>
+<p><!-- raw HTML omitted -->$ go list -m all
 go: finding rsc.io/binaryregexp v0.2.1-0.20190524193500-545cabda89ca
 github.com/my/project
 rsc.io/binaryregexp v0.2.1-0.20190524193500-545cabda89ca
-$</code></p>
-
-<p><font _mstmutation="1" _msthash="306618" _msttexthash="2987658856">并将生成的版本与旧的依赖项管理文件进行比较，以确保所选版本是适当的。如果您找到的版本不是你想要的，您可以找出为什么使用 和/或，并使用 升级或降级到正确的版本。（如果您请求的版本比以前选择的版本要旧，则将根据需要降级其他依赖项以保持兼容性。例如，</font><code>go mod why -m</code><code>go mod graph</code><code>go get</code><code>go get</code></p>
-
-<p><code>$ go mod why -m rsc.io/binaryregexp
+$<!-- raw HTML omitted --></p>
+<p><!-- raw HTML omitted -->并将生成的版本与旧的依赖项管理文件进行比较，以确保所选版本是适当的。如果您找到的版本不是你想要的，您可以找出为什么使用 和/或，并使用 升级或降级到正确的版本。（如果您请求的版本比以前选择的版本要旧，则将根据需要降级其他依赖项以保持兼容性。例如，<!-- raw HTML omitted --><code>go mod why -m``````go mod graph``````go get``````go get</code></p>
+<p><!-- raw HTML omitted -->$ go mod why -m rsc.io/binaryregexp
 [&hellip;]
 $ go mod graph | grep rsc.io/binaryregexp
 [&hellip;]
-$ go get rsc.io/binaryregexp@v0.2.0
-$</code></p>
-
+$ go get <a href="mailto:rsc.io/binaryregexp@v0.2.0">rsc.io/binaryregexp@v0.2.0</a>
+$<!-- raw HTML omitted --></p>
 <h4 id="没有依赖项管理器">没有依赖项管理器</h4>
-
-<p><font _mstmutation="1" _msthash="307554" _msttexthash="206939005">对于没有依赖项管理系统的 Go 项目，请首先创建一个文件：</font><code>go.mod</code></p>
-
-<p><code>$ git clone <a href="https://go.googlesource.com/blog">https://go.googlesource.com/blog</a>
+<p><!-- raw HTML omitted -->对于没有依赖项管理系统的 Go 项目，请首先创建一个文件：<!-- raw HTML omitted --><code>go.mod</code></p>
+<p><!-- raw HTML omitted -->$ git clone <a href="https://go.googlesource.com/blog">https://go.googlesource.com/blog</a>
 [&hellip;]
 $ cd blog
 $ go mod init golang.org/x/blog
 go: creating new go.mod: module golang.org/x/blog
 $ cat go.mod
 module golang.org/x/blog</p>
-
 <p>go 1.12
-$</code></p>
-
-<p><font _mstmutation="1" _msthash="308178" _msttexthash="1548500304">如果没有以前依赖项管理器的配置文件，将创建一个仅包含 和 指令的文件。在此示例中，我们将模块路径设置为，因为这是其自定义<a href="https://zshipu.com/t?url=https://golang.org/cmd/go/#hdr-Remote_import_paths">导入路径</a>。用户可以使用此路径导入包，我们必须小心不要更改它。</font><code>go mod init</code><code>go.mod</code><code>module</code><code>go</code><code>golang.org/x/blog</code></p>
-
-<p><font _mstmutation="1" _msthash="305669" _msttexthash="283867987">指令声明模块路径，该指令声明用于在模块中编译代码的 Go 语言的预期版本。</font><code>module</code><code>go</code></p>
-
-<p><font _mstmutation="1" _msthash="305981" _msttexthash="100820954">接下来，运行以添加模块的依赖项：</font><code>go mod tidy</code></p>
-
-<p><code>$ go mod tidy
+$<!-- raw HTML omitted --></p>
+<p><!-- raw HTML omitted -->如果没有以前依赖项管理器的配置文件，将创建一个仅包含 和 指令的文件。在此示例中，我们将模块路径设置为，因为这是其自定义<a href="https://zshipu.com/t?url=https://golang.org/cmd/go/#hdr-Remote_import_paths">导入路径</a>。用户可以使用此路径导入包，我们必须小心不要更改它。<!-- raw HTML omitted --><code>go mod init``````go.mod``````module``````go``````golang.org/x/blog</code></p>
+<p><!-- raw HTML omitted -->指令声明模块路径，该指令声明用于在模块中编译代码的 Go 语言的预期版本。<!-- raw HTML omitted --><code>module``````go</code></p>
+<p><!-- raw HTML omitted -->接下来，运行以添加模块的依赖项：<!-- raw HTML omitted --><code>go mod tidy</code></p>
+<p><!-- raw HTML omitted -->$ go mod tidy
 go: finding golang.org/x/website latest
 go: finding gopkg.in/tomb.v2 latest
 go: finding golang.org/x/net latest
@@ -343,16 +300,14 @@ go: downloading golang.org/x/website v0.0.0-20190809153340-86a7442ada7c
 go: extracting golang.org/x/website v0.0.0-20190809153340-86a7442ada7c
 $ cat go.mod
 module golang.org/x/blog</p>
-
 <p>go 1.12</p>
-
 <p>require (
-    github.com/gorilla/context v1.1.1
-    golang.org/x/net v0.0.0-20190813141303-74dc4d7220e7
-    golang.org/x/text v0.3.2
-    golang.org/x/tools v0.0.0-20190813214729-9dba7caff850
-    golang.org/x/website v0.0.0-20190809153340-86a7442ada7c
-    gopkg.in/tomb.v2 v2.0.0-20161208151619-d5d1b5820637
+github.com/gorilla/context v1.1.1
+golang.org/x/net v0.0.0-20190813141303-74dc4d7220e7
+golang.org/x/text v0.3.2
+golang.org/x/tools v0.0.0-20190813214729-9dba7caff850
+golang.org/x/website v0.0.0-20190809153340-86a7442ada7c
+gopkg.in/tomb.v2 v2.0.0-20161208151619-d5d1b5820637
 )
 $ cat go.sum
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
@@ -361,54 +316,35 @@ git.apache.org/thrift.git v0.0.0-20180902110319-2566ecd5d999/go.mod h1:fPE2ZNJGy
 git.apache.org/thrift.git v0.0.0-20181218151757-9b75e4fe745a/go.mod h1:fPE2ZNJGynbRyZ4dJvy6G277gSllfV2HJqblrnkyeyg=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 [&hellip;]
-$</code></p>
-
-<p><code>go mod tidy</code><font _mstmutation="1" _msthash="306605" _msttexthash="965903354">添加了模块中包传输导入的所有包的模块要求，并在特定版本上为每个库构建了一个包含校验和的模块。让我们通过确保代码仍在生成和测试仍然通过：</font><code>go.sum</code></p>
-
-<p><code>$ go build ./&hellip;
+$<!-- raw HTML omitted --></p>
+<p><code>go mod tidy</code><!-- raw HTML omitted -->添加了模块中包传输导入的所有包的模块要求，并在特定版本上为每个库构建了一个包含校验和的模块。让我们通过确保代码仍在生成和测试仍然通过：<!-- raw HTML omitted --><code>go.sum</code></p>
+<p><!-- raw HTML omitted -->$ go build ./&hellip;
 $ go test ./&hellip;
-ok      golang.org/x/blog   0.335s
-?       golang.org/x/blog/content/appengine [no test files]
-ok      golang.org/x/blog/content/cover 0.040s
-?       golang.org/x/blog/content/h2push/server [no test files]
-?       golang.org/x/blog/content/survey2016    [no test files]
-?       golang.org/x/blog/content/survey2017    [no test files]
-?       golang.org/x/blog/support/racy  [no test files]
-$</code></p>
-
-<p><font _mstmutation="1" _msthash="307229" _msttexthash="2726895847">请注意，在添加要求时，它会添加模块的最新版本。如果包含后来发布中断更改的依赖项的较旧版本，则可能会在 中看到 错误， 或 中出现错误。如果发生这种情况，请尝试降级到具有 （例如 ，） 的较旧版本，或花时间使模块与每个依赖项的最新版本兼容。</font><code>go mod tidy</code><code>GOPATH</code><code>go mod tidy</code><code>go build</code><code>go test</code><code>go get</code><code>go get github.com/broken/module@v1.1.0</code></p>
-
+ok  	golang.org/x/blog	0.335s
+?   	golang.org/x/blog/content/appengine	[no test files]
+ok  	golang.org/x/blog/content/cover	0.040s
+?   	golang.org/x/blog/content/h2push/server	[no test files]
+?   	golang.org/x/blog/content/survey2016	[no test files]
+?   	golang.org/x/blog/content/survey2017	[no test files]
+?   	golang.org/x/blog/support/racy	[no test files]
+$<!-- raw HTML omitted --></p>
+<p><!-- raw HTML omitted -->请注意，在添加要求时，它会添加模块的最新版本。如果包含后来发布中断更改的依赖项的较旧版本，则可能会在 中看到 错误， 或 中出现错误。如果发生这种情况，请尝试降级到具有 （例如 ，） 的较旧版本，或花时间使模块与每个依赖项的最新版本兼容。<!-- raw HTML omitted --><code>go mod tidy``````GOPATH``````go mod tidy``````go build``````go test``````go get``````go get github.com/broken/module@v1.1.0</code></p>
 <h4 id="在模块模式下进行测试">在模块模式下进行测试</h4>
-
 <p>迁移到 Go 模块后，某些测试可能需要调整。</p>
-
-<p><font _mstmutation="1" _msthash="308165" _msttexthash="1105883116">如果测试需要在包目录中写入文件，当包目录位于模块缓存中（即只读）时，它可能会失败。特别是，这可能会导致失败。测试应复制它需要写入临时目录的文件。</font><code>go test all</code></p>
-
-<p><font _mstmutation="1" _msthash="308477" _msttexthash="3084254641">如果测试依赖于相对路径 （） 来查找和读取另一个包中的文件，则如果包位于另一个模块中，则测试将失败，该模块将位于模块缓存的版本子目录或指令中指定的路径中。如果是这种情况，您可能需要将测试输入复制到模块中，或者将测试输入从原始文件转换为嵌入在源文件中的数据。</font><code>../package-in-another-module</code><code>replace</code><code>.go</code></p>
-
-<p><font _mstmutation="1" _msthash="305968" _msttexthash="982438639">如果测试要求测试中的命令在 GOPATH 模式下运行，则可能会失败。如果是这种情况，您可能需要将文件添加到要测试的源树中，或者显式设置文件。</font><code>go</code><code>go.mod</code><code>GO111MODULE=off</code></p>
-
+<p><!-- raw HTML omitted -->如果测试需要在包目录中写入文件，当包目录位于模块缓存中（即只读）时，它可能会失败。特别是，这可能会导致失败。测试应复制它需要写入临时目录的文件。<!-- raw HTML omitted --><code>go test all</code></p>
+<p><!-- raw HTML omitted -->如果测试依赖于相对路径 （） 来查找和读取另一个包中的文件，则如果包位于另一个模块中，则测试将失败，该模块将位于模块缓存的版本子目录或指令中指定的路径中。如果是这种情况，您可能需要将测试输入复制到模块中，或者将测试输入从原始文件转换为嵌入在源文件中的数据。<!-- raw HTML omitted --><code>../package-in-another-module``````replace``````.go</code></p>
+<p><!-- raw HTML omitted -->如果测试要求测试中的命令在 GOPATH 模式下运行，则可能会失败。如果是这种情况，您可能需要将文件添加到要测试的源树中，或者显式设置文件。<!-- raw HTML omitted --><code>go``````go.mod``````GO111MODULE=off</code></p>
 <h4 id="发布版本">发布版本</h4>
-
-<p>最后，您应该标记并发布新模块的发布版本。如果您尚未发布任何版本，则这是可选的，但如果没有官方版本，下游用户将依赖于使用伪版本的特定提交，这可能更难支持。[](<a href="https://zshipu.com/t?url=https://golang.org/cmd/go/#hdr-Pseudo_versions">https://zshipu.com/t?url=https://golang.org/cmd/go/#hdr-Pseudo_versions</a>)</p>
-
-<p><code>$ git tag v1.2.0
-$ git push origin v1.2.0</code></p>
-
-<p><font _mstmutation="1" _msthash="307216" _msttexthash="3607291766">新文件为模块定义了规范导入路径，并添加了新的最低版本要求。如果用户已在使用正确的导入路径，并且依赖项尚未进行重大更改，则添加文件是向后兼容的，但这是一个重大更改，可能会暴露现有问题。如果您有现有的版本标记，则应增加<a href="https://zshipu.com/t?url=https://semver.org/#spec-item-7">次要版本</a>。请参阅<a href="/publishing-go-modules">发布转到</a>模块，了解如何增加和发布版本。</font><code>go.mod</code><code>go.mod</code></p>
-
+<p>最后，您应该标记并发布新模块的发布版本。如果您尚未发布任何版本，则这是可选的，但如果没有官方版本，下游用户将依赖于使用伪版本的特定提交，这可能更难支持。<a href="https://zshipu.com/t?url=https://golang.org/cmd/go/#hdr-Pseudo_versions"></a></p>
+<p><!-- raw HTML omitted -->$ git tag v1.2.0
+$ git push origin v1.2.0<!-- raw HTML omitted --></p>
+<p><!-- raw HTML omitted -->新文件为模块定义了规范导入路径，并添加了新的最低版本要求。如果用户已在使用正确的导入路径，并且依赖项尚未进行重大更改，则添加文件是向后兼容的，但这是一个重大更改，可能会暴露现有问题。如果您有现有的版本标记，则应增加<a href="https://zshipu.com/t?url=https://semver.org/#spec-item-7">次要版本</a>。请参阅<a href="/publishing-go-modules">发布转到</a>模块，了解如何增加和发布版本。<!-- raw HTML omitted --><code>go.mod``````go.mod</code></p>
 <h4 id="导入和规范化模块路径">导入和规范化模块路径</h4>
-
-<p><font _mstmutation="1" _msthash="307840" _msttexthash="3645971524">每个模块在其文件中声明其模块路径。引用模块内包的每个语句都必须将模块路径作为包路径的前缀。但是，该命令可能会遇到一个存储库，其中包含模块通过许多不同的<a href="https://zshipu.com/t?url=https://golang.org/cmd/go/#hdr-Remote_import_paths">远程导入路径</a>。例如，和 解析为包含托管在 go.googlesource.com/lint 的<a href="https://zshipu.com/t?url=https://go.googlesource.com/lint">存储库</a>。该<a href="https://zshipu.com/t?url=https://go.googlesource.com/lint/+/refs/heads/master/go.mod"><code>存储库中包含的 go.mod</code></a>文件声明其路径为 ，因此只有该路径对应于有效的模块。</font><code>go.mod</code><code>import</code><code>go</code><code>golang.org/x/lint</code><code>github.com/golang/lint</code><code>golang.org/x/lint</code></p>
-
-<p><font _mstmutation="1" _msthash="308152" _msttexthash="3556894835">Go 1.4 提供了一种使用<a href="https://zshipu.com/t?url=https://golang.org/cmd/go/#hdr-Import_path_checking"><code>//</code></a>导入注释声明规范导入路径的机制，但包作者并不总是提供它们。因此，在模块之前编写的代码可能为模块使用了非规范的导入路径，而不会出现不匹配的错误。使用模块时，导入路径必须与规范模块路径匹配，因此您可能需要更新语句：例如，您可能需要更改为 。</font><code>import</code><code>import &quot;github.com/golang/lint&quot;</code><code>import &quot;golang.org/x/lint&quot;</code></p>
-
-<p><font _mstmutation="1" _msthash="308464" _msttexthash="3880206850">另一种情况是，在主要版本 2 或更高版本中，Go 模块的规范路径可能与其存储库路径不同。主要版本超过 1 的 Go 模块必须在其模块路径中包含主要版本的后缀：例如，版本必须具有后缀 。但是，语句可能引用模块中的包，_但没有_后缀。例如，at 的非模块用户可能已将其导入为&rdquo;作为&rdquo;，并且需要更新导入路径以包括后缀。</font><code>v2.0.0</code><code>/v2</code><code>import</code><code>github.com/russross/blackfriday/v2</code><code>v2.0.1</code><code>github.com/russross/blackfriday</code><code>/v2</code></p>
-
+<p><!-- raw HTML omitted -->每个模块在其文件中声明其模块路径。引用模块内包的每个语句都必须将模块路径作为包路径的前缀。但是，该命令可能会遇到一个存储库，其中包含模块通过许多不同的<a href="https://zshipu.com/t?url=https://golang.org/cmd/go/#hdr-Remote_import_paths">远程导入路径</a>。例如，和 解析为包含托管在 go.googlesource.com/lint 的<a href="https://zshipu.com/t?url=https://go.googlesource.com/lint">存储库</a>。该<a href="https://zshipu.com/t?url=https://go.googlesource.com/lint/+/refs/heads/master/go.mod"><code>存储库中包含的 go.mod</code></a>文件声明其路径为 ，因此只有该路径对应于有效的模块。<!-- raw HTML omitted --><code>go.mod``````import``````go``````golang.org/x/lint``````github.com/golang/lint``````golang.org/x/lint</code></p>
+<p><!-- raw HTML omitted -->Go 1.4 提供了一种使用<a href="https://zshipu.com/t?url=https://golang.org/cmd/go/#hdr-Import_path_checking"><code>//</code></a>导入注释声明规范导入路径的机制，但包作者并不总是提供它们。因此，在模块之前编写的代码可能为模块使用了非规范的导入路径，而不会出现不匹配的错误。使用模块时，导入路径必须与规范模块路径匹配，因此您可能需要更新语句：例如，您可能需要更改为 。<!-- raw HTML omitted --><code>import``````import &quot;github.com/golang/lint&quot;``````import &quot;golang.org/x/lint&quot;</code></p>
+<p><!-- raw HTML omitted -->另一种情况是，在主要版本 2 或更高版本中，Go 模块的规范路径可能与其存储库路径不同。主要版本超过 1 的 Go 模块必须在其模块路径中包含主要版本的后缀：例如，版本必须具有后缀 。但是，语句可能引用模块中的包，_但没有_后缀。例如，at 的非模块用户可能已将其导入为&quot;作为&quot;，并且需要更新导入路径以包括后缀。<!-- raw HTML omitted --><code>v2.0.0``````/v2``````import``````github.com/russross/blackfriday/v2``````v2.0.1``````github.com/russross/blackfriday``````/v2</code></p>
 <h4 id="结论">结论</h4>
-
 <p>对于大多数用户来说，转换为 Go 模块应该是一个简单明了的过程。由于非规范的导入路径或依赖项内的更改中断，可能会偶尔出现问题。未来的帖子将<a href="/publishing-go-modules">探索发布新版本，v2</a>和以后，以及调试奇怪情况的方法。</p>
-
 <p>为了提供反馈并帮助塑造 Go 中依赖项管理的未来，请向我们发送<a href="https://zshipu.com/t?url=https://golang.org/issue/new">bug 报告</a>或<a href="https://zshipu.com/t?url=https://golang.org/wiki/ExperienceReports">体验报告</a>。</p>
 
         </div>
@@ -533,6 +469,18 @@ $ git push origin v1.2.0</code></p>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD.1-%E7%B4%A7%E7%BC%A9%E7%9F%A5%E8%AF%86/" title="DDD.1 - 紧缩知识">DDD.1 - 紧缩知识</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD018-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/" title="DDD018-领领域驱动设计基础概念">DDD018-领领域驱动设计基础概念</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD017-%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%AE%83%E6%98%AF%E4%BB%80%E4%B9%88-%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E5%AE%83/" title="DDD017-领域驱动设计它是什么何使用它">DDD017-领域驱动设计它是什么何使用它</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/DDD/DDD016-%E5%9C%A8%E5%BC%80%E5%8F%91%E8%BD%AF%E4%BB%B6%E4%B8%AD%E5%BA%94%E7%94%A8%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1/" title="DDD016-在开发软件中应用领域驱动设计">DDD016-在开发软件中应用领域驱动设计</a>
     </li>
     
@@ -558,18 +506,6 @@ $ git push origin v1.2.0</code></p>
     
     <li>
         <a href="https://geek.zshipu.com/post/crawler/%E5%85%B3%E9%94%AE%E8%AF%8D%E5%BA%93-%E6%9C%AC%E5%9C%B0sqllite%E5%AD%98%E5%82%A8/" title="关键词库-本地sqllit存储">关键词库-本地sqllit存储</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/crawler/%E5%85%B3%E9%94%AE%E8%AF%8D%E5%BA%93-Go%E4%B8%AD%E4%BD%BF%E7%94%A8%E7%88%AC%E8%99%AB%E6%A1%86%E6%9E%B6/" title="关键词库-Go中使用爬虫框架">关键词库-Go中使用爬虫框架</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/DDD/DDD015-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86/" title="DDD015-实现领域驱动设计：第四部分">DDD015-实现领域驱动设计：第四部分</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/DDD/DDD014-%E5%AE%9E%E7%8E%B0%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86/" title="DDD014-实现领域驱动设计：第三部分">DDD014-实现领域驱动设计：第三部分</a>
     </li>
     
 </ul>
@@ -631,7 +567,7 @@ $ git push origin v1.2.0</code></p>
     
     <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
     
-    <a href="">Java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
     
