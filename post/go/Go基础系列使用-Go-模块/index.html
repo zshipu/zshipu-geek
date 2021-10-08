@@ -146,13 +146,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-  <ul>
-    <li>
-      <ul>
-        <li></li>
-      </ul>
-    </li>
-  </ul>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#创建新模块">创建新模块</a></li>
+<li><a href="#添加依赖项">添加依赖项</a></li>
+<li><a href="#升级依赖项">升级依赖项</a></li>
+<li><a href="#添加对新主要版本的依赖项">添加对新主要版本的依赖项</a></li>
+<li><a href="#将依赖项升级到新的主要版本">将依赖项升级到新的主要版本</a></li>
+<li><a href="#删除未使用的依赖项">删除未使用的依赖项</a></li>
+<li><a href="#结论">结论</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
 </nav>
     </div>
 </div>
@@ -199,10 +210,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            <p>Go 1.11 和 1.12 包括对<a href="https://zshipu.com/t?url=https://golang.org/doc/go1.11#modules">模块的初步支持</a>，Go 的新依赖<a href="https://zshipu.com/t?url=https://blog.golang.org/versioning-proposal">项管理系统</a>使依赖关系版本信息明确且更易于管理。本文介绍了开始使用模块所需的基本操作。</p>
-<p><!-- raw HTML omitted -->模块是存储在文件<a href="https://zshipu.com/t?url=https://golang.org/ref/spec#Packages">树中的 Go</a>包的集合，其根目录有文件。该文件定义了模块的模块_路径_，这也是用于根目录的导入路径，以及其依赖项_要求_，这是成功生成所需的其他模块。每个依赖项要求都编写为模块路径和特定的<a href="https://zshipu.com/t?url=http://semver.org/">语义版本</a>。<!-- raw HTML omitted --><code>go.mod``````go.mod</code></p>
-<p><!-- raw HTML omitted -->自 Go 1.11 起，go 命令允许在当前目录或任何父目录具有 时使用模块，前提是目录_位于 外部_。（为了兼容，go 命令仍然在旧的 GOPATH 模式下运行，即使找到 。有关详细信息<a href="https://zshipu.com/t?url=https://golang.org/cmd/go/#hdr-Preliminary_module_support">，请参阅 go</a>命令文档。从 Go 1.13 开始，模块模式将是所有发展的默认模式。<!-- raw HTML omitted --><code>go.mod``````$GOPATH/src``````$GOPATH/src``````go.mod</code></p>
+            
+
+<p>Go 1.11 和 1.12 包括对<a href="https://zshipu.com/t?url=https://golang.org/doc/go1.11#modules">模块的初步支持</a>，Go 的新依赖<a href="https://zshipu.com/t?url=https://blog.golang.org/versioning-proposal">项管理系统</a>使依赖关系版本信息明确且更易于管理。本文介绍了开始使用模块所需的基本操作。</p>
+
+<p><font _mstmutation="1" _msthash="291889" _msttexthash="2075803574">模块是存储在文件<a href="https://zshipu.com/t?url=https://golang.org/ref/spec#Packages">树中的 Go</a>包的集合，其根目录有文件。该文件定义了模块的模块_路径_，这也是用于根目录的导入路径，以及其依赖项_要求_，这是成功生成所需的其他模块。每个依赖项要求都编写为模块路径和特定的<a href="https://zshipu.com/t?url=http://semver.org/">语义版本</a>。</font><code>go.mod</code><code>go.mod</code></p>
+
+<p><font _mstmutation="1" _msthash="292188" _msttexthash="2321652450">自 Go 1.11 起，go 命令允许在当前目录或任何父目录具有 时使用模块，前提是目录_位于 外部_。（为了兼容，go 命令仍然在旧的 GOPATH 模式下运行，即使找到 。有关详细信息<a href="https://zshipu.com/t?url=https://golang.org/cmd/go/#hdr-Preliminary_module_support">，请参阅 go</a>命令文档。从 Go 1.13 开始，模块模式将是所有发展的默认模式。</font><code>go.mod</code><code>$GOPATH/src</code><code>$GOPATH/src</code><code>go.mod</code></p>
+
 <p>本文将学习使用模块开发 Go 代码时出现的一系列常见操作：</p>
+
 <ul>
 <li>创建新模块。</li>
 <li>添加依赖项。</li>
@@ -211,52 +228,79 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>将依赖项升级到新的主要版本。</li>
 <li>删除未使用的依赖项。</li>
 </ul>
+
 <h4 id="创建新模块">创建新模块</h4>
+
 <p>让我们创建一个新模块。</p>
-<p><!-- raw HTML omitted -->在 ， 在 目录外的某个地方创建一个新的空目录，然后创建一个新的源文件， ：<!-- raw HTML omitted --><code>$GOPATH/src``````cd``````hello.go</code></p>
-<p><!-- raw HTML omitted -->package hello</p>
+
+<p><font _mstmutation="1" _msthash="306007" _msttexthash="317295095">在 ， 在 目录外的某个地方创建一个新的空目录，然后创建一个新的源文件， ：</font><code>$GOPATH/src</code><code>cd</code><code>hello.go</code></p>
+
+<p><code>package hello</p>
+
 <p>func Hello() string {
-return &ldquo;Hello, world.&rdquo;
-}<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->让我们也编写一个测试，在 中：<!-- raw HTML omitted --><code>hello_test.go</code></p>
-<p><!-- raw HTML omitted -->package hello</p>
+    return &ldquo;Hello, world.&rdquo;
+}</code></p>
+
+<p><font _mstmutation="1" _msthash="306631" _msttexthash="80238951">让我们也编写一个测试，在 中：</font><code>hello_test.go</code></p>
+
+<p><code>package hello</p>
+
 <p>import &ldquo;testing&rdquo;</p>
+
 <p>func TestHello(t *testing.T) {
-want := &ldquo;Hello, world.&rdquo;
-if got := Hello(); got != want {
-t.Errorf(&ldquo;Hello() = %q, want %q&rdquo;, got, want)
-}
-}<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->此时，目录包含包，但不包含模块，因为没有文件。如果我们现在工作并运行，我们将看到：<!-- raw HTML omitted --><code>go.mod``````/home/gopher/hello``````go test</code></p>
-<p><!-- raw HTML omitted -->$ go test
+    want := &ldquo;Hello, world.&rdquo;
+    if got := Hello(); got != want {
+        t.Errorf(&ldquo;Hello() = %q, want %q&rdquo;, got, want)
+    }
+}</code></p>
+
+<p><font _mstmutation="1" _msthash="307255" _msttexthash="421944120">此时，目录包含包，但不包含模块，因为没有文件。如果我们现在工作并运行，我们将看到：</font><code>go.mod</code><code>/home/gopher/hello</code><code>go test</code></p>
+
+<p><code>$ go test
 PASS
-ok  	_/home/gopher/hello	0.020s
-$<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->最后一行总结了整个包测试。由于我们在外部和任何模块之外工作，因此该命令不知道当前目录的导入路径，并且根据目录名称组成一个假的路径： 。<!-- raw HTML omitted --><code>$GOPATH``````go``````_/home/gopher/hello</code></p>
-<p><!-- raw HTML omitted -->让我们使用 ，然后重试，使当前目录成为模块的根目录：<!-- raw HTML omitted --><code>go mod init``````go test</code></p>
-<p><!-- raw HTML omitted -->$ go mod init example.com/hello
+ok      _/home/gopher/hello 0.020s
+$</code></p>
+
+<p><font _mstmutation="1" _msthash="307879" _msttexthash="936642356">最后一行总结了整个包测试。由于我们在外部和任何模块之外工作，因此该命令不知道当前目录的导入路径，并且根据目录名称组成一个假的路径： 。</font><code>$GOPATH</code><code>go</code><code>_/home/gopher/hello</code></p>
+
+<p><font _mstmutation="1" _msthash="305370" _msttexthash="192692578">让我们使用 ，然后重试，使当前目录成为模块的根目录：</font><code>go mod init</code><code>go test</code></p>
+
+<p><code>$ go mod init example.com/hello
 go: creating new go.mod: module example.com/hello
 $ go test
 PASS
-ok  	example.com/hello	0.020s
-$<!-- raw HTML omitted --></p>
+ok      example.com/hello   0.020s
+$</code></p>
+
 <p>祝贺！您已经编写并测试了第一个模块。</p>
-<p><!-- raw HTML omitted -->该命令写了一个文件：<!-- raw HTML omitted --><code>go mod init``````go.mod</code></p>
-<p><!-- raw HTML omitted -->$ cat go.mod
+
+<p><font _mstmutation="1" _msthash="306306" _msttexthash="42213925">该命令写了一个文件：</font><code>go mod init</code><code>go.mod</code></p>
+
+<p><code>$ cat go.mod
 module example.com/hello</p>
+
 <p>go 1.12
-$<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->该文件仅显示在模块的根目录中。子目录中的包具有导入路径，包括模块路径和子目录路径。例如，如果我们创建了一个子目录 ，我们不需要（也不需要）在那里运行。通过导入路径，将自动识别为模块的一部分。<!-- raw HTML omitted --><code>go.mod``````world``````go mod init``````example.com/hello``````example.com/hello/world</code></p>
+$</code></p>
+
+<p><font _mstmutation="1" _msthash="306930" _msttexthash="1899839916">该文件仅显示在模块的根目录中。子目录中的包具有导入路径，包括模块路径和子目录路径。例如，如果我们创建了一个子目录 ，我们不需要（也不需要）在那里运行。通过导入路径，将自动识别为模块的一部分。</font><code>go.mod</code><code>world</code><code>go mod init</code><code>example.com/hello</code><code>example.com/hello/world</code></p>
+
 <h4 id="添加依赖项">添加依赖项</h4>
+
 <p>Go 模块的主要动机是改进使用其他开发人员编写的代码（即添加依赖性）的体验。</p>
-<p><!-- raw HTML omitted -->让我们更新我们的导入，并用它来实现：<!-- raw HTML omitted --><code>hello.go``````rsc.io/quote``````Hello</code></p>
-<p><!-- raw HTML omitted -->package hello</p>
+
+<p><font _mstmutation="1" _msthash="307866" _msttexthash="113907560">让我们更新我们的导入，并用它来实现：</font><code>hello.go</code><code>rsc.io/quote</code><code>Hello</code></p>
+
+<p><code>package hello</p>
+
 <p>import &ldquo;rsc.io/quote&rdquo;</p>
+
 <p>func Hello() string {
-return quote.Hello()
-}<!-- raw HTML omitted --></p>
+    return quote.Hello()
+}</code></p>
+
 <p>现在让我们再次运行测试：</p>
-<p><!-- raw HTML omitted -->$ go test
+
+<p><code>$ go test
 go: finding rsc.io/quote v1.5.2
 go: downloading rsc.io/quote v1.5.2
 go: extracting rsc.io/quote v1.5.2
@@ -267,163 +311,228 @@ go: extracting rsc.io/sampler v1.3.0
 go: downloading golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c
 go: extracting golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c
 PASS
-ok  	example.com/hello	0.023s
-$<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->该命令使用 中列出的特定依赖项模块版本解析导入。当它遇到 一个未由 中的任何模块提供的包时，该命令会自动备份包含该包的模块，并使用最新版本将它添加到 。（&ldquo;最新&quot;定义为最新的标记稳定（非<a href="https://zshipu.com/t?url=https://semver.org/#spec-item-9">预发行</a>）版本，或者最新的标记预发行版本，或者最新的未标记版本。在我们的示例中，解决了模块的新导入。它还下载 了 使用的两个依赖项，即 。文件中仅记录直接依赖项：<!-- raw HTML omitted --><code>go``````go.mod``````import``````go.mod``````go``````go.mod``````go test``````rsc.io/quote``````rsc.io/quote v1.5.2``````rsc.io/quote``````rsc.io/sampler``````golang.org/x/text``````go.mod</code></p>
-<p><!-- raw HTML omitted -->$ cat go.mod
+ok      example.com/hello   0.023s
+$</code></p>
+
+<p><font _mstmutation="1" _msthash="306293" _msttexthash="5542927845">该命令使用 中列出的特定依赖项模块版本解析导入。当它遇到 一个未由 中的任何模块提供的包时，该命令会自动备份包含该包的模块，并使用最新版本将它添加到 。（&rdquo;最新&rdquo;定义为最新的标记稳定（非<a href="https://zshipu.com/t?url=https://semver.org/#spec-item-9">预发行</a>）版本，或者最新的标记预发行版本，或者最新的未标记版本。在我们的示例中，解决了模块的新导入。它还下载 了 使用的两个依赖项，即 。文件中仅记录直接依赖项：</font><code>go</code><code>go.mod</code><code>import</code><code>go.mod</code><code>go</code><code>go.mod</code><code>go test</code><code>rsc.io/quote</code><code>rsc.io/quote v1.5.2</code><code>rsc.io/quote</code><code>rsc.io/sampler</code><code>golang.org/x/text</code><code>go.mod</code></p>
+
+<p><code>$ cat go.mod
 module example.com/hello</p>
+
 <p>go 1.12</p>
+
 <p>require rsc.io/quote v1.5.2
-$<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->第二个命令不会重复此工作，因为 现在是最新的，下载的模块在本地缓存（在 中）：<!-- raw HTML omitted --><code>go test``````go.mod``````$GOPATH/pkg/mod</code></p>
-<p><!-- raw HTML omitted -->$ go test
+$</code></p>
+
+<p><font _mstmutation="1" _msthash="306917" _msttexthash="391055210">第二个命令不会重复此工作，因为 现在是最新的，下载的模块在本地缓存（在 中）：</font><code>go test</code><code>go.mod</code><code>$GOPATH/pkg/mod</code></p>
+
+<p><code>$ go test
 PASS
-ok  	example.com/hello	0.020s
-$<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->请注意，虽然该命令使添加新的依赖项变得快速而简单，但它并非没有成本。您的模块现在_实际上_依赖于关键领域（如正确性、安全性和正确许可）中的新依赖关系，只需举几例。有关更多注意事项，请参阅 Russ Cox 的博客文章&quot;我们的<a href="https://zshipu.com/t?url=https://research.swtch.com/deps">软件依赖性问题&rdquo;。</a><!-- raw HTML omitted --><code>go</code></p>
-<p><!-- raw HTML omitted -->正如我们上面看到的，添加一个直接依赖关系通常也会带来其他间接依赖关系。该命令列出了当前模块及其所有依赖项：<!-- raw HTML omitted --><code>go list -m all</code></p>
-<p><!-- raw HTML omitted -->$ go list -m all
+ok      example.com/hello   0.020s
+$</code></p>
+
+<p><font _mstmutation="1" _msthash="307541" _msttexthash="2429521510">请注意，虽然该命令使添加新的依赖项变得快速而简单，但它并非没有成本。您的模块现在_实际上_依赖于关键领域（如正确性、安全性和正确许可）中的新依赖关系，只需举几例。有关更多注意事项，请参阅 Russ Cox 的博客文章&rdquo;我们的<a href="https://zshipu.com/t?url=https://research.swtch.com/deps">软件依赖性问题&rdquo;。</a></font><code>go</code></p>
+
+<p><font _mstmutation="1" _msthash="307853" _msttexthash="614346694">正如我们上面看到的，添加一个直接依赖关系通常也会带来其他间接依赖关系。该命令列出了当前模块及其所有依赖项：</font><code>go list -m all</code></p>
+
+<p><code>$ go list -m all
 example.com/hello
 golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c
 rsc.io/quote v1.5.2
 rsc.io/sampler v1.3.0
-$<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->在输出中，当前模块（也称为主_模块）_始终是第一行，后跟按模块路径排序的依赖项。<!-- raw HTML omitted --><code>go list</code></p>
-<p><!-- raw HTML omitted -->该版本是伪版本<a href="https://zshipu.com/t?url=https://golang.org/cmd/go/#hdr-Pseudo_versions">的示例，</a>它是命令针对特定未标记的提交的版本语法。<!-- raw HTML omitted --><code>golang.org/x/text``````v0.0.0-20170915032832-14c0d48ead0c``````go</code></p>
-<p><!-- raw HTML omitted -->除了 ，该命令还维护一个名为的文件，<a href="https://zshipu.com/t?url=https://golang.org/cmd/go/#hdr-Module_downloading_and_verification">其中包含特定模块</a>版本内容的预期加密哈希：<!-- raw HTML omitted --><code>go.mod``````go``````go.sum</code></p>
-<p><!-- raw HTML omitted -->$ cat go.sum
+$</code></p>
+
+<p><font _mstmutation="1" _msthash="308477" _msttexthash="374954892">在输出中，当前模块（也称为主_模块）_始终是第一行，后跟按模块路径排序的依赖项。</font><code>go list</code></p>
+
+<p><font _mstmutation="1" _msthash="305968" _msttexthash="245618815">该版本是伪版本<a href="https://zshipu.com/t?url=https://golang.org/cmd/go/#hdr-Pseudo_versions">的示例，</a>它是命令针对特定未标记的提交的版本语法。</font><code>golang.org/x/text</code><code>v0.0.0-20170915032832-14c0d48ead0c</code><code>go</code></p>
+
+<p><font _mstmutation="1" _msthash="306280" _msttexthash="340501044">除了 ，该命令还维护一个名为的文件，<a href="https://zshipu.com/t?url=https://golang.org/cmd/go/#hdr-Module_downloading_and_verification">其中包含特定模块</a>版本内容的预期加密哈希：</font><code>go.mod</code><code>go</code><code>go.sum</code></p>
+
+<p><code>$ cat go.sum
 golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c h1:qgOY6WgZO&hellip;
 golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c/go.mod h1:Nq&hellip;
 rsc.io/quote v1.5.2 h1:w5fcysjrx7yqtD/aO+QwRjYZOKnaM9Uh2b40tElTs3&hellip;
 rsc.io/quote v1.5.2/go.mod h1:LzX7hefJvL54yjefDEDHNONDjII0t9xZLPX&hellip;
 rsc.io/sampler v1.3.0 h1:7uVkIFmeBqHfdjD+gZwtXXI+RODJ2Wc4O7MPEh/Q&hellip;
 rsc.io/sampler v1.3.0/go.mod h1:T1hPZKmBbMNahiBKFy5HrXp6adAjACjK9&hellip;
-$<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->该命令使用该文件来确保这些模块的未来下载检索与第一次下载相同的位，以确保项目所依赖的模块不会意外更改，无论是出于恶意、意外还是其他原因。和 应签入版本控制。<!-- raw HTML omitted --><code>go``````go.sum``````go.mod``````go.sum</code></p>
+$</code></p>
+
+<p><font _mstmutation="1" _msthash="306904" _msttexthash="1162419947">该命令使用该文件来确保这些模块的未来下载检索与第一次下载相同的位，以确保项目所依赖的模块不会意外更改，无论是出于恶意、意外还是其他原因。和 应签入版本控制。</font><code>go</code><code>go.sum</code><code>go.mod</code><code>go.sum</code></p>
+
 <h4 id="升级依赖项">升级依赖项</h4>
-<p><!-- raw HTML omitted -->使用 Go 模块，版本使用语义版本标记进行引用。语义版本由三个部分组成：主要版本、次要版本和修补程序版本。例如，对于 ，主要版本为 0，次要版本为 1，修补程序版本为 2。让我们演练几个次要版本升级。下一节中，我们将考虑主要版本升级。<!-- raw HTML omitted --><code>v0.1.2</code></p>
-<p><!-- raw HTML omitted -->从 的输出中，我们可以看到我们使用的未标记版本。让我们升级到最新的标记版本，并测试一切仍然有效：<!-- raw HTML omitted --><code>go list -m all``````golang.org/x/text</code></p>
-<p><!-- raw HTML omitted -->$ go get golang.org/x/text
+
+<p><font _mstmutation="1" _msthash="307528" _msttexthash="2444931333">使用 Go 模块，版本使用语义版本标记进行引用。语义版本由三个部分组成：主要版本、次要版本和修补程序版本。例如，对于 ，主要版本为 0，次要版本为 1，修补程序版本为 2。让我们演练几个次要版本升级。下一节中，我们将考虑主要版本升级。</font><code>v0.1.2</code></p>
+
+<p><font _mstmutation="1" _msthash="307840" _msttexthash="533778518">从 的输出中，我们可以看到我们使用的未标记版本。让我们升级到最新的标记版本，并测试一切仍然有效：</font><code>go list -m all</code><code>golang.org/x/text</code></p>
+
+<p><code>$ go get golang.org/x/text
 go: finding golang.org/x/text v0.3.0
 go: downloading golang.org/x/text v0.3.0
 go: extracting golang.org/x/text v0.3.0
 $ go test
 PASS
-ok  	example.com/hello	0.013s
-$<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->呜呼！一切都过去了让我们再看看一下，文件：<!-- raw HTML omitted --><code>go list -m all``````go.mod</code></p>
-<p><!-- raw HTML omitted -->$ go list -m all
+ok      example.com/hello   0.013s
+$</code></p>
+
+<p><font _mstmutation="1" _msthash="308464" _msttexthash="146652662">呜呼！一切都过去了让我们再看看一下，文件：</font><code>go list -m all</code><code>go.mod</code></p>
+
+<p><code>$ go list -m all
 example.com/hello
 golang.org/x/text v0.3.0
 rsc.io/quote v1.5.2
 rsc.io/sampler v1.3.0
 $ cat go.mod
 module example.com/hello</p>
+
 <p>go 1.12</p>
+
 <p>require (
-golang.org/x/text v0.3.0 // indirect
-rsc.io/quote v1.5.2
+    golang.org/x/text v0.3.0 // indirect
+    rsc.io/quote v1.5.2
 )
-$<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->包已升级到最新标记版本 （）。该文件已更新以指定。注释指示依赖项不直接由此模块使用，仅由其他模块依赖项间接使用。有关详细信息，请参阅。<!-- raw HTML omitted --><code>golang.org/x/text``````v0.3.0``````go.mod``````v0.3.0``````indirect``````go help modules</code></p>
-<p><!-- raw HTML omitted -->现在，让我们尝试升级次要版本。通过运行和运行测试，以同样的方式开始：<!-- raw HTML omitted --><code>rsc.io/sampler``````go get</code></p>
-<p><!-- raw HTML omitted -->$ go get rsc.io/sampler
+$</code></p>
+
+<p><font _mstmutation="1" _msthash="306267" _msttexthash="971052888">包已升级到最新标记版本 （）。该文件已更新以指定。注释指示依赖项不直接由此模块使用，仅由其他模块依赖项间接使用。有关详细信息，请参阅。</font><code>golang.org/x/text</code><code>v0.3.0</code><code>go.mod</code><code>v0.3.0</code><code>indirect</code><code>go help modules</code></p>
+
+<p><font _mstmutation="1" _msthash="306579" _msttexthash="330084066">现在，让我们尝试升级次要版本。通过运行和运行测试，以同样的方式开始：</font><code>rsc.io/sampler</code><code>go get</code></p>
+
+<p><code>$ go get rsc.io/sampler
 go: finding rsc.io/sampler v1.99.99
 go: downloading rsc.io/sampler v1.99.99
 go: extracting rsc.io/sampler v1.99.99
 $ go test
 &mdash; FAIL: TestHello (0.00s)
-hello_test.go:8: Hello() = &ldquo;99 bottles of beer on the wall, 99 bottles of beer, &hellip;&rdquo;, want &ldquo;Hello, world.&rdquo;
+    hello_test.go:8: Hello() = &ldquo;99 bottles of beer on the wall, 99 bottles of beer, &hellip;&rdquo;, want &ldquo;Hello, world.&rdquo;
 FAIL
 exit status 1
-FAIL	example.com/hello	0.014s
-$<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->哦 哦！测试失败表明 的最新版本与我们的用法不兼容。让我们列出该模块的可用标记版本：<!-- raw HTML omitted --><code>rsc.io/sampler</code></p>
-<p><!-- raw HTML omitted -->$ go list -m -versions rsc.io/sampler
+FAIL    example.com/hello   0.014s
+$</code></p>
+
+<p><font _mstmutation="1" _msthash="307203" _msttexthash="391173185">哦 哦！测试失败表明 的最新版本与我们的用法不兼容。让我们列出该模块的可用标记版本：</font><code>rsc.io/sampler</code></p>
+
+<p><code>$ go list -m -versions rsc.io/sampler
 rsc.io/sampler v1.0.0 v1.2.0 v1.2.1 v1.3.0 v1.3.1 v1.99.99
-$<!-- raw HTML omitted --></p>
+$</code></p>
+
 <p>我们一直在使用v1.3.0;v1.99.99 明显不好。也许我们可以尝试使用 v1.3.1 代替：</p>
-<p><!-- raw HTML omitted -->$ go get <a href="mailto:rsc.io/sampler@v1.3.1">rsc.io/sampler@v1.3.1</a>
+
+<p><code>$ go get rsc.io/sampler@v1.3.1
 go: finding rsc.io/sampler v1.3.1
 go: downloading rsc.io/sampler v1.3.1
 go: extracting rsc.io/sampler v1.3.1
 $ go test
 PASS
-ok  	example.com/hello	0.022s
-$<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->请注意参数中的显式。通常，传递给的每个参数都可以使用显式版本;默认值为 ，它解析为前面定义的最新版本。<!-- raw HTML omitted --><code>@v1.3.1``````go get``````go get``````@latest</code></p>
+ok      example.com/hello   0.022s
+$</code></p>
+
+<p><font _mstmutation="1" _msthash="308451" _msttexthash="554082672">请注意参数中的显式。通常，传递给的每个参数都可以使用显式版本;默认值为 ，它解析为前面定义的最新版本。</font><code>@v1.3.1</code><code>go get</code><code>go get</code><code>@latest</code></p>
+
 <h4 id="添加对新主要版本的依赖项">添加对新主要版本的依赖项</h4>
-<p><!-- raw HTML omitted -->让我们向包中添加一个新函数：通过调用 返回 Go 并发谚语，该函数由 模块提供。首先我们更新以添加新函数：<!-- raw HTML omitted --><code>func Proverb``````quote.Concurrency``````rsc.io/quote/v3``````hello.go</code></p>
-<p><!-- raw HTML omitted -->package hello</p>
+
+<p><font _mstmutation="1" _msthash="309075" _msttexthash="545729314">让我们向包中添加一个新函数：通过调用 返回 Go 并发谚语，该函数由 模块提供。首先我们更新以添加新函数：</font><code>func Proverb</code><code>quote.Concurrency</code><code>rsc.io/quote/v3</code><code>hello.go</code></p>
+
+<p><code>package hello</p>
+
 <p>import (
-&ldquo;rsc.io/quote&rdquo;
-quoteV3 &ldquo;rsc.io/quote/v3&rdquo;
+    &ldquo;rsc.io/quote&rdquo;
+    quoteV3 &ldquo;rsc.io/quote/v3&rdquo;
 )</p>
+
 <p>func Hello() string {
-return quote.Hello()
+    return quote.Hello()
 }</p>
+
 <p>func Proverb() string {
-return quoteV3.Concurrency()
-}<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->然后，我们将一个测试添加到 ：<!-- raw HTML omitted --><code>hello_test.go</code></p>
-<p><!-- raw HTML omitted -->func TestProverb(t *testing.T) {
-want := &ldquo;Concurrency is not parallelism.&rdquo;
-if got := Proverb(); got != want {
-t.Errorf(&ldquo;Proverb() = %q, want %q&rdquo;, got, want)
-}
-}<!-- raw HTML omitted --></p>
+    return quoteV3.Concurrency()
+}</code></p>
+
+<p><font _mstmutation="1" _msthash="306878" _msttexthash="75608624">然后，我们将一个测试添加到 ：</font><code>hello_test.go</code></p>
+
+<p><code>func TestProverb(t *testing.T) {
+    want := &ldquo;Concurrency is not parallelism.&rdquo;
+    if got := Proverb(); got != want {
+        t.Errorf(&ldquo;Proverb() = %q, want %q&rdquo;, got, want)
+    }
+}</code></p>
+
 <p>然后，我们可以测试我们的代码：</p>
-<p><!-- raw HTML omitted -->$ go test
+
+<p><code>$ go test
 go: finding rsc.io/quote/v3 v3.1.0
 go: downloading rsc.io/quote/v3 v3.1.0
 go: extracting rsc.io/quote/v3 v3.1.0
 PASS
-ok  	example.com/hello	0.024s
-$<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->请注意，我们的模块现在依赖于 和 ：<!-- raw HTML omitted --><code>rsc.io/quote``````rsc.io/quote/v3</code></p>
-<p><!-- raw HTML omitted -->$ go list -m rsc.io/q&hellip;
+ok      example.com/hello   0.024s
+$</code></p>
+
+<p><font _mstmutation="1" _msthash="308126" _msttexthash="93341378">请注意，我们的模块现在依赖于 和 ：</font><code>rsc.io/quote</code><code>rsc.io/quote/v3</code></p>
+
+<p><code>$ go list -m rsc.io/q&hellip;
 rsc.io/quote v1.5.2
 rsc.io/quote/v3 v3.1.0
-$<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->Go 模块的每个不同主要版本（、等）使用不同的模块路径：从 开始，路径必须以主要版本结束。在示例中，不再 ：而是由模块路径标识。此约定称为<a href="https://zshipu.com/t?url=https://research.swtch.com/vgo-import">语义导入版本控制</a>，它给不兼容的包（具有不同主要版本的包）不同的名称。相反，应该向后兼容 ，因此它重用名称。（在上一节_中_，应该与 向后兼容，但错误或有关模块行为的错误或不正确的客户端假设都可能发生。<!-- raw HTML omitted --><code>v1``````v2``````v2``````v3``````rsc.io/quote``````rsc.io/quote``````rsc.io/quote/v3``````v1.6.0``````rsc.io/quote``````v1.5.2``````rsc.io/quote``````rsc.io/sampler``````v1.99.99``````rsc.io/sampler``````v1.3.0</code></p>
-<p><!-- raw HTML omitted -->该命令允许生成最多包含任何特定模块路径的一个版本，即最多包含一个主要版本：一个、一个、一个，等等。这为模块作者提供了关于单个模块路径可能重复的清晰规则：程序不可能同时使用 和 生成。同时，允许模块的不同主要版本（因为它们具有不同的路径）使模块使用者能够逐步升级到新的主要版本。在此示例中，我们希望使用 ，但尚未准备好迁移我们的使用 。在大型程序或代码库中，增量迁移的能力尤为重要。<!-- raw HTML omitted --><code>go``````rsc.io/quote``````rsc.io/quote/v2``````rsc.io/quote/v3``````rsc.io/quote v1.5.2``````rsc.io/quote v1.6.0``````quote.Concurrency``````rsc/quote/v3 v3.1.0``````rsc.io/quote v1.5.2</code></p>
+$</code></p>
+
+<p><font _mstmutation="1" _msthash="308750" _msttexthash="5324716982">Go 模块的每个不同主要版本（、等）使用不同的模块路径：从 开始，路径必须以主要版本结束。在示例中，不再 ：而是由模块路径标识。此约定称为<a href="https://zshipu.com/t?url=https://research.swtch.com/vgo-import">语义导入版本控制</a>，它给不兼容的包（具有不同主要版本的包）不同的名称。相反，应该向后兼容 ，因此它重用名称。（在上一节_中_，应该与 向后兼容，但错误或有关模块行为的错误或不正确的客户端假设都可能发生。</font><code>v1</code><code>v2</code><code>v2</code><code>v3</code><code>rsc.io/quote</code><code>rsc.io/quote</code><code>rsc.io/quote/v3</code><code>v1.6.0</code><code>rsc.io/quote</code><code>v1.5.2</code><code>rsc.io/quote</code><code>rsc.io/sampler</code><code>v1.99.99</code><code>rsc.io/sampler</code><code>v1.3.0</code></p>
+
+<p><font _mstmutation="1" _msthash="309062" _msttexthash="6630706238">该命令允许生成最多包含任何特定模块路径的一个版本，即最多包含一个主要版本：一个、一个、一个，等等。这为模块作者提供了关于单个模块路径可能重复的清晰规则：程序不可能同时使用 和 生成。同时，允许模块的不同主要版本（因为它们具有不同的路径）使模块使用者能够逐步升级到新的主要版本。在此示例中，我们希望使用 ，但尚未准备好迁移我们的使用 。在大型程序或代码库中，增量迁移的能力尤为重要。</font><code>go</code><code>rsc.io/quote</code><code>rsc.io/quote/v2</code><code>rsc.io/quote/v3</code><code>rsc.io/quote v1.5.2</code><code>rsc.io/quote v1.6.0</code><code>quote.Concurrency</code><code>rsc/quote/v3 v3.1.0</code><code>rsc.io/quote v1.5.2</code></p>
+
 <h4 id="将依赖项升级到新的主要版本">将依赖项升级到新的主要版本</h4>
-<p><!-- raw HTML omitted -->让我们完成从使用到仅使用的转换。由于主要版本更改，我们预期某些 API 可能已被删除、重命名或以其他方式以不兼容的方式更改。阅读文档，我们可以看到，已成为：<!-- raw HTML omitted --><code>rsc.io/quote``````rsc.io/quote/v3``````Hello``````HelloV3</code></p>
-<p><!-- raw HTML omitted -->$ go doc rsc.io/quote/v3
+
+<p><font _mstmutation="1" _msthash="306865" _msttexthash="1195358463">让我们完成从使用到仅使用的转换。由于主要版本更改，我们预期某些 API 可能已被删除、重命名或以其他方式以不兼容的方式更改。阅读文档，我们可以看到，已成为：</font><code>rsc.io/quote</code><code>rsc.io/quote/v3</code><code>Hello</code><code>HelloV3</code></p>
+
+<p><code>$ go doc rsc.io/quote/v3
 package quote // import &ldquo;rsc.io/quote&rdquo;</p>
+
 <p>Package quote collects pithy sayings.</p>
+
 <p>func Concurrency() string
 func GlassV3() string
 func GoV3() string
 func HelloV3() string
 func OptV3() string
-$<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->（输出中<a href="https://zshipu.com/t?url=https://golang.org/issue/30778">还有一</a>个已知错误;显示的导入路径错误地丢弃了 .<!-- raw HTML omitted --><code>/v3</code></p>
-<p><!-- raw HTML omitted -->我们可以更新我们的使用， 以使用：<!-- raw HTML omitted --><code>quote.Hello()``````hello.go``````quoteV3.HelloV3()</code></p>
-<p><!-- raw HTML omitted -->package hello</p>
+$</code></p>
+
+<p><font _mstmutation="1" _msthash="307489" _msttexthash="177531289">（输出中<a href="https://zshipu.com/t?url=https://golang.org/issue/30778">还有一</a>个已知错误;显示的导入路径错误地丢弃了 .</font><code>/v3</code></p>
+
+<p><font _mstmutation="1" _msthash="307801" _msttexthash="94476252">我们可以更新我们的使用， 以使用：</font><code>quote.Hello()</code><code>hello.go</code><code>quoteV3.HelloV3()</code></p>
+
+<p><code>package hello</p>
+
 <p>import quoteV3 &ldquo;rsc.io/quote/v3&rdquo;</p>
+
 <p>func Hello() string {
-return quoteV3.HelloV3()
+    return quoteV3.HelloV3()
 }</p>
+
 <p>func Proverb() string {
-return quoteV3.Concurrency()
-}<!-- raw HTML omitted --></p>
+    return quoteV3.Concurrency()
+}</code></p>
+
 <p>然后在这一点上，不再需要重命名导入，因此我们可以撤消：</p>
-<p><!-- raw HTML omitted -->package hello</p>
+
+<p><code>package hello</p>
+
 <p>import &ldquo;rsc.io/quote/v3&rdquo;</p>
+
 <p>func Hello() string {
-return quote.HelloV3()
+    return quote.HelloV3()
 }</p>
+
 <p>func Proverb() string {
-return quote.Concurrency()
-}<!-- raw HTML omitted --></p>
+    return quote.Concurrency()
+}</code></p>
+
 <p>让我们重新运行测试，以确保一切正常：</p>
-<p><!-- raw HTML omitted -->$ go test
+
+<p><code>$ go test
 PASS
-ok      example.com/hello       0.014s<!-- raw HTML omitted --></p>
+ok      example.com/hello       0.014s</code></p>
+
 <h4 id="删除未使用的依赖项">删除未使用的依赖项</h4>
-<p><!-- raw HTML omitted -->我们已经删除了 的所有用途，但它仍然出现在我们的文件中：<!-- raw HTML omitted --><code>rsc.io/quote``````go list -m all``````go.mod</code></p>
-<p><!-- raw HTML omitted -->$ go list -m all
+
+<p><font _mstmutation="1" _msthash="307164" _msttexthash="203178729">我们已经删除了 的所有用途，但它仍然出现在我们的文件中：</font><code>rsc.io/quote</code><code>go list -m all</code><code>go.mod</code></p>
+
+<p><code>$ go list -m all
 example.com/hello
 golang.org/x/text v0.3.0
 rsc.io/quote v1.5.2
@@ -431,17 +540,22 @@ rsc.io/quote/v3 v3.1.0
 rsc.io/sampler v1.3.1
 $ cat go.mod
 module example.com/hello</p>
+
 <p>go 1.12</p>
+
 <p>require (
-golang.org/x/text v0.3.0 // indirect
-rsc.io/quote v1.5.2
-rsc.io/quote/v3 v3.0.0
-rsc.io/sampler v1.3.1 // indirect
+    golang.org/x/text v0.3.0 // indirect
+    rsc.io/quote v1.5.2
+    rsc.io/quote/v3 v3.0.0
+    rsc.io/sampler v1.3.1 // indirect
 )
-$<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->为什么？因为构建单个包（如 或 ）可以轻松判断何时缺少内容并需要添加，但无法判断何时可以安全地删除某样东西。只有在检查了模块中的所有包以及这些包的所有可能的生成标记组合后，才能删除依赖项。普通生成命令不加载此信息，因此无法安全地删除依赖项。<!-- raw HTML omitted --><code>go build``````go test</code></p>
-<p><!-- raw HTML omitted -->该命令清理这些未使用的依赖项：<!-- raw HTML omitted --><code>go mod tidy</code></p>
-<p><!-- raw HTML omitted -->$ go mod tidy
+$</code></p>
+
+<p><font _mstmutation="1" _msthash="307788" _msttexthash="2745688387">为什么？因为构建单个包（如 或 ）可以轻松判断何时缺少内容并需要添加，但无法判断何时可以安全地删除某样东西。只有在检查了模块中的所有包以及这些包的所有可能的生成标记组合后，才能删除依赖项。普通生成命令不加载此信息，因此无法安全地删除依赖项。</font><code>go build</code><code>go test</code></p>
+
+<p><font _mstmutation="1" _msthash="308100" _msttexthash="88327421">该命令清理这些未使用的依赖项：</font><code>go mod tidy</code></p>
+
+<p><code>$ go mod tidy
 $ go list -m all
 example.com/hello
 golang.org/x/text v0.3.0
@@ -449,25 +563,32 @@ rsc.io/quote/v3 v3.1.0
 rsc.io/sampler v1.3.1
 $ cat go.mod
 module example.com/hello</p>
+
 <p>go 1.12</p>
+
 <p>require (
-golang.org/x/text v0.3.0 // indirect
-rsc.io/quote/v3 v3.1.0
-rsc.io/sampler v1.3.1 // indirect
+    golang.org/x/text v0.3.0 // indirect
+    rsc.io/quote/v3 v3.1.0
+    rsc.io/sampler v1.3.1 // indirect
 )</p>
+
 <p>$ go test
 PASS
-ok  	example.com/hello	0.020s
-$<!-- raw HTML omitted --></p>
+ok      example.com/hello   0.020s
+$</code></p>
+
 <h4 id="结论">结论</h4>
+
 <p>Go 模块是 Go 中依赖项管理的未来。模块功能现在在所有受支持的 Go 版本中可用（即 Go 1.11 和 Go 1.12 中）。</p>
+
 <p>本文使用 Go 模块介绍了这些工作流：</p>
+
 <ul>
-<li><code>go mod init</code><!-- raw HTML omitted -->创建一个新模块，初始化描述它的文件。<!-- raw HTML omitted --><code>go.mod</code></li>
-<li><code>go build</code><!-- raw HTML omitted -->，和其他包生成命令根据需要向 中添加新的依赖项。<!-- raw HTML omitted --><code>go test``````go.mod</code></li>
-<li><code>go list -m all</code><!-- raw HTML omitted -->打印当前模块的依赖项。<!-- raw HTML omitted --></li>
-<li><code>go get</code><!-- raw HTML omitted -->更改依赖项的所需版本（或添加新的依赖项）。<!-- raw HTML omitted --></li>
-<li><code>go mod tidy</code><!-- raw HTML omitted -->删除未使用的依赖项。<!-- raw HTML omitted --></li>
+<li><code>go mod init</code><font _mstmutation="1" _msthash="488267" _msttexthash="93348879">创建一个新模块，初始化描述它的文件。</font><code>go.mod</code>
+*   <code>go build</code><font _mstmutation="1" _msthash="488657" _msttexthash="143853333">，和其他包生成命令根据需要向 中添加新的依赖项。</font><code>go test</code><code>go.mod</code>
+*   <code>go list -m all</code><font _mstmutation="1" _msthash="489047" _msttexthash="44206539">打印当前模块的依赖项。</font>
+*   <code>go get</code><font _mstmutation="1" _msthash="489437" _msttexthash="149973109">更改依赖项的所需版本（或添加新的依赖项）。</font>
+*   <code>go mod tidy</code><font _mstmutation="1" _msthash="489827" _msttexthash="40871948">删除未使用的依赖项。</font></li>
 </ul>
 
         </div>
@@ -690,7 +811,7 @@ $<!-- raw HTML omitted --></p>
     
     <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="">Java</a>
     
     <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
     

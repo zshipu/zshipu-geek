@@ -146,13 +146,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-  <ul>
-    <li>
-      <ul>
-        <li></li>
-      </ul>
-    </li>
-  </ul>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#使用">使用：</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
 </nav>
     </div>
 </div>
@@ -206,73 +214,78 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            <ul>
-<li>寻找下一个数字，例如输入345，输出354</li>
-</ul>
-<blockquote>
-<p>思路：从最右边位和上一位对比，如果大，就往前移，移动完，尾数排序，从大到小，保证次大
+            
+
+<ul>
+<li><p>寻找下一个数字，例如输入345，输出354
+&gt;思路：从最右边位和上一位对比，如果大，就往前移，移动完，尾数排序，从大到小，保证次大
 -代码</p>
-</blockquote>
-<pre tabindex="0"><code>//字符串逆序
+
+<pre><code>//字符串逆序
 NSString *reverseStr(NSString *str){
-    NSMutableString *string=[[NSMutableString alloc] init];
-    for(int i=0;i&lt;str.length;i++){
-        [string appendString:[str substringWithRange:NSMakeRange(str.length-1-i, 1)]];
-    }
-    return string;
+NSMutableString *string=[[NSMutableString alloc] init];
+for(int i=0;i&lt;str.length;i++){
+    [string appendString:[str substringWithRange:NSMakeRange(str.length-1-i, 1)]];
+}
+return string;
 }
 
 //字符串分成数组
 NSMutableArray *separateStringToArray(NSString *str){
-    NSMutableArray *marr = [NSMutableArray array];
-    for (NSInteger i = 0; i &lt; str.length; i++) {
-        [marr addObject:[str substringWithRange:NSMakeRange(i, 1)]];
-    }
-    return marr;
+NSMutableArray *marr = [NSMutableArray array];
+for (NSInteger i = 0; i &lt; str.length; i++) {
+    [marr addObject:[str substringWithRange:NSMakeRange(i, 1)]];
+}
+return marr;
 }
 
 
 NSString *findNextLargerNum(NSString *oriNum){
 
 
-    NSMutableString *finalStr = [NSMutableString string];
+NSMutableString *finalStr = [NSMutableString string];
 
 
-    NSMutableArray *marr = separateStringToArray(oriNum);
-    for (NSInteger i = marr.count - 1; i &gt; 0; i--) {
-        NSNumber *lastNum = [marr objectAtIndex:i];
-        NSNumber *preNum = [marr objectAtIndex:i-1];
-        if (lastNum.integerValue &gt; preNum.integerValue) {
-            //截取字符串
-            NSString *rightStr = reverseStr([oriNum substringWithRange:NSMakeRange(i, oriNum.length - i)]);
-            NSString *leftStr = [oriNum substringWithRange:NSMakeRange(0,i)];
-            //第i-1位截取出来
-            NSString *leftCompareStr = [oriNum substringWithRange:NSMakeRange(i-1, 1)];
-            //和右边逐个对比
-            for (int j = 0; j &lt; rightStr.length; j++) {
-                NSString *rightCompareStr = [rightStr substringWithRange:NSMakeRange(j, 1)];
-                if (leftCompareStr.integerValue &lt; rightCompareStr.integerValue) {
-                    NSMutableArray *finalArr = separateStringToArray([NSString stringWithFormat:@&quot;%@%@&quot;,leftStr,rightStr]);
-                    NSInteger leftIndex = [finalArr indexOfObject:leftCompareStr];
-                    NSInteger rightIndex = [finalArr indexOfObject:rightCompareStr];
-                    [finalArr exchangeObjectAtIndex:leftIndex withObjectAtIndex:rightIndex];
-                    for (NSString *str in finalArr) {
-                        [finalStr appendString:str];
-                    }
-                    break;
+NSMutableArray *marr = separateStringToArray(oriNum);
+for (NSInteger i = marr.count - 1; i &gt; 0; i--) {
+    NSNumber *lastNum = [marr objectAtIndex:i];
+    NSNumber *preNum = [marr objectAtIndex:i-1];
+    if (lastNum.integerValue &gt; preNum.integerValue) {
+        //截取字符串
+        NSString *rightStr = reverseStr([oriNum substringWithRange:NSMakeRange(i, oriNum.length - i)]);
+        NSString *leftStr = [oriNum substringWithRange:NSMakeRange(0,i)];
+        //第i-1位截取出来
+        NSString *leftCompareStr = [oriNum substringWithRange:NSMakeRange(i-1, 1)];
+        //和右边逐个对比
+        for (int j = 0; j &lt; rightStr.length; j++) {
+            NSString *rightCompareStr = [rightStr substringWithRange:NSMakeRange(j, 1)];
+            if (leftCompareStr.integerValue &lt; rightCompareStr.integerValue) {
+                NSMutableArray *finalArr = separateStringToArray([NSString stringWithFormat:@&quot;%@%@&quot;,leftStr,rightStr]);
+                NSInteger leftIndex = [finalArr indexOfObject:leftCompareStr];
+                NSInteger rightIndex = [finalArr indexOfObject:rightCompareStr];
+                [finalArr exchangeObjectAtIndex:leftIndex withObjectAtIndex:rightIndex];
+                for (NSString *str in finalArr) {
+                    [finalStr appendString:str];
                 }
+                break;
             }
         }
     }
-
-    return finalStr.length?finalStr:oriNum;
 }
-</code></pre><h5 id="使用">使用：</h5>
-<pre tabindex="0"><code>NSString *str = findNextLargerNum(@&quot;8976&quot;);
+
+return finalStr.length?finalStr:oriNum;
+}
+</code></pre></li>
+</ul>
+
+<h5 id="使用">使用：</h5>
+
+<pre><code>NSString *str = findNextLargerNum(@&quot;8976&quot;);
 NSLog(@&quot;======%@&quot;,str);
 //打印结果
 ======9678
 </code></pre>
+
         </div>
 
         
@@ -489,7 +502,7 @@ NSLog(@&quot;======%@&quot;,str);
     
     <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="">Java</a>
     
     <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
     
