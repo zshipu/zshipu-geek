@@ -146,13 +146,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-  <ul>
-    <li>
-      <ul>
-        <li></li>
-      </ul>
-    </li>
-  </ul>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#完">完。</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
 </nav>
     </div>
 </div>
@@ -206,59 +211,70 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            <ul>
-<li>Create a keystore</li>
-</ul>
-<pre tabindex="0"><code>keytool -genkey -v -keystore ~/key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias key
+            
 
-</code></pre><ul>
-<li><!-- raw HTML omitted -->/android文件夹下生成属性文件关联秘钥 key.properties</li>
-</ul>
-<pre tabindex="0"><code>storePassword=&lt;password from previous step&gt;
+<ul>
+<li><p>Create a keystore</p>
+
+<pre><code>keytool -genkey -v -keystore ~/key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias key
+
+</code></pre></li>
+
+<li><p><app dir>/android文件夹下生成属性文件关联秘钥 key.properties</p>
+
+<pre><code>storePassword=&lt;password from previous step&gt;
 keyPassword=&lt;password from previous step&gt;
 keyAlias=key
 storeFile=&lt;location of the key store file, such as /Users/&lt;user name&gt;/key.jks&gt;
 
-</code></pre><ul>
-<li><!-- raw HTML omitted -->/android/app/build.gradle文件里增加load代码</li>
-</ul>
-<pre tabindex="0"><code>def keystoreProperties = new Properties()
-   def keystorePropertiesFile = rootProject.file('key.properties')
-   if (keystorePropertiesFile.exists()) {
-       keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-   }
+</code></pre></li>
 
-   android {
-         ...
+<li><p><app dir>/android/app/build.gradle文件里增加load代码</p>
+
+<pre><code>def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+   keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+android {
+     ...
+}
+</code></pre></li>
+
+<li><p>在buildTypes之前增加签名配置代码</p>
+
+<pre><code>signingConfigs {
+   release {
+       keyAlias keystoreProperties['keyAlias']
+       keyPassword keystoreProperties['keyPassword']
+       storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+       storePassword keystoreProperties['storePassword']
    }
-</code></pre><ul>
-<li>在buildTypes之前增加签名配置代码</li>
-</ul>
-<pre tabindex="0"><code>signingConfigs {
-       release {
-           keyAlias keystoreProperties['keyAlias']
-           keyPassword keystoreProperties['keyPassword']
-           storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
-           storePassword keystoreProperties['storePassword']
-       }
+}
+buildTypes {
+   release {
+       signingConfig signingConfigs.release
    }
-   buildTypes {
-       release {
-           signingConfig signingConfigs.release
-       }
-   }
-</code></pre><ul>
-<li>运行编译命令</li>
-</ul>
-<pre tabindex="0"><code>flutter build apk
-</code></pre><ul>
-<li>运行结果</li>
-</ul>
-<pre tabindex="0"><code>Running Gradle task 'assembleRelease'... Done                     143.3s (!)
+}
+</code></pre></li>
+
+<li><p>运行编译命令</p>
+
+<pre><code>flutter build apk
+</code></pre></li>
+
+<li><p>运行结果</p>
+
+<pre><code>Running Gradle task 'assembleRelease'... Done                     143.3s (!)
 ✓ Built build/app/outputs/flutter-apk/app-release.apk (79.9MB).
 
-</code></pre><h4 id="完">完。</h4>
-<p>参考：https://flutter.dev/docs/deployment/android</p>
+</code></pre></li>
+</ul>
+
+<h4 id="完">完。</h4>
+
+<p>参考：<a href="https://flutter.dev/docs/deployment/android">https://flutter.dev/docs/deployment/android</a></p>
 
         </div>
 
@@ -378,6 +394,10 @@ storeFile=&lt;location of the key store file, such as /Users/&lt;user name&gt;/k
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/bi/Metabase%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/" title="Metabase使用教程">Metabase使用教程</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/DDDali/%E9%87%8D%E6%9E%84%E5%AE%9E%E6%88%98-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E6%88%98%E7%95%A5%E5%BB%BA%E6%A8%A1%E5%9C%A8%E9%87%8D%E6%9E%84%E4%B8%9A%E5%8A%A1%E7%B3%BB%E7%BB%9F%E6%97%B6%E7%9A%84%E5%BA%94%E7%94%A8/" title="重构实战 - 领域驱动设计战略建模在重构业务系统时的应用">重构实战 - 领域驱动设计战略建模在重构业务系统时的应用</a>
     </li>
     
@@ -411,10 +431,6 @@ storeFile=&lt;location of the key store file, such as /Users/&lt;user name&gt;/k
     
     <li>
         <a href="https://geek.zshipu.com/post/DDDali/%E9%98%BF%E9%87%8C%E6%8A%80%E6%9C%AF%E4%B8%93%E5%AE%B6%E8%AF%A6%E8%A7%A3DDD%E7%B3%BB%E5%88%97-%E7%AC%AC%E4%B8%80%E8%AE%B2-Domain-Primitive/" title="阿里技术专家详解 DDD 系列 第一讲- Domain Primitive">阿里技术专家详解 DDD 系列 第一讲- Domain Primitive</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/DDDzl/%E4%BA%A4%E6%98%93%E4%B8%AD%E5%BF%83%E5%AE%9E%E6%88%98-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%B3%BB%E5%88%975/" title="交易中心实战-领域驱动设计系列5">交易中心实战-领域驱动设计系列5</a>
     </li>
     
 </ul>
@@ -472,11 +488,13 @@ storeFile=&lt;location of the key store file, such as /Users/&lt;user name&gt;/k
         <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
 <div class="tagcloud">
     
+    <a href="https://geek.zshipu.com/tags/BI/">BI</a>
+    
     <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
     
     <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="">Java</a>
     
     <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
     
