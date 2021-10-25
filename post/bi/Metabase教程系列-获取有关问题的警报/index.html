@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Metabase教程系列-获取有关问题的警报 | 知识铺的博客</title>
+    <meta property="og:title" content="Metabase教程系列-获取有关问题的警报 - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2021-10-24T18:10:00&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2021-10-24T18:10:00&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="Metabase教程系列-获取有关问题的警报">
+        
+    <meta name="author" content="知识铺">
+    <meta property="og:url" content="https://geek.zshipu.com/post/bi/Metabase%E6%95%99%E7%A8%8B%E7%B3%BB%E5%88%97-%E8%8E%B7%E5%8F%96%E6%9C%89%E5%85%B3%E9%97%AE%E9%A2%98%E7%9A%84%E8%AD%A6%E6%8A%A5/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#获取警报">获取警报</a></li>
+<li><a href="#警报类型">警报类型</a></li>
+<li><a href="#目标线警报">目标线警报</a></li>
+<li><a href="#进度条警报">进度条警报</a></li>
+<li><a href="#结果警报">结果警报</a></li>
+<li><a href="#在提醒中添加其他收件人">在提醒中添加其他收件人</a></li>
+<li><a href="#停止警报">停止警报</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Metabase教程系列-获取有关问题的警报</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年10月24日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            
+
+<p>无论您是跟踪收入、用户还是负面评论，您经常会想提醒某些事情。Metabase 有几个不同类型的警报，您可以设置，您可以选择通过电子邮件或 Slack 收到通知。</p>
+
+<h3 id="获取警报">获取警报</h3>
+
+<p>要开始使用警报，您团队中作为管理员的人员需要确保这一点<a href="../Metabase教程系列-设置电子邮件">电子邮件集成</a>首先设置。</p>
+
+<h3 id="警报类型">警报类型</h3>
+
+<p>在元基地中，您可以收到三种注意事项：</p>
+
+<ol>
+<li>当时间系列越过目标线时。</li>
+<li>当进度条达到或低于目标时。</li>
+<li>当任何其他类型的问题返回结果。</li>
+</ol>
+
+<p>我们将逐一经历这些。</p>
+
+<h3 id="目标线警报">目标线警报</h3>
+
+<p>当您执行跟踪每日活动用户等操作时，此类警报很有用，您想知道何时达到特定数量的用户，或者何时每周跟踪订单，并且您想知道该数字何时低于某个阈值。</p>
+
+<p>首先，您需要一个线、区域或条形图，显示一个数字。（如果您需要帮助，请查看页面<a href="https://www.metabase.com/docs/latest/users-guide/04-asking-questions.html">提问</a>.)</p>
+
+<p>现在我们需要建立一条目标线。为此，请单击左下角的&rdquo;设置&rdquo;按钮，打开可视化设置。然后单击显示选项卡，然后打开&rdquo;显示目标&rdquo;设置。为您的目标选择一个值，然后单击&rdquo;完成&rdquo;。</p>
+
+<p>保存您的问题，然后单击屏幕右下角的铃图标。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110250915419.png" alt="获取警报" /></p>
+
+<p>在这里，您可以选择一些东西：</p>
+
+<ul>
+<li>是想在时间系列超过目标线时或在目标线下方时提醒您。</li>
+<li>无论您是每次发生这种情况时都只想被提醒，还是只想第一次被提醒。</li>
+<li>您希望 Metabase 检查的频率，看看目标线是否已越过。</li>
+</ul>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110250915421.png" alt="目标线警报选项" /></p>
+
+<p>单击完成，您的警报将全部设置！您也会收到电子邮件确认。如果您需要从设置的警报中编辑或取消订阅，只需单击同一个图标即可。您将看到编辑和取消订阅按钮。这也是您将看到管理员可能将您添加到此问题的警报的地方。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110250915422.png" alt="编辑菜单" /></p>
+
+<h3 id="进度条警报">进度条警报</h3>
+
+<p>设置这种警报与设置目标线警报非常相似。首先，创建一个返回单个数字的问题，然后从可视化菜单中选择进度条形图类型。打开设置菜单选择目标值，单击&rdquo;完成&rdquo;，然后保存问题。</p>
+
+<p>接下来，单击右下角的铃图标，当您想要获取有关此进度栏的警报时，您将看到相同的选项屏幕。</p>
+
+<h3 id="结果警报">结果警报</h3>
+
+<p>最后，当保存的问题之一返回任何结果时，您可以获得警报。这种警报是最有用的，如果你有一个问题，*通常*不会返回任何结果，但你只是想知道什么时候*它。*例如，您可能有一张桌子叫，您想知道任何时候客户留下不好的评论，你认为这是任何低于三颗星。要设置此情况的警报，您将创建原始数据问题（即返回评论列表的问题），并添加一个筛选器，仅包含一个或两个星的结果。<code>Reviews</code></p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110250915423.png" alt="差评" /></p>
+
+<p>你可能不想被提醒你*曾经*得到的所有坏评论， 但只是最近的一个。因此，您可以添加一个过滤器，仅包括昨天或今天的结果，具体取决于您想要检查这些不良评论的频率。此时，当您检查此问题的结果时，它可能不会返回任何结果，这是一件好事。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110250915424.png" alt="无结果" /></p>
+
+<p>保存问题，单击屏幕右下角的铃图标，并选择您希望 Metabase 检查此问题以获得结果的频率。就是这样！</p>
+
+<h3 id="在提醒中添加其他收件人">在提醒中添加其他收件人</h3>
+
+<p>如果您是 Metabase 实例的管理员，您将能够查看和编辑所有已保存问题上的所有警报。您还将看到一些额外的选项，以便将收件人添加到警报中，这些选项看起来像这样：</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110250915425.png" alt="收件人" /></p>
+
+<p>就像与<a href="https://www.metabase.com/docs/latest/users-guide/10-pulses.html">脉冲</a>，您可以添加任何元基础用户、电子邮件地址，甚至 Slack 通道作为警报的接收者。管理员可以在任何警报中添加或删除收件人，即使是他们未自行创建的接收者。</p>
+
+<p>以下是有关<a href="https://www.metabase.com/docs/latest/administration-guide/02-setting-up-email.html">设置电子邮件集成</a>和<a href="https://www.metabase.com/docs/latest/administration-guide/09-setting-up-slack.html">设置松弛集成</a>.</p>
+
+<h3 id="停止警报">停止警报</h3>
+
+<p>有几种方法可以阻止警报：</p>
+
+<ul>
+<li>普通用户可以取消订阅任何警报，他们是接收者。</li>
+<li>管理员可以编辑任何警报并完全删除它。这不能撤消，所以要小心！</li>
+<li>如果一个已保存的问题（其中有警报）被编辑为警报不再有意义，则警报将被删除。例如，如果已保存的问题（其中带有目标线警报）被编辑，并且目标线被完全删除，则该警报将被删除。</li>
+<li>如果问题存档，则将删除任何警报。</li>
+</ul>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/bi/Metabase%E6%95%99%E7%A8%8B%E7%B3%BB%E5%88%97-%E8%8E%B7%E5%8F%96%E6%9C%89%E5%85%B3%E9%97%AE%E9%A2%98%E7%9A%84%E8%AD%A6%E6%8A%A5/">https://geek.zshipu.com/post/bi/Metabase%E6%95%99%E7%A8%8B%E7%B3%BB%E5%88%97-%E8%8E%B7%E5%8F%96%E6%9C%89%E5%85%B3%E9%97%AE%E9%A2%98%E7%9A%84%E8%AD%A6%E6%8A%A5/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/bi/Metabase%E6%95%99%E7%A8%8B%E7%B3%BB%E5%88%97-7-%E4%B8%AA%E6%82%A8%E5%8F%AF%E8%83%BD%E4%B8%8D%E7%9F%A5%E9%81%93%E7%9A%84%E6%96%B9%E4%BE%BF%E7%9A%84%E5%85%83%E5%9F%BA%E7%A1%80%E5%8A%9F%E8%83%BD/">Metabase教程系列-7 个您可能不知道的方便的元基础功能</a></li>
+        
+        <li><a href="/post/bi/Metabase%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/">Metabase使用教程</a></li>
+        
+        <li><a href="/post/DDDali/%E9%87%8D%E6%9E%84%E5%AE%9E%E6%88%98-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E6%88%98%E7%95%A5%E5%BB%BA%E6%A8%A1%E5%9C%A8%E9%87%8D%E6%9E%84%E4%B8%9A%E5%8A%A1%E7%B3%BB%E7%BB%9F%E6%97%B6%E7%9A%84%E5%BA%94%E7%94%A8/">重构实战 - 领域驱动设计战略建模在重构业务系统时的应用</a></li>
+        
+        <li><a href="/post/DDDali/%E9%98%BF%E9%87%8C%E6%8A%80%E6%9C%AF%E4%B8%93%E5%AE%B6%E8%AF%A6%E8%A7%A3DDD%E7%B3%BB%E5%88%97-%E7%AC%AC%E4%BA%94%E8%AE%B2-%E8%81%8A%E8%81%8A%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E5%86%99%E6%B5%81%E6%B0%B4%E8%B4%A6%E4%BB%A3%E7%A0%81/">阿里技术专家详解DDD系列 第五讲 - 聊聊如何避免写流水账代码</a></li>
+        
+        <li><a href="/post/DDDali/%E4%BB%80%E4%B9%88%E6%98%AFDDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%9A%84%E6%88%98%E7%95%A5%E8%AE%BE%E8%AE%A1/">什么是DDD领域驱动设计的战略设计</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/BI'>BI</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/bi/Metabase%E6%95%99%E7%A8%8B%E7%B3%BB%E5%88%97-%E8%AE%BE%E7%BD%AE%E7%94%B5%E5%AD%90%E9%82%AE%E4%BB%B6/" title="Metabase教程系列-设置电子邮件">Metabase教程系列-设置电子邮件</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/bi/Metabase%E6%95%99%E7%A8%8B%E7%B3%BB%E5%88%97-%E8%8E%B7%E5%8F%96%E6%9C%89%E5%85%B3%E9%97%AE%E9%A2%98%E7%9A%84%E8%AD%A6%E6%8A%A5/" title="Metabase教程系列-获取有关问题的警报">Metabase教程系列-获取有关问题的警报</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/bi/Metabase%E6%95%99%E7%A8%8B%E7%B3%BB%E5%88%97-7-%E4%B8%AA%E6%82%A8%E5%8F%AF%E8%83%BD%E4%B8%8D%E7%9F%A5%E9%81%93%E7%9A%84%E6%96%B9%E4%BE%BF%E7%9A%84%E5%85%83%E5%9F%BA%E7%A1%80%E5%8A%9F%E8%83%BD/" title="Metabase教程系列-7 个您可能不知道的方便的元基础功能">Metabase教程系列-7 个您可能不知道的方便的元基础功能</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/bi/Metabase%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/" title="Metabase使用教程">Metabase使用教程</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDali/%E9%87%8D%E6%9E%84%E5%AE%9E%E6%88%98-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E6%88%98%E7%95%A5%E5%BB%BA%E6%A8%A1%E5%9C%A8%E9%87%8D%E6%9E%84%E4%B8%9A%E5%8A%A1%E7%B3%BB%E7%BB%9F%E6%97%B6%E7%9A%84%E5%BA%94%E7%94%A8/" title="重构实战 - 领域驱动设计战略建模在重构业务系统时的应用">重构实战 - 领域驱动设计战略建模在重构业务系统时的应用</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDali/%E9%98%BF%E9%87%8C%E6%8A%80%E6%9C%AF%E4%B8%93%E5%AE%B6%E8%AF%A6%E8%A7%A3DDD%E7%B3%BB%E5%88%97-%E7%AC%AC%E4%BA%94%E8%AE%B2-%E8%81%8A%E8%81%8A%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E5%86%99%E6%B5%81%E6%B0%B4%E8%B4%A6%E4%BB%A3%E7%A0%81/" title="阿里技术专家详解DDD系列 第五讲 - 聊聊如何避免写流水账代码">阿里技术专家详解DDD系列 第五讲 - 聊聊如何避免写流水账代码</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDali/%E4%BB%80%E4%B9%88%E6%98%AFDDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%9A%84%E6%88%98%E7%95%A5%E8%AE%BE%E8%AE%A1/" title="什么是DDD领域驱动设计的战略设计">什么是DDD领域驱动设计的战略设计</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDali/%E8%B0%88%E8%B0%88%E4%BB%A3%E7%A0%81DDD%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E5%AE%8C%E5%85%A8%E5%85%A5%E9%97%A8/" title="谈谈代码：DDD从入门到完全入门">谈谈代码：DDD从入门到完全入门</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDali/%E8%B0%88%E8%B0%88%E4%BB%A3%E7%A0%81%E9%99%8D%E4%BD%8E%E5%A4%8D%E6%9D%82%E5%BA%A6%E4%BB%8E%E6%94%BE%E5%BC%83%E4%B8%89%E5%B1%82%E6%9E%B6%E6%9E%84%E5%88%B0DDD%E5%85%A5%E9%97%A8/" title="谈谈代码：降低复杂度，从放弃三层架构到DDD入门">谈谈代码：降低复杂度，从放弃三层架构到DDD入门</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDali/%E9%98%BF%E9%87%8C%E6%8A%80%E6%9C%AF%E4%B8%93%E5%AE%B6%E8%AF%A6%E8%A7%A3DDD%E7%B3%BB%E5%88%97-%E7%AC%AC%E5%9B%9B%E8%AE%B2-%E9%A2%86%E5%9F%9F%E5%B1%82%E8%AE%BE%E8%AE%A1%E8%A7%84%E8%8C%83/" title="阿里技术专家详解DDD系列 第四讲 - 领域层设计规范">阿里技术专家详解DDD系列 第四讲 - 领域层设计规范</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/BI/">BI</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/css/">css</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="">java</a>
+    
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%88%86%E8%AF%8D/">分词</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%96%87%E6%91%98/">文摘</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%88%AC%E8%99%AB/">爬虫</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
