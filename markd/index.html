@@ -91,24 +91,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </date>
         
         <div class="post-content">
-            决策引擎产品介绍 决策引擎承载的是风控业务的专家知识，基于变量和模型的输出，对用户进行分层、用户风险判断、以及用户风险定价的操作。其核心为判断流程的编制。 决策引擎产品提供可视化操作，支持判断逻辑的多种组合，流程链路配置，支持0开发部署上线，使得策略迭代速度能够得到最大的优化。
-决策引擎功能模块： 策略画布 ![](imgs/v2-3ac12013d19f5a619d859d84afc03238_720w.jpg
-策略画布是一个策略的主干，承担着执行链路配置的功能。画布中主要的组成部分如下：
- 开始节点：开始节点为策略执行的第一步，开始节点上定义了策略基本信息，策略code、策略名称、策略版本描述。  ![img](imgs/v2-cb6cc8206e68dae55f8e4b07d490687c_720w.jpg
- 缓存变量：缓存变量做为策略的一个临时容器，可以将某些值扔进来存储，以便后续使用。缓存变量的值，最后将作为策略结果进行输出。 节点：策略执行判断承载器，逻辑节点主要作用为 规则执行：逻辑节点绑定了策略中定义好的规则（可以参见组件-规则定义），逻辑节点运行会对规则进行执行，根据规则的结果（rule.result）进行综合输出，作为节点的输出（node.result）。综合逻辑为，取规则结果中最为严重的结果（reject&gt;reference&gt;pass）。 缓存变量赋值：缓存变量赋值主要是将某个执行结果的值赋予缓存变量，作为用户执行路径的记录。例如，走到a节点，用户就是好人；走到b节点，用户就是坏人，依此。 分流：分流作为判断节点下一步走到哪里，是逻辑分流的实现。  ![img](imgs/v2-cb6cc8206e68dae55f8e4b07d490687c_720w.jpg
- 分流：  增加分流：可以在图中两个节点A，B之间进行连线，代表A的下一个执行节点为B。一个节点的分流可以有多个（开始节点除外），例如A节点可以和 B、C、D相互连接，形成以下三条路由： A -&gt; B： A -&gt; C： A -&gt; D： 判断如何走到分支，由分流上的判断条件来判断。如下 分流1 A -&gt; B： if judge_1 == true 分流2 A -&gt; C： if judge_2 == ture 分流3 A -&gt; D： 分流判断的条件从上到下顺序执行，满足一条条件则走该分流 最后的分流：示例中的 分流为兜底路由，如果上述两条分流的条件都不满足，则走该条分流。
- 结束节点：  ![img](imgs/v2-632bce00462898962a53cb1368221060_720w.jpg
-结束节点为最后结束的节点，所有分流都必须走到结束节点。结束节点没有后续连接的节点。结束节点中包含的内容为：输出变量配置，可以绑定的为 策略变量，进行策略变量的输出操作。 最后策略的输出为：
- result：策略判断结果，策略的结果为结束节点上游分支的判断结果 输出参数：结束节点中，输出参数中配置的策略变量，以及对应的值  策略组件 ![img](imgs/v2-fab26a61ecaf023062789890d0478a55_720w.jpg
-策略组件有 规则、评分卡、决策表 三个类型构成，具体详情可见组件介绍。 组件血缘：记录了策略中组件相互之间关联的关系，从上最开始的策略到最下面的变量。依据血缘的引用，定义了组件的 引用和使用这两种状态：
- 是否引用：组件的输出，是否被其他组件使用（往上走） 是否使用：是否使用：向上走是否能够走到某一节点  ![img](imgs/v2-5d3532a1540542b2b34cf9a872ded799_720w.jpg
-血缘的引用关系将会在组件的修改过程中被检查：
- 组件删除：需要检查该组件是否引用，防止删除之后程序不能运行 组件的输出删除：例如决策表的输出，输出如果被其他地方使用，该输出则不能删除  策略组件-规则 ![img](imgs/v2-74857caaaf3a0f98ba80329f9cbc2c94_720w.jpg
-规则配置： 规则执行的是if…then…语句的判断，可以进行的操作有：配置 if的多层嵌套，条件可以是 并（and） 以及 或（or）。
-![img](imgs/v2-405ff8374f06eaff6a71ace36571ee66_720w.jpg
-上图中的执行语表示为：if { 1 and 2 and 3 and { 4 or 5 or 6}} 判断语句下拉框会根据选择的变量类型，来选择对应的匹配符，如果是数值型的变量，则提供 数值型判断（=, !=, &gt;, &lt;, &gt;=, &lt;=），如果是文本型的变量则提供（in，not in，contain，not contain，is null，is notnull，==，!=，~=）。 规则执行判断： 规则执行中一行条件为一个执行单位，执行单位根据组合的规则是否命中决定最后结果。一条规则中会有多个执行单位，规则将对执行单位的结果进行汇总，汇总的逻辑为 取最为严重的结果，如果执行单位中有 一个为reject，则规则结果为 reject。如果执行单位中 没有reject，执行单位中 有一个为 reference，则规则结果为 reference。如果执行单位结果全部为 pass，则最后结果为 pass。
-策略组件-决策表 ![img](imgs/v2-d71ef33b3f4daea4080fcfe6a03216f5_720w.jpg
-决策表介绍，决策表提供的是变量交叉组合之后给予特定结果。 决策表配置：决策表配置是以表格为基础的，每一列都有一个变量，分为输入和输出。每一行，是一个判断条件组合，表示 如果（变量1 条件， 变量2 条件，变量3 条件，…）都满足则，执行 输出（输出变量 =1， 输出变量 =2）。 决策表的变量支持：……
+            决策引擎产品介绍 决策引擎承载的是风控业务的专家知识，基于变量和模型的输出，对用户进行分层、用户风险判断、以及用户风险定价的操作。其核心为判断流程的编制。 决策引擎产品提供可视化操作，支持判断逻辑的多种组合，流程链路配置，支持0开发部署上线，使得策略迭代速度能够得到最大的优化。 决策引……
         </div>
         <p class="readmore"><a href="https://geek.zshipu.com/markd/%E8%A7%84%E5%88%99%E5%BC%95%E6%93%8E/%E5%86%B3%E7%AD%96%E5%BC%95%E6%93%8E/">阅读全文</a></p>
     </article>
@@ -126,12 +109,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </date>
         
         <div class="post-content">
-            一、环境准备 1、设置主机名hostname，管理节点设置主机名为master  # hostnamectl set-hostname master  设置其他节点主机名称时，可将master替换为正确的主机名node1,node2,node3即可。
-2、编辑/etc/hosts文件，添加域名分析 cat &lt;&lt;EOF &gt;&gt;/etc/hosts 192.168.56.10 master 192.168.56.11 node1 192.168.56.12 node2 EOF  3.关闭防火墙、selinux和swap。 依次执行以下操作
- # systemctl stop firewalld # systemctl disable firewalld # setenforce 0 # sed -i &quot;s/^SELINUX=enforcing/SELINUX=disabled/g&quot;/etc/selinux/config # swapoff -a # sed -i 's /.* swap.*/#&amp;/'/etc/fstab  4.配置内核参数，将桥接的IPv4流量传递到iptables的链 cat &gt;/etc/sysctl.d/k8s.conf &lt;&lt;EOF net.bridge.bridge-nf-call-ip6tables =1 net.bridge.bridge-nf-call-iptables =1 EOF  5、配置国内yum源 # yum install -y wget # mkdir /etc/yum.repos.d/bak &amp;&amp; mv /etc/yum.repos.d/*.repo /etc/yum.repos.d/bak # wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.cloud.tencent.com/repo/centos7_base.repo # wget -O /etc/yum.repos.d/epel.repo http://mirrors.cloud.tencent.com/repo/epel-7.repo # yum clean all &amp;&amp; yum makecache  　配置国内Kubernetes源
-cat &lt;&lt;EOF &gt;/etc/yum.repos.d/kubernetes.repo [kubernetes] name=Kubernetes baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/ enabled=1 gpgcheck=1 repo_gpgcheck=1 gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg EOF   配置 docker 源 # wget https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo -O /etc/yum.repos.d/docker-ce.repo  二、软件安装  注：在所有节点上进行如下操作
-1、安装docker # yum install -y docker-ce # systemctl enable docker &amp;&amp; systemctl start docker # docker --version  docker服务为容器运行提供计算资源，是所有容器运行的基本平台。
-2、安装kubeadm、kubelet、kubectl # yum install -y kubelet kubeadm kubectl # systemctl enable kubelet Kubelet负责与其他节点集群通信，并进行本节点Pod和容器生命周期的管理。Kubeadm是Kubernetes的自动化部署工具，降低了部署难度，提高效率。Kubectl是Kubernetes集群管理工具，此处注意Kubectl的版本信息，后面会用到！  三、部署master节点 注：在master节点上进行如下操作……
+            一、环境准备 1、设置主机名hostname，管理节点设置主机名为master # hostnamectl set-hostname master 设置其他节点主机名称时，可将master替换为正确的主机名node1,node2,node3即可。 2、编辑/etc/hosts文件，添加域名分析 cat &lt;&lt;EOF &gt;&gt;/etc/hosts 192.168.56.10 master 192.168.56.11 node1 192.168.56.12 node2 EOF 3.关闭防火墙、selinux和……
         </div>
         <p class="readmore"><a href="https://geek.zshipu.com/markd/k8s/k8s/">阅读全文</a></p>
     </article>
@@ -149,11 +127,7 @@ cat &lt;&lt;EOF &gt;/etc/yum.repos.d/kubernetes.repo [kubernetes] name=Kubernete
         </date>
         
         <div class="post-content">
-             dubbo 1. 服务消费方发起请求 当服务的消费方引用了某远程服务，服务的应用方在spring的配置实例如下：
-&lt;dubbo:referenceid=&quot;demoService&quot;interface=&quot;com.alibaba.dubbo.demo.DemoService&quot; /&gt;  demoService实例其实是代理工厂生产的代理对象（大家可以参考代理那部分生成的伪代码），在代码中调用demoService.sayHello(“world!”)时，
- 1.1 将方法名方法参数传入InvokerInvocationHandler的invoke方 &gt; 对于Object中的方法toString, hashCode, equals直接调用invoker的对应方法, 这里对于Object的方法需要被远程调用吗？调用了是不是报错比默认处理更好呢？？ 远程调用层是以Invocation, Result为中心， 这里根据要调用的方法以及传入的参数构建RpcInvocation对象，作为Invoker的入参
-1.2 MockClusterInvoker根据参数提供了三种调用策略
- ……
+            dubbo 1. 服务消费方发起请求 当服务的消费方引用了某远程服务，服务的应用方在spring的配置实例如下： &lt;dubbo:referenceid=&quot;demoService&quot;interface=&quot;com.alibaba.dubbo.demo.DemoService&quot; /&gt; demoService实例其实是代理工厂生产的代理对象（大家可以参考代理那部分生成的伪代码），在代码中调用demoService.sayHello(“world!”)时， 1.1 将方法名……
         </div>
         <p class="readmore"><a href="https://geek.zshipu.com/markd/dubbo/dubbo/">阅读全文</a></p>
     </article>
@@ -317,7 +291,7 @@ cat &lt;&lt;EOF &gt;/etc/yum.repos.d/kubernetes.repo [kubernetes] name=Kubernete
     
     <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
     
-    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
     
@@ -329,7 +303,7 @@ cat &lt;&lt;EOF &gt;/etc/yum.repos.d/kubernetes.repo [kubernetes] name=Kubernete
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
     
-    <a href="">java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/js/">js</a>
     

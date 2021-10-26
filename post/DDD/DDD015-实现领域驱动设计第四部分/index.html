@@ -146,20 +146,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-<ul>
-<li><a href="#对象映射对象">对象映射对象</a>
-<ul>
-<li><a href="#示例使用案例">示例使用案例</a></li>
-<li><a href="#应用实体创建域规则">应用实体创建域规则</a></li>
-<li><a href="#更新-操纵实体">更新/操纵实体</a>
-<ul>
-<li><a href="#域逻辑与应用逻辑">域逻辑与应用逻辑</a>
-<ul>
-<li><a href="#多个应用层">多个应用层</a></li>
-</ul></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#示例使用案例">示例使用案例</a></li>
+    <li><a href="#应用实体创建域规则">应用实体创建域规则</a></li>
+    <li><a href="#更新操纵实体">更新/操纵实体</a>
+      <ul>
+        <li><a href="#域逻辑与应用逻辑">域逻辑与应用逻辑</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
     </div>
 </div>
@@ -206,183 +201,134 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            
-
-<h1 id="对象映射对象">对象映射对象</h1>
-
+            <h1 id="对象映射对象">对象映射对象</h1>
 <p>当两个对象具有相同或相似属性时，自动对象到对象映射是将值从一个对象复制到另一个对象的有用方法。</p>
-
 <p>DTO 和实体类通常具有相同的/类似的属性，您通常需要从实体创建 DTO 对象。</p>
-
 <p>ABP 的对象对象映射系统与自动映射器集成使这些操作比手动映射容易得多。</p>
-
 <ul>
 <li>仅使用自动对象映射进行实体输出 DTO 映射。</li>
 <li>不要使用自动对象映射将 DTO 输入实体映射。</li>
 </ul>
-
 <p>有一些原因，为什么你不应该使用输入DTO实体自动映射：</p>
-
 <ul>
 <li>实体类通常具有一个构造器，该构造器具有需要参数并确保有效对象创建。自动对象映射操作通常需要一个空构造器。</li>
 <li>大多数实体属性将具有私设设置器，您应该使用方法以受控方式更改这些属性。</li>
 <li>您通常需要仔细验证和处理用户/客户端输入，而不是盲目地映射到实体属性。</li>
 </ul>
-
 <h2 id="示例使用案例">示例使用案例</h2>
-
 <p>本节将演示一些使用案例并讨论替代方案。</p>
-
 <p>实体创建</p>
-
 <p>从实体/聚合根类创建对象是该实体生命周期的第一步。</p>
-
 <p>聚合 / 聚合根规则和最佳实践部分建议为实体类创建一个主要构造器，以保证创建一个有效的实体。</p>
-
 <p>因此，每当我们需要创建该实体的实例时，我们应始终使用该构造器。</p>
-
 <p>请参阅下面的问题聚合根类：</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--0vTmFkeb--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/b9eii5qan5n2spx0eu8r.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252577.png" alt="image" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--0vTmFkeb--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/b9eii5qan5n2spx0eu8r.png">
+        <img class="mx-auto" alt="image" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252577.png" />   
+    </a></p>
 <p>让我们查看用于创建问题的应用服务方法：</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--thCU2GRF--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/x77ae1u3vb7nybhst0vh.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252578.png" alt="image" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--thCU2GRF--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/x77ae1u3vb7nybhst0vh.png">
+        <img class="mx-auto" alt="image" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252578.png" />   
+    </a></p>
 <p>创建酶方法;</p>
-
 <ul>
 <li>使用问题构造器创建有效问题。它使用 I 引导生成器服务传递 Id。它不使用自动对象映射在这里。</li>
 <li>如果客户端希望将此问题分配给对象创建的用户，则使用问题管理器执行此问题管理器，以便在此任务之前执行必要的检查。</li>
 <li>将实体保存到数据库</li>
 <li>最后使用 IObjectMapper 返回通过从新问题实体映射自动创建的问题Dto。</li>
 </ul>
-
 <h2 id="应用实体创建域规则">应用实体创建域规则</h2>
-
 <p>示例 问题实体没有关于实体创建的业务规则，但构造器中的某些正式验证除外。</p>
-
 <p>但是，在某些情况下，实体创建应检查一些额外的业务规则。</p>
-
 <p>例如，假设您不想在标题已经出现问题时允许创建问题。</p>
-
 <p>该规则的实施地点在哪里？在应用服务中实施此规则是不合适的，因为它是应始终检查的核心业务（域）规则。</p>
-
 <p>此规则应在域服务中实施，在这种情况下，问题管理器。</p>
-
 <p>因此，我们需要强制应用层始终使用问题管理器创建新问题。</p>
-
 <p>首先，我们可以使问题构建器内部，而不是公开：</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--B5Kzci_B--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/irf8wxagqczajoz0l66x.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252579.png" alt="image" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--B5Kzci_B--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/irf8wxagqczajoz0l66x.png">
+        <img class="mx-auto" alt="image" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252579.png" />   
+    </a></p>
 <p>这可防止应用服务直接使用
 构建器，因此他们将使用问题管理器。</p>
-
 <p>然后，我们可以在问题管理器中添加创建相称方法：</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--0qanMmGV--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/79dfs24v2t3h7aupbet2.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252580.png" alt="image" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--0qanMmGV--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/79dfs24v2t3h7aupbet2.png">
+        <img class="mx-auto" alt="image" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252580.png" />   
+    </a></p>
 <ul>
 <li>CreateAsync 方法检查是否已经存在同一标题的问题，并在本例中抛出业务例外。</li>
 <li>如果没有重复，它会创建并返回新问题。</li>
 </ul>
-
 <p>问题应用服务将更改如下所示，以便使用问题管理器的创建单一方法：</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--g7CbPeoH--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/1gciqlf34kyge6n2dpnv.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252581.png" alt="image" /></a></p>
-
-<h2 id="更新-操纵实体">更新/操纵实体</h2>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--g7CbPeoH--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/1gciqlf34kyge6n2dpnv.png">
+        <img class="mx-auto" alt="image" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252581.png" />   
+    </a></p>
+<h2 id="更新操纵实体">更新/操纵实体</h2>
 <p>创建实体后，由使用案例更新/操作该实体，直到将其从系统中删除。</p>
-
 <p>可直接或间接更改实体的不同类型的使用案例。</p>
-
 <p>在此部分中，我们将讨论更改问题多个属性的典型更新操作。</p>
-
 <p>这一次，从更新 DTO 开始：</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--5lP07Mli--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ee1o2pg23gq5trqro8or.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252582.png" alt="image" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--5lP07Mli--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ee1o2pg23gq5trqro8or.png">
+        <img class="mx-auto" alt="image" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252582.png" />   
+    </a></p>
 <p>通过比较问题创造Dto，你看不到存储库。</p>
-
 <p>因为，我们的系统不允许将问题跨存储库（请视为 GitHub 存储库）。</p>
-
 <p>只需要标题，其他属性是可选的。</p>
-
 <p>让我们在问题应用服务中查看更新实施：</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--kxbcbiM9--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/4stiw17nd9aqan12znn8.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252583.png" alt="image" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--kxbcbiM9--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/4stiw17nd9aqan12znn8.png">
+        <img class="mx-auto" alt="image" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252583.png" />   
+    </a></p>
 <h3 id="域逻辑与应用逻辑">域逻辑与应用逻辑</h3>
-
 <p>域驱动设计中的业务逻辑分为两部分（层）：域逻辑和应用逻辑：</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--g0pu7qfq--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/uz3ry9thetuxqr5bqwwp.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252584.png" alt="image" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--g0pu7qfq--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/uz3ry9thetuxqr5bqwwp.png">
+        <img class="mx-auto" alt="image" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252584.png" />   
+    </a></p>
 <p>域逻辑由系统的核心域规则组成，而应用逻辑则实施应用特定的使用案例。</p>
-
 <p>虽然定义很明确，但实施可能
 并不容易。您可能尚未决定哪些代码应位于应用层中
 ，哪些代码应位于域层中。</p>
-
 <h4 id="多个应用层">多个应用层</h4>
-
 <p>DDD 有助于处理系统大时的复杂性。特别是，如果在单个域中开发多个应用程序，则域逻辑与应用程序逻辑分离将变得更加重要。</p>
-
 <p>假设您正在构建具有多个
 应用程序的系统;</p>
-
 <ul>
 <li>公共网站应用程序，内置 ASP.NET 核心MVC，向用户展示您的产品。这样的网站不需要认证才能看到产品。用户登录网站，前提是他们正在执行某些操作（如向购物篮添加产品）。</li>
 <li>后台应用程序，使用角 UI 构建（使用 REST API）。本应用程序由公司办公室工作人员用于管理系统（如编辑产品描述）。</li>
 <li>与公共网站相比，移动应用程序具有更简单的 UI。它可以通过 REST API 或其他技术（如 TCP 插座）与服务器通信。</li>
 </ul>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s---XdQbYaO--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/k2ejb7acnwr0b2g06v5z.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252585.png" alt="image" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s---XdQbYaO--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/k2ejb7acnwr0b2g06v5z.png">
+        <img class="mx-auto" alt="image" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252585.png" />   
+    </a></p>
 <p>每个应用程序将有不同的要求，不同的使用案例（应用服务方法），不同的D托，不同的验证和授权规则。等。</p>
-
 <p>将所有这些逻辑混合到一个应用程序层中，如果
 复杂的业务逻辑条件使您的代码更难开发、维护和测试并导致潜在的错误，则您的服务包含的会太多。</p>
-
 <p>如果您有多个单一域名的应用程序;</p>
-
 <ul>
 <li>为每个应用程序/客户端类型创建单独的应用程序层，并在这些单独的图层中实现应用程序特定的业务逻辑。</li>
 <li>使用单个域层共享核心域逻辑。</li>
 </ul>
-
 <p>这样的设计使得区分域逻辑和应用逻辑变得更加重要。</p>
-
 <p>为了更清楚地了解实现情况，您可以为每个应用程序类型创建不同的项目 （.csproj）。例如：</p>
-
 <ul>
 <li>问题跟踪器.管理.应用程序跟踪器.管理.应用程序.合同项目为后台（管理员）应用程序。</li>
 <li>问题跟踪器. 公共.
 应用程序 = 问题跟踪器. 公共. 应用程序. 公共网络应用程序的合同项目。</li>
 <li>问题跟踪器.移动.应用程序和问题跟踪器.移动.应用程序.移动应用程序合同项目</li>
 </ul>
-
 <p>示例：在域服务中创建新组织</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--r1dceGxg--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/bgahgbt9zb6v6nfwilbm.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252586.png" alt="image" /></a></p>
-
-<p>让我们查看&rdquo;创建同步&rdquo;方法，逐步讨论代码部分是否应在域服务中，或者不：</p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--r1dceGxg--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/bgahgbt9zb6v6nfwilbm.png">
+        <img class="mx-auto" alt="image" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252586.png" />   
+    </a></p>
+<p>让我们查看&quot;创建同步&quot;方法，逐步讨论代码部分是否应在域服务中，或者不：</p>
 <ul>
 <li>正确：它首先检查重复的组织名称，并在本例中抛出例外。这与核心域规则有关，我们绝不允许重复名称。</li>
 <li>错误：域服务不应执行授权。授权应在应用层中完成。</li>
 <li>错误：它记录的消息包含当前用户的用户名。域服务不应依赖于当前用户。即使系统中没有用户，域服务也应可用。当前用户（会话）应是演示文稿/应用层相关概念。</li>
 <li>错误：它发送了一封关于这个新组织创建的电子邮件。我们认为这也是一个用例特定的业务逻辑。您可能希望在不同使用的情况下创建不同类型的电子邮件，或者在某些情况下不需要发送电子邮件。</li>
 </ul>
-
 <p>示例：在应用服务中创建新组织</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--VBBaD2ji--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/qsipjmpzvslb61ze2ho3.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252587.png" alt="image" /></a></p>
-
-<p>让我们查看&rdquo;创建同步&rdquo;方法，逐步讨论代码部分是否应在应用服务中：</p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--VBBaD2ji--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/qsipjmpzvslb61ze2ho3.png">
+        <img class="mx-auto" alt="image" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252587.png" />   
+    </a></p>
+<p>让我们查看&quot;创建同步&quot;方法，逐步讨论代码部分是否应在应用服务中：</p>
 <ul>
 <li>正确：应用服务方法应是工作单位（交易）。ABP 的工作单元系统使此自动（即使无需为应用服务添加 [工作单元] 属性）。</li>
 <li>正确：授权应在应用层中完成。在这里，它通过使用 [授权] 属性完成。</li>
@@ -391,22 +337,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>正确：我们可以将电子邮件作为通知发送给系统管理员。</li>
 <li>错误：不要从申请服务返回实体。返回 DTO 代替。</li>
 </ul>
-
 <p>示例：CRUD 操作</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--zl2X0fiq--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/643xq3xbm2pgzaicwcd7.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252588.png" alt="image" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--zl2X0fiq--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/643xq3xbm2pgzaicwcd7.png">
+        <img class="mx-auto" alt="image" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251252588.png" />   
+    </a></p>
 <p>此应用程序服务本身不执行任何工作，并将所有工作委托给域服务。它甚至将 DTO 传递给问题管理者。</p>
-
 <ul>
 <li>不要只针对没有任何域逻辑的简单 CRUD 操作创建域服务方法。</li>
 <li>切勿将 DTO 传递给或退回域服务中的 DTO。</li>
 </ul>
-
 <p>应用程序服务可以直接与存储库合作来查询、创建、更新或删除数据，除非在这些操作期间应执行某些域逻辑。</p>
-
 <p>在这种情况下，创建域服务方法，但仅针对真正必要的方法。</p>
-
 <p>恭喜你，谢谢大家看了所有系列部分。</p>
 
         </div>
@@ -631,7 +572,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
     
-    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
     
@@ -643,7 +584,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
     
-    <a href="">java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/js/">js</a>
     
