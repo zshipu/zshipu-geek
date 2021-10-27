@@ -146,13 +146,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-  <ul>
-    <li>
-      <ul>
-        <li></li>
-      </ul>
-    </li>
-  </ul>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#添加到函数">添加到函数</a></li>
+<li><a href="#使用接口">使用接口</a></li>
+<li><a href="#添加配置方法">添加配置方法</a></li>
+<li><a href="#维护结构兼容性">维护结构兼容性</a></li>
+<li><a href="#结论">结论</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
 </nav>
     </div>
 </div>
@@ -199,114 +208,188 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            <p>随着您添加新功能、更改行为和重新考虑模块公共表面的某些部分，模块将随着时间的推移而演变。如<a href="/v2-go-modules">Go 模块：v2 和以后，</a>对 v1+ 模块的中断更改必须作为主要版本颠簸的一部分（或采用新的模块路径）发生。</p>
+            
+
+<p>随着您添加新功能、更改行为和重新考虑模块公共表面的某些部分，模块将随着时间的推移而演变。如<a href="/v2-go-modules">Go 模块：v2 和以后，</a>对 v1+ 模块的中断更改必须作为主要版本颠簸的一部分（或采用新的模块路径）发生。</p>
+
 <p>但是，发布新的主要版本对用户来说很难。他们必须找到新版本，学习新的 API，并更改他们的代码。有些用户可能永远不会更新，这意味着您必须永远维护代码的两个版本。因此，最好以兼容的方式更改现有包。</p>
+
 <p>在这篇文章中，我们将探讨一些技术，以引入非中断的更改。常见的主题是：添加、不更改或删除。我们还将讨论如何从一开始就设计 API 的兼容性。</p>
+
 <h4 id="添加到函数">添加到函数</h4>
+
 <p>通常，重大更改以函数的新参数的形式出现。我们将介绍一些处理此类变化的方法，但首先让我们看看一种不起作用的技术。</p>
+
 <p>在添加具有合理默认值的新参数时，很容易将它们添加为可变参数。扩展函数</p>
-<p><!-- raw HTML omitted -->func Run(name string)<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->与默认为零的附加参数，有人可能会建议<!-- raw HTML omitted --><code>size</code></p>
-<p><!-- raw HTML omitted -->func Run(name string, size &hellip;int)<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->理由是所有现有的呼叫站点将继续工作。虽然这是事实，但其他用途可能会中断，像这样：<!-- raw HTML omitted --><code>Run</code></p>
-<p><!-- raw HTML omitted -->package mypkg
-var runner func(string) = yourpkg.Run<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->原始函数在这里工作，因为它的类型是 ，但新函数的类型是 ，因此赋值在编译时失败。<!-- raw HTML omitted --><code>Run``````func(string)``````Run``````func(string, ...int)</code></p>
+
+<p><code>func Run(name string)</code></p>
+
+<p><font _mstmutation="1" _msthash="306007" _msttexthash="107425045">与默认为零的附加参数，有人可能会建议</font><code>size</code></p>
+
+<p><code>func Run(name string, size &hellip;int)</code></p>
+
+<p><font _mstmutation="1" _msthash="306631" _msttexthash="420655430">理由是所有现有的呼叫站点将继续工作。虽然这是事实，但其他用途可能会中断，像这样：</font><code>Run</code></p>
+
+<p><code>package mypkg
+var runner func(string) = yourpkg.Run</code></p>
+
+<p><font _mstmutation="1" _msthash="307255" _msttexthash="366795832">原始函数在这里工作，因为它的类型是 ，但新函数的类型是 ，因此赋值在编译时失败。</font><code>Run</code><code>func(string)</code><code>Run</code><code>func(string, ...int)</code></p>
+
 <p>此示例说明调用兼容性不足以向后兼容性。事实上，不能对函数的签名进行向后兼容的更改。</p>
-<p><!-- raw HTML omitted -->添加新函数，而不是更改函数的签名。例如，在引入包后，将 1 作为第一个参数传递给函数已成为常见做法。但是，稳定的 API 无法更改导出的函数以接受 ，因为它将中断该函数的所有用途。<!-- raw HTML omitted --><code>context``````context.Context``````context.Context</code></p>
-<p><!-- raw HTML omitted -->而是添加了新的函数。例如，包的方法的签名是（现在仍然是）<!-- raw HTML omitted --><code>database/sql``````Query</code></p>
-<p><!-- raw HTML omitted -->func (db *DB) Query(query string, args &hellip;interface{}) (*Rows, error)<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->创建包时，Go 团队将新方法添加到 ：<!-- raw HTML omitted --><code>context``````database/sql</code></p>
-<p><!-- raw HTML omitted -->func (db *DB) QueryContext(ctx context.Context, query string, args &hellip;interface{}) (*Rows, error)<!-- raw HTML omitted --></p>
+
+<p><font _mstmutation="1" _msthash="307879" _msttexthash="1375993827">添加新函数，而不是更改函数的签名。例如，在引入包后，将 1 作为第一个参数传递给函数已成为常见做法。但是，稳定的 API 无法更改导出的函数以接受 ，因为它将中断该函数的所有用途。</font><code>context</code><code>context.Context</code><code>context.Context</code></p>
+
+<p><font _mstmutation="1" _msthash="305370" _msttexthash="230919624">而是添加了新的函数。例如，包的方法的签名是（现在仍然是）</font><code>database/sql</code><code>Query</code></p>
+
+<p><code>func (db *DB) Query(query string, args &hellip;interface{}) (*Rows, error)</code></p>
+
+<p><font _mstmutation="1" _msthash="305994" _msttexthash="93497053">创建包时，Go 团队将新方法添加到 ：</font><code>context</code><code>database/sql</code></p>
+
+<p><code>func (db *DB) QueryContext(ctx context.Context, query string, args &hellip;interface{}) (*Rows, error)</code></p>
+
 <p>为了避免复制代码，旧方法调用新方法：</p>
-<p><!-- raw HTML omitted -->func (db *DB) Query(query string, args &hellip;interface{}) (*Rows, error) {
-return db.QueryContext(context.Background(), query, args&hellip;)
-}<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->添加方法允许用户按照自己的节奏迁移到新的 API。由于方法读取方式类似且排序在一起，并且以新方法命名，因此 API 的此扩展不会降低包的可读性或理解性。<!-- raw HTML omitted --><code>Context``````database/sql</code></p>
+
+<p><code>func (db *DB) Query(query string, args &hellip;interface{}) (*Rows, error) {
+    return db.QueryContext(context.Background(), query, args&hellip;)
+}</code></p>
+
+<p><font _mstmutation="1" _msthash="307242" _msttexthash="1008950631">添加方法允许用户按照自己的节奏迁移到新的 API。由于方法读取方式类似且排序在一起，并且以新方法命名，因此 API 的此扩展不会降低包的可读性或理解性。</font><code>Context</code><code>database/sql</code></p>
+
 <p>如果您预计函数将来可能需要更多参数，可以通过将可选参数作为函数签名的一部分提前计划。最简单的方法是添加单个结构参数，如加密<a href="https://zshipu.com/t?url=https://pkg.go.dev/crypto/tls?tab=doc#Dial">/tls。拨号</a>功能可以：</p>
-<p><!-- raw HTML omitted -->func Dial(network, addr string, config *Config) (*Conn, error)<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->由 执行的 TLS 握手需要网络和地址，但它具有许多其他参数，且默认为合理。传递 的 for 使用这些默认值;传递包含某些字段集的结构将覆盖这些字段的默认值。将来，添加新的 TLS 配置参数只需要在结构上设置一个新字段，该更改向后兼容（几乎总是-请参阅下面的&quot;维护结构兼容性&quot;）。<!-- raw HTML omitted --><code>Dial``````nil``````config``````Config``````Config</code></p>
-<p><!-- raw HTML omitted -->有时，可以通过使选项结构方法接收器来组合添加新函数和添加选项的技术。考虑包在网络地址侦听的能力的演变。在 Go 1.11 之前，包只提供了一个带签名的功能<!-- raw HTML omitted --><code>net``````net``````Listen</code></p>
-<p><!-- raw HTML omitted -->func Listen(network, address string) (Listener, error)<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->对于 Go 1.11，在侦听中添加了两个功能：传递上下文，并允许调用方提供&quot;控制函数&quot;，以在创建后但在绑定之前调整原始连接。结果可能是一个新的函数，它采取了上下文、网络、地址和控制功能。相反，包作者添加了<a href="https://zshipu.com/t?url=https://pkg.go.dev/net@go1.11?tab=doc#ListenConfig"><code>一个侦听配置</code></a>结构，预计有一天可能需要更多的选项。他们不是用繁琐的名称定义新的顶级函数，而是将方法添加到：<!-- raw HTML omitted --><code>net``````Listen``````ListenConfig</code></p>
-<p><!-- raw HTML omitted -->type ListenConfig struct {
-Control func(network, address string, c syscall.RawConn) error
+
+<p><code>func Dial(network, addr string, config *Config) (*Conn, error)</code></p>
+
+<p><font _mstmutation="1" _msthash="308178" _msttexthash="3281533086">由 执行的 TLS 握手需要网络和地址，但它具有许多其他参数，且默认为合理。传递 的 for 使用这些默认值;传递包含某些字段集的结构将覆盖这些字段的默认值。将来，添加新的 TLS 配置参数只需要在结构上设置一个新字段，该更改向后兼容（几乎总是-请参阅下面的&rdquo;维护结构兼容性&rdquo;）。</font><code>Dial</code><code>nil</code><code>config</code><code>Config</code><code>Config</code></p>
+
+<p><font _mstmutation="1" _msthash="305669" _msttexthash="968448182">有时，可以通过使选项结构方法接收器来组合添加新函数和添加选项的技术。考虑包在网络地址侦听的能力的演变。在 Go 1.11 之前，包只提供了一个带签名的功能</font><code>net</code><code>net</code><code>Listen</code></p>
+
+<p><code>func Listen(network, address string) (Listener, error)</code></p>
+
+<p><font _mstmutation="1" _msthash="306293" _msttexthash="4530637813">对于 Go 1.11，在侦听中添加了两个功能：传递上下文，并允许调用方提供&rdquo;控制函数&rdquo;，以在创建后但在绑定之前调整原始连接。结果可能是一个新的函数，它采取了上下文、网络、地址和控制功能。相反，包作者添加了<a href="https://zshipu.com/t?url=https://pkg.go.dev/net@go1.11?tab=doc#ListenConfig"><code>一个侦听配置</code></a>结构，预计有一天可能需要更多的选项。他们不是用繁琐的名称定义新的顶级函数，而是将方法添加到：</font><code>net</code><code>Listen</code><code>ListenConfig</code></p>
+
+<p><code>type ListenConfig struct {
+    Control func(network, address string, c syscall.RawConn) error
 }</p>
-<p>func (*ListenConfig) Listen(ctx context.Context, network, address string) (Listener, error)<!-- raw HTML omitted --></p>
-<p>将来提供新选项的另一种方式是&quot;选项类型&quot;模式，其中选项作为可变参数传递，每个选项都是一个函数，用于更改所构造值的状态。他们更详细地描述了罗布派克后<a href="https://zshipu.com/t?url=https://commandcenter.blogspot.com/2014/01/self-referential-functions-and-design.html">自我引用函数和选项的设计</a>。一个广泛使用的例子<a href="https://zshipu.com/t?url=https://pkg.go.dev/google.golang.org/grpc?tab=doc">google.golang.org/grpc</a>的<a href="https://zshipu.com/t?url=https://pkg.go.dev/google.golang.org/grpc?tab=doc#DialOption">拨号选项</a>。</p>
-<p><!-- raw HTML omitted -->选项类型在函数参数中实现与结构选项相同的角色：它们是传递行为修改配置的可扩展方式。决定选择哪种因素很大程度上取决于风格问题。请考虑 gRPC 选项类型的以下简单用法：<!-- raw HTML omitted --><code>DialOption</code></p>
-<p><!-- raw HTML omitted -->grpc.Dial(&ldquo;some-target&rdquo;,
-grpc.WithAuthority(&ldquo;some-authority&rdquo;),
-grpc.WithMaxDelay(time.Second),
-grpc.WithBlock())<!-- raw HTML omitted --></p>
+
+<p>func (*ListenConfig) Listen(ctx context.Context, network, address string) (Listener, error)</code></p>
+
+<p>将来提供新选项的另一种方式是&rdquo;选项类型&rdquo;模式，其中选项作为可变参数传递，每个选项都是一个函数，用于更改所构造值的状态。他们更详细地描述了罗布派克后<a href="https://zshipu.com/t?url=https://commandcenter.blogspot.com/2014/01/self-referential-functions-and-design.html">自我引用函数和选项的设计</a>。一个广泛使用的例子<a href="https://zshipu.com/t?url=https://pkg.go.dev/google.golang.org/grpc?tab=doc">google.golang.org/grpc</a>的<a href="https://zshipu.com/t?url=https://pkg.go.dev/google.golang.org/grpc?tab=doc#DialOption">拨号选项</a>。</p>
+
+<p><font _mstmutation="1" _msthash="307229" _msttexthash="1312224875">选项类型在函数参数中实现与结构选项相同的角色：它们是传递行为修改配置的可扩展方式。决定选择哪种因素很大程度上取决于风格问题。请考虑 gRPC 选项类型的以下简单用法：</font><code>DialOption</code></p>
+
+<p><code>grpc.Dial(&ldquo;some-target&rdquo;,
+  grpc.WithAuthority(&ldquo;some-authority&rdquo;),
+  grpc.WithMaxDelay(time.Second),
+  grpc.WithBlock())</code></p>
+
 <p>这也可以作为结构选项实现：</p>
-<p><!-- raw HTML omitted -->notgrpc.Dial(&ldquo;some-target&rdquo;, &amp;notgrpc.Options{
-Authority: &ldquo;some-authority&rdquo;,
-MaxDelay:  time.Minute,
-Block:     true,
-})<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->功能选项有一些缺点：它们要求在每次调用的选项之前写入包名称;它们会增加包命名空间的大小;如果提供两次相同的选项， 则不清楚该行为应该是什么。另一方面，使用选项结构的函数需要一个参数，该参数可能几乎总是 ，有些人觉得该参数没有吸引力。当类型的零值具有有效含义时，指定选项应具有其默认值（通常需要指针或额外的布尔字段）是笨拙的。<!-- raw HTML omitted --><code>nil</code></p>
+
+<p><code>notgrpc.Dial(&ldquo;some-target&rdquo;, &amp;notgrpc.Options{
+  Authority: &ldquo;some-authority&rdquo;,
+  MaxDelay:  time.Minute,
+  Block:     true,
+})</code></p>
+
+<p><font _mstmutation="1" _msthash="308477" _msttexthash="5191723563">功能选项有一些缺点：它们要求在每次调用的选项之前写入包名称;它们会增加包命名空间的大小;如果提供两次相同的选项， 则不清楚该行为应该是什么。另一方面，使用选项结构的函数需要一个参数，该参数可能几乎总是 ，有些人觉得该参数没有吸引力。当类型的零值具有有效含义时，指定选项应具有其默认值（通常需要指针或额外的布尔字段）是笨拙的。</font><code>nil</code></p>
+
 <p>这两种选择都是确保模块公共 API 未来可扩展性的合理选择。</p>
+
 <h4 id="使用接口">使用接口</h4>
+
 <p>有时，新功能需要更改公开接口：例如，需要使用新方法扩展接口。直接添加到接口是一个突破性的变化，但是，我们如何支持在公开公开的接口上采用新方法呢？</p>
+
 <p>基本思想是使用新方法定义新接口，然后无论使用旧接口，动态检查所提供的类型是较旧类型还是较新的类型。</p>
-<p><!-- raw HTML omitted -->让我们用存档/tar 包中的示例<a href="https://zshipu.com/t?url=https://pkg.go.dev/archive/tar?tab=doc"><code>来说明这一</code></a>点。<a href="https://zshipu.com/t?url=https://pkg.go.dev/archive/tar?tab=doc#NewReader"><code>焦油。NewReader</code></a>接受 ，但随着时间的推移，Go 团队意识到，如果可以调用<a href="https://zshipu.com/t?url=https://pkg.go.dev/io?tab=doc#Seeker"><code>Seek，</code></a>从一个文件头跳到下一个文件头会更有效率。但是，他们不能向 中添加方法：这将破坏 的所有实现者。<!-- raw HTML omitted --><code>io.Reader``````Seek``````io.Reader``````io.Reader</code></p>
-<p><!-- raw HTML omitted -->另一个排除选项是更改为接受<a href="https://zshipu.com/t?url=https://pkg.go.dev/io?tab=doc#ReadSeeker"><code>io。ReadSeeker</code></a>而不是 ，因为它同时支持方法和 （通过 ）但是，正如我们上面看到的，更改函数签名也是一个突破性的变化。<!-- raw HTML omitted --><code>tar.NewReader``````io.Reader``````io.Reader``````Seek``````io.Seeker</code></p>
-<p><!-- raw HTML omitted -->因此，他们决定保持签名不变，但在方法中键入检查（和支持）：<!-- raw HTML omitted --><code>tar.NewReader``````io.Seeker``````tar.Reader</code></p>
-<p><!-- raw HTML omitted -->package tar</p>
+
+<p><font _mstmutation="1" _msthash="307216" _msttexthash="2178848776">让我们用存档/tar 包中的示例<a href="https://zshipu.com/t?url=https://pkg.go.dev/archive/tar?tab=doc"><code>来说明这一</code></a>点。<a href="https://zshipu.com/t?url=https://pkg.go.dev/archive/tar?tab=doc#NewReader"><code>焦油。NewReader</code></a>接受 ，但随着时间的推移，Go 团队意识到，如果可以调用<a href="https://zshipu.com/t?url=https://pkg.go.dev/io?tab=doc#Seeker"><code>Seek，</code></a>从一个文件头跳到下一个文件头会更有效率。但是，他们不能向 中添加方法：这将破坏 的所有实现者。</font><code>io.Reader</code><code>Seek</code><code>io.Reader</code><code>io.Reader</code></p>
+
+<p><font _mstmutation="1" _msthash="307528" _msttexthash="1077876943">另一个排除选项是更改为接受<a href="https://zshipu.com/t?url=https://pkg.go.dev/io?tab=doc#ReadSeeker"><code>io。ReadSeeker</code></a>而不是 ，因为它同时支持方法和 （通过 ）但是，正如我们上面看到的，更改函数签名也是一个突破性的变化。</font><code>tar.NewReader</code><code>io.Reader</code><code>io.Reader</code><code>Seek</code><code>io.Seeker</code></p>
+
+<p><font _mstmutation="1" _msthash="307840" _msttexthash="261528293">因此，他们决定保持签名不变，但在方法中键入检查（和支持）：</font><code>tar.NewReader</code><code>io.Seeker</code><code>tar.Reader</code></p>
+
+<p><code>package tar</p>
+
 <p>type Reader struct {
-r io.Reader
+  r io.Reader
 }</p>
+
 <p>func NewReader(r io.Reader) *Reader {
-return &amp;Reader{r: r}
+  return &amp;Reader{r: r}
 }</p>
+
 <p>func (r *Reader) Read(b []byte) (int, error) {
-if rs, ok := r.r.(io.Seeker); ok {
-// Use more efficient rs.Seek.
-}
-// Use less efficient r.r.Read.
-}<!-- raw HTML omitted --></p>
+  if rs, ok := r.r.(io.Seeker); ok {
+    // Use more efficient rs.Seek.
+  }
+  // Use less efficient r.r.Read.
+}</code></p>
+
 <p>（<a href="https://zshipu.com/t?url=https://github.com/golang/go/blob/60f78765022a59725121d3b800268adffe78bde3/src/archive/tar/reader.go#L837">有关实际代码，请参阅 reader. go。</a></p>
+
 <p>当您遇到要将方法添加到现有接口的情况下，您可能能够遵循此策略。首先使用新方法创建新接口，或使用新方法标识现有接口。接下来，确定需要支持它的相关函数，键入第二个接口的检查，并添加使用它的代码。</p>
+
 <p>此策略仅在没有新方法的旧接口仍受支持时才有效，从而限制了模块的未来可扩展性。</p>
+
 <p>在可能的情况下，最好完全避免此类问题。例如，在设计构造函数时，更喜欢返回具体类型。使用具体类型允许您在将来添加方法，而不会破坏用户，这与接口不同。该属性允许您的模块在将来更容易扩展。</p>
+
 <p>提示：如果您确实需要使用接口，但不打算让用户实现它，可以添加未出口的方法。这样可以防止包外部定义的类型在不嵌入的情况下满足界面，从而释放您以后添加方法的自由，而不会破坏用户实现。例如，请参阅<a href="https://zshipu.com/t?url=https://github.com/golang/go/blob/83b181c68bf332ac7948f145f33d128377a09c42/src/testing/testing.go#L564-L567"><code>测试。TB</code>的<code>私有（） 函数</code></a>。</p>
-<p><!-- raw HTML omitted -->type TB interface {
-Error(args &hellip;interface{})
-Errorf(format string, args &hellip;interface{})
-// &hellip;</p>
+
+<p><code>type TB interface {
+    Error(args &hellip;interface{})
+    Errorf(format string, args &hellip;interface{})
+    // &hellip;</p>
+
 <pre><code>// A private method to prevent users implementing the
 // interface and so future additions to it will not
 // violate Go 1 compatibility.
 private()
 </code></pre>
-<p>}<!-- raw HTML omitted --></p>
-<p>这个话题在乔纳森阿姆斯特丹的&quot;检测不兼容的API变化&quot;谈话（视频，幻灯片）中<a href="https://zshipu.com/t?url=https://www.youtube.com/watch?v=JhdL5AkH-AQ">也进行了</a><a href="https://zshipu.com/t?url=https://github.com/gophercon/2019-talks/blob/master/JonathanAmsterdam-DetectingIncompatibleAPIChanges/slides.pdf">更详细的探讨</a>。</p>
+
+<p>}</code></p>
+
+<p>这个话题在乔纳森阿姆斯特丹的&rdquo;检测不兼容的API变化&rdquo;谈话（视频，幻灯片）中<a href="https://zshipu.com/t?url=https://www.youtube.com/watch?v=JhdL5AkH-AQ">也进行了</a><a href="https://zshipu.com/t?url=https://github.com/gophercon/2019-talks/blob/master/JonathanAmsterdam-DetectingIncompatibleAPIChanges/slides.pdf">更详细的探讨</a>。</p>
+
 <h4 id="添加配置方法">添加配置方法</h4>
+
 <p>到目前为止，我们已经讨论过公开中断的更改，其中更改类型或函数将导致用户的代码停止编译。但是，行为更改也会破坏用户，即使用户代码继续编译。例如，许多用户期望<a href="https://zshipu.com/t?url=https://pkg.go.dev/encoding/json?tab=doc#Decoder"><code>json。解码</code></a>器忽略 JSON 中不在参数结构中的字段。当 Go 团队想要在这种情况下返回错误时，他们必须小心。在没有选择加入机制的情况下这样做意味着许多依赖这些方法的用户可能会开始接收以前没有的错误。</p>
-<p><!-- raw HTML omitted -->因此，他们不是改变所有用户的行为，而是向结构中添加了一个配置方法：<a href="https://zshipu.com/t?url=https://pkg.go.dev/encoding/json?tab=doc#Decoder.DisallowUnknownFields"><code>解码器.Disallow未知Fields。</code></a>调用此方法会选择用户加入新行为，但这样做会保留现有用户的旧行为。<!-- raw HTML omitted --><code>Decoder</code></p>
+
+<p><font _mstmutation="1" _msthash="308451" _msttexthash="1262112163">因此，他们不是改变所有用户的行为，而是向结构中添加了一个配置方法：<a href="https://zshipu.com/t?url=https://pkg.go.dev/encoding/json?tab=doc#Decoder.DisallowUnknownFields"><code>解码器.Disallow未知Fields。</code></a>调用此方法会选择用户加入新行为，但这样做会保留现有用户的旧行为。</font><code>Decoder</code></p>
+
 <h4 id="维护结构兼容性">维护结构兼容性</h4>
+
 <p>我们在上面看到，对函数签名的任何更改都是一个突破性的变化。结构的情况要好得多。如果具有导出的结构类型，则几乎总是可以添加字段或删除未导出的字段，而不会破坏兼容性。添加字段时，请确保其零值有意义并保留旧行为，以便不设置字段的现有代码继续工作。</p>
-<p><!-- raw HTML omitted -->回想一下，该包的作者在 Go 1.11 中添加了该包，因为他们认为可能会有更多的选项。事实证明他们是对的。在 Go 1.13 中，<a href="https://zshipu.com/t?url=https://pkg.go.dev/net@go1.13?tab=doc#ListenConfig"><code>添加了 KeepAlive</code></a>字段，以允许禁用保持活动状态或更改其周期。默认值为 0 将保留启用默认期间保持活动的原始行为。<!-- raw HTML omitted --><code>net``````ListenConfig</code></p>
-<p><!-- raw HTML omitted -->有一种微妙的方式，新字段可以意外中断用户代码。如果结构中的所有字段类型都是可比较的，即这些类型的值可以与映射键进行比较并用作映射键，则整个结构类型也是可比较的。在这种情况下，添加不可比较类型的新字段将使整体结构类型不可比较，从而破坏比较该结构类型的值的任何代码。<!-- raw HTML omitted --><code>==``````!=</code></p>
+
+<p><font _mstmutation="1" _msthash="306566" _msttexthash="2165522372">回想一下，该包的作者在 Go 1.11 中添加了该包，因为他们认为可能会有更多的选项。事实证明他们是对的。在 Go 1.13 中，<a href="https://zshipu.com/t?url=https://pkg.go.dev/net@go1.13?tab=doc#ListenConfig"><code>添加了 KeepAlive</code></a>字段，以允许禁用保持活动状态或更改其周期。默认值为 0 将保留启用默认期间保持活动的原始行为。</font><code>net</code><code>ListenConfig</code></p>
+
+<p><font _mstmutation="1" _msthash="306878" _msttexthash="3405920622">有一种微妙的方式，新字段可以意外中断用户代码。如果结构中的所有字段类型都是可比较的，即这些类型的值可以与映射键进行比较并用作映射键，则整个结构类型也是可比较的。在这种情况下，添加不可比较类型的新字段将使整体结构类型不可比较，从而破坏比较该结构类型的值的任何代码。</font><code>==</code><code>!=</code></p>
+
 <p>为了保持结构的可比性，不要向其添加非可比字段。您可以为此编写一个测试，或者依靠即将推出<a href="https://zshipu.com/t?url=https://pkg.go.dev/golang.org/x/exp/cmd/gorelease?tab=doc">的 go 发行工具</a>来捕获它。</p>
+
 <p>首先要防止比较，请确保结构具有非可比字段。它可能已经有一个 - 没有切片，地图或函数类型是可比的 - 但如果没有，可以添加一个类似：</p>
-<p><!-- raw HTML omitted -->type Point struct {
-_ [0]func()
-X int
-Y int
-}<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->类型无法比较，零长度数组不占用任何空间。我们可以定义一个类型来阐明我们的意图：<!-- raw HTML omitted --><code>func()</code></p>
-<p><!-- raw HTML omitted -->type doNotCompare [0]func()</p>
+
+<p><code>type Point struct {
+        _ [0]func()
+        X int
+        Y int
+}</code></p>
+
+<p><font _mstmutation="1" _msthash="308126" _msttexthash="364931385">类型无法比较，零长度数组不占用任何空间。我们可以定义一个类型来阐明我们的意图：</font><code>func()</code></p>
+
+<p><code>type doNotCompare [0]func()</p>
+
 <p>type Point struct {
-doNotCompare
-X int
-Y int
-}<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->你应该在你的结构中使用吗？如果您已经定义了要用作指针的结构，也就是说，它有指针方法，也许还有一个返回指针的构造函数，那么添加字段可能是过头了。指针类型的用户了解该类型的每个值都是不同的：如果他们想要比较两个值，他们应该比较指针。<!-- raw HTML omitted --><code>doNotCompare``````NewXXX``````doNotCompare</code></p>
-<p><!-- raw HTML omitted -->如果您正在定义一个结构，旨在直接用作值，如我们的示例，则您通常希望它是可比较的。在不常见的情况下，您有一个不需要比较的值结构，那么添加一个字段将为您提供以后更改结构的自由，而不必担心打破比较。缺点是，该类型不能用作地图键。<!-- raw HTML omitted --><code>Point``````doNotCompare</code></p>
+        doNotCompare
+        X int
+        Y int
+}</code></p>
+
+<p><font _mstmutation="1" _msthash="308750" _msttexthash="2722644899">你应该在你的结构中使用吗？如果您已经定义了要用作指针的结构，也就是说，它有指针方法，也许还有一个返回指针的构造函数，那么添加字段可能是过头了。指针类型的用户了解该类型的每个值都是不同的：如果他们想要比较两个值，他们应该比较指针。</font><code>doNotCompare</code><code>NewXXX</code><code>doNotCompare</code></p>
+
+<p><font _mstmutation="1" _msthash="309062" _msttexthash="2535006955">如果您正在定义一个结构，旨在直接用作值，如我们的示例，则您通常希望它是可比较的。在不常见的情况下，您有一个不需要比较的值结构，那么添加一个字段将为您提供以后更改结构的自由，而不必担心打破比较。缺点是，该类型不能用作地图键。</font><code>Point</code><code>doNotCompare</code></p>
+
 <h4 id="结论">结论</h4>
+
 <p>从头开始规划 API 时，请仔细考虑 API 将来对新更改的可扩展性。当您确实需要添加新功能时，请记住以下规则：添加、不更改或删除，请记住异常情况 — 接口、函数参数和返回值不能以向后兼容的方式添加。</p>
+
 <p>如果您需要大幅更改 API，或者 API 在添加更多功能时开始失去焦点，则可能是新的主要版本的时间。但大多数时候，进行向后兼容的更改很容易，并避免给用户带来痛苦。</p>
 
         </div>
@@ -431,6 +514,10 @@ Y int
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/bi/Metabase%E6%95%99%E7%A8%8B%E7%B3%BB%E5%88%97-%E5%90%84%E7%A7%8D%E5%8F%AF%E8%A7%86%E5%8C%96%E5%85%83%E7%B4%A0%E5%9F%BA%E6%9C%AC%E8%BF%90%E7%94%A8/" title="Metabase教程系列-各种可视化元素基本运用">Metabase教程系列-各种可视化元素基本运用</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/bi/Metabase%E6%95%99%E7%A8%8B%E7%B3%BB%E5%88%97-Metabase%E5%9F%BA%E6%9C%AC%E8%AE%A4%E8%AF%86%E5%92%8C%E5%88%9D%E7%BA%A7%E5%88%86%E6%9E%90/" title="Metabase教程系列-Metabase基本认识和初级分析">Metabase教程系列-Metabase基本认识和初级分析</a>
     </li>
     
@@ -464,10 +551,6 @@ Y int
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/BI-%E6%95%B0%E6%8D%AE%E6%B9%96-%E4%BB%80%E4%B9%88%E6%98%AF%E6%95%B0%E6%8D%AE%E6%B9%96-%E5%AE%83%E6%98%AF%E5%BB%BA%E7%AD%91-%E6%95%B0%E6%8D%AE%E6%B9%96%E6%95%99%E7%A8%8B/" title="BI-数据湖-什么是数据湖 它是建筑-数据湖教程">BI-数据湖-什么是数据湖 它是建筑-数据湖教程</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/BI-%E6%95%B0%E6%8D%AE%E6%B9%96-%E4%B8%80%E6%96%87%E7%9C%8B%E6%87%82%E6%95%B0%E6%8D%AE%E6%B9%96%E6%A6%82%E5%BF%B5%E7%89%B9%E5%BE%81%E6%9E%B6%E6%9E%84%E4%B8%8E%E6%A1%88%E4%BE%8B/" title="BI-数据湖-一文看懂数据湖：概念、特征、架构与案例">BI-数据湖-一文看懂数据湖：概念、特征、架构与案例</a>
     </li>
     
 </ul>
@@ -531,7 +614,7 @@ Y int
     
     <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
     
     <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
     
@@ -543,7 +626,7 @@ Y int
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="">java</a>
     
     <a href="https://geek.zshipu.com/tags/js/">js</a>
     
