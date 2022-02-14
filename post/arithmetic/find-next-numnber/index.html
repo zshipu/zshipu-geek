@@ -146,13 +146,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-  <ul>
-    <li>
-      <ul>
-        <li></li>
-      </ul>
-    </li>
-  </ul>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#使用">使用：</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
 </nav>
     </div>
 </div>
@@ -206,73 +214,78 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            <ul>
-<li>寻找下一个数字，例如输入345，输出354</li>
-</ul>
-<blockquote>
-<p>思路：从最右边位和上一位对比，如果大，就往前移，移动完，尾数排序，从大到小，保证次大
+            
+
+<ul>
+<li><p>寻找下一个数字，例如输入345，输出354
+&gt;思路：从最右边位和上一位对比，如果大，就往前移，移动完，尾数排序，从大到小，保证次大
 -代码</p>
-</blockquote>
-<pre tabindex="0"><code>//字符串逆序
+
+<pre><code>//字符串逆序
 NSString *reverseStr(NSString *str){
-    NSMutableString *string=[[NSMutableString alloc] init];
-    for(int i=0;i&lt;str.length;i++){
-        [string appendString:[str substringWithRange:NSMakeRange(str.length-1-i, 1)]];
-    }
-    return string;
+NSMutableString *string=[[NSMutableString alloc] init];
+for(int i=0;i&lt;str.length;i++){
+    [string appendString:[str substringWithRange:NSMakeRange(str.length-1-i, 1)]];
+}
+return string;
 }
 
 //字符串分成数组
 NSMutableArray *separateStringToArray(NSString *str){
-    NSMutableArray *marr = [NSMutableArray array];
-    for (NSInteger i = 0; i &lt; str.length; i++) {
-        [marr addObject:[str substringWithRange:NSMakeRange(i, 1)]];
-    }
-    return marr;
+NSMutableArray *marr = [NSMutableArray array];
+for (NSInteger i = 0; i &lt; str.length; i++) {
+    [marr addObject:[str substringWithRange:NSMakeRange(i, 1)]];
+}
+return marr;
 }
 
 
 NSString *findNextLargerNum(NSString *oriNum){
 
 
-    NSMutableString *finalStr = [NSMutableString string];
+NSMutableString *finalStr = [NSMutableString string];
 
 
-    NSMutableArray *marr = separateStringToArray(oriNum);
-    for (NSInteger i = marr.count - 1; i &gt; 0; i--) {
-        NSNumber *lastNum = [marr objectAtIndex:i];
-        NSNumber *preNum = [marr objectAtIndex:i-1];
-        if (lastNum.integerValue &gt; preNum.integerValue) {
-            //截取字符串
-            NSString *rightStr = reverseStr([oriNum substringWithRange:NSMakeRange(i, oriNum.length - i)]);
-            NSString *leftStr = [oriNum substringWithRange:NSMakeRange(0,i)];
-            //第i-1位截取出来
-            NSString *leftCompareStr = [oriNum substringWithRange:NSMakeRange(i-1, 1)];
-            //和右边逐个对比
-            for (int j = 0; j &lt; rightStr.length; j++) {
-                NSString *rightCompareStr = [rightStr substringWithRange:NSMakeRange(j, 1)];
-                if (leftCompareStr.integerValue &lt; rightCompareStr.integerValue) {
-                    NSMutableArray *finalArr = separateStringToArray([NSString stringWithFormat:@&quot;%@%@&quot;,leftStr,rightStr]);
-                    NSInteger leftIndex = [finalArr indexOfObject:leftCompareStr];
-                    NSInteger rightIndex = [finalArr indexOfObject:rightCompareStr];
-                    [finalArr exchangeObjectAtIndex:leftIndex withObjectAtIndex:rightIndex];
-                    for (NSString *str in finalArr) {
-                        [finalStr appendString:str];
-                    }
-                    break;
+NSMutableArray *marr = separateStringToArray(oriNum);
+for (NSInteger i = marr.count - 1; i &gt; 0; i--) {
+    NSNumber *lastNum = [marr objectAtIndex:i];
+    NSNumber *preNum = [marr objectAtIndex:i-1];
+    if (lastNum.integerValue &gt; preNum.integerValue) {
+        //截取字符串
+        NSString *rightStr = reverseStr([oriNum substringWithRange:NSMakeRange(i, oriNum.length - i)]);
+        NSString *leftStr = [oriNum substringWithRange:NSMakeRange(0,i)];
+        //第i-1位截取出来
+        NSString *leftCompareStr = [oriNum substringWithRange:NSMakeRange(i-1, 1)];
+        //和右边逐个对比
+        for (int j = 0; j &lt; rightStr.length; j++) {
+            NSString *rightCompareStr = [rightStr substringWithRange:NSMakeRange(j, 1)];
+            if (leftCompareStr.integerValue &lt; rightCompareStr.integerValue) {
+                NSMutableArray *finalArr = separateStringToArray([NSString stringWithFormat:@&quot;%@%@&quot;,leftStr,rightStr]);
+                NSInteger leftIndex = [finalArr indexOfObject:leftCompareStr];
+                NSInteger rightIndex = [finalArr indexOfObject:rightCompareStr];
+                [finalArr exchangeObjectAtIndex:leftIndex withObjectAtIndex:rightIndex];
+                for (NSString *str in finalArr) {
+                    [finalStr appendString:str];
                 }
+                break;
             }
         }
     }
-
-    return finalStr.length?finalStr:oriNum;
 }
-</code></pre><h5 id="使用">使用：</h5>
-<pre tabindex="0"><code>NSString *str = findNextLargerNum(@&quot;8976&quot;);
+
+return finalStr.length?finalStr:oriNum;
+}
+</code></pre></li>
+</ul>
+
+<h5 id="使用">使用：</h5>
+
+<pre><code>NSString *str = findNextLargerNum(@&quot;8976&quot;);
 NSLog(@&quot;======%@&quot;,str);
 //打印结果
 ======9678
 </code></pre>
+
         </div>
 
         
@@ -333,7 +346,7 @@ NSLog(@&quot;======%@&quot;,str);
 
                     <footer id="footer">
     <div>
-        &copy; 2021 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
         
         | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
         
@@ -391,6 +404,14 @@ NSLog(@&quot;======%@&quot;,str);
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/Web3.0-%E5%AE%9A%E4%B9%89web3/" title="Web3.0 - 定义web3">Web3.0 - 定义web3</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/10%E4%B8%AA%E5%9C%A82022%E5%B9%B4%E6%88%90%E4%B8%BAReact.js%E5%BC%80%E5%8F%91%E4%BA%BA%E5%91%98%E7%9A%84%E6%9C%80%E4%BD%B3%E7%BD%91%E7%AB%99/" title="ReactJS-10个在2022年成为React.js开发人员的最佳网站">ReactJS-10个在2022年成为React.js开发人员的最佳网站</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/android/Android-4.x-%E6%94%AF%E6%8C%81HTTPS%E8%AF%B7%E6%B1%82/" title="Android 4.x 支持HTTPS请求">Android 4.x 支持HTTPS请求</a>
     </li>
     
@@ -420,14 +441,6 @@ NSLog(@&quot;======%@&quot;,str);
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/BI-%E5%8F%AF%E8%A7%86%E5%8C%96-Metabase%E4%B8%8ECBoard%E5%B7%AE%E5%BC%82%E5%8C%96%E5%88%86%E6%9E%90%E8%AF%B4%E6%98%8E/" title="BI-可视化-Metabase与CBoard差异化分析说明">BI-可视化-Metabase与CBoard差异化分析说明</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/BI-%E5%8F%AF%E8%A7%86%E5%8C%96-supersetmetabaseredash%E4%B8%89%E4%B8%AA%E5%BC%80%E6%BA%90BI%E5%B7%A5%E5%85%B7%E7%9A%84%E4%B8%AA%E4%BA%BA%E4%BD%BF%E7%94%A8%E5%BF%83%E5%BE%97%E5%8F%8A%E5%88%86%E6%9E%90/" title="BI-可视化-superset、metabase、redash三个开源BI工具的个人使用心得及分析">BI-可视化-superset、metabase、redash三个开源BI工具的个人使用心得及分析</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/BI-ETL-%E5%9C%A810%E5%88%86%E9%92%9F%E5%86%85%E6%8E%8C%E6%8F%A1Apache-Airflow/" title="BI-ETL-在10分钟内掌握Apache Airflow">BI-ETL-在10分钟内掌握Apache Airflow</a>
     </li>
     
 </ul>
@@ -491,7 +504,7 @@ NSLog(@&quot;======%@&quot;,str);
     
     <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
     
     <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
     
@@ -507,7 +520,7 @@ NSLog(@&quot;======%@&quot;,str);
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="">java</a>
     
     <a href="https://geek.zshipu.com/tags/js/">js</a>
     
@@ -524,6 +537,8 @@ NSLog(@&quot;======%@&quot;,str);
     <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
     
     <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/web3/">web3</a>
     
     <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
     

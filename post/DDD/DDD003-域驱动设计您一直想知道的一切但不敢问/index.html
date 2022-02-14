@@ -146,25 +146,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-  <ul>
-    <li><a href="#那么什么是域驱动设计呢">那么什么是域驱动设计呢？</a></li>
-  </ul>
-
-  <ul>
-    <li><a href="#绑定上下文">绑定上下文</a></li>
-    <li><a href="#上下文映射">上下文映射</a></li>
-  </ul>
-
-  <ul>
-    <li><a href="#实体">实体</a></li>
-    <li><a href="#值对象">值对象</a></li>
-    <li><a href="#服务业">服务业</a></li>
-    <li><a href="#域对象及其生命周期">域对象及其生命周期</a></li>
-    <li><a href="#集-料">集 料</a></li>
-    <li><a href="#工厂">工厂</a></li>
-    <li><a href="#存储-库">存储 库</a></li>
-    <li><a href="#将域与其他关注区隔离开来">将域与其他关注区隔离开来</a></li>
-  </ul>
+<ul>
+<li>
+<ul>
+<li><a href="#那么什么是域驱动设计呢">那么什么是域驱动设计呢？</a></li>
+</ul></li>
+<li><a href="#战略设计-拆分设计-以免失去理智">战略设计：拆分设计，以免失去理智</a>
+<ul>
+<li><a href="#绑定上下文">绑定上下文</a></li>
+<li><a href="#上下文映射">上下文映射</a></li>
+</ul></li>
+<li><a href="#协作建模-丰富的沟通和有效的协作">协作建模：丰富的沟通和有效的协作</a></li>
+<li><a href="#战术设计-ddd的螺母和螺栓">战术设计：DDD的螺母和螺栓</a>
+<ul>
+<li><a href="#实体">实体</a></li>
+<li><a href="#值对象">值对象</a></li>
+<li><a href="#服务业">服务业</a></li>
+<li><a href="#域对象及其生命周期">域对象及其生命周期</a></li>
+<li><a href="#集-料">集 料</a></li>
+<li><a href="#工厂">工厂</a></li>
+<li><a href="#存储-库">存储 库</a></li>
+<li><a href="#将域与其他关注区隔离开来">将域与其他关注区隔离开来</a></li>
+</ul></li>
+<li><a href="#结论">结论</a></li>
+</ul>
 </nav>
     </div>
 </div>
@@ -211,50 +216,89 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            <p>随着代码基数的增长，其复杂性必然会增加。由于这种情况，它往往变得更加难以保持代码的组织和结构，因为最初的意图，这被称为软件熵。在多次迭代中，如果不执行严格的架构准则，保持良好的关注分离以及正确脱钩类和模块将更具挑战性。</p>
-<p>在传统的模型视图控制器 （MVC） 架构中，&ldquo;M&quot;层将掌握所有业务逻辑，但不会就如何保持适当的责任边界提供明确的规则。出现了几个模式来缓解这个问题，但组件之间始终存在逻辑和责任泄露的风险，随着模型的发展，维护性和稳定性变得更加棘手。</p>
+            
+
+<p>随着代码基数的增长，其复杂性必然会增加。由于这种情况，它往往变得更加难以保持代码的组织和结构，因为最初的意图，这被称为软件熵。在多次迭代中，如果不执行严格的架构准则，保持良好的关注分离以及正确脱钩类和模块将更具挑战性。</p>
+
+<p>在传统的模型视图控制器 （MVC） 架构中，&rdquo;M&rdquo;层将掌握所有业务逻辑，但不会就如何保持适当的责任边界提供明确的规则。出现了几个模式来缓解这个问题，但组件之间始终存在逻辑和责任泄露的风险，随着模型的发展，维护性和稳定性变得更加棘手。</p>
+
 <p>另一方面，与业务专家的沟通、需求收集以及技术和非技术团队之间的共识，以正确设计和实施解决业务问题的系统，是一个不断的迭次过程，很容易被误解，并最终使项目偏离其最初目标。</p>
+
 <p>例如，命名内容一直是软件开发人员面临的最困难的挑战之一。我们应该足够清楚，让其他开发人员了解我们在代码中的意图，同时使用适当的命名选项，以促进与业务利益相关者的对话。</p>
+
 <p>域驱动设计 （DDD） 试图通过调和软件项目中碰撞的技术和非技术力量，并提出一套有助于构建成功系统的实践和模式来解决这些挑战。</p>
+
 <h2 id="那么什么是域驱动设计呢">那么什么是域驱动设计呢？</h2>
-<p>让我们首先定义&quot;域&quot;一词在此上下文中的含义。我喜欢把它定义为</p>
+
+<p>让我们首先定义&rdquo;域&rdquo;一词在此上下文中的含义。我喜欢把它定义为</p>
+
 <blockquote>
-<p><!-- raw HTML omitted -->定义应用程序逻辑解决问题的一组常见要求、术语和功能的特定活动领域或知识领域。<!-- raw HTML omitted --></p>
+<p><mark class="vx vy nd">定义应用程序逻辑解决问题的一组常见要求、术语和功能的特定活动领域或知识领域。</mark></p>
 </blockquote>
+
 <p>域驱动设计是一种软件设计方法，将系统的实现粘合到不断发展的模型中，而忽略了编程语言、基础技术等不相关的细节。</p>
+
 <p>它主要关注一个商业问题，以及如何严格组织解决它的逻辑。埃里克·埃文斯在他的著作《<a href="https://zshipu.com/t?url=https://www.goodreads.com/book/show/179133.Domain_Driven_Design"><em>域驱动设计处理软件核心的复杂性》中</em></a>首次描述了这种方法。</p>
+
 <p>现在，我们知道 DDD 的定义及其目标是什么，让我们深入探讨此方法的三大支柱。</p>
-<h1 id="战略设计拆分设计以免失去理智">战略设计：拆分设计，以免失去理智</h1>
+
+<h1 id="战略设计-拆分设计-以免失去理智">战略设计：拆分设计，以免失去理智</h1>
+
 <p>随着实施过程的不断演变，以及系统的复杂性逐渐增加，保持对系统的控制可能令人望而生畏。因此，一个严格的战略来理解和控制大型系统是根本的。将模型分解成相互交互的绑定上下文 - 它们本身在概念和代码上都有自己的统一模型 - 是避免复杂性陷阱的有效方法。</p>
+
 <h2 id="绑定上下文">绑定上下文</h2>
+
 <p>边界上下文是围绕应用程序和/或项目在业务领域、团队和代码方面的部分概念边界。它对相关组件和概念进行分组，避免模棱两可，因为其中一些在没有明确上下文的情况下可能具有类似的含义。</p>
-<p>例如，在&quot;边界上下文&quot;之外，&ldquo;字母&quot;可能意味着两种截然不同的东西：字符或写在纸上的消息。通过定义边界和上下文，您可以确定其含义</p>
+
+<p>例如，在&rdquo;边界上下文&rdquo;之外，&rdquo;字母&rdquo;可能意味着两种截然不同的东西：字符或写在纸上的消息。通过定义边界和上下文，您可以确定其含义</p>
+
 <p>在许多项目中，团队被边界上下文划分，每个团队都专注于自己的领域专业知识和逻辑。</p>
+
 <h2 id="上下文映射">上下文映射</h2>
+
 <p>识别和图形记录项目中的每个边界上下文称为上下文映射。上下文地图有助于更好地了解绑定上下文和团队如何相互关联和沟通。他们清楚地了解了实际边界，并帮助团队直观地描述系统设计的概念细分。</p>
-<p>
-        <img class="mx-auto" alt="image-20210924134313406" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20210924134313406.png" />   
-    </p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20210924134313406.png" alt="image-20210924134313406" /></p>
+
 <p>受限上下文之间的关系可能有所不同，具体取决于设计要求和其他项目特定限制，本文将省略某些关系，但以下四个除外：</p>
+
 <p><strong>反腐败层：</strong></p>
+
 <p>下游边界上下文实现一层，该层可以翻译来自上游上下文的数据或对象，确保它支持内部模型。</p>
+
 <p><strong>墨守成规：</strong></p>
+
 <p>下游边界上下文符合并适应上游上下文，如果需要，必须更改。在这种情况下，上游上下文对满足下游需求不感兴趣。</p>
+
 <p><strong>客户/供应商：</strong></p>
+
 <p>上游为下游提供服务，下游环境充当客户，确定需求并要求上游更改以满足其需求。</p>
+
 <p><strong>共享内核：</strong></p>
+
 <p>有时，两个（或更多）上下文不可避免地重叠，最终共享资源或组件。这种关系要求两种上下文在需要更改时保持连续同步，因此应尽可能避免这种关系。</p>
-<h1 id="协作建模丰富的沟通和有效的协作">协作建模：丰富的沟通和有效的协作</h1>
-<p>DDD 建议通过采用协作方式有效地建模该领域，不仅涉及技术，还涉及业务知识的所有各方。正如 Evans 描述的那样，域模型&quot;不仅仅是域专家头脑中的知识：它是一个严格组织和选择性的抽象知识。</p>
+
+<h1 id="协作建模-丰富的沟通和有效的协作">协作建模：丰富的沟通和有效的协作</h1>
+
+<p>DDD 建议通过采用协作方式有效地建模该领域，不仅涉及技术，还涉及业务知识的所有各方。正如 Evans 描述的那样，域模型&rdquo;不仅仅是域专家头脑中的知识：它是一个严格组织和选择性的抽象知识。</p>
+
 <p>开发人员与域专家合作，旨在不断改进域模型，迫使他们学习他们试图解决的业务问题的重要细节和原则，而不仅仅是机械地生成代码。</p>
+
 <p>为了实现业务团队和技术团队之间的这种协作，Domain 模型应使用一种将业务与技术行话连接在一起的语言，并找到所有团队成员都能理解和同意的中间立场，这称为无处不在的语言。使用定义明确的无处不在的语言将改善技术团队和业务团队之间的每一次互动，使他们不那么模棱两可，更有效。</p>
+
 <p>最终，这种无处不在的语言将嵌入到代码中。</p>
-<h1 id="战术设计ddd的螺母和螺栓">战术设计：DDD的螺母和螺栓</h1>
+
+<h1 id="战术设计-ddd的螺母和螺栓">战术设计：DDD的螺母和螺栓</h1>
+
 <p>域对象之间实现关联并描述其功能一目了然，但应以清晰直观的方式正确区分其含义和存在原因。DDD 提出了一组构造和模式来实现它。</p>
+
 <h2 id="实体">实体</h2>
+
 <p>具有独特身份并具有连续性线程的对象称为实体，它们不仅仅由其属性定义，而更多地由_它们是谁_来定义。它们的属性可能会发生变异，其生命周期可能会发生巨大变化，但它们的身份仍然存在。身份通过唯一键或保证为唯一属性的组合进行维护。</p>
+
 <p>例如，在电子商务领域，订单具有唯一的标识符，它经历了几个不同的阶段：打开、确认、发货和其他阶段，因此它被视为域实体。</p>
-<pre tabindex="0"><code>export class Customer {
+
+<pre><code>export class Customer {
 
     private id: number;
     private name: string;
@@ -277,11 +321,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         return new Customer(name);
     }
 }
-</code></pre><h2 id="值对象">值对象</h2>
+</code></pre>
+
+<h2 id="值对象">值对象</h2>
+
 <p>描述特征且不具有任何独特身份的对象称为值对象，它们只关心它们是什么，而不是它们是谁。</p>
+
 <p>价值对象是多个实体的属性，并且可以共享，例如：两个客户可以具有相同的运费地址。虽然存在风险 - 如果他们的属性之一需要更改，所有共享它们的实体都会受到影响。为了防止这种情况，值对象必须是不变的，当需要更新时，迫使系统以新的实例替换它们。</p>
+
 <p>此外，价值对象的创建应始终取决于用于创建它们的数据的有效性，以及它如何尊重业务不变。因此，如果数据无效，则不会创建对象实例。例如，在北美，具有非字母数字字符的邮政编码将违反业务不变，并会触发地址创建的例外情况。</p>
-<pre tabindex="0"><code>export class Address {
+
+<pre><code>export class Address {
 
     private readonly streetAddress: string;
     private readonly postalCode: string
@@ -325,20 +375,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         return objectHelper.isEqual(this, otherAddress);
     }
 }
-</code></pre><h2 id="服务业">服务业</h2>
+</code></pre>
+
+<h2 id="服务业">服务业</h2>
+
 <p>在许多情况下，域模型要求某些与实体或价值对象没有直接关系的操作或操作，迫使这些操作或操作进入其实施中会导致其定义失真。服务是提供无国籍操作的类。它们通常被命名为动词，而不是实体和值对象的名词，并且根据无处不在的语言命名。</p>
+
 <p>应精心设计服务，始终确保它们不会剥夺实体和价值对象的直接责任和行为。它们还应是无国籍的，以便客户可以在应用程序使用期间无视该实例历史记录的任何给定服务实例。没有域逻辑的实体和值对象被认为是一种称为<a href="https://zshipu.com/t?url=https://martinfowler.com/bliki/AnemicDomainModel.html">贫血域模型</a>的反模式。</p>
+
 <h2 id="域对象及其生命周期">域对象及其生命周期</h2>
+
 <p>域对象通常具有复杂的生命周期，它们被刻解，经历几个变化，与其他对象相互作用，执行操作，持续，重组，被删除，等等。维护他们的完整性，同时确保系统不会管理他们复杂的生命周期，这是实施适当的域模型所代表的主要挑战之一。</p>
+
 <p>要在域模型中保持可管理的复杂性，很难最大限度地减少域对象之间的关系和交互，尤其是在复杂的业务领域，或者正如 Eric Evans 描述的那样：</p>
+
 <blockquote>
 <p>&ldquo;很难保证具有复杂关联的模型中对象更改的一致性。需要维护适用于密切相关的对象组的不变物，而不仅仅是离散对象。然而，谨慎的锁定计划导致多个用户相互无意义地相互干扰，使系统无法使用&rdquo;</p>
 </blockquote>
+
 <h2 id="集-料">集 料</h2>
+
 <p>为了减轻上述挑战，需要汇总实体和价值对象，限制违反业务不变。</p>
+
 <p>聚合物是相关实体和价值对象的集合，聚集在一起表示交易边界。每个聚合体都有一个面向外侧的实体，并控制对边界内对象的所有访问，此实体称为聚合根，它是其他对象可以与之交互的唯一对象。聚合内的对象不能直接从外部世界调用，从而保持内部的一致性。</p>
+
 <p>业务不变是保证聚合物完整性的业务规则，换句话说，它是一种确保其状态始终与业务规则一致的机制。例如，当某一产品的库存量为零时，永远无法下订单。</p>
-<pre tabindex="0"><code>export class Order {
+
+<pre><code>export class Order {
 
     private id: number;
     private isConfirmed: boolean;
@@ -389,10 +452,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         this.isConfirmed = true;
     }
 }
-</code></pre><h2 id="工厂">工厂</h2>
+</code></pre>
+
+<h2 id="工厂">工厂</h2>
+
 <p>创建复杂的对象和聚合实例可能是一项艰巨的任务，还可以披露对象的内部详细信息。使用工厂，我们可以解决这个问题，并提供必要的封装。</p>
+
 <p>工厂应能够在一次原子操作中构建域对象或聚合体，要求客户端在调用时提供所有需要的数据，并在创建的对象上强制执行所有不变。此活动不是域模型的一部分，但仍属于域层，因为它是适用于系统的业务规则的一部分。</p>
-<pre tabindex="0"><code>export class OrderFactory implements Factory {
+
+<pre><code>export class OrderFactory implements Factory {
 
     private customerEntity: Customer;
     private addressValue: Address;
@@ -420,11 +488,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }
     }
 }
-</code></pre><h2 id="存储-库">存储 库</h2>
+</code></pre>
+
+<h2 id="存储-库">存储 库</h2>
+
 <p>为了能够从我们的持久性中检索对象，无论是内存、文件系统还是数据库，我们需要提供一个界面，向客户端隐藏实现详细信息，以便它不依赖于基础架构细节，而仅仅依赖于抽象。</p>
+
 <p>存储库提供了域层可用于检索存储对象的界面，避免与存储逻辑紧密耦合，并给客户端一种直接从内存中检索对象的错觉。</p>
+
 <p>需要注意的是，所有存储库界面定义都应位于域层，但其具体实现属于基础架构层。</p>
-<pre tabindex="0"><code>export class OrderRepository implements Repository {
+
+<pre><code>export class OrderRepository implements Repository {
     private model: OrderModel;
     private mapper: OrderMapper;
     private productsRepository: Repository;
@@ -465,21 +539,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         return true;
     }
 }
-</code></pre><h2 id="将域与其他关注区隔离开来">将域与其他关注区隔离开来</h2>
+</code></pre>
+
+<h2 id="将域与其他关注区隔离开来">将域与其他关注区隔离开来</h2>
+
 <p>专门解决域问题的代码部分只是整个代码库的一小部分。如果这部分与解决其他问题的代码交织在一起，将很难理解和改进。明确地将域逻辑与所有其他功能分离将减少泄漏，并避免在大型复杂系统中出现混淆。</p>
+
 <p>DDD 提出了分层架构，通过将代码库分为 4 个主要层（用户界面、应用程序、域和基础结构）来区分问题和避免责任混淆。</p>
+
 <p>这里的主要规则是，每个层中的组件只能取决于同一层的组件或其下方的任何层。上层只需调用其公共接口即可使用下层的组件，下层_只能_通过<a href="https://zshipu.com/t?url=https://medium.com/@amitkma/understanding-inversion-of-control-ioc-principle-163b1dc97454">反向控制</a>（IoC） 向上通信。</p>
+
 <ul>
-<li>**用户界面层：**负责显示数据和捕获用户的命令。</li>
-<li>**应用层：**作为域工作的编排器，它不知道域规则，但组织和委托域对象来完成他们的工作。它也是其他边界上下文中唯一可以访问的层。</li>
-<li>**域层：**掌握业务逻辑和规则，以及业务状态。这是域模型的居住地。</li>
-<li>**基础层：**实现应用所需的所有技术功能，以支持更高的层次、持久性、消息传递、层间通信等。</li>
+<li><strong>用户界面层：</strong>负责显示数据和捕获用户的命令。</li>
+<li><strong>应用层：</strong>作为域工作的编排器，它不知道域规则，但组织和委托域对象来完成他们的工作。它也是其他边界上下文中唯一可以访问的层。</li>
+<li><strong>域层：</strong>掌握业务逻辑和规则，以及业务状态。这是域模型的居住地。</li>
+<li><strong>基础层：</strong>实现应用所需的所有技术功能，以支持更高的层次、持久性、消息传递、层间通信等。</li>
 </ul>
+
 <p>尽管并非每个系统都需要所有层，但域层的存在是 DDD 中的先决条件。</p>
-<p>
-        <img class="mx-auto" alt="image-20210924134338172" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20210924134338172.png" />   
-    </p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20210924134338172.png" alt="image-20210924134338172" /></p>
+
 <h1 id="结论">结论</h1>
+
 <p>总之，DDD 是一种通过与域专家的丰富协作和严格的设计模式解决业务问题的整体方法，它并不是所有软件项目的通用解决方案，但应用得当，可以带来显著的好处。</p>
 
         </div>
@@ -546,7 +628,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                     <footer id="footer">
     <div>
-        &copy; 2021 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
         
         | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
         
@@ -604,6 +686,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/Web3.0-%E5%AE%9A%E4%B9%89web3/" title="Web3.0 - 定义web3">Web3.0 - 定义web3</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/10%E4%B8%AA%E5%9C%A82022%E5%B9%B4%E6%88%90%E4%B8%BAReact.js%E5%BC%80%E5%8F%91%E4%BA%BA%E5%91%98%E7%9A%84%E6%9C%80%E4%BD%B3%E7%BD%91%E7%AB%99/" title="ReactJS-10个在2022年成为React.js开发人员的最佳网站">ReactJS-10个在2022年成为React.js开发人员的最佳网站</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/android/Android-4.x-%E6%94%AF%E6%8C%81HTTPS%E8%AF%B7%E6%B1%82/" title="Android 4.x 支持HTTPS请求">Android 4.x 支持HTTPS请求</a>
     </li>
     
@@ -633,14 +723,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/BI-%E5%8F%AF%E8%A7%86%E5%8C%96-Metabase%E4%B8%8ECBoard%E5%B7%AE%E5%BC%82%E5%8C%96%E5%88%86%E6%9E%90%E8%AF%B4%E6%98%8E/" title="BI-可视化-Metabase与CBoard差异化分析说明">BI-可视化-Metabase与CBoard差异化分析说明</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/BI-%E5%8F%AF%E8%A7%86%E5%8C%96-supersetmetabaseredash%E4%B8%89%E4%B8%AA%E5%BC%80%E6%BA%90BI%E5%B7%A5%E5%85%B7%E7%9A%84%E4%B8%AA%E4%BA%BA%E4%BD%BF%E7%94%A8%E5%BF%83%E5%BE%97%E5%8F%8A%E5%88%86%E6%9E%90/" title="BI-可视化-superset、metabase、redash三个开源BI工具的个人使用心得及分析">BI-可视化-superset、metabase、redash三个开源BI工具的个人使用心得及分析</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/BI-ETL-%E5%9C%A810%E5%88%86%E9%92%9F%E5%86%85%E6%8E%8C%E6%8F%A1Apache-Airflow/" title="BI-ETL-在10分钟内掌握Apache Airflow">BI-ETL-在10分钟内掌握Apache Airflow</a>
     </li>
     
 </ul>
@@ -704,7 +786,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
     
     <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
     
@@ -720,7 +802,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="">java</a>
     
     <a href="https://geek.zshipu.com/tags/js/">js</a>
     
@@ -737,6 +819,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
     
     <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/web3/">web3</a>
     
     <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
     
