@@ -6,8 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Go的干净样板，领域驱动设计，清洁架构，Gin和GORM | 知识铺的博客</title>
-    <meta property="og:title" content="Go的干净样板，领域驱动设计，清洁架构，Gin和GORM - 知识铺的博客">
+    <title>Go的干净模板，领域驱动设计，清洁架构，Gin和GORM | 知识铺的博客</title>
+    <meta property="og:title" content="Go的干净模板，领域驱动设计，清洁架构，Gin和GORM - 知识铺的博客">
     <meta property="og:type" content="article">
         
     <meta property="article:published_time" content='2022-03-07T08:55:38&#43;08:00'>
@@ -16,7 +16,7 @@
     <meta property="article:modified_time" content='2022-03-07T08:55:38&#43;08:00'>
         
     <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
-    <meta name="description" content="Go的干净样板，领域驱动设计，清洁架构，Gin和GORM">
+    <meta name="description" content="Go的干净模板，领域驱动设计，清洁架构，Gin和GORM">
         <meta name="author" content="知识铺">
         
     <meta property="og:url" content="https://geek.zshipu.com/post/Go%E7%9A%84%E5%B9%B2%E5%87%80%E6%A0%B7%E6%9D%BF%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E6%B8%85%E6%B4%81%E6%9E%B6%E6%9E%84Gin%E5%92%8CGORM/">
@@ -151,8 +151,53 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul>
 <li><a href="#开始">开始</a></li>
 <li><a href="#goilerplate-via-ssh">Goilerplate via SSH</a></li>
+<li><a href="#入口">入口</a></li>
+<li><a href="#包结构">包结构</a>
+<ul>
+<li><a href="#领域层">领域层</a></li>
+<li><a href="#应用层">应用层</a></li>
+<li><a href="#适配器层">适配器层</a></li>
+<li><a href="#外层">外层</a></li>
 </ul></li>
-<li><a href="#cd-git-clone-https-github-com-resotto-goilerplate-users-resotto-go-src-github-com-resotto-goilerplate">cd .; git clone &ndash; <a href="https://github.com/resotto/goilerplate">https://github.com/resotto/goilerplate</a> /Users/resotto/go/src/github.com/resotto/goilerplate</a></li>
+<li><a href="#如何跨越这些图层的边界">如何跨越这些图层的边界</a>
+<ul>
+<li><a href="#存储-库">存储 库</a></li>
+</ul></li>
+<li><a href="#依赖注入">依赖注入</a>
+<ul>
+<li><a href="#使用位置参数">使用位置参数</a></li>
+<li><a href="#使用关键字参数">使用关键字参数</a></li>
+<li><a href="#全局喷油器变量">全局喷油器变量</a></li>
+</ul></li>
+<li><a href="#如何从goilerplate开始">如何从Goilerplate开始</a>
+<ul>
+<li><a href="#包装布局">包装布局</a></li>
+<li><a href="#定义实体">定义实体</a></li>
+<li><a href="#定义存储库接口">定义存储库接口</a></li>
+<li><a href="#定义用例">定义用例</a></li>
+<li><a href="#定义存储库实现">定义存储库实现</a></li>
+<li><a href="#定义控制器">定义控制器</a></li>
+</ul></li>
+<li><a href="#测试">测试</a>
+<ul>
+<li><a href="#测试包结构">测试包结构</a></li>
+<li><a href="#实体">实体</a></li>
+<li><a href="#用例">用例</a></li>
+</ul></li>
+<li><a href="#命名约定">命名约定</a>
+<ul>
+<li><a href="#接口">接口</a></li>
+<li><a href="#模拟">模拟</a></li>
+<li><a href="#文件">文件</a></li>
+<li><a href="#包">包</a></li>
+</ul></li>
+<li><a href="#与gochk">与GOCHK</a></li>
+<li><a href="#使用postgresql">使用PostgreSQL</a>
+<ul>
+<li><a href="#建筑形象">建筑形象</a></li>
+<li><a href="#docker-映像">Docker 映像</a></li>
+</ul></li>
+</ul></li>
 </ul>
 </nav>
     </div>
@@ -186,7 +231,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </script>
     <article class="post">
         <header>
-            <h1 class="post-title">Go的干净样板，领域驱动设计，清洁架构，Gin和GORM</h1>
+            <h1 class="post-title">Go的干净模板，领域驱动设计，清洁架构，Gin和GORM</h1>
         </header>
         <date class="post-meta meta-date">
             2022年3月7日
@@ -205,8 +250,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>GitHub Repo： <a href="https://zshipu.com/t?url=https://github.com/resotto/goilerplate">https://github.com/resotto/goilerplate</a></p>
 
 <h1 id="goilerplate">Goilerplate</h1>
-
-<p><a href="https://zshipu.com/t?url=https://github.com/resotto/goilerplate/actions"><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--zkX93fPv--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://github.com/resotto/goilerplate/workflows/test/badge.svg" alt="" /></a><a href="https://zshipu.com/t?url=https://goreportcard.com/report/github.com/resotto/goilerplate"><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--Fc2NyxRZ--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://goreportcard.com/badge/github.com/resotto/goilerplate" alt="" /></a><a href="https://zshipu.com/t?url=https://pkg.go.dev/github.com/resotto/goilerplate"><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--cKpSPc56--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://pkg.go.dev/badge/github.com/resotto/goilerplate" alt="" /></a><a href="https://zshipu.com/t?url=https://github.com/resotto/goilerplate/issues/1"><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--OYF4HZLQ--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://img.shields.io/badge/chat-on%2520issue-yellow" alt="" /></a><a href="https://zshipu.com/t?url=https://github.com/resotto/goilerplate/blob/master/LICENSE"><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--nzG0kFIm--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://img.shields.io/badge/license-GPL%2520v3.0-brightgreen.svg" alt="" /></a></p>
 
 <p>Go的干净样板，领域驱动设计，清洁架构，Gin和GORM。</p>
 
@@ -235,10 +278,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <ul>
 <li>默认的应用程序/测试代码是微不足道的，因为您将编写很酷的逻辑。</li>
-<li><a href="https://zshipu.com/t?url=https://github.com/bitbankinc/bitbank-api-docs/blob/master/public-api.md#general-endpoints">bitbank的公共API</a>，即位于东京的比特币交易所，默认情况下用于某些端点。</li>
-</ul>
+<li><a href="https://zshipu.com/t?url=https://github.com/bitbankinc/bitbank-api-docs/blob/master/public-api.md#general-endpoints">bitbank的公共API</a>，即位于东京的比特币交易所，默认情况下用于某些端点。
 
-<hr />
+<br /></li>
+</ul>
 
 <h2 id="开始">开始</h2>
 
@@ -249,48 +292,57 @@ open <a href="http://0.0.0.0:8080">http://0.0.0.0:8080</a></code></p>
 
 <h2 id="goilerplate-via-ssh">Goilerplate via SSH</h2>
 
-<pre><code class="language-go">
+<pre><code>go get
 </code></pre>
 
-<p>~  &gt; go get -u github.com/resotto/goilerplate</p>
+<p>默认情况下，通过 HTTPS 获取 GitHub 存储库。所以你可能会失败：<code>go get</code></p>
 
-<h1 id="cd-git-clone-https-github-com-resotto-goilerplate-users-resotto-go-src-github-com-resotto-goilerplate">cd .; git clone &ndash; <a href="https://github.com/resotto/goilerplate">https://github.com/resotto/goilerplate</a> /Users/resotto/go/src/github.com/resotto/goilerplate</h1>
+<pre><code>~  &gt; go get -u github.com/resotto/goilerplate
 
-<p>Cloning into &lsquo;/Users/resotto/go/src/github.com/resotto/goilerplate&rsquo;&hellip;
-fatal: could not read Username for &lsquo;<a href="https://github.com':">https://github.com':</a> terminal prompts disabled
-package github.com/resotto/goilerplate: exit status 128</p>
+# cd .; git clone -- https://github.com/resotto/goilerplate /Users/resotto/go/src/github.com/resotto/goilerplate
+
+Cloning into '/Users/resotto/go/src/github.com/resotto/goilerplate'...
+fatal: could not read Username for 'https://github.com': terminal prompts disabled
+package github.com/resotto/goilerplate: exit status 128
+</code></pre>
+
+<p>如果您通过 SSH 运行 GitHub 存储库，请运行以下命令：<code>go get</code></p>
+
+<p><code>git config &ndash;global url.git@github.com:.insteadOf <a href="https://github.com/">https://github.com/</a></code></p>
+
+<p>然后，请再次尝试<a href="#getting-started">入门</a>。</p>
+
+<h2 id="入口">入口</h2>
+
+<ul>
+<li><p>使用模板</p>
+
+<ul>
+<li><code>GET /</code>
+*   注意：以下路径来自CURRENT目录，因此请从根目录运行Gin。 <code>r.LoadHTMLGlob(&ldquo;internal/app/adapter/view/*&ldquo;)</code></li>
+</ul></li>
+
+<li><p>使用位库的公共 API</p>
+
+<ul>
+<li><code>GET /ticker</code>
+*   <code>GET /candlestick</code>
+*   注意：由于其API限制，这适用于0AM ~ 3PM（UTC）。</li>
+</ul></li>
+
+<li><p>使用PostgreSQL</p>
+
+<ul>
+<li><a href="#with-postgresql">注意：请先运行此步骤的 postgres 容器。</a></li>
+<li><code>GET /parameter</code>
+*   <code>GET /order</code></li>
+</ul></li>
+</ul>
+
+<h2 id="包结构">包结构</h2>
 
 <pre><code>
-
-
-如果您通过 SSH 运行 GitHub 存储库，请运行以下命令：```go get```
-
- &lt;code&gt;git config --global url.git@github.com:.insteadOf https://github.com/&lt;/code&gt; 
-
-然后，请再次尝试[入门](#getting-started)。
-
-## 入口
-
-*   使用模板
-
-    *   ```GET /```
-    *   注意：以下路径来自CURRENT目录，因此请从根目录运行Gin。 &lt;code&gt;r.LoadHTMLGlob(&quot;internal/app/adapter/view/*&quot;)&lt;/code&gt; 
-*   使用位库的公共 API
-
-    *   ```GET /ticker```
-    *   ```GET /candlestick```
-    *   注意：由于其API限制，这适用于0AM ~ 3PM（UTC）。
-*   使用PostgreSQL
-
-    *   [注意：请先运行此步骤的 postgres 容器。](#with-postgresql)
-    *   ```GET /parameter```
-    *   ```GET /order```
-
-##  包结构
-
-</code></pre>
-
-<p>├── LICENSE
+├── LICENSE
 ├── README.md
 ├── build                                     # Packaging and Continuous Integration
 │   ├── Dockerfile
@@ -346,241 +398,225 @@ package github.com/resotto/goilerplate: exit status 128</p>
 │               ├── ticker.go
 │               └── timeunit.go
 └── testdata                                  # Test Data
-    └── exchange_mock.go</p>
+    └── exchange_mock.go
+</code></pre>
+
+<h3 id="领域层">领域层</h3>
+
+<ul>
+<li>清洁架构的核心。它说&rdquo;实体&rdquo;。</li>
+</ul>
+
+<h3 id="应用层">应用层</h3>
+
+<ul>
+<li>来自核心的第二层。它说&rdquo;用例&rdquo;。</li>
+</ul>
+
+<h3 id="适配器层">适配器层</h3>
+
+<ul>
+<li>第三层来自核心。它说&rdquo;控制器/网关/演示者&rdquo;。</li>
+</ul>
+
+<h3 id="外层">外层</h3>
+
+<ul>
+<li><p>第四层从核心。它说&rdquo;设备/ DB / 外部接口/ UI / Web&rdquo;。</p>
+
+<ul>
+<li><strong>我们在这个层中不写太多代码。</strong>
+<br /></li>
+</ul>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220307140549986.png" alt="image-20220307140549986" /></p></li>
+</ul>
+
+<p><a href="https://zshipu.com/t?url=https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html">清洁架构</a></p>
+
+<h2 id="如何跨越这些图层的边界">如何跨越这些图层的边界</h2>
+
+<p>在 Clean Architecture 中，有<a href="https://zshipu.com/t?url=https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html#the-dependency-rule">依赖关系规则</a>：</p>
+
+<blockquote>
+<p>此规则表示源代码依赖项只能指向内部。在一个内圈里，没有任何东西可以知道关于外圈里某件事的任何事情。</p>
+</blockquote>
+
+<p>换句话说，<strong>依赖注入</strong>需要遵循此规则。</p>
+
+<p>因此，请遵循以下四个步骤：</p>
+
+<ol>
+<li>定义接口</li>
+<li>以参数为接口并调用其函数</li>
+<li>实施它</li>
+<li>注入依赖关系</li>
+</ol>
+
+<p>在这里，我选取存储库的示例。</p>
+
+<h3 id="存储-库">存储 库</h3>
 
 <pre><code>
 
-
-### 领域层
-
-*   清洁架构的核心。它说&quot;实体&quot;。
-
-### 应用层
-
-*   来自核心的第二层。它说&quot;用例&quot;。
-
-###  适配器层
-
-*   第三层来自核心。它说&quot;控制器/网关/演示者&quot;。
-
-###  外层
-
-*   第四层从核心。它说&quot;设备/ DB / 外部接口/ UI / Web&quot;。
-    * **我们在这个层中不写太多代码。**
-    
-      ![image-20220307140549986](https://cdn.jsdelivr.net/gh/zshipu/images/image-20220307140549986.png)
-
-
-
-[清洁架构](https://zshipu.com/t?url=https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-
-## 如何跨越这些图层的边界
-
-在 Clean Architecture 中，有[依赖关系规则](https://zshipu.com/t?url=https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html#the-dependency-rule)：
-
-&gt; 此规则表示源代码依赖项只能指向内部。在一个内圈里，没有任何东西可以知道关于外圈里某件事的任何事情。
-
-换句话说，**依赖注入**需要遵循此规则。
-
-因此，请遵循以下四个步骤：
-
-1.  定义接口
-2.  以参数为接口并调用其函数
-3.  实施它
-4.  注入依赖关系
-
-在这里，我选取存储库的示例。
-
-### 存储 库
-
-</code></pre>
-
-<p>.
+.
 └── internal
     └── app
         ├── adapter
-        │   ├── controller.go    # 4. Dependency Injection
+        │   ├── controller.go    # 4\. Dependency Injection
         │   └── repository
-        │       └── parameter.go # 3. Implementation
+        │       └── parameter.go # 3\. Implementation
         ├── application
         │   └── usecase
-        │       └── parameter.go # 2. Interface Function Call
+        │       └── parameter.go # 2\. Interface Function Call
         └── domain
             ├── parameter.go
             └── repository
-                └── parameter.go # 1. Interface</p>
-
-<pre><code>
-
-
-1.  域层接口：
-
+                └── parameter.go # 1\. Interface
 </code></pre>
 
-<p>package repository</p>
+<ol>
+<li><p>域层接口：</p>
 
-<p>import &ldquo;github.com/resotto/goilerplate/internal/app/domain&rdquo;</p>
+<pre><code>package repository
 
-<p>// IParameter is interface of parameter repository
+import &quot;github.com/resotto/goilerplate/internal/app/domain&quot;
+
+// IParameter is interface of parameter repository
 type IParameter interface {
-    Get() domain.Parameter
-}</p>
+Get() domain.Parameter
+}
+</code></pre></li>
 
-<pre><code>
+<li><p>应用程序层用例：</p>
 
+<pre><code>package usecase
 
-1.  应用程序层用例：
-
-</code></pre>
-
-<p>package usecase</p>
-
-<p>// NOTICE: This usecase DON&rsquo;T depend on Adapter layer
+// NOTICE: This usecase DON'T depend on Adapter layer
 import (
-    &ldquo;github.com/resotto/goilerplate/internal/app/domain&rdquo;
-    &ldquo;github.com/resotto/goilerplate/internal/app/domain/repository&rdquo;
-)</p>
+&quot;github.com/resotto/goilerplate/internal/app/domain&quot;
+&quot;github.com/resotto/goilerplate/internal/app/domain/repository&quot;
+)
 
-<p>// Parameter is the usecase of getting parameter
+// Parameter is the usecase of getting parameter
 func Parameter(r repository.IParameter) domain.Parameter {
-    return r.Get()
-}</p>
+return r.Get()
+}
+</code></pre></li>
 
-<pre><code>
+<li><p>适配器层的实现：</p>
 
+<pre><code>package repository
 
-1.  适配器层的实现：
+// Parameter is the repository of domain.Parameter
+type Parameter struct{}
 
-</code></pre>
-
-<p>package repository</p>
-
-<p>// Parameter is the repository of domain.Parameter
-type Parameter struct{}</p>
-
-<p>// Get gets parameter
+// Get gets parameter
 func (r Parameter) Get() domain.Parameter {
-    db := postgresql.Connection()
-    var param model.Parameter
-    result := db.First(&amp;param, 1)
-    if result.Error != nil {
-        panic(result.Error)
-    }
-    return domain.Parameter{
-        Funds: param.Funds,
-        Btc:   param.Btc,
-    }
-}</p>
+db := postgresql.Connection()
+var param model.Parameter
+result := db.First(&amp;param, 1)
+if result.Error != nil {
+    panic(result.Error)
+}
+return domain.Parameter{
+    Funds: param.Funds,
+    Btc:   param.Btc,
+}
+}
+</code></pre></li>
 
-<pre><code>
+<li><p>适配器层控制器处的依赖关系注入：</p>
 
+<pre><code>package adapter
 
-1.  适配器层控制器处的依赖关系注入：
-
-</code></pre>
-
-<p>package adapter</p>
-
-<p>// NOTICE: Controller depends on INNER CIRCLE so it points inward (The Dependency Rule)
+// NOTICE: Controller depends on INNER CIRCLE so it points inward (The Dependency Rule)
 import (
-    &ldquo;github.com/gin-gonic/gin&rdquo;
-    &ldquo;github.com/resotto/goilerplate/internal/app/adapter/repository&rdquo;
-    &ldquo;github.com/resotto/goilerplate/internal/app/application/usecase&rdquo;
-)</p>
+&quot;github.com/gin-gonic/gin&quot;
+&quot;github.com/resotto/goilerplate/internal/app/adapter/repository&quot;
+&quot;github.com/resotto/goilerplate/internal/app/application/usecase&quot;
+)
 
-<p>var (
-    parameterRepository = repository.Parameter{}
-)</p>
+var (
+parameterRepository = repository.Parameter{}
+)
 
-<p>func (ctrl Controller) parameter(c *gin.Context) {
-    parameter := usecase.Parameter(parameterRepository) // Dependency Injection
-    c.JSON(200, parameter)
-}</p>
+func (ctrl Controller) parameter(c *gin.Context) {
+parameter := usecase.Parameter(parameterRepository) // Dependency Injection
+c.JSON(200, parameter)
+}
+</code></pre></li>
+</ol>
 
-<pre><code>
+<p>应用程序服务的实现也是相同的。</p>
 
+<h2 id="依赖注入">依赖注入</h2>
 
-应用程序服务的实现也是相同的。
+<p><strong>在 Goilerplate 中，依赖项是手动注入的。</strong></p>
 
-## 依赖注入
+<ul>
+<li>注意：如果Go中的其他DI工具没有成为某种应用程序框架，它也是可以接受的。</li>
+</ul>
 
-**在 Goilerplate 中，依赖项是手动注入的。**
+<p>有两种传递依赖项的方法：</p>
 
-*   注意：如果Go中的其他DI工具没有成为某种应用程序框架，它也是可以接受的。
+<ul>
+<li>使用位置参数</li>
+<li>使用关键字参数</li>
+</ul>
 
-有两种传递依赖项的方法：
+<h3 id="使用位置参数">使用位置参数</h3>
 
-*   使用位置参数
-*   使用关键字参数
+<p>首先，使用接口类型的参数定义用例。</p>
 
-### 使用位置参数
+<pre><code>package usecase
 
-首先，使用接口类型的参数定义用例。
-
-</code></pre>
-
-<p>package usecase</p>
-
-<p>func Parameter(r repository.IParameter) domain.Parameter { // Take Argument as Interface
+func Parameter(r repository.IParameter) domain.Parameter { // Take Argument as Interface
     return r.Get()
-}</p>
-
-<pre><code>
-
-
-其次，初始化实现并将其提供给用例。
-
-
-
+}
 </code></pre>
 
-<p>package adapter</p>
+<p>其次，初始化实现并将其提供给用例。</p>
 
-<p>var (
+<pre><code>package adapter
+
+var (
     parameterRepository = repository.Parameter{}        // Initialize Implementation
-)</p>
+)
 
-<p>func (ctrl Controller) parameter(c *gin.Context) {
+func (ctrl Controller) parameter(c *gin.Context) {
     parameter := usecase.Parameter(parameterRepository) // Inject Implementation to Usecase
     c.JSON(200, parameter)
-}</p>
-
-<pre><code>
-
-
-###  使用关键字参数
-
-首先，定义参数结构和用例。
-
+}
 </code></pre>
 
-<p>package usecase</p>
+<h3 id="使用关键字参数">使用关键字参数</h3>
 
-<p>// OhlcArgs are arguments of Ohlc usecase
+<p>首先，定义参数结构和用例。</p>
+
+<pre><code>package usecase
+
+// OhlcArgs are arguments of Ohlc usecase
 type OhlcArgs struct {
     E service.IExchange                       // Interface
     P valueobject.Pair
     T valueobject.Timeunit
-}</p>
+}
 
-<p>func Ohlc(a OhlcArgs) []valueobject.CandleStick { // Take Argument as OhlcArgs
+func Ohlc(a OhlcArgs) []valueobject.CandleStick { // Take Argument as OhlcArgs
     return a.E.Ohlc(a.P, a.T)
-}</p>
-
-<pre><code>
-
-
-然后，使用关键字参数初始化结构并将其提供给用例。
-
+}
 </code></pre>
 
-<p>package adapter</p>
+<p>然后，使用关键字参数初始化结构并将其提供给用例。</p>
 
-<p>var (
+<pre><code>package adapter
+
+var (
     bitbank             = service.Bitbank{}      // Implementation
-)</p>
+)
 
-<p>func (ctrl Controller) candlestick(c *gin.Context) {
+func (ctrl Controller) candlestick(c *gin.Context) {
     args := usecase.OhlcArgs{                    // Initialize Struct with Keyword Arguments
         E: bitbank,                          // Passing the implementation
         P: valueobject.BtcJpy,
@@ -588,60 +624,57 @@ type OhlcArgs struct {
     }
     candlestick := usecase.Ohlc(args)            // Give Arguments to Usecase
     c.JSON(200, candlestick)
-}</p>
-
-<pre><code>
-
-
-###  全局喷油器变量
-
-在手动DI中，实现初始化成本将很昂贵。
-
-因此，让我们使用全局注入器变量，以便仅初始化它们一次。
-
+}
 </code></pre>
 
-<p>package adapter</p>
+<h3 id="全局喷油器变量">全局喷油器变量</h3>
 
-<p>var (
+<p>在手动DI中，实现初始化成本将很昂贵。</p>
+
+<p>因此，让我们使用全局注入器变量，以便仅初始化它们一次。</p>
+
+<pre><code> package adapter
+ 
+ var (
      bitbank             = service.Bitbank{}      // Injecter Variable
      parameterRepository = repository.Parameter{}
      orderRepository     = repository.Order{}
- )</p>
-
-<p>func (ctrl Controller) ticker(c *gin.Context) {
+ )
+ 
+ func (ctrl Controller) ticker(c *gin.Context) {
      pair := valueobject.BtcJpy
      ticker := usecase.Ticker(bitbank, pair)      // DI by passing bitbank
      c.JSON(200, ticker)
- }</p>
-
-<pre><code>
-
-
-## 如何从Goilerplate开始
-
-使用Goilerplate，您可以顺利地开始您的项目。
-
-为了便于解释，让我们使用 Goilerplate 创建以下规范的 CRUD 的简单&quot;CR&quot;部分。
-
-规格：
-
-*   有三个实体，如&quot;客户&quot;、&quot;产品和订单&quot;。
-*   订单聚合客户和产品（订单是聚合根）。
-*   只有一个用例用于创建订单。
-
-通知：
-
-*   为方便起见，此处显示了最小代码。
-*   为方便起见，此说明中没有测试代码。
-
-首先，请准备.go文件，并遵循以下软件包布局。
-
-### 包装布局
-
+ }
 </code></pre>
 
-<p>└── internal
+<h2 id="如何从goilerplate开始">如何从Goilerplate开始</h2>
+
+<p>使用Goilerplate，您可以顺利地开始您的项目。</p>
+
+<p>为了便于解释，让我们使用 Goilerplate 创建以下规范的 CRUD 的简单&rdquo;CR&rdquo;部分。</p>
+
+<p>规格：</p>
+
+<ul>
+<li>有三个实体，如&rdquo;客户&rdquo;、&rdquo;产品和订单&rdquo;。</li>
+<li>订单聚合客户和产品（订单是聚合根）。</li>
+<li>只有一个用例用于创建订单。</li>
+</ul>
+
+<p>通知：</p>
+
+<ul>
+<li>为方便起见，此处显示了最小代码。</li>
+<li>为方便起见，此说明中没有测试代码。</li>
+</ul>
+
+<p>首先，请准备.go文件，并遵循以下软件包布局。</p>
+
+<h3 id="包装布局">包装布局</h3>
+
+<pre><code>
+└── internal
     └── app
         ├── adapter
         │   ├── controller.go                 # Controller
@@ -659,180 +692,155 @@ type OhlcArgs struct {
             └── repository                    # Repository Interface
                 ├── customer.go
                 ├── product.go
-                └── order.go</p>
-
-<pre><code>
-
-
-
-
-### 定义实体
-
-其次，让我们创建实体、客户、产品和订单。
-
+                └── order.go
 </code></pre>
 
-<p>go</p>
+<h3 id="定义实体">定义实体</h3>
 
-<p>// customer.go
-package domain</p>
+<p>其次，让我们创建实体、客户、产品和订单。</p>
 
-<p>type Customer struct {
+<pre><code class="language-go">
+
+// customer.go
+package domain
+
+type Customer struct {
     ID string
     Name string
-}</p>
+}
 
-<p>// product.go
-package domain</p>
+// product.go
+package domain
 
-<p>type Product struct {
+type Product struct {
     ID string
     Price int
-}</p>
+}
 
-<p>// order.go
-package domain</p>
+// order.go
+package domain
 
-<p>type Order struct {
+type Order struct {
     ID string
     Customer Customer
     Product Product
-}</p>
-
-<pre><code>
-
-
-### 定义存储库接口
-
-定义实体后，让我们在包中准备它们的存储库。```domain```
-
+}
 </code></pre>
 
-<p>go
-// customer.go
-package repository</p>
+<h3 id="定义存储库接口">定义存储库接口</h3>
 
-<p>type ICustomer interface {
+<p>定义实体后，让我们在包中准备它们的存储库。<code>domain</code></p>
+
+<pre><code class="language-go">// customer.go
+package repository
+
+type ICustomer interface {
     Get(id string) domain.Customer
-}</p>
+}
 
-<p>// product.go
-package repository</p>
+// product.go
+package repository
 
-<p>type IProduct interface {
+type IProduct interface {
     Get(id string) domain.Product
-}</p>
+}
 
-<p>// order.go
-package repository</p>
+// order.go
+package repository
 
-<p>type IOrder interface {
+type IOrder interface {
     Save(order Order)
-}</p>
-
-<pre><code>
-
-
-### 定义用例
-
-然后，让我们准备创建顺序的用例。
-
+} 
 </code></pre>
 
-<p>go</p>
+<h3 id="定义用例">定义用例</h3>
 
-<p>// createOrder.go
-package usecase</p>
+<p>然后，让我们准备创建顺序的用例。</p>
 
-<p>import (
-    &ldquo;domain&rdquo;            // simplified for convenience
-    &ldquo;domain/repository&rdquo; // simplified for convenience
-)</p>
+<pre><code class="language-go">
 
-<p>type CreateOrderArgs struct {
+// createOrder.go
+package usecase
+
+import (
+    &quot;domain&quot;            // simplified for convenience
+    &quot;domain/repository&quot; // simplified for convenience
+)
+
+type CreateOrderArgs struct {
     CustomerID         string
     ProductID          string
     CustomerRepository repository.ICustomer
     ProductRepository  repository.IProduct
     OrderRepository    repository.IOrder
-}</p>
+}
 
-<p>func CreateOrder(args CreateOrderArgs) domain.Order {
+func CreateOrder(args CreateOrderArgs) domain.Order {
     customer := args.CustomerRepository.Get(args.CustomerID)
     product := args.ProductRepository.Get(args.ProductID)
     order := domain.Order{
-        ID: &ldquo;123&rdquo;,
+        ID: &quot;123&quot;,
         Customer: customer,
         Product: product,
     }
     args.OrderRepository.Save(order)
     return order
-}</p>
-
-<pre><code>
- 
-
-###  定义存储库实现
-
-准备用例后，让我们在包中实现存储库接口。```adapter```
-
-但是，为方便起见，此处省略了这一部分。
-
+}
 </code></pre>
 
-<p>// order.go
-package repository</p>
+<h3 id="定义存储库实现">定义存储库实现</h3>
 
-<p>import (
-    &ldquo;domain&rdquo; // simplified for convenience
-)</p>
+<p>准备用例后，让我们在包中实现存储库接口。<code>adapter</code></p>
 
-<p>type Order struct{}</p>
+<p>但是，为方便起见，此处省略了这一部分。</p>
 
-<p>func (o Order) Save(order domain.Order) {
+<pre><code>// order.go
+package repository
+
+import (
+    &quot;domain&quot; // simplified for convenience
+)
+
+type Order struct{}
+
+func (o Order) Save(order domain.Order) {
     // omitted here for convenience
-}</p>
-
-<pre><code>
-
-
-### 定义控制器
-
-最后，让我们定义控制器来调用创建订单的用例。
-
+}
 </code></pre>
 
-<p>go
-// controller.go
-package adapter</p>
+<h3 id="定义控制器">定义控制器</h3>
 
-<p>import (
-    &ldquo;repository&rdquo; // simplified for convenience
-    &ldquo;usecase&rdquo;    // simplified for convenience</p>
+<p>最后，让我们定义控制器来调用创建订单的用例。</p>
 
-<pre><code>&quot;github.com/gin-gonic/gin&quot;
-</code></pre>
+<pre><code class="language-go">// controller.go
+package adapter
 
-<p>)</p>
+import (
+    &quot;repository&quot; // simplified for convenience
+    &quot;usecase&quot;    // simplified for convenience
 
-<p>var (
+    &quot;github.com/gin-gonic/gin&quot;
+
+)
+
+var (
     customerRepository = repository.Customer{}
     productRepository  = repository.Product{}
     orderRepository    = repository.Order{}
-)</p>
+)
 
-<p>type Controller struct{}</p>
+type Controller struct{}
 
-<p>func Router() *gin.Engine {
+func Router() *gin.Engine {
     r := gin.Default()
     ctrl := Controller{}
-    r.POST(&ldquo;/order&rdquo;, ctrl.createOrder)
+    r.POST(&quot;/order&quot;, ctrl.createOrder)
     return r
-}</p>
+}
 
-<p>func (ctrl Controller) createOrder(c *gin.Context) {
-    customerID := c.Query(&ldquo;customerId&rdquo;)
-    productID := c.Query(&ldquo;productId&rdquo;)
+func (ctrl Controller) createOrder(c *gin.Context) {
+    customerID := c.Query(&quot;customerId&quot;)
+    productID := c.Query(&quot;productId&quot;)
     args := usecase.CreateOrderArgs{
         CustomerID:         customerID,
         ProductID:          productID,
@@ -842,20 +850,15 @@ package adapter</p>
     }
     order := usecase.CreateOrder(args)
     c.JSON(200, order)
-}</p>
-
-<pre><code>
-
-
-就是这样！
-
-## 测试
-
+}
 </code></pre>
 
-<p>go</p>
+<p>就是这样！</p>
 
-<p>~/go/src/github.com/resotto/goilerplate (master) &gt; go test ./internal/app/&hellip;
+<h2 id="测试">测试</h2>
+
+<pre><code class="language-go">
+~/go/src/github.com/resotto/goilerplate (master) &gt; go test ./internal/app/...
 ?       github.com/resotto/goilerplate/internal/app/adapter     [no test files]
 ?       github.com/resotto/goilerplate/internal/app/adapter/postgresql  [no test files]
 ?       github.com/resotto/goilerplate/internal/app/adapter/postgresql/model    [no test files]
@@ -866,23 +869,21 @@ ok      github.com/resotto/goilerplate/internal/app/application/usecase 0.204s
 ok      github.com/resotto/goilerplate/internal/app/domain      0.273s
 ?       github.com/resotto/goilerplate/internal/app/domain/factory      [no test files]
 ?       github.com/resotto/goilerplate/internal/app/domain/repository   [no test files]
-?       github.com/resotto/goilerplate/internal/app/domain/valueobject  [no test files]</p>
-
-<pre><code>
-
-
-有两条规则：
-
-*   包含测试代码的包的名称为 。```xxx_test```
-*   在包装上放置模拟。```testdata```
-
-### 测试包结构
-
+?       github.com/resotto/goilerplate/internal/app/domain/valueobject  [no test files]
 </code></pre>
 
-<p>go</p>
+<p>有两条规则：</p>
 
-<p>.
+<ul>
+<li>包含测试代码的包的名称为 。<code>xxx_test</code></li>
+<li>在包装上放置模拟。<code>testdata</code></li>
+</ul>
+
+<h3 id="测试包结构">测试包结构</h3>
+
+<pre><code class="language-go">
+
+.
 ├── internal
 │   └── app
 │       ├── application
@@ -893,79 +894,68 @@ ok      github.com/resotto/goilerplate/internal/app/domain      0.273s
 │           ├── parameter.go       # Entity
 │           └── parameter_test.go  # Entity Test
 └── testdata
-    └── exchange_mock.go           # Mock if needed</p>
-
-<pre><code>
-
-
-### 实体
-
-请在实体所在的同一目录中编写测试。
-
+    └── exchange_mock.go           # Mock if needed
 </code></pre>
 
-<p>go
- .
+<h3 id="实体">实体</h3>
+
+<p>请在实体所在的同一目录中编写测试。</p>
+
+<pre><code class="language-go"> .
  └── internal
      └── app
          └── domain
              ├── parameter.go      # Target Entity
-             └── parameter_test.go # Test</code></p>
-
-<p>// parameter_test.go
- package domain_test</p>
-
-<p>import (
-     &ldquo;testing&rdquo;</p>
-
-<pre><code> &quot;github.com/resotto/goilerplate/internal/app/domain&quot;
-</code></pre>
-
-<p>)</p>
-
-<p>func TestParameter(t *testing.T) {
+             └── parameter_test.go # Test&lt;/code&gt; 
+ 
+ // parameter_test.go
+ package domain_test
+ 
+ import (
+     &quot;testing&quot;
+ 
+     &quot;github.com/resotto/goilerplate/internal/app/domain&quot;
+ 
+ )
+ 
+ func TestParameter(t *testing.T) {
      tests := []struct {
          name                       string
          funds, btc                 int
          expectedfunds, expectedbtc int
      }{
-         {&ldquo;more funds than btc&rdquo;, 1000, 0, 1000, 0},
-         {&ldquo;same amount&rdquo;, 100, 100, 100, 100},
-         {&ldquo;much more funds than btc&rdquo;, 100000, 20, 100000, 20},
-     }</p>
-
-<pre><code> for _, tt := range tests {
-     tt := tt
-     t.Run(tt.name, func(t *testing.T) {
-         t.Parallel()
-         parameter := domain.Parameter{
-             Funds: tt.funds,
-             Btc:   tt.btc,
-         }
-         if parameter.Funds != tt.expectedfunds {
-             t.Errorf(&quot;got %q, want %q&quot;, parameter.Funds, tt.expectedfunds)
-         }
-         if parameter.Btc != tt.expectedbtc {
-             t.Errorf(&quot;got %q, want %q&quot;, parameter.Btc, tt.expectedbtc)
-         }
-     })
+         {&quot;more funds than btc&quot;, 1000, 0, 1000, 0},
+         {&quot;same amount&quot;, 100, 100, 100, 100},
+         {&quot;much more funds than btc&quot;, 100000, 20, 100000, 20},
+     }
+ 
+     for _, tt := range tests {
+         tt := tt
+         t.Run(tt.name, func(t *testing.T) {
+             t.Parallel()
+             parameter := domain.Parameter{
+                 Funds: tt.funds,
+                 Btc:   tt.btc,
+             }
+             if parameter.Funds != tt.expectedfunds {
+                 t.Errorf(&quot;got %q, want %q&quot;, parameter.Funds, tt.expectedfunds)
+             }
+             if parameter.Btc != tt.expectedbtc {
+                 t.Errorf(&quot;got %q, want %q&quot;, parameter.Btc, tt.expectedbtc)
+             }
+         })
+     }
+ 
  }
 </code></pre>
 
-<p>}</p>
+<h3 id="用例">用例</h3>
 
-<pre><code>
+<p>请在包上准备模拟（如果需要），并在与用例相同的目录中编写测试。<code>testdata</code></p>
 
+<pre><code class="language-go">
 
-### 用例
-
-请在包上准备模拟（如果需要），并在与用例相同的目录中编写测试。```testdata```
-
-</code></pre>
-
-<p>go</p>
-
-<p>.
+.
 ├── internal
 │   └── app
 │       └── application
@@ -975,56 +965,55 @@ ok      github.com/resotto/goilerplate/internal/app/domain      0.273s
 │               ├── ticker.go      # Target Usecase
 │               └── ticker_test.go # Test
 └── testdata
-    └── exchange_mock.go           # Mock of Application Service Interface</code></p>
+    └── exchange_mock.go           # Mock of Application Service Interface&lt;/code&gt; 
 
-<p>// exchange_mock.go
-package testdata</p>
+// exchange_mock.go
+package testdata
 
-<p>import &ldquo;github.com/resotto/goilerplate/internal/app/domain/valueobject&rdquo;</p>
+import &quot;github.com/resotto/goilerplate/internal/app/domain/valueobject&quot;
 
-<p>// MExchange is mock of service.IExchange
-type MExchange struct{}</p>
+// MExchange is mock of service.IExchange
+type MExchange struct{}
 
-<p>// Ticker is mock implementation of service.IExchange.Ticker()
+// Ticker is mock implementation of service.IExchange.Ticker()
 func (e MExchange) Ticker(p valueobject.Pair) valueobject.Ticker {
     return valueobject.Ticker{
-        Sell:      &ldquo;1000&rdquo;,
-        Buy:       &ldquo;1000&rdquo;,
-        High:      &ldquo;2000&rdquo;,
-        Low:       &ldquo;500&rdquo;,
-        Last:      &ldquo;1200&rdquo;,
-        Vol:       &ldquo;20&rdquo;,
-        Timestamp: &ldquo;1600769562&rdquo;,
+        Sell:      &quot;1000&quot;,
+        Buy:       &quot;1000&quot;,
+        High:      &quot;2000&quot;,
+        Low:       &quot;500&quot;,
+        Last:      &quot;1200&quot;,
+        Vol:       &quot;20&quot;,
+        Timestamp: &quot;1600769562&quot;,
     }
-}</p>
+}
 
-<p>// Ohlc is mock implementation of service.IExchange.Ohlc()
+// Ohlc is mock implementation of service.IExchange.Ohlc()
 func (e MExchange) Ohlc(p valueobject.Pair, t valueobject.Timeunit) []valueobject.CandleStick {
     cs := make([]valueobject.CandleStick, 0)
     return append(cs, valueobject.CandleStick{
-        Open:      &ldquo;1000&rdquo;,
-        High:      &ldquo;2000&rdquo;,
-        Low:       &ldquo;500&rdquo;,
-        Close:     &ldquo;1500&rdquo;,
-        Volume:    &ldquo;30&rdquo;,
-        Timestamp: &ldquo;1600769562&rdquo;,
+        Open:      &quot;1000&quot;,
+        High:      &quot;2000&quot;,
+        Low:       &quot;500&quot;,
+        Close:     &quot;1500&quot;,
+        Volume:    &quot;30&quot;,
+        Timestamp: &quot;1600769562&quot;,
     })
-}</p>
+}
 
-<p>// ticker_test.go
-package usecase_test</p>
+// ticker_test.go
+package usecase_test
 
-<p>import (
-    &ldquo;testing&rdquo;</p>
+import (
+    &quot;testing&quot;
 
-<pre><code>&quot;github.com/resotto/goilerplate/internal/app/application/usecase&quot;
-&quot;github.com/resotto/goilerplate/internal/app/domain/valueobject&quot;
-&quot;github.com/resotto/goilerplate/testdata&quot;
-</code></pre>
+    &quot;github.com/resotto/goilerplate/internal/app/application/usecase&quot;
+    &quot;github.com/resotto/goilerplate/internal/app/domain/valueobject&quot;
+    &quot;github.com/resotto/goilerplate/testdata&quot;
 
-<p>)</p>
+)
 
-<p>func TestTicker(t *testing.T) {
+func TestTicker(t *testing.T) {
     tests := []struct {
         name              string
         pair              valueobject.Pair
@@ -1036,98 +1025,111 @@ package usecase_test</p>
         expectedvol       string
         expectedtimestamp string
     }{
-        {&ldquo;btcjpy&rdquo;, valueobject.BtcJpy, &ldquo;1000&rdquo;, &ldquo;1000&rdquo;, &ldquo;2000&rdquo;, &ldquo;500&rdquo;, &ldquo;1200&rdquo;, &ldquo;20&rdquo;, &ldquo;1600769562&rdquo;},
-    }</p>
+        {&quot;btcjpy&quot;, valueobject.BtcJpy, &quot;1000&quot;, &quot;1000&quot;, &quot;2000&quot;, &quot;500&quot;, &quot;1200&quot;, &quot;20&quot;, &quot;1600769562&quot;},
+    }
 
-<pre><code>for _, tt := range tests {
-    tt := tt
-    t.Run(tt.name, func(t *testing.T) {
-        t.Parallel()
-        mexchange := testdata.MExchange{} // using Mock
-        result := usecase.Ticker(mexchange, tt.pair)
-        if result.Sell != tt.expectedsell {
-            t.Errorf(&quot;got %q, want %q&quot;, result.Sell, tt.expectedsell)
-        }
-        if result.Buy != tt.expectedbuy {
-            t.Errorf(&quot;got %q, want %q&quot;, result.Buy, tt.expectedbuy)
-        }
-        if result.High != tt.expectedhigh {
-            t.Errorf(&quot;got %q, want %q&quot;, result.High, tt.expectedhigh)
-        }
-        if result.Low != tt.expectedlow {
-            t.Errorf(&quot;got %q, want %q&quot;, result.Low, tt.expectedlow)
-        }
-        if result.Last != tt.expectedlast {
-            t.Errorf(&quot;got %q, want %q&quot;, result.Last, tt.expectedlast)
-        }
-        if result.Vol != tt.expectedvol {
-            t.Errorf(&quot;got %q, want %q&quot;, result.Vol, tt.expectedvol)
-        }
-        if result.Timestamp != tt.expectedtimestamp {
-            t.Errorf(&quot;got %q, want %q&quot;, result.Timestamp, tt.expectedtimestamp)
-        }
-    })
+    for _, tt := range tests {
+        tt := tt
+        t.Run(tt.name, func(t *testing.T) {
+            t.Parallel()
+            mexchange := testdata.MExchange{} // using Mock
+            result := usecase.Ticker(mexchange, tt.pair)
+            if result.Sell != tt.expectedsell {
+                t.Errorf(&quot;got %q, want %q&quot;, result.Sell, tt.expectedsell)
+            }
+            if result.Buy != tt.expectedbuy {
+                t.Errorf(&quot;got %q, want %q&quot;, result.Buy, tt.expectedbuy)
+            }
+            if result.High != tt.expectedhigh {
+                t.Errorf(&quot;got %q, want %q&quot;, result.High, tt.expectedhigh)
+            }
+            if result.Low != tt.expectedlow {
+                t.Errorf(&quot;got %q, want %q&quot;, result.Low, tt.expectedlow)
+            }
+            if result.Last != tt.expectedlast {
+                t.Errorf(&quot;got %q, want %q&quot;, result.Last, tt.expectedlast)
+            }
+            if result.Vol != tt.expectedvol {
+                t.Errorf(&quot;got %q, want %q&quot;, result.Vol, tt.expectedvol)
+            }
+            if result.Timestamp != tt.expectedtimestamp {
+                t.Errorf(&quot;got %q, want %q&quot;, result.Timestamp, tt.expectedtimestamp)
+            }
+        })
+    }
+
 }
 </code></pre>
 
-<p>}</p>
+<h2 id="命名约定">命名约定</h2>
 
-<pre><code>
+<h3 id="接口">接口</h3>
 
+<ul>
+<li>添加前缀，如 。<code>I</code><code>IExchange</code>
 
-##  命名约定
+<ul>
+<li>注意：如果您可以区分接口和实现，则任何命名约定都是可以接受的。</li>
+</ul></li>
+</ul>
 
-###  接口
+<h3 id="模拟">模拟</h3>
 
-*   添加前缀，如 。```I``````IExchange```
-    *   注意：如果您可以区分接口和实现，则任何命名约定都是可以接受的。
+<ul>
+<li>添加前缀，如 。<code>M</code><code>MExchange</code>
 
-###  模拟
+<ul>
+<li>注意：如果您可以区分模拟和生产，则任何命名约定都是可以接受的。</li>
+</ul></li>
+</ul>
 
-*   添加前缀，如 。```M``````MExchange```
-    *   注意：如果您可以区分模拟和生产，则任何命名约定都是可以接受的。
+<h3 id="文件">文件</h3>
 
-###  文件
+<ul>
+<li>文件名可以重复。</li>
+<li>对于测试，请添加后缀，如 .<code>_test</code><code>parameter_test.go</code></li>
+<li>对于模拟，请添加后缀，如 .<code>_mock</code><code>exchange_mock.go</code></li>
+</ul>
 
-*   文件名可以重复。
-*   对于测试，请添加后缀，如 .```_test``````parameter_test.go```
-*   对于模拟，请添加后缀，如 .```_mock``````exchange_mock.go```
+<h3 id="包">包</h3>
 
-### 包
+<ul>
+<li><p>有关软件包名称，请查看以下帖子：</p>
 
-*   有关软件包名称，请查看以下帖子：
+<ul>
+<li><a href="https://zshipu.com/t?url=https://blog.golang.org/package-names">包名称</a></li>
+<li><a href="https://zshipu.com/t?url=https://golang.org/doc/effective_go.html#names">名字</a></li>
+</ul></li>
 
-    *   [包名称](https://zshipu.com/t?url=https://blog.golang.org/package-names)
-    *   [名字](https://zshipu.com/t?url=https://golang.org/doc/effective_go.html#names)
-*   有关包装布局，请检查：
+<li><p>有关包装布局，请检查：</p>
 
-    *   [项目布局](https://zshipu.com/t?url=https://github.com/golang-standards/project-layout)
+<ul>
+<li><a href="https://zshipu.com/t?url=https://github.com/golang-standards/project-layout">项目布局</a></li>
+</ul></li>
+</ul>
 
-## 与GOCHK
+<h2 id="与gochk">与GOCHK</h2>
 
-[Gochk，用于go文件的静态依赖关系分析工具，](https://zshipu.com/t?url=https://github.com/resotto/gochk)赋予Goilerplate如此多的功能！
+<p><a href="https://zshipu.com/t?url=https://github.com/resotto/gochk">Gochk，用于go文件的静态依赖关系分析工具，</a>赋予Goilerplate如此多的功能！</p>
 
-**[Gochk](https://zshipu.com/t?url=https://github.com/resotto/gochk)确认代码库遵循[清洁架构依赖规则](https://zshipu.com/t?url=https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html#the-dependency-rule)。**
+<p><strong><a href="https://zshipu.com/t?url=https://github.com/resotto/gochk">Gochk</a>确认代码库遵循<a href="https://zshipu.com/t?url=https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html#the-dependency-rule">清洁架构依赖规则</a>。</strong></p>
 
-让我们将 Gochk 合并到 CI 流程中。
+<p>让我们将 Gochk 合并到 CI 流程中。</p>
 
-</code></pre>
+<pre><code class="language-go">
+name: test
 
-<p>go</p>
-
-<p>name: test</p>
-
-<p>on:
+on:
   push:
     branches:
       - master
     paths-ignore:
-      - &ldquo;*<em>/</em>.md&rdquo;
+      - &quot;**/*.md&quot;
   pull_request:
     branches:
-      - master</p>
+      - master
 
-<p>jobs:
+jobs:
   gochk-goilerplate:
     runs-on: ubuntu-latest
     container:
@@ -1139,102 +1141,91 @@ package usecase_test</p>
           repository: {{ github.repository }}
             - name: Run Gochk
           run: |
-            /go/bin/gochk -c=/go/src/github.com/resotto/gochk/configs/config.json</p>
-
-<pre><code>
- 
-
-然后，[它的结果是](https://zshipu.com/t?url=https://github.com/resotto/goilerplate/runs/1367461573)：
-
-![image-20220307140633299](https://cdn.jsdelivr.net/gh/zshipu/images/image-20220307140633299.png)
-
-
-
-##  使用PostgreSQL
-
-首先，从 GitHub 容器注册表拉取 docker 映像，并使用以下命令运行容器：```ghcr.io/resotto/goilerplate-pg```
-
- &lt;code&gt;docker run -d -it --name pg -p 5432:5432 -e POSTGRES_PASSWORD=postgres ghcr.io/resotto/goilerplate-pg:latest&lt;/code&gt; 
-
-然后，让我们来看看：
-
+            /go/bin/gochk -c=/go/src/github.com/resotto/gochk/configs/config.json
 </code></pre>
 
-<p>open <a href="http://0.0.0.0:8080/parameter">http://0.0.0.0:8080/parameter</a>
- open <a href="http://0.0.0.0:8080/order">http://0.0.0.0:8080/order</a></p>
+<p>然后，<a href="https://zshipu.com/t?url=https://github.com/resotto/goilerplate/runs/1367461573">它的结果是</a>：</p>
 
-<pre><code>
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220307140633299.png" alt="image-20220307140633299" /></p>
 
+<h2 id="使用postgresql">使用PostgreSQL</h2>
 
-###  建筑形象
+<p>首先，从 GitHub 容器注册表拉取 docker 映像，并使用以下命令运行容器：<code>ghcr.io/resotto/goilerplate-pg</code></p>
 
-如果从 GitHub 容器注册表拉取映像失败，还可以从 Dockerfile 生成 Docker 映像。
+<p><code>docker run -d -it &ndash;name pg -p 5432:5432 -e POSTGRES_PASSWORD=postgres ghcr.io/resotto/goilerplate-pg:latest</code></p>
 
- &lt;code&gt;cd build
+<p>然后，让我们来看看：</p>
+
+<pre><code> open http://0.0.0.0:8080/parameter
+ open http://0.0.0.0:8080/order
+</code></pre>
+
+<h3 id="建筑形象">建筑形象</h3>
+
+<p>如果从 GitHub 容器注册表拉取映像失败，还可以从 Dockerfile 生成 Docker 映像。</p>
+
+<p><code>cd build
 docker build -t goilerplate-pg:latest .
-docker run -d -it --name pg -p 5432:5432 -e POSTGRES_PASSWORD=postgres goilerplate-pg:latest&lt;/code&gt; 
+docker run -d -it &ndash;name pg -p 5432:5432 -e POSTGRES_PASSWORD=postgres goilerplate-pg:latest</code></p>
 
-###  Docker 映像
+<h3 id="docker-映像">Docker 映像</h3>
 
-从 GitHub 容器注册表中提取的映像是从简单的 Dockerfile 和 init.sql构建的。
+<p>从 GitHub 容器注册表中提取的映像是从简单的 Dockerfile 和 init.sql构建的。</p>
+
+<pre><code class="language-dockerfile">
+
+FROM postgres
+
+EXPOSE 5432
+
+COPY ./init.sql /docker-entrypoint-initdb.d/&lt;/code&gt; 
+
 
 </code></pre>
 
-<p>dockerfile</p>
-
-<p>FROM postgres</p>
-
-<p>EXPOSE 5432</p>
-
-<p>COPY ./init.sql /docker-entrypoint-initdb.d/</code></p>
-
-<pre><code>
-</code></pre>
-
-<p>mysql
-create table parameters (
+<pre><code class="language-mysql">create table parameters (
     id integer primary key,
     funds integer,
     btc integer
-);</p>
+);
 
-<p>insert into parameters values (1, 10000, 10);</p>
+insert into parameters values (1, 10000, 10);
 
-<p>create table persons (
+create table persons (
     person_id uuid primary key,
     name text not null,
     weight integer
-);</p>
+);
 
-<p>create table card_brands (
+create table card_brands (
     brand text primary key
-);</p>
+);
 
-<p>create table cards (
+create table cards (
     card_id uuid primary key,
     brand text references card_brands(brand) on update cascade
-);</p>
+);
 
-<p>create table orders (
+create table orders (
     order_id uuid primary key,
     person_id uuid references persons(person_id)
-);</p>
+);
 
-<p>create table payments (
+create table payments (
     order_id uuid primary key references orders(order_id),
     card_id uuid references cards(card_id)
-);</p>
+);
 
-<p>insert into persons values (&lsquo;f3bf75a9-ea4c-4f57-9161-cfa8f96e2d0b&rsquo;, &lsquo;Jerry&rsquo;, 1);</p>
+insert into persons values ('f3bf75a9-ea4c-4f57-9161-cfa8f96e2d0b', 'Jerry', 1);
 
-<p>insert into card_brands values (&lsquo;VISA&rsquo;), (&lsquo;AMEX&rsquo;);</p>
+insert into card_brands values ('VISA'), ('AMEX');
 
-<p>insert into cards values (&lsquo;3224ebc0-0a6e-4e22-9ce8-c6564a1bb6a1&rsquo;, &lsquo;VISA&rsquo;);</p>
+insert into cards values ('3224ebc0-0a6e-4e22-9ce8-c6564a1bb6a1', 'VISA');
 
-<p>insert into orders values (&lsquo;722b694c-984c-4208-bddd-796553cf83e1&rsquo;, &lsquo;f3bf75a9-ea4c-4f57-9161-cfa8f96e2d0b&rsquo;);</p>
+insert into orders values ('722b694c-984c-4208-bddd-796553cf83e1', 'f3bf75a9-ea4c-4f57-9161-cfa8f96e2d0b');
 
-<p>insert into payments values (&lsquo;722b694c-984c-4208-bddd-796553cf83e1&rsquo;, &lsquo;3224ebc0-0a6e-4e22-9ce8-c6564a1bb6a1&rsquo;);
-```</p>
+insert into payments values ('722b694c-984c-4208-bddd-796553cf83e1', '3224ebc0-0a6e-4e22-9ce8-c6564a1bb6a1');
+</code></pre>
 
         </div>
 
@@ -1358,7 +1349,7 @@ create table parameters (
 <ul class="widget-list">
     
     <li>
-        <a href="https://geek.zshipu.com/post/Go%E7%9A%84%E5%B9%B2%E5%87%80%E6%A0%B7%E6%9D%BF%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E6%B8%85%E6%B4%81%E6%9E%B6%E6%9E%84Gin%E5%92%8CGORM/" title="Go的干净样板，领域驱动设计，清洁架构，Gin和GORM">Go的干净样板，领域驱动设计，清洁架构，Gin和GORM</a>
+        <a href="https://geek.zshipu.com/post/Go%E7%9A%84%E5%B9%B2%E5%87%80%E6%A0%B7%E6%9D%BF%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E6%B8%85%E6%B4%81%E6%9E%B6%E6%9E%84Gin%E5%92%8CGORM/" title="Go的干净模板，领域驱动设计，清洁架构，Gin和GORM">Go的干净模板，领域驱动设计，清洁架构，Gin和GORM</a>
     </li>
     
     <li>
