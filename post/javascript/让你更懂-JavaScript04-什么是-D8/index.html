@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>让你更懂 JavaScript：04 什么是 D8 | 知识铺的博客</title>
+    <meta property="og:title" content="让你更懂 JavaScript：04 什么是 D8 - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2022-03-14T17:22:10&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2022-03-14T17:22:10&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="让你更懂 JavaScript：04 什么是 D8">
+        <meta name="author" content="知识铺">
+        
+    <meta property="og:url" content="https://geek.zshipu.com/post/javascript/%E8%AE%A9%E4%BD%A0%E6%9B%B4%E6%87%82-JavaScript04-%E4%BB%80%E4%B9%88%E6%98%AF-D8/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#安装-d8">安装 D8</a>
+<ul>
+<li><a href="#方法一-自行下载编译">方法一：自行下载编译</a></li>
+<li><a href="#方法二-使用编译好的-d8-工具-解压文件-点击-d8-打开-mac-安全策略限制的话-按住-control-再点击-弹出菜单中选择打开">方法二：使用编译好的 d8 工具 (解压文件，点击 d8 打开（mac 安全策略限制的话，按住 control，再点击，弹出菜单中选择打开)</a></li>
+<li><a href="#方法三-mac">方法三：mac</a></li>
+<li><a href="#方法四-使用-node-代替-比如可以用-node-print-bytecode-test-js-打印出-ignition-解释器-生成的-bytecode-字节码">方法四：使用 node 代替，比如可以用 node &ndash;print-bytecode ./test.js，打印出 Ignition（解释器）生成的 Bytecode（字节码）。</a></li>
+</ul></li>
+<li><a href="#都有哪些-d8-命令可供使用">都有哪些 d8 命令可供使用？</a></li>
+<li><a href="#如何使用-d8-进行调试">如何使用 d8 进行调试？</a></li>
+<li><a href="#内部方法的使用">内部方法的使用</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">让你更懂 JavaScript：04 什么是 D8</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年3月14日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            
+
+<p>D8 是一个非常有用的调试工具，你可以把它看成是 debug for V8 的缩写。我们可以使用 d8 来查看 V8 在执行 JavaScript 过程中的各种中间数据，比如作用域、AST、字节码、优化的二进制代码、垃圾回收的状态，还可以使用 d8 提供的私有 API 查看一些内部信息。</p>
+
+<p>V8 源码编译出来的可执行程序名为 d8。d8 作为 V8 引擎在命令行中可以使用的交互 shell 存在。Google 官方已经不记得 d8 这个名字的由来，但是做为 delveloper shell 的缩写，用首字母 d 和 8 结合，恰到好处。还有一种说法是 d8 最初叫 developer shell，因为 d 后面有 8 个字符，因此简写为 d8，类似于 i18n(internationalization) 这样的简写。参考：Using d8</p>
+
+<h3 id="安装-d8">安装 D8</h3>
+
+<h4 id="方法一-自行下载编译">方法一：自行下载编译</h4>
+
+<ul>
+<li>v8 google 下载及编译使用</li>
+<li>官方文档：Using d8</li>
+</ul>
+
+<h4 id="方法二-使用编译好的-d8-工具-解压文件-点击-d8-打开-mac-安全策略限制的话-按住-control-再点击-弹出菜单中选择打开">方法二：使用编译好的 d8 工具 (解压文件，点击 d8 打开（mac 安全策略限制的话，按住 control，再点击，弹出菜单中选择打开)</h4>
+
+<ul>
+<li>mac 平台</li>
+<li>linux32 平台</li>
+<li>linux64 平台</li>
+<li>win32 平台</li>
+<li>win64 平台</li>
+</ul>
+
+<h4 id="方法三-mac">方法三：mac</h4>
+
+<pre><code># 如果已有 HomeBrew，忽略第一条命令
+
+ruby -e &quot;\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)&quot;
+brew install v8
+</code></pre>
+
+<h4 id="方法四-使用-node-代替-比如可以用-node-print-bytecode-test-js-打印出-ignition-解释器-生成的-bytecode-字节码">方法四：使用 node 代替，比如可以用 node &ndash;print-bytecode ./test.js，打印出 Ignition（解释器）生成的 Bytecode（字节码）。</h4>
+
+<h3 id="都有哪些-d8-命令可供使用">都有哪些 d8 命令可供使用？</h3>
+
+<p>1、查看 d8 命令</p>
+
+<pre><code># 如果不想使用./d8 这种方式进行调试，可将 d8 加入环境变量，之后就可以直接`d8 --help`了
+
+./d8 --help
+`2、过滤特定的命令`
+
+# 如果是 Windows 系统，可能缺少 grep 程序，请自行下载安装并添加环境变量
+
+./d8 --help |grep print
+</code></pre>
+
+<p>如：</p>
+
+<ul>
+<li>print-bytecode 查看生成的字节码</li>
+<li>print-opt-code 查看优化后的代码</li>
+<li>print-ast 查看中间生成的 AST</li>
+<li>print-scopes 查看中间生成的作用域</li>
+<li>trace-gc 查看这段代码的内存回收状态</li>
+<li>trace-opt 查看哪些代码被优化了</li>
+<li>trace-deopt 查看哪些代码被反优化了</li>
+<li>turbofan-stats 打印优化编译器的一些统计数据</li>
+</ul>
+
+<h3 id="如何使用-d8-进行调试">如何使用 d8 进行调试？</h3>
+
+<p>下面是一段 js 测试代码：</p>
+
+<pre><code>`// test.js function sum(a) { var b = 6; return a + 6; } console.log(sum(3));`
+</code></pre>
+
+<p>执行命令：</p>
+
+<pre><code># d8 后面跟上文件名和要执行的命令，如执行下面这行命令，就会打印出 test.js 文件所生成的字节码。
+
+./d8 ./test.js --print-bytecode
+
+# 执行以下命令，输出 9
+
+./d8 ./test.js
+</code></pre>
+
+<h3 id="内部方法的使用">内部方法的使用</h3>
+
+<p>还可以使用 V8 所提供的一些内部方法，只需要在启动 V8 时传入 &ndash;allow-natives-syntax 命令，你就可以在 test.js 中使用诸如 HasFastProperties（检查一个对象是否拥有快属性）的内部方法 (索引属性、常规属性、快属性等下文会介绍)。</p>
+
+<pre><code class="language-javascript">function Foo(property_num, element_num) { //添加可索引属性 
+    for (let i = 0; i &lt; element_num; i++) {
+        this[i] = `element${i}`; 
+    } //添加常规属性 
+    for (let i = 0; i &lt; property_num; i++) { 
+        let ppt = `property${i}`; 
+        this[ppt] = ppt; 
+    } 
+} 
+var bar = new Foo(10, 10); // 检查一个对象是否拥有快属性 
+console.log(%HasFastProperties(bar)); 
+delete bar.property2; 
+console.log(%HasFastProperties(bar)); 
+</code></pre>
+
+<p>执行：</p>
+
+<pre><code>./d8 --allow-natives-syntax ./test.js
+
+# 依次打印：true false
+</code></pre>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/javascript/%E8%AE%A9%E4%BD%A0%E6%9B%B4%E6%87%82-JavaScript04-%E4%BB%80%E4%B9%88%E6%98%AF-D8/">https://geek.zshipu.com/post/javascript/%E8%AE%A9%E4%BD%A0%E6%9B%B4%E6%87%82-JavaScript04-%E4%BB%80%E4%B9%88%E6%98%AF-D8/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/javascript/%E8%AE%A9%E4%BD%A0%E6%9B%B4%E6%87%82-JavaScript03-%E7%83%AD%E9%97%A8-JavaScript-%E7%9A%84%E5%BC%95%E6%93%8E%E6%9C%89%E5%93%AA%E4%BA%9B/">让你更懂 JavaScript：03 热门 JavaScript 的引擎有哪些</a></li>
+        
+        <li><a href="/post/javascript/%E8%AE%A9%E4%BD%A0%E6%9B%B4%E6%87%82-JavaScript02-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81-JavaScript-%E5%BC%95%E6%93%8E/">让你更懂 JavaScript：02 为什么需要 JavaScript 引擎</a></li>
+        
+        <li><a href="/post/javascript/%E8%AE%A9%E4%BD%A0%E6%9B%B4%E6%87%82-JavaScript01-JavaScript-%E7%9A%84%E5%9F%BA%E6%9C%AC%E7%89%B9%E6%80%A7%E5%92%8C%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/">让你更懂 JavaScript：JavaScript 的基本特性和设计思想</a></li>
+        
+        <li><a href="/post/DDDxx/DDD%E5%AE%9E%E6%88%9810-DDD%E4%B8%AD%E5%8F%B0%E5%92%8C%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%AE%83%E4%BB%AC%E6%98%AF%E5%A6%82%E4%BD%95%E5%8D%8F%E4%BD%9C%E7%9A%84/">DDD实战：10 DDD、中台和微服务：它们是如何协作的</a></li>
+        
+        <li><a href="/post/DDDxx/DDD%E5%AE%9E%E6%88%9809-%E4%B8%AD%E5%8F%B0%E6%95%B0%E5%AD%97%E8%BD%AC%E5%9E%8B%E5%90%8E%E5%88%B0%E5%BA%95%E5%BA%94%E8%AF%A5%E5%85%B1%E4%BA%AB%E4%BB%80%E4%B9%88/">DDD实战：09 中台：数字转型后到底应该共享什么</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/JavaScript'>JavaScript</a></li>
+                
+                <li><a href='/tags/JS'>JS</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/%E4%BD%BF%E7%94%A8%E4%BA%8B%E4%BB%B6%E9%A3%8E%E6%9A%B4%E5%92%8C%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%AF%B9%E5%8F%8D%E5%BA%94%E5%BC%8F%E7%B3%BB%E7%BB%9F%E8%BF%9B%E8%A1%8C%E5%BB%BA%E6%A8%A1/" title="DDD实战：‎使用事件风暴和域驱动设计对反应式系统进行建模‎">DDD实战：‎使用事件风暴和域驱动设计对反应式系统进行建模‎</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9814-%E4%BB%A3%E7%A0%81%E6%A8%A1%E5%9E%8B%E4%B8%8B%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E9%A2%86%E5%9F%9F%E6%A8%A1%E5%9E%8B%E4%B8%8E%E4%BB%A3%E7%A0%81%E6%A8%A1%E5%9E%8B%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7/" title="DDD实战：14 代码模型（下）：如何保证领域模型与代码模型的一致性">DDD实战：14 代码模型（下）：如何保证领域模型与代码模型的一致性</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9813-%E4%BB%A3%E7%A0%81%E6%A8%A1%E5%9E%8B%E4%B8%8A%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8DDD%E8%AE%BE%E8%AE%A1%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%BB%A3%E7%A0%81%E6%A8%A1%E5%9E%8B/" title="DDD实战：13 代码模型（上）：如何使用DDD设计微服务代码模型">DDD实战：13 代码模型（上）：如何使用DDD设计微服务代码模型</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9812-%E9%A2%86%E5%9F%9F%E5%BB%BA%E6%A8%A1%E5%A6%82%E4%BD%95%E7%94%A8%E4%BA%8B%E4%BB%B6%E9%A3%8E%E6%9A%B4%E6%9E%84%E5%BB%BA%E9%A2%86%E5%9F%9F%E6%A8%A1%E5%9E%8B/" title="DDD实战：12 领域建模：如何用事件风暴构建领域模型">DDD实战：12 领域建模：如何用事件风暴构建领域模型</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/javascript/%E8%AE%A9%E4%BD%A0%E6%9B%B4%E6%87%82-JavaScript13-JavaScript-%E5%90%AF%E5%8A%A8%E6%80%A7%E8%83%BD%E7%93%B6%E9%A2%88%E5%88%86%E6%9E%90%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-/" title="让你更懂 JavaScript：13 JavaScript 启动性能瓶颈分析与解决方案">让你更懂 JavaScript：13 JavaScript 启动性能瓶颈分析与解决方案</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/javascript/%E8%AE%A9%E4%BD%A0%E6%9B%B4%E6%87%82-JavaScript12-%E5%9C%A8-V8-%E5%BC%95%E6%93%8E%E9%87%8C-5-%E4%B8%AA%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81%E7%9A%84%E6%8A%80%E5%B7%A7/" title="让你更懂 JavaScript：12 在 V8 引擎里 5 个优化代码的技巧">让你更懂 JavaScript：12 在 V8 引擎里 5 个优化代码的技巧</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/javascript/%E8%AE%A9%E4%BD%A0%E6%9B%B4%E6%87%82-JavaScript11-13-%E4%B8%AA-JavaScript-%E6%80%A7%E8%83%BD%E6%8F%90%E5%8D%87%E6%8A%80%E5%B7%A7-/" title="让你更懂 JavaScript：11 13 个 JavaScript 性能提升技巧">让你更懂 JavaScript：11 13 个 JavaScript 性能提升技巧</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/javascript/%E8%AE%A9%E4%BD%A0%E6%9B%B4%E6%87%82-JavaScript10-%E6%9C%BA%E5%99%A8%E7%A0%81%E5%AD%97%E8%8A%82%E7%A0%81/" title="让你更懂 JavaScript：10 机器码、字节码">让你更懂 JavaScript：10 机器码、字节码</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/javascript/%E8%AE%A9%E4%BD%A0%E6%9B%B4%E6%87%82-JavaScript09-Javascript-%E4%B8%8E-V8/" title="让你更懂 JavaScript：Javascript 与 V8">让你更懂 JavaScript：Javascript 与 V8</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/javascript/%E8%AE%A9%E4%BD%A0%E6%9B%B4%E6%87%82-JavaScript08-V8-%E6%98%AF%E6%80%8E%E4%B9%88%E6%89%A7%E8%A1%8C%E4%B8%80%E6%AE%B5-JavaScript-%E4%BB%A3%E7%A0%81%E7%9A%84/" title="让你更懂 JavaScript：08 V8 是怎么执行一段 JavaScript 代码的">让你更懂 JavaScript：08 V8 是怎么执行一段 JavaScript 代码的</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/BI/">BI</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD%E5%AE%9E%E6%88%98/">DDD实战</a>
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    
+    <a href="">Java</a>
+    
+    <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
+    
+    <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/css/">css</a>
+    
+    <a href="https://geek.zshipu.com/tags/game/">game</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    
+    <a href="">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/web3/">web3</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/">人工智能</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%88%86%E8%AF%8D/">分词</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%96%87%E6%91%98/">文摘</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%88%AC%E8%99%AB/">爬虫</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

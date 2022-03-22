@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>DDD实战：13 代码模型（上）：如何使用DDD设计微服务代码模型 | 知识铺的博客</title>
+    <meta property="og:title" content="DDD实战：13 代码模型（上）：如何使用DDD设计微服务代码模型 - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2022-03-19T14:22:10&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2022-03-19T14:22:10&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="DDD实战：13 代码模型（上）：如何使用DDD设计微服务代码模型">
+        <meta name="author" content="知识铺">
+        
+    <meta property="og:url" content="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9813-%E4%BB%A3%E7%A0%81%E6%A8%A1%E5%9E%8B%E4%B8%8A%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8DDD%E8%AE%BE%E8%AE%A1%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%BB%A3%E7%A0%81%E6%A8%A1%E5%9E%8B/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#ddd-分层架构与微服务代码模型">DDD 分层架构与微服务代码模型</a></li>
+<li><a href="#微服务代码模型">微服务代码模型</a>
+<ul>
+<li><a href="#微服务一级目录结构">微服务一级目录结构</a></li>
+<li><a href="#各层目录结构">各层目录结构</a></li>
+<li><a href="#代码模型总目录结构">代码模型总目录结构</a></li>
+</ul></li>
+<li><a href="#总结">总结</a></li>
+</ul></li>
+</ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">DDD实战：13 代码模型（上）：如何使用DDD设计微服务代码模型</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年3月19日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            
+
+<p>上一讲我们完成了领域模型的设计，接下来我们就要开始微服务的设计和落地了。那微服务落地时首先要确定的就是微服务的代码结构，也就是我今天要讲的微服务代码模型。</p>
+
+<p>只有建立了标准的微服务代码模型和代码规范后，我们才可以将领域对象所对应的代码对象放在合适的软件包的目录结构中。标准的代码模型可以让项目团队成员更好地理解代码，根据代码规范实现团队协作；还可以让微服务各层的逻辑互不干扰、分工协作、各据其位、各司其职，避免不必要的代码混淆。另外，标准的代码模型还可以让你在微服务架构演进时，轻松完成代码重构。</p>
+
+<p>那在 DDD 里，微服务的代码结构长什么样子呢？我们又是依据什么来建立微服务代码模型？这就是我们今天重点要解决的两个问题。</p>
+
+<h2 id="ddd-分层架构与微服务代码模型">DDD 分层架构与微服务代码模型</h2>
+
+<p>我们参考 DDD 分层架构模型来设计微服务代码模型。没错！微服务代码模型就是依据 DDD 分层架构模型设计出来的。那为什么是 DDD 分层架构模型呢？</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/a308123994f87a5ce99adc85dd9b4d01-1628936632403.jpg" alt="img" /></p>
+
+<p>我们先简单回顾一下 [第 07 讲] 介绍过的 DDD 分层架构模型。它包括用户接口层、应用层、领域层和基础层，分层架构各层的职责边界非常清晰，又能有条不紊地分层协作。</p>
+
+<p>用户接口层：面向前端提供服务适配，面向资源层提供资源适配。这一层聚集了接口适配相关的功能。</p>
+
+<p>应用层职责：实现服务组合和编排，适应业务流程快速变化的需求。这一层聚集了应用服务和事件相关的功能。</p>
+
+<p>领域层：实现领域的核心业务逻辑。这一层聚集了领域模型的聚合、聚合根、实体、值对象、领域服务和事件等领域对象，以及它们组合所形成的业务能力。</p>
+
+<p>基础层：贯穿所有层，为各层提供基础资源服务。这一层聚集了各种底层资源相关的服务和能力。</p>
+
+<p>业务逻辑从领域层、应用层到用户接口层逐层封装和协作，对外提供灵活的服务，既实现了各层的分工，又实现了各层的协作。因此，毋庸置疑，DDD 分层架构模型就是设计微服务代码模型的最佳依据。</p>
+
+<h2 id="微服务代码模型">微服务代码模型</h2>
+
+<p>现在，我们来看一下，按照 DDD 分层架构模型设计出来的微服务代码模型到底长什么样子呢？</p>
+
+<p>其实，DDD 并没有给出标准的代码模型，不同的人可能会有不同理解。下面要说的这个微服务代码模型是我经过思考和实践后建立起来的，主要考虑的是微服务的边界、分层以及架构演进。</p>
+
+<h3 id="微服务一级目录结构">微服务一级目录结构</h3>
+
+<p>微服务一级目录是按照 DDD 分层架构的分层职责来定义的。从下面这张图中，我们可以看到，在代码模型里分别为用户接口层、应用层、领域层和基础层，建立了 interfaces、application、domain 和 infrastructure 四个一级代码目录。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/d1bea7dc6bd93f3bd30ced821f36bb71.jpg" alt="img" /></p>
+
+<p>这些目录的职能和代码形态是这样的。</p>
+
+<p><strong>Interfaces（用户接口层）：</strong>它主要存放用户接口层与前端交互、展现数据相关的代码。前端应用通过这一层的接口，向应用服务获取展现所需的数据。这一层主要用来处理用户发送的 Restful 请求，解析用户输入的配置文件，并将数据传递给 Application 层。数据的组装、数据传输格式以及 Facade 接口等代码都会放在这一层目录里。</p>
+
+<p><strong>Application（应用层）：</strong>它主要存放应用层服务组合和编排相关的代码。应用服务向下基于微服务内的领域服务或外部微服务的应用服务完成服务的编排和组合，向上为用户接口层提供各种应用数据展现支持服务。应用服务和事件等代码会放在这一层目录里。</p>
+
+<p><strong>Domain（领域层）：</strong>它主要存放领域层核心业务逻辑相关的代码。领域层可以包含多个聚合代码包，它们共同实现领域模型的核心业务逻辑。聚合以及聚合内的实体、方法、领域服务和事件等代码会放在这一层目录里。</p>
+
+<p><strong>Infrastructure（基础层）：</strong>它主要存放基础资源服务相关的代码，为其它各层提供的通用技术能力、三方软件包、数据库服务、配置和基础资源服务的代码都会放在这一层目录里。</p>
+
+<h3 id="各层目录结构">各层目录结构</h3>
+
+<p><strong>1. 用户接口层</strong></p>
+
+<p>Interfaces 的代码目录结构有：assembler、dto 和 façade 三类。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/c6ea040a520c91dfe6400f206ff36fef.jpg" alt="img" /></p>
+
+<p><strong>Assembler：</strong>实现 DTO 与领域对象之间的相互转换和数据交换。一般来说 Assembler 与 DTO 总是一同出现。</p>
+
+<p><strong>Dto：</strong>它是数据传输的载体，内部不存在任何业务逻辑，我们可以通过 DTO 把内部的领域对象与外界隔离。</p>
+
+<p><strong>Facade：</strong>提供较粗粒度的调用接口，将用户请求委派给一个或多个应用服务进行处理。</p>
+
+<p><strong>2. 应用层</strong></p>
+
+<p>Application 的代码目录结构有：event 和 service。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/30caee3ceaf1085b7aa2cc388f996e61.jpg" alt="img" /></p>
+
+<p><strong>Event（事件）：</strong>这层目录主要存放事件相关的代码。它包括两个子目录：publish 和 subscribe。前者主要存放事件发布相关代码，后者主要存放事件订阅相关代码（事件处理相关的核心业务逻辑在领域层实现）。</p>
+
+<p>这里提示一下：虽然应用层和领域层都可以进行事件的发布和处理，但为了实现事件的统一管理，我建议你将微服务内所有事件的发布和订阅的处理都统一放到应用层，事件相关的核心业务逻辑实现放在领域层。通过应用层调用领域层服务，来实现完整的事件发布和订阅处理流程。</p>
+
+<p><strong>Service（应用服务）：</strong>这层的服务是应用服务。应用服务会对多个领域服务或外部应用服务进行封装、编排和组合，对外提供粗粒度的服务。应用服务主要实现服务组合和编排，是一段独立的业务逻辑。你可以将所有应用服务放在一个应用服务类里，也可以把一个应用服务设计为一个应用服务类，以防应用服务类代码量过大。</p>
+
+<p><strong>3. 领域层</strong></p>
+
+<p>Domain 是由一个或多个聚合包构成，共同实现领域模型的核心业务逻辑。聚合内的代码模型是标准和统一的，包括：entity、event、repository 和 service 四个子目录。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/688dd55b8399779baff8fc5b7c124c2c.jpg" alt="img" /></p>
+
+<p>而领域层聚合内部的代码目录结构是这样的。</p>
+
+<p><strong>Aggregate（聚合）：</strong>它是聚合软件包的根目录，可以根据实际项目的聚合名称命名，比如权限聚合。在聚合内定义聚合根、实体和值对象以及领域服务之间的关系和边界。聚合内实现高内聚的业务逻辑，它的代码可以独立拆分为微服务。</p>
+
+<p>以聚合为单位的代码放在一个包里的主要目的是为了业务内聚，而更大的目的是为了以后微服务之间聚合的重组。聚合之间清晰的代码边界，可以让你轻松地实现以聚合为单位的微服务重组，在微服务架构演进中有着很重要的作用。</p>
+
+<p><strong>Entity（实体）：</strong>它存放聚合根、实体、值对象以及工厂模式（Factory）相关代码。实体类采用充血模型，同一实体相关的业务逻辑都在实体类代码中实现。跨实体的业务逻辑代码在领域服务中实现。</p>
+
+<p><strong>Event（事件）：</strong>它存放事件实体以及与事件活动相关的业务逻辑代码。</p>
+
+<p><strong>Service（领域服务）：</strong>它存放领域服务代码。一个领域服务是多个实体组合出来的一段业务逻辑。你可以将聚合内所有领域服务都放在一个领域服务类中，你也可以把每一个领域服务设计为一个类。如果领域服务内的业务逻辑相对复杂，我建议你将一个领域服务设计为一个领域服务类，避免由于所有领域服务代码都放在一个领域服务类中，而出现代码臃肿的问题。领域服务封装多个实体或方法后向上层提供应用服务调用。</p>
+
+<p><strong>Repository（仓储）：</strong>它存放所在聚合的查询或持久化领域对象的代码，通常包括仓储接口和仓储实现方法。为了方便聚合的拆分和组合，我们设定了一个原则：一个聚合对应一个仓储。</p>
+
+<p>特别说明：按照 DDD 分层架构，仓储实现本应该属于基础层代码，但为了在微服务架构演进时，保证代码拆分和重组的便利性，我是把聚合仓储实现的代码放到了聚合包内。这样，如果需求或者设计发生变化导致聚合需要拆分或重组时，我们就可以将包括核心业务逻辑和仓储代码的聚合包整体迁移，轻松实现微服务架构演进。</p>
+
+<p><strong>4. 基础层</strong></p>
+
+<p>Infrastructure 的代码目录结构有：config 和 util 两个子目录。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/5bbe3454e2ecf4ff4770e887a4967b5a.jpg" alt="img" /></p>
+
+<p><strong>Config：</strong>主要存放配置相关代码。</p>
+
+<p><strong>Util：</strong>主要存放平台、开发框架、消息、数据库、缓存、文件、总线、网关、第三方类库、通用算法等基础代码，你可以为不同的资源类别建立不同的子目录。</p>
+
+<h3 id="代码模型总目录结构">代码模型总目录结构</h3>
+
+<p>在完成一级和二级代码模型设计后，你就可以看到下图这样的微服务代码模型的总目录结构了。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/915ad8d830d925a893cd09ff6cbdadb8.jpg" alt="img" /></p>
+
+<h2 id="总结">总结</h2>
+
+<p>今天我们根据 DDD 分层架构模型建立了标准的微服务代码模型，在代码模型里面，各代码对象各据其位、各司其职，共同协作完成微服务的业务逻辑。</p>
+
+<p>那关于代码模型我还需要强调两点内容。</p>
+
+<p>第一点：聚合之间的代码边界一定要清晰。聚合之间的服务调用和数据关联应该是尽可能的松耦合和低关联，聚合之间的服务调用应该通过上层的应用层组合实现调用，原则上不允许聚合之间直接调用领域服务。这种松耦合的代码关联，在以后业务发展和需求变更时，可以很方便地实现业务功能和聚合代码的重组，在微服务架构演进中将会起到非常重要的作用。</p>
+
+<p>第二点：你一定要有代码分层的概念。写代码时一定要搞清楚代码的职责，将它放在职责对应的代码目录内。应用层代码主要完成服务组合和编排，以及聚合之间的协作，它是很薄的一层，不应该有核心领域逻辑代码。领域层是业务的核心，领域模型的核心逻辑代码一定要在领域层实现。如果将核心领域逻辑代码放到应用层，你的基于 DDD 分层架构模型的微服务慢慢就会演变成传统的三层架构模型了。</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9813-%E4%BB%A3%E7%A0%81%E6%A8%A1%E5%9E%8B%E4%B8%8A%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8DDD%E8%AE%BE%E8%AE%A1%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%BB%A3%E7%A0%81%E6%A8%A1%E5%9E%8B/">https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9813-%E4%BB%A3%E7%A0%81%E6%A8%A1%E5%9E%8B%E4%B8%8A%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8DDD%E8%AE%BE%E8%AE%A1%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%BB%A3%E7%A0%81%E6%A8%A1%E5%9E%8B/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/DDDxx/DDD%E5%AE%9E%E6%88%9812-%E9%A2%86%E5%9F%9F%E5%BB%BA%E6%A8%A1%E5%A6%82%E4%BD%95%E7%94%A8%E4%BA%8B%E4%BB%B6%E9%A3%8E%E6%9A%B4%E6%9E%84%E5%BB%BA%E9%A2%86%E5%9F%9F%E6%A8%A1%E5%9E%8B/">DDD实战：12 领域建模：如何用事件风暴构建领域模型</a></li>
+        
+        <li><a href="/post/DDDxx/DDD%E5%AE%9E%E6%88%9810-DDD%E4%B8%AD%E5%8F%B0%E5%92%8C%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%AE%83%E4%BB%AC%E6%98%AF%E5%A6%82%E4%BD%95%E5%8D%8F%E4%BD%9C%E7%9A%84/">DDD实战：10 DDD、中台和微服务：它们是如何协作的</a></li>
+        
+        <li><a href="/post/DDDxx/DDD%E5%AE%9E%E6%88%9809-%E4%B8%AD%E5%8F%B0%E6%95%B0%E5%AD%97%E8%BD%AC%E5%9E%8B%E5%90%8E%E5%88%B0%E5%BA%95%E5%BA%94%E8%AF%A5%E5%85%B1%E4%BA%AB%E4%BB%80%E4%B9%88/">DDD实战：09 中台：数字转型后到底应该共享什么</a></li>
+        
+        <li><a href="/post/DDDxx/DDD%E5%AE%9E%E6%88%9808-%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%9E%8B%E5%87%A0%E7%A7%8D%E5%B8%B8%E8%A7%81%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%AF%B9%E6%AF%94%E5%92%8C%E5%88%86%E6%9E%90/">DDD实战：08 微服务架构模型：几种常见模型的对比和分析</a></li>
+        
+        <li><a href="/post/DDDxx/DDD%E5%AE%9E%E6%88%9807-DDD%E5%88%86%E5%B1%82%E6%9E%B6%E6%9E%84%E6%9C%89%E6%95%88%E9%99%8D%E4%BD%8E%E5%B1%82%E4%B8%8E%E5%B1%82%E4%B9%8B%E9%97%B4%E7%9A%84%E4%BE%9D%E8%B5%96/">DDD实战：07 DDD分层架构：有效降低层与层之间的依赖</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/DDD'>DDD</a></li>
+                
+                <li><a href='/tags/DDD%E5%AE%9E%E6%88%98'>DDD实战</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/%E4%BD%BF%E7%94%A8%E4%BA%8B%E4%BB%B6%E9%A3%8E%E6%9A%B4%E5%92%8C%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%AF%B9%E5%8F%8D%E5%BA%94%E5%BC%8F%E7%B3%BB%E7%BB%9F%E8%BF%9B%E8%A1%8C%E5%BB%BA%E6%A8%A1/" title="DDD实战：‎使用事件风暴和域驱动设计对反应式系统进行建模‎">DDD实战：‎使用事件风暴和域驱动设计对反应式系统进行建模‎</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9814-%E4%BB%A3%E7%A0%81%E6%A8%A1%E5%9E%8B%E4%B8%8B%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E9%A2%86%E5%9F%9F%E6%A8%A1%E5%9E%8B%E4%B8%8E%E4%BB%A3%E7%A0%81%E6%A8%A1%E5%9E%8B%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7/" title="DDD实战：14 代码模型（下）：如何保证领域模型与代码模型的一致性">DDD实战：14 代码模型（下）：如何保证领域模型与代码模型的一致性</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9813-%E4%BB%A3%E7%A0%81%E6%A8%A1%E5%9E%8B%E4%B8%8A%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8DDD%E8%AE%BE%E8%AE%A1%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%BB%A3%E7%A0%81%E6%A8%A1%E5%9E%8B/" title="DDD实战：13 代码模型（上）：如何使用DDD设计微服务代码模型">DDD实战：13 代码模型（上）：如何使用DDD设计微服务代码模型</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9812-%E9%A2%86%E5%9F%9F%E5%BB%BA%E6%A8%A1%E5%A6%82%E4%BD%95%E7%94%A8%E4%BA%8B%E4%BB%B6%E9%A3%8E%E6%9A%B4%E6%9E%84%E5%BB%BA%E9%A2%86%E5%9F%9F%E6%A8%A1%E5%9E%8B/" title="DDD实战：12 领域建模：如何用事件风暴构建领域模型">DDD实战：12 领域建模：如何用事件风暴构建领域模型</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/javascript/%E8%AE%A9%E4%BD%A0%E6%9B%B4%E6%87%82-JavaScript13-JavaScript-%E5%90%AF%E5%8A%A8%E6%80%A7%E8%83%BD%E7%93%B6%E9%A2%88%E5%88%86%E6%9E%90%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-/" title="让你更懂 JavaScript：13 JavaScript 启动性能瓶颈分析与解决方案">让你更懂 JavaScript：13 JavaScript 启动性能瓶颈分析与解决方案</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/javascript/%E8%AE%A9%E4%BD%A0%E6%9B%B4%E6%87%82-JavaScript12-%E5%9C%A8-V8-%E5%BC%95%E6%93%8E%E9%87%8C-5-%E4%B8%AA%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81%E7%9A%84%E6%8A%80%E5%B7%A7/" title="让你更懂 JavaScript：12 在 V8 引擎里 5 个优化代码的技巧">让你更懂 JavaScript：12 在 V8 引擎里 5 个优化代码的技巧</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/javascript/%E8%AE%A9%E4%BD%A0%E6%9B%B4%E6%87%82-JavaScript11-13-%E4%B8%AA-JavaScript-%E6%80%A7%E8%83%BD%E6%8F%90%E5%8D%87%E6%8A%80%E5%B7%A7-/" title="让你更懂 JavaScript：11 13 个 JavaScript 性能提升技巧">让你更懂 JavaScript：11 13 个 JavaScript 性能提升技巧</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/javascript/%E8%AE%A9%E4%BD%A0%E6%9B%B4%E6%87%82-JavaScript10-%E6%9C%BA%E5%99%A8%E7%A0%81%E5%AD%97%E8%8A%82%E7%A0%81/" title="让你更懂 JavaScript：10 机器码、字节码">让你更懂 JavaScript：10 机器码、字节码</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/javascript/%E8%AE%A9%E4%BD%A0%E6%9B%B4%E6%87%82-JavaScript09-Javascript-%E4%B8%8E-V8/" title="让你更懂 JavaScript：Javascript 与 V8">让你更懂 JavaScript：Javascript 与 V8</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/javascript/%E8%AE%A9%E4%BD%A0%E6%9B%B4%E6%87%82-JavaScript08-V8-%E6%98%AF%E6%80%8E%E4%B9%88%E6%89%A7%E8%A1%8C%E4%B8%80%E6%AE%B5-JavaScript-%E4%BB%A3%E7%A0%81%E7%9A%84/" title="让你更懂 JavaScript：08 V8 是怎么执行一段 JavaScript 代码的">让你更懂 JavaScript：08 V8 是怎么执行一段 JavaScript 代码的</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/BI/">BI</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD%E5%AE%9E%E6%88%98/">DDD实战</a>
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    
+    <a href="">Java</a>
+    
+    <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
+    
+    <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/css/">css</a>
+    
+    <a href="https://geek.zshipu.com/tags/game/">game</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    
+    <a href="">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/web3/">web3</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/">人工智能</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%88%86%E8%AF%8D/">分词</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%96%87%E6%91%98/">文摘</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%88%AC%E8%99%AB/">爬虫</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
