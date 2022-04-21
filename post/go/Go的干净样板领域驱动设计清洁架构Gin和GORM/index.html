@@ -1,0 +1,1546 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Go的干净模板，领域驱动设计，清洁架构，Gin和GORM | 知识铺的博客</title>
+    <meta property="og:title" content="Go的干净模板，领域驱动设计，清洁架构，Gin和GORM - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2022-03-07T08:55:38&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2022-03-07T08:55:38&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="Go的干净模板，领域驱动设计，清洁架构，Gin和GORM">
+        <meta name="author" content="知识铺">
+        
+    <meta property="og:url" content="https://geek.zshipu.com/post/go/Go%E7%9A%84%E5%B9%B2%E5%87%80%E6%A0%B7%E6%9D%BF%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E6%B8%85%E6%B4%81%E6%9E%B6%E6%9E%84Gin%E5%92%8CGORM/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+<ul>
+<li><a href="#goilerplate">Goilerplate</a>
+<ul>
+<li><a href="#开始">开始</a></li>
+<li><a href="#goilerplate-via-ssh">Goilerplate via SSH</a></li>
+<li><a href="#入口">入口</a></li>
+<li><a href="#包结构">包结构</a>
+<ul>
+<li><a href="#领域层">领域层</a></li>
+<li><a href="#应用层">应用层</a></li>
+<li><a href="#适配器层">适配器层</a></li>
+<li><a href="#外层">外层</a></li>
+</ul></li>
+<li><a href="#如何跨越这些图层的边界">如何跨越这些图层的边界</a>
+<ul>
+<li><a href="#存储-库">存储 库</a></li>
+</ul></li>
+<li><a href="#依赖注入">依赖注入</a>
+<ul>
+<li><a href="#使用位置参数">使用位置参数</a></li>
+<li><a href="#使用关键字参数">使用关键字参数</a></li>
+<li><a href="#全局喷油器变量">全局喷油器变量</a></li>
+</ul></li>
+<li><a href="#如何从goilerplate开始">如何从Goilerplate开始</a>
+<ul>
+<li><a href="#包装布局">包装布局</a></li>
+<li><a href="#定义实体">定义实体</a></li>
+<li><a href="#定义存储库接口">定义存储库接口</a></li>
+<li><a href="#定义用例">定义用例</a></li>
+<li><a href="#定义存储库实现">定义存储库实现</a></li>
+<li><a href="#定义控制器">定义控制器</a></li>
+</ul></li>
+<li><a href="#测试">测试</a>
+<ul>
+<li><a href="#测试包结构">测试包结构</a></li>
+<li><a href="#实体">实体</a></li>
+<li><a href="#用例">用例</a></li>
+</ul></li>
+<li><a href="#命名约定">命名约定</a>
+<ul>
+<li><a href="#接口">接口</a></li>
+<li><a href="#模拟">模拟</a></li>
+<li><a href="#文件">文件</a></li>
+<li><a href="#包">包</a></li>
+</ul></li>
+<li><a href="#与gochk">与GOCHK</a></li>
+<li><a href="#使用postgresql">使用PostgreSQL</a>
+<ul>
+<li><a href="#建筑形象">建筑形象</a></li>
+<li><a href="#docker-映像">Docker 映像</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Go的干净模板，领域驱动设计，清洁架构，Gin和GORM</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年3月7日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            
+
+<p>GitHub Repo： <a href="https://zshipu.com/t?url=https://github.com/resotto/goilerplate">https://github.com/resotto/goilerplate</a></p>
+
+<h1 id="goilerplate">Goilerplate</h1>
+
+<p>Go的干净样板，领域驱动设计，清洁架构，Gin和GORM。</p>
+
+<hr />
+
+<p>什么是Goilerplate？</p>
+
+<ul>
+<li><strong>使用清洁架构的好例子。</strong></li>
+<li><strong>Go，Domain-Driven Design，<a href="https://zshipu.com/t?url=https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html">Clean Architecture</a>，<a href="https://zshipu.com/t?url=https://github.com/gin-gonic/gin">Gin和GORM</a>的火箭入门指南</strong>。</li>
+</ul>
+
+<p>谁是Goilerplate的主要用户？</p>
+
+<ul>
+<li>各种地鼠（新手到专业人士）。</li>
+</ul>
+
+<p>为什么选择Goilerplate？</p>
+
+<ul>
+<li><strong>Go中易于应用的样板。</strong></li>
+</ul>
+
+<p>注意</p>
+
+<ul>
+<li>默认的应用程序/测试代码是微不足道的，因为您将编写很酷的逻辑。</li>
+<li><a href="https://zshipu.com/t?url=https://github.com/bitbankinc/bitbank-api-docs/blob/master/public-api.md#general-endpoints">bitbank的公共API</a>，即位于东京的比特币交易所，默认情况下用于某些端点。
+
+<br /></li>
+</ul>
+
+<h2 id="开始">开始</h2>
+
+<p><code>go get -u github.com/resotto/goilerplate        # might take few minutes
+cd ${GOPATH}/src/github.com/resotto/goilerplate
+go run cmd/app/main.go                          # from root directory
+open <a href="http://0.0.0.0:8080">http://0.0.0.0:8080</a></code></p>
+
+<h2 id="goilerplate-via-ssh">Goilerplate via SSH</h2>
+
+<pre><code>go get
+</code></pre>
+
+<p>默认情况下，通过 HTTPS 获取 GitHub 存储库。所以你可能会失败：<code>go get</code></p>
+
+<pre><code>~  &gt; go get -u github.com/resotto/goilerplate
+
+# cd .; git clone -- https://github.com/resotto/goilerplate /Users/resotto/go/src/github.com/resotto/goilerplate
+
+Cloning into '/Users/resotto/go/src/github.com/resotto/goilerplate'...
+fatal: could not read Username for 'https://github.com': terminal prompts disabled
+package github.com/resotto/goilerplate: exit status 128
+</code></pre>
+
+<p>如果您通过 SSH 运行 GitHub 存储库，请运行以下命令：<code>go get</code></p>
+
+<p><code>git config &ndash;global url.git@github.com:.insteadOf <a href="https://github.com/">https://github.com/</a></code></p>
+
+<p>然后，请再次尝试<a href="#getting-started">入门</a>。</p>
+
+<h2 id="入口">入口</h2>
+
+<ul>
+<li><p>使用模板</p>
+
+<ul>
+<li><code>GET /</code>
+*   注意：以下路径来自CURRENT目录，因此请从根目录运行Gin。 <code>r.LoadHTMLGlob(&ldquo;internal/app/adapter/view/*&ldquo;)</code></li>
+</ul></li>
+
+<li><p>使用位库的公共 API</p>
+
+<ul>
+<li><code>GET /ticker</code>
+*   <code>GET /candlestick</code>
+*   注意：由于其API限制，这适用于0AM ~ 3PM（UTC）。</li>
+</ul></li>
+
+<li><p>使用PostgreSQL</p>
+
+<ul>
+<li><a href="#with-postgresql">注意：请先运行此步骤的 postgres 容器。</a></li>
+<li><code>GET /parameter</code>
+*   <code>GET /order</code></li>
+</ul></li>
+</ul>
+
+<h2 id="包结构">包结构</h2>
+
+<pre><code>
+├── LICENSE
+├── README.md
+├── build                                     # Packaging and Continuous Integration
+│   ├── Dockerfile
+│   └── init.sql
+├── cmd                                       # Main Application
+│   └── app
+│       └── main.go
+├── internal                                  # Private Codes
+│   └── app
+│       ├── adapter
+│       │   ├── controller.go                 # Controller
+│       │   ├── postgresql                    # Database
+│       │   │   ├── conn.go
+│       │   │   └── model                     # Database Model
+│       │   │       ├── card.go
+│       │   │       ├── cardBrand.go
+│       │   │       ├── order.go
+│       │   │       ├── parameter.go
+│       │   │       ├── payment.go
+│       │   │       └── person.go
+│       │   ├── repository                    # Repository Implementation
+│       │   │   ├── order.go
+│       │   │   └── parameter.go
+│       │   ├── service                       # Application Service Implementation
+│       │   │   └── bitbank.go
+│       │   └── view                          # Templates
+│       │       └── index.tmpl
+│       ├── application
+│       │   ├── service                       # Application Service Interface
+│       │   │   └── exchange.go
+│       │   └── usecase                       # Usecase
+│       │       ├── addNewCardAndEatCheese.go
+│       │       ├── ohlc.go
+│       │       ├── parameter.go
+│       │       ├── ticker.go
+│       │       └── ticker_test.go
+│       └── domain
+│           ├── factory                       # Factory
+│           │   └── order.go
+│           ├── order.go                      # Entity
+│           ├── parameter.go
+│           ├── parameter_test.go
+│           ├── person.go
+│           ├── repository                    # Repository Interface
+│           │   ├── order.go
+│           │   └── parameter.go
+│           └── valueobject                   # ValueObject
+│               ├── candlestick.go
+│               ├── card.go
+│               ├── cardbrand.go
+│               ├── pair.go
+│               ├── payment.go
+│               ├── ticker.go
+│               └── timeunit.go
+└── testdata                                  # Test Data
+    └── exchange_mock.go
+</code></pre>
+
+<h3 id="领域层">领域层</h3>
+
+<ul>
+<li>清洁架构的核心。它说&rdquo;实体&rdquo;。</li>
+</ul>
+
+<h3 id="应用层">应用层</h3>
+
+<ul>
+<li>来自核心的第二层。它说&rdquo;用例&rdquo;。</li>
+</ul>
+
+<h3 id="适配器层">适配器层</h3>
+
+<ul>
+<li>第三层来自核心。它说&rdquo;控制器/网关/演示者&rdquo;。</li>
+</ul>
+
+<h3 id="外层">外层</h3>
+
+<ul>
+<li><p>第四层从核心。它说&rdquo;设备/ DB / 外部接口/ UI / Web&rdquo;。</p>
+
+<ul>
+<li><strong>我们在这个层中不写太多代码。</strong>
+<br /></li>
+</ul>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220307140549986.png" alt="image-20220307140549986" /></p></li>
+</ul>
+
+<p><a href="https://zshipu.com/t?url=https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html">清洁架构</a></p>
+
+<h2 id="如何跨越这些图层的边界">如何跨越这些图层的边界</h2>
+
+<p>在 Clean Architecture 中，有<a href="https://zshipu.com/t?url=https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html#the-dependency-rule">依赖关系规则</a>：</p>
+
+<blockquote>
+<p>此规则表示源代码依赖项只能指向内部。在一个内圈里，没有任何东西可以知道关于外圈里某件事的任何事情。</p>
+</blockquote>
+
+<p>换句话说，<strong>依赖注入</strong>需要遵循此规则。</p>
+
+<p>因此，请遵循以下四个步骤：</p>
+
+<ol>
+<li>定义接口</li>
+<li>以参数为接口并调用其函数</li>
+<li>实施它</li>
+<li>注入依赖关系</li>
+</ol>
+
+<p>在这里，我选取存储库的示例。</p>
+
+<h3 id="存储-库">存储 库</h3>
+
+<pre><code>
+
+.
+└── internal
+    └── app
+        ├── adapter
+        │   ├── controller.go    # 4\. Dependency Injection
+        │   └── repository
+        │       └── parameter.go # 3\. Implementation
+        ├── application
+        │   └── usecase
+        │       └── parameter.go # 2\. Interface Function Call
+        └── domain
+            ├── parameter.go
+            └── repository
+                └── parameter.go # 1\. Interface
+</code></pre>
+
+<ol>
+<li><p>域层接口：</p>
+
+<pre><code>package repository
+
+import &quot;github.com/resotto/goilerplate/internal/app/domain&quot;
+
+// IParameter is interface of parameter repository
+type IParameter interface {
+Get() domain.Parameter
+}
+</code></pre></li>
+
+<li><p>应用程序层用例：</p>
+
+<pre><code>package usecase
+
+// NOTICE: This usecase DON'T depend on Adapter layer
+import (
+&quot;github.com/resotto/goilerplate/internal/app/domain&quot;
+&quot;github.com/resotto/goilerplate/internal/app/domain/repository&quot;
+)
+
+// Parameter is the usecase of getting parameter
+func Parameter(r repository.IParameter) domain.Parameter {
+return r.Get()
+}
+</code></pre></li>
+
+<li><p>适配器层的实现：</p>
+
+<pre><code>package repository
+
+// Parameter is the repository of domain.Parameter
+type Parameter struct{}
+
+// Get gets parameter
+func (r Parameter) Get() domain.Parameter {
+db := postgresql.Connection()
+var param model.Parameter
+result := db.First(&amp;param, 1)
+if result.Error != nil {
+    panic(result.Error)
+}
+return domain.Parameter{
+    Funds: param.Funds,
+    Btc:   param.Btc,
+}
+}
+</code></pre></li>
+
+<li><p>适配器层控制器处的依赖关系注入：</p>
+
+<pre><code>package adapter
+
+// NOTICE: Controller depends on INNER CIRCLE so it points inward (The Dependency Rule)
+import (
+&quot;github.com/gin-gonic/gin&quot;
+&quot;github.com/resotto/goilerplate/internal/app/adapter/repository&quot;
+&quot;github.com/resotto/goilerplate/internal/app/application/usecase&quot;
+)
+
+var (
+parameterRepository = repository.Parameter{}
+)
+
+func (ctrl Controller) parameter(c *gin.Context) {
+parameter := usecase.Parameter(parameterRepository) // Dependency Injection
+c.JSON(200, parameter)
+}
+</code></pre></li>
+</ol>
+
+<p>应用程序服务的实现也是相同的。</p>
+
+<h2 id="依赖注入">依赖注入</h2>
+
+<p><strong>在 Goilerplate 中，依赖项是手动注入的。</strong></p>
+
+<ul>
+<li>注意：如果Go中的其他DI工具没有成为某种应用程序框架，它也是可以接受的。</li>
+</ul>
+
+<p>有两种传递依赖项的方法：</p>
+
+<ul>
+<li>使用位置参数</li>
+<li>使用关键字参数</li>
+</ul>
+
+<h3 id="使用位置参数">使用位置参数</h3>
+
+<p>首先，使用接口类型的参数定义用例。</p>
+
+<pre><code>package usecase
+
+func Parameter(r repository.IParameter) domain.Parameter { // Take Argument as Interface
+    return r.Get()
+}
+</code></pre>
+
+<p>其次，初始化实现并将其提供给用例。</p>
+
+<pre><code>package adapter
+
+var (
+    parameterRepository = repository.Parameter{}        // Initialize Implementation
+)
+
+func (ctrl Controller) parameter(c *gin.Context) {
+    parameter := usecase.Parameter(parameterRepository) // Inject Implementation to Usecase
+    c.JSON(200, parameter)
+}
+</code></pre>
+
+<h3 id="使用关键字参数">使用关键字参数</h3>
+
+<p>首先，定义参数结构和用例。</p>
+
+<pre><code>package usecase
+
+// OhlcArgs are arguments of Ohlc usecase
+type OhlcArgs struct {
+    E service.IExchange                       // Interface
+    P valueobject.Pair
+    T valueobject.Timeunit
+}
+
+func Ohlc(a OhlcArgs) []valueobject.CandleStick { // Take Argument as OhlcArgs
+    return a.E.Ohlc(a.P, a.T)
+}
+</code></pre>
+
+<p>然后，使用关键字参数初始化结构并将其提供给用例。</p>
+
+<pre><code>package adapter
+
+var (
+    bitbank             = service.Bitbank{}      // Implementation
+)
+
+func (ctrl Controller) candlestick(c *gin.Context) {
+    args := usecase.OhlcArgs{                    // Initialize Struct with Keyword Arguments
+        E: bitbank,                          // Passing the implementation
+        P: valueobject.BtcJpy,
+        T: valueobject.OneMin,
+    }
+    candlestick := usecase.Ohlc(args)            // Give Arguments to Usecase
+    c.JSON(200, candlestick)
+}
+</code></pre>
+
+<h3 id="全局喷油器变量">全局喷油器变量</h3>
+
+<p>在手动DI中，实现初始化成本将很昂贵。</p>
+
+<p>因此，让我们使用全局注入器变量，以便仅初始化它们一次。</p>
+
+<pre><code> package adapter
+ 
+ var (
+     bitbank             = service.Bitbank{}      // Injecter Variable
+     parameterRepository = repository.Parameter{}
+     orderRepository     = repository.Order{}
+ )
+ 
+ func (ctrl Controller) ticker(c *gin.Context) {
+     pair := valueobject.BtcJpy
+     ticker := usecase.Ticker(bitbank, pair)      // DI by passing bitbank
+     c.JSON(200, ticker)
+ }
+</code></pre>
+
+<h2 id="如何从goilerplate开始">如何从Goilerplate开始</h2>
+
+<p>使用Goilerplate，您可以顺利地开始您的项目。</p>
+
+<p>为了便于解释，让我们使用 Goilerplate 创建以下规范的 CRUD 的简单&rdquo;CR&rdquo;部分。</p>
+
+<p>规格：</p>
+
+<ul>
+<li>有三个实体，如&rdquo;客户&rdquo;、&rdquo;产品和订单&rdquo;。</li>
+<li>订单聚合客户和产品（订单是聚合根）。</li>
+<li>只有一个用例用于创建订单。</li>
+</ul>
+
+<p>通知：</p>
+
+<ul>
+<li>为方便起见，此处显示了最小代码。</li>
+<li>为方便起见，此说明中没有测试代码。</li>
+</ul>
+
+<p>首先，请准备.go文件，并遵循以下软件包布局。</p>
+
+<h3 id="包装布局">包装布局</h3>
+
+<pre><code>
+└── internal
+    └── app
+        ├── adapter
+        │   ├── controller.go                 # Controller
+        │   └── repository                    # Repository Implementation
+        │       ├── customer.go
+        │       ├── product.go
+        │       └── order.go
+        ├── application
+        │   └── usecase                       # Usecase
+        │       └── createOrder.go
+        └── domain
+            ├── customer.go                   # Entity
+            ├── product.go                    # Entity
+            ├── order.go                      # Entity
+            └── repository                    # Repository Interface
+                ├── customer.go
+                ├── product.go
+                └── order.go
+</code></pre>
+
+<h3 id="定义实体">定义实体</h3>
+
+<p>其次，让我们创建实体、客户、产品和订单。</p>
+
+<pre><code class="language-go">
+
+// customer.go
+package domain
+
+type Customer struct {
+    ID string
+    Name string
+}
+
+// product.go
+package domain
+
+type Product struct {
+    ID string
+    Price int
+}
+
+// order.go
+package domain
+
+type Order struct {
+    ID string
+    Customer Customer
+    Product Product
+}
+</code></pre>
+
+<h3 id="定义存储库接口">定义存储库接口</h3>
+
+<p>定义实体后，让我们在包中准备它们的存储库。<code>domain</code></p>
+
+<pre><code class="language-go">// customer.go
+package repository
+
+type ICustomer interface {
+    Get(id string) domain.Customer
+}
+
+// product.go
+package repository
+
+type IProduct interface {
+    Get(id string) domain.Product
+}
+
+// order.go
+package repository
+
+type IOrder interface {
+    Save(order Order)
+} 
+</code></pre>
+
+<h3 id="定义用例">定义用例</h3>
+
+<p>然后，让我们准备创建顺序的用例。</p>
+
+<pre><code class="language-go">
+
+// createOrder.go
+package usecase
+
+import (
+    &quot;domain&quot;            // simplified for convenience
+    &quot;domain/repository&quot; // simplified for convenience
+)
+
+type CreateOrderArgs struct {
+    CustomerID         string
+    ProductID          string
+    CustomerRepository repository.ICustomer
+    ProductRepository  repository.IProduct
+    OrderRepository    repository.IOrder
+}
+
+func CreateOrder(args CreateOrderArgs) domain.Order {
+    customer := args.CustomerRepository.Get(args.CustomerID)
+    product := args.ProductRepository.Get(args.ProductID)
+    order := domain.Order{
+        ID: &quot;123&quot;,
+        Customer: customer,
+        Product: product,
+    }
+    args.OrderRepository.Save(order)
+    return order
+}
+</code></pre>
+
+<h3 id="定义存储库实现">定义存储库实现</h3>
+
+<p>准备用例后，让我们在包中实现存储库接口。<code>adapter</code></p>
+
+<p>但是，为方便起见，此处省略了这一部分。</p>
+
+<pre><code>// order.go
+package repository
+
+import (
+    &quot;domain&quot; // simplified for convenience
+)
+
+type Order struct{}
+
+func (o Order) Save(order domain.Order) {
+    // omitted here for convenience
+}
+</code></pre>
+
+<h3 id="定义控制器">定义控制器</h3>
+
+<p>最后，让我们定义控制器来调用创建订单的用例。</p>
+
+<pre><code class="language-go">// controller.go
+package adapter
+
+import (
+    &quot;repository&quot; // simplified for convenience
+    &quot;usecase&quot;    // simplified for convenience
+
+    &quot;github.com/gin-gonic/gin&quot;
+
+)
+
+var (
+    customerRepository = repository.Customer{}
+    productRepository  = repository.Product{}
+    orderRepository    = repository.Order{}
+)
+
+type Controller struct{}
+
+func Router() *gin.Engine {
+    r := gin.Default()
+    ctrl := Controller{}
+    r.POST(&quot;/order&quot;, ctrl.createOrder)
+    return r
+}
+
+func (ctrl Controller) createOrder(c *gin.Context) {
+    customerID := c.Query(&quot;customerId&quot;)
+    productID := c.Query(&quot;productId&quot;)
+    args := usecase.CreateOrderArgs{
+        CustomerID:         customerID,
+        ProductID:          productID,
+        CustomerRepository: customerRepository,
+        ProductRepository:  productRepository,
+        OrderRepository:    orderRepository,
+    }
+    order := usecase.CreateOrder(args)
+    c.JSON(200, order)
+}
+</code></pre>
+
+<p>就是这样！</p>
+
+<h2 id="测试">测试</h2>
+
+<pre><code class="language-go">
+~/go/src/github.com/resotto/goilerplate (master) &gt; go test ./internal/app/...
+?       github.com/resotto/goilerplate/internal/app/adapter     [no test files]
+?       github.com/resotto/goilerplate/internal/app/adapter/postgresql  [no test files]
+?       github.com/resotto/goilerplate/internal/app/adapter/postgresql/model    [no test files]
+?       github.com/resotto/goilerplate/internal/app/adapter/repository  [no test files]
+?       github.com/resotto/goilerplate/internal/app/adapter/service     [no test files]
+?       github.com/resotto/goilerplate/internal/app/application/service [no test files]
+ok      github.com/resotto/goilerplate/internal/app/application/usecase 0.204s
+ok      github.com/resotto/goilerplate/internal/app/domain      0.273s
+?       github.com/resotto/goilerplate/internal/app/domain/factory      [no test files]
+?       github.com/resotto/goilerplate/internal/app/domain/repository   [no test files]
+?       github.com/resotto/goilerplate/internal/app/domain/valueobject  [no test files]
+</code></pre>
+
+<p>有两条规则：</p>
+
+<ul>
+<li>包含测试代码的包的名称为 。<code>xxx_test</code></li>
+<li>在包装上放置模拟。<code>testdata</code></li>
+</ul>
+
+<h3 id="测试包结构">测试包结构</h3>
+
+<pre><code class="language-go">
+
+.
+├── internal
+│   └── app
+│       ├── application
+│       │   └── usecase
+│       │       ├── ticker.go      # Usecase
+│       │       └── ticker_test.go # Usecase Test
+│       └── domain
+│           ├── parameter.go       # Entity
+│           └── parameter_test.go  # Entity Test
+└── testdata
+    └── exchange_mock.go           # Mock if needed
+</code></pre>
+
+<h3 id="实体">实体</h3>
+
+<p>请在实体所在的同一目录中编写测试。</p>
+
+<pre><code class="language-go"> .
+ └── internal
+     └── app
+         └── domain
+             ├── parameter.go      # Target Entity
+             └── parameter_test.go # Test&lt;/code&gt; 
+ 
+ // parameter_test.go
+ package domain_test
+ 
+ import (
+     &quot;testing&quot;
+ 
+     &quot;github.com/resotto/goilerplate/internal/app/domain&quot;
+ 
+ )
+ 
+ func TestParameter(t *testing.T) {
+     tests := []struct {
+         name                       string
+         funds, btc                 int
+         expectedfunds, expectedbtc int
+     }{
+         {&quot;more funds than btc&quot;, 1000, 0, 1000, 0},
+         {&quot;same amount&quot;, 100, 100, 100, 100},
+         {&quot;much more funds than btc&quot;, 100000, 20, 100000, 20},
+     }
+ 
+     for _, tt := range tests {
+         tt := tt
+         t.Run(tt.name, func(t *testing.T) {
+             t.Parallel()
+             parameter := domain.Parameter{
+                 Funds: tt.funds,
+                 Btc:   tt.btc,
+             }
+             if parameter.Funds != tt.expectedfunds {
+                 t.Errorf(&quot;got %q, want %q&quot;, parameter.Funds, tt.expectedfunds)
+             }
+             if parameter.Btc != tt.expectedbtc {
+                 t.Errorf(&quot;got %q, want %q&quot;, parameter.Btc, tt.expectedbtc)
+             }
+         })
+     }
+ 
+ }
+</code></pre>
+
+<h3 id="用例">用例</h3>
+
+<p>请在包上准备模拟（如果需要），并在与用例相同的目录中编写测试。<code>testdata</code></p>
+
+<pre><code class="language-go">
+
+.
+├── internal
+│   └── app
+│       └── application
+│           ├── service
+│           │   └── exchange.go    # Application Service Interface
+│           └── usecase
+│               ├── ticker.go      # Target Usecase
+│               └── ticker_test.go # Test
+└── testdata
+    └── exchange_mock.go           # Mock of Application Service Interface&lt;/code&gt; 
+
+// exchange_mock.go
+package testdata
+
+import &quot;github.com/resotto/goilerplate/internal/app/domain/valueobject&quot;
+
+// MExchange is mock of service.IExchange
+type MExchange struct{}
+
+// Ticker is mock implementation of service.IExchange.Ticker()
+func (e MExchange) Ticker(p valueobject.Pair) valueobject.Ticker {
+    return valueobject.Ticker{
+        Sell:      &quot;1000&quot;,
+        Buy:       &quot;1000&quot;,
+        High:      &quot;2000&quot;,
+        Low:       &quot;500&quot;,
+        Last:      &quot;1200&quot;,
+        Vol:       &quot;20&quot;,
+        Timestamp: &quot;1600769562&quot;,
+    }
+}
+
+// Ohlc is mock implementation of service.IExchange.Ohlc()
+func (e MExchange) Ohlc(p valueobject.Pair, t valueobject.Timeunit) []valueobject.CandleStick {
+    cs := make([]valueobject.CandleStick, 0)
+    return append(cs, valueobject.CandleStick{
+        Open:      &quot;1000&quot;,
+        High:      &quot;2000&quot;,
+        Low:       &quot;500&quot;,
+        Close:     &quot;1500&quot;,
+        Volume:    &quot;30&quot;,
+        Timestamp: &quot;1600769562&quot;,
+    })
+}
+
+// ticker_test.go
+package usecase_test
+
+import (
+    &quot;testing&quot;
+
+    &quot;github.com/resotto/goilerplate/internal/app/application/usecase&quot;
+    &quot;github.com/resotto/goilerplate/internal/app/domain/valueobject&quot;
+    &quot;github.com/resotto/goilerplate/testdata&quot;
+
+)
+
+func TestTicker(t *testing.T) {
+    tests := []struct {
+        name              string
+        pair              valueobject.Pair
+        expectedsell      string
+        expectedbuy       string
+        expectedhigh      string
+        expectedlow       string
+        expectedlast      string
+        expectedvol       string
+        expectedtimestamp string
+    }{
+        {&quot;btcjpy&quot;, valueobject.BtcJpy, &quot;1000&quot;, &quot;1000&quot;, &quot;2000&quot;, &quot;500&quot;, &quot;1200&quot;, &quot;20&quot;, &quot;1600769562&quot;},
+    }
+
+    for _, tt := range tests {
+        tt := tt
+        t.Run(tt.name, func(t *testing.T) {
+            t.Parallel()
+            mexchange := testdata.MExchange{} // using Mock
+            result := usecase.Ticker(mexchange, tt.pair)
+            if result.Sell != tt.expectedsell {
+                t.Errorf(&quot;got %q, want %q&quot;, result.Sell, tt.expectedsell)
+            }
+            if result.Buy != tt.expectedbuy {
+                t.Errorf(&quot;got %q, want %q&quot;, result.Buy, tt.expectedbuy)
+            }
+            if result.High != tt.expectedhigh {
+                t.Errorf(&quot;got %q, want %q&quot;, result.High, tt.expectedhigh)
+            }
+            if result.Low != tt.expectedlow {
+                t.Errorf(&quot;got %q, want %q&quot;, result.Low, tt.expectedlow)
+            }
+            if result.Last != tt.expectedlast {
+                t.Errorf(&quot;got %q, want %q&quot;, result.Last, tt.expectedlast)
+            }
+            if result.Vol != tt.expectedvol {
+                t.Errorf(&quot;got %q, want %q&quot;, result.Vol, tt.expectedvol)
+            }
+            if result.Timestamp != tt.expectedtimestamp {
+                t.Errorf(&quot;got %q, want %q&quot;, result.Timestamp, tt.expectedtimestamp)
+            }
+        })
+    }
+
+}
+</code></pre>
+
+<h2 id="命名约定">命名约定</h2>
+
+<h3 id="接口">接口</h3>
+
+<ul>
+<li>添加前缀，如 。<code>I</code><code>IExchange</code>
+
+<ul>
+<li>注意：如果您可以区分接口和实现，则任何命名约定都是可以接受的。</li>
+</ul></li>
+</ul>
+
+<h3 id="模拟">模拟</h3>
+
+<ul>
+<li>添加前缀，如 。<code>M</code><code>MExchange</code>
+
+<ul>
+<li>注意：如果您可以区分模拟和生产，则任何命名约定都是可以接受的。</li>
+</ul></li>
+</ul>
+
+<h3 id="文件">文件</h3>
+
+<ul>
+<li>文件名可以重复。</li>
+<li>对于测试，请添加后缀，如 .<code>_test</code><code>parameter_test.go</code></li>
+<li>对于模拟，请添加后缀，如 .<code>_mock</code><code>exchange_mock.go</code></li>
+</ul>
+
+<h3 id="包">包</h3>
+
+<ul>
+<li><p>有关软件包名称，请查看以下帖子：</p>
+
+<ul>
+<li><a href="https://zshipu.com/t?url=https://blog.golang.org/package-names">包名称</a></li>
+<li><a href="https://zshipu.com/t?url=https://golang.org/doc/effective_go.html#names">名字</a></li>
+</ul></li>
+
+<li><p>有关包装布局，请检查：</p>
+
+<ul>
+<li><a href="https://zshipu.com/t?url=https://github.com/golang-standards/project-layout">项目布局</a></li>
+</ul></li>
+</ul>
+
+<h2 id="与gochk">与GOCHK</h2>
+
+<p><a href="https://zshipu.com/t?url=https://github.com/resotto/gochk">Gochk，用于go文件的静态依赖关系分析工具，</a>赋予Goilerplate如此多的功能！</p>
+
+<p><strong><a href="https://zshipu.com/t?url=https://github.com/resotto/gochk">Gochk</a>确认代码库遵循<a href="https://zshipu.com/t?url=https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html#the-dependency-rule">清洁架构依赖规则</a>。</strong></p>
+
+<p>让我们将 Gochk 合并到 CI 流程中。</p>
+
+<pre><code class="language-go">
+name: test
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - &quot;**/*.md&quot;
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  gochk-goilerplate:
+    runs-on: ubuntu-latest
+    container:
+      image: docker://ghcr.io/resotto/gochk:latest
+    steps:
+      - name: Clone Goilerplate
+        uses: actions/checkout@v2
+        with:
+          repository: {{ github.repository }}
+            - name: Run Gochk
+          run: |
+            /go/bin/gochk -c=/go/src/github.com/resotto/gochk/configs/config.json
+</code></pre>
+
+<p>然后，<a href="https://zshipu.com/t?url=https://github.com/resotto/goilerplate/runs/1367461573">它的结果是</a>：</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220307140633299.png" alt="image-20220307140633299" /></p>
+
+<h2 id="使用postgresql">使用PostgreSQL</h2>
+
+<p>首先，从 GitHub 容器注册表拉取 docker 映像，并使用以下命令运行容器：<code>ghcr.io/resotto/goilerplate-pg</code></p>
+
+<p><code>docker run -d -it &ndash;name pg -p 5432:5432 -e POSTGRES_PASSWORD=postgres ghcr.io/resotto/goilerplate-pg:latest</code></p>
+
+<p>然后，让我们来看看：</p>
+
+<pre><code> open http://0.0.0.0:8080/parameter
+ open http://0.0.0.0:8080/order
+</code></pre>
+
+<h3 id="建筑形象">建筑形象</h3>
+
+<p>如果从 GitHub 容器注册表拉取映像失败，还可以从 Dockerfile 生成 Docker 映像。</p>
+
+<p><code>cd build
+docker build -t goilerplate-pg:latest .
+docker run -d -it &ndash;name pg -p 5432:5432 -e POSTGRES_PASSWORD=postgres goilerplate-pg:latest</code></p>
+
+<h3 id="docker-映像">Docker 映像</h3>
+
+<p>从 GitHub 容器注册表中提取的映像是从简单的 Dockerfile 和 init.sql构建的。</p>
+
+<pre><code class="language-dockerfile">
+
+FROM postgres
+
+EXPOSE 5432
+
+COPY ./init.sql /docker-entrypoint-initdb.d/&lt;/code&gt; 
+
+
+</code></pre>
+
+<pre><code class="language-mysql">create table parameters (
+    id integer primary key,
+    funds integer,
+    btc integer
+);
+
+insert into parameters values (1, 10000, 10);
+
+create table persons (
+    person_id uuid primary key,
+    name text not null,
+    weight integer
+);
+
+create table card_brands (
+    brand text primary key
+);
+
+create table cards (
+    card_id uuid primary key,
+    brand text references card_brands(brand) on update cascade
+);
+
+create table orders (
+    order_id uuid primary key,
+    person_id uuid references persons(person_id)
+);
+
+create table payments (
+    order_id uuid primary key references orders(order_id),
+    card_id uuid references cards(card_id)
+);
+
+insert into persons values ('f3bf75a9-ea4c-4f57-9161-cfa8f96e2d0b', 'Jerry', 1);
+
+insert into card_brands values ('VISA'), ('AMEX');
+
+insert into cards values ('3224ebc0-0a6e-4e22-9ce8-c6564a1bb6a1', 'VISA');
+
+insert into orders values ('722b694c-984c-4208-bddd-796553cf83e1', 'f3bf75a9-ea4c-4f57-9161-cfa8f96e2d0b');
+
+insert into payments values ('722b694c-984c-4208-bddd-796553cf83e1', '3224ebc0-0a6e-4e22-9ce8-c6564a1bb6a1');
+</code></pre>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/go/Go%E7%9A%84%E5%B9%B2%E5%87%80%E6%A0%B7%E6%9D%BF%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E6%B8%85%E6%B4%81%E6%9E%B6%E6%9E%84Gin%E5%92%8CGORM/">https://geek.zshipu.com/post/go/Go%E7%9A%84%E5%B9%B2%E5%87%80%E6%A0%B7%E6%9D%BF%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E6%B8%85%E6%B4%81%E6%9E%B6%E6%9E%84Gin%E5%92%8CGORM/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/DDD/DDD021-%E6%9C%89%E7%95%8C%E4%B8%8A%E4%B8%8B%E6%96%87/">DDD021-有界上下文</a></li>
+        
+        <li><a href="/post/DDD/DDD020-%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%85%A5%E9%97%A8%E5%BB%BA%E6%A8%A1%E8%BF%87%E7%A8%8B/">DDD020-域驱动设计入门建模过程</a></li>
+        
+        <li><a href="/post/DDDali/%E9%87%8D%E6%9E%84%E5%AE%9E%E6%88%98-%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E6%88%98%E7%95%A5%E5%BB%BA%E6%A8%A1%E5%9C%A8%E9%87%8D%E6%9E%84%E4%B8%9A%E5%8A%A1%E7%B3%BB%E7%BB%9F%E6%97%B6%E7%9A%84%E5%BA%94%E7%94%A8/">重构实战 - 领域驱动设计战略建模在重构业务系统时的应用</a></li>
+        
+        <li><a href="/post/DDDali/%E9%98%BF%E9%87%8C%E6%8A%80%E6%9C%AF%E4%B8%93%E5%AE%B6%E8%AF%A6%E8%A7%A3DDD%E7%B3%BB%E5%88%97-%E7%AC%AC%E4%BA%94%E8%AE%B2-%E8%81%8A%E8%81%8A%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E5%86%99%E6%B5%81%E6%B0%B4%E8%B4%A6%E4%BB%A3%E7%A0%81/">阿里技术专家详解DDD系列 第五讲 - 聊聊如何避免写流水账代码</a></li>
+        
+        <li><a href="/post/DDDali/%E4%BB%80%E4%B9%88%E6%98%AFDDD%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E7%9A%84%E6%88%98%E7%95%A5%E8%AE%BE%E8%AE%A1/">什么是DDD领域驱动设计的战略设计</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/DDD'>DDD</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/React-%E5%88%9D%E5%AD%A6%E8%80%85-%E5%88%9B%E5%BB%BA%E6%96%B0%E7%9A%84-React-%E5%BA%94%E7%94%A8-%E4%B8%80/" title="React 初学者： 创建新的 React 应用 一">React 初学者： 创建新的 React 应用 一</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/go/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Go%E7%9A%84GC%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/" title="深入理解Go的GC回收机制">深入理解Go的GC回收机制</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/%E5%A6%82%E4%BD%95%E4%B8%BA%E6%82%A8%E7%9A%84Next.js%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E5%8F%AF%E6%89%A9%E5%B1%95%E7%9A%84%E6%9E%B6%E6%9E%84/" title="起步：如何为您的Next.js项目构建可扩展的架构">起步：如何为您的Next.js项目构建可扩展的架构</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9820-%E6%80%BB%E7%BB%93%E4%BA%8C%E5%88%86%E5%B8%83%E5%BC%8F%E6%9E%B6%E6%9E%84%E5%85%B3%E9%94%AE%E8%AE%BE%E8%AE%A110%E9%97%AE/" title="DDD实战：20 总结（二）：分布式架构关键设计10问">DDD实战：20 总结（二）：分布式架构关键设计10问</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9819-%E6%80%BB%E7%BB%93%E4%B8%80%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%AE%BE%E8%AE%A1%E5%92%8C%E6%8B%86%E5%88%86%E8%A6%81%E5%9D%9A%E6%8C%81%E5%93%AA%E4%BA%9B%E5%8E%9F%E5%88%99/" title="DDD实战：19 总结（一）：微服务设计和拆分要坚持哪些原则">DDD实战：19 总结（一）：微服务设计和拆分要坚持哪些原则</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9818-%E7%9F%A5%E8%AF%86%E7%82%B9%E4%B8%B2%E8%AE%B2%E5%9F%BA%E4%BA%8EDDD%E7%9A%84%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%AE%BE%E8%AE%A1%E5%AE%9E%E4%BE%8B/" title="DDD实战：18 知识点串讲：基于DDD的微服务设计实例">DDD实战：18 知识点串讲：基于DDD的微服务设计实例</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9817-%E4%BB%8E%E5%90%8E%E7%AB%AF%E5%88%B0%E5%89%8D%E7%AB%AF%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%90%8E%E5%89%8D%E7%AB%AF%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1/" title="DDD实战：17 从后端到前端：微服务后，前端如何设计">DDD实战：17 从后端到前端：微服务后，前端如何设计</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9816-%E8%A7%86%E5%9B%BE%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%9C%8D%E5%8A%A1%E5%92%8C%E6%95%B0%E6%8D%AE%E5%9C%A8%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%90%84%E5%B1%82%E7%9A%84%E5%8D%8F%E4%BD%9C/" title="DDD实战：16 视图：如何实现服务和数据在微服务各层的协作">DDD实战：16 视图：如何实现服务和数据在微服务各层的协作</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9815-%E8%BE%B9%E7%95%8C%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%9A%84%E5%90%84%E7%A7%8D%E8%BE%B9%E7%95%8C%E5%9C%A8%E6%9E%B6%E6%9E%84%E6%BC%94%E8%BF%9B%E4%B8%AD%E7%9A%84%E4%BD%9C%E7%94%A8/" title="DDD实战：15 边界：微服务的各种边界在架构演进中的作用">DDD实战：15 边界：微服务的各种边界在架构演进中的作用</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/%E4%BD%BF%E7%94%A8%E4%BA%8B%E4%BB%B6%E9%A3%8E%E6%9A%B4%E5%92%8C%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%AF%B9%E5%8F%8D%E5%BA%94%E5%BC%8F%E7%B3%BB%E7%BB%9F%E8%BF%9B%E8%A1%8C%E5%BB%BA%E6%A8%A1/" title="DDD实战：‎使用事件风暴和域驱动设计对反应式系统进行建模‎">DDD实战：‎使用事件风暴和域驱动设计对反应式系统进行建模‎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/BI/">BI</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD%E5%AE%9E%E6%88%98/">DDD实战</a>
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    
+    <a href="">Java</a>
+    
+    <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
+    
+    <a href="">Nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
+    
+    <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/css/">css</a>
+    
+    <a href="https://geek.zshipu.com/tags/game/">game</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    
+    <a href="">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/web3/">web3</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/">人工智能</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%88%86%E8%AF%8D/">分词</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%96%87%E6%91%98/">文摘</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%88%AC%E8%99%AB/">爬虫</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E8%B5%B7%E6%AD%A5/">起步</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

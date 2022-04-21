@@ -1,0 +1,1247 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>如何使用 Python 基于 PyQt5 第三方库，进行实现 exe 桌面应用软件开发 | 知识铺的博客</title>
+    <meta property="og:title" content="如何使用 Python 基于 PyQt5 第三方库，进行实现 exe 桌面应用软件开发 - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="如何使用 Python 基于 PyQt5 第三方库，进行实现 exe 桌面应用软件开发">
+        
+    <meta name="author" content="知识铺">
+    <meta property="og:url" content="https://geek.zshipu.com/post/tlg/output/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Python-%E5%9F%BA%E4%BA%8E-PyQt5-%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BA%93%E8%BF%9B%E8%A1%8C%E5%AE%9E%E7%8E%B0-exe-%E6%A1%8C%E9%9D%A2%E5%BA%94%E7%94%A8%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#安装-pyqt5-第三方库开发环境">安装 PyQt5 第三方库开发环境</a></li>
+<li><a href="#初始化创建桌面应用程序">初始化创建桌面应用程序</a></li>
+<li><a href="#pycharm-添加-qt-designer-扩展工具">Pycharm 添加 Qt designer 扩展工具</a></li>
+<li><a href="#main-函数加载-ui-文件运行">main 函数加载 ui 文件运行</a></li>
+<li><a href="#创建-qwidget-子类进行调用">创建 Qwidget 子类进行调用</a></li>
+<li><a href="#mainwindow-窗口显示图片">MainWindow 窗口显示图片</a></li>
+<li><a href="#结合-opencv-实现图片模糊处理">结合 opencv 实现图片模糊处理</a></li>
+<li><a href="#调用摄像头外设进行图像存储">调用摄像头外设进行图像存储</a></li>
+<li><a href="#mainwindow-窗口嵌套-web-页面">MainWindow 窗口嵌套 web 页面</a></li>
+<li><a href="#结合-pyautogui-远程控制-pc">结合 pyautogui 远程控制 PC</a></li>
+<li><a href="#实现-python-gui-程序打包成-exe">实现 python gui 程序打包成 exe</a></li>
+<li><a href="#解决打包-py-文件运行-exe-闪退">解决打包 py 文件运行 exe 闪退</a></li>
+</ul></li>
+</ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">如何使用 Python 基于 PyQt5 第三方库，进行实现 exe 桌面应用软件开发</h1>
+        </header>
+        <date class="post-meta meta-date">
+            1年1月1日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            
+
+<h2 id="安装-pyqt5-第三方库开发环境">安装 PyQt5 第三方库开发环境</h2>
+
+<p>下面直接使用 pip 来安装 PyQt5，此处可能是 pip/pip3，或者两者皆可，后面不再重复</p>
+
+<p>直接 pip 安装 PyQt5，当然也可以加镜像加快安装</p>
+
+<pre><code>pip install PyQt5
+
+</code></pre>
+
+<p>由于 Qt Designer 已经在 Python3.5 版本从 PyQt5 转移到了 tools，因此我们还需要安装 pyqt5-tools</p>
+
+<pre><code>pip install pyqt5-tools
+
+</code></pre>
+
+<p>然后键盘按下 Win+S 呼出 Cornata 主面板（搜索框），输入 designer，如果看到跟下图类似的结果说明 PyQt Designer 已经被安装。<img src="https://cdn.jsdelivr.net/gh/zshipu/images/38a9ba7e3f7e413c9af03d5ae39a6256.png" alt="" /><br />
+在 cmd 中输入 pyuic5，如果返回 “Error: one input ui-file must be specified” 也能够说明安装成功。</p>
+
+<pre><code>C:\Users\16204&gt;pyuic5
+Error: one input ui-file must be specified
+
+</code></pre>
+
+<h2 id="初始化创建桌面应用程序">初始化创建桌面应用程序</h2>
+
+<p>使用 Pycharm，做简单的测试，创建 Widget 窗口对象，进行展示</p>
+
+<pre><code>import sys
+from PyQt5.QtWidgets import QApplication, QWidget
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    
+    widget = QWidget() 
+    # create the obj of widget
+    widget.resize(400, 200)  
+    # the size of widget window
+    widget.move(300, 300)  
+    # the position of widget window
+    widget.setWindowTitle(&quot;第一个唤醒手腕桌面应用程序&quot;)  
+    # the title of widget window
+    widget.show()  
+    # show widget window
+    sys.exit(app.exec_())  
+    # 进入程序的主循环、并通过exit函数确保主循环安全结束
+
+</code></pre>
+
+<p>运行的结果展示如下所示：<br />
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/505100a72428429190392c0d8dc9c08d.png" alt="" /></p>
+
+<h2 id="pycharm-添加-qt-designer-扩展工具">Pycharm 添加 Qt designer 扩展工具</h2>
+
+<p>在使用 PyQT5 创建 GUI 图形用户界面程序时，会生成扩展名为. ui 的文件，该文件需要转换为. py 文件后才可以被 Python 识别，所以需要配置 Pycharm。</p>
+
+<pre><code>名称(Name)：Qt Designer [外部工具的名称 可自定义]
+组(Group)：使用默认值
+程序(Program)：C:\\Python\Python38\Lib\site-packages\QtDesigner\designer.exe [输入自己的PyQt5开发工具安装路径]
+工作目录(Working directory)：$ProjectFileDir$ [表示自己文件所在的项目路径]
+
+</code></pre>
+
+<p>图示操作：<br />
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/1b69b15cbf324dbbae86227aaa78f354.png" alt="" /><br />
+当然将 ui 文件转换成 py 文件也可以采用如下命令：</p>
+
+<pre><code>xxx.ui所在目录 &gt; pyuic5 -o XXX.py xxx.ui
+
+</code></pre>
+
+<h2 id="main-函数加载-ui-文件运行">main 函数加载 ui 文件运行</h2>
+
+<p>使用 Qt Designer 创建 English.ui，首先将 English.ui 文件转换成 English.py 文件，在 main 进行调用，展示如下：</p>
+
+<pre><code>import sys
+from PyQt5.QtWidgets import QApplication, QWidget
+
+import English
+
+if __name__ == &quot;__main__&quot;:
+    app = QApplication(sys.argv)
+    widget = QWidget()
+    ui = English.Ui_Form() # 加载ui对象
+    ui.setupUi(widget)
+    widget.show() # 窗口展示
+    sys.exit(app.exec_())
+
+</code></pre>
+
+<h2 id="创建-qwidget-子类进行调用">创建 Qwidget 子类进行调用</h2>
+
+<p>自定义继承 QWidget 的子类，进行调用测试，也可以进行窗口 logo 的设置，展示如下：</p>
+
+<pre><code>import sys
+
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QWidget
+
+class UsingTest(QWidget):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setWindowTitle(&quot;唤醒手腕&quot;)
+        self.setGeometry(300, 300, 350, 150)
+
+if __name__ == '__main__':  # 程序的入口
+    app = QApplication(sys.argv)
+    win = UsingTest()
+    win.setWindowIcon(QIcon(&quot;./excel_wrist.ico&quot;))
+    win.show()
+    sys.exit(app.exec_())
+
+</code></pre>
+
+<p>如何设置窗口的居中显示：</p>
+
+<pre><code>def setCenterPosition(self):
+    # 获取屏幕坐标系
+    screen = QDesktopWidget().screenGeometry()
+    # 获取自身的窗口坐标系
+    size = self.geometry()
+    newLeft = (screen.width() - size.width()) / 2
+    newTop = (screen.height() - size.height()) / 2
+    self.move(newLeft, newTop)
+
+</code></pre>
+
+<h2 id="mainwindow-窗口显示图片">MainWindow 窗口显示图片</h2>
+
+<p>首先我们设计好 ui，转换成 py 文件：</p>
+
+<pre><code>from PyQt5 import QtCore, QtGui, QtWidgets
+
+
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName(&quot;MainWindow&quot;)
+        MainWindow.resize(500, 300)
+        MainWindow.setMinimumSize(QtCore.QSize(500, 300))
+        MainWindow.setMaximumSize(QtCore.QSize(500, 300))
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName(&quot;centralwidget&quot;)
+        self.label_2 = QtWidgets.QLabel(self.centralwidget)
+        self.label_2.setGeometry(QtCore.QRect(30, 30, 240, 240))
+        self.label_2.setText(&quot;&quot;)
+        self.label_2.setPixmap(QtGui.QPixmap(&quot;apple.webp&quot;))
+        self.label_2.setObjectName(&quot;label_2&quot;)
+        self.pushButton_2 = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_2.setGeometry(QtCore.QRect(310, 220, 151, 51))
+        font = QtGui.QFont()
+        font.setPointSize(13)
+        self.pushButton_2.setFont(font)
+        self.pushButton_2.setObjectName(&quot;pushButton_2&quot;)
+        MainWindow.setCentralWidget(self.centralwidget)
+
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    def retranslateUi(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate(&quot;MainWindow&quot;, &quot;MainWindow&quot;))
+        self.pushButton_2.setText(_translate(&quot;MainWindow&quot;, &quot;Choose Image&quot;))
+
+
+</code></pre>
+
+<p>然后进行设计主 main 调用，展示如下所示：</p>
+
+<pre><code>import sys
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
+from chooseMyImage import *
+
+
+class MyClass(QMainWindow, Ui_MainWindow):
+    def __init__(self, parent=None):
+        super(MyClass, self).__init__(parent)
+        self.setupUi(self)
+        self.pushButton_2.clicked.connect(self.openimage)
+
+    def openimage(self):
+        imgName, imgType = QFileDialog.getOpenFileName(self, &quot;打开图片&quot;, &quot;&quot;, &quot;*.jpg;;*.png;;All Files(*)&quot;)
+
+        jpg = QtGui.QPixmap(imgName).scaled(240, 240)
+        self.label_2.setPixmap(jpg)
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    myWin = MyClass()
+    myWin.show()
+    sys.exit(app.exec_())
+
+</code></pre>
+
+<p>运行结果展示如下：<br />
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/380b4bf07c2a4afdb9f3f819f44859fe.png" alt="" /><br />
+调整图片显示尺寸的函数 scaled()：<br />
+<img src="https://img-blog.csdnimg.cn/7b6c397e5f4b4bdfadca4d90b52051ad.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5ZSk6YaS5omL6IWV,size_20,color_FFFFFF,t_70,g_se,x_16" alt="" /><br />
+从源码可以看出，我们也可以根据高度与宽度进行自适应的尺寸表示。</p>
+
+<h2 id="结合-opencv-实现图片模糊处理">结合 opencv 实现图片模糊处理</h2>
+
+<p>需要使用 PyQt5、numpy、cv2 等第三方库，代码展示：</p>
+
+<pre><code>import sys
+import cv2
+import numpy as np
+from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtWidgets import QApplication, QDialog, QFileDialog, QGridLayout, QLabel, QPushButton
+
+
+class Window(QDialog):
+    def __init__(self):
+        # 初始化一个img的ndarry，用于存储图像
+        self.img = np.ndarray(())
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        self.resize(500, 400)
+        self.btnOpen = QPushButton('Open', self)
+        self.btnSave = QPushButton('Save', self)
+        self.btnProcess = QPushButton('Process', self)
+        self.btnQuit = QPushButton('Quit', self)
+        self.label = QLabel()
+
+        # 布局设定
+        layout = QGridLayout(self)
+        layout.addWidget(self.label, 0, 1, 3, 4)
+        layout.addWidget(self.btnOpen, 4, 1, 1, 1)
+        layout.addWidget(self.btnSave, 4, 2, 1, 1)
+        layout.addWidget(self.btnProcess, 4, 3, 1, 1)
+        layout.addWidget(self.btnQuit, 4, 4, 1, 1)
+
+        # 信号与槽进行连接，信号可绑定普通成员函数
+        self.btnOpen.clicked.connect(self.openSlot)
+        self.btnSave.clicked.connect(self.saveSlot)
+        self.btnProcess.clicked.connect(self.processSlot)
+        self.btnQuit.clicked.connect(self.close)
+
+    def openSlot(self):
+        # 调用存储文件
+        fileName, tmp = QFileDialog.getOpenFileName(self, 'Open Image', 'Image', '*.png *.jpg *.bmp')
+        # 采用OpenCV函数读取数据
+        self.img = cv2.imread(fileName, -1)
+        self.refreshShow()
+
+    def saveSlot(self):
+        # 调用存储文件dialog
+        fileName, tmp = QFileDialog.getSaveFileName(self, 'Save Image', 'Image', '*.png *.jpg *.bmp')
+        # 调用OpenCV写入函数
+        cv2.imwrite(fileName, self.img)
+
+    def processSlot(self):
+        # 对图像做模糊处理，窗口设定为5*5
+        self.img = cv2.blur(self.img, (5, 5))
+        self.refreshShow()
+
+    def refreshShow(self):
+        # 提取图像的通道和尺寸，用于将OpenCV下的image转换成Qimage
+        height, width, channel = self.img.shape
+        bytesPerline = 3 * width
+        self.qImg = QImage(self.img.data, width, height, bytesPerline, QImage.Format_RGB888).rgbSwapped()
+        # 将QImage显示出来
+        self.label.setPixmap(QPixmap.fromImage(self.qImg).scaledToHeight(400))
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    win = Window()
+    win.show()
+    sys.exit(app.exec_())
+
+</code></pre>
+
+<p>运行展示如下所示：<br />
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/9e259fc5561f49a88447e2ce303c860d.png" alt="" /></p>
+
+<h2 id="调用摄像头外设进行图像存储">调用摄像头外设进行图像存储</h2>
+
+<p>首先是建立 ui 文件：</p>
+
+<pre><code>from PyQt5 import QtCore, QtGui, QtWidgets
+
+
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName(&quot;MainWindow&quot;)
+        MainWindow.resize(800, 400)
+        MainWindow.setMinimumSize(QtCore.QSize(800, 400))
+        MainWindow.setMaximumSize(QtCore.QSize(800, 400))
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName(&quot;centralwidget&quot;)
+        self.SaveButton = QtWidgets.QPushButton(self.centralwidget)
+        self.SaveButton.setGeometry(QtCore.QRect(570, 160, 200, 51))
+        font = QtGui.QFont()
+        font.setPointSize(11)
+        self.SaveButton.setFont(font)
+        self.SaveButton.setObjectName(&quot;SaveButton&quot;)
+        self.VideoLabel = QtWidgets.QLabel(self.centralwidget)
+        self.VideoLabel.setText(&quot;监控展示区域&quot;)
+        self.VideoLabel.setGeometry(QtCore.QRect(30, 20, 500, 360))
+        self.VideoLabel.setMinimumSize(QtCore.QSize(480, 360))
+        self.VideoLabel.setObjectName(&quot;VideoLabel&quot;)
+        self.ImageLabel = QtWidgets.QLabel(self.centralwidget)
+        self.ImageLabel.setGeometry(QtCore.QRect(570, 230, 200, 150))
+        self.ImageLabel.setObjectName(&quot;ImageLabel&quot;)
+        self.ImageLabel.setText(&quot;图像截取展示区域&quot;)
+        self.GetButton = QtWidgets.QPushButton(self.centralwidget)
+        self.GetButton.setGeometry(QtCore.QRect(570, 90, 200, 51))
+        font = QtGui.QFont()
+        font.setPointSize(11)
+        self.GetButton.setFont(font)
+        self.GetButton.setObjectName(&quot;GetButton&quot;)
+        self.PauseButton = QtWidgets.QPushButton(self.centralwidget)
+        self.PauseButton.setGeometry(QtCore.QRect(570, 20, 200, 51))
+        font = QtGui.QFont()
+        font.setPointSize(11)
+        self.PauseButton.setFont(font)
+        self.PauseButton.setObjectName(&quot;PauseButton&quot;)
+        MainWindow.setCentralWidget(self.centralwidget)
+
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    def retranslateUi(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate(&quot;MainWindow&quot;, &quot;MainWindow&quot;))
+        self.SaveButton.setText(_translate(&quot;MainWindow&quot;, &quot;保存最近一次画面&quot;))
+        self.VideoLabel.setText(_translate(&quot;MainWindow&quot;, &quot;TextLabel&quot;))
+        self.ImageLabel.setText(_translate(&quot;MainWindow&quot;, &quot;TextLabel&quot;))
+        self.GetButton.setText(_translate(&quot;MainWindow&quot;, &quot;截取当前监控画面&quot;))
+        self.PauseButton.setText(_translate(&quot;MainWindow&quot;, &quot;开启自动跟踪监控&quot;))
+
+</code></pre>
+
+<p>然后是 main 文件的代码，展示如下：</p>
+
+<pre><code>import sys
+from datetime import datetime
+
+from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
+from wristcamera import *
+import cv2
+
+capture = cv2.VideoCapture(0)
+
+
+class MyClass(QMainWindow, Ui_MainWindow):
+    def __init__(self, parent=None):
+        super(MyClass, self).__init__(parent)
+        self.setupUi(self)
+        self.isStartState = False
+        self.isImageExist = False
+
+        self.PauseButton.clicked.connect(self.startVideo)
+        self.GetButton.clicked.connect(self.getImage)
+        self.SaveButton.clicked.connect(self.saveImage)
+
+    def startVideo(self):
+        self.isStartState = ~self.isStartState
+        while self.isStartState:
+            self.VideoLabel.setPixmap(self.nowImage()[0])
+            cv2.waitKey(50)
+
+    def getImage(self):
+        if self.isStartState == False:
+            return
+        self.isImageExist = True
+        self.ImageLabel.setPixmap(self.nowImage()[0].scaled(200, 150))
+
+    def saveImage(self):
+        if self.isImageExist == False:
+            return
+        FileName = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')
+        file, tmp = QFileDialog.getSaveFileName(self, 'Save Image', FileName, '*.png *.jpg *.bmp')
+        cv2.imwrite(file, self.nowImage()[1])
+    # 当前的画面
+    def nowImage(self):
+        ret, frame = capture.read()
+        # 摄像头读取, ret为是否成功打开摄像头, true, false：frame为视频的每一帧图像
+        self.img = cv2.flip(frame, 1)
+        # 摄像头是和人对立的，将图像左右调换回来正常显示。
+
+        # 提取图像的通道和尺寸，用于将OpenCV下的image转换成Qimage
+        height, width, channel = self.img.shape
+        bytesPerline = 3 * width
+        self.qImg = QImage(self.img.data, width, height, bytesPerline, QImage.Format_RGB888).rgbSwapped()
+        # 将QImage显示出来
+        return QPixmap.fromImage(self.qImg.scaled(480, 360)), self.img
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    myWin = MyClass()
+    myWin.setWindowTitle(&quot;唤醒手腕 - 猫头鹰智能监控光棱2000&quot;)
+    myWin.show()
+    sys.exit(app.exec_())
+
+</code></pre>
+
+<p>运行的结果展示：马赛克是为了保护博主丑陋的模样，谢谢配合<br />
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/4a43f6b005714c8aa0298112b766f048.png" alt="" /><br />
+点击保存最近一次画面就会弹窗，文件保存的路径提示：<br />
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/b809b5a7cc9b4c2caf5dfccb114d5f53.png" alt="" /></p>
+
+<h2 id="mainwindow-窗口嵌套-web-页面">MainWindow 窗口嵌套 web 页面</h2>
+
+<p>在新版本中的需要自行下载 QtWebEngine，展示如下：</p>
+
+<pre><code> pip install PyQtWebEngine
+
+</code></pre>
+
+<p>具体实现代码展示：</p>
+
+<pre><code>import sys
+
+from PyQt5.QtCore import QUrl
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtWidgets import QApplication, QDesktopWidget
+from PyQt5.QtWidgets import QMainWindow
+
+
+class UsingTest(QMainWindow):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setWindowTitle(&quot;唤醒手腕&quot;)
+        self.setMaximumSize(1500, 900)
+        self.setMinimumSize(1500, 900)
+        self.browser = QWebEngineView()
+        self.browser.load(QUrl(&quot;http://wrist.cc/&quot;))
+        self.setCentralWidget(self.browser)
+
+    def setCenterPosition(self):
+        # 获取屏幕坐标系
+        screen = QDesktopWidget().screenGeometry()
+        # 获取自身的窗口坐标系
+        size = self.geometry()
+        newLeft = (screen.width() - size.width()) / 2
+        newTop = (screen.height() - size.height()) / 2
+        self.move(newLeft, newTop)
+
+
+if __name__ == '__main__':  # 程序的入口
+    app = QApplication(sys.argv)
+    win = UsingTest()
+    win.setWindowIcon(QIcon(&quot;./excel_wrist.ico&quot;))
+    win.setCenterPosition()
+    win.show()
+    sys.exit(app.exec_())
+
+</code></pre>
+
+<p>代码运行结果：<br />
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/d011d4e0e767434faf8ac6b6c71e89b7.png" alt="" /></p>
+
+<h2 id="结合-pyautogui-远程控制-pc">结合 pyautogui 远程控制 PC</h2>
+
+<p><strong>首先搭建客户端网页 HTML</strong></p>
+
+<p>想法是这样的，那么借助 js 我们可以获取鼠标在网页的位置，那么将网页呈现的桌面画面与实际桌面相称，进行从而远程控制。</p>
+
+<pre><code>$(document).click(
+    function (event) {
+        event = event || window.event;
+        var x = event.offsetX || event.originalEvent.layerX;
+        var y = event.offsetY || event.originalEvent.layerY;
+        var x_rate = x / document.body.clientWidth;
+        var y_rate = y / document.body.clientHeight;
+    }
+);
+
+</code></pre>
+
+<p>如上的 Javascript 代码就是获取鼠标点击网页页面时候，鼠标位于网页页面的位置坐标（坐标百分比表示），那么我们可以把这个坐标的值转发到服务器端，通过 pyautogui 进行对应的操作即可。</p>
+
+<p>发送的时候，采用 Ajax 发送模式，就是不刷新网页就进行发送数据：</p>
+
+<pre><code>function sendPointerPosition(xrate, yrate) {
+    $.ajax({
+        url: &quot;/pointer?xrate=&quot; + xrate + &quot;&amp;yrate=&quot; + yrate,
+        type: &quot;get&quot;,
+        success: function (data) {
+            console.log(data)
+        },
+        error: function (error) {
+            alert(error)
+        }
+    })
+}
+
+</code></pre>
+
+<p>客户端页面的代码完整展示：</p>
+
+<pre><code>&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge&quot;&gt;
+    &lt;meta &gt;
+    &lt;script src=&quot;http://libs.baidu.com/jquery/2.0.0/jquery.js&quot;&gt;&lt;/script&gt;
+    &lt;title&gt;唤醒手腕&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;img src=&quot;{{ url_for('video_feed') }}&quot;&gt;
+&lt;style&gt;
+    * { padding: 0; margin: 0 }
+    img { width: 100%; }
+&lt;/style&gt;
+&lt;script&gt;
+    $(document).click(
+        function (event) {
+            event = event || window.event;
+            var x = event.offsetX || event.originalEvent.layerX;
+            var y = event.offsetY || event.originalEvent.layerY;
+            var x_rate = x / document.body.clientWidth;
+            var y_rate = y / document.body.clientHeight;
+            sendPointerPosition(x_rate, y_rate)
+        }
+    );
+
+    function sendPointerPosition(xrate, yrate) {
+        $.ajax({
+            url: &quot;/pointer?xrate=&quot; + xrate + &quot;&amp;yrate=&quot; + yrate,
+            type: &quot;get&quot;,
+            success: function (data) {
+                console.log(data)
+            },
+            error: function (error) {
+                alert(error)
+            }
+        })
+    }
+
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+</code></pre>
+
+<p><strong>首先搭建服务端媒体流传输，传输电脑实时画面</strong></p>
+
+<p>这边就是采用 pyautogui 进行捕捉电脑的画面，并且服务器要对接收到的坐标数据进行执行的操作，展示如下所示：</p>
+
+<pre><code>import pyautogui
+from flask import Flask, render_template, Response, request
+import io
+
+app = Flask(__name__)
+
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+
+@app.route('/pointer')
+def pointer():
+    x = int(float(request.args[&quot;xrate&quot;]) * 1920)
+    y = int(float(request.args[&quot;yrate&quot;]) * 1080)
+    # 执行点击操作
+    pyautogui.click(x, y)
+    return &quot;success&quot;
+	
+
+def gen():
+    while True:
+        screenShotImg = pyautogui.screenshot()
+
+        imgByteArr = io.BytesIO()
+        screenShotImg.save(imgByteArr, format='JPEG')
+        imgByteArr = imgByteArr.getvalue()
+        frame = imgByteArr
+        yield (b'--frame\r\n Content-Type: image/jpeg\r\n\r\n' + frame)
+
+
+@app.route('/video_feed')
+def video_feed():
+    return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+if __name__ == '__main__':
+    app.run(host='192.168.43.247', debug=True, threaded=True)
+
+</code></pre>
+
+<p><strong>构建远程控制桌面 gui，将网页嵌入 gui 应用程序</strong></p>
+
+<pre><code>import sys
+
+from PyQt5.QtCore import QUrl
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtWidgets import QApplication, QDesktopWidget
+from PyQt5.QtWidgets import QMainWindow
+
+
+class UsingTest(QMainWindow):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setWindowTitle(&quot;唤醒手腕&quot;)
+        self.setMaximumSize(1600, 900)
+        self.setMinimumSize(1600, 900)
+        self.browser = QWebEngineView()
+        self.browser.load(QUrl(&quot;http://192.168.1.102:5000/&quot;))
+        self.setCentralWidget(self.browser)
+
+    def setCenterPosition(self):
+        # 获取屏幕坐标系
+        screen = QDesktopWidget().screenGeometry()
+        # 获取自身的窗口坐标系
+        size = self.geometry()
+        newLeft = (screen.width() - size.width()) / 2
+        newTop = (screen.height() - size.height()) / 2
+        self.move(newLeft, newTop)
+
+
+if __name__ == '__main__':  # 程序的入口
+    app = QApplication(sys.argv)
+    win = UsingTest()
+    win.setWindowIcon(QIcon(&quot;./excel_wrist.ico&quot;))
+    win.setCenterPosition()
+    win.show()
+    sys.exit(app.exec_())
+
+</code></pre>
+
+<p>当然可以把 gui 桌面应用进行打包成 exe，在另一台电脑上运行。我这边没有另一台电脑，只能在扩展展示：<br />
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/f199b31e233c495dbcfc0f12db35cd26.png" alt="" /><br />
+可以发现电脑的实时状态已经呈现，我们点击 gui 上的对应位置，其实在真实电脑中也会同样的执行操作。</p>
+
+<p>就比如我们用鼠标点击 gui 画面中的 windows 菜单图标，js 会把我们的点击位置传给真实电脑的服务器应用中，然后执行对应的操作，展示如下：<br />
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/f56336670649406fb204a578ef8e5da8.png" alt="" /></p>
+
+<p>总结：我们采用的同一台电脑上测试，其实建议用另一台笔记本进行操作，这样的话效果会更加的明显。当前这仅仅是单击事件而已，如果加强功能，也可以增加双击，或者长按拖拽的事件。</p>
+
+<h2 id="实现-python-gui-程序打包成-exe">实现 python gui 程序打包成 exe</h2>
+
+<p>安装第三方库 pyinstaller</p>
+
+<pre><code>pip install pyinstaller
+
+</code></pre>
+
+<p>然后打包 exe，若需将 xxx.py 文件打包，只需在终端执行：</p>
+
+<pre><code>pyinstaller xxx.py
+
+</code></pre>
+
+<blockquote>
+<p>特别注意：终端需切换至 xxx.py 文件所在目录下</p>
+</blockquote>
+
+<p>pyinstaller 常用可选项及说明：</p>
+
+<pre><code>-F：打包后只生成单个exe格式文件；
+-D：默认选项，创建一个目录，包含exe文件以及大量依赖文件；
+-c：默认选项，使用控制台(就是类似cmd的黑框)；
+-w：不使用控制台；
+-p：添加搜索路径，让其找到对应的库；
+-i：改变生成程序的icon图标。
+
+</code></pre>
+
+<p>然后我们可以发现在目录下生成 dist 文件夹：<br />
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/a30fabcd74a740b1b53afcff6ad35628.png" alt="" /><br />
+然后我们运行 main.exe 文件：<br />
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/a41cae1b5077420199194df35932e9a1.png" alt="" /></p>
+
+<h2 id="解决打包-py-文件运行-exe-闪退">解决打包 py 文件运行 exe 闪退</h2>
+
+<p>这部分借鉴白金之星 1717 博主：<a href="https://blog.csdn.net/qq_41997888/article/details/100101951?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522165002391416781683950453%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fall.%2522%257D&amp;request_id=165002391416781683950453&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~first_rank_ecpm_v1~rank_v31_ecpm-1-100101951.142%5Ev9%5Epc_search_result_cache,157%5Ev4%5Econtrol&amp;utm_term=pyinstaller%E6%89%93%E5%8C%85exe%E9%97%AA%E9%80%80&amp;spm=1018.2226.3001.4187">解决 pyinstaller 打包 py 文件运行 exe 闪退等诸多疑难杂症</a></p>
+
+<p>在打包之前，你需要安装 pyinstaller，如果你是使用的虚拟环境，在打包前需要在命令行里激活你安装了 pyinstaller 的那个虚拟环境。</p>
+
+<p>在使用 pyinstaller 打包 python 程序的时候大概分为两种请况：</p>
+
+<ul>
+<li>要打包的程序为单个 py 文件</li>
+<li>要打包的文件为多个 py 文件</li>
+</ul>
+
+<p>当要打包的文件为多个 py 文件，这种情况一般你的代码较多，项目较大，可能你写了一个 GUI 界面 py 文件，但这个文件调用了其他文件的函数什么的。</p>
+
+<p>这个时候你需要生成 spec 文件来打包，这里假设你的要打包的主文件为 test.py，首先在命令行中，cd 到项目的相对目录下，然后输入：</p>
+
+<pre><code>pyi-makespec test.py
+
+</code></pre>
+
+<p>之后会在当前目录下生成一个 test.spec，你可以在 pycharm 中打开这个文件，里面的内容大概是这样的，展示如下所示：<br />
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/c31406c5b5594df588a91a9ded6d785a.png" alt="" /><br />
+你需要把你的除了主文件以外的其他 py 文件也写到 a = Analysis([‘GUI.py’]， 的这个列表中，像这样</p>
+
+<pre><code>Analysis(['GUI.py'， 'test1.py', 'E:\\a\\test2.py']
+
+</code></pre>
+
+<p>如果你的其他 py 文件和你要打包的主文件 test.py 不在同一个目录，那么你在 list 中需要输入这个 py 文件的绝对地址。</p>
+
+<p>如果你的项目调用了一些图片、dll 等二进制文件，你也需要将他们打包进去，不然程序无法正常运行，你可以在 spec 文件中的 datas 这个 list 中添加，方法和上面那个一样，不过最好填绝对地址，也可以等你项目打包完了在 copy 到你的那个 exe 文件的目录下。</p>
+
+<blockquote>
+<p>这个种情况，你在程序中调用这些资源的时候最好用相对地址，不然程序到了别人电脑上就找不到地址了，大致只需要配置这些东西啦，其他东西都不是必须的。</p>
+</blockquote>
+
+<p>然后在刚刚的命令行中输入：pyinstaller -D test.spec 就开始打包了，在这里 - D 是打包成一个文件夹，-F 是打包成一整个文件（传说打包成一整个文件打包缓慢，容易出错，因此不推荐使用，我也没试过）</p>
+
+<table><thead><tr><th>args</th><th>information</th></tr></thead><tbody><tr><td>-D</td><td>–onedir Create a one-folder bundle containing an executable (default)</td></tr><tr><td>-F</td><td>–onefile Create a one-file bundled executable.</td></tr></tbody></table>
+
+<blockquote>
+<p>同理打包完成后可以在 dist 目录下找到打包好的 exe 文件</p>
+</blockquote>
+
+<p><strong>运行 exe 文件刹那闪退如何解决？</strong></p>
+
+<p>最常见的问题就是闪退，这种错误让人最烦，因为报错都没看到就结束了，想解决都无从下手，之前我还想过用 qq 截图，当他报错的一瞬间按下截图快捷键，对手速的要求极高，十分考验程序猿的年龄、婚否等等综合素质，然后 2 分钟后我想了一个简单的方法，首先打开命令行，然后再命令行中输入你的 exe 文件的地址：<br />
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/e4851630dc094be9b63ebce160758ea1.png" alt="" /><br />
+这样就能够展示出相应的报错的信息了。</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/tlg/output/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Python-%E5%9F%BA%E4%BA%8E-PyQt5-%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BA%93%E8%BF%9B%E8%A1%8C%E5%AE%9E%E7%8E%B0-exe-%E6%A1%8C%E9%9D%A2%E5%BA%94%E7%94%A8%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91/">https://geek.zshipu.com/post/tlg/output/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-Python-%E5%9F%BA%E4%BA%8E-PyQt5-%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BA%93%E8%BF%9B%E8%A1%8C%E5%AE%9E%E7%8E%B0-exe-%E6%A1%8C%E9%9D%A2%E5%BA%94%E7%94%A8%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/React-%E5%88%9D%E5%AD%A6%E8%80%85-%E5%88%9B%E5%BB%BA%E6%96%B0%E7%9A%84-React-%E5%BA%94%E7%94%A8-%E4%B8%80/">React 初学者： 创建新的 React 应用 一</a></li>
+        
+        <li><a href="/post/go/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Go%E7%9A%84GC%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/">深入理解Go的GC回收机制</a></li>
+        
+        <li><a href="/post/nextjs/%E5%A6%82%E4%BD%95%E4%B8%BA%E6%82%A8%E7%9A%84Next.js%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E5%8F%AF%E6%89%A9%E5%B1%95%E7%9A%84%E6%9E%B6%E6%9E%84/">起步：如何为您的Next.js项目构建可扩展的架构</a></li>
+        
+        <li><a href="/post/DDDxx/DDD%E5%AE%9E%E6%88%9820-%E6%80%BB%E7%BB%93%E4%BA%8C%E5%88%86%E5%B8%83%E5%BC%8F%E6%9E%B6%E6%9E%84%E5%85%B3%E9%94%AE%E8%AE%BE%E8%AE%A110%E9%97%AE/">DDD实战：20 总结（二）：分布式架构关键设计10问</a></li>
+        
+        <li><a href="/post/DDDxx/DDD%E5%AE%9E%E6%88%9819-%E6%80%BB%E7%BB%93%E4%B8%80%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%AE%BE%E8%AE%A1%E5%92%8C%E6%8B%86%E5%88%86%E8%A6%81%E5%9D%9A%E6%8C%81%E5%93%AA%E4%BA%9B%E5%8E%9F%E5%88%99/">DDD实战：19 总结（一）：微服务设计和拆分要坚持哪些原则</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            没有标签
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/React-%E5%88%9D%E5%AD%A6%E8%80%85-%E5%88%9B%E5%BB%BA%E6%96%B0%E7%9A%84-React-%E5%BA%94%E7%94%A8-%E4%B8%80/" title="React 初学者： 创建新的 React 应用 一">React 初学者： 创建新的 React 应用 一</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/go/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Go%E7%9A%84GC%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/" title="深入理解Go的GC回收机制">深入理解Go的GC回收机制</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/%E5%A6%82%E4%BD%95%E4%B8%BA%E6%82%A8%E7%9A%84Next.js%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E5%8F%AF%E6%89%A9%E5%B1%95%E7%9A%84%E6%9E%B6%E6%9E%84/" title="起步：如何为您的Next.js项目构建可扩展的架构">起步：如何为您的Next.js项目构建可扩展的架构</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9820-%E6%80%BB%E7%BB%93%E4%BA%8C%E5%88%86%E5%B8%83%E5%BC%8F%E6%9E%B6%E6%9E%84%E5%85%B3%E9%94%AE%E8%AE%BE%E8%AE%A110%E9%97%AE/" title="DDD实战：20 总结（二）：分布式架构关键设计10问">DDD实战：20 总结（二）：分布式架构关键设计10问</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9819-%E6%80%BB%E7%BB%93%E4%B8%80%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%AE%BE%E8%AE%A1%E5%92%8C%E6%8B%86%E5%88%86%E8%A6%81%E5%9D%9A%E6%8C%81%E5%93%AA%E4%BA%9B%E5%8E%9F%E5%88%99/" title="DDD实战：19 总结（一）：微服务设计和拆分要坚持哪些原则">DDD实战：19 总结（一）：微服务设计和拆分要坚持哪些原则</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9818-%E7%9F%A5%E8%AF%86%E7%82%B9%E4%B8%B2%E8%AE%B2%E5%9F%BA%E4%BA%8EDDD%E7%9A%84%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%AE%BE%E8%AE%A1%E5%AE%9E%E4%BE%8B/" title="DDD实战：18 知识点串讲：基于DDD的微服务设计实例">DDD实战：18 知识点串讲：基于DDD的微服务设计实例</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9817-%E4%BB%8E%E5%90%8E%E7%AB%AF%E5%88%B0%E5%89%8D%E7%AB%AF%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%90%8E%E5%89%8D%E7%AB%AF%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1/" title="DDD实战：17 从后端到前端：微服务后，前端如何设计">DDD实战：17 从后端到前端：微服务后，前端如何设计</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9816-%E8%A7%86%E5%9B%BE%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%9C%8D%E5%8A%A1%E5%92%8C%E6%95%B0%E6%8D%AE%E5%9C%A8%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%90%84%E5%B1%82%E7%9A%84%E5%8D%8F%E4%BD%9C/" title="DDD实战：16 视图：如何实现服务和数据在微服务各层的协作">DDD实战：16 视图：如何实现服务和数据在微服务各层的协作</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9815-%E8%BE%B9%E7%95%8C%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%9A%84%E5%90%84%E7%A7%8D%E8%BE%B9%E7%95%8C%E5%9C%A8%E6%9E%B6%E6%9E%84%E6%BC%94%E8%BF%9B%E4%B8%AD%E7%9A%84%E4%BD%9C%E7%94%A8/" title="DDD实战：15 边界：微服务的各种边界在架构演进中的作用">DDD实战：15 边界：微服务的各种边界在架构演进中的作用</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDDxx/%E4%BD%BF%E7%94%A8%E4%BA%8B%E4%BB%B6%E9%A3%8E%E6%9A%B4%E5%92%8C%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%AF%B9%E5%8F%8D%E5%BA%94%E5%BC%8F%E7%B3%BB%E7%BB%9F%E8%BF%9B%E8%A1%8C%E5%BB%BA%E6%A8%A1/" title="DDD实战：‎使用事件风暴和域驱动设计对反应式系统进行建模‎">DDD实战：‎使用事件风暴和域驱动设计对反应式系统进行建模‎</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/BI/">BI</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD%E5%AE%9E%E6%88%98/">DDD实战</a>
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    
+    <a href="">Java</a>
+    
+    <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
+    
+    <a href="">Nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
+    
+    <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/css/">css</a>
+    
+    <a href="https://geek.zshipu.com/tags/game/">game</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    
+    <a href="">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/web3/">web3</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/">人工智能</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%88%86%E8%AF%8D/">分词</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%96%87%E6%91%98/">文摘</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%88%AC%E8%99%AB/">爬虫</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E8%B5%B7%E6%AD%A5/">起步</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
