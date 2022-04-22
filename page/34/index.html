@@ -81,6 +81,39 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <article class="post">
         <header>
             <h1 class="post-title">
+                <a href="https://geek.zshipu.com/post/tlg/output/React-%E7%BB%9D%E5%9C%B0%E5%8F%8D%E6%9D%80%E4%B9%8B%E4%B8%87%E5%AD%97%E9%95%BF%E6%96%87%E5%BD%BB%E5%BA%95%E6%90%9E%E6%87%82%E6%B8%B2%E6%9F%93%E6%9B%B4%E6%96%B0%E6%B5%81%E7%A8%8B/" title=""></a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            1年1月1日
+        </date>
+        
+        <div class="post-content">
+            React 15 架构分层 React 15 版本 (Fiber 以前) 整个更新渲染流程分为两个部分：
+ Reconciler(协调器); 负责找出变化的组件
+ Renderer(渲染器); 负责将变化的组件渲染到页面上
+  Reconciler 在 React 中可以通过 setState、forceUpdate、ReactDOM.render 来触发更新。每当有更新发生时，Reconciler 会做如下工作：
+ 调用组件的 render 方法，将返回的 JSX 转化为虚拟 DOM
+ 将虚拟 DOM 和上次更新时的虚拟 DOM 对比
+ 通过对比找出本次更新中变化的虚拟 DOM
+ 通知 Renderer 将变化的虚拟 DOM 渲染到页面上
+  Renderer 在对某个更新节点执行玩 Reconciler 之后，会通知 Renderer 根据不同的 &ldquo;宿主环境&rdquo; 进行相应的节点渲染 / 更新。
+React 15 的缺陷 React 15 的 diff 过程是 递归执行更新 的。由于是递归，一旦开始就 &ldquo;无法中断&rdquo; 。当层级太深或者 diff 逻辑 (钩子函数里的逻辑) 太复杂，导致递归更新的时间过长，Js 线程一直卡主，那么用户交互和渲染就会产生卡顿。看个例子: count-demo
+&lt;button&gt; click &lt;button&gt; &lt;li&gt;1&lt;li&gt; -&gt; &lt;li&gt;2&lt;li&gt; &lt;li&gt;2&lt;li&gt; -&gt; &lt;li&gt;4&lt;li&gt; &lt;li&gt;3&lt;li&gt; -&gt; &lt;li&gt;6&lt;li&gt;  当点击 button 后，列表从左边的 1、2、3 变为右边的 2、4、6。每个节点的更新过程对用户来说基本是同步，但实际上他们是顺序遍历的。具体步骤如下：
+ 点击 button，触发更新
+ Reconciler 检测到需要变更为，则立刻通知 Renderer 更新 DOM。列表变成 2、2、3
+ Reconciler 检测到需要变更为，通知 Renderer 更新 DOM。列表变成 2、4、3
+ Reconciler 检测到需要变更为，则立刻通知 Renderer 更新 DOM。列表变成 2、4、6
+  从此可见 Reconciler 和 Renderer 是交替工作 的，当第一个节点在页面上已经变化后，第二个节点再进入 Reconciler。由于整个过程都是同步的，所以在用户看来所有节点是同时更新的。如果中断更新，则会在页面上看见更新不完全的新的节点树！
+假如当进行到第 2 步的时候，突然因为其他任务而中断当前任务，导致第 3、4 步无法进行那么用户就会看到:
+&lt;button&gt; click &lt;button&gt; &lt;li&gt;1&lt;li&gt; -&gt; &lt;li&gt;2&lt;li&gt; &lt;li&gt;2&lt;li&gt; -&gt; &lt;li&gt;2&lt;li&gt; &lt;li&gt;3&lt;li&gt; -&gt; &lt;li&gt;3&lt;li&gt;  这种情况是 React 绝对不希望出现的。但是这种应用场景又是十分必须的。想象一下，用户在某个时间点进行了输入事件，此时应该更新 input 内的内容，但是因为一个不在当前可视区域的列表的更新导致用户的输入更新被滞后，那么给用户的体验就是卡顿的。因此 React 团队需要寻找一个办法，来解决这个缺陷。……
+        </div>
+        <p class="readmore"><a href="https://geek.zshipu.com/post/tlg/output/React-%E7%BB%9D%E5%9C%B0%E5%8F%8D%E6%9D%80%E4%B9%8B%E4%B8%87%E5%AD%97%E9%95%BF%E6%96%87%E5%BD%BB%E5%BA%95%E6%90%9E%E6%87%82%E6%B8%B2%E6%9F%93%E6%9B%B4%E6%96%B0%E6%B5%81%E7%A8%8B/">阅读全文</a></p>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
                 <a href="https://geek.zshipu.com/post/tlg/output/%E4%B8%87%E5%AD%97%E9%95%BF%E6%96%87%E6%8E%8C%E6%8F%A1%E8%BD%AF%E4%BB%B6%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1-DDD/" title=""></a>
             </h1>
         </header>
@@ -363,6 +396,10 @@ DDD 提出的战略设计覆盖了问题空间和解空间，而战术设计则�
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/%E4%BD%A0%E5%BF%85%E9%A1%BB%E5%87%86%E5%A4%87%E7%9A%84-50-%E4%B8%AA-React-%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/" title="你必须准备的 50 个 React 面试问题">你必须准备的 50 个 React 面试问题</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/React-%E5%88%9D%E5%AD%A6%E8%80%85-%E6%95%99%E7%A8%8BReact-%E7%AE%80%E4%BB%8B-%E4%BA%94/" title="React 初学者： 教程：React 简介 五">React 初学者： 教程：React 简介 五</a>
     </li>
     
@@ -396,10 +433,6 @@ DDD 提出的战略设计覆盖了问题空间和解空间，而战术设计则�
     
     <li>
         <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9819-%E6%80%BB%E7%BB%93%E4%B8%80%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%AE%BE%E8%AE%A1%E5%92%8C%E6%8B%86%E5%88%86%E8%A6%81%E5%9D%9A%E6%8C%81%E5%93%AA%E4%BA%9B%E5%8E%9F%E5%88%99/" title="DDD实战：19 总结（一）：微服务设计和拆分要坚持哪些原则">DDD实战：19 总结（一）：微服务设计和拆分要坚持哪些原则</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9818-%E7%9F%A5%E8%AF%86%E7%82%B9%E4%B8%B2%E8%AE%B2%E5%9F%BA%E4%BA%8EDDD%E7%9A%84%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%AE%BE%E8%AE%A1%E5%AE%9E%E4%BE%8B/" title="DDD实战：18 知识点串讲：基于DDD的微服务设计实例">DDD实战：18 知识点串讲：基于DDD的微服务设计实例</a>
     </li>
     
 </ul>
@@ -465,9 +498,9 @@ DDD 提出的战略设计覆盖了问题空间和解空间，而战术设计则�
     
     <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
     
-    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    <a href="">JS</a>
     
-    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    <a href="">Java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -491,9 +524,9 @@ DDD 提出的战略设计覆盖了问题空间和解空间，而战术设计则�
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
     
-    <a href="">java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
-    <a href="">js</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
     
