@@ -83,6 +83,95 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <article class="post">
         <header>
             <h1 class="post-title">
+                <a href="https://geek.zshipu.com/post/tlg/output/React-%E7%BB%9D%E5%9C%B0%E5%8F%8D%E6%9D%80%E4%B9%8B%E4%B8%87%E5%AD%97%E9%95%BF%E6%96%87%E5%BD%BB%E5%BA%95%E6%90%9E%E6%87%82%E6%B8%B2%E6%9F%93%E6%9B%B4%E6%96%B0%E6%B5%81%E7%A8%8B/" title=""></a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            1年1月1日
+        </date>
+        
+        <div class="post-content">
+            React 15 架构分层 React 15 版本 (Fiber 以前) 整个更新渲染流程分为两个部分：
+ Reconciler(协调器); 负责找出变化的组件
+ Renderer(渲染器); 负责将变化的组件渲染到页面上
+  Reconciler 在 React 中可以通过 setState、forceUpdate、ReactDOM.render 来触发更新。每当有更新发生时，Reconciler 会做如下工作：
+ 调用组件的 render 方法，将返回的 JSX 转化为虚拟 DOM
+ 将虚拟 DOM 和上次更新时的虚拟 DOM 对比
+ 通过对比找出本次更新中变化的虚拟 DOM
+ 通知 Renderer 将变化的虚拟 DOM 渲染到页面上
+  Renderer 在对某个更新节点执行玩 Reconciler 之后，会通知 Renderer 根据不同的 &ldquo;宿主环境&rdquo; 进行相应的节点渲染 / 更新。
+React 15 的缺陷 React 15 的 diff 过程是 递归执行更新 的。由于是递归，一旦开始就 &ldquo;无法中断&rdquo; 。当层级太深或者 diff 逻辑 (钩子函数里的逻辑) 太复杂，导致递归更新的时间过长，Js 线程一直卡主，那么用户交互和渲染就会产生卡顿。看个例子: count-demo
+&lt;button&gt; click &lt;button&gt; &lt;li&gt;1&lt;li&gt; -&gt; &lt;li&gt;2&lt;li&gt; &lt;li&gt;2&lt;li&gt; -&gt; &lt;li&gt;4&lt;li&gt; &lt;li&gt;3&lt;li&gt; -&gt; &lt;li&gt;6&lt;li&gt;  当点击 button 后，列表从左边的 1、2、3 变为右边的 2、4、6。每个节点的更新过程对用户来说基本是同步，但实际上他们是顺序遍历的。具体步骤如下：
+ 点击 button，触发更新
+ Reconciler 检测到需要变更为，则立刻通知 Renderer 更新 DOM。列表变成 2、2、3
+ Reconciler 检测到需要变更为，通知 Renderer 更新 DOM。列表变成 2、4、3
+ Reconciler 检测到需要变更为，则立刻通知 Renderer 更新 DOM。列表变成 2、4、6
+  从此可见 Reconciler 和 Renderer 是交替工作 的，当第一个节点在页面上已经变化后，第二个节点再进入 Reconciler。由于整个过程都是同步的，所以在用户看来所有节点是同时更新的。如果中断更新，则会在页面上看见更新不完全的新的节点树！
+假如当进行到第 2 步的时候，突然因为其他任务而中断当前任务，导致第 3、4 步无法进行那么用户就会看到:
+&lt;button&gt; click &lt;button&gt; &lt;li&gt;1&lt;li&gt; -&gt; &lt;li&gt;2&lt;li&gt; &lt;li&gt;2&lt;li&gt; -&gt; &lt;li&gt;2&lt;li&gt; &lt;li&gt;3&lt;li&gt; -&gt; &lt;li&gt;3&lt;li&gt;  这种情况是 React 绝对不希望出现的。但是这种应用场景又是十分必须的。想象一下，用户在某个时间点进行了输入事件，此时应该更新 input 内的内容，但是因为一个不在当前可视区域的列表的更新导致用户的输入更新被滞后，那么给用户的体验就是卡顿的。因此 React 团队需要寻找一个办法，来解决这个缺陷。……
+        </div>
+        <p class="readmore"><a href="https://geek.zshipu.com/post/tlg/output/React-%E7%BB%9D%E5%9C%B0%E5%8F%8D%E6%9D%80%E4%B9%8B%E4%B8%87%E5%AD%97%E9%95%BF%E6%96%87%E5%BD%BB%E5%BA%95%E6%90%9E%E6%87%82%E6%B8%B2%E6%9F%93%E6%9B%B4%E6%96%B0%E6%B5%81%E7%A8%8B/">阅读全文</a></p>
+    </article>
+    
+    
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://geek.zshipu.com/post/tlg/output/Golang-%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95/" title=""></a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            1年1月1日
+        </date>
+        
+        <div class="post-content">
+            本文由 简悦 SimpRead 转码， 原文地址 www.cnblogs.com
+1、单元测试概述 1.1 什么是单元&amp;单元测试 单元是应用的最小可测试部件，如函数和对象的方法 单元测试是软件开发中对最小单位进行正确性检验的测试工作 1.2 为什么进行单元测试 保证变更/重
+ 目录
+ 1、单元测试概述  1.1 什么是单元 &amp; 单元测试 1.2 为什么进行单元测试 1.3 单元测试用例编写的原则 1.4 单测用例规定  2、golang 常用的单测框架  2.1 testing  2.1.1 单元测试 2.1.2 测试覆盖率 2.1.3 子测试 t.run  2.2 goconvey  2.2.1 基本使用 2.2.2 图形化使用  2.3 testify  2.3.1 简单使用 2.3.2 表驱动测试 2.3.3 mock 功能 2.3.4 单元测试覆盖率应用实例    1、单元测试概述 1.1 什么是单元 &amp; 单元测试  单元是应用的最小可测试部件，如函数和对象的方法 单元测试是软件开发中对最小单位进行正确性检验的测试工作  1.2 为什么进行单元测试  保证变更 / 重构的正确性，特别是在一些频繁变动和多人合作开发的项目中 简化调试过程： 可以轻松的让我们知道哪一部分代码出了问题 单测最好的文档：在单测中直接给出具体接口的使用方法，是最好的实例代码  1.3 单元测试用例编写的原则  单一原则：一个测试用例只负责一个场景 原子性：结果只有两种情况：Pass、Fail 优先要核心组件和逻辑的测试用例 高频使用库，util，重点覆盖  1.4 单测用例规定  文件名必须要xx_test.go命名 测试方法必须是TestXXX开头 方法中的参数必须是t *testing.T 测试文件和被测试文件必须在一个包中  2、golang 常用的单测框架 2.1 testing https://golang.google.cn/pkg/testing/
+2.1.1 单元测试 Go提供了test工具用于代码的单元测试，test工具会查找包下以_test.go结尾的文件，调用测试文件中以 Test或Benchmark开头的函数并给出运行结果
+测试函数需要导入testing包，并定义以Test开头的函数，参数为testing.T指针类型，在测试函数中调用函数进行返回值测试，当测试失败可通过testing.T结构体的Error函数抛出错误
+单元测试是对某个功能的测试
+命令行执行
+go test 包名 # 测试整个包 go test -v . go test 包名/文件名 # 测试某个文件  简单使用
+准备待测代码compute.go
+package pkg03 func Add(a, b int) int { return a + b } func Mul(a, b int) int { return a * b } func Div(a, b int) int { return a / b }  准备测试用例compute_test.……
+        </div>
+        <p class="readmore"><a href="https://geek.zshipu.com/post/tlg/output/Golang-%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95/">阅读全文</a></p>
+    </article>
+    
+    
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://geek.zshipu.com/post/tlg/output/4-3-5-Chakra-UI/" title=""></a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            1年1月1日
+        </date>
+        
+        <div class="post-content">
+            Chakra UI 是一个简单的, 模块化的易于理解的 UI 组件库. 提供了丰富的构建 React 应用所需的 UI 组件. 文档: https://next.chakra-ui.com/docs/getting-started
+ Chakra UI 内置 Emotion，是 CSS-IN-JS 解决方案的集大成者 基于 Styled-Systems https://styled-system.com/ 支持开箱即用的主题功能 默认支持白天和黑夜两种模式 拥有大量功能丰富且非常有用的组件 使响应式设计变得轻而易举 文档清晰而全面. 查找 API 更加容易 适用于构建用于展示的给用户的界面 框架正在变得越来越完善
+//下载 npm install @chakra-ui/core@1.0.0-next.2   快速使用 克隆默认主题 Chakra-UI 提供的组件是建立在主题基础之上的, 只有先引入了主题组件才能够使用其他组件.
+npm install @chakra-ui/theme
+引入主题 import {ChakraProvider} from '@chakra-ui/core' import theme from '@chakra-ui/theme' &lt;ChakraProvider theme={theme}&gt; &lt;App/&gt; &lt;/ChakraProvider&gt;  引入 CSS 重置组件 import {CSSReset} from '@chakra-ui/core' &lt;ChakraProvider theme={theme}&gt; &lt;CSSReset /&gt; &lt;App/&gt; &lt;/ChakraProvider&gt;  Style Props 样式属性 Style Props 是用来更改组件样式的, 通过为组件传递属性的方式实现. 通过传递简化的样式属性以达到提升开发效率的目的.
+import {Box} from '@chakra-ui/core' &lt;Box w={200} h={200} bg='tomato' p='3px'&gt;Hello&lt;/Box&gt;  主题 颜色模式 (color mode) chakra-ui 提供的组件都支持两种颜色模式, 浅色模式 (light) 和暗色模式(dark). 可以通过 useColorMode 进行颜色模式的更改.
+import {userColorMode} from '@chakra-ui/core' const [colorMode, toggleColorMode] = useColorMode() &lt;Text&gt;当前颜色模式为{colorMode}&lt;/Text&gt; &lt;Button onClick={toggleColorMode}&gt;切换颜色模式&lt;/Button&gt;  Chakra 将颜色模式存储在 localStorage 中, 并使用类名策略来确保颜色模式是持久的.
+根据颜色模式设置样式 chakra 允许在为元素设置样式时根据颜色模式产生不同值. 通过 useColorModeValue 钩子函数实现.
+const bgColor = useColorModeValue(lightModeValue, darkModeValue) &lt;Box bgColor={bgColor}&gt;&lt;/Box&gt;  强制组件颜色模式 使组件不受颜色模式的影响, 始终保持在某个颜色模式下的样式.……
+        </div>
+        <p class="readmore"><a href="https://geek.zshipu.com/post/tlg/output/4-3-5-Chakra-UI/">阅读全文</a></p>
+    </article>
+    
+    
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
                 <a href="https://geek.zshipu.com/post/java/Java-%E9%9D%A2%E8%AF%95-150%E5%88%B0%E9%9D%A2%E8%AF%95%E9%A2%98%E5%8F%8A%E7%AD%94%E6%A1%88%E8%AE%A9%E4%BD%A0%E7%9B%B4%E6%8E%A5%E6%8B%BF%E5%88%B0offer/" title=""></a>
             </h1>
         </header>
@@ -290,6 +379,10 @@ END 推荐好文 强大，10k+点赞的 SpringBoot 后台管理系统竟然出�
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/React-%E5%88%9D%E5%AD%A6%E8%80%85-JSX-%E7%AE%80%E4%BB%8B-%E5%9B%9B/" title="React 初学者： JSX 简介 四">React 初学者： JSX 简介 四</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/React-%E5%88%9D%E5%AD%A6%E8%80%85-%E5%AD%A6%E4%B9%A0-ReactJS-%E4%B9%8B%E5%89%8D%E5%BF%85%E9%A1%BB%E4%BA%86%E8%A7%A3%E7%9A%84-5-%E5%A4%A7%E6%8A%80%E8%83%BD-%E4%B8%89/" title="React 初学者： 学习 ReactJS 之前必须了解的 5 大技能 三">React 初学者： 学习 ReactJS 之前必须了解的 5 大技能 三</a>
     </li>
     
@@ -323,10 +416,6 @@ END 推荐好文 强大，10k+点赞的 SpringBoot 后台管理系统竟然出�
     
     <li>
         <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9817-%E4%BB%8E%E5%90%8E%E7%AB%AF%E5%88%B0%E5%89%8D%E7%AB%AF%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%90%8E%E5%89%8D%E7%AB%AF%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1/" title="DDD实战：17 从后端到前端：微服务后，前端如何设计">DDD实战：17 从后端到前端：微服务后，前端如何设计</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/DDDxx/DDD%E5%AE%9E%E6%88%9816-%E8%A7%86%E5%9B%BE%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%9C%8D%E5%8A%A1%E5%92%8C%E6%95%B0%E6%8D%AE%E5%9C%A8%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%90%84%E5%B1%82%E7%9A%84%E5%8D%8F%E4%BD%9C/" title="DDD实战：16 视图：如何实现服务和数据在微服务各层的协作">DDD实战：16 视图：如何实现服务和数据在微服务各层的协作</a>
     </li>
     
 </ul>
