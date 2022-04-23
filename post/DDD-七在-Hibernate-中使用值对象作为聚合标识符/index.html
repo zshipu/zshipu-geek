@@ -1,0 +1,846 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>DDD-七、在 Hibernate 中使用值对象作为聚合标识符 | 知识铺的博客</title>
+    <meta property="og:title" content="DDD-七、在 Hibernate 中使用值对象作为聚合标识符 - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2022-04-23T15:13:05&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2022-04-23T15:13:05&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="DDD-七、在 Hibernate 中使用值对象作为聚合标识符">
+        <meta name="author" content="知识铺">
+        
+    <meta property="og:url" content="https://geek.zshipu.com/post/DDD-%E4%B8%83%E5%9C%A8-Hibernate-%E4%B8%AD%E4%BD%BF%E7%94%A8%E5%80%BC%E5%AF%B9%E8%B1%A1%E4%BD%9C%E4%B8%BA%E8%81%9A%E5%90%88%E6%A0%87%E8%AF%86%E7%AC%A6/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+<ul>
+<li><a href="#属性转换器不会做">属性转换器不会做</a></li>
+<li><a href="#创建自定义休眠类型">创建自定义休眠类型</a></li>
+<li><a href="#生成值对象-id">生成值对象 ID</a>
+<ul>
+<li><a href="#重构你的基类">重构你的基类</a></li>
+<li><a href="#实现-id-生成器">实现 ID 生成器</a></li>
+</ul></li>
+<li><a href="#关于复合键的说明">关于复合键的说明</a></li>
+</ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">DDD-七、在 Hibernate 中使用值对象作为聚合标识符</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年4月23日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            
+
+<p>如果您使用的是除 Hibernate 之外的其他 JPA 实现，则必须查看该实现的文档以了解如何创建自定义类型。</p>
+
+<h1 id="属性转换器不会做">属性转换器不会做</h1>
+
+<p>第一个想法可能是使用简单的值对象和属性转换器。不幸的是，这是不可能的，因为 JPA 不支持对<code>@Id</code>字段使用属性转换器。您可以做出妥协并为您的<code>@Id</code>字段和简单的值对象使用“原始”ID 以从其他聚合中引用它们，但我个人不喜欢这种方法，因为您必须在值对象及其包装的原始对象之间来回移动ID，使编写查询更加困难。更好、更一致的方法是创建自定义 Hibernate 类型。</p>
+
+<h1 id="创建自定义休眠类型">创建自定义休眠类型</h1>
+
+<p>当您为您的 ID 值对象创建自定义 Hibernate 类型时，它们可以在您的整个持久性上下文中使用，而无需任何额外的注释。这涉及以下步骤：</p>
+
+<ol>
+<li>决定要在值对象中使用哪种原始 ID 类型：<code>UUID</code>、<code>String</code>或<code>Long</code></li>
+<li>为您的值对象创建类型描述符。该描述符知道如何将另一个值转换为值对象的实例（包装），反之亦然（展开）。</li>
+<li>创建一个自定义类型，将您的类型描述符与您想要用于您的 ID 的 JDBC 列类型联系在一起。</li>
+<li>使用 Hibernate 注册您的自定义类型。</li>
+</ol>
+
+<p>让我们看一个代码示例来更好地说明这一点。我们将创建一个名为的值对象 ID <code>CustomerId</code>，它包含一个<code>UUID</code>. 值对象如下所示：</p>
+
+<pre><code>package foo.bar.domain.model;
+
+// Imports omitted
+
+public class CustomerId implements ValueObject, Serializable { // &lt;1&gt;
+
+    private final UUID uuid;
+
+    public CustomerId(@NotNull UUID uuid) {
+        this.uuid = Objects.requireNonNull(uuid);
+    }
+
+    public @NotNull UUID unwrap() { // &lt;2&gt;
+        return uuid;
+    }
+
+    // Implementation of equals() and hashCode() omitted.
+}
+</code></pre>
+
+<ol>
+<li>您必须实现<code>Serializable</code>接口，因为<code>Persistable</code>假定 ID 类型是可持久的。我有时会创建一个新的标记接口<code>DomainObjectId</code>，称为扩展<code>ValueObject</code>和<code>Serializable</code>。</li>
+<li><code>UUID</code>当您实现类型描述符时，您需要一种获取底层的方法。</li>
+</ol>
+
+<p>接下来，我们将创建类型描述符。我通常将它放在一个子包<code>.hibernate</code>中，以保持域模型本身的美观和整洁。</p>
+
+<pre><code>package foo.bar.domain.model.hibernate;
+
+// Imports omitted
+
+public class CustomerIdTypeDescriptor extends AbstractTypeDescriptor&lt;CustomerId&gt; { // &lt;1&gt;
+
+    public CustomerIdTypeDescriptor() {
+        super(CustomerId.class);
+    }
+
+    @Override
+    public String toString(CustomerId value) { // &lt;2&gt;
+        return UUIDTypeDescriptor.ToStringTransformer.INSTANCE.transform(value.unwrap()); 
+    }
+
+    @Override
+    public ID fromString(String string) { // &lt;3&gt;
+        return new CustomerId(UUIDTypeDescriptor.ToStringTransformer.INSTANCE.parse(string)); 
+    }
+
+    @Override
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public &lt;X&gt; X unwrap(CustomerId value, Class&lt;X&gt; type, WrapperOptions options) { // &lt;4&gt;
+        if (value == null) {
+            return null;
+        }
+        if (getJavaType().isAssignableFrom(type)) {
+            return (X) value;
+        }
+        if (UUID.class.isAssignableFrom(type)) {
+            return (X) UUIDTypeDescriptor.PassThroughTransformer.INSTANCE.transform(value.unwrap());
+        }
+        if (String.class.isAssignableFrom(type)) {
+            return (X) UUIDTypeDescriptor.ToStringTransformer.INSTANCE.transform(value.unwrap());
+        }
+        if (byte[].class.isAssignableFrom(type)) {
+            return (X) UUIDTypeDescriptor.ToBytesTransformer.INSTANCE.transform(value.unwrap());
+        }
+        throw unknownUnwrap(type);
+    }
+
+    @Override
+    public &lt;X&gt; CustomerId wrap(X value, WrapperOptions options) { // &lt;5&gt;
+        if (value == null) {
+            return null;
+        }
+        if (getJavaType().isInstance(value)) {
+            return getJavaType().cast(value);
+        }
+        if (value instanceof UUID) {
+            return new CustomerId(UUIDTypeDescriptor.PassThroughTransformer.INSTANCE.parse(value));
+        }
+        if (value instanceof String) {
+            return new CustomerId(UUIDTypeDescriptor.ToStringTransformer.INSTANCE.parse(value));
+        }
+        if (value instanceof byte[]) {
+            return new CustomerId(UUIDTypeDescriptor.ToBytesTransformer.INSTANCE.parse(value));
+        }
+        throw unknownWrap(value.getClass());
+    }
+
+    public static final CustomerIdTypeDescriptor INSTANCE = new CustomerIdTypeDescriptor(); // &lt;6&gt;
+}
+</code></pre>
+
+<ol>
+<li><code>AbstractTypeDescriptor</code>是驻留在<code>org.hibernate.type.descriptor.java</code>包中的 Hibernate 基类。</li>
+<li>此方法将我们的值对象转换为字符串。我们使用 Hibernate 内置<code>UUIDTypeDescriptor</code>（也来自<code>org.hibernate.type.descriptor.java</code>包）的帮助类来执行转换。</li>
+<li>此方法从字符串构造值对象。同样，我们使用来自<code>UUIDTypeDescriptor</code>.</li>
+<li>此方法将值对象转换为<code>UUID</code>、字符串或字节数组。同样，我们使用来自<code>UUIDTypeDescriptor</code>.</li>
+<li>此方法将一个<code>UUID</code>、一个字符串或一个字节数组转换为一个值对象。这里也使用了辅助类。</li>
+<li>我们可以将此类型描述符作为单例访问，因为它不包含任何可变状态。</li>
+</ol>
+
+<p>到目前为止，我们只处理了 Java 类型。现在是时候将 SQL 和 JDBC 结合起来并创建我们的自定义类型了：</p>
+
+<pre><code>package foo.bar.domain.model.hibernate;
+
+// Imports omitted
+
+public class CustomerIdType extends AbstractSingleColumnStandardBasicType&lt;CustomerId&gt; // &lt;1&gt;
+    implements ResultSetIdentifierConsumer { // &lt;2&gt;
+
+    public CustomerIdType() {
+        super(BinaryTypeDescriptor.INSTANCE, CustomerIdTypeDescriptor.INSTANCE); // &lt;3&gt;
+    }
+
+    @Override
+    public Serializable consumeIdentifier(ResultSet resultSet) {
+        try {
+            var id = resultSet.getBytes(1); // &lt;4&gt;
+            return getJavaTypeDescriptor().wrap(id, null); // &lt;5&gt;
+        } catch (SQLException ex) {
+            throw new IllegalStateException(&quot;Could not extract ID from ResultSet&quot;, ex);
+        }
+    }
+
+    @Override
+    public String getName() {
+        return getJavaTypeDescriptor().getJavaType().getSimpleName(); // &lt;6&gt;
+    }
+}
+</code></pre>
+
+<ol>
+<li><code>AbstractSingleColumnStandardBasicType</code>是驻留在<code>org.hibernate.type</code>包中的 Hibernate 基类。</li>
+<li>为了使自定义类型在<code>@Id</code>字段中正常工作，我们必须从<code>org.hibernate.id</code>包中实现这个额外的接口。</li>
+<li>这里我们传入 SQL 类型描述符（在本例中为二进制，因为我们将 UUID 存储在 16 字节二进制列中）和我们的 Java 类型描述符。</li>
+<li>在这里，我们从 JDBC 结果集中检索 ID 作为字节数组&hellip;</li>
+<li>&hellip;并<code>CustomerId</code>使用我们的 Java 类型描述符将其转换为 a。</li>
+<li>自定义类型需要一个名称，因此我们使用 Java 类型的名称。</li>
+</ol>
+
+<p>最后，我们只需要在 Hibernate 中注册我们的新类型。我们将在与我们的类<code>package-info.java</code>位于同一包中的文件中执行此操作：<code>CustomerId</code></p>
+
+<pre><code>@TypeDef(defaultForType = CustomerId.class, typeClass = CustomerIdType.class) // &lt;1&gt;
+package foo.bar.domain.model;
+
+import org.hibernate.annotations.TypeDef; // &lt;2&gt;
+import foo.bar.domain.model.hibernate.CustomerIdType;
+</code></pre>
+
+<ol>
+<li>这个 Hibernate 注释告诉 Hibernate<code>CustomerIdType</code>在遇到<code>CustomerId</code>.</li>
+<li>请注意，导入是在文件中的注释之后进行的，<code>package-info.java</code>而不是在类文件中之前。</li>
+</ol>
+
+<p>呸！现在我们可以使用<code>CustomerId</code>两者来识别<code>Customer</code>聚合并从其他聚合中引用它们。但是请记住，如果您让 Hibernate 为您生成 SQL 模式并且您使用 ID 来引用聚合而不是<code>@ManyToOne</code>关联，那么 Hibernate 将不会创建外键约束。您必须自己执行此操作，例如使用<a href="https://flywaydb.org/">Flyway</a>。</p>
+
+<p>如果您有许多不同的 ID 值对象类型，您将需要为您的类型描述符和自定义类型创建抽象基类，以避免重复自己。我将把这个作为练习留给读者。</p>
+
+<p>但是等等，我们是不是忘记了什么？<code>CustomerID</code>当我们持久化新创建的<code>Customer</code>聚合根时，我们实际上将如何生成新实例？让我们来了解一下。</p>
+
+<h1 id="生成值对象-id">生成值对象 ID</h1>
+
+<p>准备好 ID 值对象和自定义类型后，您需要一种生成新 ID 的方法。您可以在持久化实体之前创建您的 ID 并手动分配它们（如果您使用 UUID，这真的很容易），或者您可以将 Hibernate 配置为在需要时自动为您生成 ID。后一种方法设置起来更困难，但一旦完成就更容易使用，所以让我们来看看。</p>
+
+<h2 id="重构你的基类">重构你的基类</h2>
+
+<p>JPA 支持不同的 ID 生成器。如果查看<code>@GeneratedValue</code>注释，则可以指定<code>generator</code>要使用的名称。在这里，我们遇到了第一个警告。如果您在映射的超类（例如<code>AbstractPersistable</code>）中声明您的 ID 字段，则您无法覆盖该<code>@GeneratedValue</code>字段的注释。换句话说，对于扩展此基类的所有聚合根和实体，您都无法使用相同的 ID 生成器。如果您发现自己处于这种情况，您必须从基类中删除您的 ID 字段，并让每个聚合根和实体声明其自己的 ID 字段。</p>
+
+<p>因此，<code>BaseEntity</code>类（我们最初<a href="https://dev.to/peholmst/building-aggregates-with-spring-data-2iig">在这里</a>定义了这个类）变成了这样的：</p>
+
+<pre><code>@MappedSuperclass
+public abstract class BaseEntity&lt;Id extends Serializable&gt; implements Persistable&lt;Id&gt; { // &lt;1&gt;
+
+    @Version
+    private Long version;
+
+    @Override
+    @Transient 
+    public abstract @Nullable ID getId(); // &lt;2&gt;
+
+    @Override
+    @Transient 
+    public boolean isNew() { // &lt;3&gt;
+        return getId() == null;
+    }
+
+    public @NotNull Optional&lt;Long&gt; getVersion() {
+        return Optional.ofNullable(version);
+    }
+
+    protected void setVersion(@Nullable version) {
+        this.version = version;
+    }
+
+    @Override
+    public String toString() { // &lt;4&gt;
+        return String.format(&quot;%s{id=%s}&quot;, getClass().getSimpleName(), getId());
+    }
+
+    @Override
+    public boolean equals(Object obj) { // &lt;5&gt;
+        if (null == obj) {
+            return false;
+        }
+        if (this == obj) {
+            return true;
+        }
+        if (!getClass().equals(ProxyUtils.getUserClass(obj))) { // &lt;6&gt;
+            return false;
+        }
+
+        var that = (BaseEntity&lt;?&gt;) obj;
+        var id = getId();
+        return id != null &amp;&amp; id.equals(that.getId());
+    }
+
+    @Override
+    public int hashCode() { // &lt;7&gt;
+        var id = getId();
+        return id == null ? super.hashCode() : id.hashCode();
+    }
+}
+</code></pre>
+
+<ol>
+<li>我们不再扩展<code>AbstractPersistable</code>，但我们确实实现了<code>Persistable</code>接口。</li>
+<li>此方法来自<code>Persistable</code>接口，必须由子类实现。</li>
+<li>这个方法也来自<code>Persistable</code>接口。</li>
+<li>由于我们不再扩展<code>AbstractPersistable</code>，我们必须重写<code>toString</code>自己以返回有用的东西。我有时还包括对象身份哈希码，以明确我们是否正在处理同一实体的不同实例。</li>
+<li>我们还必须覆盖<code>equals</code>. 请记住，具有相同 ID 的相同类型的两个实体被视为相同的实体。</li>
+<li><code>ProxyUtils</code>是一个 Spring 实用程序类，对于 JPA 实现对实体类进行字节码更改的情况很有用，导致<code>getClass()</code>不一定返回您认为它可能返回的内容。</li>
+<li>既然我们已经覆盖<code>equals</code>了，我们也必须以<code>hashCode</code>同样的方式覆盖。</li>
+</ol>
+
+<p>现在，当我们对 进行必要的更改后<code>BaseEntity</code>，我们可以将 ID 字段添加到聚合根：</p>
+
+<pre><code>@Entity
+public class Customer extends BaseAggregateRoot&lt;CustomerId&gt; { // &lt;1&gt;
+
+    public static final String ID_GENERATOR_NAME = &quot;customer-id-generator&quot;; // &lt;2&gt;
+
+    @Id
+    @GeneratedValue(generator = ID_GENERATOR_NAME) // &lt;3&gt;
+    private CustomerId id;
+
+    @Override
+    public @Nullable CustomerId getId() { // &lt;4&gt;
+        return id;
+    }
+}
+</code></pre>
+
+<ol>
+<li>我们 extend <code>BaseAggregateRoot</code>，这反过来又扩展了我们重构的<code>BaseEntity</code>类。</li>
+<li>我们在常量中声明 ID 生成器的名称。当我们向 Hibernate 注册我们的自定义生成器时，我们将使用它。</li>
+<li>现在我们不再拘泥于映射超类中使用的任何注释。</li>
+<li>我们从 中实现抽象<code>getId()</code>方法<code>Persistable</code>。</li>
+</ol>
+
+<h2 id="实现-id-生成器">实现 ID 生成器</h2>
+
+<p>接下来，我们必须实现我们的自定义 ID 生成器。由于我们使用的是 UUID，这几乎是微不足道的。对于其他 ID 生成策略，我建议您选择现有的 Hibernate 生成器并在此基础上进行构建（开始查看<a href="https://github.com/hibernate/hibernate-orm/tree/main/hibernate-core/src/main/java/org/hibernate/id">此处</a>）。ID 生成器将如下所示：</p>
+
+<pre><code>package foo.bar.domain.model.hibernate;
+
+public class CustomerIdGenerator implements IdentifierGenerator { // &lt;1&gt;
+
+    public static final String STRATEGY = &quot;foo.bar.domain.model.hibernate.CustomerIdGenerator&quot;; // &lt;2&gt;
+
+    @Override
+    public Serializable generate(SharedSessionContractImplementor session, Object object) throws HibernateException {
+        return new CustomerId(UUID.randomUUID()); // &lt;3&gt;
+    }
+}
+</code></pre>
+
+<ol>
+<li><code>IdentifierGenerator</code>是驻留在<code>org.hibernate.id</code>包中的接口。</li>
+<li>由于新生成器是如何在 Hibernate 中注册的，我们需要类的全名作为字符串。我们将它存储在一个常量中，以使未来的重构更容易 - 并最大限度地减少由拼写错误引起的错误风险。</li>
+<li>在此示例中，我们使用<code>UUID.randomUUID()</code>创建新的 UUID。请注意，如果您需要执行更高级的操作，例如从数据库序列中检索数值，您可以访问 Hibernate 会话。</li>
+</ol>
+
+<p>最后，我们必须向 Hibernate 注册我们的新 ID 生成器。与自定义类型一样，这发生在 中<code>package-info.java</code>，变为：</p>
+
+<pre><code>@TypeDef(defaultForType = CustomerId.class, typeClass = CustomerIdType.class)
+@GenericGenerator(name = Customer.ID_GENERATOR_NAME, strategy = CustomerIdGenerator.STRATEGY) // &lt;1&gt;
+package foo.bar.domain.model;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.TypeDef;
+import foo.bar.domain.model.hibernate.CustomerIdType;
+import foo.bar.domain.model.hibernate.CustomerIdGenerator;
+</code></pre>
+
+<ol>
+<li>这个注解告诉 Hibernate<code>CustomerIdGenerator</code>在遇到名为<code>customer-id-generator</code>.</li>
+</ol>
+
+<p>双呸！现在，我们的域模型应该可以按照我们的预期工作，使用自动生成的值对象作为 ID。</p>
+
+<h1 id="关于复合键的说明">关于复合键的说明</h1>
+
+<p>在我们离开 ID 的主题之前，我只想提一件事。通过将 ID 字段从映射的超<code>BaseEntity</code>类（例如，您可能遇到组合键由另一个聚合根的 ID 和枚举常量组成的情况。<code>Customer</code><code>@EmbeddedId</code><code>@IdClass</code></p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/DDD-%E4%B8%83%E5%9C%A8-Hibernate-%E4%B8%AD%E4%BD%BF%E7%94%A8%E5%80%BC%E5%AF%B9%E8%B1%A1%E4%BD%9C%E4%B8%BA%E8%81%9A%E5%90%88%E6%A0%87%E8%AF%86%E7%AC%A6/">https://geek.zshipu.com/post/DDD-%E4%B8%83%E5%9C%A8-Hibernate-%E4%B8%AD%E4%BD%BF%E7%94%A8%E5%80%BC%E5%AF%B9%E8%B1%A1%E4%BD%9C%E4%B8%BA%E8%81%9A%E5%90%88%E6%A0%87%E8%AF%86%E7%AC%A6/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/DDD-%E5%85%AD%E4%BD%BF%E7%94%A8-Spring-Data-%E6%9E%84%E5%BB%BA%E5%AD%98%E5%82%A8%E5%BA%93/">DDD-六、使用 Spring Data 构建存储库</a></li>
+        
+        <li><a href="/post/DDD-%E4%BA%94%E4%BD%BF%E7%94%A8-Spring-Data-%E6%9E%84%E5%BB%BA%E8%81%9A%E5%90%88/">DDD-五、使用 Spring Data 构建聚合</a></li>
+        
+        <li><a href="/post/DDD-%E5%9B%9B%E5%9C%A8-JPA-%E4%B8%AD%E4%BD%BF%E7%94%A8%E5%80%BC%E5%AF%B9%E8%B1%A1/">DDD-四、在 JPA 中使用值对象</a></li>
+        
+        <li><a href="/post/DDD-%E4%B8%89%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%92%8C%E5%85%AD%E8%BE%B9%E5%BD%A2%E6%9E%B6%E6%9E%84/">DDD-三、领域驱动设计和六边形架构</a></li>
+        
+        <li><a href="/post/DDD-%E4%BA%8C%E6%88%98%E6%9C%AF%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1/">DDD-二、战术领域驱动设计</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/DDD'>DDD</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD-%E5%8D%81%E9%80%9A%E8%BF%87%E9%A2%84%E5%AE%9A%E4%BD%9C%E4%B8%9A%E7%9A%84%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7/" title="DDD-十、通过预定作业的最终一致性">DDD-十、通过预定作业的最终一致性</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD-%E4%B9%9D%E4%BD%BF%E7%94%A8-Spring-%E5%A4%84%E7%90%86%E9%A2%86%E5%9F%9F%E4%BA%8B%E4%BB%B6/" title="DDD-九、使用 Spring Data 发布领域事件">DDD-九、使用 Spring Data 发布领域事件</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD-%E5%85%AB%E4%BD%BF%E7%94%A8-Spring-Data-%E5%8F%91%E5%B8%83%E9%A2%86%E5%9F%9F%E4%BA%8B%E4%BB%B6/" title="DDD-八、使用 Spring 处理领域事件">DDD-八、使用 Spring 处理领域事件</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD-%E4%B8%83%E5%9C%A8-Hibernate-%E4%B8%AD%E4%BD%BF%E7%94%A8%E5%80%BC%E5%AF%B9%E8%B1%A1%E4%BD%9C%E4%B8%BA%E8%81%9A%E5%90%88%E6%A0%87%E8%AF%86%E7%AC%A6/" title="DDD-七、在 Hibernate 中使用值对象作为聚合标识符">DDD-七、在 Hibernate 中使用值对象作为聚合标识符</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD-%E5%85%AD%E4%BD%BF%E7%94%A8-Spring-Data-%E6%9E%84%E5%BB%BA%E5%AD%98%E5%82%A8%E5%BA%93/" title="DDD-六、使用 Spring Data 构建存储库">DDD-六、使用 Spring Data 构建存储库</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD-%E4%BA%94%E4%BD%BF%E7%94%A8-Spring-Data-%E6%9E%84%E5%BB%BA%E8%81%9A%E5%90%88/" title="DDD-五、使用 Spring Data 构建聚合">DDD-五、使用 Spring Data 构建聚合</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD-%E5%9B%9B%E5%9C%A8-JPA-%E4%B8%AD%E4%BD%BF%E7%94%A8%E5%80%BC%E5%AF%B9%E8%B1%A1/" title="DDD-四、在 JPA 中使用值对象">DDD-四、在 JPA 中使用值对象</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD-%E4%B8%89%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%92%8C%E5%85%AD%E8%BE%B9%E5%BD%A2%E6%9E%B6%E6%9E%84/" title="DDD-三、领域驱动设计和六边形架构">DDD-三、领域驱动设计和六边形架构</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD-%E4%BA%8C%E6%88%98%E6%9C%AF%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1/" title="DDD-二、战术领域驱动设计">DDD-二、战术领域驱动设计</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD-%E4%B8%80%E6%88%98%E7%95%A5%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1/" title="DDD-一、战略领域驱动设计">DDD-一、战略领域驱动设计</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/BI/">BI</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD%E5%AE%9E%E6%88%98/">DDD实战</a>
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    
+    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    
+    <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
+    
+    <a href="">Nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
+    
+    <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/css/">css</a>
+    
+    <a href="https://geek.zshipu.com/tags/game/">game</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="">java</a>
+    
+    <a href="">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/web3/">web3</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/">人工智能</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%88%86%E8%AF%8D/">分词</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%96%87%E6%91%98/">文摘</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%88%AC%E8%99%AB/">爬虫</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E8%B5%B7%E6%AD%A5/">起步</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
