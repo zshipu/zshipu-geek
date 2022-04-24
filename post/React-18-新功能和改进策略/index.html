@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>React 18 - 新功能和改进策略 | 知识铺的博客</title>
+    <meta property="og:title" content="React 18 - 新功能和改进策略 - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2022-04-24T16:41:52&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2022-04-24T16:41:52&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="React 18 - 新功能和改进策略">
+        <meta name="author" content="知识铺">
+        
+    <meta property="og:url" content="https://geek.zshipu.com/post/React-18-%E6%96%B0%E5%8A%9F%E8%83%BD%E5%92%8C%E6%94%B9%E8%BF%9B%E7%AD%96%E7%95%A5/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#concurrency-font-style-vertical-align-inherit-font-style-vertical-align-inherit-并发-font-font">[](#concurrency)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">并发</font></font></a></li>
+</ul></li>
+<li><a href="#suspense-for-server-side-rendering-font-style-vertical-align-inherit-font-style-vertical-align-inherit-服务端渲染的悬念-font-font">[](#suspense-for-server-side-rendering)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">服务端渲染的悬念</font></font></a></li>
+<li><a href="#automatic-batching-font-style-vertical-align-inherit-font-style-vertical-align-inherit-自动配料-font-font">[](#automatic-batching)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">自动配料</font></font></a></li>
+<li><a href="#transitions-font-style-vertical-align-inherit-font-style-vertical-align-inherit-过渡-font-font">[](#transitions)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">过渡</font></font></a>
+<ul>
+<li>
+<ul>
+<li><a href="#a-real-life-example-font-style-vertical-align-inherit-font-style-vertical-align-inherit-一个真实的例子-font-font">[](#a-real-life-example)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">一个真实的例子</font></font></a></li>
+<li><a href="#another-realtime-example-font-style-vertical-align-inherit-font-style-vertical-align-inherit-另一个实时示例-font-font">[](#another-realtime-example)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">另一个实时示例</font></font></a></li>
+<li><a href="#d-useinsertioneffect-font-style-vertical-align-inherit-font-style-vertical-align-inherit-d-font-font-style-vertical-align-inherit-使用插入效果-font-font">[](#d-useinsertioneffect)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">d。</font><font style="vertical-align: inherit;">使用插入效果</font></font></a></li>
+</ul></li>
+</ul></li>
+<li><a href="#conclusion-font-style-vertical-align-inherit-font-style-vertical-align-inherit-结论-font-font">[](#conclusion)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">结论</font></font></a></li>
+</ul></li>
+</ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">React 18 - 新功能和改进策略</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年4月24日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">3 月 8 日，React 团队发布了 React 18 RC（Release Candidate）。</font><font style="vertical-align: inherit;">最新版本带来了许多新功能，可以改变许多应用程序中的编码模式。</font><font style="vertical-align: inherit;">它带来了一些性能改进，我将在本博客中介绍这些改进。</font></font></p>
+
+<h3 id="concurrency-font-style-vertical-align-inherit-font-style-vertical-align-inherit-并发-font-font">[](#concurrency)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">并发</font></font></h3>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">并发是系统的一种属性，其中多个进程同时执行，并且可能会或可能不会相互交互。</font><font style="vertical-align: inherit;">太复杂了？</font><font style="vertical-align: inherit;">让我们分解一下。</font><font style="vertical-align: inherit;">假设正在进行一场比赛。</font><font style="vertical-align: inherit;">现在，并发是有多少人在平行赛道上参加一场比赛。</font></font></p>
+
+<p><a href="https://zshipu.com/t?url=https://res.cloudinary.com/practicaldev/image/fetch/s--IZp9_ZcB--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/g8umsaxl8dv69xadwn1e.jpg"><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--IZp9_ZcB--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/g8umsaxl8dv69xadwn1e.jpg" alt="并发" /></a></p>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">并发是 React 18 引入的一个新特性。</font><font style="vertical-align: inherit;">它是一种新的幕后机制，使 React 能够同时</font></font><strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">准备多个版本的 UI</font></font></strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">在这种机制下，与以前的情况不同，React 可能会开始渲染，中间暂停一些关键任务，然后再次恢复渲染。</font><font style="vertical-align: inherit;">唯一要记住的是，它也可能完全放弃进程渲染。</font><font style="vertical-align: inherit;">即使渲染中断，React 也能保证 UI 看起来是一致的。</font></font></p>
+
+<p><strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">这使 React 能够在后台准备屏幕 - 不会阻塞新线程！</font></font></strong></p>
+
+<h2 id="suspense-for-server-side-rendering-font-style-vertical-align-inherit-font-style-vertical-align-inherit-服务端渲染的悬念-font-font">[](#suspense-for-server-side-rendering)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">服务端渲染的悬念</font></font></h2>
+
+<p><a href="https://zshipu.com/t?url=https://res.cloudinary.com/practicaldev/image/fetch/s--HpWxw1p6--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/9190smf7ojw3vbjor3rd.png"><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--HpWxw1p6--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/9190smf7ojw3vbjor3rd.png" alt="服务端渲染的悬念" /></a></p>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">React 在 Next.js、Relay、Hydrogen 或 Remix 等服务器端渲染框架中带来了 Suspense 的特性。</font><font style="vertical-align: inherit;">React 18 引入：</font><font style="vertical-align: inherit;">有悬念</font></font>
+<strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">的服务端代码拆分，服务端</font></font></strong>
+<strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Streaming 渲染</font></font></strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+
+<h2 id="automatic-batching-font-style-vertical-align-inherit-font-style-vertical-align-inherit-自动配料-font-font">[](#automatic-batching)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">自动配料</font></font></h2>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">批处理是 React 将多个状态更新分组到一个重新渲染中以实现更好的性能优化的现象。</font></font></p>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">动图</font></font></p>
+
+<canvas class="ff-canvas ff-canvas-ready" width="678" height="466"></canvas>
+
+<p><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--pdXfjQwq--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_66%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/heg1wl20xnkv9hbncw3t.gif" alt="配料" /></p>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">在 React 18 之前，对基于React的事件处理程序执行批量更新。</font><font style="vertical-align: inherit;">但是对于</font></font><strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">promises、setTimeouts、本机事件处理程序或任何其他事件，</font></font></strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">没有执行批量更新。</font><font style="vertical-align: inherit;">React 18 也针对上述情况执行自动批量更新。</font></font></p>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">让我们使用代码来理解这一点。</font></font></p>
+
+<p>setTimeout(() =&gt; {
+  setCount(count =&gt; count + 1);
+  setFlag(flag =&gt; !flag);
+  // React will only re-render once at the end (that&rsquo;s batching!)
+}, 1000);</p>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">同样，上述代码的行为与此相同：</font></font></p>
+
+<p>fetch(/<em>&hellip;</em>/).then(() =&gt; {
+  setCount(counter =&gt; counter + 1);
+  setFlag(flag =&gt; !flag);
+  // React will only re-render once at the end (that&rsquo;s batching!)
+})</p>
+
+<p><em><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如果您不想批处理，可以使用</font></font><code>ReactDOM.flushSync()</code></em><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">.</font> <font style="vertical-align: inherit;">让我们用一点代码来理解</font></font></p>
+
+<p>import { flushSync } from &lsquo;react-dom&rsquo;; // Note: react-dom, not react</p>
+
+<p>function handleFlushesClick() {
+  flushSync(() =&gt; {
+    setCounter(counter =&gt; counter + 1);
+  });
+  // React has updated the DOM by now
+  flushSync(() =&gt; {
+    setFlag(flag =&gt; !flag);
+  });
+  // React has updated the DOM by now
+}</p>
+
+<h2 id="transitions-font-style-vertical-align-inherit-font-style-vertical-align-inherit-过渡-font-font">[](#transitions)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">过渡</font></font></h2>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">此功能区分紧急和非紧急更新。</font><font style="vertical-align: inherit;">紧急更新是需要立即响应的更新。</font><font style="vertical-align: inherit;">紧急更新包括点击、按下、键入等操作——需要立即响应或</font></font><em><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">用户希望 UI 立即响应的操作。</font></font></em>
+<strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">屏幕上不会显示任何中间值。</font></font></strong></p>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">动图</font></font></p>
+
+<canvas class="ff-canvas ff-canvas-ready" width="678" height="509"></canvas>
+
+<p><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--iQyK7Db_--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_66%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ih0bbg78vj461sob1ze5.gif" alt="过渡示例" /></p>
+
+<h4 id="a-real-life-example-font-style-vertical-align-inherit-font-style-vertical-align-inherit-一个真实的例子-font-font">[](#a-real-life-example)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">一个真实的例子</font></font></h4>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">考虑一个现实生活中的例子，让我们考虑一个去抖动的 typeahead。</font><font style="vertical-align: inherit;">现在，当您输入输入时，您希望输入框反映输入的值。</font><font style="vertical-align: inherit;">但是，您希望结果立即出现吗？</font><font style="vertical-align: inherit;">没有权利！</font><font style="vertical-align: inherit;">它会去抖动，然后你会得到结果。</font><font style="vertical-align: inherit;">因此，从您输入输入到您收到建议之间有一段过渡时间。</font><font style="vertical-align: inherit;">这个时间框架将用于过渡。</font></font></p>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">通常，为了获得最佳用户体验，单个用户输入应导致紧急和非紧急更新。</font></font></p>
+
+<p>import {startTransition} from &lsquo;react&rsquo;;</p>
+
+<p>// Urgent: Show what was typed
+    setInputValue(input);`</p>
+
+<p>// Mark any state updates inside as transitions
+  startTransition(() =&gt; {
+     // Transition: Show the autosuggestion based on the input
+        value
+      setSearchQuery(input);
+});</p>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">动图</font></font></p>
+
+<canvas class="ff-canvas ff-canvas-ready" width="678" height="509"></canvas>
+
+<p><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--8_KQnZ9G--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_66%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/bv88pvre4abh8796em8b.gif" alt="搜索栏" /></p>
+
+<h4 id="another-realtime-example-font-style-vertical-align-inherit-font-style-vertical-align-inherit-另一个实时示例-font-font">[](#another-realtime-example)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">另一个实时示例</font></font></h4>
+
+<p>const [isPending, startTransition] = useTransition()</p>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">这里 useTransition 钩子有 2 个被解构的参数。</font></font></p>
+
+<pre><code class="language-isPending```&lt;font">
+</code></pre>
+
+<p>startTransition```<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">：执行事务代码的函数。</font></font></p>
+
+<p>function handleClick() {
+   startTransition(() =&gt; {
+     setTab(&lsquo;comments&rsquo;);
+   });
+}</p>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">当您想从照片选项卡切换到评论选项卡时，会调用此函数。</font></font></p>
+
+<pre><code class="language-&lt;Suspense">&lt;div style={{ opacity: isPending ? 0.8 : 1 }}&gt;
+{tab === 'photos' ? &lt;Photos /&gt; : &lt;Comments /&gt;}
+&lt;/div&gt;
+&lt;/Suspense&gt;``` 
+
+&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;在过渡阶段，当 React 正在准备新的 UI 时，带有照片 UI 的选项卡现在将以 80% 的不透明度向用户显示，以提供平滑的过渡视图。&lt;/font&gt;&lt;/font&gt;
+
+## [](#strict-mode-in-react)&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;React 中的严格模式&lt;/font&gt;&lt;/font&gt;
+
+&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;开发服务器中的严格模式在 React 18 中带来了一些有趣的变化。这种模式本质上为 React 提供了开箱即用的性能。&lt;/font&gt;&lt;/font&gt;
+
+_&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;每当第一次安装组件时，此新检查将自动卸载并重新安装每个组件，并在第二次安装时恢复先前的状态。&lt;/font&gt;&lt;/font&gt;_
+
+&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;现在安装期间的一系列事件：&lt;/font&gt;&lt;/font&gt;
+
+&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;I. React 挂载组件。&lt;/font&gt;&lt;/font&gt;
+
+*   &lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;创建布局效果。&lt;/font&gt;&lt;/font&gt;
+*   &lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;创建效果。&lt;/font&gt;&lt;/font&gt;
+
+&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;二、&lt;/font&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;React 模拟卸载组件。&lt;/font&gt;&lt;/font&gt;
+
+*   &lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;布局效果被破坏。&lt;/font&gt;&lt;/font&gt;
+*   &lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;效果被破坏。&lt;/font&gt;&lt;/font&gt;
+
+&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;三、&lt;/font&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;React 模拟使用先前状态安装组件。&lt;/font&gt;&lt;/font&gt;
+
+*   &lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;创建布局效果。&lt;/font&gt;&lt;/font&gt;
+*   &lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;效果已创建。`&lt;/font&gt;&lt;/font&gt;
+
+&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;在卸载期间，会发生以下事件&lt;/font&gt;&lt;/font&gt;
+
+&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;I. 布局效果被破坏，Effect 效果被破坏。&lt;/font&gt;&lt;/font&gt;
+
+## [](#new-hooks)&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;新钩子&lt;/font&gt;&lt;/font&gt;
+
+[![图片描述](https://res.cloudinary.com/practicaldev/image/fetch/s--Xq2KUuJd--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/321rzz9e5sindiakqy9y.png)](https://zshipu.com/t?url=https://res.cloudinary.com/practicaldev/image/fetch/s--Xq2KUuJd--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/321rzz9e5sindiakqy9y.png)
+
+#### [](#a-useid)&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;一种。&lt;/font&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;使用 ID&lt;/font&gt;&lt;/font&gt;
+
+&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;useId 是一个新的钩子，用于在客户端和服务器上生成**唯一 ID*&lt;/font&gt;&lt;/font&gt; _&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;，同时避免水合不匹配。&lt;/font&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;这会生成一个包含 : 的 **unique 字符串，它不会与 css 选择器和&lt;/font&gt;&lt;/font&gt;```querySelectorAll```_&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;*冲突&lt;/font&gt;&lt;/font&gt;
+
+&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;您还可以将 userId 与 identifierPrefix 一起使用，以防止多根应用程序中的冲突。&lt;/font&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;对于同一组件中的多个 ID，请使用相同的 id 附加后缀。&lt;/font&gt;&lt;/font&gt;
+
+#### [](#b-usedeferredvalue)&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;湾。&lt;/font&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;使用延迟值&lt;/font&gt;&lt;/font&gt;
+
+&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;useDeferredValue 将允许您推迟重新渲染树的非紧急部分。&lt;/font&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;还记得我们讨论过非紧急渲染吗？&lt;/font&gt;&lt;/font&gt; **&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;它没有固定的时间延迟，因此 React 将在第一次渲染反映在屏幕上之后立即尝试延迟渲染。&lt;/font&gt;&lt;/font&gt;**
+
+#### [](#c-usesyncexternalstore)&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;C。&lt;/font&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;使用同步外部存储&lt;/font&gt;&lt;/font&gt;
+
+&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;useSyncExternalStore 是一个新的钩子，它允许外部存储通过强制对存储的更新同步来支持并发读取。&lt;/font&gt;&lt;/font&gt;**&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;在实现对外部数据源的订阅时，它消除了对 useEffect 的需求。&lt;/font&gt;&lt;/font&gt;**
+
+&lt;font style=&quot;vertical-align: inherit;&quot;&gt;&lt;font style=&quot;vertical-align: inherit;&quot;&gt;代码片段：&lt;/font&gt;&lt;/font&gt;
+
+   const state = useSyncExternalStore(subscribe, getSnapshot[, getServerSnapshot]);
+
+</code></pre>
+
+<p>subscribe```<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">: 注册回调的函数，每当商店更改时调用该回调。</font></font></p>
+
+<pre><code class="language-getSnapshot```&lt;font"></code></pre>
+
+<p>getServerSnapshot```<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">：返回服务器渲染期间使用的快照的函数。</font></font></p>
+
+<h4 id="d-useinsertioneffect-font-style-vertical-align-inherit-font-style-vertical-align-inherit-d-font-font-style-vertical-align-inherit-使用插入效果-font-font">[](#d-useinsertioneffect)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">d。</font><font style="vertical-align: inherit;">使用插入效果</font></font></h4>
+
+<p><code>useInsertionEffect(didUpdate);</code></p>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">useInsertionEffect 是一个新的钩子，它允许 CSS-in-JS 库解决在渲染中注入样式的性能问题。</font></font><strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">这个钩子将在 DOM 发生变异之后运行，但在布局效果读取新布局之前。</font></font></strong></p>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">这个钩子将有助于计算与并发重新渲染同步的布局。</font></font></p>
+
+<hr />
+
+<h2 id="conclusion-font-style-vertical-align-inherit-font-style-vertical-align-inherit-结论-font-font">[](#conclusion)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">结论</font></font></h2>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">还有其他一些小但重要的更新——例如使用</font></font><strong><code>createRoot()</code></strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">钩子而不是</font></font><strong><code>ReactDOM.render</code></strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">.</font> <font style="vertical-align: inherit;">此方法将用于渲染 DOM 元素并使用 umount</font></font><strong><code>root.unmount()</code></strong></p>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">除了 React 之外，还有对使用</font></font><strong><code>renderToPipeableStream</code></strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">&amp;的服务器的流式 Suspense 支持</font></font><strong><code>renderToReadableStream</code></strong></p>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">React 开发人员继续关注此发布版本中的增强和改进以及几个错误修复。</font><font style="vertical-align: inherit;">更新并不细致，可以在早上的会议中完成，本身。</font><font style="vertical-align: inherit;">那么，应用程序开发人员还等什么呢？</font><font style="vertical-align: inherit;">让我们升级我们的库并开始工作吧！</font><font style="vertical-align: inherit;">向 React 团队致敬！</font></font></p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/React-18-%E6%96%B0%E5%8A%9F%E8%83%BD%E5%92%8C%E6%94%B9%E8%BF%9B%E7%AD%96%E7%95%A5/">https://geek.zshipu.com/post/React-18-%E6%96%B0%E5%8A%9F%E8%83%BD%E5%92%8C%E6%94%B9%E8%BF%9B%E7%AD%96%E7%95%A5/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/%E4%BD%A0%E5%BF%85%E9%A1%BB%E5%87%86%E5%A4%87%E7%9A%84-50-%E4%B8%AA-React-%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/">你必须准备的 50 个 React 面试问题</a></li>
+        
+        <li><a href="/post/React-%E5%88%9D%E5%AD%A6%E8%80%85-%E6%95%99%E7%A8%8BReact-%E7%AE%80%E4%BB%8B-%E4%BA%94/">React 初学者： 教程：React 简介 五</a></li>
+        
+        <li><a href="/post/React-%E5%88%9D%E5%AD%A6%E8%80%85-JSX-%E7%AE%80%E4%BB%8B-%E5%9B%9B/">React 初学者： JSX 简介 四</a></li>
+        
+        <li><a href="/post/React-%E5%88%9D%E5%AD%A6%E8%80%85-%E5%AD%A6%E4%B9%A0-ReactJS-%E4%B9%8B%E5%89%8D%E5%BF%85%E9%A1%BB%E4%BA%86%E8%A7%A3%E7%9A%84-5-%E5%A4%A7%E6%8A%80%E8%83%BD-%E4%B8%89/">React 初学者： 学习 ReactJS 之前必须了解的 5 大技能 三</a></li>
+        
+        <li><a href="/post/React-%E5%88%9D%E5%AD%A6%E8%80%85-%E5%A6%82%E4%BD%95%E5%AD%A6%E4%B9%A0-ReactJS-%E4%BA%8C/">React 初学者： 如何学习 ReactJS 二</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/reactjs'>reactjs</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/React-18-%E6%96%B0%E5%8A%9F%E8%83%BD%E5%92%8C%E6%94%B9%E8%BF%9B%E7%AD%96%E7%95%A5/" title="React 18 - 新功能和改进策略">React 18 - 新功能和改进策略</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DOM-%E5%92%8C%E8%99%9A%E6%8B%9F-DOM-%E7%9A%84%E5%8C%BA%E5%88%AB/" title="DOM 和虚拟 DOM 的区别">DOM 和虚拟 DOM 的区别</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/GlideIM-Golang-%E5%AE%9E%E7%8E%B0%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F-IM/" title="GlideIM - Golang 实现的高性能的分布式 IM">GlideIM - Golang 实现的高性能的分布式 IM</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE%E7%AC%AC-2-%E9%83%A8%E5%88%86%E9%99%84%E6%8F%92%E5%9B%BE/" title="浏览器的工作原理 - 获取数据（第 2 部分，附插图）🚀">浏览器的工作原理 - 获取数据（第 2 部分，附插图）🚀</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/%E4%B8%BA%E4%BB%80%E4%B9%88-Flutter-%E4%BD%BF%E7%94%A8-Dart/" title="为什么 Flutter 使用 Dart">为什么 Flutter 使用 Dart</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E5%AF%BC%E8%88%AA%E7%AC%AC-1-%E9%83%A8%E5%88%86%E5%B8%A6%E6%8F%92%E5%9B%BE%EF%B8%8F/" title="浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥">浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD-%E5%8D%81%E9%80%9A%E8%BF%87%E9%A2%84%E5%AE%9A%E4%BD%9C%E4%B8%9A%E7%9A%84%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7/" title="DDD-十、通过预定作业的最终一致性">DDD-十、通过预定作业的最终一致性</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD-%E4%B9%9D%E4%BD%BF%E7%94%A8-Spring-%E5%A4%84%E7%90%86%E9%A2%86%E5%9F%9F%E4%BA%8B%E4%BB%B6/" title="DDD-九、使用 Spring Data 发布领域事件">DDD-九、使用 Spring Data 发布领域事件</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD-%E5%85%AB%E4%BD%BF%E7%94%A8-Spring-Data-%E5%8F%91%E5%B8%83%E9%A2%86%E5%9F%9F%E4%BA%8B%E4%BB%B6/" title="DDD-八、使用 Spring 处理领域事件">DDD-八、使用 Spring 处理领域事件</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD-%E4%B8%83%E5%9C%A8-Hibernate-%E4%B8%AD%E4%BD%BF%E7%94%A8%E5%80%BC%E5%AF%B9%E8%B1%A1%E4%BD%9C%E4%B8%BA%E8%81%9A%E5%90%88%E6%A0%87%E8%AF%86%E7%AC%A6/" title="DDD-七、在 Hibernate 中使用值对象作为聚合标识符">DDD-七、在 Hibernate 中使用值对象作为聚合标识符</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/BI/">BI</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD%E5%AE%9E%E6%88%98/">DDD实战</a>
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="https://geek.zshipu.com/tags/IM/">IM</a>
+    
+    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    
+    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    
+    <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
+    
+    <a href="">Nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
+    
+    <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/css/">css</a>
+    
+    <a href="https://geek.zshipu.com/tags/flutter/">flutter</a>
+    
+    <a href="https://geek.zshipu.com/tags/game/">game</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="">java</a>
+    
+    <a href="">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/web/">web</a>
+    
+    <a href="https://geek.zshipu.com/tags/web3/">web3</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/">人工智能</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%88%86%E8%AF%8D/">分词</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%96%87%E6%91%98/">文摘</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%88%AC%E8%99%AB/">爬虫</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E8%B5%B7%E6%AD%A5/">起步</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
