@@ -146,11 +146,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-  <ul>
-    <li><a href="#font-_mstmutation1-_msthash44499-_msttexthash43058340运行我们的服务器和服务muxfont"><!-- raw HTML omitted -->运行我们的服务器和服务Mux<!-- raw HTML omitted --></a></li>
-    <li><a href="#font-_mstmutation1-_msthash37674-_msttexthash23249889正常关闭服务器font"><!-- raw HTML omitted -->正常关闭服务器<!-- raw HTML omitted --></a></li>
-    <li><a href="#font-_mstmutation1-_msthash33007-_msttexthash7750756处理器font"><!-- raw HTML omitted -->处理器<!-- raw HTML omitted --></a></li>
-  </ul>
+<ul>
+<li><a href="#font-mstmutation-1-msthash-27612-msttexthash-29193541-文件结构如何-font"><font _mstmutation="1" _msthash="27612" _msttexthash="29193541">文件结构如何？</font></a></li>
+<li><a href="#font-mstmutation-1-msthash-29549-msttexthash-17330404-深入到代码中-font"><font _mstmutation="1" _msthash="29549" _msttexthash="17330404">深入到代码中</font></a>
+<ul>
+<li><a href="#font-mstmutation-1-msthash-44499-msttexthash-43058340-运行我们的服务器和服务mux-font"><font _mstmutation="1" _msthash="44499" _msttexthash="43058340">运行我们的服务器和服务Mux</font></a></li>
+<li><a href="#font-mstmutation-1-msthash-37674-msttexthash-23249889-正常关闭服务器-font"><font _mstmutation="1" _msthash="37674" _msttexthash="23249889">正常关闭服务器</font></a></li>
+<li><a href="#font-mstmutation-1-msthash-33007-msttexthash-7750756-处理器-font"><font _mstmutation="1" _msthash="33007" _msttexthash="7750756">处理器</font></a></li>
+</ul></li>
+<li><a href="#font-mstmutation-1-msthash-34255-msttexthash-6674577-结论-font"><font _mstmutation="1" _msthash="34255" _msttexthash="6674577">结论</font></a></li>
+<li><a href="#font-mstmutation-1-msthash-27404-msttexthash-5334199-引用-font"><font _mstmutation="1" _msthash="27404" _msttexthash="5334199">引用</font></a></li>
+</ul>
 </nav>
     </div>
 </div>
@@ -197,123 +203,159 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            <p><!-- raw HTML omitted -->来自JavaScript的背景，我一直想学习一种静态类型的编程语言，今年早些时候，我拿起Golang后，阅读了有关语言的评论，Golang得到了谷歌的支持。哦， 当然， 流行的 Devops 工具， 如码头， 库伯内特， Terraform， 是用Golang建造的。在通过 freecodecamp 从这个<a href="https://zshipu.com/t?url=https://www.youtube.com/watch?v=YS4e4q9oBaU&amp;ab_channel=freeCodeCamp.org">令人敬畏</a>的教程中选取基础知识后，我决定构建一个生产级别的微服务体系结构。该项目将具有单元测试、CI/CD 集成和健壮的体系结构，这些架构将来可以扩展。前端将写在React中。<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->这将是一个多部分博客，记录了整个体系结构的创建。代码将托管在这里<a href="https://zshipu.com/t?url=https://github.com/nandangrover/go-microservices">：https://github.com/nandangrover/go-microservices。</a>本系列的第一部分，这是这个博客文档可以在此分支<a href="https://zshipu.com/t?url=https://github.com/nandangrover/go-microservices/tree/microservices_basic_1">找到</a>。我会使用 Ubuntu 的系列， 但Golang坐在其他 Os 以及， 所以它不应该是一个问题。<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->我选择的代码编辑器是视觉工作室，我建议你使用它。它有许多开箱即用的好处。Visual Studio 代码支持&quot;开箱即用&quot;突出显示的 Go 语法。vscode-go<a href="https://zshipu.com/t?url=https://github.com/Microsoft/vscode-go">插件提供了其他功能</a>，该插件与十几种标准 Go 工具集成。如果您没有设置 GOPATH，插件将要求您在尝试编辑 Go 语言文件时尽快设置它;您可以为项目和/或系统环境设置它。如果您没有安装 Go 工具，插件将要求将它们安装在 GOPATH 确定的标准位置。<!-- raw HTML omitted --></p>
-<h1 id="font-_mstmutation1-_msthash27612-_msttexthash29193541文件结构如何font"><!-- raw HTML omitted -->文件结构如何？<!-- raw HTML omitted --></h1>
-<p><!-- raw HTML omitted -->我的 go 工作区将转到二进制文件以及我的个人项目分开。在我看来，这让工作空间变得不那么杂乱无章。我们将利用 GOPATH 环境变量来形成这样的工作区。<!-- raw HTML omitted --></p>
-<p>
-        <img class="mx-auto" alt="image-20211005082249193" src="https://cdn.jsdelivr.net/gh/zshipu/images/202110050822543.png" />   
-    </p>
-<p><!-- raw HTML omitted -->如上图所示，go 库/二进制文件存储在 golib 文件夹中，而我们的个人项目将存储在 goCode 中。<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->现在，让我们看看 goCode 文件夹。它由一个 go-microservices 目录组成，该目录以相同的名称推送在 git 上。<!-- raw HTML omitted --></p>
-<p>
-        <img class="mx-auto" alt="image-20211005082324707" src="https://cdn.jsdelivr.net/gh/zshipu/images/202110050823288.png" />   
-    </p>
-<p><!-- raw HTML omitted -->它包含一个 main.go 文件和一个名为处理程序的文件夹。我们有我们的 gitgnore 和 README.md GitHub 的一个。<!-- raw HTML omitted --></p>
-<h1 id="font-_mstmutation1-_msthash29549-_msttexthash17330404深入到代码中font"><!-- raw HTML omitted -->深入到代码中<!-- raw HTML omitted --></h1>
-<p><!-- raw HTML omitted -->让我们看看我们的 main.go 文件，它包含构建两个简单的微服务的逻辑 - 你好再见。<!-- raw HTML omitted --></p>
+            
+
+<p><font _mstmutation="1" _msthash="39273" _msttexthash="7523966125">来自JavaScript的背景，我一直想学习一种静态类型的编程语言，今年早些时候，我拿起Golang后，阅读了有关语言的评论，Golang得到了谷歌的支持。哦， 当然， 流行的 Devops 工具， 如码头， 库伯内特， Terraform， 是用Golang建造的。在通过 freecodecamp 从这个<a href="https://zshipu.com/t?url=https://www.youtube.com/watch?v=YS4e4q9oBaU&amp;ab_channel=freeCodeCamp.org">令人敬畏</a>的教程中选取基础知识后，我决定构建一个生产级别的微服务体系结构。该项目将具有单元测试、CI/CD 集成和健壮的体系结构，这些架构将来可以扩展。前端将写在React中。</font></p>
+
+<p><font _mstmutation="1" _msthash="28314" _msttexthash="2655542422">这将是一个多部分博客，记录了整个体系结构的创建。代码将托管在这里<a href="https://zshipu.com/t?url=https://github.com/nandangrover/go-microservices">：https://github.com/nandangrover/go-microservices。</a>本系列的第一部分，这是这个博客文档可以在此分支<a href="https://zshipu.com/t?url=https://github.com/nandangrover/go-microservices/tree/microservices_basic_1">找到</a>。我会使用 Ubuntu 的系列， 但Golang坐在其他 Os 以及， 所以它不应该是一个问题。</font></p>
+
+<p><font _mstmutation="1" _msthash="33384" _msttexthash="5551259012">我选择的代码编辑器是视觉工作室，我建议你使用它。它有许多开箱即用的好处。Visual Studio 代码支持&rdquo;开箱即用&rdquo;突出显示的 Go 语法。vscode-go<a href="https://zshipu.com/t?url=https://github.com/Microsoft/vscode-go">插件提供了其他功能</a>，该插件与十几种标准 Go 工具集成。如果您没有设置 GOPATH，插件将要求您在尝试编辑 Go 语言文件时尽快设置它;您可以为项目和/或系统环境设置它。如果您没有安装 Go 工具，插件将要求将它们安装在 GOPATH 确定的标准位置。</font></p>
+
+<h1 id="font-mstmutation-1-msthash-27612-msttexthash-29193541-文件结构如何-font"><font _mstmutation="1" _msthash="27612" _msttexthash="29193541">文件结构如何？</font></h1>
+
+<p><font _mstmutation="1" _msthash="24414" _msttexthash="901021823">我的 go 工作区将转到二进制文件以及我的个人项目分开。在我看来，这让工作空间变得不那么杂乱无章。我们将利用 GOPATH 环境变量来形成这样的工作区。</font></p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110050822543.png" alt="image-20211005082249193" /></p>
+
+<p><font _mstmutation="1" _msthash="35256" _msttexthash="329389970">如上图所示，go 库/二进制文件存储在 golib 文件夹中，而我们的个人项目将存储在 goCode 中。</font></p>
+
+<p><font _mstmutation="1" _msthash="22490" _msttexthash="466665030">现在，让我们看看 goCode 文件夹。它由一个 go-microservices 目录组成，该目录以相同的名称推送在 git 上。</font></p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110050823288.png" alt="image-20211005082324707" /></p>
+
+<p><font _mstmutation="1" _msthash="28444" _msttexthash="297809564">它包含一个 main.go 文件和一个名为处理程序的文件夹。我们有我们的 gitgnore 和 README.md GitHub 的一个。</font></p>
+
+<h1 id="font-mstmutation-1-msthash-29549-msttexthash-17330404-深入到代码中-font"><font _mstmutation="1" _msthash="29549" _msttexthash="17330404">深入到代码中</font></h1>
+
+<p><font _mstmutation="1" _msthash="32045" _msttexthash="306491783">让我们看看我们的 main.go 文件，它包含构建两个简单的微服务的逻辑 - 你好再见。</font></p>
+
 <p>func main() {
-l := log.New(os.Stdout, &ldquo;product-api&rdquo;, log.LstdFlags)
-hh := handlers.NewHello(l)
-gh := handlers.NewGoodbye(l)sm := http.NewServeMux()
-sm.Handle(&quot;/&quot;, hh)
-sm.Handle(&quot;/goodbye&quot;, gh)s := &amp;http.Server{
-Addr:         &ldquo;:9090&rdquo;,
-Handler:      sm,
-IdleTimeout:  120 * time.Second,
-ReadTimeout:  1 * time.Second,
-WriteTimeout: 1 * time.Second,
-}
-// wrapping ListenAndServe in gofunc so it&rsquo;s not going to block
-go func() {
-err := s.ListenAndServe()
-if err != nil {
-l.Fatal(err)
-}
-}()// make a new channel to notify on os interrupt of server (ctrl + C)
-sigChan := make(chan os.Signal)
-signal.Notify(sigChan, os.Interrupt)
-signal.Notify(sigChan, os.Kill)// This blocks the code until the channel receives some message
-sig := &lt;-sigChan
-l.Println(&ldquo;Received terminate, graceful shutdown&rdquo;, sig)
-// Once message is consumed shut everything down
-// Gracefully shuts down all client requests. Makes server more reliable
-tc, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-defer cancel()
-s.Shutdown(tc)
+ l := log.New(os.Stdout, &ldquo;product-api&rdquo;, log.LstdFlags)
+ hh := handlers.NewHello(l)
+ gh := handlers.NewGoodbye(l)sm := http.NewServeMux()
+ sm.Handle(&ldquo;/&rdquo;, hh)
+ sm.Handle(&ldquo;/goodbye&rdquo;, gh)s := &amp;http.Server{
+  Addr:         &ldquo;:9090&rdquo;,
+  Handler:      sm,
+  IdleTimeout:  120 * time.Second,
+  ReadTimeout:  1 * time.Second,
+  WriteTimeout: 1 * time.Second,
+ }
+ // wrapping ListenAndServe in gofunc so it&rsquo;s not going to block
+ go func() {
+  err := s.ListenAndServe()
+  if err != nil {
+   l.Fatal(err)
+  }
+ }()// make a new channel to notify on os interrupt of server (ctrl + C)
+ sigChan := make(chan os.Signal)
+ signal.Notify(sigChan, os.Interrupt)
+ signal.Notify(sigChan, os.Kill)// This blocks the code until the channel receives some message
+ sig := &lt;-sigChan
+ l.Println(&ldquo;Received terminate, graceful shutdown&rdquo;, sig)
+ // Once message is consumed shut everything down
+ // Gracefully shuts down all client requests. Makes server more reliable
+ tc, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+ defer cancel()
+ s.Shutdown(tc)
 }</p>
-<p><!-- raw HTML omitted -->我们首先通过调用日志创建新记录器。新增功能。我们可以有多个记录器在未来，所以我们创建一个简单的记录器的名称产品api开始。<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->下一步是使用记录器初始化我们的处理程序。处理程序是我们的自定义方法，实现处理程序接口。在内部，在 http 模块中，Handler 接口实现 ServeHTTP 方法，该方法又接受 http。响应编写器和指向 *http 的指针。请求。Golang 很好地记录了 http 服务器，您可以查看其官方文档中的处理程序<a href="https://zshipu.com/t?url=https://golang.org/src/net/http/server.go">接口，</a>以更好地了解 http 模块的内部工作。<!-- raw HTML omitted --></p>
-<h2 id="font-_mstmutation1-_msthash44499-_msttexthash43058340运行我们的服务器和服务muxfont"><!-- raw HTML omitted -->运行我们的服务器和服务Mux<!-- raw HTML omitted --></h2>
-<p><!-- raw HTML omitted -->而不是使用 http 创建新服务器。ListenAndServe （&ldquo;9090&rdquo;），我们使用很少使用的 NewServeMux 函数与指向 http 的指针相结合。用于自定义服务器的服务器。名称描述的 NewServeMux 返回一个 ServeMux。<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->ServeMux 是 HTTP 请求多路复用器。它根据已注册模式的列表匹配每个传入请求的 URL，并调用与 URL 最匹配的模式的处理程序。你可以在官方文档中阅读更多<a href="https://zshipu.com/t?url=https://golang.org/pkg/net/http/#ServeMux">关于它。</a><!-- raw HTML omitted --></p>
+
+<p><font _mstmutation="1" _msthash="43823" _msttexthash="672819459">我们首先通过调用日志创建新记录器。新增功能。我们可以有多个记录器在未来，所以我们创建一个简单的记录器的名称产品api开始。</font></p>
+
+<p><font _mstmutation="1" _msthash="22945" _msttexthash="3773283020">下一步是使用记录器初始化我们的处理程序。处理程序是我们的自定义方法，实现处理程序接口。在内部，在 http 模块中，Handler 接口实现 ServeHTTP 方法，该方法又接受 http。响应编写器和指向 *http 的指针。请求。Golang 很好地记录了 http 服务器，您可以查看其官方文档中的处理程序<a href="https://zshipu.com/t?url=https://golang.org/src/net/http/server.go">接口，</a>以更好地了解 http 模块的内部工作。</font></p>
+
+<h2 id="font-mstmutation-1-msthash-44499-msttexthash-43058340-运行我们的服务器和服务mux-font"><font _mstmutation="1" _msthash="44499" _msttexthash="43058340">运行我们的服务器和服务Mux</font></h2>
+
+<p><font _mstmutation="1" _msthash="27729" _msttexthash="1303150719">而不是使用 http 创建新服务器。ListenAndServe （&rdquo;9090&rdquo;），我们使用很少使用的 NewServeMux 函数与指向 http 的指针相结合。用于自定义服务器的服务器。名称描述的 NewServeMux 返回一个 ServeMux。</font></p>
+
+<p><font _mstmutation="1" _msthash="35139" _msttexthash="1128797293">ServeMux 是 HTTP 请求多路复用器。它根据已注册模式的列表匹配每个传入请求的 URL，并调用与 URL 最匹配的模式的处理程序。你可以在官方文档中阅读更多<a href="https://zshipu.com/t?url=https://golang.org/pkg/net/http/#ServeMux">关于它。</a></font></p>
+
 <p>sm := http.NewServeMux()
-sm.Handle(&quot;/&quot;, hh)
-sm.Handle(&quot;/goodbye&quot;, gh)</p>
+sm.Handle(&ldquo;/&rdquo;, hh)
+sm.Handle(&ldquo;/goodbye&rdquo;, gh)</p>
+
 <p>s := &amp;http.Server{
-Addr:         &ldquo;:9090&rdquo;,
-Handler:      sm,
-IdleTimeout:  120 * time.Second,
-ReadTimeout:  1 * time.Second,
-WriteTimeout: 1 * time.Second,
-}
-// wrapping ListenAndServe in gofunc so it&rsquo;s not going to block
-go func() {
-err := s.ListenAndServe()
-if err != nil {
-l.Fatal(err)
-}
-}()</p>
-<p><!-- raw HTML omitted -->服务器定义运行 HTTP 服务器的参数。使用初始参数初始化后，我们调用 ListenandServe 函数。这将在指定的端口中启动我们的 http 服务器，该端口目前为 9090。我们为什么要用一条古例来包装这个？ListenandServe 是一个阻塞代码。它阻止该过程，因此不会执行该行下方的任何东西。Go 程序本质上是非阻塞的。这样，服务器可以在单独的 CPU 进程中启动。这也是我们必须采取的第一步，以便在 Go 中运行多台服务器。<!-- raw HTML omitted --></p>
+  Addr:         &ldquo;:9090&rdquo;,
+  Handler:      sm,
+  IdleTimeout:  120 * time.Second,
+  ReadTimeout:  1 * time.Second,
+  WriteTimeout: 1 * time.Second,
+ }
+ // wrapping ListenAndServe in gofunc so it&rsquo;s not going to block
+ go func() {
+  err := s.ListenAndServe()
+  if err != nil {
+   l.Fatal(err)
+  }
+ }()</p>
+
+<p><font _mstmutation="1" _msthash="33605" _msttexthash="6553513252">服务器定义运行 HTTP 服务器的参数。使用初始参数初始化后，我们调用 ListenandServe 函数。这将在指定的端口中启动我们的 http 服务器，该端口目前为 9090。我们为什么要用一条古例来包装这个？ListenandServe 是一个阻塞代码。它阻止该过程，因此不会执行该行下方的任何东西。Go 程序本质上是非阻塞的。这样，服务器可以在单独的 CPU 进程中启动。这也是我们必须采取的第一步，以便在 Go 中运行多台服务器。</font></p>
+
 <blockquote>
-<p><!-- raw HTML omitted -->💡_与__方法调用__不同，方法调用不需要任何参数，因为服务器的配置存在于结构__本身中。函数__内部使用函数在__地址上__创建侦听器__，函数返回 和__函数一__起使用它，使用字段值__（ServeMux 对象）侦听传入连接。_<!-- raw HTML omitted --><code>_http.ListenAndServe(addr string, handler Handler)_``````_server._[_ListenAndServe_](https://zshipu.com/t?url=https://golang.org/pkg/net/http/#Server.ListenAndServe)_()_``````_server_``````_server.ListenAndServe_``````_tcp_``````_addr_``````_net._[_Listen_](https://zshipu.com/t?url=https://golang.org/pkg/net/#Listen)``````_net._[_Listener_](https://zshipu.com/t?url=https://golang.org/pkg/net/#Listener)``````_server._[_Serve_](https://zshipu.com/t?url=https://golang.org/pkg/net/http/#Server.Serve)``````_server.Handler_</code></p>
+<p><font _mstmutation="1" _msthash="28743" _msttexthash="1585112984">💡_与<strong>方法调用</strong>不同，方法调用不需要任何参数，因为服务器的配置存在于结构<strong>本身中。函数</strong>内部使用函数在<strong>地址上</strong>创建侦听器<strong>，函数返回 和</strong>函数一<strong>起使用它，使用字段值</strong>（ServeMux 对象）侦听传入连接。_</font><code>_http.ListenAndServe(addr string, handler Handler)_</code><code>_server._[_ListenAndServe_](https://zshipu.com/t?url=https://golang.org/pkg/net/http/#Server.ListenAndServe)_()_</code><code>_server_</code><code>_server.ListenAndServe_</code><code>_tcp_</code><code>_addr_</code><code>_net._[_Listen_](https://zshipu.com/t?url=https://golang.org/pkg/net/#Listen)</code><code>_net._[_Listener_](https://zshipu.com/t?url=https://golang.org/pkg/net/#Listener)</code><code>_server._[_Serve_](https://zshipu.com/t?url=https://golang.org/pkg/net/http/#Server.Serve)</code><code>_server.Handler_</code></p>
 </blockquote>
-<h2 id="font-_mstmutation1-_msthash37674-_msttexthash23249889正常关闭服务器font"><!-- raw HTML omitted -->正常关闭服务器<!-- raw HTML omitted --></h2>
-<p><!-- raw HTML omitted -->为什么关闭服务器非常重要？假设客户端已发送请求以将其映像保存在数据库中。同时，我们必须做一些维护工作，我们关闭服务器。映像在后端应有多个调用来处理它。第一个是 aws， 以实际保存它， 并得到文件 ID 和链接。假设此部分已完成执行，但为了将映像注册为已保存，我们不必将 aws 数据保存在内部数据库中。此时，服务器将停止。因此，映像保存在 aws 中，但我们不知道，当服务器在执行客户端请求时停止时。<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->为了防止发生此类情况，我们必须正常关闭服务器，以便处理所有当前处于活动状态的客户端请求。<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->关闭正常关闭服务器，而不会中断任何活动连接。关闭的工作原理是首先关闭所有打开的侦听器，然后关闭所有空闲连接，然后无限期地等待连接返回到空闲状态，然后关闭。如果提供的上下文在关闭完成之前过期，则&quot;关机&quot;将返回上下文的错误，否则，它将返回关闭服务器的基础侦听器返回的任何错误。<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->为了触发关机，我们侦听来自 os 的中断信号。我们通过传递 os 创建一个 go 通道。信号。通知用于注册以中断和终止来自服务器的信号。<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->去通道是自然阻塞的。因此，如果我们从 out sigChan 读取消息，则它随后会阻止它下面的所有代码。收到中断信号后，我们将打印关机消息并创建 30 秒的超时上下文。我们将此传递给我们的服务器。关机功能。<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->关闭方法需要<strong>传入请求</strong>的基本上下文。如果尚未配置结构的字段，可以使用 ，因为它是该字段的默认值。<!-- raw HTML omitted --><code>[BaseContext](https://zshipu.com/t?url=https://golang.org/pkg/net/http/#Server.BaseContext)``````Server``````context.[Background](https://zshipu.com/t?url=https://golang.org/pkg/context/#Background)()``````BaseContext</code></p>
+
+<h2 id="font-mstmutation-1-msthash-37674-msttexthash-23249889-正常关闭服务器-font"><font _mstmutation="1" _msthash="37674" _msttexthash="23249889">正常关闭服务器</font></h2>
+
+<p><font _mstmutation="1" _msthash="40261" _msttexthash="6431144005">为什么关闭服务器非常重要？假设客户端已发送请求以将其映像保存在数据库中。同时，我们必须做一些维护工作，我们关闭服务器。映像在后端应有多个调用来处理它。第一个是 aws， 以实际保存它， 并得到文件 ID 和链接。假设此部分已完成执行，但为了将映像注册为已保存，我们不必将 aws 数据保存在内部数据库中。此时，服务器将停止。因此，映像保存在 aws 中，但我们不知道，当服务器在执行客户端请求时停止时。</font></p>
+
+<p><font _mstmutation="1" _msthash="28730" _msttexthash="438132370">为了防止发生此类情况，我们必须正常关闭服务器，以便处理所有当前处于活动状态的客户端请求。</font></p>
+
+<p><font _mstmutation="1" _msthash="33774" _msttexthash="3662126364">关闭正常关闭服务器，而不会中断任何活动连接。关闭的工作原理是首先关闭所有打开的侦听器，然后关闭所有空闲连接，然后无限期地等待连接返回到空闲状态，然后关闭。如果提供的上下文在关闭完成之前过期，则&rdquo;关机&rdquo;将返回上下文的错误，否则，它将返回关闭服务器的基础侦听器返回的任何错误。</font></p>
+
+<p><font _mstmutation="1" _msthash="39975" _msttexthash="688530167">为了触发关机，我们侦听来自 os 的中断信号。我们通过传递 os 创建一个 go 通道。信号。通知用于注册以中断和终止来自服务器的信号。</font></p>
+
+<p><font _mstmutation="1" _msthash="22295" _msttexthash="1650977952">去通道是自然阻塞的。因此，如果我们从 out sigChan 读取消息，则它随后会阻止它下面的所有代码。收到中断信号后，我们将打印关机消息并创建 30 秒的超时上下文。我们将此传递给我们的服务器。关机功能。</font></p>
+
+<p><font _mstmutation="1" _msthash="23855" _msttexthash="502143031">关闭方法需要<strong>传入请求</strong>的基本上下文。如果尚未配置结构的字段，可以使用 ，因为它是该字段的默认值。</font><code>[BaseContext](https://zshipu.com/t?url=https://golang.org/pkg/net/http/#Server.BaseContext)</code><code>Server</code><code>context.[Background](https://zshipu.com/t?url=https://golang.org/pkg/context/#Background)()</code><code>BaseContext</code></p>
+
 <p>// make a new channel to notify on os interrupt of server (ctrl + C)
-sigChan := make(chan os.Signal)
-signal.Notify(sigChan, os.Interrupt)
-signal.Notify(sigChan, os.Kill)// This blocks the code until the channel receives some message
-sig := &lt;-sigChan
-l.Println(&ldquo;Received terminate, graceful shutdown&rdquo;, sig)
-// Once message is consumed shut everything down
-// Gracefully shuts down all client requests. Makes server more reliable
-tc, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-defer cancel()
-s.Shutdown(tc)</p>
-<h2 id="font-_mstmutation1-_msthash33007-_msttexthash7750756处理器font"><!-- raw HTML omitted -->处理器<!-- raw HTML omitted --></h2>
-<p><!-- raw HTML omitted -->如前所述，处理程序是我们的自定义方法，实现处理程序接口。以下代码显示 Hello 处理程序的创建。当请求发送到本地主机：9090 时，将执行此命令。我们还可以发送数据。在 Linux 中，我们可以通过以下命令轻松做到这一点<!-- raw HTML omitted --><code>curl -v localhost:9090 -d &quot;World&quot;</code></p>
+ sigChan := make(chan os.Signal)
+ signal.Notify(sigChan, os.Interrupt)
+ signal.Notify(sigChan, os.Kill)// This blocks the code until the channel receives some message
+ sig := &lt;-sigChan
+ l.Println(&ldquo;Received terminate, graceful shutdown&rdquo;, sig)
+ // Once message is consumed shut everything down
+ // Gracefully shuts down all client requests. Makes server more reliable
+ tc, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+ defer cancel()
+ s.Shutdown(tc)</p>
+
+<h2 id="font-mstmutation-1-msthash-33007-msttexthash-7750756-处理器-font"><font _mstmutation="1" _msthash="33007" _msttexthash="7750756">处理器</font></h2>
+
+<p><font _mstmutation="1" _msthash="34619" _msttexthash="1880634288">如前所述，处理程序是我们的自定义方法，实现处理程序接口。以下代码显示 Hello 处理程序的创建。当请求发送到本地主机：9090 时，将执行此命令。我们还可以发送数据。在 Linux 中，我们可以通过以下命令轻松做到这一点</font><code>curl -v localhost:9090 -d &quot;World&quot;</code></p>
+
 <p>// Hello handler
 type Hello struct {
-l *log.Logger
+ l *log.Logger
 }// NewHello Function which gives reference to Hello handler
 func NewHello(l *log.Logger) *Hello {
-return &amp;Hello{l}
+ return &amp;Hello{l}
 }func (h *Hello) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-h.l.Println(&ldquo;Hello world&rdquo;)
-d, err := ioutil.ReadAll(r.Body)if err != nil {
-http.Error(rw, &ldquo;Oops&rdquo;, http.StatusBadRequest)
-return
-}
-fmt.Fprintf(rw, &ldquo;Hello %s\n&rdquo;, d)
+ h.l.Println(&ldquo;Hello world&rdquo;)
+ d, err := ioutil.ReadAll(r.Body)if err != nil {
+  http.Error(rw, &ldquo;Oops&rdquo;, http.StatusBadRequest)
+  return
+ }
+ fmt.Fprintf(rw, &ldquo;Hello %s\n&rdquo;, d)
 }</p>
-<p><!-- raw HTML omitted -->我们首先定义一个名为 Hello 的结构，其类型为*<strong>log。记录器</strong>（指向记录器模块的指针）。<!-- raw HTML omitted --></p>
-<p><!-- raw HTML omitted -->ServeHTTP 是 Hello 处理程序上的方法，当我们向本地主机：9090 发送请求时，由 http/server 模块执行该方法。该方法当前仅在服务器日志中记录 Hello world。如果随一些数据一起发送**，则 ioutil**会从请求正文和 http 读取**数据。响应**编写器用于将数据打印为响应。<!-- raw HTML omitted --></p>
-<h1 id="font-_mstmutation1-_msthash34255-_msttexthash6674577结论font"><!-- raw HTML omitted -->结论<!-- raw HTML omitted --></h1>
-<p><!-- raw HTML omitted -->我们创建了一个非常基本的 http 服务器，可用于以标准化格式进一步创建更多 API。使用 go 通道实现了正常关闭。我们可以期待在博客的下一部分创建 RESTful 服务。<!-- raw HTML omitted --></p>
-<h1 id="font-_mstmutation1-_msthash27404-_msttexthash5334199引用font"><!-- raw HTML omitted -->引用<!-- raw HTML omitted --></h1>
+
+<p><font _mstmutation="1" _msthash="28522" _msttexthash="396006130">我们首先定义一个名为 Hello 的结构，其类型为*<strong>log。记录器</strong>（指向记录器模块的指针）。</font></p>
+
+<p><font _mstmutation="1" _msthash="32526" _msttexthash="2593876155">ServeHTTP 是 Hello 处理程序上的方法，当我们向本地主机：9090 发送请求时，由 http/server 模块执行该方法。该方法当前仅在服务器日志中记录 Hello world。如果随一些数据一起发送<strong>，则 ioutil</strong>会从请求正文和 http 读取<strong>数据。响应</strong>编写器用于将数据打印为响应。</font></p>
+
+<h1 id="font-mstmutation-1-msthash-34255-msttexthash-6674577-结论-font"><font _mstmutation="1" _msthash="34255" _msttexthash="6674577">结论</font></h1>
+
+<p><font _mstmutation="1" _msthash="28431" _msttexthash="904819539">我们创建了一个非常基本的 http 服务器，可用于以标准化格式进一步创建更多 API。使用 go 通道实现了正常关闭。我们可以期待在博客的下一部分创建 RESTful 服务。</font></p>
+
+<h1 id="font-mstmutation-1-msthash-27404-msttexthash-5334199-引用-font"><font _mstmutation="1" _msthash="27404" _msttexthash="5334199">引用</font></h1>
+
 <ul>
-<li><!-- raw HTML omitted -->代码库： <a href="https://zshipu.com/t?url=https://github.com/nandangrover/go-microservices">https://github.com/nandangrover/go-microservices</a><!-- raw HTML omitted --></li>
-<li><!-- raw HTML omitted -->第 1 部分 github 链接： <a href="https://zshipu.com/t?url=https://github.com/nandangrover/go-microservices/tree/microservices_basic_1">https://github.com/nandangrover/go-microservices/tree/microservices_basic_1</a><!-- raw HTML omitted --></li>
-<li><!-- raw HTML omitted -->Golang的自由代码营地教程： <a href="https://zshipu.com/t?url=https://www.youtube.com/watch?v=YS4e4q9oBaU&amp;ab_channel=freeCodeCamp.org">https://www.youtube.com/watch?v=YS4e4q9oBaU&amp;ab_channel=freeCodeCamp.org</a><!-- raw HTML omitted --></li>
-<li><!-- raw HTML omitted -->Golang的服务器文档： <a href="https://zshipu.com/t?url=https://golang.org/src/net/http/server.go">https://golang.org/src/net/http/server.go</a><!-- raw HTML omitted --></li>
-<li><!-- raw HTML omitted -->服务器Mux： <a href="https://zshipu.com/t?url=https://golang.org/pkg/net/http/#ServeMux">https://golang.org/pkg/net/http/#ServeMux</a><!-- raw HTML omitted --></li>
+<li><font _mstmutation="1" _msthash="27625" _msttexthash="18526599">代码库： <a href="https://zshipu.com/t?url=https://github.com/nandangrover/go-microservices">https://github.com/nandangrover/go-microservices</a></font></li>
+<li><font _mstmutation="1" _msthash="27651" _msttexthash="46143188">第 1 部分 github 链接： <a href="https://zshipu.com/t?url=https://github.com/nandangrover/go-microservices/tree/microservices_basic_1">https://github.com/nandangrover/go-microservices/tree/microservices_basic_1</a></font></li>
+<li><font _mstmutation="1" _msthash="32136" _msttexthash="68295487">Golang的自由代码营地教程： <a href="https://zshipu.com/t?url=https://www.youtube.com/watch?v=YS4e4q9oBaU&amp;ab_channel=freeCodeCamp.org">https://www.youtube.com/watch?v=YS4e4q9oBaU&amp;ab_channel=freeCodeCamp.org</a></font></li>
+<li><font _mstmutation="1" _msthash="27924" _msttexthash="42324373">Golang的服务器文档： <a href="https://zshipu.com/t?url=https://golang.org/src/net/http/server.go">https://golang.org/src/net/http/server.go</a></font></li>
+<li><font _mstmutation="1" _msthash="27794" _msttexthash="19986109">服务器Mux： <a href="https://zshipu.com/t?url=https://golang.org/pkg/net/http/#ServeMux">https://golang.org/pkg/net/http/#ServeMux</a></font></li>
 </ul>
 
         </div>
@@ -442,6 +484,10 @@ fmt.Fprintf(rw, &ldquo;Hello %s\n&rdquo;, d)
     </li>
     
     <li>
+        <a href="https://geek.zshipu.com/post/GlideIM-Golang-%E5%AE%9E%E7%8E%B0%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F-IM/" title="GlideIM - Golang 实现的高性能的分布式 IM">GlideIM - Golang 实现的高性能的分布式 IM</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE%E7%AC%AC-2-%E9%83%A8%E5%88%86%E9%99%84%E6%8F%92%E5%9B%BE/" title="浏览器的工作原理 - 获取数据（第 2 部分，附插图）🚀">浏览器的工作原理 - 获取数据（第 2 部分，附插图）🚀</a>
     </li>
     
@@ -471,10 +517,6 @@ fmt.Fprintf(rw, &ldquo;Hello %s\n&rdquo;, d)
     
     <li>
         <a href="https://geek.zshipu.com/post/DDD-%E5%85%AD%E4%BD%BF%E7%94%A8-Spring-Data-%E6%9E%84%E5%BB%BA%E5%AD%98%E5%82%A8%E5%BA%93/" title="DDD-六、使用 Spring Data 构建存储库">DDD-六、使用 Spring Data 构建存储库</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/DDD-%E4%BA%94%E4%BD%BF%E7%94%A8-Spring-Data-%E6%9E%84%E5%BB%BA%E8%81%9A%E5%90%88/" title="DDD-五、使用 Spring Data 构建聚合">DDD-五、使用 Spring Data 构建聚合</a>
     </li>
     
 </ul>
@@ -540,17 +582,19 @@ fmt.Fprintf(rw, &ldquo;Hello %s\n&rdquo;, d)
     
     <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
     
-    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="">JS</a>
+    
+    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
     <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
     
-    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
+    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
     
-    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
+    <a href="">Nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
@@ -568,7 +612,7 @@ fmt.Fprintf(rw, &ldquo;Hello %s\n&rdquo;, d)
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="">java</a>
     
     <a href="https://geek.zshipu.com/tags/js/">js</a>
     
