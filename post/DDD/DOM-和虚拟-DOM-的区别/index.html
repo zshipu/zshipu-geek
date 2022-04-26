@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>DOM 和虚拟 DOM 的区别 | 知识铺的博客</title>
+    <meta property="og:title" content="DOM 和虚拟 DOM 的区别 - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2022-04-24T16:08:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2022-04-24T16:08:57&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="DOM 和虚拟 DOM 的区别">
+        <meta name="author" content="知识铺">
+        
+    <meta property="og:url" content="https://geek.zshipu.com/post/DDD/DOM-%E5%92%8C%E8%99%9A%E6%8B%9F-DOM-%E7%9A%84%E5%8C%BA%E5%88%AB/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#intro-font-style-vertical-align-inherit-font-style-vertical-align-inherit-介绍-font-font">[](#intro)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">介绍</font></font></a></li>
+<li><a href="#what-is-dom-font-style-vertical-align-inherit-font-style-vertical-align-inherit-什么是-dom-font-font">[](#what-is-dom)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">什么是 DOM</font></font></a></li>
+<li><a href="#problem-with-dom-font-style-vertical-align-inherit-font-style-vertical-align-inherit-dom-的问题-font-font">[](#problem-with-dom)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">DOM 的问题</font></font></a></li>
+<li><a href="#what-is-virtual-dom-font-style-vertical-align-inherit-font-style-vertical-align-inherit-什么是虚拟-dom-font-font">[](#what-is-virtual-dom)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">什么是虚拟 DOM</font></font></a></li>
+<li><a href="#how-does-it-solve-the-problem-font-style-vertical-align-inherit-font-style-vertical-align-inherit-它如何解决问题-font-font">[](#how-does-it-solve-the-problem)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">它如何解决问题？</font></font></a></li>
+<li><a href="#conclusion-font-style-vertical-align-inherit-font-style-vertical-align-inherit-结论-font-font">[](#conclusion)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">结论</font></font></a></li>
+</ul></li>
+</ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">DOM 和虚拟 DOM 的区别</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年4月24日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">在本文中，我们将尝试找出什么是 DOM 及其存在的问题。</font><font style="vertical-align: inherit;">什么是 Virtual DOM，并解释它是如何解决真实 DOM 的问题的。</font></font></p>
+
+<h2 id="intro-font-style-vertical-align-inherit-font-style-vertical-align-inherit-介绍-font-font">[](#intro)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">介绍</font></font></h2>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Facebook 开发人员创建的 React 引入了一个新术语，虚拟 DOM。</font><font style="vertical-align: inherit;">虚拟 DOM 在大幅提高使用该库创建的应用程序的性能方面发挥着重要作用。</font><font style="vertical-align: inherit;">在下文中，我们将定义虚拟 DOM 和真实 DOM，并解释虚拟 DOM 如何解决真实 DOM 的问题。</font></font></p>
+
+<h2 id="what-is-dom-font-style-vertical-align-inherit-font-style-vertical-align-inherit-什么是-dom-font-font">[](#what-is-dom)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">什么是 DOM</font></font></h2>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">只是为了让事情变得简单 - DOM 代表文档对象模型，是结构化文本的抽象。</font><font style="vertical-align: inherit;">它采用 HTML 元素并将它们包装在具有树结构的对象中——维护这些嵌套 HTML 元素的父/子关系。</font></font>
+<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">HTML DOM 提供了一个接口 (API) 以多种方式遍历和修改Node——例如添加Node、删除Node、编辑Node的内容等。它包含 getElementById 或 removeChild 等方法。</font><font style="vertical-align: inherit;">我们通常使用 JavaScript 语言来处理 DOM。</font></font>
+<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">对其内部某些元素的任何操作都会导致完全重新渲染。</font><font style="vertical-align: inherit;">随着越来越复杂的 Web 应用程序，这些真实 DOM 的完整呈现非常昂贵，导致应用程序性能下降。</font></font></p>
+
+<h2 id="problem-with-dom-font-style-vertical-align-inherit-font-style-vertical-align-inherit-dom-的问题-font-font">[](#problem-with-dom)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">DOM 的问题</font></font></h2>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">DOM 操作是现代交互式网络的核心。</font><font style="vertical-align: inherit;">但不幸的是，它也比大多数 JavaScript 操作慢很多。</font></font>
+<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如上所述，HTML DOM 始终是树形结构的——这是 HTML 文档的结构所允许的。</font><font style="vertical-align: inherit;">这很棒，因为我们可以很容易地遍历树。</font><font style="vertical-align: inherit;">不幸的是，在这里轻松并不意味着很快。</font><font style="vertical-align: inherit;">由于大多数 JavaScript 框架对 DOM 的更新比它们必须做的多得多，因此这种缓慢变得更糟。</font></font>
+<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如今，DOM 树非常庞大。</font><font style="vertical-align: inherit;">在单个 SPA（单页应用程序 - SPA）中拥有一千个Node是很常见的。</font><font style="vertical-align: inherit;">由于我们越来越倾向于动态 Web 应用程序，因此我们需要不断地大量修改 DOM 树。</font><font style="vertical-align: inherit;">像每次更改都重新绘制整个页面这样的低效更新非常昂贵，这是一个真正的性能和开发痛苦。</font></font></p>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">这正是 Virtual DOM 发挥作用的地方。</font></font></p>
+
+<h2 id="what-is-virtual-dom-font-style-vertical-align-inherit-font-style-vertical-align-inherit-什么是虚拟-dom-font-font">[](#what-is-virtual-dom)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">什么是虚拟 DOM</font></font></h2>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Virtual DOM 是真实 DOM 的轻量级抽象。</font><font style="vertical-align: inherit;">您可以将其视为 DOM 的副本，可以在不影响实际 DOM 的情况下对其进行更新。</font></font>
+<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">它由表示为树结构的真实 DOM 的两个副本组成。</font><font style="vertical-align: inherit;">一个副本是真实 DOM 的精确副本，并保持不变，而另一个副本会随着对某些元素的操作而发生变化。</font><font style="vertical-align: inherit;">在那一刻，两者进行比较并提取它们之间的变化。</font><font style="vertical-align: inherit;">然后在真实 DOM 中实现提取的更改，而无需完全重新渲染。</font><font style="vertical-align: inherit;">成功实施后，又有两个精确的副本。</font><font style="vertical-align: inherit;">当对某个元素的操作再次发生时，该过程将重复。</font></font>
+<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">它具有与真实 DOM 对象相同的所有属性，但没有像真实 DOM 那样写入屏幕的能力。</font><font style="vertical-align: inherit;">虚拟 DOM 因其轻量级而获得了速度和效率。</font><font style="vertical-align: inherit;">实际上，每次重新渲染后都会创建一个新的虚拟 DOM。</font></font></p>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">为了使真实和虚拟 DOM 保持同步，使用了一个名为 Reconciliation 的过程。</font><font style="vertical-align: inherit;">差异算法是 React 使用的一种协调技术。</font></font></p>
+
+<h2 id="how-does-it-solve-the-problem-font-style-vertical-align-inherit-font-style-vertical-align-inherit-它如何解决问题-font-font">[](#how-does-it-solve-the-problem)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">它如何解决问题？</font></font></h2>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">当您在虚拟 DOM 中渲染元素时，每个虚拟 DOM 对象都会更新。</font></font>
+<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">这听起来非常低效，但成本微不足道，因为虚拟 DOM 可以更新得如此之快。</font></font>
+<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">一旦更新了虚拟 DOM，React 就会将虚拟 DOM 与更新之前拍摄的虚拟 DOM 快照进行比较。</font></font>
+<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">通过将新的虚拟 DOM 与更新前的版本进行比较，React 可以准确地确定哪些虚拟 DOM 对象发生了变化。</font><font style="vertical-align: inherit;">这个过程称为“差异化”。</font></font>
+<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">一旦 React 知道哪些虚拟 DOM 对象发生了变化，React 就会在真实 DOM 上更新这些对象，并且只更新这些对象。</font><font style="vertical-align: inherit;">在我们之前的示例中，React 足够聪明，可以重新构建一个已选中的列表项，而无需理会列表的其余部分。</font></font>
+<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">这有很大的不同！</font><font style="vertical-align: inherit;">React 只能更新 DOM 的必要部分。</font><font style="vertical-align: inherit;">React 在性能方面的声誉主要来自这种创新。</font></font></p>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">总之，当您尝试在 React 中更新 DOM 时，会发生以下情况：</font></font></p>
+
+<ol>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">整个虚拟 DOM 得到更新。</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">将虚拟 DOM 与更新前的样子进行比较。</font><font style="vertical-align: inherit;">React 计算出哪些对象发生了变化。</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">更改的对象，以及仅更改的对象，在真实 DOM 上得到更新。</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">真实 DOM 的变化会导致屏幕发生变化。</font></font></li>
+</ol>
+
+<h2 id="conclusion-font-style-vertical-align-inherit-font-style-vertical-align-inherit-结论-font-font">[](#conclusion)<font style="vertical-align: inherit;"><font style="vertical-align: inherit;">结论</font></font></h2>
+
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Virtual DOM的创建解决了real DOM性能低、重渲染慢的问题。</font><font style="vertical-align: inherit;">它使 Web 应用程序对用户来说更加复杂和更具交互性，而不必牺牲这么多的性能。</font></font></p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/DDD/DOM-%E5%92%8C%E8%99%9A%E6%8B%9F-DOM-%E7%9A%84%E5%8C%BA%E5%88%AB/">https://geek.zshipu.com/post/DDD/DOM-%E5%92%8C%E8%99%9A%E6%8B%9F-DOM-%E7%9A%84%E5%8C%BA%E5%88%AB/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/react/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE%E7%AC%AC-2-%E9%83%A8%E5%88%86%E9%99%84%E6%8F%92%E5%9B%BE/">浏览器的工作原理 - 获取数据（第 2 部分，附插图）🚀</a></li>
+        
+        <li><a href="/post/react/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E5%AF%BC%E8%88%AA%E7%AC%AC-1-%E9%83%A8%E5%88%86%E5%B8%A6%E6%8F%92%E5%9B%BE%EF%B8%8F/">浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥</a></li>
+        
+        <li><a href="/post/go/GlideIM-Golang-%E5%AE%9E%E7%8E%B0%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F-IM/">GlideIM - Golang 实现的高性能的分布式 IM</a></li>
+        
+        <li><a href="/post/flutter/%E4%B8%BA%E4%BB%80%E4%B9%88-Flutter-%E4%BD%BF%E7%94%A8-Dart/">为什么 Flutter 使用 Dart</a></li>
+        
+        <li><a href="/post/DDD/DDD-%E5%8D%81%E9%80%9A%E8%BF%87%E9%A2%84%E5%AE%9A%E4%BD%9C%E4%B8%9A%E7%9A%84%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7/">DDD-十、通过预定作业的最终一致性</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/web'>web</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/bi/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/%E7%9F%A5%E4%B9%8E%E7%9A%84%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E4%B8%8E%E5%AE%9E%E6%97%B6%E6%95%B0%E6%8D%AE%E7%9A%84%E6%9E%B6%E6%9E%84%E4%B8%8E%E5%AE%9E%E8%B7%B5/" title="知乎的用户画像与实时数据的架构与实践">知乎的用户画像与实时数据的架构与实践</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/React-18-%E6%96%B0%E5%8A%9F%E8%83%BD%E5%92%8C%E6%94%B9%E8%BF%9B%E7%AD%96%E7%95%A5/" title="React 18 - 新功能和改进策略">React 18 - 新功能和改进策略</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DOM-%E5%92%8C%E8%99%9A%E6%8B%9F-DOM-%E7%9A%84%E5%8C%BA%E5%88%AB/" title="DOM 和虚拟 DOM 的区别">DOM 和虚拟 DOM 的区别</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/go/GlideIM-Golang-%E5%AE%9E%E7%8E%B0%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F-IM/" title="GlideIM - Golang 实现的高性能的分布式 IM">GlideIM - Golang 实现的高性能的分布式 IM</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE%E7%AC%AC-2-%E9%83%A8%E5%88%86%E9%99%84%E6%8F%92%E5%9B%BE/" title="浏览器的工作原理 - 获取数据（第 2 部分，附插图）🚀">浏览器的工作原理 - 获取数据（第 2 部分，附插图）🚀</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/flutter/%E4%B8%BA%E4%BB%80%E4%B9%88-Flutter-%E4%BD%BF%E7%94%A8-Dart/" title="为什么 Flutter 使用 Dart">为什么 Flutter 使用 Dart</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E5%AF%BC%E8%88%AA%E7%AC%AC-1-%E9%83%A8%E5%88%86%E5%B8%A6%E6%8F%92%E5%9B%BE%EF%B8%8F/" title="浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥">浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD-%E5%8D%81%E9%80%9A%E8%BF%87%E9%A2%84%E5%AE%9A%E4%BD%9C%E4%B8%9A%E7%9A%84%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7/" title="DDD-十、通过预定作业的最终一致性">DDD-十、通过预定作业的最终一致性</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD-%E4%B9%9D%E4%BD%BF%E7%94%A8-Spring-%E5%A4%84%E7%90%86%E9%A2%86%E5%9F%9F%E4%BA%8B%E4%BB%B6/" title="DDD-九、使用 Spring Data 发布领域事件">DDD-九、使用 Spring Data 发布领域事件</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD-%E5%85%AB%E4%BD%BF%E7%94%A8-Spring-Data-%E5%8F%91%E5%B8%83%E9%A2%86%E5%9F%9F%E4%BA%8B%E4%BB%B6/" title="DDD-八、使用 Spring 处理领域事件">DDD-八、使用 Spring 处理领域事件</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/BI/">BI</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD%E5%AE%9E%E6%88%98/">DDD实战</a>
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="https://geek.zshipu.com/tags/IM/">IM</a>
+    
+    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    
+    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    
+    <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
+    
+    <a href="">Nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
+    
+    <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/css/">css</a>
+    
+    <a href="https://geek.zshipu.com/tags/flutter/">flutter</a>
+    
+    <a href="https://geek.zshipu.com/tags/game/">game</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="">java</a>
+    
+    <a href="">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/web/">web</a>
+    
+    <a href="https://geek.zshipu.com/tags/web3/">web3</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/">人工智能</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%88%86%E8%AF%8D/">分词</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%96%87%E6%91%98/">文摘</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%88%AC%E8%99%AB/">爬虫</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/">用户画像</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E8%B5%B7%E6%AD%A5/">起步</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

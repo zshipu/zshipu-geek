@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>DDD-四、在 JPA 中使用值对象 | 知识铺的博客</title>
+    <meta property="og:title" content="DDD-四、在 JPA 中使用值对象 - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2022-04-23T15:09:05&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2022-04-23T15:09:05&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="DDD-四、在 JPA 中使用值对象">
+        <meta name="author" content="知识铺">
+        
+    <meta property="og:url" content="https://geek.zshipu.com/post/DDD/DDD-%E5%9B%9B%E5%9C%A8-JPA-%E4%B8%AD%E4%BD%BF%E7%94%A8%E5%80%BC%E5%AF%B9%E8%B1%A1/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+<ul>
+<li><a href="#简单值对象-属性转换器">简单值对象：属性转换器</a>
+<ul>
+<li><a href="#长度很重要">长度很重要</a></li>
+<li><a href="#不要对遗留数据做出假设">不要对遗留数据做出假设</a></li>
+</ul></li>
+<li><a href="#复杂值对象-可嵌入">复杂值对象：可嵌入</a>
+<ul>
+<li><a href="#再多一件事-或四件事">再多一件事（或四件事）</a></li>
+</ul></li>
+</ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">DDD-四、在 JPA 中使用值对象</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年4月23日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            
+
+<p>在<a href="https://geek.zshipu.com/post/%E6%88%98%E6%9C%AF%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1/">战术设计</a>中，我们了解了值对象是什么以及它有什么用处。我们从未真正研究过如何在实际项目中使用它。现在是时候卷起袖子，仔细看看一些实际的代码了！</p>
+
+<p>值对象是领域驱动设计中最简单和最有用的构建块之一，因此让我们从了解在 JPA 中使用值对象的不同方式开始。为此，我们将从 XML Schema 规范中窃取*简单类型*和<em>复杂类型的概念。</em></p>
+
+<p>简单值对象是一个值对象，它只包含某种类型的一个值，例如单个字符串或整数。复杂值对象是包含多个类型的多个值的值对象，例如包含街道名称、号码、邮政编码、城市、州、国家等的邮政地址。</p>
+
+<p>因为我们要将值对象持久化到关系数据库中，所以在实现它们时必须区别对待这两种类型。但是，这些实现细节与实际使用值对象的代码无关。</p>
+
+<h1 id="简单值对象-属性转换器">简单值对象：属性转换器</h1>
+
+<p>简单的值对象非常容易持久化，并且对于最终字段和所有字段都可以真正不可变。为了持久化它们，您必须编写一个<code>AttributeConverter</code>（标准 JPA 接口），该接口知道如何在已知类型的数据库列和您的值对象之间进行转换。</p>
+
+<p>让我们从一个示例值对象开始：</p>
+
+<pre><code>public class EmailAddress implements ValueObject { // &lt;1&gt;
+
+    private final String email; // &lt;2&gt;
+
+    public EmailAddress(@NotNull String email) { 
+        this.email = validate(email); // &lt;3&gt;
+    }
+
+    @Override
+    public @NotNull String toString() { // &lt;4&gt;
+        return email;
+    }
+
+    @Override
+    public boolean equals(Object o) { // &lt;5&gt;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EmailAddress that = (EmailAddress) o;
+        return email.equals(that.email);
+    }
+
+    @Override
+    public int hashCode() { // &lt;6&gt;
+        return email.hashCode();
+    }
+
+    public static @NotNull String validate(@NotNull String email) { // &lt;7&gt;
+        if (!isValid(email)) {
+            throw new IllegalArgumentException(&quot;Invalid email: &quot; + email);
+        }
+        return email;
+    }
+
+    public static boolean isValid(@NotNull String email) { // &lt;8&gt;
+        // Validate the input string, return true or false depending on whether it is a valid e-mail address or not
+    }
+
+}
+</code></pre>
+
+<ol>
+<li><code>ValueObject</code>是空标记界面。它仅用于文档目的，没有功能意义。如果你愿意，你可以把它排除在外。</li>
+<li>包含电子邮件地址的字符串被标记为<code>final</code>。由于这是类中唯一的字段，因此它使类真正不可变。</li>
+<li>输入字符串在构造函数中得到验证，因此不可能使该字符串的实例<code>EmailAddress</code>包含无效数据。</li>
+<li><code>toString()</code>可以通过该方法访问电子邮件地址字符串。如果您想将此方法用于调试目的，您可以使用您选择的另一种 getter 方法（我有时使用一种<code>unwrap()</code>方法，因为简单的值对象本质上是其他值的包装器）。</li>
+<li>具有相同值的两个值对象被认为是相等的，因此我们必须<code>equals()</code>相应地实现该方法。</li>
+<li>我们改变了<code>equals()</code>，所以现在我们也必须改变<code>hashCode()</code>。</li>
+<li>这是构造函数用来验证输入的静态方法，但也可以从外部使用它来验证包含电子邮件地址的字符串。如果电子邮件地址无效，此版本将引发异常。</li>
+<li>另一种验证电子邮件地址字符串的静态方法，但这个方法只返回一个布尔值。这也可以从外部使用。</li>
+</ol>
+
+<p>现在，相应的属性转换器将如下所示：</p>
+
+<pre><code>@Converter // &lt;1&gt;
+public class EmailAddressAttributeConverter implements AttributeConverter&lt;String, EmailAddress&gt; { // &lt;2&gt;
+
+    @Override
+    @Contract(&quot;null -&gt; null&quot;)
+    public String convertToDatabaseColumn(EmailAddress attribute) {
+        return attribute == null ? null : attribute.toString(); // &lt;3&gt;
+    }
+
+    @Override
+    @Contract(&quot;null -&gt; null&quot;)
+    public EmailAddress convertToEntityAttribute(String dbData) {
+        return dbData == null ? null : new EmailAddress(dbData); // &lt;4&gt;
+    }
+}
+</code></pre>
+
+<ol>
+<li><code>@Converter</code>是一个标准的 JPA 注释。如果您希望 Hibernate 自动将转换器应用于所有<code>EmailAddress</code>属性，请将<code>autoApply</code>参数设置为 true（在本示例中为 false，这是默认设置）。</li>
+<li><code>AttributeConverter</code>是一个标准的 JPA 接口，它采用两个通用参数：数据库列类型和属性类型。</li>
+<li>此方法将 an 转换<code>EmailAddress</code>为字符串。请注意，输入参数可以是<code>null</code>.</li>
+<li>此方法将字符串转换为<code>EmailAddress</code>. 再次请注意，输入参数可以是<code>null</code>.</li>
+</ol>
+
+<p><code>.converters</code>您可以将转换器存储在与值对象相同的包中，或者如果您想保持域包整洁干净，则可以将其存储在子包中（例如）。</p>
+
+<p>最后，您可以在 JPA 实体中使用此值对象，如下所示：</p>
+
+<pre><code>@Entity
+public class Contact {
+
+    @Convert(converter = EmailAddressAttributeConverter.class)  // &lt;1&gt;
+    private EmailAddress emailAddress;
+
+    // ...
+}
+</code></pre>
+
+<ol>
+<li>此注释通知您的 JPA 实现使用哪个转换器。如果没有它，例如 Hibernate 将尝试将电子邮件地址存储为序列化的 POJO，而不是字符串。如果您已将转换器标记为自动应用，则不需要<code>@Convert</code>注释。但是，我发现明确说明要使用的转换器不太容易出错。我遇到过应该自动应用转换器的情况，但由于某种原因没有被 Hibernate 检测到，因此值对象被持久化为序列化 POJO 并且集成测试通过了，因为它使用了嵌入式 H2 数据库并让 Hibernate生成架构。</li>
+</ol>
+
+<p>现在我们几乎完成了简单的值对象。但是，一旦我们投入生产，有两个我们错过的警告可能会回来并咬我们。它们都与数据库有关。</p>
+
+<h2 id="长度很重要">长度很重要</h2>
+
+<p>第一个警告与数据库列的长度有关。默认情况下，JPA 将所有数据库字符串 ( ) 列的长度限制<code>varchar</code>为 255 个字符。电子邮件地址的长度可以是 320 个字符，因此如果用户在系统中输入的电子邮件地址超过 255 个字符，当您尝试保存值对象时会出现异常。要解决此问题，您需要执行以下操作：</p>
+
+<ol>
+<li>确保您的数据库列足够宽以包含有效的电子邮件地址。</li>
+<li>确保您的验证方法包括输入的长度检查。应该不可能创建<code>EmailAddress</code>无法成功持久化的实例。</li>
+</ol>
+
+<p>这当然也适用于其他字符串值对象。根据用例，您可以拒绝接受太长的字符串，或者只是默默地截断它们。</p>
+
+<h2 id="不要对遗留数据做出假设">不要对遗留数据做出假设</h2>
+
+<p>第二个警告与遗留数据有关。假设您有一个现有的数据库，其中包含以前作为简单字符串处理的电子邮件地址，现在您引入了一个漂亮、干净的<code>EmailAddress</code>值对象。如果这些旧电子邮件地址中的任何一个无效，则每次尝试加载具有无效电子邮件地址的实体时都会出现异常：您的属性转换器使用构造函数创建新<code>EmailAddress</code>实例，并且该构造函数验证输入. 要解决此问题，您可以执行以下任何操作：</p>
+
+<ol>
+<li>清理您的数据库并修复或删除所有无效的电子邮件地址。</li>
+
+<li><p>创建仅由属性转换器使用的第二个构造函数，它绕过验证，而是<code>invalid</code>在值对象内设置一个标志。这使得可以<code>EmailAddress</code>为现有的旧数据创建无效对象，同时强制新的电子邮件地址正确。代码可能如下所示：</p>
+
+<pre><code>public class EmailAddress implements ValueObject {
+
+private final String email;
+private final boolean invalid; // &lt;1&gt;
+
+public EmailAddress(@NotNull String email) { 
+    this(email, true);
+}
+
+EmailAddress(@NotNull String email, boolean validate) { // &lt;2&gt;
+    if (validate) {
+        this.email = validate(email);
+        this.invalid = false;
+    } else {
+        this.email = email;
+        this.invalid = !isValid(email);
+    }
+}
+
+public boolean isInvalid() { // &lt;3&gt;
+    return invalid;
+}
+
+// The rest of the methods omitted
+
+}
+</code></pre></li>
+
+<li><p>此布尔标志仅在值对象内部使用，从不存储在数据库中。</p></li>
+
+<li><p>在此示例中，构造函数具有包可见性，以防止外部代码使用它（我们希望所有新的电子邮件对象都有效）。但是，这也要求属性转换器在同一个包中。</p></li>
+
+<li><p>可以将此标志传递给 UI，以向用户指示电子邮件地址错误并且需要更正。</p></li>
+</ol>
+
+<p>那里！我们涵盖了所有案例，以及用于实现和持久化简单值对象的健壮和干净的策略。然而，原则上我们的值对象根本不需要关心的底层数据库技术已经设法潜入实现过程（即使它在代码中并不真正可见）。如果我们想利用 JPA 提供的一切，这是我们必须做出的权衡。当我们开始处理复杂的值对象时，这种权衡会更大。让我们看看如何。</p>
+
+<h1 id="复杂值对象-可嵌入">复杂值对象：可嵌入</h1>
+
+<p>在关系数据库中持久化复杂值对象涉及将多个字段映射到多个数据库列。在 JPA 中，用于此目的的主要工具是可嵌入对象（使用注解进行<code>@Embeddable</code>注解）。可嵌入对象既可以作为单个字段（使用注释进行<code>@Embedded</code>注释）也可以作为集合（使用注释进行<code>@ElementCollection</code>注释）持久化。</p>
+
+<p>但是，JPA 对可嵌入对象施加了某些限制，以防止它们成为真正的不可变对象。可嵌入对象不能包含任何<code>final</code>字段，并且应该具有默认的无参数构造函数。尽管如此，我们还是想让我们的值对象看起来和表现得好像它们对外部世界是不可变的。我们如何做到这一点？</p>
+
+<p>让我们从构造函数开始，或者构造函数，因为我们需要其中的两个。第一个构造函数是初始化构造函数，它将是公共的。此构造函数是在代码中构造值对象的新实例的唯一允许方式。</p>
+
+<p>第二个构造函数是默认构造函数，它只会被 Hibernate 使用。它不需要公开，因此为了防止它在代码中使用，您可以将其设为受保护、包保护甚至私有（它适用于 Hibernate，但例如 IntelliJ IDEA 会抱怨）。有时我还会制作一个自定义注释<code>@UsedByHibernateOnly</code>或类似的注释，用于标记这些构造函数。然后，您可以将 IDE 配置为在查找未使用的代码时忽略这些构造函数。</p>
+
+<p>至于字段，很简单：不要将字段标记为<code>final</code>，只在初始化构造函数中设置字段值，不要声明任何 setter 方法或其他写入字段的方法。您可能还必须配置您的 IDE 以不建议您创建这些字段<code>final</code>。</p>
+
+<p>最后，您需要覆盖<code>equals</code>，<code>hashCode</code>以便它们基于值而不是基于对象身份进行比较。</p>
+
+<p>下面是一个完成的复杂值对象的示例：</p>
+
+<pre><code>@Embeddable
+public class PersonName implements ValueObject { // &lt;1&gt;
+
+    private String firstname; // &lt;2&gt;
+    private String middlename;
+    private String lastname;
+
+    @SuppressWarnings(&quot;unused&quot;)
+    PersonName() { // &lt;3&gt;    
+    }
+
+    public PersonName(@NotNull String firstname, @NotNull String middlename, @NotNull String lastname) { // &lt;4&gt;
+        this.firstname = Objects.requireNonNull(firstname);
+        this.middlename = Objects.requireNonNull(middlename);
+        this.lastname = Objects.requireNonNull(lastname);
+    }
+
+    public PersonName(@NotNull String firstname, @NotNull String lastname) { // &lt;5&gt;
+        this(firstname, &quot;&quot;, lastname);
+    }
+
+    public @NotNull String getFirstname() { // &lt;6&gt;
+        return firstname;
+    }
+
+    public @NotNull String getMiddlename() {
+        return middlename;
+    }
+
+    public @NotNull String getLastname() {
+        return lastname;
+    }
+
+    @Override
+    public boolean equals(Object o) { // &lt;7&gt;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PersonName that = (PersonName) o;
+        return firstname.equals(that.firstname)
+            &amp;&amp; middlename.equals(that.middlename)
+            &amp;&amp; lastname.equals(that.lastname);
+    }
+
+    @Override
+    public int hashCode() { // &lt;8&gt;
+        return Objects.hash(firstname, middlename, lastname);
+    }
+}
+</code></pre>
+
+<ol>
+<li><code>ValueObject</code>我们使用与简单值对象相同的标记接口。同样，如果你愿意，你可以把它排除在外。</li>
+<li>没有字段被标记为<code>final</code>。</li>
+<li>默认构造函数是包保护的，根本不被任何代码使用。</li>
+<li>初始化构造函数将由代码使用。</li>
+<li>如果不是所有字段都是必需的，请创建重载构造函数或使用构建器或本质模式。强制调用代码传入 null 或默认参数是丑陋的（我个人的看法）。</li>
+<li>外部世界仅从 getter 访问字段。根本没有二传手。</li>
+<li>具有相同值的两个值对象被认为是相等的，因此我们必须<code>equals()</code>相应地实现该方法。</li>
+<li>我们改变了<code>equals()</code>，所以现在我们也必须改变<code>hashCode()</code>。</li>
+</ol>
+
+<p>然后可以在这样的实体中使用此值对象：</p>
+
+<pre><code>@Entity
+public class Contact {
+
+    @Embedded
+    private PersonName name;
+
+    // ...
+}
+</code></pre>
+
+<h2 id="再多一件事-或四件事">再多一件事（或四件事）</h2>
+
+<p>细心的读者现在会注意到我们又错过了一些东西：关于数据库列宽的长度检查。就像我们必须处理简单的值对象一样，我们必须在这里处理它。我将把它作为练习留给读者。</p>
+
+<p>说到数据库，在处理<code>@Embeddable</code>值对象时还要考虑一些事情：列名和可空性。</p>
+
+<p><code>@Column</code>通常，您可以使用注释在可嵌入对象中指定列名。如果将其省略，则列名是从字段名派生的。这对您来说可能已经足够了，但在某些情况下，您可能会发现自己在不同的实体中使用相同的值对象，并且列具有不同的名称。在这种情况下，您必须依赖<code>@AttributeOverride</code>注解（如果您不熟悉它，请查看它）。</p>
+
+<p>可空性与您将如何保持值对象为空的状态有关。对于很简单的简单值对象 - 只需将 NULL 存储在数据库列中。对于存储在集合中的复杂值对象，这也很容易——只需将值对象排除在外。对于存储在字段中的复杂值对象，您必须检查您的 JPA 实现。</p>
+
+<p>默认情况下，如果字段为空，Hibernate 会将 NULL 写入所有列。同样，当从数据库读取时，如果所有列都为 NULL，Hibernate 会将字段设置为 null。这通常很好，前提是您实际上不希望有一个其字段都设置为 null 的值对象实例。这也意味着即使您的值对象可能要求其一个或多个字段*不*为空，但如果整个值对象可以为空，则数据库表必须允许该列或列中的空值。</p>
+
+<p>最后，如果您最终让一个<code>@Embeddable</code>类扩展了另一个<code>@Embeddable</code>类，请记住将<code>@MappedSuperclass</code>注释添加到父类。如果你忽略它，你的父类中的所有内容都将被忽略。这将导致一些奇怪的行为和丢失的数据，调试起来并不明显。</p>
+
+<p>如您所见，底层数据库和持久性技术在我们复杂值对象的实现中比在简单值对象中出现的更多。从生产力的角度来看，我认为这是一个可以接受的权衡。可以在完全不知道它们是如何持久化的情况下编写域对象，但这需要在存储库中做更多的工作——你必须自己做这些工作。除非你有充分的理由，否则通常不值得付出努力（不过，这是一次有趣的学习经历，所以如果你有兴趣和时间，那么一定要试一试）。</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/DDD/DDD-%E5%9B%9B%E5%9C%A8-JPA-%E4%B8%AD%E4%BD%BF%E7%94%A8%E5%80%BC%E5%AF%B9%E8%B1%A1/">https://geek.zshipu.com/post/DDD/DDD-%E5%9B%9B%E5%9C%A8-JPA-%E4%B8%AD%E4%BD%BF%E7%94%A8%E5%80%BC%E5%AF%B9%E8%B1%A1/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/DDD/DDD-%E4%B8%89%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%92%8C%E5%85%AD%E8%BE%B9%E5%BD%A2%E6%9E%B6%E6%9E%84/">DDD-三、领域驱动设计和六边形架构</a></li>
+        
+        <li><a href="/post/DDD/DDD-%E4%BA%8C%E6%88%98%E6%9C%AF%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1/">DDD-二、战术领域驱动设计</a></li>
+        
+        <li><a href="/post/DDD/DDD-%E4%B8%80%E6%88%98%E7%95%A5%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1/">DDD-一、战略领域驱动设计</a></li>
+        
+        <li><a href="/post/DDDxx/DDD%E5%AE%9E%E6%88%9820-%E6%80%BB%E7%BB%93%E4%BA%8C%E5%88%86%E5%B8%83%E5%BC%8F%E6%9E%B6%E6%9E%84%E5%85%B3%E9%94%AE%E8%AE%BE%E8%AE%A110%E9%97%AE/">DDD实战：20 总结（二）：分布式架构关键设计10问</a></li>
+        
+        <li><a href="/post/DDDxx/DDD%E5%AE%9E%E6%88%9819-%E6%80%BB%E7%BB%93%E4%B8%80%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%AE%BE%E8%AE%A1%E5%92%8C%E6%8B%86%E5%88%86%E8%A6%81%E5%9D%9A%E6%8C%81%E5%93%AA%E4%BA%9B%E5%8E%9F%E5%88%99/">DDD实战：19 总结（一）：微服务设计和拆分要坚持哪些原则</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/DDD'>DDD</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/bi/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/%E7%9F%A5%E4%B9%8E%E7%9A%84%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E4%B8%8E%E5%AE%9E%E6%97%B6%E6%95%B0%E6%8D%AE%E7%9A%84%E6%9E%B6%E6%9E%84%E4%B8%8E%E5%AE%9E%E8%B7%B5/" title="知乎的用户画像与实时数据的架构与实践">知乎的用户画像与实时数据的架构与实践</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/React-18-%E6%96%B0%E5%8A%9F%E8%83%BD%E5%92%8C%E6%94%B9%E8%BF%9B%E7%AD%96%E7%95%A5/" title="React 18 - 新功能和改进策略">React 18 - 新功能和改进策略</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DOM-%E5%92%8C%E8%99%9A%E6%8B%9F-DOM-%E7%9A%84%E5%8C%BA%E5%88%AB/" title="DOM 和虚拟 DOM 的区别">DOM 和虚拟 DOM 的区别</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/go/GlideIM-Golang-%E5%AE%9E%E7%8E%B0%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F-IM/" title="GlideIM - Golang 实现的高性能的分布式 IM">GlideIM - Golang 实现的高性能的分布式 IM</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE%E7%AC%AC-2-%E9%83%A8%E5%88%86%E9%99%84%E6%8F%92%E5%9B%BE/" title="浏览器的工作原理 - 获取数据（第 2 部分，附插图）🚀">浏览器的工作原理 - 获取数据（第 2 部分，附插图）🚀</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/flutter/%E4%B8%BA%E4%BB%80%E4%B9%88-Flutter-%E4%BD%BF%E7%94%A8-Dart/" title="为什么 Flutter 使用 Dart">为什么 Flutter 使用 Dart</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E5%AF%BC%E8%88%AA%E7%AC%AC-1-%E9%83%A8%E5%88%86%E5%B8%A6%E6%8F%92%E5%9B%BE%EF%B8%8F/" title="浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥">浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD-%E5%8D%81%E9%80%9A%E8%BF%87%E9%A2%84%E5%AE%9A%E4%BD%9C%E4%B8%9A%E7%9A%84%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7/" title="DDD-十、通过预定作业的最终一致性">DDD-十、通过预定作业的最终一致性</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD-%E4%B9%9D%E4%BD%BF%E7%94%A8-Spring-%E5%A4%84%E7%90%86%E9%A2%86%E5%9F%9F%E4%BA%8B%E4%BB%B6/" title="DDD-九、使用 Spring Data 发布领域事件">DDD-九、使用 Spring Data 发布领域事件</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD-%E5%85%AB%E4%BD%BF%E7%94%A8-Spring-Data-%E5%8F%91%E5%B8%83%E9%A2%86%E5%9F%9F%E4%BA%8B%E4%BB%B6/" title="DDD-八、使用 Spring 处理领域事件">DDD-八、使用 Spring 处理领域事件</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/BI/">BI</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD%E5%AE%9E%E6%88%98/">DDD实战</a>
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="https://geek.zshipu.com/tags/IM/">IM</a>
+    
+    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    
+    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    
+    <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
+    
+    <a href="">Nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
+    
+    <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/css/">css</a>
+    
+    <a href="https://geek.zshipu.com/tags/flutter/">flutter</a>
+    
+    <a href="https://geek.zshipu.com/tags/game/">game</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="">java</a>
+    
+    <a href="">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/web/">web</a>
+    
+    <a href="https://geek.zshipu.com/tags/web3/">web3</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/">人工智能</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%88%86%E8%AF%8D/">分词</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%96%87%E6%91%98/">文摘</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%88%AC%E8%99%AB/">爬虫</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/">用户画像</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E8%B5%B7%E6%AD%A5/">起步</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

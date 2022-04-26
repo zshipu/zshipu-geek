@@ -83,6 +83,41 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <article class="post">
         <header>
             <h1 class="post-title">
+                <a href="https://geek.zshipu.com/post/tlg/output/React-%E7%BB%9D%E5%9C%B0%E5%8F%8D%E6%9D%80%E4%B9%8B%E4%B8%87%E5%AD%97%E9%95%BF%E6%96%87%E5%BD%BB%E5%BA%95%E6%90%9E%E6%87%82%E6%B8%B2%E6%9F%93%E6%9B%B4%E6%96%B0%E6%B5%81%E7%A8%8B/" title=""></a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            1年1月1日
+        </date>
+        
+        <div class="post-content">
+            React 15 架构分层 React 15 版本 (Fiber 以前) 整个更新渲染流程分为两个部分：
+ Reconciler(协调器); 负责找出变化的组件
+ Renderer(渲染器); 负责将变化的组件渲染到页面上
+  Reconciler 在 React 中可以通过 setState、forceUpdate、ReactDOM.render 来触发更新。每当有更新发生时，Reconciler 会做如下工作：
+ 调用组件的 render 方法，将返回的 JSX 转化为虚拟 DOM
+ 将虚拟 DOM 和上次更新时的虚拟 DOM 对比
+ 通过对比找出本次更新中变化的虚拟 DOM
+ 通知 Renderer 将变化的虚拟 DOM 渲染到页面上
+  Renderer 在对某个更新节点执行玩 Reconciler 之后，会通知 Renderer 根据不同的 &ldquo;宿主环境&rdquo; 进行相应的节点渲染 / 更新。
+React 15 的缺陷 React 15 的 diff 过程是 递归执行更新 的。由于是递归，一旦开始就 &ldquo;无法中断&rdquo; 。当层级太深或者 diff 逻辑 (钩子函数里的逻辑) 太复杂，导致递归更新的时间过长，Js 线程一直卡主，那么用户交互和渲染就会产生卡顿。看个例子: count-demo
+&lt;button&gt; click &lt;button&gt; &lt;li&gt;1&lt;li&gt; -&gt; &lt;li&gt;2&lt;li&gt; &lt;li&gt;2&lt;li&gt; -&gt; &lt;li&gt;4&lt;li&gt; &lt;li&gt;3&lt;li&gt; -&gt; &lt;li&gt;6&lt;li&gt;  当点击 button 后，列表从左边的 1、2、3 变为右边的 2、4、6。每个节点的更新过程对用户来说基本是同步，但实际上他们是顺序遍历的。具体步骤如下：
+ 点击 button，触发更新
+ Reconciler 检测到需要变更为，则立刻通知 Renderer 更新 DOM。列表变成 2、2、3
+ Reconciler 检测到需要变更为，通知 Renderer 更新 DOM。列表变成 2、4、3
+ Reconciler 检测到需要变更为，则立刻通知 Renderer 更新 DOM。列表变成 2、4、6
+  从此可见 Reconciler 和 Renderer 是交替工作 的，当第一个节点在页面上已经变化后，第二个节点再进入 Reconciler。由于整个过程都是同步的，所以在用户看来所有节点是同时更新的。如果中断更新，则会在页面上看见更新不完全的新的节点树！
+假如当进行到第 2 步的时候，突然因为其他任务而中断当前任务，导致第 3、4 步无法进行那么用户就会看到:
+&lt;button&gt; click &lt;button&gt; &lt;li&gt;1&lt;li&gt; -&gt; &lt;li&gt;2&lt;li&gt; &lt;li&gt;2&lt;li&gt; -&gt; &lt;li&gt;2&lt;li&gt; &lt;li&gt;3&lt;li&gt; -&gt; &lt;li&gt;3&lt;li&gt;  这种情况是 React 绝对不希望出现的。但是这种应用场景又是十分必须的。想象一下，用户在某个时间点进行了输入事件，此时应该更新 input 内的内容，但是因为一个不在当前可视区域的列表的更新导致用户的输入更新被滞后，那么给用户的体验就是卡顿的。因此 React 团队需要寻找一个办法，来解决这个缺陷。……
+        </div>
+        <p class="readmore"><a href="https://geek.zshipu.com/post/tlg/output/React-%E7%BB%9D%E5%9C%B0%E5%8F%8D%E6%9D%80%E4%B9%8B%E4%B8%87%E5%AD%97%E9%95%BF%E6%96%87%E5%BD%BB%E5%BA%95%E6%90%9E%E6%87%82%E6%B8%B2%E6%9F%93%E6%9B%B4%E6%96%B0%E6%B5%81%E7%A8%8B/">阅读全文</a></p>
+    </article>
+    
+    
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
                 <a href="https://geek.zshipu.com/post/tlg/output/Golang-%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95/" title=""></a>
             </h1>
         </header>
@@ -184,7 +219,6 @@ public class Employee extends Person { private String name; public Employee(Stri
 总的来看，问题的主要原因是缺少可预知的监控平台，总是等问题出现了才知道。次要的原因是服务器作用不明朗和发版流程的不稳定。
 解决方案 发版流程不稳定 重构发版流程。业务全面k8s化，构建以kubernetes为核心的ci/cd流程。
 发版流程 有关发版流程如下：
-image.png
 浅析：研发人员提交代码到developer分支(时刻确保developer分支处于最新的代码)，developer分支合并到需要发版环境对应的分支，触发企业微信告警，触发部署在k8s集群的gitlab-runner pod，新启runner pod 执行ci/cd操作。在这个过程中需要有三个步骤：测试用例、打包镜像、更新pod。
 第一次部署服务在k8s集群环境的时候可能需要：创建namespace、创建imagepullsecret、创建pv(storageclass)、创建deployment（pod controller）、创建svc、创建ingress、等。其中镜像打包推送阿里云仓库和从阿里云仓库下载镜像使用vpc访问，不走公网，无网速限制。流程完毕，runner pod 销毁，gitlab 返回结果。
 需要强调的一点是，在这里的资源资源清单不包含configmap或者secret，牵扯到安全性的问题，不应该出
@@ -344,43 +378,43 @@ END 推荐好文 强大，10k+点赞的 SpringBoot 后台管理系统竟然出�
 <ul class="widget-list">
     
     <li>
-        <a href="https://geek.zshipu.com/post/React-18-%E6%96%B0%E5%8A%9F%E8%83%BD%E5%92%8C%E6%94%B9%E8%BF%9B%E7%AD%96%E7%95%A5/" title="React 18 - 新功能和改进策略">React 18 - 新功能和改进策略</a>
+        <a href="https://geek.zshipu.com/post/bi/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/%E7%9F%A5%E4%B9%8E%E7%9A%84%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E4%B8%8E%E5%AE%9E%E6%97%B6%E6%95%B0%E6%8D%AE%E7%9A%84%E6%9E%B6%E6%9E%84%E4%B8%8E%E5%AE%9E%E8%B7%B5/" title="知乎的用户画像与实时数据的架构与实践">知乎的用户画像与实时数据的架构与实践</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/DOM-%E5%92%8C%E8%99%9A%E6%8B%9F-DOM-%E7%9A%84%E5%8C%BA%E5%88%AB/" title="DOM 和虚拟 DOM 的区别">DOM 和虚拟 DOM 的区别</a>
+        <a href="https://geek.zshipu.com/post/react/React-18-%E6%96%B0%E5%8A%9F%E8%83%BD%E5%92%8C%E6%94%B9%E8%BF%9B%E7%AD%96%E7%95%A5/" title="React 18 - 新功能和改进策略">React 18 - 新功能和改进策略</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/GlideIM-Golang-%E5%AE%9E%E7%8E%B0%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F-IM/" title="GlideIM - Golang 实现的高性能的分布式 IM">GlideIM - Golang 实现的高性能的分布式 IM</a>
+        <a href="https://geek.zshipu.com/post/DDD/DOM-%E5%92%8C%E8%99%9A%E6%8B%9F-DOM-%E7%9A%84%E5%8C%BA%E5%88%AB/" title="DOM 和虚拟 DOM 的区别">DOM 和虚拟 DOM 的区别</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE%E7%AC%AC-2-%E9%83%A8%E5%88%86%E9%99%84%E6%8F%92%E5%9B%BE/" title="浏览器的工作原理 - 获取数据（第 2 部分，附插图）🚀">浏览器的工作原理 - 获取数据（第 2 部分，附插图）🚀</a>
+        <a href="https://geek.zshipu.com/post/go/GlideIM-Golang-%E5%AE%9E%E7%8E%B0%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F-IM/" title="GlideIM - Golang 实现的高性能的分布式 IM">GlideIM - Golang 实现的高性能的分布式 IM</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/%E4%B8%BA%E4%BB%80%E4%B9%88-Flutter-%E4%BD%BF%E7%94%A8-Dart/" title="为什么 Flutter 使用 Dart">为什么 Flutter 使用 Dart</a>
+        <a href="https://geek.zshipu.com/post/react/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE%E7%AC%AC-2-%E9%83%A8%E5%88%86%E9%99%84%E6%8F%92%E5%9B%BE/" title="浏览器的工作原理 - 获取数据（第 2 部分，附插图）🚀">浏览器的工作原理 - 获取数据（第 2 部分，附插图）🚀</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E5%AF%BC%E8%88%AA%E7%AC%AC-1-%E9%83%A8%E5%88%86%E5%B8%A6%E6%8F%92%E5%9B%BE%EF%B8%8F/" title="浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥">浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥</a>
+        <a href="https://geek.zshipu.com/post/flutter/%E4%B8%BA%E4%BB%80%E4%B9%88-Flutter-%E4%BD%BF%E7%94%A8-Dart/" title="为什么 Flutter 使用 Dart">为什么 Flutter 使用 Dart</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/DDD-%E5%8D%81%E9%80%9A%E8%BF%87%E9%A2%84%E5%AE%9A%E4%BD%9C%E4%B8%9A%E7%9A%84%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7/" title="DDD-十、通过预定作业的最终一致性">DDD-十、通过预定作业的最终一致性</a>
+        <a href="https://geek.zshipu.com/post/react/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E5%AF%BC%E8%88%AA%E7%AC%AC-1-%E9%83%A8%E5%88%86%E5%B8%A6%E6%8F%92%E5%9B%BE%EF%B8%8F/" title="浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥">浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/DDD-%E4%B9%9D%E4%BD%BF%E7%94%A8-Spring-%E5%A4%84%E7%90%86%E9%A2%86%E5%9F%9F%E4%BA%8B%E4%BB%B6/" title="DDD-九、使用 Spring Data 发布领域事件">DDD-九、使用 Spring Data 发布领域事件</a>
+        <a href="https://geek.zshipu.com/post/DDD/DDD-%E5%8D%81%E9%80%9A%E8%BF%87%E9%A2%84%E5%AE%9A%E4%BD%9C%E4%B8%9A%E7%9A%84%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7/" title="DDD-十、通过预定作业的最终一致性">DDD-十、通过预定作业的最终一致性</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/DDD-%E5%85%AB%E4%BD%BF%E7%94%A8-Spring-Data-%E5%8F%91%E5%B8%83%E9%A2%86%E5%9F%9F%E4%BA%8B%E4%BB%B6/" title="DDD-八、使用 Spring 处理领域事件">DDD-八、使用 Spring 处理领域事件</a>
+        <a href="https://geek.zshipu.com/post/DDD/DDD-%E4%B9%9D%E4%BD%BF%E7%94%A8-Spring-%E5%A4%84%E7%90%86%E9%A2%86%E5%9F%9F%E4%BA%8B%E4%BB%B6/" title="DDD-九、使用 Spring Data 发布领域事件">DDD-九、使用 Spring Data 发布领域事件</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/DDD-%E4%B8%83%E5%9C%A8-Hibernate-%E4%B8%AD%E4%BD%BF%E7%94%A8%E5%80%BC%E5%AF%B9%E8%B1%A1%E4%BD%9C%E4%B8%BA%E8%81%9A%E5%90%88%E6%A0%87%E8%AF%86%E7%AC%A6/" title="DDD-七、在 Hibernate 中使用值对象作为聚合标识符">DDD-七、在 Hibernate 中使用值对象作为聚合标识符</a>
+        <a href="https://geek.zshipu.com/post/DDD/DDD-%E5%85%AB%E4%BD%BF%E7%94%A8-Spring-Data-%E5%8F%91%E5%B8%83%E9%A2%86%E5%9F%9F%E4%BA%8B%E4%BB%B6/" title="DDD-八、使用 Spring 处理领域事件">DDD-八、使用 Spring 处理领域事件</a>
     </li>
     
 </ul>
@@ -511,6 +545,8 @@ END 推荐好文 强大，10k+点赞的 SpringBoot 后台管理系统竟然出�
     <a href="https://geek.zshipu.com/tags/%E6%9E%B6%E6%9E%84/">架构</a>
     
     <a href="https://geek.zshipu.com/tags/%E7%88%AC%E8%99%AB/">爬虫</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/">用户画像</a>
     
     <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
     

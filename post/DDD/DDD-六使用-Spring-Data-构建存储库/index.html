@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>DDD-六、使用 Spring Data 构建存储库 | 知识铺的博客</title>
+    <meta property="og:title" content="DDD-六、使用 Spring Data 构建存储库 - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2022-04-23T15:12:05&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2022-04-23T15:12:05&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="DDD-六、使用 Spring Data 构建存储库">
+        <meta name="author" content="知识铺">
+        
+    <meta property="og:url" content="https://geek.zshipu.com/post/DDD/DDD-%E5%85%AD%E4%BD%BF%E7%94%A8-Spring-Data-%E6%9E%84%E5%BB%BA%E5%AD%98%E5%82%A8%E5%BA%93/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+<ul>
+<li><a href="#查询方式及规格">查询方式及规格</a>
+<ul>
+<li><a href="#关于存储库和-querydsl-的说明">关于存储库和 QueryDSL 的说明</a></li>
+</ul></li>
+<li><a href="#规格和测试">规格和测试</a></li>
+</ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">DDD-六、使用 Spring Data 构建存储库</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年4月23日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            
+
+<p>使用 Spring Data 构建存储库非常容易。您需要做的就是声明您的存储库接口并让它扩展 Spring Data 接口<code>JpaRepository</code>。但是，这也很容易意外地为本地实体创建存储库（如果您的开发人员不熟悉 DDD 但熟悉 JPA，则可能会发生这种情况）。因此，我总是像这样声明自己的基础存储库接口：</p>
+
+<pre><code>@NoRepositoryBean // &lt;1&gt;
+public interface BaseRepository&lt;Aggregate extends BaseAggregateRoot&lt;ID&gt;, ID extends Serializable&gt; // &lt;2&gt;
+        extends JpaRepository&lt;Aggregate, ID&gt;,  // &lt;3&gt;
+                JpaSpecificationExecutor&lt;Aggregate&gt; { // &lt;4&gt;
+
+    default @NotNull Aggregate getById(@NotNull ID id) { // &lt;5&gt;
+        return findById(id).orElseThrow(() -&gt; new EmptyResultDataAccessException(1));
+    }
+}
+</code></pre>
+
+<ol>
+<li>这个注解告诉 Spring Data 不要试图直接实例化这个接口。</li>
+<li>我们将存储库服务的实体限制为仅聚合根。</li>
+<li>我们扩展<code>JpaRepository</code>.</li>
+<li>我个人更喜欢规范而不是查询方法。我们稍后会回到为什么。</li>
+<li>内置<code>findById</code>方法返回一个<code>Optional</code>. 在许多情况下，当您通过其 ID 获取聚合时，您会假设它存在。必须处理<code>Optional</code>每一次都是浪费时间和代码，因此您不妨直接在存储库中执行此操作。</li>
+</ol>
+
+<p>有了这个基本接口，<code>Customer</code>聚合根的存储库可能看起来像这样：</p>
+
+<pre><code>public interface CustomerRepository extends BaseRepository&lt;Customer, CustomerId&gt; {
+    // No need for additional methods
+}
+</code></pre>
+
+<p>这就是检索和保存聚合所需的全部内容。现在让我们看看如何实现查询。</p>
+
+<h1 id="查询方式及规格">查询方式及规格</h1>
+
+<p>在 Spring Data 中创建查询最直接的方法是定义仔细命名的<code>findBy</code>-methods（如果您不熟悉，请查看<a href="https://docs.spring.io/spring-data/jpa/docs/2.5.0/reference/html/#reference">Spring Data 参考文档</a>）。</p>
+
+<p>我发现这些对于仅基于一个或两个键查找聚合的简单查询很有用；例如，在 a 中<code>PersonRepository</code>可以调用一个方法<code>findBySocialSecurityNumber</code>，在 a 中<code>CustomerRepository</code>可以调用一个方法<code>findByCustomerNumber</code>。但是，对于更高级或更复杂的查询，我尽量避免使用<code>findBy</code>-methods。</p>
+
+<p>我这样做主要有两个原因：首先，方法名称往往会变得很长，并且无论在哪里使用都会污染代码。</p>
+
+<p>其次，来自应用程序服务的非常具体的需求可能会潜入存储库，一段时间后，您的存储库会充满查询方法，这些方法几乎可以完成相同的工作，但变化很小。我想保持我的域模型尽可能干净。相反，我喜欢使用*规范*来构建我的查询。</p>
+
+<p>当您按规范查询时，您首先要构建一个规范对象，该对象描述您想要从查询中得到的结果。规范对象也可以使用逻辑运算符*and*和*or*进行组合。为了获得最大的灵活性，我尽量保持我的规格尽可能小。如果需要，我会为常用的规格组合创建复合规格。</p>
+
+<p>Spring Data 内置了对规范的支持。要创建规范，您必须实现<code>Specification</code>接口。这个接口依赖于 JPA Criteria API，所以如果你以前没有使用过它，你需要熟悉它（<a href="https://docs.jboss.org/hibernate/orm/5.4/userguide/html_single/Hibernate_User_Guide.html#criteria">这里</a>是 Hibernate 的关于它的文档）。</p>
+
+<p>该<code>Specification</code>接口包含一个您必须实现的方法。它生成一个 JPA Criteria 谓词，并将创建所述谓词所需的所有必要对象作为输入。</p>
+
+<p>创建规范的最简单方法是创建规范工厂。最好用一个例子来说明这一点：</p>
+
+<pre><code>public class CustomerSpecifications {
+
+    public @NotNull Specification&lt;Customer&gt; byName(@NotNull String name) {
+        return (root, query, criteriaBuilder) -&gt; criteriaBuilder.like( // &lt;1&gt;
+            root.get(Customer_.name), // &lt;2&gt;
+            name
+        );
+    }
+
+    public @NotNull Specification&lt;Customer&gt; byLastInvoiceDateAfter(@NotNull LocalDate date) {
+        return (root, query, criteriaBuilder) -&gt; criteriaBuilder.greaterThan(root.get(Customer_.lastInvoiceDate), date);
+    }
+
+    public @NotNull Specification&lt;Customer&gt; byLastInvoiceDateBefore(@NotNull LocalDate date) {
+        return (root, query, criteriaBuilder) -&gt; criteriaBuilder.lessThan(root.get(Customer_.lastInvoiceDate), date);
+    }
+
+    public @NotNull Specification&lt;Customer&gt; activeOnly() {
+        return (root, query, criteriaBuilder) -&gt; criteriaBuilder.isTrue(root.get(Customer_.active));
+    }
+}
+</code></pre>
+
+<ol>
+<li>这里我只是做一个简单的<code>like</code>查询，但在现实世界的规范中，您可能希望更彻底，注意通配符、大小写匹配等。</li>
+<li><code>Customer_</code>是由 JPA 实现（例如<a href="https://hibernate.org/orm/tooling/">Hibernate</a>）生成的元模型类。</li>
+</ol>
+
+<p>然后，您将按以下方式使用规范：</p>
+
+<pre><code>public class CustomerService {
+
+    private final CustomerRepository repository;
+    private final CustomerSpecifications specifications;
+
+    public CustomerService(CustomerRepository repository, CustomerSpecifications specifications) {
+        this.repository = repository;
+        this.specifications = specifications;
+    }
+
+    public Page&lt;Customer&gt; findActiveCustomersByName(String name, Pageable pageable) { // &lt;1&gt;
+        return repository.findAll(
+            specifications.byName(name).and(specifications.activeOnly()), // &lt;2&gt;
+            pageable
+        );
+    }
+}
+</code></pre>
+
+<ol>
+<li>永远不要编写返回没有上限的结果集的方法（至少在生产代码中）。要么使用分页（就像我在这里做的那样），要么对查询可以返回的记录数使用有限且合理的限制。</li>
+<li>这里使用运算符将两个规范组合在一起<code>and</code>。</li>
+</ol>
+
+<h2 id="关于存储库和-querydsl-的说明">关于存储库和 QueryDSL 的说明</h2>
+
+<p>Spring Data 还支持<a href="http://www.querydsl.com/">QueryDSL</a>。在这种情况下，您不是使用规范，而是直接使用 QueryDSL 谓词。设计原则几乎相同，因此如果您觉得 QueryDSL 比 JPA Criteria API 更舒服，那么您没有理由改变。</p>
+
+<h1 id="规格和测试">规格和测试</h1>
+
+<p>使用规范来支持查询方法有一个明显的缺点，这与单元测试有关。<code>Criteria</code>由于规范在后台使用了 JPA Criteria API，因此在不构造和分析其 JPA 谓词的情况下，没有简单的方法对给定对象的内容进行断言 - 这是一个重要的过程。</p>
+
+<p>但是，有一些方法可以解决这个问题。最明显的方法是在单元测试中模拟存储库时忽略对传入规范的检查，并使用单独的集成测试来测试你的规范，例如使用内存中的 H2 数据库。在许多情况下，这可能已经足够好了。</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/DDD/DDD-%E5%85%AD%E4%BD%BF%E7%94%A8-Spring-Data-%E6%9E%84%E5%BB%BA%E5%AD%98%E5%82%A8%E5%BA%93/">https://geek.zshipu.com/post/DDD/DDD-%E5%85%AD%E4%BD%BF%E7%94%A8-Spring-Data-%E6%9E%84%E5%BB%BA%E5%AD%98%E5%82%A8%E5%BA%93/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/DDD/DDD-%E4%BA%94%E4%BD%BF%E7%94%A8-Spring-Data-%E6%9E%84%E5%BB%BA%E8%81%9A%E5%90%88/">DDD-五、使用 Spring Data 构建聚合</a></li>
+        
+        <li><a href="/post/DDD/DDD-%E5%9B%9B%E5%9C%A8-JPA-%E4%B8%AD%E4%BD%BF%E7%94%A8%E5%80%BC%E5%AF%B9%E8%B1%A1/">DDD-四、在 JPA 中使用值对象</a></li>
+        
+        <li><a href="/post/DDD/DDD-%E4%B8%89%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1%E5%92%8C%E5%85%AD%E8%BE%B9%E5%BD%A2%E6%9E%B6%E6%9E%84/">DDD-三、领域驱动设计和六边形架构</a></li>
+        
+        <li><a href="/post/DDD/DDD-%E4%BA%8C%E6%88%98%E6%9C%AF%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1/">DDD-二、战术领域驱动设计</a></li>
+        
+        <li><a href="/post/DDD/DDD-%E4%B8%80%E6%88%98%E7%95%A5%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1/">DDD-一、战略领域驱动设计</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/DDD'>DDD</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/bi/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/%E7%9F%A5%E4%B9%8E%E7%9A%84%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E4%B8%8E%E5%AE%9E%E6%97%B6%E6%95%B0%E6%8D%AE%E7%9A%84%E6%9E%B6%E6%9E%84%E4%B8%8E%E5%AE%9E%E8%B7%B5/" title="知乎的用户画像与实时数据的架构与实践">知乎的用户画像与实时数据的架构与实践</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/React-18-%E6%96%B0%E5%8A%9F%E8%83%BD%E5%92%8C%E6%94%B9%E8%BF%9B%E7%AD%96%E7%95%A5/" title="React 18 - 新功能和改进策略">React 18 - 新功能和改进策略</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DOM-%E5%92%8C%E8%99%9A%E6%8B%9F-DOM-%E7%9A%84%E5%8C%BA%E5%88%AB/" title="DOM 和虚拟 DOM 的区别">DOM 和虚拟 DOM 的区别</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/go/GlideIM-Golang-%E5%AE%9E%E7%8E%B0%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F-IM/" title="GlideIM - Golang 实现的高性能的分布式 IM">GlideIM - Golang 实现的高性能的分布式 IM</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE%E7%AC%AC-2-%E9%83%A8%E5%88%86%E9%99%84%E6%8F%92%E5%9B%BE/" title="浏览器的工作原理 - 获取数据（第 2 部分，附插图）🚀">浏览器的工作原理 - 获取数据（第 2 部分，附插图）🚀</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/flutter/%E4%B8%BA%E4%BB%80%E4%B9%88-Flutter-%E4%BD%BF%E7%94%A8-Dart/" title="为什么 Flutter 使用 Dart">为什么 Flutter 使用 Dart</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E5%AF%BC%E8%88%AA%E7%AC%AC-1-%E9%83%A8%E5%88%86%E5%B8%A6%E6%8F%92%E5%9B%BE%EF%B8%8F/" title="浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥">浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD-%E5%8D%81%E9%80%9A%E8%BF%87%E9%A2%84%E5%AE%9A%E4%BD%9C%E4%B8%9A%E7%9A%84%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7/" title="DDD-十、通过预定作业的最终一致性">DDD-十、通过预定作业的最终一致性</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD-%E4%B9%9D%E4%BD%BF%E7%94%A8-Spring-%E5%A4%84%E7%90%86%E9%A2%86%E5%9F%9F%E4%BA%8B%E4%BB%B6/" title="DDD-九、使用 Spring Data 发布领域事件">DDD-九、使用 Spring Data 发布领域事件</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DDD-%E5%85%AB%E4%BD%BF%E7%94%A8-Spring-Data-%E5%8F%91%E5%B8%83%E9%A2%86%E5%9F%9F%E4%BA%8B%E4%BB%B6/" title="DDD-八、使用 Spring 处理领域事件">DDD-八、使用 Spring 处理领域事件</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/BI/">BI</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD%E5%AE%9E%E6%88%98/">DDD实战</a>
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="https://geek.zshipu.com/tags/IM/">IM</a>
+    
+    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    
+    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    
+    <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
+    
+    <a href="">Nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
+    
+    <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/css/">css</a>
+    
+    <a href="https://geek.zshipu.com/tags/flutter/">flutter</a>
+    
+    <a href="https://geek.zshipu.com/tags/game/">game</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="">java</a>
+    
+    <a href="">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/web/">web</a>
+    
+    <a href="https://geek.zshipu.com/tags/web3/">web3</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/">人工智能</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%88%86%E8%AF%8D/">分词</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%96%87%E6%91%98/">文摘</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%88%AC%E8%99%AB/">爬虫</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/">用户画像</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E8%B5%B7%E6%AD%A5/">起步</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
