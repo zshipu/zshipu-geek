@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>无需离开 IDE 即可部署您的第一个网站 | 知识铺的博客</title>
+    <meta property="og:title" content="无需离开 IDE 即可部署您的第一个网站 - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2022-04-27T11:29:08&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2022-04-27T11:29:08&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="无需离开 IDE 即可部署您的第一个网站">
+        <meta name="author" content="知识铺">
+        
+    <meta property="og:url" content="https://geek.zshipu.com/post/%E6%97%A0%E9%9C%80%E7%A6%BB%E5%BC%80-IDE-%E5%8D%B3%E5%8F%AF%E9%83%A8%E7%BD%B2%E6%82%A8%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E7%BD%91%E7%AB%99/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#我为什么建造它">我为什么建造它</a></li>
+<li><a href="#https-zshipu-com-t-url-https-dev-to-github-deploy-your-first-website-without-leaving-your-ide-2mpp-how-it-works-这个怎么运作">[](<a href="https://zshipu.com/t?url=https://dev.to/github/deploy-your-first-website-without-leaving-your-ide-2mpp#how-it-works)这个怎么运作">https://zshipu.com/t?url=https://dev.to/github/deploy-your-first-website-without-leaving-your-ide-2mpp#how-it-works)这个怎么运作</a></a></li>
+<li><a href="#https-zshipu-com-t-url-https-dev-to-github-deploy-your-first-website-without-leaving-your-ide-2mpp-how-i-built-it-我是如何建造的">[](<a href="https://zshipu.com/t?url=https://dev.to/github/deploy-your-first-website-without-leaving-your-ide-2mpp#how-i-built-it)我是如何建造的">https://zshipu.com/t?url=https://dev.to/github/deploy-your-first-website-without-leaving-your-ide-2mpp#how-i-built-it)我是如何建造的</a></a></li>
+<li><a href="#https-zshipu-com-t-url-https-dev-to-github-deploy-your-first-website-without-leaving-your-ide-2mpp-open-to-contributions-开放供稿">[](<a href="https://zshipu.com/t?url=https://dev.to/github/deploy-your-first-website-without-leaving-your-ide-2mpp#open-to-contributions)开放供稿">https://zshipu.com/t?url=https://dev.to/github/deploy-your-first-website-without-leaving-your-ide-2mpp#open-to-contributions)开放供稿</a></a></li>
+</ul></li>
+</ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">无需离开 IDE 即可部署您的第一个网站</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年4月27日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            
+
+<h2 id="我为什么建造它">我为什么建造它</h2>
+
+<p>我构建了一个 VS Code Extension，将代码部署到 GitHub Pages。</p>
+
+<p>我一直想构建一个 VS 代码扩展，但我从来没有理由或足够的时间。现在我在 GitHub 的 DevRel 工作，我终于有机会这样做了！Microsoft VS Code 团队举办了一个<a href="https://zshipu.com/t?url=https://github.com/ornelladotcom/resume-website-workshop">简历网站研讨会</a>，参与者将使用 HTML 和 CSS 构建的简历部署到 GitHub Pages。</p>
+
+<p>我与 VS Code 团队合作创建了一个 VS Code 扩展，使您能够在不离开 IDE 的情况下将静态网页（Jekyll 或 HTML）快速部署到 GitHub Pages。</p>
+
+<p>我最喜欢的两件事是产生积极的影响和尝试我没有使用过的技术！</p>
+
+<h2 id="https-zshipu-com-t-url-https-dev-to-github-deploy-your-first-website-without-leaving-your-ide-2mpp-how-it-works-这个怎么运作">[](<a href="https://zshipu.com/t?url=https://dev.to/github/deploy-your-first-website-without-leaving-your-ide-2mpp#how-it-works)这个怎么运作">https://zshipu.com/t?url=https://dev.to/github/deploy-your-first-website-without-leaving-your-ide-2mpp#how-it-works)这个怎么运作</a></h2>
+
+<p>用户体验和工作流程仍有改进的空间。尽管如此，对于我使用我构建的扩展将代码部署到 GitHub Pages 的初始迭代，您可以采取以下步骤：</p>
+
+<ul>
+<li><strong>创建一个存储库。</strong>在下面的屏幕截图中，我创建了一个名为<a href="https://zshipu.com/t?url=https://github.com/blackgirlbytes/ghpages-into-the-spiderverse">ghpages-into-the-spiderverse的存储库</a></li>
+</ul>
+
+<p><a href="https://zshipu.com/t?url=https://res.cloudinary.com/practicaldev/image/fetch/s--odogxxex--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/hqtkzowf2ufouqaqpe6w.png"><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--odogxxex--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/hqtkzowf2ufouqaqpe6w.png" alt="图片描述" /></a></p>
+
+<ul>
+<li>至少<strong>创建一个 index.html 文件。</strong>您也可以添加 CSS 和 JavaScript。对于这篇博文，我将创建一个 HTML 文件。我创建了一个名为 index.html 的文件，其中包含一个 h1 元素，其中包括电影 Spiderman: Intro to Spiderverse 的引言和电影中的图像。</li>
+</ul>
+
+<p><a href="https://zshipu.com/t?url=https://res.cloudinary.com/practicaldev/image/fetch/s--Du0c_3wN--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/31q6abkuuvf86b5v4fd5.png"><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--Du0c_3wN--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/31q6abkuuvf86b5v4fd5.png" alt="图片描述" /></a></p>
+
+<ul>
+<li><strong>不要忘记提交您的文件。</strong>下面的截图表明我点击了“提交新文件”按钮来提交我新创建的 index.html 文件。</li>
+</ul>
+
+<p><a href="https://zshipu.com/t?url=https://res.cloudinary.com/practicaldev/image/fetch/s--nVwOTV_0--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/qyad8q20vdxpubr5dpu9.png"><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--nVwOTV_0--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/qyad8q20vdxpubr5dpu9.png" alt="图片描述" /></a></p>
+
+<ul>
+<li>安装名为“Deploy to GitHub Pages”<strong>的 VS Code 扩展。</strong>为了找到扩展，我单击了 Visual Studio Code 中的扩展图标并搜索“Deploy to GitHub Pages”。我为那个特定的扩展按下了安装。</li>
+</ul>
+
+<p><a href="https://zshipu.com/t?url=https://res.cloudinary.com/practicaldev/image/fetch/s--o0flXo2f--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/eifp9uif7r4xbx1rhaif.png"><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--o0flXo2f--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/eifp9uif7r4xbx1rhaif.png" alt="图片描述" /></a></p>
+
+<ul>
+<li><strong>打开搜索栏</strong>以搜索新文件。您可以通过以下方法做到这一点：
+
+<ul>
+<li>使用转到菜单下的转到文件</li>
+<li>在 Windows 上使用此键盘快捷键 Ctrl+p 或 Ctrl+e</li>
+<li>在 macOS Cmd 上使用此键盘快捷键 ⌘+p</li>
+<li>在 Linux 上使用此键盘快捷键 Ctrl+p 或 Ctrl+e</li>
+</ul></li>
+</ul>
+
+<p><a href="https://zshipu.com/t?url=https://res.cloudinary.com/practicaldev/image/fetch/s--Pto0gp8H--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/h6u37fvtoxi78m4ivv87.png"><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--Pto0gp8H--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/h6u37fvtoxi78m4ivv87.png" alt="图片描述" /></a></p>
+
+<ul>
+<li>通过在搜索栏中<strong>键入“&gt;”来触发扩展。</strong>如果它正常工作，您应该会看到“部署到 GitHub Pages”字样，如下图所示。</li>
+</ul>
+
+<p><a href="https://zshipu.com/t?url=https://res.cloudinary.com/practicaldev/image/fetch/s--3TAE1V1N--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/elpupywxoyu8hkxlq4x5.png"><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--3TAE1V1N--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/elpupywxoyu8hkxlq4x5.png" alt="图片描述" /></a></p>
+
+<ul>
+<li><strong>选择“部署到 GitHub 页面”</strong>后，您将收到登录 GitHub 的提示。</li>
+</ul>
+
+<p><a href="https://zshipu.com/t?url=https://res.cloudinary.com/practicaldev/image/fetch/s--5OqprFwd--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/3r41p7tykot3ih0heliz.png"><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--5OqprFwd--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/3r41p7tykot3ih0heliz.png" alt="图片描述" /></a></p>
+
+<ul>
+<li><strong>完成身份验证过程后，您的 IDE 将显示一个下拉列表，其中包含您最近创建的十个存储库。</strong>在屏幕截图中，我的“ghpages-into-the-spiderverse”存储库位于列表顶部。</li>
+</ul>
+
+<p><a href="https://zshipu.com/t?url=https://res.cloudinary.com/practicaldev/image/fetch/s--ewJjSHvN--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/w0nx9aam6boo7orm7m6h.png"><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--ewJjSHvN--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/w0nx9aam6boo7orm7m6h.png" alt="图片描述" /></a></p>
+
+<ul>
+<li><strong>选择存储库“ghpages-into-the-spiderverse”后，会</strong>出现一条 toast 消息，提示我将存储库发布到 GitHub Pages。单击“发布”按钮以确认您要将存储库部署到 GitHub Pages。</li>
+</ul>
+
+<p><a href="https://zshipu.com/t?url=https://res.cloudinary.com/practicaldev/image/fetch/s--89F7bjFB--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/rclkujv6qx9ft722bely.png"><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--89F7bjFB--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/rclkujv6qx9ft722bely.png" alt="图片描述" /></a></p>
+
+<ul>
+<li><strong>Toast 将更新一条消息</strong>，表明您的网站将在几分钟后上线。</li>
+</ul>
+
+<p><a href="https://zshipu.com/t?url=https://res.cloudinary.com/practicaldev/image/fetch/s--InRmb0e0--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/y7yc00epn94q2geyuke1.png"><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--InRmb0e0--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/y7yc00epn94q2geyuke1.png" alt="图片描述" /></a></p>
+
+<ul>
+<li><strong>检查操作日志以了解进度。</strong>GitHub Pages 使用操作来构建和部署站点。如果您看到所有绿色复选标记，如下图所示，您的网站已上线！</li>
+</ul>
+
+<p><a href="https://zshipu.com/t?url=https://res.cloudinary.com/practicaldev/image/fetch/s--rCftB5Yk--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ubct4at47v1avebqfo5g.png"><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--rCftB5Yk--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ubct4at47v1avebqfo5g.png" alt="图片描述" /></a></p>
+
+<ul>
+<li><strong>单击您网站的 URL，</strong>然后查看托管在 GitHub Pages 上的新静态站点。你可以在这个链接找到我的网站：<a href="https://zshipu.com/t?url=https://blackgirlbytes.github.io/ghpages-into-the-spiderverse/">https ://blackgirlbytes.github.io/ghpages-into-the-spiderverse/</a></li>
+</ul>
+
+<p><a href="https://zshipu.com/t?url=https://res.cloudinary.com/practicaldev/image/fetch/s--HNbvK8b8--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/xvjyovd9pogyrytrtl5w.png"><img src="https://res.cloudinary.com/practicaldev/image/fetch/s--HNbvK8b8--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/xvjyovd9pogyrytrtl5w.png" alt="图片描述" /></a></p>
+
+<h2 id="https-zshipu-com-t-url-https-dev-to-github-deploy-your-first-website-without-leaving-your-ide-2mpp-how-i-built-it-我是如何建造的">[](<a href="https://zshipu.com/t?url=https://dev.to/github/deploy-your-first-website-without-leaving-your-ide-2mpp#how-i-built-it)我是如何建造的">https://zshipu.com/t?url=https://dev.to/github/deploy-your-first-website-without-leaving-your-ide-2mpp#how-i-built-it)我是如何建造的</a></h2>
+
+<p><a href="https://zshipu.com/t?url=https://dev.to/github/how-i-built-it-the-anatomy-of-a-vs-code-extension-3p55">我在这里</a>写了关于我的 VS Code 扩展的剖析。</p>
+
+<h2 id="https-zshipu-com-t-url-https-dev-to-github-deploy-your-first-website-without-leaving-your-ide-2mpp-open-to-contributions-开放供稿">[](<a href="https://zshipu.com/t?url=https://dev.to/github/deploy-your-first-website-without-leaving-your-ide-2mpp#open-to-contributions)开放供稿">https://zshipu.com/t?url=https://dev.to/github/deploy-your-first-website-without-leaving-your-ide-2mpp#open-to-contributions)开放供稿</a></h2>
+
+<p>老实说，我没有投入尽可能多的时间来创建这个扩展。有改进的余地。我愿意为帮助我改进自述文件、改进工作流程等做出贡献。随时在此存储库中打开问题和拉取请求：<a href="https://zshipu.com/t?url=https://github.com/blackgirlbytes/vscodeextension-deploy-to-gh-pages">https ://github.com/blackgirlbytes/vscodeextension-deploy-to-gh-pages</a></p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/%E6%97%A0%E9%9C%80%E7%A6%BB%E5%BC%80-IDE-%E5%8D%B3%E5%8F%AF%E9%83%A8%E7%BD%B2%E6%82%A8%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E7%BD%91%E7%AB%99/">https://geek.zshipu.com/post/%E6%97%A0%E9%9C%80%E7%A6%BB%E5%BC%80-IDE-%E5%8D%B3%E5%8F%AF%E9%83%A8%E7%BD%B2%E6%82%A8%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E7%BD%91%E7%AB%99/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/bi/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/%E7%9F%A5%E4%B9%8E%E7%9A%84%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E4%B8%8E%E5%AE%9E%E6%97%B6%E6%95%B0%E6%8D%AE%E7%9A%84%E6%9E%B6%E6%9E%84%E4%B8%8E%E5%AE%9E%E8%B7%B5/">知乎的用户画像与实时数据的架构与实践</a></li>
+        
+        <li><a href="/post/react/React-18-%E6%96%B0%E5%8A%9F%E8%83%BD%E5%92%8C%E6%94%B9%E8%BF%9B%E7%AD%96%E7%95%A5/">React 18 - 新功能和改进策略</a></li>
+        
+        <li><a href="/post/DDD/DOM-%E5%92%8C%E8%99%9A%E6%8B%9F-DOM-%E7%9A%84%E5%8C%BA%E5%88%AB/">DOM 和虚拟 DOM 的区别</a></li>
+        
+        <li><a href="/post/go/GlideIM-Golang-%E5%AE%9E%E7%8E%B0%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F-IM/">GlideIM - Golang 实现的高性能的分布式 IM</a></li>
+        
+        <li><a href="/post/react/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE%E7%AC%AC-2-%E9%83%A8%E5%88%86%E9%99%84%E6%8F%92%E5%9B%BE/">浏览器的工作原理 - 获取数据（第 2 部分，附插图）🚀</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/github'>github</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/%E6%97%A0%E9%9C%80%E7%A6%BB%E5%BC%80-IDE-%E5%8D%B3%E5%8F%AF%E9%83%A8%E7%BD%B2%E6%82%A8%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E7%BD%91%E7%AB%99/" title="无需离开 IDE 即可部署您的第一个网站">无需离开 IDE 即可部署您的第一个网站</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/bi/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/%E7%9F%A5%E4%B9%8E%E7%9A%84%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E4%B8%8E%E5%AE%9E%E6%97%B6%E6%95%B0%E6%8D%AE%E7%9A%84%E6%9E%B6%E6%9E%84%E4%B8%8E%E5%AE%9E%E8%B7%B5/" title="知乎的用户画像与实时数据的架构与实践">知乎的用户画像与实时数据的架构与实践</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/React-18-%E6%96%B0%E5%8A%9F%E8%83%BD%E5%92%8C%E6%94%B9%E8%BF%9B%E7%AD%96%E7%95%A5/" title="React 18 - 新功能和改进策略">React 18 - 新功能和改进策略</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/DDD/DOM-%E5%92%8C%E8%99%9A%E6%8B%9F-DOM-%E7%9A%84%E5%8C%BA%E5%88%AB/" title="DOM 和虚拟 DOM 的区别">DOM 和虚拟 DOM 的区别</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/go/GlideIM-Golang-%E5%AE%9E%E7%8E%B0%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F-IM/" title="GlideIM - Golang 实现的高性能的分布式 IM">GlideIM - Golang 实现的高性能的分布式 IM</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE%E7%AC%AC-2-%E9%83%A8%E5%88%86%E9%99%84%E6%8F%92%E5%9B%BE/" title="浏览器的工作原理 - 获取数据（第 2 部分，附插图）🚀">浏览器的工作原理 - 获取数据（第 2 部分，附插图）🚀</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/flutter/Flutter%E6%95%99%E7%A8%8B%E5%BC%80%E5%9D%91%E7%AF%87/" title="Flutter教程开坑篇 001">Flutter教程开坑篇 001</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/javascript/%E5%A6%82%E6%9E%9C-Javascript-%E6%98%AF%E5%8D%95%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%AE%83%E6%98%AF%E5%A6%82%E4%BD%95%E5%BC%82%E6%AD%A5%E7%9A%84/" title="如果 Javascript 是单线程的，它是如何异步的">如果 Javascript 是单线程的，它是如何异步的</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/flutter/%E4%B8%BA%E4%BB%80%E4%B9%88-Flutter-%E4%BD%BF%E7%94%A8-Dart/" title="为什么 Flutter 使用 Dart">为什么 Flutter 使用 Dart</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E5%AF%BC%E8%88%AA%E7%AC%AC-1-%E9%83%A8%E5%88%86%E5%B8%A6%E6%8F%92%E5%9B%BE%EF%B8%8F/" title="浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥">浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/BI/">BI</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD%E5%AE%9E%E6%88%98/">DDD实战</a>
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="https://geek.zshipu.com/tags/IM/">IM</a>
+    
+    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    
+    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    
+    <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
+    
+    <a href="">Nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
+    
+    <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/css/">css</a>
+    
+    <a href="https://geek.zshipu.com/tags/flutter/">flutter</a>
+    
+    <a href="https://geek.zshipu.com/tags/game/">game</a>
+    
+    <a href="https://geek.zshipu.com/tags/github/">github</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="">java</a>
+    
+    <a href="">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/web/">web</a>
+    
+    <a href="https://geek.zshipu.com/tags/web3/">web3</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/">人工智能</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%88%86%E8%AF%8D/">分词</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%96%87%E6%91%98/">文摘</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%88%AC%E8%99%AB/">爬虫</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/">用户画像</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E8%B5%B7%E6%AD%A5/">起步</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
