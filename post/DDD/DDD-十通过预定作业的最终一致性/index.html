@@ -146,47 +146,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#总体思路">总体思路</a>
-<ul>
-<li><a href="#让您的工作接受所有或部分输入">让您的工作接受所有或部分输入</a>
-<ul>
-<li><a href="#例子">例子</a></li>
-</ul></li>
-<li><a href="#解耦-job-和-job-的触发">解耦 Job 和 Job 的触发</a>
-<ul>
-<li><a href="#例子-1">例子</a></li>
-</ul></li>
-<li><a href="#使您的工作具有幂等性">使您的工作具有幂等性</a>
-<ul>
-<li><a href="#例子-2">例子</a></li>
-</ul></li>
-<li><a href="#避免同时执行同一作业">避免同时执行同一作业</a>
-<ul>
-<li><a href="#例子-3">例子</a></li>
-</ul></li>
-<li><a href="#明智地使用线程">明智地使用线程</a>
-<ul>
-<li><a href="#例子-4">例子</a></li>
-</ul></li>
-<li><a href="#在查询中使用上限">在查询中使用上限</a></li>
-<li><a href="#明智地安排工作">明智地安排工作</a></li>
-</ul></li>
-<li><a href="#架构考虑">架构考虑</a>
-<ul>
-<li><a href="#单一有界上下文">单一有界上下文</a></li>
-<li><a href="#多个有界上下文">多个有界上下文</a>
-<ul>
-<li><a href="#客户供应商和墨守成规者">客户供应商和墨守成规者</a></li>
-<li><a href="#反腐败层">反腐败层</a></li>
-<li><a href="#中间件">中间件</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#优点和缺点">优点和缺点</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#总体思路">总体思路</a>
+      <ul>
+        <li><a href="#让您的工作接受所有或部分输入">让您的工作接受所有或部分输入</a></li>
+        <li><a href="#解耦-job-和-job-的触发">解耦 Job 和 Job 的触发</a></li>
+        <li><a href="#使您的工作具有幂等性">使您的工作具有幂等性</a></li>
+        <li><a href="#避免同时执行同一作业">避免同时执行同一作业</a></li>
+        <li><a href="#明智地使用线程">明智地使用线程</a></li>
+        <li><a href="#在查询中使用上限">在查询中使用上限</a></li>
+        <li><a href="#明智地安排工作">明智地安排工作</a></li>
+      </ul>
+    </li>
+    <li><a href="#架构考虑">架构考虑</a>
+      <ul>
+        <li><a href="#单一有界上下文">单一有界上下文</a></li>
+        <li><a href="#多个有界上下文">多个有界上下文</a></li>
+      </ul>
+    </li>
+    <li><a href="#优点和缺点">优点和缺点</a></li>
+  </ul>
 </nav>
     </div>
 </div>
@@ -233,29 +212,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            
-
-<p>如何从单个域事件处理程序失败或整个系统在事务提交后但在所有域事件处理程序处理事件之前崩溃的情况中恢复。</p>
-
+            <p>如何从单个域事件处理程序失败或整个系统在事务提交后但在所有域事件处理程序处理事件之前崩溃的情况中恢复。</p>
 <p>与软件中的大多数（如果不是全部？）问题一样，这里没有万能的解决方案。相反，您必须找到最能满足您的特定系统要求的解决方案。在这篇博文中，我们将研究一种保证最终一致性的简单（ish）方法，即使我们不时错过一个领域事件。这些示例假设我们使用的是 Spring 和 Java，但这些原则也适用于其他框架和语言。</p>
-
 <h2 id="总体思路">总体思路</h2>
-
-<p>这种方法背后的想法是使用计划作业而不是（或除此之外）域事件来同步聚合之间甚至有界上下文之间的状态。这些作业在一天中的不同时间间隔或时间自动运行，但也可以由域事件处理程序触发。这意味着如果一切顺利，数据将在域事件触发后的*几秒钟内在整个系统中变得一致。*另一方面，如果出现问题，数据将*在下一次成功的计划运行后*变得一致。</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--eTYrfcnH--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/zumo17dlhvdekr6de0om.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202204231526654.png" alt="图片" /></a></p>
-
+<p>这种方法背后的想法是使用计划作业而不是（或除此之外）域事件来同步聚合之间甚至有界上下文之间的状态。这些作业在一天中的不同时间间隔或时间自动运行，但也可以由域事件处理程序触发。这意味着如果一切顺利，数据将在域事件触发后的<em>几秒钟内在整个系统中变得一致。<em>另一方面，如果出现问题，数据将</em>在下一次成功的计划运行后</em>变得一致。</p>
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--eTYrfcnH--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/zumo17dlhvdekr6de0om.png">
+        <img class="mx-auto" alt="图片" src="https://cdn.jsdelivr.net/gh/zshipu/images/202204231526654.png" />   
+    </a></p>
 <p>像这样的系统并不难实现，但也没有乍看之下那么简单，因为有一些警告。但是，您可以通过遵循以下准则来避免它们：</p>
-
 <h3 id="让您的工作接受所有或部分输入">让您的工作接受所有或部分输入</h3>
-
 <p>当您运行计划作业时，它通常是某种适用于所有适用输入的批处理操作。但是，在这种特殊情况下，您还希望能够仅在一个特定输入或一小组输入上运行作业。这提供了很大的灵活性，如果您从一开始就以这种方式设计工作，则很容易做到。</p>
-
 <h4 id="例子">例子</h4>
-
 <p>假设您有一项工作将为已发货的订单创建发票。该类将具有以下方法：</p>
-
-<pre><code>@Component
+<pre tabindex="0"><code>@Component
 public class InvoiceCreationJob {
 
     @Transactional(propagation = REQUIRES_NEW)    
@@ -268,17 +237,12 @@ public class InvoiceCreationJob {
         //...
     }
 }
-</code></pre>
-
-<ul>
+</code></pre><ul>
 <li>第一种方法为其 ID 已作为方法参数传递的订单创建发票（当然，前提是这些订单已发货但尚未开票；稍后会详细介绍）。</li>
-<li>第二种方法是批处理作业，它为*所有*已发货但尚未开票的订单创建发票。</li>
+<li>第二种方法是批处理作业，它为<em>所有</em>已发货但尚未开票的订单创建发票。</li>
 </ul>
-
 <h3 id="解耦-job-和-job-的触发">解耦 Job 和 Job 的触发</h3>
-
 <p>在设计工作时，请考虑何时以及如何触发它们：</p>
-
 <ul>
 <li>系统什么时候启动？</li>
 <li>由用户手动？</li>
@@ -287,23 +251,19 @@ public class InvoiceCreationJob {
 <li>通过 JMX？</li>
 <li>在其他方面你还不知道？</li>
 </ul>
-
 <p>我会推荐一个看起来像这样的设计：</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--TPKWPMf3--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/xvw2qwwrdwv84j6t0ou3.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202204231526655.png" alt="图片" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--TPKWPMf3--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/xvw2qwwrdwv84j6t0ou3.png">
+        <img class="mx-auto" alt="图片" src="https://cdn.jsdelivr.net/gh/zshipu/images/202204231526655.png" />   
+    </a></p>
 <ul>
 <li>作业本身是一个单独的对象，当被其他对象告知时，它会做它的事情。</li>
 <li>应用程序服务启动作业以响应人类用户操作。</li>
 <li>域事件处理程序启动作业以响应域事件。</li>
 <li>工作人员处理计划的作业执行（例如每小时一次、每十分钟一次或每天午夜一次）。</li>
 </ul>
-
 <h4 id="例子-1">例子</h4>
-
 <p>让我们继续发票生成示例。我们从一个域事件处理程序开始，它会在订单发货后立即生成发票：</p>
-
-<pre><code>@DomainEventHandler
+<pre tabindex="0"><code>@DomainEventHandler
 public class InvoiceGenerationOnShipmentTrigger {
 
     private final InvoiceCreationJob job;
@@ -318,11 +278,8 @@ public class InvoiceGenerationOnShipmentTrigger {
         job.createInvoiceForOrders(evt.getOrderId());
     }
 }
-</code></pre>
-
-<p>接下来，我们要在每天午夜触发作业：</p>
-
-<pre><code>@Component
+</code></pre><p>接下来，我们要在每天午夜触发作业：</p>
+<pre tabindex="0"><code>@Component
 public class InvoiceGenerationWorker {
 
     private final InvoiceCreationJob job;
@@ -336,11 +293,8 @@ public class InvoiceGenerationWorker {
         job.createInvoiceForAllOrders();
     }
 }
-</code></pre>
-
-<p>最后，我们希望管理员能够通过应用服务随时触发作业：</p>
-
-<pre><code>@Service
+</code></pre><p>最后，我们希望管理员能够通过应用服务随时触发作业：</p>
+<pre tabindex="0"><code>@Service
 public class InvoiceGenerationService {
 
     private final InvoiceCreationJob job;
@@ -355,51 +309,34 @@ public class InvoiceGenerationService {
         job.createInvoiceForAllOrders();
     }
 }
-</code></pre>
-
-<h3 id="使您的工作具有幂等性">使您的工作具有幂等性</h3>
-
-<p>当您编写作业时，您知道系统的预期最终状态将是什么。但是，您永远不应该对此做出任何假设，也不应该对起始状态做出假设。你的工作应该总是*检查*开始状态是什么，然后弄清楚它需要采取什么行动才能达到所需的结束状态。如果系统已经处于期望的状态，你的工作*应该什么都不做*。</p>
-
+</code></pre><h3 id="使您的工作具有幂等性">使您的工作具有幂等性</h3>
+<p>当您编写作业时，您知道系统的预期最终状态将是什么。但是，您永远不应该对此做出任何假设，也不应该对起始状态做出假设。你的工作应该总是<em>检查</em>开始状态是什么，然后弄清楚它需要采取什么行动才能达到所需的结束状态。如果系统已经处于期望的状态，你的工作<em>应该什么都不做</em>。</p>
 <p>如果您的工作是这样实现的，您可以使用相同的输入多次运行它，并且不会产生任何副作用（例如为同一订单生成多张发票）。如果由于网络错误或断电等原因导致作业执行失败，您可以稍后重新运行它。</p>
-
 <h4 id="例子-2">例子</h4>
-
 <p>让我们再次继续发票生成示例。在初始设计中，订单将遍历的状态如下：</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--UaJ1Xyxb--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/vch8ezrievjfett6riq5.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202204231526657.png" alt="图片" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--UaJ1Xyxb--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/vch8ezrievjfett6riq5.png">
+        <img class="mx-auto" alt="图片" src="https://cdn.jsdelivr.net/gh/zshipu/images/202204231526657.png" />   
+    </a></p>
 <p>因此，我们通往幂等性之路的第一步是检查订单的状态，并且仅在该状态为 时才采取行动<code>SHIPPED</code>。对于每个发货的订单，该作业将执行以下操作：</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--n7yabpmV--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/chew2crdvuh2k06ye610.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202204231526658.png" alt="图片" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--n7yabpmV--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/chew2crdvuh2k06ye610.png">
+        <img class="mx-auto" alt="图片" src="https://cdn.jsdelivr.net/gh/zshipu/images/202204231526658.png" />   
+    </a></p>
 <p>但是，这里有一个问题：如果第二笔交易由于某种原因失败了怎么办？这意味着下次作业运行时，即使状态为 ，也已经有发票<code>SHIPPED</code>。</p>
-
 <p>因此，我们通往幂等性之路的下一步是检测是否已经为特定订单创建了发票。我们可以通过向聚合中添加一个<code>OrderId</code>字段来做到这一点，并<code>Invoice</code>在创建新发票之前使用它来检查是否未创建任何发票。如果发票已经存在，则作业将继续将状态设置为<code>INVOICED</code>（您将需要一些数据库约束或悲观锁定来正确实现此功能，但这超出了本文的范围）</p>
-
 <p>在更复杂的情况下，您可能必须添加一些中间状态（例如<code>INVOICE_GENERATION_IN_PROGRESS</code>），以便在发生故障时能够从中断的地方继续。</p>
-
 <h3 id="避免同时执行同一作业">避免同时执行同一作业</h3>
-
 <p>由于您的工作可以通过多种不同的方式启动，因此存在在它已经运行的同时启动它的风险。如果作业是幂等的，这应该不会导致任何数据一致性问题，但最终可能会导致事务死锁或其他并发问题。这也是资源的浪费，可能会减慢系统的其他部分。</p>
-
 <p>如果同一作业的同时执行很少发生，您可以选择忍受它并让幂等性处理它。但是，如果它经常发生，你应该以某种方式处理它。您采取的操作取决于用例，但通常是以下之一：</p>
-
 <ul>
 <li>让当前的工作完成，不要开始新的工作。</li>
 <li>取消当前作业，然后开始新作业。</li>
 <li>让当前工作完成，然后开始新工作。</li>
 </ul>
-
 <h4 id="例子-3">例子</h4>
-
 <p>我可以只写一篇关于这个特定问题的完整博文，所以对于这个例子，我们将缩小范围并继续使用发票生成案例。</p>
-
 <p>假设我们正在处理一个仅部署为单个实例的小型应用程序，因此我们无需担心相同作业同时在不同机器上运行的情况。</p>
-
 <p>我们要做的第一件事是确保一次只能运行一个批处理操作实例。最简单的方法是使用<code>AtomicBoolean</code>（因为<code>InvoiceCreationJob</code>是单例）：</p>
-
-<pre><code>@Component
+<pre tabindex="0"><code>@Component
 public class InvoiceCreationJob {
 
     private final AtomicBoolean working 
@@ -416,139 +353,96 @@ public class InvoiceCreationJob {
         }
     }
 }
-</code></pre>
-
-<ul>
+</code></pre><ul>
 <li>如果<code>working</code>变量是<code>false</code>, if until 设置为<code>true</code>并且允许开始工作。完成后，将<code>working</code>变量设置回<code>false</code>.</li>
 <li>如果<code>working</code>变量是<code>true</code>，则该方法将不执行任何操作。</li>
 </ul>
-
 <p>这已经足够好了，因为批处理操作仅用作备用解决方案，以防我们无法正确处理某些<code>InvoiceShippedEvent</code>s。</p>
-
 <p>那<code>createInvoiceForOrders</code>方法呢？此方法可能会同时针对不同<code>Order</code>的 s 运行，但这不是问题，因此我们不想阻止这种情况。</p>
-
-<p><code>Order</code>尽管它仍然*可能*发生，但该方法不太可能同时运行。在这种情况下，我们可以依靠操作的幂等性。这同样适用于同时运行的<code>createInvoiceForOrders</code>情况<code>createInvoiceForAllOrders</code>。</p>
-
+<p><code>Order</code>尽管它仍然<em>可能</em>发生，但该方法不太可能同时运行。在这种情况下，我们可以依靠操作的幂等性。这同样适用于同时运行的<code>createInvoiceForOrders</code>情况<code>createInvoiceForAllOrders</code>。</p>
 <h3 id="明智地使用线程">明智地使用线程</h3>
-
 <p>当你实现一个作业时，你应该考虑它将在哪个线程中运行。无论它是如何启动的，它是否总是在它自己的线程中运行，或者在启动它的线程中，或者两者的组合？</p>
-
 <p>让我们看一些例子来说明为什么这很重要：</p>
-
 <ul>
 <li>假设一个工作计划由一个工人连续执行，有五分钟的延迟。这意味着新作业应在前一个作业完成五分钟后开始。现在，如果作业在其自己的线程中运行，则工作线程会在作业线程开始时认为它已经完成。如果工作需要超过五分钟，即使旧工作仍在运行，工人也会开始新工作。在这种情况下，最好让作业在启动它的线程中运行。</li>
 <li>用户通过应用服务启动另一个作业。这也是一项长期的工作。现在，如果作业在启动它的线程内运行，它将阻塞 UI，直到作业完成。在这种情况下，最好让作业在自己的线程中运行。</li>
 </ul>
-
-<p>现在假设上面提到的工作实际上是同一个工作。为了让您的选项保持开放，*您应该始终实现您的作业以在调用线程内运行*，然后*让调用者担心使用哪个线程*。</p>
-
+<p>现在假设上面提到的工作实际上是同一个工作。为了让您的选项保持开放，<em>您应该始终实现您的作业以在调用线程内运行</em>，然后<em>让调用者担心使用哪个线程</em>。</p>
 <h4 id="例子-4">例子</h4>
-
 <p>向上滚动到演示触发作业的不同方式的示例。请注意，应用程序服务使用<code>@Async</code>注释，而域事件处理程序和工作人员不使用。为什么？让我们来看看每个案例：</p>
-
 <ul>
 <li>应用程序服务通过 UI 调用，并由管理员用于手动触发批处理作业。这项工作可能需要一些时间才能完成，我们不希望这会阻塞 UI。因此，我们在后台线程中异步运行它。</li>
 <li>域事件处理程序在事件到达时被调用，这是一种边缘情况：当您有少量快速返回的事件处理程序时，您可以在调用线程中运行它们。但是，如果您有大量的处理程序或其中一些需要时间来完成，您可能希望在后台线程中运行它们。</li>
 <li>worker 已经被后台线程调用了，所以我们可以继续使用它。</li>
 </ul>
-
 <h3 id="在查询中使用上限">在查询中使用上限</h3>
-
 <p>您的作业将执行不同的查询以确定系统的状态。需要处理的数据量取决于许多因素，例如系统的使用量或上次运行作业的时间。</p>
-
 <p>正因为如此，无论何时编写查询，都应遵循良好的经验法则：<em>任何查询都将不返回任何记录、仅返回一条记录或大量记录</em></p>
-
 <p>除非您确定查询属于前两个类别，否则应始终为查询添加上限。您可以实现作业以批量运行，直到没有更多数据要处理，或者只处理前 N 条记录，然后等待下一次运行。</p>
-
 <h3 id="明智地安排工作">明智地安排工作</h3>
-
 <p>安排工作时，您通常有以下选择：</p>
-
 <ul>
-<li>*固定速率*：作业以固定速率启动，例如每 60 分钟一次。</li>
-<li>*固定延迟*：作业在上一次执行完成后以固定延迟启动。</li>
-<li>*Cron*：作业在一天中的特定时间或一周中的某一天开始，例如每小时过去五分钟，或周日凌晨 2 点。</li>
+<li><em>固定速率</em>：作业以固定速率启动，例如每 60 分钟一次。</li>
+<li><em>固定延迟</em>：作业在上一次执行完成后以固定延迟启动。</li>
+<li><em>Cron</em>：作业在一天中的特定时间或一周中的某一天开始，例如每小时过去五分钟，或周日凌晨 2 点。</li>
 </ul>
-
 <p>为您的工作选择正确的时间表可能需要一些试验和错误。如果您运行得太频繁，您最终可能会在旧作业完成之前开始新作业，从而减慢整个系统的速度并导致系统其他部分的事务死锁。如果你跑得太少，用户就会不高兴。您可能必须尝试不同的时间表才能找到最佳平衡点。</p>
-
 <p>最后记得把你所有的工作作为一个整体来看待：处理相同数据的不同工作之间是否存在冲突的风险？不同的重量级作业是否同时运行？有些工作需要在其他工作之前运行吗？</p>
-
 <h2 id="架构考虑">架构考虑</h2>
-
 <p>现在，当我们熟悉了一般概念后，我们需要看看它如何适应系统架构（假设为<a href="https://dev.to/peholmst/domain-driven-design-and-the-hexagonal-architecture-2o87">六边形</a>）。</p>
-
 <p>我们已经知道应用程序服务和领域事件处理程序，但是工人和工作会去哪里呢？让我们从工人开始，因为它是最简单的。</p>
-
-<p>工作器是一个组件，它触发操作以响应计时器生成的事件。如果需要，它可以控制自己的事务和线程。这将它与域事件处理程序一起放入*编排*器类别，因此它属于应用程序层。</p>
-
+<p>工作器是一个组件，它触发操作以响应计时器生成的事件。如果需要，它可以控制自己的事务和线程。这将它与域事件处理程序一起放入<em>编排</em>器类别，因此它属于应用程序层。</p>
 <p>但是工作本身呢？答案是：视情况而定。继续阅读。</p>
-
 <h3 id="单一有界上下文">单一有界上下文</h3>
-
-<p>当作业是关于在同一个有界上下文中传播更改时，该作业最有可能实现为*域服务*。域事件处理程序、工作者和应用程序服务位于应用程序层，并根据需要调用域服务（并且还控制事务）。</p>
-
+<p>当作业是关于在同一个有界上下文中传播更改时，该作业最有可能实现为<em>域服务</em>。域事件处理程序、工作者和应用程序服务位于应用程序层，并根据需要调用域服务（并且还控制事务）。</p>
 <h3 id="多个有界上下文">多个有界上下文</h3>
-
 <p>当工作是关于将更改从一个有界上下文传播到另一个时，我们正在谈论<a href="https://dev.to/peholmst/strategic-domain-driven-design-3e87">上下文映射</a>。作业的实现和位置取决于您最终选择的集成模式。让我们看三个例子（有更多的解决方案，但我们必须在某处划清界限）。</p>
-
 <h4 id="客户供应商和墨守成规者">客户供应商和墨守成规者</h4>
-
-<p>在这种情况下，两个上下文之间存在单向关系，其中*下游*上下文希望*上游*上下文执行某些操作（推）或返回某些内容（拉）。这通常会导致以下架构：</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--uqiS-QD0--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/fg1zaopsd42ahv8hwuch.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202204231526659.png" alt="图片" /></a></p>
-
+<p>在这种情况下，两个上下文之间存在单向关系，其中<em>下游</em>上下文希望<em>上游</em>上下文执行某些操作（推）或返回某些内容（拉）。这通常会导致以下架构：</p>
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--uqiS-QD0--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/fg1zaopsd42ahv8hwuch.png">
+        <img class="mx-auto" alt="图片" src="https://cdn.jsdelivr.net/gh/zshipu/images/202204231526659.png" />   
+    </a></p>
 <ul>
 <li>上游上下文提供了一个适配器，下游上下文可以使用该适配器来访问系统。
-
 <ul>
 <li>在客户-供应商关系中，需要上游团队根据下游团队的需求来设计这个适配器。</li>
 <li>在顺从关系中，下游团队将使用上游团队选择放入适配器的任何内容，而没有任何发言权。</li>
-</ul></li>
+</ul>
+</li>
 <li>作业本身是一个应用程序服务委托。这意味着它存在于应用层，但它不是一个纯粹的应用服务，因为它根本不执行任何安全检查。</li>
 <li>如果上下文在同一个单体应用程序中运行，则作业可以由来自两个上下文的域事件触发。</li>
 <li>如果上下文在单独的应用程序中运行，则作业只能由来自下游上下文的域事件触发，因为我们无法分发事件。再说一次，这也是我们改用预定作业的原因之一。</li>
 </ul>
-
 <h4 id="反腐败层">反腐败层</h4>
-
 <p>在这种情况下，上下文之间再次存在单向关系，但在这种情况下，下游团队决定将应用程序与上游上下文完全屏蔽：</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--mLk_MEu2--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/s10kxp68leh5541yrxf8.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202204231526660.png" alt="图片" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--mLk_MEu2--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/s10kxp68leh5541yrxf8.png">
+        <img class="mx-auto" alt="图片" src="https://cdn.jsdelivr.net/gh/zshipu/images/202204231526660.png" />   
+    </a></p>
 <ul>
 <li>下游上下文提供了一个适配器（反腐败层），它使上游上下文适应下游团队已声明的 API。</li>
 <li>该作业仍然是应用程序服务委托，但它通过 API 与上游上下文对话。</li>
 <li>如果反腐败层支持将事件从上游上下文传播到下游上下文，则作业可以由来自两个上下文的事件触发。否则，它仅限于来自下游上下文的事件。</li>
 </ul>
-
 <h4 id="中间件">中间件</h4>
-
 <p>如果您无法控制任何涉及的上下文，或者即使上下文本身不知道彼此的存在，关系是双向的，中间件解决方案可能会派上用场：</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--n7tbvMi6--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/qcilcspfh36wov986nuy.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202204231526661.png" alt="图片" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--n7tbvMi6--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/qcilcspfh36wov986nuy.png">
+        <img class="mx-auto" alt="图片" src="https://cdn.jsdelivr.net/gh/zshipu/images/202204231526661.png" />   
+    </a></p>
 <ul>
-<li>作业、工作人员、任何域事件处理程序和其他组件都从有界上下文中移出并进入单独的*中间件*组件。</li>
+<li>作业、工作人员、任何域事件处理程序和其他组件都从有界上下文中移出并进入单独的<em>中间件</em>组件。</li>
 <li>中间件负责在上下文之间来回移动数据，而上下文甚至不知道它。</li>
 <li>这适用于单体和分布式系统。</li>
 </ul>
-
 <h2 id="优点和缺点">优点和缺点</h2>
-
 <p>现在是时候总结一下使用计划作业实现最终一致性的利弊了。</p>
-
 <p>这种方法的主要优点如下：</p>
-
 <ul>
 <li><code>@TransactionalEventListener</code>到目前为止，它可以与我们在此博客文章系列中介绍的所有其他基于 Spring 的构建块和工具一起工作。</li>
 <li>您不需要引入任何新的移动部件（如消息代理）或编写任何基础架构代码来持久化和分发域事件。</li>
 <li>它很容易实现，并且可以根据用例调整其复杂性。</li>
 <li>如果做得好，它会导致系统具有弹性和健壮性。</li>
 </ul>
-
 <p>但是，它也有几个缺点：</p>
-
 <ul>
 <li>您的系统实际上不是事件驱动的。有些事件用于提前触发作业，但作业本身是数据驱动的。</li>
 <li>额外的状态可能必须存储在聚合中以指导作业（例如，为了实现幂等性）。</li>
@@ -680,6 +574,10 @@ public class InvoiceCreationJob {
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-MySQL-%E6%9E%84%E5%BB%BA-Node.js-REST-API/" title="如何使用 MySQL 构建 Node.js REST API">如何使用 MySQL 构建 Node.js REST API</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/%E6%97%A0%E9%9C%80%E7%A6%BB%E5%BC%80-IDE-%E5%8D%B3%E5%8F%AF%E9%83%A8%E7%BD%B2%E6%82%A8%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E7%BD%91%E7%AB%99/" title="无需离开 IDE 即可部署您的第一个网站">无需离开 IDE 即可部署您的第一个网站</a>
     </li>
     
@@ -713,10 +611,6 @@ public class InvoiceCreationJob {
     
     <li>
         <a href="https://geek.zshipu.com/post/flutter/%E4%B8%BA%E4%BB%80%E4%B9%88-Flutter-%E4%BD%BF%E7%94%A8-Dart/" title="为什么 Flutter 使用 Dart">为什么 Flutter 使用 Dart</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/react/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E5%AF%BC%E8%88%AA%E7%AC%AC-1-%E9%83%A8%E5%88%86%E5%B8%A6%E6%8F%92%E5%9B%BE%EF%B8%8F/" title="浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥">浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥</a>
     </li>
     
 </ul>
@@ -784,17 +678,17 @@ public class InvoiceCreationJob {
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
-    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
     <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
     
-    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
     
-    <a href="">Nextjs</a>
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
@@ -814,13 +708,15 @@ public class InvoiceCreationJob {
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
     
-    <a href="">java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
-    <a href="">js</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
     
     <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
+    
+    <a href="https://geek.zshipu.com/tags/nodejs/">nodejs</a>
     
     <a href="https://geek.zshipu.com/tags/npm/">npm</a>
     

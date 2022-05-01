@@ -146,16 +146,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-<ul>
-<li><a href="#属性转换器不会做">属性转换器不会做</a></li>
-<li><a href="#创建自定义休眠类型">创建自定义休眠类型</a></li>
-<li><a href="#生成值对象-id">生成值对象 ID</a>
-<ul>
-<li><a href="#重构你的基类">重构你的基类</a></li>
-<li><a href="#实现-id-生成器">实现 ID 生成器</a></li>
-</ul></li>
-<li><a href="#关于复合键的说明">关于复合键的说明</a></li>
-</ul>
+  <ul>
+    <li><a href="#重构你的基类">重构你的基类</a></li>
+    <li><a href="#实现-id-生成器">实现 ID 生成器</a></li>
+  </ul>
 </nav>
     </div>
 </div>
@@ -202,28 +196,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            
-
-<p>如果您使用的是除 Hibernate 之外的其他 JPA 实现，则必须查看该实现的文档以了解如何创建自定义类型。</p>
-
+            <p>如果您使用的是除 Hibernate 之外的其他 JPA 实现，则必须查看该实现的文档以了解如何创建自定义类型。</p>
 <h1 id="属性转换器不会做">属性转换器不会做</h1>
-
 <p>第一个想法可能是使用简单的值对象和属性转换器。不幸的是，这是不可能的，因为 JPA 不支持对<code>@Id</code>字段使用属性转换器。您可以做出妥协并为您的<code>@Id</code>字段和简单的值对象使用“原始”ID 以从其他聚合中引用它们，但我个人不喜欢这种方法，因为您必须在值对象及其包装的原始对象之间来回移动ID，使编写查询更加困难。更好、更一致的方法是创建自定义 Hibernate 类型。</p>
-
 <h1 id="创建自定义休眠类型">创建自定义休眠类型</h1>
-
 <p>当您为您的 ID 值对象创建自定义 Hibernate 类型时，它们可以在您的整个持久性上下文中使用，而无需任何额外的注释。这涉及以下步骤：</p>
-
 <ol>
 <li>决定要在值对象中使用哪种原始 ID 类型：<code>UUID</code>、<code>String</code>或<code>Long</code></li>
 <li>为您的值对象创建类型描述符。该描述符知道如何将另一个值转换为值对象的实例（包装），反之亦然（展开）。</li>
 <li>创建一个自定义类型，将您的类型描述符与您想要用于您的 ID 的 JDBC 列类型联系在一起。</li>
 <li>使用 Hibernate 注册您的自定义类型。</li>
 </ol>
-
 <p>让我们看一个代码示例来更好地说明这一点。我们将创建一个名为的值对象 ID <code>CustomerId</code>，它包含一个<code>UUID</code>. 值对象如下所示：</p>
-
-<pre><code>package foo.bar.domain.model;
+<pre tabindex="0"><code>package foo.bar.domain.model;
 
 // Imports omitted
 
@@ -241,16 +226,12 @@ public class CustomerId implements ValueObject, Serializable { // &lt;1&gt;
 
     // Implementation of equals() and hashCode() omitted.
 }
-</code></pre>
-
-<ol>
+</code></pre><ol>
 <li>您必须实现<code>Serializable</code>接口，因为<code>Persistable</code>假定 ID 类型是可持久的。我有时会创建一个新的标记接口<code>DomainObjectId</code>，称为扩展<code>ValueObject</code>和<code>Serializable</code>。</li>
 <li><code>UUID</code>当您实现类型描述符时，您需要一种获取底层的方法。</li>
 </ol>
-
 <p>接下来，我们将创建类型描述符。我通常将它放在一个子包<code>.hibernate</code>中，以保持域模型本身的美观和整洁。</p>
-
-<pre><code>package foo.bar.domain.model.hibernate;
+<pre tabindex="0"><code>package foo.bar.domain.model.hibernate;
 
 // Imports omitted
 
@@ -313,9 +294,7 @@ public class CustomerIdTypeDescriptor extends AbstractTypeDescriptor&lt;Customer
 
     public static final CustomerIdTypeDescriptor INSTANCE = new CustomerIdTypeDescriptor(); // &lt;6&gt;
 }
-</code></pre>
-
-<ol>
+</code></pre><ol>
 <li><code>AbstractTypeDescriptor</code>是驻留在<code>org.hibernate.type.descriptor.java</code>包中的 Hibernate 基类。</li>
 <li>此方法将我们的值对象转换为字符串。我们使用 Hibernate 内置<code>UUIDTypeDescriptor</code>（也来自<code>org.hibernate.type.descriptor.java</code>包）的帮助类来执行转换。</li>
 <li>此方法从字符串构造值对象。同样，我们使用来自<code>UUIDTypeDescriptor</code>.</li>
@@ -323,10 +302,8 @@ public class CustomerIdTypeDescriptor extends AbstractTypeDescriptor&lt;Customer
 <li>此方法将一个<code>UUID</code>、一个字符串或一个字节数组转换为一个值对象。这里也使用了辅助类。</li>
 <li>我们可以将此类型描述符作为单例访问，因为它不包含任何可变状态。</li>
 </ol>
-
 <p>到目前为止，我们只处理了 Java 类型。现在是时候将 SQL 和 JDBC 结合起来并创建我们的自定义类型了：</p>
-
-<pre><code>package foo.bar.domain.model.hibernate;
+<pre tabindex="0"><code>package foo.bar.domain.model.hibernate;
 
 // Imports omitted
 
@@ -352,9 +329,7 @@ public class CustomerIdType extends AbstractSingleColumnStandardBasicType&lt;Cus
         return getJavaTypeDescriptor().getJavaType().getSimpleName(); // &lt;6&gt;
     }
 }
-</code></pre>
-
-<ol>
+</code></pre><ol>
 <li><code>AbstractSingleColumnStandardBasicType</code>是驻留在<code>org.hibernate.type</code>包中的 Hibernate 基类。</li>
 <li>为了使自定义类型在<code>@Id</code>字段中正常工作，我们必须从<code>org.hibernate.id</code>包中实现这个额外的接口。</li>
 <li>这里我们传入 SQL 类型描述符（在本例中为二进制，因为我们将 UUID 存储在 16 字节二进制列中）和我们的 Java 类型描述符。</li>
@@ -362,38 +337,25 @@ public class CustomerIdType extends AbstractSingleColumnStandardBasicType&lt;Cus
 <li>&hellip;并<code>CustomerId</code>使用我们的 Java 类型描述符将其转换为 a。</li>
 <li>自定义类型需要一个名称，因此我们使用 Java 类型的名称。</li>
 </ol>
-
 <p>最后，我们只需要在 Hibernate 中注册我们的新类型。我们将在与我们的类<code>package-info.java</code>位于同一包中的文件中执行此操作：<code>CustomerId</code></p>
-
-<pre><code>@TypeDef(defaultForType = CustomerId.class, typeClass = CustomerIdType.class) // &lt;1&gt;
+<pre tabindex="0"><code>@TypeDef(defaultForType = CustomerId.class, typeClass = CustomerIdType.class) // &lt;1&gt;
 package foo.bar.domain.model;
 
 import org.hibernate.annotations.TypeDef; // &lt;2&gt;
 import foo.bar.domain.model.hibernate.CustomerIdType;
-</code></pre>
-
-<ol>
+</code></pre><ol>
 <li>这个 Hibernate 注释告诉 Hibernate<code>CustomerIdType</code>在遇到<code>CustomerId</code>.</li>
 <li>请注意，导入是在文件中的注释之后进行的，<code>package-info.java</code>而不是在类文件中之前。</li>
 </ol>
-
 <p>呸！现在我们可以使用<code>CustomerId</code>两者来识别<code>Customer</code>聚合并从其他聚合中引用它们。但是请记住，如果您让 Hibernate 为您生成 SQL 模式并且您使用 ID 来引用聚合而不是<code>@ManyToOne</code>关联，那么 Hibernate 将不会创建外键约束。您必须自己执行此操作，例如使用<a href="https://flywaydb.org/">Flyway</a>。</p>
-
 <p>如果您有许多不同的 ID 值对象类型，您将需要为您的类型描述符和自定义类型创建抽象基类，以避免重复自己。我将把这个作为练习留给读者。</p>
-
 <p>但是等等，我们是不是忘记了什么？<code>CustomerID</code>当我们持久化新创建的<code>Customer</code>聚合根时，我们实际上将如何生成新实例？让我们来了解一下。</p>
-
 <h1 id="生成值对象-id">生成值对象 ID</h1>
-
 <p>准备好 ID 值对象和自定义类型后，您需要一种生成新 ID 的方法。您可以在持久化实体之前创建您的 ID 并手动分配它们（如果您使用 UUID，这真的很容易），或者您可以将 Hibernate 配置为在需要时自动为您生成 ID。后一种方法设置起来更困难，但一旦完成就更容易使用，所以让我们来看看。</p>
-
 <h2 id="重构你的基类">重构你的基类</h2>
-
 <p>JPA 支持不同的 ID 生成器。如果查看<code>@GeneratedValue</code>注释，则可以指定<code>generator</code>要使用的名称。在这里，我们遇到了第一个警告。如果您在映射的超类（例如<code>AbstractPersistable</code>）中声明您的 ID 字段，则您无法覆盖该<code>@GeneratedValue</code>字段的注释。换句话说，对于扩展此基类的所有聚合根和实体，您都无法使用相同的 ID 生成器。如果您发现自己处于这种情况，您必须从基类中删除您的 ID 字段，并让每个聚合根和实体声明其自己的 ID 字段。</p>
-
 <p>因此，<code>BaseEntity</code>类（我们最初<a href="https://dev.to/peholmst/building-aggregates-with-spring-data-2iig">在这里</a>定义了这个类）变成了这样的：</p>
-
-<pre><code>@MappedSuperclass
+<pre tabindex="0"><code>@MappedSuperclass
 public abstract class BaseEntity&lt;Id extends Serializable&gt; implements Persistable&lt;Id&gt; { // &lt;1&gt;
 
     @Version
@@ -445,9 +407,7 @@ public abstract class BaseEntity&lt;Id extends Serializable&gt; implements Persi
         return id == null ? super.hashCode() : id.hashCode();
     }
 }
-</code></pre>
-
-<ol>
+</code></pre><ol>
 <li>我们不再扩展<code>AbstractPersistable</code>，但我们确实实现了<code>Persistable</code>接口。</li>
 <li>此方法来自<code>Persistable</code>接口，必须由子类实现。</li>
 <li>这个方法也来自<code>Persistable</code>接口。</li>
@@ -456,10 +416,8 @@ public abstract class BaseEntity&lt;Id extends Serializable&gt; implements Persi
 <li><code>ProxyUtils</code>是一个 Spring 实用程序类，对于 JPA 实现对实体类进行字节码更改的情况很有用，导致<code>getClass()</code>不一定返回您认为它可能返回的内容。</li>
 <li>既然我们已经覆盖<code>equals</code>了，我们也必须以<code>hashCode</code>同样的方式覆盖。</li>
 </ol>
-
 <p>现在，当我们对 进行必要的更改后<code>BaseEntity</code>，我们可以将 ID 字段添加到聚合根：</p>
-
-<pre><code>@Entity
+<pre tabindex="0"><code>@Entity
 public class Customer extends BaseAggregateRoot&lt;CustomerId&gt; { // &lt;1&gt;
 
     public static final String ID_GENERATOR_NAME = &quot;customer-id-generator&quot;; // &lt;2&gt;
@@ -473,20 +431,15 @@ public class Customer extends BaseAggregateRoot&lt;CustomerId&gt; { // &lt;1&gt;
         return id;
     }
 }
-</code></pre>
-
-<ol>
+</code></pre><ol>
 <li>我们 extend <code>BaseAggregateRoot</code>，这反过来又扩展了我们重构的<code>BaseEntity</code>类。</li>
 <li>我们在常量中声明 ID 生成器的名称。当我们向 Hibernate 注册我们的自定义生成器时，我们将使用它。</li>
 <li>现在我们不再拘泥于映射超类中使用的任何注释。</li>
 <li>我们从 中实现抽象<code>getId()</code>方法<code>Persistable</code>。</li>
 </ol>
-
 <h2 id="实现-id-生成器">实现 ID 生成器</h2>
-
 <p>接下来，我们必须实现我们的自定义 ID 生成器。由于我们使用的是 UUID，这几乎是微不足道的。对于其他 ID 生成策略，我建议您选择现有的 Hibernate 生成器并在此基础上进行构建（开始查看<a href="https://github.com/hibernate/hibernate-orm/tree/main/hibernate-core/src/main/java/org/hibernate/id">此处</a>）。ID 生成器将如下所示：</p>
-
-<pre><code>package foo.bar.domain.model.hibernate;
+<pre tabindex="0"><code>package foo.bar.domain.model.hibernate;
 
 public class CustomerIdGenerator implements IdentifierGenerator { // &lt;1&gt;
 
@@ -497,17 +450,13 @@ public class CustomerIdGenerator implements IdentifierGenerator { // &lt;1&gt;
         return new CustomerId(UUID.randomUUID()); // &lt;3&gt;
     }
 }
-</code></pre>
-
-<ol>
+</code></pre><ol>
 <li><code>IdentifierGenerator</code>是驻留在<code>org.hibernate.id</code>包中的接口。</li>
 <li>由于新生成器是如何在 Hibernate 中注册的，我们需要类的全名作为字符串。我们将它存储在一个常量中，以使未来的重构更容易 - 并最大限度地减少由拼写错误引起的错误风险。</li>
 <li>在此示例中，我们使用<code>UUID.randomUUID()</code>创建新的 UUID。请注意，如果您需要执行更高级的操作，例如从数据库序列中检索数值，您可以访问 Hibernate 会话。</li>
 </ol>
-
 <p>最后，我们必须向 Hibernate 注册我们的新 ID 生成器。与自定义类型一样，这发生在 中<code>package-info.java</code>，变为：</p>
-
-<pre><code>@TypeDef(defaultForType = CustomerId.class, typeClass = CustomerIdType.class)
+<pre tabindex="0"><code>@TypeDef(defaultForType = CustomerId.class, typeClass = CustomerIdType.class)
 @GenericGenerator(name = Customer.ID_GENERATOR_NAME, strategy = CustomerIdGenerator.STRATEGY) // &lt;1&gt;
 package foo.bar.domain.model;
 
@@ -515,17 +464,12 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.TypeDef;
 import foo.bar.domain.model.hibernate.CustomerIdType;
 import foo.bar.domain.model.hibernate.CustomerIdGenerator;
-</code></pre>
-
-<ol>
+</code></pre><ol>
 <li>这个注解告诉 Hibernate<code>CustomerIdGenerator</code>在遇到名为<code>customer-id-generator</code>.</li>
 </ol>
-
 <p>双呸！现在，我们的域模型应该可以按照我们的预期工作，使用自动生成的值对象作为 ID。</p>
-
 <h1 id="关于复合键的说明">关于复合键的说明</h1>
-
-<p>在我们离开 ID 的主题之前，我只想提一件事。通过将 ID 字段从映射的超<code>BaseEntity</code>类（例如，您可能遇到组合键由另一个聚合根的 ID 和枚举常量组成的情况。<code>Customer</code><code>@EmbeddedId</code><code>@IdClass</code></p>
+<p>在我们离开 ID 的主题之前，我只想提一件事。通过将 ID 字段从映射的超<code>BaseEntity</code>类（例如，您可能遇到组合键由另一个聚合根的 ID 和枚举常量组成的情况。<code>Customer``@EmbeddedId``@IdClass</code></p>
 
         </div>
 
@@ -649,6 +593,10 @@ import foo.bar.domain.model.hibernate.CustomerIdGenerator;
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-MySQL-%E6%9E%84%E5%BB%BA-Node.js-REST-API/" title="如何使用 MySQL 构建 Node.js REST API">如何使用 MySQL 构建 Node.js REST API</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/%E6%97%A0%E9%9C%80%E7%A6%BB%E5%BC%80-IDE-%E5%8D%B3%E5%8F%AF%E9%83%A8%E7%BD%B2%E6%82%A8%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E7%BD%91%E7%AB%99/" title="无需离开 IDE 即可部署您的第一个网站">无需离开 IDE 即可部署您的第一个网站</a>
     </li>
     
@@ -682,10 +630,6 @@ import foo.bar.domain.model.hibernate.CustomerIdGenerator;
     
     <li>
         <a href="https://geek.zshipu.com/post/flutter/%E4%B8%BA%E4%BB%80%E4%B9%88-Flutter-%E4%BD%BF%E7%94%A8-Dart/" title="为什么 Flutter 使用 Dart">为什么 Flutter 使用 Dart</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/react/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E5%AF%BC%E8%88%AA%E7%AC%AC-1-%E9%83%A8%E5%88%86%E5%B8%A6%E6%8F%92%E5%9B%BE%EF%B8%8F/" title="浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥">浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥</a>
     </li>
     
 </ul>
@@ -753,17 +697,17 @@ import foo.bar.domain.model.hibernate.CustomerIdGenerator;
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
-    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
     <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
     
-    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
     
-    <a href="">Nextjs</a>
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
@@ -783,13 +727,15 @@ import foo.bar.domain.model.hibernate.CustomerIdGenerator;
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
     
-    <a href="">java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
-    <a href="">js</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
     
     <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
+    
+    <a href="https://geek.zshipu.com/tags/nodejs/">nodejs</a>
     
     <a href="https://geek.zshipu.com/tags/npm/">npm</a>
     

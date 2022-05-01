@@ -141,7 +141,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="post-toc" style="position: absolute; top: 188px;">
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
-        
+        <nav id="TableOfContents"></nav>
     </div>
 </div>
 <script type="text/javascript">
@@ -189,47 +189,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="post-content">
             <blockquote>
 <p>本文由 <a href="http://ksria.com/simpread/">简悦 SimpRead</a> 转码， 原文地址 <a href="https://www.cnblogs.com/lihan829/p/14850175.html">www.cnblogs.com</a></p>
-
+</blockquote>
+<blockquote>
 <p>来源：利用nginx设置浏览器协商缓存 - debugger.wiki - debugger.wiki 用途：备忘 强缓存与协商缓存的区别 强缓存：浏览器不与服务端协商直接取浏览器缓存 协商缓存：浏览</p>
 </blockquote>
-
 <p><strong>来源：<a href="https://www.debugger.wiki/article/html/1561103192707398">利用 nginx 设置浏览器协商缓存 - debugger.wiki - debugger.wiki</a></strong></p>
-
 <p><strong>用途：备忘</strong></p>
-
 <p><strong>强缓存与协商缓存的区别</strong></p>
-
 <p>　　强缓存：浏览器不与服务端协商直接取浏览器缓存</p>
-
 <p>　　协商缓存：浏览器会先向服务器确认资源的有效性后才决定是从缓存中取资源还是重新获取资源</p>
-
 <p><strong>协商缓存运作原理</strong></p>
-
 <p>　　现在有一个这样的业务情景：后端的静态资源会不定时地发生更新，而因为浏览器默认使用强缓存，会默认从浏览器缓存中取到过时的资源。</p>
-
 <p>　　现在我们希望浏览器每次获取资源的时候都向后端确认资源是否更新，就要设置浏览器使用协商缓存</p>
-
 <p>　　那么后端如何判断资源是否更新了呢？这时就要用到 Etag 和 Last-Modified 两项响应头。</p>
-
 <p>　　每次收到一个静态资源的请求时，后端都将资源的最后修改时间（Last-Modified）、根据资源内容计算出来的 Etag 放在响应头给前端。</p>
-
 <p>　　前端收到响应后将这两项缓存起来，然后在下次请求同样资源的时候，将这两项的内容放到 If-Modified-Since 和 If-None-Match 这两项请求头中。</p>
-
 <p>　　服务端收到这两项后，会与资源当前生成的 Etag 和 Last-Modified 做比较，如果两者都一致，说明资源没有更新，服务端会返回 304 空响应；否则，说明资源有更新，服务端会将完整的资源内容返回</p>
-
 <p><strong>实现</strong></p>
-
 <p>　　那么如何实现这样一个复杂的过程呢？其实很简单，只要使用 nginx 作为静态资源的服务器，再在响应头加上 Cache-Control:no-cache 就可以了。</p>
-
 <p>　　下面来分步骤实现一下</p>
-
 <p>　　1.  使用 nginx 作为静态资源的服务器</p>
-
 <p>　　　　在 nginx 的配置中，将对静态资源的请求映射到资源的磁盘路径上</p>
-
-<p><a href="javascript:void(0);" title="复制代码"><img src="http://common.cnblogs.com/images/copycode.gif" alt="" /></a></p>
-
-<pre><code> 1 http {
+<p><a href="" title="复制代码">
+        <img class="mx-auto" alt="" src="http://common.cnblogs.com/images/copycode.gif" />   
+    </a></p>
+<pre tabindex="0"><code> 1 http {
  2     server {
  3     listen 80;
  4     ...
@@ -245,49 +229,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 14     }
 15 }    
 
-</code></pre>
-
-<p><a href="javascript:void(0);" title="复制代码"><img src="http://common.cnblogs.com/images/copycode.gif" alt="" /></a></p>
-
+</code></pre><p><a href="" title="复制代码">
+        <img class="mx-auto" alt="" src="http://common.cnblogs.com/images/copycode.gif" />   
+    </a></p>
 <p>　　2.  重新加载 nginx 配置</p>
+<pre tabindex="0"><code>nginx -s reload
 
-<pre><code>nginx -s reload
-
-</code></pre>
-
-<p>　　3.  此时，请求静态资源的时候 nginx 会自动在 response 头中加上 Etag 和 Last-Modified 两项</p>
-
-<p> 　　<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAACbklEQVRoQ+2aMU4dMRCGZw6RC1CSSyQdLZJtKQ2REgoiRIpQkCYClCYpkgIESQFIpIlkW+IIcIC0gUNwiEFGz+hlmbG9b1nesvGW++zxfP7H4/H6IYzkwZFwQAUZmpJVkSeniFJKA8ASIi7MyfkrRPxjrT1JjZ8MLaXUDiJuzwngn2GJaNd7vyP5IoIYY94Q0fEQIKIPRGS8947zSQTRWh8CwLuBgZx479+2BTkHgBdDAgGAC+fcywoyIFWqInWN9BSONbTmFVp/AeA5o+rjKRJ2XwBYRsRXM4ZXgAg2LAPzOCDTJYQx5pSIVlrC3EI45y611osMTHuQUPUiYpiVooerg7TWRwDAlhSM0TuI+BsD0x4kGCuFSRVzSqkfiLiWmY17EALMbCAlMCmI6IwxZo+INgQYEYKBuW5da00PKikjhNNiiPGm01rrbwDwofGehQjjNcv1SZgddALhlJEgwgJFxDNr7acmjFLqCyJuTd6LEGFttpmkYC91Hrk3s1GZFERMmUT01Xv/sQljjPlMRMsxO6WULwnb2D8FEs4j680wScjO5f3vzrlNJszESWq2LYXJgTzjZm56MCHf3zVBxH1r7ftU1splxxKYHEgoUUpTo+grEf303rPH5hxENJqDKQEJtko2q9zGeeycWy3JhpKhWT8+NM/sufIhBwKI+Mta+7pkfxKMtd8Qtdbcx4dUQZcFCQ2I6DcAnLUpf6YMPxhIDDOuxC4C6djoQUE6+tKpewWZ1wlRkq0qUhXptKTlzv93aI3jWmE0Fz2TeujpX73F9TaKy9CeMk8vZusfBnqZ1g5GqyIdJq+XrqNR5AahKr9CCcxGSwAAAABJRU5ErkJggg==" alt="" /></p>
-
+</code></pre><p>　　3.  此时，请求静态资源的时候 nginx 会自动在 response 头中加上 Etag 和 Last-Modified 两项</p>
+<p> 　　
+        <img class="mx-auto" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAACbklEQVRoQ&#43;2aMU4dMRCGZw6RC1CSSyQdLZJtKQ2REgoiRIpQkCYClCYpkgIESQFIpIlkW&#43;IIcIC0gUNwiEFGz&#43;hlmbG9b1nesvGW&#43;&#43;zxfP7H4/H6IYzkwZFwQAUZmpJVkSeniFJKA8ASIi7MyfkrRPxjrT1JjZ8MLaXUDiJuzwngn2GJaNd7vyP5IoIYY94Q0fEQIKIPRGS8947zSQTRWh8CwLuBgZx479&#43;2BTkHgBdDAgGAC&#43;fcywoyIFWqInWN9BSONbTmFVp/AeA5o&#43;rjKRJ2XwBYRsRXM4ZXgAg2LAPzOCDTJYQx5pSIVlrC3EI45y611osMTHuQUPUiYpiVooerg7TWRwDAlhSM0TuI&#43;BsD0x4kGCuFSRVzSqkfiLiWmY17EALMbCAlMCmI6IwxZo&#43;INgQYEYKBuW5da00PKikjhNNiiPGm01rrbwDwofGehQjjNcv1SZgddALhlJEgwgJFxDNr7acmjFLqCyJuTd6LEGFttpmkYC91Hrk3s1GZFERMmUT01Xv/sQljjPlMRMsxO6WULwnb2D8FEs4j680wScjO5f3vzrlNJszESWq2LYXJgTzjZm56MCHf3zVBxH1r7ftU1splxxKYHEgoUUpTo&#43;grEf303rPH5hxENJqDKQEJtko2q9zGeeycWy3JhpKhWT8&#43;NM/sufIhBwKI&#43;Mta&#43;7pkfxKMtd8Qtdbcx4dUQZcFCQ2I6DcAnLUpf6YMPxhIDDOuxC4C6djoQUE6&#43;tKpewWZ1wlRkq0qUhXptKTlzv93aI3jWmE0Fz2TeujpX73F9TaKy9CeMk8vZusfBnqZ1g5GqyIdJq&#43;XrqNR5AahKr9CCcxGSwAAAABJRU5ErkJggg==" />   
+    </p>
 <p>　　4.  但是这时发现，如果不配置 Cache-Contrl: no-cache，浏览器在下次请求这个资源的时候不会将请求发向后端，而是直接从缓存中获取资源</p>
-
 <p>　　5. 在 nginx 中配置</p>
-
-<pre><code>location /picture/ { 
+<pre tabindex="0"><code>location /picture/ { 
     add_header Cache-Control no-cache;
     alias D:/luozixi/tcp_test/picture/; 
 }  
 
-</code></pre>
-
-<p>　　6. 清除浏览器缓存后第一次发起请求，会得到一个正常的 200 Response，而且响应头里已经有了 Cache-Control: no-cache，表示使用协商缓存</p>
-
+</code></pre><p>　　6. 清除浏览器缓存后第一次发起请求，会得到一个正常的 200 Response，而且响应头里已经有了 Cache-Control: no-cache，表示使用协商缓存</p>
 <p>　　7.  再次发起请求后，会发现请求头已经带上了 If-Modified-Since 和 If-None-Match 两项</p>
-
-<p>　　<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAACbklEQVRoQ+2aMU4dMRCGZw6RC1CSSyQdLZJtKQ2REgoiRIpQkCYClCYpkgIESQFIpIlkW+IIcIC0gUNwiEFGz+hlmbG9b1nesvGW++zxfP7H4/H6IYzkwZFwQAUZmpJVkSeniFJKA8ASIi7MyfkrRPxjrT1JjZ8MLaXUDiJuzwngn2GJaNd7vyP5IoIYY94Q0fEQIKIPRGS8947zSQTRWh8CwLuBgZx479+2BTkHgBdDAgGAC+fcywoyIFWqInWN9BSONbTmFVp/AeA5o+rjKRJ2XwBYRsRXM4ZXgAg2LAPzOCDTJYQx5pSIVlrC3EI45y611osMTHuQUPUiYpiVooerg7TWRwDAlhSM0TuI+BsD0x4kGCuFSRVzSqkfiLiWmY17EALMbCAlMCmI6IwxZo+INgQYEYKBuW5da00PKikjhNNiiPGm01rrbwDwofGehQjjNcv1SZgddALhlJEgwgJFxDNr7acmjFLqCyJuTd6LEGFttpmkYC91Hrk3s1GZFERMmUT01Xv/sQljjPlMRMsxO6WULwnb2D8FEs4j680wScjO5f3vzrlNJszESWq2LYXJgTzjZm56MCHf3zVBxH1r7ftU1splxxKYHEgoUUpTo+grEf303rPH5hxENJqDKQEJtko2q9zGeeycWy3JhpKhWT8+NM/sufIhBwKI+Mta+7pkfxKMtd8Qtdbcx4dUQZcFCQ2I6DcAnLUpf6YMPxhIDDOuxC4C6djoQUE6+tKpewWZ1wlRkq0qUhXptKTlzv93aI3jWmE0Fz2TeujpX73F9TaKy9CeMk8vZusfBnqZ1g5GqyIdJq+XrqNR5AahKr9CCcxGSwAAAABJRU5ErkJggg==" alt="" /></p>
-
+<p>　　
+        <img class="mx-auto" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAACbklEQVRoQ&#43;2aMU4dMRCGZw6RC1CSSyQdLZJtKQ2REgoiRIpQkCYClCYpkgIESQFIpIlkW&#43;IIcIC0gUNwiEFGz&#43;hlmbG9b1nesvGW&#43;&#43;zxfP7H4/H6IYzkwZFwQAUZmpJVkSeniFJKA8ASIi7MyfkrRPxjrT1JjZ8MLaXUDiJuzwngn2GJaNd7vyP5IoIYY94Q0fEQIKIPRGS8947zSQTRWh8CwLuBgZx479&#43;2BTkHgBdDAgGAC&#43;fcywoyIFWqInWN9BSONbTmFVp/AeA5o&#43;rjKRJ2XwBYRsRXM4ZXgAg2LAPzOCDTJYQx5pSIVlrC3EI45y611osMTHuQUPUiYpiVooerg7TWRwDAlhSM0TuI&#43;BsD0x4kGCuFSRVzSqkfiLiWmY17EALMbCAlMCmI6IwxZo&#43;INgQYEYKBuW5da00PKikjhNNiiPGm01rrbwDwofGehQjjNcv1SZgddALhlJEgwgJFxDNr7acmjFLqCyJuTd6LEGFttpmkYC91Hrk3s1GZFERMmUT01Xv/sQljjPlMRMsxO6WULwnb2D8FEs4j680wScjO5f3vzrlNJszESWq2LYXJgTzjZm56MCHf3zVBxH1r7ftU1splxxKYHEgoUUpTo&#43;grEf303rPH5hxENJqDKQEJtko2q9zGeeycWy3JhpKhWT8&#43;NM/sufIhBwKI&#43;Mta&#43;7pkfxKMtd8Qtdbcx4dUQZcFCQ2I6DcAnLUpf6YMPxhIDDOuxC4C6djoQUE6&#43;tKpewWZ1wlRkq0qUhXptKTlzv93aI3jWmE0Fz2TeujpX73F9TaKy9CeMk8vZusfBnqZ1g5GqyIdJq&#43;XrqNR5AahKr9CCcxGSwAAAABJRU5ErkJggg==" />   
+    </p>
 <p>　　8.  服务端（nginx）收到这两项后，会与资源当前生成的 Etag 和 Last-Modified 做比较，如果两者都一致，说明资源没有更新，服务端会返回 304 空响应；否则，说明资源有更新，服务端会将完整的资源内容返回</p>
-
 <p>　　　　另外，服务器验证 If-Modified-Since 的方式只是简单的字符串比较，即使资源的 Last-Modified 比 If-Modified-Since 要早，服务端仍认为资源有更新</p>
-
 <p>　　9. 浏览器在收到 304 响应后，会从浏览器缓存中取资源。因此速度非常块</p>
-
-<p>　　<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAACbklEQVRoQ+2aMU4dMRCGZw6RC1CSSyQdLZJtKQ2REgoiRIpQkCYClCYpkgIESQFIpIlkW+IIcIC0gUNwiEFGz+hlmbG9b1nesvGW++zxfP7H4/H6IYzkwZFwQAUZmpJVkSeniFJKA8ASIi7MyfkrRPxjrT1JjZ8MLaXUDiJuzwngn2GJaNd7vyP5IoIYY94Q0fEQIKIPRGS8947zSQTRWh8CwLuBgZx479+2BTkHgBdDAgGAC+fcywoyIFWqInWN9BSONbTmFVp/AeA5o+rjKRJ2XwBYRsRXM4ZXgAg2LAPzOCDTJYQx5pSIVlrC3EI45y611osMTHuQUPUiYpiVooerg7TWRwDAlhSM0TuI+BsD0x4kGCuFSRVzSqkfiLiWmY17EALMbCAlMCmI6IwxZo+INgQYEYKBuW5da00PKikjhNNiiPGm01rrbwDwofGehQjjNcv1SZgddALhlJEgwgJFxDNr7acmjFLqCyJuTd6LEGFttpmkYC91Hrk3s1GZFERMmUT01Xv/sQljjPlMRMsxO6WULwnb2D8FEs4j680wScjO5f3vzrlNJszESWq2LYXJgTzjZm56MCHf3zVBxH1r7ftU1splxxKYHEgoUUpTo+grEf303rPH5hxENJqDKQEJtko2q9zGeeycWy3JhpKhWT8+NM/sufIhBwKI+Mta+7pkfxKMtd8Qtdbcx4dUQZcFCQ2I6DcAnLUpf6YMPxhIDDOuxC4C6djoQUE6+tKpewWZ1wlRkq0qUhXptKTlzv93aI3jWmE0Fz2TeujpX73F9TaKy9CeMk8vZusfBnqZ1g5GqyIdJq+XrqNR5AahKr9CCcxGSwAAAABJRU5ErkJggg==" alt="" /></p>
-
+<p>　　
+        <img class="mx-auto" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAACbklEQVRoQ&#43;2aMU4dMRCGZw6RC1CSSyQdLZJtKQ2REgoiRIpQkCYClCYpkgIESQFIpIlkW&#43;IIcIC0gUNwiEFGz&#43;hlmbG9b1nesvGW&#43;&#43;zxfP7H4/H6IYzkwZFwQAUZmpJVkSeniFJKA8ASIi7MyfkrRPxjrT1JjZ8MLaXUDiJuzwngn2GJaNd7vyP5IoIYY94Q0fEQIKIPRGS8947zSQTRWh8CwLuBgZx479&#43;2BTkHgBdDAgGAC&#43;fcywoyIFWqInWN9BSONbTmFVp/AeA5o&#43;rjKRJ2XwBYRsRXM4ZXgAg2LAPzOCDTJYQx5pSIVlrC3EI45y611osMTHuQUPUiYpiVooerg7TWRwDAlhSM0TuI&#43;BsD0x4kGCuFSRVzSqkfiLiWmY17EALMbCAlMCmI6IwxZo&#43;INgQYEYKBuW5da00PKikjhNNiiPGm01rrbwDwofGehQjjNcv1SZgddALhlJEgwgJFxDNr7acmjFLqCyJuTd6LEGFttpmkYC91Hrk3s1GZFERMmUT01Xv/sQljjPlMRMsxO6WULwnb2D8FEs4j680wScjO5f3vzrlNJszESWq2LYXJgTzjZm56MCHf3zVBxH1r7ftU1splxxKYHEgoUUpTo&#43;grEf303rPH5hxENJqDKQEJtko2q9zGeeycWy3JhpKhWT8&#43;NM/sufIhBwKI&#43;Mta&#43;7pkfxKMtd8Qtdbcx4dUQZcFCQ2I6DcAnLUpf6YMPxhIDDOuxC4C6djoQUE6&#43;tKpewWZ1wlRkq0qUhXptKTlzv93aI3jWmE0Fz2TeujpX73F9TaKy9CeMk8vZusfBnqZ1g5GqyIdJq&#43;XrqNR5AahKr9CCcxGSwAAAABJRU5ErkJggg==" />   
+    </p>
 <p><strong>no-cache 与 no-store 的区别</strong></p>
-
 <p>　　no-cache 表示不缓存过期资源，缓存会向服务器进行有效处理确认之后处理资源</p>
-
 <p>　　而 no-store 才是真正的不进行缓存。</p>
 
         </div>
@@ -311,6 +282,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2>See Also</h2>
     <ul class="listing">
         
+        <li><a href="/post/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-MySQL-%E6%9E%84%E5%BB%BA-Node.js-REST-API/">如何使用 MySQL 构建 Node.js REST API</a></li>
+        
         <li><a href="/post/%E6%97%A0%E9%9C%80%E7%A6%BB%E5%BC%80-IDE-%E5%8D%B3%E5%8F%AF%E9%83%A8%E7%BD%B2%E6%82%A8%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E7%BD%91%E7%AB%99/">无需离开 IDE 即可部署您的第一个网站</a></li>
         
         <li><a href="/post/bi/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/%E7%9F%A5%E4%B9%8E%E7%9A%84%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E4%B8%8E%E5%AE%9E%E6%97%B6%E6%95%B0%E6%8D%AE%E7%9A%84%E6%9E%B6%E6%9E%84%E4%B8%8E%E5%AE%9E%E8%B7%B5/">知乎的用户画像与实时数据的架构与实践</a></li>
@@ -318,8 +291,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <li><a href="/post/react/React-18-%E6%96%B0%E5%8A%9F%E8%83%BD%E5%92%8C%E6%94%B9%E8%BF%9B%E7%AD%96%E7%95%A5/">React 18 - 新功能和改进策略</a></li>
         
         <li><a href="/post/DDD/DOM-%E5%92%8C%E8%99%9A%E6%8B%9F-DOM-%E7%9A%84%E5%8C%BA%E5%88%AB/">DOM 和虚拟 DOM 的区别</a></li>
-        
-        <li><a href="/post/go/GlideIM-Golang-%E5%AE%9E%E7%8E%B0%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E7%9A%84%E5%88%86%E5%B8%83%E5%BC%8F-IM/">GlideIM - Golang 实现的高性能的分布式 IM</a></li>
         
     </ul>
 </div>
@@ -408,6 +379,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-MySQL-%E6%9E%84%E5%BB%BA-Node.js-REST-API/" title="如何使用 MySQL 构建 Node.js REST API">如何使用 MySQL 构建 Node.js REST API</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/%E6%97%A0%E9%9C%80%E7%A6%BB%E5%BC%80-IDE-%E5%8D%B3%E5%8F%AF%E9%83%A8%E7%BD%B2%E6%82%A8%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E7%BD%91%E7%AB%99/" title="无需离开 IDE 即可部署您的第一个网站">无需离开 IDE 即可部署您的第一个网站</a>
     </li>
     
@@ -441,10 +416,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/flutter/%E4%B8%BA%E4%BB%80%E4%B9%88-Flutter-%E4%BD%BF%E7%94%A8-Dart/" title="为什么 Flutter 使用 Dart">为什么 Flutter 使用 Dart</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/react/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E5%AF%BC%E8%88%AA%E7%AC%AC-1-%E9%83%A8%E5%88%86%E5%B8%A6%E6%8F%92%E5%9B%BE%EF%B8%8F/" title="浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥">浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥</a>
     </li>
     
 </ul>
@@ -512,17 +483,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
-    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
     <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
     
-    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
     
-    <a href="">Nextjs</a>
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
@@ -542,13 +513,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
     
-    <a href="">java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
-    <a href="">js</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
     
     <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
+    
+    <a href="https://geek.zshipu.com/tags/nodejs/">nodejs</a>
     
     <a href="https://geek.zshipu.com/tags/npm/">npm</a>
     

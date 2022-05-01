@@ -146,16 +146,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#前言">前言</a></li>
-<li><a href="#一-为什么要使用-ddd">一、为什么要使用 DDD</a></li>
-<li><a href="#二-ddd-能带来什么">二、DDD 能带来什么</a></li>
-<li><a href="#三-积分服务实践-ddd">三、积分服务实践 DDD</a></li>
-<li><a href="#总结">总结</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#前言">前言</a></li>
+    <li><a href="#一为什么要使用-ddd">一、为什么要使用 DDD</a></li>
+    <li><a href="#二ddd-能带来什么">二、DDD 能带来什么</a></li>
+    <li><a href="#三积分服务实践-ddd">三、积分服务实践 DDD</a></li>
+    <li><a href="#总结">总结</a></li>
+  </ul>
 </nav>
     </div>
 </div>
@@ -202,86 +199,57 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            
-
-<h2 id="前言">前言</h2>
-
+            <h2 id="前言">前言</h2>
 <p>原有用户业务线上，属于大熔炉模式，所有和用户相关的业务逻辑都放在用户工程下，用户账号，用户会员，用户积分，活动等等在各个业务逻辑中都有互相掺杂，在面对业务快速发展的新零售电商行业显得力不从心。在进行业务迭代，新需求开发，让整个用户系统伤筋动骨。</p>
-
-<h2 id="一-为什么要使用-ddd">一、为什么要使用 DDD</h2>
-
+<h2 id="一为什么要使用-ddd">一、为什么要使用 DDD</h2>
 <p><strong>1、贫血症引起的失忆症</strong></p>
-
 <p>项目中的对象都是数据库的映射，俗称 data model，没有任何的业务含义，只是承担了数据库载体，通过脚本式进行业务逻辑开发。 这种模式在简单业务或者单一业务情况下是很好的实现方式，快速开发，快速迭代，通过定义接口方法满足单一职责。但当业务逻辑复杂，业务逻辑发生变更迭代，原有的接口方法会进行膨胀，会出现更多的方法，一条调用链调用的方法数会持续增加，业务逻辑会散落在更多的方法中，原本的代码业务逻辑开始不明确，如果需要明确业务需要进行回溯代码，更复杂情况下需要配合数据库，根据脚本式执行找寻原有的业务逻辑，这就是<strong>贫血症引起的失忆症。</strong></p>
-
-<h2 id="二-ddd-能带来什么">二、DDD 能带来什么</h2>
-
+<h2 id="二ddd-能带来什么">二、DDD 能带来什么</h2>
 <p>DDD 通过划分限界上下文，使用通用语言来表达限界上下文内的业务含义。通过限界上下文映射图清晰表达各上下文的职责与联系，通过创建领域对象模型，聚合业务逻辑。总结来说 DDD 可以给你带来一个有用的领域模型，清晰的业务定义，清晰的模型边界，DDD 让你的系统简化清晰而不是复杂化。</p>
-
-<h2 id="三-积分服务实践-ddd">三、积分服务实践 DDD</h2>
-
+<h2 id="三积分服务实践-ddd">三、积分服务实践 DDD</h2>
 <p><strong>1、限界上下文</strong></p>
-
 <p>通常来说限界上下文的划分可以通过产品逻辑转化通用语言进行提炼相关概念。</p>
-
 <p>以积分服务来说</p>
-
-<pre><code>1.1、满足用户积分操作要求，兑换，扣减，增加等。
+<pre tabindex="0"><code>1.1、满足用户积分操作要求，兑换，扣减，增加等。
 1.2、满足运营要求，可进行多个积分定义，比如各种值。
 1.3、能有积分的流水记录供用户查看。
 1.4、支持积分规则，比如兑换上限等。
 1.5、需要满足用户安全，防止黑产用户的操作。
-</code></pre>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/v2-206b933eee73c124723d31cf0d5f2fe6_r.jpg" alt="img" /></p>
-
+</code></pre><p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/zshipu/images/v2-206b933eee73c124723d31cf0d5f2fe6_r.jpg" />   
+    </p>
 <p><strong>2、上下文映射图</strong></p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/v2-3cc943f8029cf904b55a39ba40d7f835_r.jpg" alt="img" /></p>
-
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/zshipu/images/v2-3cc943f8029cf904b55a39ba40d7f835_r.jpg" />   
+    </p>
 <p><strong>3、实体</strong></p>
-
 <p>实体最重要的属性是具有唯一性，在逻辑执行中具有生命周期。在积分账户上下文中，通过创建积分账户实体 CreditAccount，通过领域对象行为进行业务逻辑处理。在实践过程中，所有的实体都去除了 setter 方法，避免了领域对象受外部调用的影响。</p>
-
 <p><strong>4、聚合根</strong></p>
-
 <p>聚合将实体和值对象在一致性边界上进行聚合。</p>
-
 <p>聚合其实并不简单，在积分账户上下文中，操作积分等逻辑会涉及到积分流水，积分操作订单校验等。如果按照业务用例进行设计，CreditAccount 就是一个聚合，在 CreditAccount 中会存在很多的值对象，但这种设计会让 CreditAccount 变得臃肿，一方面，加载 CreditAccount 对象需要查询这些值对象影响性能切很多业务下是没必要尽心。同时对于某些涉及臃肿的聚合在解决事务性也是个大问题，当聚合所涉及的实体过多，如何解决事务一致性也需要进行考虑。</p>
-
 <p>通过上诉描述，想表达的是聚合并不是简单的实体，值对象的聚合，在聚合过程设计中需要考虑聚合的伸缩性，事务一致性。设计用例并不是唯一，通过设计小聚合，使用唯一性数据进行关联，通过领域服务，对象工厂方法进行关联操作。</p>
-
 <p><strong>5、领域服务</strong></p>
-
 <p>领域服务不是应用服务，通常在一个行为无法在一个领域对象上进行明确表达时需要领域服务。比如多个领域对象作为输入进行显著业务处理，对领域对象进行转换。注意需要谨慎使用领域服务，会产生贫血性失忆症。在实践过程中，并没有大量使用领域服务，使用的场景主要在对于某些领域对象进行组合转换。</p>
-
 <p><strong>6、领域事件</strong></p>
-
 <p>通过领域事件进行业务耦合，可通过观察者模式，mq 队列等实现领域事件。在实践过程中，对于操作积分相关业务进行发布 mq 消息，相关业务方只需要监听积分操作 mq 消息即可。</p>
-
 <p><strong>7、资源库</strong></p>
-
 <p>作为 domain model 和数据库实体的桥梁。同时也是 OHS 到外部上下文的媒介。在实践中，资源库将领域对象转换为数据库实体进行入库操作，查询等。还有对于用户权限查询，规则引擎查询也通过资源库进行操作，通过资源库将外部上下文对象适配成内部上下文对象，承担了防腐层的作用。</p>
-
 <p><strong>8、工程结构</strong></p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/v2-e70e2c8bc39259701885e183fba49277_r.jpg" alt="img" /></p>
-
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/zshipu/images/v2-e70e2c8bc39259701885e183fba49277_r.jpg" />   
+    </p>
 <p>上图为 DDD 依赖倒置架构，在对工程结构分析之后，对结构进行了取舍</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/v2-8f58c9ee881f402bb9e4769caf94357d_b.jpg" alt="img" /></p>
-
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/zshipu/images/v2-8f58c9ee881f402bb9e4769caf94357d_b.jpg" />   
+    </p>
 <p>具体各层提供能力如下图</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/v2-1e7f93228a153ac31cc29fb691f4566f_r.jpg" alt="img" /></p>
-
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/zshipu/images/v2-1e7f93228a153ac31cc29fb691f4566f_r.jpg" />   
+    </p>
 <h2 id="总结">总结</h2>
-
 <p>DDD 是一种架构思想，并没有固定的模式，在实践过程中，需要更多的进行自我理解。通过 DDD 可以让你更好的理解业务逻辑，剖析项目，避免了过去面向数据库开发，即 CRUD。上诉文章内容是我在实践过程中的总结，结合我自己的理解，提出了相关的看法。对于不同的项目，不同的行业，在实践 DDD 过程中，需要根据实际情况做一些取舍。</p>
-
 <p>参考文章：实现领域驱动设计 (Vaughn Vernon 著)</p>
-
-<p>转载：<a href="https://zhuanlan.zhihu.com/p/165475638">https://zhuanlan.zhihu.com/p/165475638</a></p>
+<p>转载：https://zhuanlan.zhihu.com/p/165475638</p>
 
         </div>
 
@@ -405,6 +373,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-MySQL-%E6%9E%84%E5%BB%BA-Node.js-REST-API/" title="如何使用 MySQL 构建 Node.js REST API">如何使用 MySQL 构建 Node.js REST API</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/%E6%97%A0%E9%9C%80%E7%A6%BB%E5%BC%80-IDE-%E5%8D%B3%E5%8F%AF%E9%83%A8%E7%BD%B2%E6%82%A8%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E7%BD%91%E7%AB%99/" title="无需离开 IDE 即可部署您的第一个网站">无需离开 IDE 即可部署您的第一个网站</a>
     </li>
     
@@ -438,10 +410,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/flutter/%E4%B8%BA%E4%BB%80%E4%B9%88-Flutter-%E4%BD%BF%E7%94%A8-Dart/" title="为什么 Flutter 使用 Dart">为什么 Flutter 使用 Dart</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/react/%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86-%E5%AF%BC%E8%88%AA%E7%AC%AC-1-%E9%83%A8%E5%88%86%E5%B8%A6%E6%8F%92%E5%9B%BE%EF%B8%8F/" title="浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥">浏览器的工作原理 - 导航（第 1 部分，带插图）⚙️💥</a>
     </li>
     
 </ul>
@@ -509,17 +477,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
-    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
     <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
     
-    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
     
-    <a href="">Nextjs</a>
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
@@ -539,13 +507,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
     
-    <a href="">java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
-    <a href="">js</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
     
     <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
+    
+    <a href="https://geek.zshipu.com/tags/nodejs/">nodejs</a>
     
     <a href="https://geek.zshipu.com/tags/npm/">npm</a>
     
