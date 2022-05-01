@@ -1,0 +1,814 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Netty那点事（四）Netty与Reactor模式 | 知识铺的博客</title>
+    <meta property="og:title" content="Netty那点事（四）Netty与Reactor模式 - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2022-05-01T20:01:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2022-05-01T20:01:57&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="Netty那点事（四）Netty与Reactor模式">
+        <meta name="author" content="知识铺">
+        
+    <meta property="og:url" content="https://geek.zshipu.com/post/netty/netty-learning/ch4-reactor/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#netty那点事四netty与reactor模式">Netty那点事（四）Netty与Reactor模式</a></li>
+    <li><a href="#一nettynio多线程">一：Netty、NIO、多线程？</a></li>
+    <li><a href="#二reactor反应堆还是核电站">二：Reactor，反应堆还是核电站？</a>
+      <ul>
+        <li><a href="#1reactor的由来">1、Reactor的由来</a></li>
+        <li><a href="#2reactor与nio">2、Reactor与NIO</a></li>
+        <li><a href="#3与reactor相关的其他概念">3、与Reactor相关的其他概念</a></li>
+      </ul>
+    </li>
+    <li><a href="#三由reactor出发来理解netty">三：由Reactor出发来理解Netty</a>
+      <ul>
+        <li><a href="#1多线程下的reactor">1、多线程下的Reactor</a></li>
+        <li><a href="#2netty中的reactor与nio">2、Netty中的Reactor与NIO</a></li>
+        <li><a href="#3netty中的多线程">3、Netty中的多线程</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Netty那点事（四）Netty与Reactor模式</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年5月1日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <h2 id="netty那点事四netty与reactor模式">Netty那点事（四）Netty与Reactor模式</h2>
+<p>
+        <img class="mx-auto" alt="image-20220501195915050" src="https://cdn.jsdelivr.net/gh/zshipu/images/202205011959407.png" />   
+    </p>
+<h2 id="一nettynio多线程">一：Netty、NIO、多线程？</h2>
+<p>时隔很久终于又更新了！之前一直迟迟未动也是因为积累不够，后面比较难下手。过年期间<a href="http://weibo.com/lilinfeng">@李林锋hw</a>发布了一个Netty5.0架构剖析和源码解读 <a href="http://vdisk.weibo.com/s/C9LV9iVqH13rW/1391437855">http://vdisk.weibo.com/s/C9LV9iVqH13rW/1391437855</a>，看完也是收获不少。前面的文章我们分析了Netty的结构，这次咱们来分析最错综复杂的一部分-Netty中的多线程以及NIO的应用。</p>
+<p>理清NIO与Netty的关系之前，我们必须先要来看看Reactor模式。Netty是一个典型的多线程的Reactor模式的使用，理解了这部分，在宏观上理解Netty的NIO及多线程部分就不会有什么困难了。</p>
+<p>本篇文章依然针对Netty 3.7，不过因为也看过一点Netty 5的源码，所以会有一点介绍。</p>
+<h2 id="二reactor反应堆还是核电站">二：Reactor，反应堆还是核电站？</h2>
+<h3 id="1reactor的由来">1、Reactor的由来</h3>
+<p>Reactor是一种广泛应用在服务器端开发的设计模式。Reactor中文大多译为“反应堆”，我当初接触这个概念的时候，就感觉很厉害，是不是它的原理就跟“核反应”差不多？后来才知道其实没有什么关系，从Reactor的兄弟“Proactor”（多译为前摄器）就能看得出来，这两个词的中文翻译其实都不是太好，不够形象。实际上，Reactor模式又有别名“Dispatcher”或者“Notifier”，我觉得这两个都更加能表明它的本质。</p>
+<p>那么，Reactor模式究竟是个什么东西呢？这要从事件驱动的开发方式说起。我们知道，对于应用服务器，一个主要规律就是，CPU的处理速度是要远远快于IO速度的，如果CPU为了IO操作（例如从Socket读取一段数据）而阻塞显然是不划算的。好一点的方法是分为多进程或者线程去进行处理，但是这样会带来一些进程切换的开销，试想一个进程一个数据读了500ms，期间进程切换到它3次，但是CPU却什么都不能干，就这么切换走了，是不是也不划算？</p>
+<p>这时先驱们找到了事件驱动，或者叫回调的方式，来完成这件事情。这种方式就是，应用业务向一个中间人注册一个回调（event handler），当IO就绪后，就这个中间人产生一个事件，并通知此handler进行处理。<em>这种回调的方式，也体现了“好莱坞原则”（Hollywood principle）-“Don&rsquo;t call us, we&rsquo;ll call you”，在我们熟悉的IoC中也有用到。看来软件开发真是互通的！</em></p>
+<p>好了，我们现在来看Reactor模式。在前面事件驱动的例子里有个问题：我们如何知道IO就绪这个事件，谁来充当这个中间人？Reactor模式的答案是：由一个不断等待和循环的单独进程（线程）来做这件事，它接受所有handler的注册，并负责先操作系统查询IO是否就绪，在就绪后就调用指定handler进行处理，这个角色的名字就叫做Reactor。</p>
+<h3 id="2reactor与nio">2、Reactor与NIO</h3>
+<p>Java中的NIO可以很好的和Reactor模式结合。关于NIO中的Reactor模式，我想没有什么资料能比Doug Lea大神（不知道Doug Lea？看看JDK集合包和并发包的作者吧）在<a href="http://gee.cs.oswego.edu/dl/cpjslides/nio.pdf">《Scalable IO in Java》</a>解释的更简洁和全面了。NIO中Reactor的核心是<code>Selector</code>，我写了一个简单的Reactor示例，这里我贴一个核心的Reactor的循环（这种循环结构又叫做<code>EventLoop</code>），剩余代码在<a href="learning-src/src/main/java/us/codecraft/netty/reactor">learning-src</a>目录下。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">run</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+			<span style="color:#000;font-weight:bold">while</span> <span style="color:#000;font-weight:bold">(!</span>Thread<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">interrupted</span><span style="color:#000;font-weight:bold">())</span> <span style="color:#000;font-weight:bold">{</span>
+				selector<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">select</span><span style="color:#000;font-weight:bold">();</span>
+				Set selected <span style="color:#000;font-weight:bold">=</span> selector<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">selectedKeys</span><span style="color:#000;font-weight:bold">();</span>
+				Iterator it <span style="color:#000;font-weight:bold">=</span> selected<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">iterator</span><span style="color:#000;font-weight:bold">();</span>
+				<span style="color:#000;font-weight:bold">while</span> <span style="color:#000;font-weight:bold">(</span>it<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">hasNext</span><span style="color:#000;font-weight:bold">())</span>
+					dispatch<span style="color:#000;font-weight:bold">((</span>SelectionKey<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">(</span>it<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">next</span><span style="color:#000;font-weight:bold">()));</span>
+				selected<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">clear</span><span style="color:#000;font-weight:bold">();</span>
+			<span style="color:#000;font-weight:bold">}</span>
+		<span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>IOException ex<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span> <span style="color:#998;font-style:italic">/* ... */</span>
+		<span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="3与reactor相关的其他概念">3、与Reactor相关的其他概念</h3>
+<p>前面提到了Proactor模式，这又是什么呢？简单来说，Reactor模式里，操作系统只负责通知IO就绪，具体的IO操作（例如读写）仍然是要在业务进程里阻塞的去做的，而Proactor模式则更进一步，由操作系统将IO操作执行好（例如读取，会将数据直接读到内存buffer中），而handler只负责处理自己的逻辑，真正做到了IO与程序处理异步执行。所以我们一般又说Reactor是同步IO，Proactor是异步IO。</p>
+<p>关于阻塞和非阻塞、异步和非异步，以及UNIX底层的机制，大家可以看看这篇文章<a href="http://blog.csdn.net/historyasamirror/article/details/5778378">IO - 同步，异步，阻塞，非阻塞 （亡羊补牢篇）</a>，以及陶辉（《深入理解nginx》的作者）<a href="http://blog.csdn.net/russell_tao/article/details/17452997">《高性能网络编程》</a>的系列。</p>
+<h2 id="三由reactor出发来理解netty">三：由Reactor出发来理解Netty</h2>
+<h3 id="1多线程下的reactor">1、多线程下的Reactor</h3>
+<p>讲了一堆Reactor，我们回到Netty。在《Scalable IO in Java》中讲到了一种多线程下的Reactor模式。在这个模式里，mainReactor只有一个，负责响应client的连接请求，并建立连接，它使用一个NIO Selector；subReactor可以有一个或者多个，每个subReactor都会在一个独立线程中执行，并且维护一个独立的NIO Selector。</p>
+<p>这样的好处很明显，因为subReactor也会执行一些比较耗时的IO操作，例如消息的读写，使用多个线程去执行，则更加有利于发挥CPU的运算能力，减少IO等待时间。</p>
+<p>
+        <img class="mx-auto" alt="image-20220501195936190" src="https://cdn.jsdelivr.net/gh/zshipu/images/202205011959422.png" />   
+    </p>
+<h3 id="2netty中的reactor与nio">2、Netty中的Reactor与NIO</h3>
+<p>好了，了解了多线程下的Reactor模式，我们来看看Netty吧（以下部分主要针对NIO，OIO部分更加简单一点，不重复介绍了）。Netty里对应mainReactor的角色叫做“Boss”，而对应subReactor的角色叫做&quot;Worker&quot;。Boss负责分配请求，Worker负责执行，好像也很贴切！以TCP的Server端为例，这两个对应的实现类分别为<code>NioServerBoss</code>和<code>NioWorker</code>（Server和Client的Worker没有区别，因为建立连接之后，双方就是对等的进行传输了）。</p>
+<p>Netty 3.7中Reactor的EventLoop在<code>AbstractNioSelector.run()</code>中，它实现了<code>Runnable</code>接口。这个类是Netty NIO部分的核心。它的逻辑非常复杂，其中还包括一些对JDK Bug的处理（例如<code>rebuildSelector</code>），刚开始读的时候不需要深入那么细节。我精简了大部分代码，保留主干如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">abstract</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">AbstractNioSelector</span> <span style="color:#000;font-weight:bold">implements</span> NioSelector <span style="color:#000;font-weight:bold">{</span>
+
+    
+    <span style="color:#998;font-style:italic">//NIO Selector
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">protected</span> <span style="color:#000;font-weight:bold">volatile</span> Selector selector<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#998;font-style:italic">//内部任务队列
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">final</span> Queue<span style="color:#000;font-weight:bold">&lt;</span>Runnable<span style="color:#000;font-weight:bold">&gt;</span> taskQueue <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> ConcurrentLinkedQueue<span style="color:#000;font-weight:bold">&lt;</span>Runnable<span style="color:#000;font-weight:bold">&gt;();</span>
+
+    <span style="color:#998;font-style:italic">//selector循环
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">run</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">for</span> <span style="color:#000;font-weight:bold">(;;)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#998;font-style:italic">//处理内部任务队列
+</span><span style="color:#998;font-style:italic"></span>                processTaskQueue<span style="color:#000;font-weight:bold">();</span>
+                <span style="color:#998;font-style:italic">//处理selector事件对应逻辑
+</span><span style="color:#998;font-style:italic"></span>                process<span style="color:#000;font-weight:bold">(</span>selector<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>Throwable t<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+                    Thread<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">sleep</span><span style="color:#000;font-weight:bold">(</span>1000<span style="color:#000;font-weight:bold">);</span>
+                <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>InterruptedException e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                    <span style="color:#998;font-style:italic">// Ignore.
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#000;font-weight:bold">}</span>
+            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">processTaskQueue</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">for</span> <span style="color:#000;font-weight:bold">(;;)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">final</span> Runnable task <span style="color:#000;font-weight:bold">=</span> taskQueue<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">poll</span><span style="color:#000;font-weight:bold">();</span>
+            <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>task <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#000;font-weight:bold">break</span><span style="color:#000;font-weight:bold">;</span>
+            <span style="color:#000;font-weight:bold">}</span>
+            task<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">run</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">protected</span> <span style="color:#000;font-weight:bold">abstract</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">process</span><span style="color:#000;font-weight:bold">(</span>Selector selector<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> IOException<span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>其中process是主要的处理事件的逻辑，例如在<code>AbstractNioWorker</code>中，处理逻辑如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#000;font-weight:bold">protected</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">process</span><span style="color:#000;font-weight:bold">(</span>Selector selector<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> IOException <span style="color:#000;font-weight:bold">{</span>
+        Set<span style="color:#000;font-weight:bold">&lt;</span>SelectionKey<span style="color:#000;font-weight:bold">&gt;</span> selectedKeys <span style="color:#000;font-weight:bold">=</span> selector<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">selectedKeys</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>selectedKeys<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">isEmpty</span><span style="color:#000;font-weight:bold">())</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">return</span><span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">for</span> <span style="color:#000;font-weight:bold">(</span>Iterator<span style="color:#000;font-weight:bold">&lt;</span>SelectionKey<span style="color:#000;font-weight:bold">&gt;</span> i <span style="color:#000;font-weight:bold">=</span> selectedKeys<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">iterator</span><span style="color:#000;font-weight:bold">();</span> i<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">hasNext</span><span style="color:#000;font-weight:bold">();)</span> <span style="color:#000;font-weight:bold">{</span>
+            SelectionKey k <span style="color:#000;font-weight:bold">=</span> i<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">next</span><span style="color:#000;font-weight:bold">();</span>
+            i<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">remove</span><span style="color:#000;font-weight:bold">();</span>
+            <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#458;font-weight:bold">int</span> readyOps <span style="color:#000;font-weight:bold">=</span> k<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">readyOps</span><span style="color:#000;font-weight:bold">();</span>
+                <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">((</span>readyOps <span style="color:#000;font-weight:bold">&amp;</span> SelectionKey<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">OP_READ</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">!=</span> 0 <span style="color:#000;font-weight:bold">||</span> readyOps <span style="color:#000;font-weight:bold">==</span> 0<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(!</span>read<span style="color:#000;font-weight:bold">(</span>k<span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
+                        <span style="color:#998;font-style:italic">// Connection already closed - no need to handle write.
+</span><span style="color:#998;font-style:italic"></span>                        <span style="color:#000;font-weight:bold">continue</span><span style="color:#000;font-weight:bold">;</span>
+                    <span style="color:#000;font-weight:bold">}</span>
+                <span style="color:#000;font-weight:bold">}</span>
+                <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">((</span>readyOps <span style="color:#000;font-weight:bold">&amp;</span> SelectionKey<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">OP_WRITE</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">!=</span> 0<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                    writeFromSelectorLoop<span style="color:#000;font-weight:bold">(</span>k<span style="color:#000;font-weight:bold">);</span>
+                <span style="color:#000;font-weight:bold">}</span>
+            <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>CancelledKeyException e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                close<span style="color:#000;font-weight:bold">(</span>k<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">}</span>
+
+            <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>cleanUpCancelledKeys<span style="color:#000;font-weight:bold">())</span> <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#000;font-weight:bold">break</span><span style="color:#000;font-weight:bold">;</span> <span style="color:#998;font-style:italic">// break the loop to avoid ConcurrentModificationException
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这不就是第二部分提到的selector经典用法了么？</p>
+<p>在Netty 4.0之后，作者觉得<code>NioSelector</code>这个叫法，以及区分<code>NioBoss</code>和<code>NioWorker</code>的做法稍微繁琐了点，干脆就将这些合并成了<code>NioEventLoop</code>，从此这两个角色就不做区分了。我倒是觉得新版本的会更优雅一点。</p>
+<h3 id="3netty中的多线程">3、Netty中的多线程</h3>
+<p>下面我们来看Netty的多线程部分。一旦对应的Boss或者Worker启动，就会分配给它们一个线程去一直执行。对应的概念为<code>BossPool</code>和<code>WorkerPool</code>。对于每个<code>NioServerSocketChannel</code>，Boss的Reactor有一个线程，而Worker的线程数由Worker线程池大小决定，但是默认最大不会超过CPU核数*2，当然，这个参数可以通过<code>NioServerSocketChannelFactory</code>构造函数的参数来设置。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">NioServerSocketChannelFactory</span><span style="color:#000;font-weight:bold">(</span>
+            Executor bossExecutor<span style="color:#000;font-weight:bold">,</span> Executor workerExecutor<span style="color:#000;font-weight:bold">,</span>
+            <span style="color:#458;font-weight:bold">int</span> workerCount<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">(</span>bossExecutor<span style="color:#000;font-weight:bold">,</span> 1<span style="color:#000;font-weight:bold">,</span> workerExecutor<span style="color:#000;font-weight:bold">,</span> workerCount<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>最后我们比较关心一个问题，我们之前<code>ChannlePipeline</code>中的ChannleHandler是在哪个线程执行的呢？答案是在Worker线程里执行的，并且会阻塞Worker的EventLoop。例如，在<code>NioWorker</code>中，读取消息完毕之后，会触发<code>MessageReceived</code>事件，这会使得Pipeline中的handler都得到执行。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#000;font-weight:bold">protected</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">read</span><span style="color:#000;font-weight:bold">(</span>SelectionKey k<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">....</span>
+
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>readBytes <span style="color:#000;font-weight:bold">&gt;</span> 0<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#998;font-style:italic">// Fire the event.
+</span><span style="color:#998;font-style:italic"></span>            fireMessageReceived<span style="color:#000;font-weight:bold">(</span>channel<span style="color:#000;font-weight:bold">,</span> buffer<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>可以看到，对于处理事件较长的业务，并不太适合直接放到ChannelHandler中执行。那么怎么处理呢？我们在Handler部分会进行介绍。</p>
+<p>参考资料：</p>
+<ul>
+<li>Scalable IO in Java <a href="http://gee.cs.oswego.edu/dl/cpjslides/nio.pdf">http://gee.cs.oswego.edu/dl/cpjslides/nio.pdf</a></li>
+<li>Netty5.0架构剖析和源码解读 <a href="http://vdisk.weibo.com/s/C9LV9iVqH13rW/1391437855">http://vdisk.weibo.com/s/C9LV9iVqH13rW/1391437855</a></li>
+<li>Reactor pattern <a href="http://en.wikipedia.org/wiki/Reactor_pattern">http://en.wikipedia.org/wiki/Reactor_pattern</a></li>
+<li>Reactor - An Object Behavioral Pattern for Demultiplexing and Dispatching Handles for Synchronous Events <a href="http://www.cs.wustl.edu/~schmidt/PDF/reactor-siemens.pdf">http://www.cs.wustl.edu/~schmidt/PDF/reactor-siemens.pdf</a></li>
+<li>高性能网络编程6&ndash;reactor反应堆与定时器管理 <a href="http://blog.csdn.net/russell_tao/article/details/17452997">http://blog.csdn.net/russell_tao/article/details/17452997</a></li>
+<li>IO - 同步，异步，阻塞，非阻塞 （亡羊补牢篇）<a href="http://blog.csdn.net/historyasamirror/article/details/5778378">http://blog.csdn.net/historyasamirror/article/details/5778378</a></li>
+</ul>
+<p>题图来自：<a href="http://www.worldindustrialreporter.com/france-gives-green-light-to-tokamak-fusion-reactor/">http://www.worldindustrialreporter.com/france-gives-green-light-to-tokamak-fusion-reactor/</a></p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/netty/netty-learning/ch4-reactor/">https://geek.zshipu.com/post/netty/netty-learning/ch4-reactor/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/netty/netty-learning/ch3-pipeline/">Netty那点事（三）Channel中的Pipeline</a></li>
+        
+        <li><a href="/post/netty/netty-learning/ch2-buffer/">Netty那点事（二）Netty中的buffer</a></li>
+        
+        <li><a href="/post/netty/netty-learning/ch1-overview/">Netty那点事（一）概述</a></li>
+        
+        <li><a href="/post/%E6%9B%B4%E5%BF%AB%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A8%8B%E7%9A%84-10-%E4%B8%AA%E5%85%B3%E9%94%AE%E6%8A%80%E5%B7%A7/">更快学习编程的 10 个关键技巧</a></li>
+        
+        <li><a href="/post/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-MySQL-%E6%9E%84%E5%BB%BA-Node.js-REST-API/">如何使用 MySQL 构建 Node.js REST API</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/Netty'>Netty</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/netty/netty-learning/detail/ch1-async-in-netty/" title="Netty那点事（八）理解Netty中的异步">Netty那点事（八）理解Netty中的异步</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/netty/netty-learning/trival-notes/" title="Netty那点事（七）层层分析Netty中的Channel(下)">Netty那点事（七）层层分析Netty中的Channel(下)</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/netty/netty-learning/socks-proxy-by-netty/" title="Netty那点事（六）使用netty构建一个socks proxy">Netty那点事（六）使用netty构建一个socks proxy</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/netty/netty-learning/ch5-handler/" title="Netty那点事（五）讲讲Handler">Netty那点事（五）讲讲Handler</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/netty/netty-learning/ch4-reactor/" title="Netty那点事（四）Netty与Reactor模式">Netty那点事（四）Netty与Reactor模式</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/netty/netty-learning/ch3-pipeline/" title="Netty那点事（三）Channel中的Pipeline">Netty那点事（三）Channel中的Pipeline</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/netty/netty-learning/ch2-buffer/" title="Netty那点事（二）Netty中的buffer">Netty那点事（二）Netty中的buffer</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/netty/netty-learning/ch1-overview/" title="Netty那点事（一）概述">Netty那点事（一）概述</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/%E6%9B%B4%E5%BF%AB%E5%AD%A6%E4%B9%A0%E7%BC%96%E7%A8%8B%E7%9A%84-10-%E4%B8%AA%E5%85%B3%E9%94%AE%E6%8A%80%E5%B7%A7/" title="更快学习编程的 10 个关键技巧">更快学习编程的 10 个关键技巧</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-MySQL-%E6%9E%84%E5%BB%BA-Node.js-REST-API/" title="如何使用 MySQL 构建 Node.js REST API">如何使用 MySQL 构建 Node.js REST API</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/BI/">BI</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD%E5%AE%9E%E6%88%98/">DDD实战</a>
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="https://geek.zshipu.com/tags/IM/">IM</a>
+    
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    
+    <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
+    
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
+    
+    <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/css/">css</a>
+    
+    <a href="https://geek.zshipu.com/tags/flutter/">flutter</a>
+    
+    <a href="https://geek.zshipu.com/tags/game/">game</a>
+    
+    <a href="https://geek.zshipu.com/tags/github/">github</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
+    
+    <a href="https://geek.zshipu.com/tags/nodejs/">nodejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/web/">web</a>
+    
+    <a href="https://geek.zshipu.com/tags/web3/">web3</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/">人工智能</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%88%86%E8%AF%8D/">分词</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%AD%A6%E4%B9%A0/">学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%96%87%E6%91%98/">文摘</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%88%AC%E8%99%AB/">爬虫</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/">用户画像</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E8%B5%B7%E6%AD%A5/">起步</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
