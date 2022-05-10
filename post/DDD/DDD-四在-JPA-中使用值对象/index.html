@@ -146,14 +146,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-  <ul>
-    <li><a href="#长度很重要">长度很重要</a></li>
-    <li><a href="#不要对遗留数据做出假设">不要对遗留数据做出假设</a></li>
-  </ul>
-
-  <ul>
-    <li><a href="#再多一件事或四件事">再多一件事（或四件事）</a></li>
-  </ul>
+<ul>
+<li><a href="#简单值对象-属性转换器">简单值对象：属性转换器</a>
+<ul>
+<li><a href="#长度很重要">长度很重要</a></li>
+<li><a href="#不要对遗留数据做出假设">不要对遗留数据做出假设</a></li>
+</ul></li>
+<li><a href="#复杂值对象-可嵌入">复杂值对象：可嵌入</a>
+<ul>
+<li><a href="#再多一件事-或四件事">再多一件事（或四件事）</a></li>
+</ul></li>
+</ul>
 </nav>
     </div>
 </div>
@@ -200,14 +203,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            <p>在<a href="https://geek.zshipu.com/post/%E6%88%98%E6%9C%AF%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1/">战术设计</a>中，我们了解了值对象是什么以及它有什么用处。我们从未真正研究过如何在实际项目中使用它。现在是时候卷起袖子，仔细看看一些实际的代码了！</p>
-<p>值对象是领域驱动设计中最简单和最有用的构建块之一，因此让我们从了解在 JPA 中使用值对象的不同方式开始。为此，我们将从 XML Schema 规范中窃取<em>简单类型</em>和<em>复杂类型的概念。</em></p>
+            
+
+<p>在<a href="https://geek.zshipu.com/post/%E6%88%98%E6%9C%AF%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1/">战术设计</a>中，我们了解了值对象是什么以及它有什么用处。我们从未真正研究过如何在实际项目中使用它。现在是时候卷起袖子，仔细看看一些实际的代码了！</p>
+
+<p>值对象是领域驱动设计中最简单和最有用的构建块之一，因此让我们从了解在 JPA 中使用值对象的不同方式开始。为此，我们将从 XML Schema 规范中窃取*简单类型*和<em>复杂类型的概念。</em></p>
+
 <p>简单值对象是一个值对象，它只包含某种类型的一个值，例如单个字符串或整数。复杂值对象是包含多个类型的多个值的值对象，例如包含街道名称、号码、邮政编码、城市、州、国家等的邮政地址。</p>
+
 <p>因为我们要将值对象持久化到关系数据库中，所以在实现它们时必须区别对待这两种类型。但是，这些实现细节与实际使用值对象的代码无关。</p>
-<h1 id="简单值对象属性转换器">简单值对象：属性转换器</h1>
+
+<h1 id="简单值对象-属性转换器">简单值对象：属性转换器</h1>
+
 <p>简单的值对象非常容易持久化，并且对于最终字段和所有字段都可以真正不可变。为了持久化它们，您必须编写一个<code>AttributeConverter</code>（标准 JPA 接口），该接口知道如何在已知类型的数据库列和您的值对象之间进行转换。</p>
+
 <p>让我们从一个示例值对象开始：</p>
-<pre tabindex="0"><code>public class EmailAddress implements ValueObject { // &lt;1&gt;
+
+<pre><code>public class EmailAddress implements ValueObject { // &lt;1&gt;
 
     private final String email; // &lt;2&gt;
 
@@ -245,7 +257,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
 
 }
-</code></pre><ol>
+</code></pre>
+
+<ol>
 <li><code>ValueObject</code>是空标记界面。它仅用于文档目的，没有功能意义。如果你愿意，你可以把它排除在外。</li>
 <li>包含电子邮件地址的字符串被标记为<code>final</code>。由于这是类中唯一的字段，因此它使类真正不可变。</li>
 <li>输入字符串在构造函数中得到验证，因此不可能使该字符串的实例<code>EmailAddress</code>包含无效数据。</li>
@@ -255,8 +269,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>这是构造函数用来验证输入的静态方法，但也可以从外部使用它来验证包含电子邮件地址的字符串。如果电子邮件地址无效，此版本将引发异常。</li>
 <li>另一种验证电子邮件地址字符串的静态方法，但这个方法只返回一个布尔值。这也可以从外部使用。</li>
 </ol>
+
 <p>现在，相应的属性转换器将如下所示：</p>
-<pre tabindex="0"><code>@Converter // &lt;1&gt;
+
+<pre><code>@Converter // &lt;1&gt;
 public class EmailAddressAttributeConverter implements AttributeConverter&lt;String, EmailAddress&gt; { // &lt;2&gt;
 
     @Override
@@ -271,15 +287,20 @@ public class EmailAddressAttributeConverter implements AttributeConverter&lt;Str
         return dbData == null ? null : new EmailAddress(dbData); // &lt;4&gt;
     }
 }
-</code></pre><ol>
+</code></pre>
+
+<ol>
 <li><code>@Converter</code>是一个标准的 JPA 注释。如果您希望 Hibernate 自动将转换器应用于所有<code>EmailAddress</code>属性，请将<code>autoApply</code>参数设置为 true（在本示例中为 false，这是默认设置）。</li>
 <li><code>AttributeConverter</code>是一个标准的 JPA 接口，它采用两个通用参数：数据库列类型和属性类型。</li>
 <li>此方法将 an 转换<code>EmailAddress</code>为字符串。请注意，输入参数可以是<code>null</code>.</li>
 <li>此方法将字符串转换为<code>EmailAddress</code>. 再次请注意，输入参数可以是<code>null</code>.</li>
 </ol>
+
 <p><code>.converters</code>您可以将转换器存储在与值对象相同的包中，或者如果您想保持域包整洁干净，则可以将其存储在子包中（例如）。</p>
+
 <p>最后，您可以在 JPA 实体中使用此值对象，如下所示：</p>
-<pre tabindex="0"><code>@Entity
+
+<pre><code>@Entity
 public class Contact {
 
     @Convert(converter = EmailAddressAttributeConverter.class)  // &lt;1&gt;
@@ -287,64 +308,88 @@ public class Contact {
 
     // ...
 }
-</code></pre><ol>
+</code></pre>
+
+<ol>
 <li>此注释通知您的 JPA 实现使用哪个转换器。如果没有它，例如 Hibernate 将尝试将电子邮件地址存储为序列化的 POJO，而不是字符串。如果您已将转换器标记为自动应用，则不需要<code>@Convert</code>注释。但是，我发现明确说明要使用的转换器不太容易出错。我遇到过应该自动应用转换器的情况，但由于某种原因没有被 Hibernate 检测到，因此值对象被持久化为序列化 POJO 并且集成测试通过了，因为它使用了嵌入式 H2 数据库并让 Hibernate生成架构。</li>
 </ol>
+
 <p>现在我们几乎完成了简单的值对象。但是，一旦我们投入生产，有两个我们错过的警告可能会回来并咬我们。它们都与数据库有关。</p>
+
 <h2 id="长度很重要">长度很重要</h2>
+
 <p>第一个警告与数据库列的长度有关。默认情况下，JPA 将所有数据库字符串 ( ) 列的长度限制<code>varchar</code>为 255 个字符。电子邮件地址的长度可以是 320 个字符，因此如果用户在系统中输入的电子邮件地址超过 255 个字符，当您尝试保存值对象时会出现异常。要解决此问题，您需要执行以下操作：</p>
+
 <ol>
 <li>确保您的数据库列足够宽以包含有效的电子邮件地址。</li>
 <li>确保您的验证方法包括输入的长度检查。应该不可能创建<code>EmailAddress</code>无法成功持久化的实例。</li>
 </ol>
+
 <p>这当然也适用于其他字符串值对象。根据用例，您可以拒绝接受太长的字符串，或者只是默默地截断它们。</p>
+
 <h2 id="不要对遗留数据做出假设">不要对遗留数据做出假设</h2>
+
 <p>第二个警告与遗留数据有关。假设您有一个现有的数据库，其中包含以前作为简单字符串处理的电子邮件地址，现在您引入了一个漂亮、干净的<code>EmailAddress</code>值对象。如果这些旧电子邮件地址中的任何一个无效，则每次尝试加载具有无效电子邮件地址的实体时都会出现异常：您的属性转换器使用构造函数创建新<code>EmailAddress</code>实例，并且该构造函数验证输入. 要解决此问题，您可以执行以下任何操作：</p>
+
 <ol>
 <li>清理您的数据库并修复或删除所有无效的电子邮件地址。</li>
-<li>创建仅由属性转换器使用的第二个构造函数，它绕过验证，而是<code>invalid</code>在值对象内设置一个标志。这使得可以<code>EmailAddress</code>为现有的旧数据创建无效对象，同时强制新的电子邮件地址正确。代码可能如下所示：</li>
-</ol>
-<pre tabindex="0"><code>public class EmailAddress implements ValueObject {
 
-    private final String email;
-    private final boolean invalid; // &lt;1&gt;
+<li><p>创建仅由属性转换器使用的第二个构造函数，它绕过验证，而是<code>invalid</code>在值对象内设置一个标志。这使得可以<code>EmailAddress</code>为现有的旧数据创建无效对象，同时强制新的电子邮件地址正确。代码可能如下所示：</p>
 
-    public EmailAddress(@NotNull String email) { 
-        this(email, true);
+<pre><code>public class EmailAddress implements ValueObject {
+
+private final String email;
+private final boolean invalid; // &lt;1&gt;
+
+public EmailAddress(@NotNull String email) { 
+    this(email, true);
+}
+
+EmailAddress(@NotNull String email, boolean validate) { // &lt;2&gt;
+    if (validate) {
+        this.email = validate(email);
+        this.invalid = false;
+    } else {
+        this.email = email;
+        this.invalid = !isValid(email);
     }
+}
 
-    EmailAddress(@NotNull String email, boolean validate) { // &lt;2&gt;
-        if (validate) {
-            this.email = validate(email);
-            this.invalid = false;
-        } else {
-            this.email = email;
-            this.invalid = !isValid(email);
-        }
-    }
+public boolean isInvalid() { // &lt;3&gt;
+    return invalid;
+}
 
-    public boolean isInvalid() { // &lt;3&gt;
-        return invalid;
-    }
-
-    // The rest of the methods omitted
+// The rest of the methods omitted
 
 }
-</code></pre><ol>
-<li>此布尔标志仅在值对象内部使用，从不存储在数据库中。</li>
-<li>在此示例中，构造函数具有包可见性，以防止外部代码使用它（我们希望所有新的电子邮件对象都有效）。但是，这也要求属性转换器在同一个包中。</li>
-<li>可以将此标志传递给 UI，以向用户指示电子邮件地址错误并且需要更正。</li>
+</code></pre></li>
+
+<li><p>此布尔标志仅在值对象内部使用，从不存储在数据库中。</p></li>
+
+<li><p>在此示例中，构造函数具有包可见性，以防止外部代码使用它（我们希望所有新的电子邮件对象都有效）。但是，这也要求属性转换器在同一个包中。</p></li>
+
+<li><p>可以将此标志传递给 UI，以向用户指示电子邮件地址错误并且需要更正。</p></li>
 </ol>
+
 <p>那里！我们涵盖了所有案例，以及用于实现和持久化简单值对象的健壮和干净的策略。然而，原则上我们的值对象根本不需要关心的底层数据库技术已经设法潜入实现过程（即使它在代码中并不真正可见）。如果我们想利用 JPA 提供的一切，这是我们必须做出的权衡。当我们开始处理复杂的值对象时，这种权衡会更大。让我们看看如何。</p>
-<h1 id="复杂值对象可嵌入">复杂值对象：可嵌入</h1>
+
+<h1 id="复杂值对象-可嵌入">复杂值对象：可嵌入</h1>
+
 <p>在关系数据库中持久化复杂值对象涉及将多个字段映射到多个数据库列。在 JPA 中，用于此目的的主要工具是可嵌入对象（使用注解进行<code>@Embeddable</code>注解）。可嵌入对象既可以作为单个字段（使用注释进行<code>@Embedded</code>注释）也可以作为集合（使用注释进行<code>@ElementCollection</code>注释）持久化。</p>
+
 <p>但是，JPA 对可嵌入对象施加了某些限制，以防止它们成为真正的不可变对象。可嵌入对象不能包含任何<code>final</code>字段，并且应该具有默认的无参数构造函数。尽管如此，我们还是想让我们的值对象看起来和表现得好像它们对外部世界是不可变的。我们如何做到这一点？</p>
+
 <p>让我们从构造函数开始，或者构造函数，因为我们需要其中的两个。第一个构造函数是初始化构造函数，它将是公共的。此构造函数是在代码中构造值对象的新实例的唯一允许方式。</p>
+
 <p>第二个构造函数是默认构造函数，它只会被 Hibernate 使用。它不需要公开，因此为了防止它在代码中使用，您可以将其设为受保护、包保护甚至私有（它适用于 Hibernate，但例如 IntelliJ IDEA 会抱怨）。有时我还会制作一个自定义注释<code>@UsedByHibernateOnly</code>或类似的注释，用于标记这些构造函数。然后，您可以将 IDE 配置为在查找未使用的代码时忽略这些构造函数。</p>
+
 <p>至于字段，很简单：不要将字段标记为<code>final</code>，只在初始化构造函数中设置字段值，不要声明任何 setter 方法或其他写入字段的方法。您可能还必须配置您的 IDE 以不建议您创建这些字段<code>final</code>。</p>
+
 <p>最后，您需要覆盖<code>equals</code>，<code>hashCode</code>以便它们基于值而不是基于对象身份进行比较。</p>
+
 <p>下面是一个完成的复杂值对象的示例：</p>
-<pre tabindex="0"><code>@Embeddable
+
+<pre><code>@Embeddable
 public class PersonName implements ValueObject { // &lt;1&gt;
 
     private String firstname; // &lt;2&gt;
@@ -392,7 +437,9 @@ public class PersonName implements ValueObject { // &lt;1&gt;
         return Objects.hash(firstname, middlename, lastname);
     }
 }
-</code></pre><ol>
+</code></pre>
+
+<ol>
 <li><code>ValueObject</code>我们使用与简单值对象相同的标记接口。同样，如果你愿意，你可以把它排除在外。</li>
 <li>没有字段被标记为<code>final</code>。</li>
 <li>默认构造函数是包保护的，根本不被任何代码使用。</li>
@@ -402,8 +449,10 @@ public class PersonName implements ValueObject { // &lt;1&gt;
 <li>具有相同值的两个值对象被认为是相等的，因此我们必须<code>equals()</code>相应地实现该方法。</li>
 <li>我们改变了<code>equals()</code>，所以现在我们也必须改变<code>hashCode()</code>。</li>
 </ol>
+
 <p>然后可以在这样的实体中使用此值对象：</p>
-<pre tabindex="0"><code>@Entity
+
+<pre><code>@Entity
 public class Contact {
 
     @Embedded
@@ -411,13 +460,22 @@ public class Contact {
 
     // ...
 }
-</code></pre><h2 id="再多一件事或四件事">再多一件事（或四件事）</h2>
+</code></pre>
+
+<h2 id="再多一件事-或四件事">再多一件事（或四件事）</h2>
+
 <p>细心的读者现在会注意到我们又错过了一些东西：关于数据库列宽的长度检查。就像我们必须处理简单的值对象一样，我们必须在这里处理它。我将把它作为练习留给读者。</p>
+
 <p>说到数据库，在处理<code>@Embeddable</code>值对象时还要考虑一些事情：列名和可空性。</p>
+
 <p><code>@Column</code>通常，您可以使用注释在可嵌入对象中指定列名。如果将其省略，则列名是从字段名派生的。这对您来说可能已经足够了，但在某些情况下，您可能会发现自己在不同的实体中使用相同的值对象，并且列具有不同的名称。在这种情况下，您必须依赖<code>@AttributeOverride</code>注解（如果您不熟悉它，请查看它）。</p>
+
 <p>可空性与您将如何保持值对象为空的状态有关。对于很简单的简单值对象 - 只需将 NULL 存储在数据库列中。对于存储在集合中的复杂值对象，这也很容易——只需将值对象排除在外。对于存储在字段中的复杂值对象，您必须检查您的 JPA 实现。</p>
-<p>默认情况下，如果字段为空，Hibernate 会将 NULL 写入所有列。同样，当从数据库读取时，如果所有列都为 NULL，Hibernate 会将字段设置为 null。这通常很好，前提是您实际上不希望有一个其字段都设置为 null 的值对象实例。这也意味着即使您的值对象可能要求其一个或多个字段<em>不</em>为空，但如果整个值对象可以为空，则数据库表必须允许该列或列中的空值。</p>
+
+<p>默认情况下，如果字段为空，Hibernate 会将 NULL 写入所有列。同样，当从数据库读取时，如果所有列都为 NULL，Hibernate 会将字段设置为 null。这通常很好，前提是您实际上不希望有一个其字段都设置为 null 的值对象实例。这也意味着即使您的值对象可能要求其一个或多个字段*不*为空，但如果整个值对象可以为空，则数据库表必须允许该列或列中的空值。</p>
+
 <p>最后，如果您最终让一个<code>@Embeddable</code>类扩展了另一个<code>@Embeddable</code>类，请记住将<code>@MappedSuperclass</code>注释添加到父类。如果你忽略它，你的父类中的所有内容都将被忽略。这将导致一些奇怪的行为和丢失的数据，调试起来并不明显。</p>
+
 <p>如您所见，底层数据库和持久性技术在我们复杂值对象的实现中比在简单值对象中出现的更多。从生产力的角度来看，我认为这是一个可以接受的权衡。可以在完全不知道它们是如何持久化的情况下编写域对象，但这需要在存储库中做更多的工作——你必须自己做这些工作。除非你有充分的理由，否则通常不值得付出努力（不过，这是一次有趣的学习经历，所以如果你有兴趣和时间，那么一定要试一试）。</p>
 
         </div>
@@ -646,9 +704,9 @@ public class Contact {
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    <a href="">JS</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -656,9 +714,9 @@ public class Contact {
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
-    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
+    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
     
-    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
+    <a href="">Nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
@@ -678,7 +736,7 @@ public class Contact {
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="">java</a>
     
     <a href="https://geek.zshipu.com/tags/js/">js</a>
     

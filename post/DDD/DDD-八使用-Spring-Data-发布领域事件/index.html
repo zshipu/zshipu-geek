@@ -146,10 +146,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-  <ul>
-    <li><a href="#处理事件eventlistener">处理事件<code>@EventListener</code></a></li>
-    <li><a href="#介绍transactionaleventlistener">介绍<code>@TransactionalEventListener</code></a></li>
-  </ul>
+<ul>
+<li>
+<ul>
+<li><a href="#处理事件-eventlistener">处理事件<code>@EventListener</code></a></li>
+<li><a href="#介绍-transactionaleventlistener">介绍<code>@TransactionalEventListener</code></a></li>
+</ul></li>
+</ul>
 </nav>
     </div>
 </div>
@@ -196,10 +199,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            <p>Spring Data 使用标准发布域事件<code>ApplicationEventPublisher</code>。这意味着我们也可以使用标准的 Spring 方式处理事件，<code>@EventListener</code>所以让我们先来看看。</p>
-<h2 id="处理事件eventlistener">处理事件<code>@EventListener</code></h2>
-<p>使用的域事件处理程序（我有时也使用术语<em>域事件侦听</em>器 - 它们的意思相同）<code>@EventListener</code>看起来像这样：</p>
-<pre tabindex="0"><code>@Component
+            
+
+<p>Spring Data 使用标准发布域事件<code>ApplicationEventPublisher</code>。这意味着我们也可以使用标准的 Spring 方式处理事件，<code>@EventListener</code>所以让我们先来看看。</p>
+
+<h2 id="处理事件-eventlistener">处理事件<code>@EventListener</code></h2>
+
+<p>使用的域事件处理程序（我有时也使用术语*域事件侦听*器 - 它们的意思相同）<code>@EventListener</code>看起来像这样：</p>
+
+<pre><code>@Component
 class MyDomainEventHandler {
 
     @EventListener
@@ -207,17 +215,29 @@ class MyDomainEventHandler {
         // Handler code here.
     }
 }
-</code></pre><p>域事件处理程序是一个 Spring bean，这意味着您可以将其他 bean 注入其中。</p>
+</code></pre>
+
+<p>域事件处理程序是一个 Spring bean，这意味着您可以将其他 bean 注入其中。</p>
+
 <p>使用 发布事件后<code>ApplicationEventPublisher</code>，默认情况下将移交给<code>ApplicationEventMulticaster</code>。这个的默认实现<code>SimpleApplicationEventMulticaster</code>- 将遍历所有适用的侦听器并一次调用它们。除非明确指定了任务执行器和错误处理程序，否则将在发布事件的同一线程内调用侦听器，如果任何一个侦听器抛出异常，它将停止进程并且不会通知其余侦听器一点也不。</p>
+
 <p>这意味着，如果您使用事件多播器的默认配置并<code>@EventListener</code>用于您的域事件处理程序，它们将参与发布事件的同一事务。这也意味着如果您从事件处理程序中抛出异常，您将回滚整个事务。</p>
+
 <p>在某些用例中，这可能是所需的行为，在这种情况下，使用<code>@EventListener</code>是要走的路。但是，这也违反了<a href="https://geek.zshipu.com/post/%E6%88%98%E6%9C%AF%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1/">聚合设计的第三条准则，</a>该准则规定您只能在一个事务中编辑一个聚合。</p>
+
 <p>这个指南是有原因的，当我们用于<code>@EventListener</code>我们的域事件处理程序时，我自己也被它咬住了。问题是，在发布它们的同一事务中处理域事件可以正常工作，只要您有少量轻量级的域处理程序并且<em>您知道</em>. 当其他开发人员附加更多重量级的域处理程序时，问题开始出现，这些处理程序本身可能触发域事件，这些事件在同一事务中处理，等等。这会导致两个重大问题：</p>
+
 <p>首先，这会导致运行时间更长的事务，这些事务可能会超时或遇到不同的锁定问题，例如死锁或乐观锁定失败。</p>
-<p>其次，如果链中的任何一个域事件处理程序发生故障，该域事件处理程序将有权回滚整个事务，基本上撤消所有事件。您真的想将改变过去的权力赋予单个域事件处理程序吗？毕竟，发布领域事件是因为某事<em>已经</em>发生，而不是因为某事<em>将会</em>或<em>可能</em>发生。</p>
+
+<p>其次，如果链中的任何一个域事件处理程序发生故障，该域事件处理程序将有权回滚整个事务，基本上撤消所有事件。您真的想将改变过去的权力赋予单个域事件处理程序吗？毕竟，发布领域事件是因为某事*已经*发生，而不是因为某事*将会*或*可能*发生。</p>
+
 <p>那么我们如何确保我们的领域事件处理程序在他们自己的事务中运行呢？</p>
-<h2 id="介绍transactionaleventlistener">介绍<code>@TransactionalEventListener</code></h2>
+
+<h2 id="介绍-transactionaleventlistener">介绍<code>@TransactionalEventListener</code></h2>
+
 <p>Spring 为需要事务感知的事件处理程序提供了一个替代注解，即<code>@TransactionalEventListener</code>. 注释的使用方式与以下完全相同<code>@EventListener</code>：</p>
-<pre tabindex="0"><code>@Component
+
+<pre><code>@Component
 class MyTransactionalDomainEventHandler {
 
     @TransactionalEventListener
@@ -225,15 +245,23 @@ class MyTransactionalDomainEventHandler {
         // Handler code here.
     }
 }
-</code></pre><p>发布事件时不会直接调用这些事件侦听器。相反，它们与当前活动事务的生命周期相关联（因此，如果您使用反应式事务管理器，它们将不起作用）。</p>
-<p>a 的默认行为<code>@TransactionalEventListener</code>是在当前事务<em>成功提交</em>后执行。如果事务被回滚，或者没有活动事务开始，则不会发生任何事情。</p>
+</code></pre>
+
+<p>发布事件时不会直接调用这些事件侦听器。相反，它们与当前活动事务的生命周期相关联（因此，如果您使用反应式事务管理器，它们将不起作用）。</p>
+
+<p>a 的默认行为<code>@TransactionalEventListener</code>是在当前事务*成功提交*后执行。如果事务被回滚，或者没有活动事务开始，则不会发生任何事情。</p>
+
 <p>您可以通过将不同的参数传递给注释来更改此行为。可以通过多种方式配置注解，但我们只看两个参数：</p>
+
 <ul>
 <li><code>phase</code>：将事件绑定到的事务阶段。默认为<code>AFTER_COMMIT</code>, 但其他选项为<code>BEFORE_COMMIT</code>,<code>AFTER_ROLLBACK</code>和<code>AFTER_COMPLETION</code>（无论事务是提交还是回滚，都会执行事件处理程序）。</li>
 <li><code>fallbackExecution</code>：即使没有活动事务，是否应该执行事件处理程序。默认为<code>false</code>。</li>
 </ul>
-<p>如果您使用<code>AFTER_COMMIT</code>or <code>AFTER_COMPLETION</code>，那么您可以从事件处理程序中调用的任何事务代码<em>启动它自己的事务</em>（换句话说，它们应该使用<code>REQUIRES_NEW</code>事务传播而不是<code>REQUIRED</code>）是非常重要的。<a href="https://dev.to/peholmst/knee-deep-in-spring-boot-transactional-event-listeners-and-cglib-proxies-1il9">您可以在这篇</a>博文中了解原因。</p>
+
+<p>如果您使用<code>AFTER_COMMIT</code>or <code>AFTER_COMPLETION</code>，那么您可以从事件处理程序中调用的任何事务代码*启动它自己的事务*（换句话说，它们应该使用<code>REQUIRES_NEW</code>事务传播而不是<code>REQUIRED</code>）是非常重要的。<a href="https://dev.to/peholmst/knee-deep-in-spring-boot-transactional-event-listeners-and-cglib-proxies-1il9">您可以在这篇</a>博文中了解原因。</p>
+
 <p>所以现在我们所有的问题都解决了，对吧？不完全的。当我们的事件在同一个事务中处理时，要么所有更改都已提交，要么没有。事务完成后，数据将始终处于一致状态。</p>
+
 <p>有了<code>@TransactionalEventListener</code>这不再是这种情况。如果某些事件侦听器失败而其他事件侦听器成功怎么办？或者，如果在第一个事务提交之后，但在任何事件侦听器执行之前，整个系统都崩溃了怎么办？这可能会使我们的数据处于不一致的状态。我们如何从中恢复过来？</p>
 
         </div>
@@ -462,9 +490,9 @@ class MyTransactionalDomainEventHandler {
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    <a href="">JS</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -472,9 +500,9 @@ class MyTransactionalDomainEventHandler {
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
-    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
+    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
     
-    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
+    <a href="">Nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
@@ -494,7 +522,7 @@ class MyTransactionalDomainEventHandler {
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="">java</a>
     
     <a href="https://geek.zshipu.com/tags/js/">js</a>
     
