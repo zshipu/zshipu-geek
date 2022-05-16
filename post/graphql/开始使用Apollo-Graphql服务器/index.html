@@ -1,0 +1,826 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>开始使用Apollo Graphql服务器 | 知识铺的博客</title>
+    <meta property="og:title" content="开始使用Apollo Graphql服务器 - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2022-05-04T11:29:08&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2022-05-04T11:29:08&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="开始使用Apollo Graphql服务器">
+        <meta name="author" content="知识铺">
+        
+    <meta property="og:url" content="https://geek.zshipu.com/post/graphql/%E5%BC%80%E5%A7%8B%E4%BD%BF%E7%94%A8Apollo-Graphql%E6%9C%8D%E5%8A%A1%E5%99%A8/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#步骤-1创建新项目step-1-create-a-new-project"><a href="#step-1-create-a-new-project">步骤 1：创建新项目</a></a></li>
+    <li><a href="#步骤-2安装依赖项step-2-install-dependencies"><a href="step-2-install-dependencies">步骤 2：安装依赖项</a></a></li>
+    <li><a href="#步骤-3定义您的-graphql-模式step-3-define-your-graphql-schema"><a href="#step-3-define-your-graphql-schema">步骤 3：定义您的 GraphQL 模式</a></a></li>
+    <li><a href="#第-4-步定义数据集step-4-define-your-data-set"><a href="#step-4-define-your-data-set">第 4 步：定义数据集</a></a></li>
+    <li><a href="#步骤-5定义冲突解决程序step-5-define-a-resolver"><a href="#step-5-define-a-resolver">步骤 5：定义冲突解决程序</a></a></li>
+    <li><a href="#步骤-6创建-apolloserver-的实例step-6-create-an-instance-of-apolloserver"><a href="#step-6-create-an-instance-of-apolloserver">步骤 6：创建 <code>ApolloServer</code> 的实例</a></a></li>
+    <li><a href="#步骤-7启动服务器step-7-start-the-server"><a href="#step-7-start-the-server">步骤 7：启动服务器</a></a></li>
+    <li><a href="#步骤-8执行第一个查询step-8-execute-your-first-query"><a href="#step-8-execute-your-first-query">步骤 8：执行第一个查询</a></a></li>
+    <li><a href="#组合示例combined-example"><a href="#combined-example">组合示例</a></a></li>
+    <li><a href="#今后的步骤next-steps"><a href="#next-steps">今后的步骤</a></a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">开始使用Apollo Graphql服务器</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年5月4日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p>本教程可帮助您：</p>
+<ul>
+<li>获得对 GraphQL 原理的基本理解</li>
+<li>定义一个表示数据集结构的 GraphQL <strong>模式</strong></li>
+<li>运行 Apollo Server 实例，该实例允许您针对架构执行查询</li>
+</ul>
+<p>本教程假定您熟悉命令行和 JavaScript，并且您安装了最新版本的 Node.js （12+）。</p>
+<p>本教程将引导您完成阿波罗服务器的安装和配置。如果您刚刚开始使用 GraphQL 或 Apollo 平台，我们建议您先完成<a href="https://www.apollographql.com/docs/tutorial/introduction/">全栈教程</a>。</p>
+<h2 id="步骤-1创建新项目step-1-create-a-new-project"><a href="#step-1-create-a-new-project">步骤 1：创建新项目</a></h2>
+<ol>
+<li>
+<p>从您首选的开发目录中，为新项目创建一个目录并进入其中：<code>cd</code></p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">mkdir graphql-server-example
+<span style="color:#0086b3">cd</span> graphql-server-example
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>使用（或您喜欢的其他包管理器，例如 Yarn）初始化新的 Node.js 项目：<code>npm</code></p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">npm init --yes
+</code></pre></td></tr></table>
+</div>
+</div></li>
+</ol>
+<p>您的项目目录现在包含一个文件。<code>package.json</code></p>
+<h2 id="步骤-2安装依赖项step-2-install-dependencies"><a href="step-2-install-dependencies">步骤 2：安装依赖项</a></h2>
+<p>运行 Apollo Server 的应用程序需要两个顶级依赖项：</p>
+<ul>
+<li><a href="https://npm.im/apollo-server"><code>apollo-server</code></a> 是 Apollo Server 本身的核心库，它可以帮助您定义数据的形状以及如何获取数据。</li>
+<li><a href="https://npm.im/graphql"><code>graphql</code></a> 是用于构建 GraphQL 模式并对其执行查询的库。</li>
+</ul>
+<p>运行以下命令以安装这两个依赖项，并将它们保存在项目的目录中：<code>node_modules</code></p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">npm install apollo-server graphql
+</code></pre></td></tr></table>
+</div>
+</div><p>同时在项目的根目录中创建一个空文件：<code>index.js</code></p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">touch index.js
+</code></pre></td></tr></table>
+</div>
+</div><p>为简单起见，将包含此示例应用程序<strong>的所有</strong>代码。<code>index.js</code></p>
+<h2 id="步骤-3定义您的-graphql-模式step-3-define-your-graphql-schema"><a href="#step-3-define-your-graphql-schema">步骤 3：定义您的 GraphQL 模式</a></h2>
+<p>每个 GraphQL 服务器（包括 Apollo Server）都使用<strong>一个模式</strong>来定义客户端可以查询的数据结构。在此示例中，我们将创建一个服务器，用于按标题和作者查询一组图书。</p>
+<p>在您的首选编辑器中打开，然后将以下内容粘贴到其中：<code>index.js</code></p>
+<p>索引.js</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#000;font-weight:bold">const</span> { ApolloServer, gql } <span style="color:#000;font-weight:bold">=</span> require(<span style="color:#d14">&#39;apollo-server&#39;</span>);
+
+<span style="color:#998;font-style:italic">// A schema is a collection of type definitions (hence &#34;typeDefs&#34;)
+</span><span style="color:#998;font-style:italic">// that together define the &#34;shape&#34; of queries that are executed against
+</span><span style="color:#998;font-style:italic">// your data.
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">const</span> typeDefs <span style="color:#000;font-weight:bold">=</span> gql<span style="color:#d14">`
+</span><span style="color:#d14">  # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
+</span><span style="color:#d14">
+</span><span style="color:#d14">  # This &#34;Book&#34; type defines the queryable fields for every book in our data source.
+</span><span style="color:#d14">  type Book {
+</span><span style="color:#d14">    title: String
+</span><span style="color:#d14">    author: String
+</span><span style="color:#d14">  }
+</span><span style="color:#d14">
+</span><span style="color:#d14">  # The &#34;Query&#34; type is special: it lists all of the available queries that
+</span><span style="color:#d14">  # clients can execute, along with the return type for each. In this
+</span><span style="color:#d14">  # case, the &#34;books&#34; query returns an array of zero or more Books (defined above).
+</span><span style="color:#d14">  type Query {
+</span><span style="color:#d14">    books: [Book]
+</span><span style="color:#d14">  }
+</span><span style="color:#d14">`</span>;
+</code></pre></td></tr></table>
+</div>
+</div><p>此代码段定义了一个简单、有效的 GraphQL 模式。客户端将能够执行名为 的查询，我们的服务器将返回一个包含零个或多个 s 的数组。<code>books``Book</code></p>
+<h2 id="第-4-步定义数据集step-4-define-your-data-set"><a href="#step-4-define-your-data-set">第 4 步：定义数据集</a></h2>
+<p>现在我们已经定义了*数据的结构，*我们可以定义数据本身。Apollo Server 可以从您连接到的任何源（包括数据库、REST API、静态对象存储服务，甚至是另一个 GraphQL 服务器）获取数据。出于本教程的目的，我们将只对一些示例数据进行硬编码。</p>
+<p>在 的底部添加以下内容：<code>index.js</code></p>
+<p>索引.js</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#000;font-weight:bold">const</span> books <span style="color:#000;font-weight:bold">=</span> [
+  {
+    title<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;The Awakening&#39;</span>,
+    author<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;Kate Chopin&#39;</span>,
+  },
+  {
+    title<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;City of Glass&#39;</span>,
+    author<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;Paul Auster&#39;</span>,
+  },
+];
+</code></pre></td></tr></table>
+</div>
+</div><p>此代码段定义了客户端可以查询的简单数据集。请注意，数组中的两个对象都与我们在架构中定义的类型的结构匹配。<code>Book</code></p>
+<h2 id="步骤-5定义冲突解决程序step-5-define-a-resolver"><a href="#step-5-define-a-resolver">步骤 5：定义冲突解决程序</a></h2>
+<p>我们已经定义了我们的数据集，但 Apollo Server 不知道它在执行查询时应该<em>使用</em>该数据集。为了解决此问题，我们创建了一个<strong>解析程序</strong>。</p>
+<p>解析器告诉 Apollo Server <em>如何</em>获取与特定类型关联的数据。由于我们的数组是硬编码的，因此相应的解析器非常简单。<code>Book</code></p>
+<p>在 的底部添加以下内容：<code>index.js</code></p>
+<p>索引.js</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#998;font-style:italic">// Resolvers define the technique for fetching the types defined in the
+</span><span style="color:#998;font-style:italic">// schema. This resolver retrieves books from the &#34;books&#34; array above.
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">const</span> resolvers <span style="color:#000;font-weight:bold">=</span> {
+  Query<span style="color:#000;font-weight:bold">:</span> {
+    books<span style="color:#000;font-weight:bold">:</span> () =&gt; books,
+  },
+};
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="步骤-6创建-apolloserver-的实例step-6-create-an-instance-of-apolloserver"><a href="#step-6-create-an-instance-of-apolloserver">步骤 6：创建 <code>ApolloServer</code> 的实例</a></h2>
+<p>我们已经定义了架构、数据集和解析程序。现在，我们只需要在初始化 Apollo Server 时向它提供此信息。</p>
+<p>在 的底部添加以下内容：<code>index.js</code></p>
+<p>索引.js</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#998;font-style:italic">// The ApolloServer constructor requires two parameters: your schema
+</span><span style="color:#998;font-style:italic">// definition and your set of resolvers.
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">const</span> server <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> ApolloServer({ typeDefs, resolvers });
+
+<span style="color:#998;font-style:italic">// The `listen` method launches a web server.
+</span><span style="color:#998;font-style:italic"></span>server.listen().then(({ url }) =&gt; {
+  console.log(<span style="color:#d14">`🚀  Server ready at </span><span style="color:#d14">${</span>url<span style="color:#d14">}</span><span style="color:#d14">`</span>);
+});
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="步骤-7启动服务器step-7-start-the-server"><a href="#step-7-start-the-server">步骤 7：启动服务器</a></h2>
+<p>我们已准备好启动我们的服务器！从项目的根目录运行以下命令：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">node index.js
+</code></pre></td></tr></table>
+</div>
+</div><p>您应看到以下输出：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">🚀 Server ready at http://localhost:4000/
+</code></pre></td></tr></table>
+</div>
+</div><p>我们已启动并运行！</p>
+<h2 id="步骤-8执行第一个查询step-8-execute-your-first-query"><a href="#step-8-execute-your-first-query">步骤 8：执行第一个查询</a></h2>
+<p>现在，我们可以在服务器上执行 GraphQL 查询。要执行第一个查询，我们可以使用 <strong>Apollo Sandbox</strong>。</p>
+<p>在浏览器中访问。此时将显示 Apollo Server 的默认登录页面：<code>http://localhost:4000</code></p>
+<p>
+        <img class="mx-auto" alt="Apollo Server default landing page" src="https://cdn.jsdelivr.net/gh/zshipu/images/202205041700883.jpg" />   
+    </p>
+<p>单击“<strong>查询您的服务器</strong>”以打开沙盒。</p>
+<p>您还可以：</p>
+<ul>
+<li>选择**“下次自动重定向到工作室**”，前提是您希望在每次访问时自动打开沙盒<code>localhost:4000</code></li>
+<li>直接在 <a href="https://studio.apollographql.com/sandbox">studio.apollographql.com/sandbox</a> 打开沙盒</li>
+</ul>
+<p>
+        <img class="mx-auto" alt="Apollo Sandbox" src="https://cdn.jsdelivr.net/gh/zshipu/images/202205041700884.jpg" />   
+    </p>
+<p>沙盒 UI 包括：</p>
+<ul>
+<li>用于编写和执行查询的操作面板（中间）</li>
+<li>用于查看查询结果的响应面板（右侧）</li>
+<li>用于架构浏览、搜索和设置的选项卡（左侧）</li>
+<li>用于连接到其他 GraphQL 服务器的 URL 栏（左上角）</li>
+</ul>
+<p>我们的服务器支持名为 的单个查询。让我们来执行它！<code>books</code></p>
+<p>下面是用于执行查询的 GraphQL 查询<strong>字符串</strong>：<code>books</code></p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-graphql" data-lang="graphql"><span style="color:#000;font-weight:bold">query</span><span style="color:#bbb"> </span><span style="color:#458;font-weight:bold">GetBooks</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>books<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span><span style="color:#bbb">    </span>title<span style="color:#bbb">
+</span><span style="color:#bbb">    </span>author<span style="color:#bbb">
+</span><span style="color:#bbb">  </span>}<span style="color:#bbb">
+</span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>将此字符串粘贴到“操作”面板中，然后单击右上角的蓝色按钮。结果（来自我们的硬编码数据集）显示在响应面板中：</p>
+<p>
+        <img class="mx-auto" alt="Sandbox response panel" src="https://cdn.jsdelivr.net/gh/zshipu/images/202205041700885.jpg" />   
+    </p>
+<p><strong>注意：<strong>如果将服务器部署到设置为 的环境，则默认情况下</strong>禁用</strong>自省。这会阻止 Apollo Sandbox 正常工作。要启用自省，请在 <a href="https://www.apollographql.com/docs/apollo-server/api/apollo-server/#constructor"><code>ApolloServer 构造函数</code>的选项</a>中设置。<code>NODE_ENV``production``introspection: true</code></p>
+<p>GraphQL 最重要的概念之一是，客户端可以选择<em>仅查询他们需要的字段</em>。从查询字符串中删除，然后再次执行。响应将更新为仅包含每本书的字段！<code>author``title</code></p>
+<h2 id="组合示例combined-example"><a href="#combined-example">组合示例</a></h2>
+<p>您可以在 CodeSandbox 上查看和分叉这个完整的示例：</p>
+<p><a href="https://codesandbox.io/s/github/apollographql/docs-examples/tree/main/apollo-server/v3/getting-started?fontsize=14&amp;hidenavigation=1&amp;theme=dark">
+        <img class="mx-auto" alt="Edit server-getting-started" src="https://cdn.jsdelivr.net/gh/zshipu/images/202205041700886.svg" />   
+    </a></p>
+<h2 id="今后的步骤next-steps"><a href="#next-steps">今后的步骤</a></h2>
+<p>此示例应用程序是使用 Apollo Server 的良好起点。请查看以下资源，了解有关架构、解析程序和部署的基础知识的详细信息：</p>
+<ul>
+<li><a href="https://www.apollographql.com/docs/apollo-server/schema/schema">架构基础知识</a></li>
+<li><a href="https://www.apollographql.com/docs/apollo-server/data/resolvers">解析 器</a></li>
+<li><a href="https://www.apollographql.com/docs/apollo-server/deployment/heroku">使用 Heroku 进行部署</a></li>
+</ul>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/graphql/%E5%BC%80%E5%A7%8B%E4%BD%BF%E7%94%A8Apollo-Graphql%E6%9C%8D%E5%8A%A1%E5%99%A8/">https://geek.zshipu.com/post/graphql/%E5%BC%80%E5%A7%8B%E4%BD%BF%E7%94%A8Apollo-Graphql%E6%9C%8D%E5%8A%A1%E5%99%A8/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/netty/netty-learning/detail/ch1-async-in-netty/">Netty那点事（八）理解Netty中的异步</a></li>
+        
+        <li><a href="/post/netty/netty-learning/trival-notes/">Netty那点事（七）层层分析Netty中的Channel(下)</a></li>
+        
+        <li><a href="/post/netty/netty-learning/socks-proxy-by-netty/">Netty那点事（六）使用netty构建一个socks proxy</a></li>
+        
+        <li><a href="/post/netty/netty-learning/ch5-handler/">Netty那点事（五）讲讲Handler</a></li>
+        
+        <li><a href="/post/netty/netty-learning/ch4-reactor/">Netty那点事（四）Netty与Reactor模式</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/graphql'>graphql</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/level01/2.-React-%E5%BE%88%E6%A3%92%E7%9A%84%E7%BB%84%E4%BB%B6/" title="2. React 很棒的组件">2. React 很棒的组件</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/level01/1.-%E5%88%9D%E5%AD%A6%E8%80%85%E7%9A%84-React-/" title="1.初学者的 React">1.初学者的 React</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.4-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E4%BA%86%E8%A7%A3-TypeScript-%E4%B8%AD%E7%9A%84%E9%AB%98%E7%BA%A7%E6%A6%82%E5%BF%B5/" title="2.3 拓展知识了解 TypeScript 中的高级概念">2.3 拓展知识了解 TypeScript 中的高级概念</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.3-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E5%AD%A6%E4%B9%A0-TypeScript-%E5%85%A8%E9%9D%A2%E6%8C%87%E5%8D%97/" title="2.3 拓展知识学习 TypeScript 指南">2.3 拓展知识学习 TypeScript 指南</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.2-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E6%9E%84%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84-UI-%E7%BB%84%E4%BB%B6%E5%BA%93/" title="2.2 拓展知识构建自己的 UI 组件库">2.2 拓展知识构建自己的 UI 组件库</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.1-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86_document.js-%E5%A6%82%E4%BD%95%E5%9C%A8-Next.js-%E4%B8%AD%E6%94%B9%E8%BF%9B-SEO/" title="2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO">2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.%E6%90%AD%E5%BB%BA-Next.js-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/" title="2.搭建 Next.js 应用程序">2.搭建 Next.js 应用程序</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/1.%E4%BD%BF%E7%94%A8-StorybookTailwindcss-%E5%92%8C-Apollo-%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%BE%E7%BD%AE-Next.Js/" title="1.使用 Storybook、Tailwindcss 和 Apollo 客户端设置 Next.Js">1.使用 Storybook、Tailwindcss 和 Apollo 客户端设置 Next.Js</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/css/CSS-%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="CSS 特性的完整指南">CSS 特性的完整指南</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/web/Web-3.0%E5%BC%80%E5%8F%91%E8%80%85%E8%B7%AF%E7%BA%BF%E5%9B%BE%E6%8C%87%E5%8D%97%E5%92%8C%E5%85%A5%E9%97%A8%E8%B5%84%E6%BA%90/" title="Web 3.0：开发者路线图、指南和入门资源">Web 3.0：开发者路线图、指南和入门资源</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/BI/">BI</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD%E5%AE%9E%E6%88%98/">DDD实战</a>
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="https://geek.zshipu.com/tags/IM/">IM</a>
+    
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    
+    <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
+    
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
+    
+    <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/apollo/">apollo</a>
+    
+    <a href="https://geek.zshipu.com/tags/css/">css</a>
+    
+    <a href="https://geek.zshipu.com/tags/flutter/">flutter</a>
+    
+    <a href="https://geek.zshipu.com/tags/game/">game</a>
+    
+    <a href="https://geek.zshipu.com/tags/github/">github</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="https://geek.zshipu.com/tags/graphql/">graphql</a>
+    
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
+    
+    <a href="https://geek.zshipu.com/tags/nodejs/">nodejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/react/">react</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/storybook/">storybook</a>
+    
+    <a href="https://geek.zshipu.com/tags/tailwind/">tailwind</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/web/">web</a>
+    
+    <a href="https://geek.zshipu.com/tags/web3/">web3</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/">人工智能</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%88%86%E8%AF%8D/">分词</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%AD%A6%E4%B9%A0/">学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%96%87%E6%91%98/">文摘</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%88%AC%E8%99%AB/">爬虫</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/">用户画像</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E8%B5%B7%E6%AD%A5/">起步</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

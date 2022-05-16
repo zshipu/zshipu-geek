@@ -1,0 +1,925 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>2.搭建 Next.js 应用程序 | 知识铺的博客</title>
+    <meta property="og:title" content="2.搭建 Next.js 应用程序 - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2022-05-14T19:22:10&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2022-05-14T19:22:10&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="2.搭建 Next.js 应用程序">
+        <meta name="author" content="知识铺">
+        
+    <meta property="og:url" content="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.%E6%90%AD%E5%BB%BA-Next.js-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#更新-indexjs">更新 index.js</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">2.搭建 Next.js 应用程序</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年5月14日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p>在本文中，我们将介绍</p>
+<ul>
+<li>如何配置故事书</li>
+<li>配置 TailwindCSS</li>
+<li>添加 SEO 友好的 _document.js</li>
+<li>创建基本组件</li>
+</ul>
+<h1 id="配置故事书">配置故事书</h1>
+<p>在上一篇文章中，我们在 Next.js 应用程序中安装和设置了故事书。安装过程会创建一个名为 stories 的文件夹。并且，在该文件夹下，有安装过程中附带的 JavaScript 文件。删除 stories 文件夹下的所有文件。它会在 6006 端口打破故事书。</p>
+<p>安装以下内容：</p>
+<pre tabindex="0"><code>npm install @storybook/addon-postcss
+npm install storybook-css-modules-preset
+</code></pre><p>进入 .storybook 文件夹，打开 main.js 文件，修改文件内容如下：</p>
+<pre tabindex="0"><code>module.exports = {
+  &quot;stories&quot;: [
+    &quot;../stories/**/*.stories.mdx&quot;,
+    &quot;../stories/**/*.stories.@(js|jsx|ts|tsx)&quot;
+  ],
+  &quot;addons&quot;: [
+    &quot;@storybook/addon-links&quot;,
+    &quot;@storybook/addon-essentials&quot;,
+    &quot;@storybook/addon-postcss&quot;,
+    &quot;storybook-css-modules-preset&quot;
+  ],
+  webpackFinal: async config =&gt; {
+    config.module.rules.push({
+      test: /\.scss$/,
+      use: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader']
+    });
+    return config
+  }
+}
+</code></pre><p>打开 preview.js 文件，更新内容如下：</p>
+<pre tabindex="0"><code>import '../styles/globals.css'
+export const parameters = {
+  actions: { argTypesRegex: &quot;^on[A-Z].*&quot; },
+  controls: {
+    matchers: {
+      color: /(background|color)$/i,
+      date: /Date$/,
+    },
+  },
+}
+</code></pre><h1 id="配置-tailwindcss">配置 TailwindCSS</h1>
+<p>在上一篇文章中，我们安装和配置 TailwindCSS。让我们快速添加一个新主题。</p>
+<p>打开tailwind.config.js并将主题修改为</p>
+<pre tabindex="0"><code>theme: {
+  extend: {
+    colors: {
+      'light-blue': colors.lightBlue,
+      cyan: colors.cyan,
+    }
+  },
+},
+</code></pre><p>现在，文件的内容看起来像，</p>
+<pre tabindex="0"><code>const colors = require('tailwindcss/colors')
+module.exports = {
+  purge: ['./pages/**/*.{js,ts,jsx,tsx}', './components/**/*.{js,ts,jsx,tsx}'],
+  darkMode: false, // or 'media' or 'class'
+  theme: {
+    extend: {
+      colors: {
+        'light-blue': colors.lightBlue,
+        cyan: colors.cyan,
+      }
+    },
+  },
+  variants: {
+    extend: {},
+  },
+  plugins: [],
+}
+</code></pre><h1 id="创建-_documentjs">创建 _document.js</h1>
+<p>在 pages 文件夹下，新建文件 _document.js 并添加以下内容。</p>
+<pre tabindex="0"><code>import Document from &quot;next/document&quot;;
+import {Html, Head, Main, NextScript} from &quot;next/document&quot;;
+class AppDocument extends Document {
+    render () {
+        return (
+            &lt;Html lang=&quot;en&quot;&gt;
+                &lt;Head&gt;
+                    &lt;meta httpEquiv=&quot;Cache-control&quot; content=&quot;public&quot; /&gt;
+                    &lt;meta httpEquiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+                    &lt;meta name=&quot;keywords&quot; content=&quot;Perl, Python, Mojolicious tutorial, Javascript, Next.js&quot; /&gt;
+                &lt;/Head&gt;
+                &lt;body&gt;
+                    &lt;Main&gt;&lt;/Main&gt;
+                    &lt;NextScript&gt;&lt;/NextScript&gt;
+                &lt;/body&gt;
+            &lt;/Html&gt;
+        )
+    }
+}
+export default AppDocument
+</code></pre><p>您可以根据自己的喜好修改元名称。它只是一个样本。</p>
+<p>如果您不知道 _document.js 是什么，请点看下一篇 &ldquo;2.1-_document.js-如何在-Next.js-中改进-SEO&quot;了解更多信息。</p>
+<h1 id="组件">组件</h1>
+<p>我们将创建一些组件，然后在我们的页面中使用这些组件。我们将从以下内容开始：</p>
+<ul>
+<li>标头组件
+<ul>
+<li>导航组件</li>
+</ul>
+</li>
+<li>类别组件
+<ul>
+<li>类别列表组件</li>
+</ul>
+</li>
+<li>博客组件
+<ul>
+<li>博客列表组件</li>
+</ul>
+</li>
+<li>按钮组件</li>
+</ul>
+<p>我们将创建按钮组件，但我们将在接下来的文章中使用它。</p>
+<p>我更喜欢将应用程序分成更小的组件。因此，更容易管理和调试它。它还有另一个优点，我们将在整个应用程序中使用它而不会干扰 UI。</p>
+<p>创建新的目录组件。并且，在 components 文件夹下，创建 Header、Footer、Blog、Button、Categories 文件夹。</p>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/zshipu/images/202205150952784.png" />   
+    </p>
+<p>在 Header 文件夹下，创建两个 javascript 文件：</p>
+<ul>
+<li>HeaderComponent.js</li>
+<li>导航组件.js</li>
+</ul>
+<p>打开 NavigationComponent.js 并添加以下内容：</p>
+<pre tabindex="0"><code>function NavigationComponent() {
+    return (
+        &lt;div className=&quot;bg-gradient-to-r from-cyan-400 to-light-blue-500 rounded shadow-lg&quot;&gt;
+            &lt;nav className=&quot;flex flex-wrap items-center justify-between p-4  rounded&quot;&gt;
+                &lt;div className=&quot;block lg:hidden&quot;&gt;
+                    &lt;button
+                        className=&quot;navbar-burger flex items-center py-2 px-3 text-indigo-500 rounded border border-indigo-500&quot;&gt;
+                        &lt;svg className=&quot;fill-current h-3 w-3&quot; viewBox=&quot;0 0 20 20&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;&gt;
+                            &lt;title&gt;Menu&lt;/title&gt;
+                            &lt;path d=&quot;M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z&quot;&gt;&lt;/path&gt;
+                        &lt;/svg&gt;
+                    &lt;/button&gt;
+                &lt;/div&gt;
+                &lt;div className=&quot;navbar-menu hidden lg:flex lg:flex-grow lg:items-center w-full lg:w-auto&quot;&gt;
+                    &lt;div className=&quot;lg:mx-auto&quot;&gt;
+                        &lt;a className=&quot;block lg:inline-block mt-4 lg:mt-0 mr-10 font-bold text-white hover:underline&quot;
+                        href=&quot;/&quot;&gt;
+                            Home
+                        &lt;/a&gt;
+                        &lt;a className=&quot;block lg:inline-block mt-4 lg:mt-0 mr-10 font-bold text-white hover:underline&quot;
+                        href=&quot;/about&quot;&gt;
+                            About
+                        &lt;/a&gt;
+                        &lt;a className=&quot;block lg:inline-block mt-4 lg:mt-0 text-white font-bold hover:underline&quot;
+                        href=&quot;/contact&quot;&gt;
+                            Contact
+                        &lt;/a&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/nav&gt;
+        &lt;/div&gt;
+    )
+}
+export default NavigationComponent
+</code></pre><p>现在，打开<em>HeaderComponent.js</em>文件并使用其中的 NagivationComponent。</p>
+<pre tabindex="0"><code>import NavigationComponent from &quot;./NavigationComponent&quot;;
+function HeaderComponent() {
+    return (
+        &lt;div&gt;
+            &lt;NavigationComponent /&gt;
+        &lt;/div&gt;
+    )
+}
+export default HeaderComponent;
+</code></pre><p>这就是您的 HeaderComponent 的全部内容。</p>
+<p>并验证您的标头组件是否工作正常。在故事文件夹中创建一个故事。</p>
+<p>创建一个新文件 Header.stories.js 并添加以下内容：</p>
+<pre tabindex="0"><code>import HeaderComponent from &quot;../components/Header/HeaderComponent&quot;;
+export default {
+    title: 'App/AppHeader',
+    component: HeaderComponent
+}
+const Template = args =&gt; &lt;HeaderComponent /&gt;
+// New instance of component
+ export const Default = Template.bind({})
+</code></pre><p>我们没有为这个故事传递任何论据，因为目前没有必要。也许我们会在即将发表的文章中添加。</p>
+<p>现在，运行</p>
+<pre tabindex="0"><code>yarn storybook
+</code></pre><p>在故事书 URL 中，您将在 App 文件夹下看到 AppHeader。当您单击 AppHeader 时，它看起来像下面的屏幕截图。</p>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/zshipu/images/202205150942856.png" />   
+    </p>
+<h1 id="类别-组件">类别 组件</h1>
+<p>在 components 文件夹下创建文件夹类别。</p>
+<p>我们将创建两个组件，主组件总是返回类别列表（CategoriesItem.js 文件）。我们还将创建另一个使用 categories-item 组件的组件。让我们快点做吧。</p>
+<p>创建文件<em>CategoriesItem.js</em>并添加以下代码：</p>
+<pre tabindex="0"><code>import Link from &quot;next/link&quot;;
+function CategoriesItem() {
+    const Categories = ['Perl', 'Python', 'Data Analysis', 'Mojolicious', 'NextJs']
+    return (
+        &lt;div className=&quot;h-full-screen shadow-lg rounded&quot;&gt;
+            &lt;ul className=&quot;ml-4 mb-4 max-w-full mr-4&quot;&gt;
+                &lt;li&gt;/#&gt; ls&lt;/li&gt;
+                {
+                    Categories.map(event =&gt;
+                        &lt;div key={event}&gt;
+                            &lt;li className=&quot;mt-2 mb-2 mr-4 py-4 px-4&quot; id={event} &gt;
+                                - &lt;a className=&quot;hover:underline hover:text-cyan-600&quot; href=&quot;#&quot;&gt; {event} &lt;/a&gt;
+                            &lt;/li&gt;
+                            &lt;hr /&gt;
+                        &lt;/div&gt;
+                    )
+                }
+            &lt;/ul&gt;
+        &lt;/div&gt;
+    )
+}
+export default CategoriesItem
+</code></pre><p>现在我们将创建<em>CategoriesComponent.js</em>并添加以下代码：</p>
+<pre tabindex="0"><code>import CategoriesItem from &quot;./CategoriesItem&quot;;
+function CategoriesComponent() {
+    return (
+        &lt;div className=&quot;ml-10 mt-4&quot;&gt;
+            &lt;CategoriesItem /&gt;
+        &lt;/div&gt;
+    )
+}
+</code></pre><p>现在，它完成了我们的类别组件。让我们更新它的故事。</p>
+<p>在故事下，创建一个文件<em>Categories.stories.js</em>。添加以下代码：</p>
+<pre tabindex="0"><code>import CategoriesComponent from &quot;../components/Categories/CategoriesComponent&quot;;
+export default {
+    title: 'App/Categories',
+    component: CategoriesComponent
+}
+const Template = args =&gt; &lt;CategoriesComponent /&gt;
+// New instance of component
+ export const Default = Template.bind({})
+</code></pre><p>如果故事书已经在运行，那么您会在 APP 下看到类别。</p>
+<h1 id="按钮组件">按钮组件</h1>
+<p>我们不会在本文中使用 Button 组件。但是，我们在接下来的部分/文章中需要它。</p>
+<p>现在让我们创建一个主按钮。</p>
+<p>在 components 目录下创建一个文件夹 Button。</p>
+<p>并添加文件<em>Button.js</em>。使用以下内容更新文件：</p>
+<pre tabindex="0"><code>const Button = ({size, children}) =&gt; {
+    return(
+        &lt;button className={` bg-gradient-to-r from-cyan-400 to-light-blue-500 font-bold text-white px-6 py-2 rounded hover:bg-green-500 ${size} `}&gt;
+            {children}
+        &lt;/button&gt;
+    )
+}
+export default Button;
+</code></pre><p>现在更新故事。</p>
+<p>在故事下创建一个文件<em>Button.stories.js</em>。并添加以下代码：</p>
+<pre tabindex="0"><code>import Button from &quot;../components/Button/Button&quot;;
+
+export default {
+    title: 'UI/Control/Buttons'
+}
+
+const Template = args =&gt; &lt;Button {...args} /&gt;
+
+export const Primary = Template.bind({})
+
+Primary.args ={
+    size: &quot;h-10 w-56&quot;,
+    children: &quot;Primary Button&quot;
+}
+</code></pre><p>打开故事书，您将在 UI/Control/Buttons 下看到按钮。</p>
+<h1 id="博客组件">博客组件</h1>
+<p>到目前为止，我们已经为我们的应用程序创建了一个基本的导航标题、类别。是时候添加 Blog 组件的布局了。</p>
+<p>在 components 文件夹下创建一个文件夹 Blog。添加 BlogComponent.js 和 BlogList.js 文件。</p>
+<p>在<em>BlogList.js</em>文件中添加虚拟内容并使用以下内容更新文件：</p>
+<pre tabindex="0"><code>function BlogList() {
+    return (
+        &lt;div className=&quot;ml-4&quot;&gt;
+            &lt;div className=&quot;border-b shadow rounded-md hover:shadow-lg hover:border&quot;&gt;
+                &lt;div className=&quot;ml-4 mt-4&quot;&gt;
+                    &lt;h1 className=&quot;font-bold text-2xl&quot;&gt;It's All About (The) Next.js api routes&lt;/h1&gt;
+                &lt;/div&gt;
+                {/*Posted Date*/}
+                &lt;div className=&quot;ml-4 mt-4 flex&quot;&gt;
+                    &lt;p&gt;
+                        &lt;span className=&quot;text-gray-400&quot;&gt;Posted On &lt;/span&gt;
+                        &lt;small className=&quot;hover:underline hover:text-cyan-500&quot;&gt;May 22, 2021&lt;/small&gt;
+                    &lt;/p&gt;
+                    {/*Categories Belongs to*/}
+                    &lt;div className=&quot;ml-10&quot;&gt;
+                        &lt;span className=&quot;inline-block bg-cyan-200 text-cyan-800 text-xs px-2 rounded-full uppercase font-semibold tracking-wide mr-2&quot;&gt;
+                            Perl
+                        &lt;/span&gt;
+                        &lt;span className=&quot;inline-block bg-cyan-200 text-cyan-800 text-xs px-2 rounded-full uppercase font-semibold tracking-wide mb-10&quot;&gt;
+                            Nextjs
+                        &lt;/span&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div className=&quot;border-b shadow rounded-md hover:shadow-lg hover:border&quot;&gt;
+                &lt;div className=&quot;ml-4 mt-4&quot;&gt;
+                    &lt;h1 className=&quot;font-bold text-2xl&quot;&gt;Develop a blog in Next.js and Mojolicious - (Part - 1)&lt;/h1&gt;
+                &lt;/div&gt;
+                {/*Posted Date*/}
+                &lt;div className=&quot;ml-4 mt-4 flex&quot;&gt;
+                    &lt;p&gt;
+                        &lt;span className=&quot;text-gray-400&quot;&gt;Posted On &lt;/span&gt;
+                        &lt;small className=&quot;hover:underline hover:text-cyan-500&quot;&gt;May 22, 2021&lt;/small&gt;
+                    &lt;/p&gt;
+                    {/*Categories Belongs to*/}
+                    &lt;div className=&quot;ml-10&quot;&gt;
+                        &lt;span className=&quot;inline-block bg-cyan-200 text-cyan-800 text-xs px-2 rounded-full uppercase font-semibold tracking-wide mr-2&quot;&gt;
+                            Perl
+                        &lt;/span&gt;
+                        &lt;span className=&quot;inline-block bg-cyan-200 text-cyan-800 text-xs px-2 rounded-full uppercase font-semibold tracking-wide mb-10&quot;&gt;
+                            Nextjs
+                        &lt;/span&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div className=&quot;border-b shadow rounded-md hover:shadow-lg hover:border&quot;&gt;
+                &lt;div className=&quot;ml-4 mt-4&quot;&gt;
+                    &lt;h1 className=&quot;font-bold text-2xl&quot;&gt;It's All About (The) Next.js Api routes (Part-2)&lt;/h1&gt;
+                &lt;/div&gt;
+                {/*Posted Date*/}
+                &lt;div className=&quot;ml-4 mt-4 flex&quot;&gt;
+                    &lt;p&gt;
+                        &lt;span className=&quot;text-gray-400&quot;&gt;Posted On &lt;/span&gt;
+                        &lt;small className=&quot;hover:underline hover:text-cyan-500&quot;&gt;May 22, 2021&lt;/small&gt;
+                    &lt;/p&gt;
+                    {/*Categories Belongs to*/}
+                    &lt;div className=&quot;ml-10&quot;&gt;
+                        &lt;span className=&quot;inline-block bg-cyan-200 text-cyan-800 text-xs px-2 rounded-full uppercase font-semibold tracking-wide mr-2&quot;&gt;
+                            Perl
+                        &lt;/span&gt;
+                        &lt;span className=&quot;inline-block bg-cyan-200 text-cyan-800 text-xs px-2 rounded-full uppercase font-semibold tracking-wide mb-10&quot;&gt;
+                            Nextjs
+                        &lt;/span&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    )
+}
+
+export default BlogList
+</code></pre><p>在<em>BlogComponent.js</em>文件中，使用 BlogList.js 组件。</p>
+<pre tabindex="0"><code>import BlogList from &quot;./BlogList&quot;;
+function BlogComponent() {
+    return (
+        &lt;div className=&quot;ml-4 mt-4 w-1/2 container mr-4&quot;&gt;
+            &lt;BlogList /&gt;
+        &lt;/div&gt;
+    )
+}
+export default BlogComponent
+</code></pre><h2 id="更新-indexjs">更新 index.js</h2>
+<p>在最后一节中，我们需要在主页上使用这些组件。打开 pages 文件夹下的 index.js 并将内容替换为：</p>
+<pre tabindex="0"><code>import Head from 'next/head'
+import CategoriesComponent from &quot;../components/Categories/CategoriesComponent&quot;;
+import BlogComponent from &quot;../components/Blog/BlogComponent&quot;;
+export default function Home() {
+  return (
+    &lt;div&gt;
+      &lt;Head&gt;
+        &lt;title&gt;Ashutosh.dev - A place to learn Programming&lt;/title&gt;
+        &lt;meta name=&quot;description&quot; content=&quot;Generated by create next app&quot; /&gt;
+        &lt;link rel=&quot;icon&quot; href=&quot;/favicon.ico&quot; /&gt;
+      &lt;/Head&gt;
+      &lt;div className=&quot;flex flex-auto&quot;&gt;
+          &lt;CategoriesComponent /&gt;
+          &lt;BlogComponent /&gt;
+          &lt;div&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  )
+}
+</code></pre><p>执行以下操作：</p>
+<pre tabindex="0"><code>yarn dev
+</code></pre><p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/zshipu/images/202205150942690.png" />   
+    </p>
+<p>到目前为止，锚链接不起作用，因为我们只创建了应用程序的基本布局。随着本系列的进展，我们将继续添加组件。</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.%E6%90%AD%E5%BB%BA-Next.js-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/">https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.%E6%90%AD%E5%BB%BA-Next.js-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/nextjs/storybooktailwindnextjs/1.%E4%BD%BF%E7%94%A8-StorybookTailwindcss-%E5%92%8C-Apollo-%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%BE%E7%BD%AE-Next.Js/">1.使用 Storybook、Tailwindcss 和 Apollo 客户端设置 Next.Js</a></li>
+        
+        <li><a href="/post/nextjs/nextjsbase/%E5%A6%82%E4%BD%95%E4%B8%BA%E6%82%A8%E7%9A%84Next.js%E9%A1%B9%E7%9B%AE%E6%9E%84%E5%BB%BA%E5%8F%AF%E6%89%A9%E5%B1%95%E7%9A%84%E6%9E%B6%E6%9E%84/">起步：如何为您的Next.js项目构建可扩展的架构</a></li>
+        
+        <li><a href="/post/css/CSS-%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/">CSS 特性的完整指南</a></li>
+        
+        <li><a href="/post/web/Web-3.0%E5%BC%80%E5%8F%91%E8%80%85%E8%B7%AF%E7%BA%BF%E5%9B%BE%E6%8C%87%E5%8D%97%E5%92%8C%E5%85%A5%E9%97%A8%E8%B5%84%E6%BA%90/">Web 3.0：开发者路线图、指南和入门资源</a></li>
+        
+        <li><a href="/post/graphql/%E5%BC%80%E5%A7%8B%E4%BD%BF%E7%94%A8Apollo-Graphql%E6%9C%8D%E5%8A%A1%E5%99%A8/">开始使用Apollo Graphql服务器</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/NextJS'>NextJS</a></li>
+                
+                <li><a href='/tags/storybook'>storybook</a></li>
+                
+                <li><a href='/tags/tailwind'>tailwind</a></li>
+                
+                <li><a href='/tags/apollo'>apollo</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/level01/2.-React-%E5%BE%88%E6%A3%92%E7%9A%84%E7%BB%84%E4%BB%B6/" title="2. React 很棒的组件">2. React 很棒的组件</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/level01/1.-%E5%88%9D%E5%AD%A6%E8%80%85%E7%9A%84-React-/" title="1.初学者的 React">1.初学者的 React</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.4-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E4%BA%86%E8%A7%A3-TypeScript-%E4%B8%AD%E7%9A%84%E9%AB%98%E7%BA%A7%E6%A6%82%E5%BF%B5/" title="2.3 拓展知识了解 TypeScript 中的高级概念">2.3 拓展知识了解 TypeScript 中的高级概念</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.3-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E5%AD%A6%E4%B9%A0-TypeScript-%E5%85%A8%E9%9D%A2%E6%8C%87%E5%8D%97/" title="2.3 拓展知识学习 TypeScript 指南">2.3 拓展知识学习 TypeScript 指南</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.2-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E6%9E%84%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84-UI-%E7%BB%84%E4%BB%B6%E5%BA%93/" title="2.2 拓展知识构建自己的 UI 组件库">2.2 拓展知识构建自己的 UI 组件库</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.1-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86_document.js-%E5%A6%82%E4%BD%95%E5%9C%A8-Next.js-%E4%B8%AD%E6%94%B9%E8%BF%9B-SEO/" title="2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO">2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.%E6%90%AD%E5%BB%BA-Next.js-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/" title="2.搭建 Next.js 应用程序">2.搭建 Next.js 应用程序</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/1.%E4%BD%BF%E7%94%A8-StorybookTailwindcss-%E5%92%8C-Apollo-%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%BE%E7%BD%AE-Next.Js/" title="1.使用 Storybook、Tailwindcss 和 Apollo 客户端设置 Next.Js">1.使用 Storybook、Tailwindcss 和 Apollo 客户端设置 Next.Js</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/css/CSS-%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="CSS 特性的完整指南">CSS 特性的完整指南</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/web/Web-3.0%E5%BC%80%E5%8F%91%E8%80%85%E8%B7%AF%E7%BA%BF%E5%9B%BE%E6%8C%87%E5%8D%97%E5%92%8C%E5%85%A5%E9%97%A8%E8%B5%84%E6%BA%90/" title="Web 3.0：开发者路线图、指南和入门资源">Web 3.0：开发者路线图、指南和入门资源</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/BI/">BI</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD%E5%AE%9E%E6%88%98/">DDD实战</a>
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="https://geek.zshipu.com/tags/IM/">IM</a>
+    
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    
+    <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
+    
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
+    
+    <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/apollo/">apollo</a>
+    
+    <a href="https://geek.zshipu.com/tags/css/">css</a>
+    
+    <a href="https://geek.zshipu.com/tags/flutter/">flutter</a>
+    
+    <a href="https://geek.zshipu.com/tags/game/">game</a>
+    
+    <a href="https://geek.zshipu.com/tags/github/">github</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="https://geek.zshipu.com/tags/graphql/">graphql</a>
+    
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
+    
+    <a href="https://geek.zshipu.com/tags/nodejs/">nodejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/react/">react</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/storybook/">storybook</a>
+    
+    <a href="https://geek.zshipu.com/tags/tailwind/">tailwind</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/web/">web</a>
+    
+    <a href="https://geek.zshipu.com/tags/web3/">web3</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/">人工智能</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%88%86%E8%AF%8D/">分词</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%AD%A6%E4%B9%A0/">学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%96%87%E6%91%98/">文摘</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%88%AC%E8%99%AB/">爬虫</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/">用户画像</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E8%B5%B7%E6%AD%A5/">起步</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

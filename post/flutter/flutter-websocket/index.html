@@ -145,7 +145,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="post-toc" style="position: absolute; top: 188px;">
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
-        
+        <nav id="TableOfContents"></nav>
     </div>
 </div>
 <script type="text/javascript">
@@ -199,126 +199,227 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>目的：实现客户端与服务端的实时通讯，基于TCP协议</p>
-
 <p>与keep-alive区别：keep-alive机制会连接一小段时间，最终会断开，ws协议不会断开</p>
-
 <p>原理：通过一条特殊的http协议请求进行握手后，服务端支持ws协议，则进行协议升级，利用http创建的tcp连接，实现长连接。</p>
-
 <p>步骤分解：</p>
-
 <ul>
-<li><p>连接服务器</p>
-
-<pre><code class="language-dart">final channel = IOWebSocketChannel.connect('ws://echo.websocket.org');
-</code></pre></li>
-
-<li><p>关闭连接</p>
-
-<pre><code class="language-dart">channel.sink.close();
-</code></pre></li>
-
-<li><p>监听服务器</p>
-
+<li>
+<p>连接服务器</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dart" data-lang="dart"><span style="color:#000;font-weight:bold">final</span> channel <span style="color:#000;font-weight:bold">=</span> IOWebSocketChannel.connect(<span style="color:#d14">&#39;ws://echo.websocket.org&#39;</span>);
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>关闭连接</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dart" data-lang="dart">channel.sink.close();
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>监听服务器</p>
 <ul>
-<li><p>StreamBuilder是一个组件，收到一个stream就刷新界面</p>
-
-<pre><code class="language-dart">new StreamBuilder(
-stream: widget.channel.stream,
-builder: (context, snapshot) {
-return new Text(snapshot.hasData ? '${snapshot.data}' : '');
-},
-);
-</code></pre></li>
-</ul></li>
-
-<li><p>发送消息</p>
-
-<pre><code class="language-dart">channel.sink.add('Hello!');
-</code></pre></li>
+<li>StreamBuilder是一个组件，收到一个stream就刷新界面</li>
 </ul>
-
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dart" data-lang="dart"><span style="color:#000;font-weight:bold">new</span> StreamBuilder(
+  <span style="color:#900;font-weight:bold">stream:</span> widget.channel.stream,
+  <span style="color:#900;font-weight:bold">builder:</span> (context, snapshot) {
+    <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">new</span> Text(snapshot.hasData <span style="color:#000;font-weight:bold">?</span> <span style="color:#d14">&#39;</span><span style="color:#d14">${</span>snapshot.data<span style="color:#d14">}</span><span style="color:#d14">&#39;</span> <span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;&#39;</span>);
+  },
+);
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>发送消息</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dart" data-lang="dart">channel.sink.add(<span style="color:#d14">&#39;Hello!&#39;</span>);
+</code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
 <p>完整demo</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">64
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">65
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">66
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">67
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">68
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">69
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">70
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">71
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">72
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">73
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">74
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">75
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dart" data-lang="dart"><span style="color:#000;font-weight:bold">import</span> <span style="color:#d14">&#39;package:flutter/material.dart&#39;</span>;
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#d14">&#39;package:web_socket_channel/io.dart&#39;</span>;
 
-<pre><code class="language-dart">import 'package:flutter/material.dart';
-import 'package:web_socket_channel/io.dart';
-
-class WebSocketRoute extends StatefulWidget {
-  @override
-  _WebSocketRouteState createState() =&gt; new _WebSocketRouteState();
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">WebSocketRoute</span> <span style="color:#000;font-weight:bold">extends</span> StatefulWidget {
+  <span style="color:#a61717;background-color:#e3d2d2">@</span>override
+  _WebSocketRouteState createState() <span style="color:#000;font-weight:bold">=&gt;</span> <span style="color:#000;font-weight:bold">new</span> _WebSocketRouteState();
 }
 
-class _WebSocketRouteState extends State&lt;WebSocketRoute&gt; {
-  TextEditingController _controller = new TextEditingController();
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">_WebSocketRouteState</span> <span style="color:#000;font-weight:bold">extends</span> State<span style="color:#000;font-weight:bold">&lt;</span>WebSocketRoute<span style="color:#000;font-weight:bold">&gt;</span> {
+  TextEditingController _controller <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> TextEditingController();
   IOWebSocketChannel channel;
-  String _text = &quot;&quot;;
+  <span style="color:#458;font-weight:bold">String</span> _text <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;&#34;</span>;
 
 
-  @override
-  void initState() {
-    //创建websocket连接
-    channel = new IOWebSocketChannel.connect('ws://echo.websocket.org');
+  <span style="color:#a61717;background-color:#e3d2d2">@</span>override
+  <span style="color:#458;font-weight:bold">void</span> initState() {
+    <span style="color:#998;font-style:italic">//创建websocket连接
+</span><span style="color:#998;font-style:italic"></span>    channel <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> IOWebSocketChannel.connect(<span style="color:#d14">&#39;ws://echo.websocket.org&#39;</span>);
   }
 
-  @override
+  <span style="color:#a61717;background-color:#e3d2d2">@</span>override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(&quot;WebSocket(内容回显)&quot;),
+    <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">new</span> Scaffold(
+      <span style="color:#900;font-weight:bold">appBar:</span> <span style="color:#000;font-weight:bold">new</span> AppBar(
+        <span style="color:#900;font-weight:bold">title:</span> <span style="color:#000;font-weight:bold">new</span> Text(<span style="color:#d14">&#34;WebSocket(内容回显)&#34;</span>),
       ),
-      body: new Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: new Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: &lt;Widget&gt;[
-            new Form(
-              child: new TextFormField(
-                controller: _controller,
-                decoration: new InputDecoration(labelText: 'Send a message'),
+      <span style="color:#900;font-weight:bold">body:</span> <span style="color:#000;font-weight:bold">new</span> Padding(
+        <span style="color:#900;font-weight:bold">padding:</span> <span style="color:#000;font-weight:bold">const</span> EdgeInsets.all(<span style="color:#099">20.0</span>),
+        <span style="color:#900;font-weight:bold">child:</span> <span style="color:#000;font-weight:bold">new</span> Column(
+          <span style="color:#900;font-weight:bold">crossAxisAlignment:</span> CrossAxisAlignment.start,
+          <span style="color:#900;font-weight:bold">children:</span> <span style="color:#000;font-weight:bold">&lt;</span>Widget<span style="color:#000;font-weight:bold">&gt;</span>[
+            <span style="color:#000;font-weight:bold">new</span> Form(
+              <span style="color:#900;font-weight:bold">child:</span> <span style="color:#000;font-weight:bold">new</span> TextFormField(
+                <span style="color:#900;font-weight:bold">controller:</span> _controller,
+                <span style="color:#900;font-weight:bold">decoration:</span> <span style="color:#000;font-weight:bold">new</span> InputDecoration(<span style="color:#900;font-weight:bold">labelText:</span> <span style="color:#d14">&#39;Send a message&#39;</span>),
               ),
             ),
-            new StreamBuilder(
-              stream: channel.stream,
-              builder: (context, snapshot) {
-                //网络不通会走到这
-                if (snapshot.hasError) {
-                  _text = &quot;网络不通...&quot;;
-                } else if (snapshot.hasData) {
-                  _text = &quot;echo: &quot;+snapshot.data;
+            <span style="color:#000;font-weight:bold">new</span> StreamBuilder(
+              <span style="color:#900;font-weight:bold">stream:</span> channel.stream,
+              <span style="color:#900;font-weight:bold">builder:</span> (context, snapshot) {
+                <span style="color:#998;font-style:italic">//网络不通会走到这
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#000;font-weight:bold">if</span> (snapshot.hasError) {
+                  _text <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;网络不通...&#34;</span>;
+                } <span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">if</span> (snapshot.hasData) {
+                  _text <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;echo: &#34;</span><span style="color:#000;font-weight:bold">+</span>snapshot.data;
                 }
-                return new Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24.0),
-                  child: new Text(_text),
+                <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">new</span> Padding(
+                  <span style="color:#900;font-weight:bold">padding:</span> <span style="color:#000;font-weight:bold">const</span> EdgeInsets.symmetric(<span style="color:#900;font-weight:bold">vertical:</span> <span style="color:#099">24.0</span>),
+                  <span style="color:#900;font-weight:bold">child:</span> <span style="color:#000;font-weight:bold">new</span> Text(_text),
                 );
               },
             )
           ],
         ),
       ),
-      floatingActionButton: new FloatingActionButton(
-        onPressed: _sendMessage,
-        tooltip: 'Send message',
-        child: new Icon(Icons.send),
+      <span style="color:#900;font-weight:bold">floatingActionButton:</span> <span style="color:#000;font-weight:bold">new</span> FloatingActionButton(
+        <span style="color:#900;font-weight:bold">onPressed:</span> _sendMessage,
+        <span style="color:#900;font-weight:bold">tooltip:</span> <span style="color:#d14">&#39;Send message&#39;</span>,
+        <span style="color:#900;font-weight:bold">child:</span> <span style="color:#000;font-weight:bold">new</span> Icon(Icons.send),
       ),
     );
   }
 
-  void _sendMessage() {
-    if (_controller.text.isNotEmpty) {
+  <span style="color:#458;font-weight:bold">void</span> _sendMessage() {
+    <span style="color:#000;font-weight:bold">if</span> (_controller.text.isNotEmpty) {
       channel.sink.add(_controller.text);
     }
   }
 
-  @override
-  void dispose() {
+  <span style="color:#a61717;background-color:#e3d2d2">@</span>override
+  <span style="color:#458;font-weight:bold">void</span> dispose() {
     channel.sink.close();
-    super.dispose();
+    <span style="color:#000;font-weight:bold">super</span>.dispose();
   }
 }
-</code></pre>
-
-<p>数据类型：发送的过程中数据以frame形式存在，每一个frame都由opcode字段指定类型，客户端在收到消息时已经知道类型，会自动转换，streamBuilder.snapshot.data如果是文本，类型是string，二进制数据，类型是List<int>,还有其他类型</p>
-
-<p>参考：<a href="https://book.flutterchina.club/chapter11/websocket.html">https://book.flutterchina.club/chapter11/websocket.html</a></p>
+</code></pre></td></tr></table>
+</div>
+</div><p>数据类型：发送的过程中数据以frame形式存在，每一个frame都由opcode字段指定类型，客户端在收到消息时已经知道类型，会自动转换，streamBuilder.snapshot.data如果是文本，类型是string，二进制数据，类型是List<!-- raw HTML omitted -->,还有其他类型</p>
+<p>参考：https://book.flutterchina.club/chapter11/websocket.html</p>
 
         </div>
 
@@ -446,35 +547,35 @@ class _WebSocketRouteState extends State&lt;WebSocketRoute&gt; {
     </li>
     
     <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.4-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E4%BA%86%E8%A7%A3-TypeScript-%E4%B8%AD%E7%9A%84%E9%AB%98%E7%BA%A7%E6%A6%82%E5%BF%B5/" title="2.3 拓展知识了解 TypeScript 中的高级概念">2.3 拓展知识了解 TypeScript 中的高级概念</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.3-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E5%AD%A6%E4%B9%A0-TypeScript-%E5%85%A8%E9%9D%A2%E6%8C%87%E5%8D%97/" title="2.3 拓展知识学习 TypeScript 指南">2.3 拓展知识学习 TypeScript 指南</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.2-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E6%9E%84%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84-UI-%E7%BB%84%E4%BB%B6%E5%BA%93/" title="2.2 拓展知识构建自己的 UI 组件库">2.2 拓展知识构建自己的 UI 组件库</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.1-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86_document.js-%E5%A6%82%E4%BD%95%E5%9C%A8-Next.js-%E4%B8%AD%E6%94%B9%E8%BF%9B-SEO/" title="2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO">2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.%E6%90%AD%E5%BB%BA-Next.js-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/" title="2.搭建 Next.js 应用程序">2.搭建 Next.js 应用程序</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/1.%E4%BD%BF%E7%94%A8-StorybookTailwindcss-%E5%92%8C-Apollo-%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%BE%E7%BD%AE-Next.Js/" title="1.使用 Storybook、Tailwindcss 和 Apollo 客户端设置 Next.Js">1.使用 Storybook、Tailwindcss 和 Apollo 客户端设置 Next.Js</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/css/CSS-%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="CSS 特性的完整指南">CSS 特性的完整指南</a>
     </li>
     
     <li>
         <a href="https://geek.zshipu.com/post/web/Web-3.0%E5%BC%80%E5%8F%91%E8%80%85%E8%B7%AF%E7%BA%BF%E5%9B%BE%E6%8C%87%E5%8D%97%E5%92%8C%E5%85%A5%E9%97%A8%E8%B5%84%E6%BA%90/" title="Web 3.0：开发者路线图、指南和入门资源">Web 3.0：开发者路线图、指南和入门资源</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/detail/ch1-async-in-netty/" title="Netty那点事（八）理解Netty中的异步">Netty那点事（八）理解Netty中的异步</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/trival-notes/" title="Netty那点事（七）层层分析Netty中的Channel(下)">Netty那点事（七）层层分析Netty中的Channel(下)</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/socks-proxy-by-netty/" title="Netty那点事（六）使用netty构建一个socks proxy">Netty那点事（六）使用netty构建一个socks proxy</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/ch5-handler/" title="Netty那点事（五）讲讲Handler">Netty那点事（五）讲讲Handler</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/ch4-reactor/" title="Netty那点事（四）Netty与Reactor模式">Netty那点事（四）Netty与Reactor模式</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/ch3-pipeline/" title="Netty那点事（三）Channel中的Pipeline">Netty那点事（三）Channel中的Pipeline</a>
     </li>
     
 </ul>
@@ -542,9 +643,9 @@ class _WebSocketRouteState extends State&lt;WebSocketRoute&gt; {
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
-    <a href="">Java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -552,15 +653,17 @@ class _WebSocketRouteState extends State&lt;WebSocketRoute&gt; {
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
-    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
     
-    <a href="">Nextjs</a>
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     
     <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/apollo/">apollo</a>
     
     <a href="https://geek.zshipu.com/tags/css/">css</a>
     
@@ -574,9 +677,11 @@ class _WebSocketRouteState extends State&lt;WebSocketRoute&gt; {
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
     
+    <a href="https://geek.zshipu.com/tags/graphql/">graphql</a>
+    
     <a href="https://geek.zshipu.com/tags/java/">java</a>
     
-    <a href="">js</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
     
@@ -593,6 +698,10 @@ class _WebSocketRouteState extends State&lt;WebSocketRoute&gt; {
     <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
     
     <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/storybook/">storybook</a>
+    
+    <a href="https://geek.zshipu.com/tags/tailwind/">tailwind</a>
     
     <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
     

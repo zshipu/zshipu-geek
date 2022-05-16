@@ -146,18 +146,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li><a href="#parse">Parse</a></li>
-<li><a href="#ignition">Ignition</a></li>
-<li><a href="#turbofan">TurboFan</a></li>
-<li><a href="#orinoco">Orinoco</a></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#parse">Parse</a></li>
+        <li><a href="#ignition">Ignition</a></li>
+        <li><a href="#turbofan">TurboFan</a></li>
+        <li><a href="#orinoco">Orinoco</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
     </div>
 </div>
@@ -204,57 +202,42 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            
-
-<p>V8 是一个非常复杂的项目，有超过 100 万行 C++ 代码。它由许多子模块构成，其中这 4 个模块是最重要的：</p>
-
+            <p>V8 是一个非常复杂的项目，有超过 100 万行 C++ 代码。它由许多子模块构成，其中这 4 个模块是最重要的：</p>
 <h3 id="parse">Parse</h3>
-
 <p>负责将 JavaScript 源码转换为 Abstract Syntax Tree (AST)。确切的说，在 Parser 将 JavaScript 源码转换为 AST 前，还有一个叫 Scanner 的过程，具体流程如下：</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220318110507930.png" alt="image-20220318110507930" /></p>
-
+<p>
+        <img class="mx-auto" alt="image-20220318110507930" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220318110507930.png" />   
+    </p>
 <h3 id="ignition">Ignition</h3>
-
 <p>即解释器，负责将 AST 转换为 Bytecode，解释执行 Bytecode；同时收集 TurboFan 优化编译所需的信息，比如函数参数的类型；解释器执行时主要有四个模块，内存中的字节码、寄存器、栈、堆。<strong>通常有两种类型的解释器，基于栈 (Stack-based) 和 基于寄存器 (Register-based)。</strong></p>
-
 <ul>
 <li>基于栈的解释器：使用栈来保存函数参数、中间运算结果、变量等；</li>
 <li>基于寄存器的虚拟机则支持寄存器的指令操作，使用寄存器来保存参数、中间计算结果。 通常，基于栈的虚拟机也定义了少量的寄存器，基于寄存器的虚拟机也有堆栈，其<strong>区别体现在它们提供的指令集体系。大多数解释器都是基于栈的</strong>，比如 Java 虚拟机，.Net 虚拟机，还有早期的 V8 虚拟机。基于堆栈的虚拟机在处理函数调用、解决递归问题和切换上下文时简单明快。而现在的 V8 虚拟机则采用了基于寄存器的设计，它将一些中间数据保存到寄存器中。</li>
 </ul>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220318110620865.png" alt="image-20220318110620865" /></p>
-
+<p>
+        <img class="mx-auto" alt="image-20220318110620865" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220318110620865.png" />   
+    </p>
 <h3 id="turbofan">TurboFan</h3>
-
 <p>compiler，即编译器，利用 Ignition 所收集的类型信息，将 Bytecode 转换为优化的汇编代码；</p>
-
 <h3 id="orinoco">Orinoco</h3>
-
 <p>garbage collector，垃圾回收模块，负责将程序不再需要的内存空间回收。</p>
-
 <p>其中，Parser，Ignition 以及 TurboFan 可以将 JS 源码编译为汇编代码，其流程图如下：</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220318110633734.png" alt="image-20220318110633734" /></p>
-
+<p>
+        <img class="mx-auto" alt="image-20220318110633734" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220318110633734.png" />   
+    </p>
 <p>简单地说，<strong>Parser 将 JS 源码转换为 AST，然后 Ignition 将 AST 转换为 Bytecode，最后 TurboFan 将 Bytecode 转换为经过优化的 Machine Code(实际上是汇编代码)。</strong></p>
-
 <ul>
 <li>如果函数没有被调用，则 V8 不会去编译它。</li>
 <li>如果函数只被调用 1 次，则 Ignition 将其编译 Bytecode 就直接解释执行了。TurboFan 不会进行优化编译，因为它需要 Ignition 收集函数执行时的类型信息。这就要求函数至少需要执行 1 次，TurboFan 才有可能进行优化编译。</li>
-
-<li><p>如果函数被调用多次，则它有可能会被识别为热点函数，且 Ignition 收集的类型信息证明可以进行优化编译的话，这时 TurboFan 则会将 Bytecode 编译为 Optimized Machine Code（已优化的机器码），以提高代码的执行性能。 图片中的红色虚线是逆向的，也就是说 Optimized Machine Code 会被还原为 Bytecode，这个过程叫做 Deoptimization。这是因为 Ignition 收集的信息可能是错误的，比如 add 函数的参数之前是整数，后来又变成了字符串。生成的 Optimized Machine Code 已经假定 add 函数的参数是整数，那当然是错误的，于是需要进行 Deoptimization</p>
-
-<pre><code>function add(x, y) {
-return x + y;
-}
+<li>如果函数被调用多次，则它有可能会被识别为热点函数，且 Ignition 收集的类型信息证明可以进行优化编译的话，这时 TurboFan 则会将 Bytecode 编译为 Optimized Machine Code（已优化的机器码），以提高代码的执行性能。 图片中的红色虚线是逆向的，也就是说 Optimized Machine Code 会被还原为 Bytecode，这个过程叫做 Deoptimization。这是因为 Ignition 收集的信息可能是错误的，比如 add 函数的参数之前是整数，后来又变成了字符串。生成的 Optimized Machine Code 已经假定 add 函数的参数是整数，那当然是错误的，于是需要进行 Deoptimization</li>
+</ul>
+<pre tabindex="0"><code>  function add(x, y) {
+  return x + y;
+  }
 
 add(3, 5);
 add('3', '5');
-</code></pre></li>
-</ul>
-
-<p>在运行 C、C++ 以及 Java 等程序之前，需要进行编译，不能直接执行源码；但对于 JavaScript 来说，我们可以直接执行源码 (比如：node test.js)，它是在运行的时候先编译再执行，这种方式被称为「即时编译 (Just-in-time compilation)」，简称为 JIT。因此，V8 也属于 JIT 编译器。</p>
+</code></pre><p>在运行 C、C++ 以及 Java 等程序之前，需要进行编译，不能直接执行源码；但对于 JavaScript 来说，我们可以直接执行源码 (比如：node test.js)，它是在运行的时候先编译再执行，这种方式被称为「即时编译 (Just-in-time compilation)」，简称为 JIT。因此，V8 也属于 JIT 编译器。</p>
 
         </div>
 
@@ -388,35 +371,35 @@ add('3', '5');
     </li>
     
     <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.4-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E4%BA%86%E8%A7%A3-TypeScript-%E4%B8%AD%E7%9A%84%E9%AB%98%E7%BA%A7%E6%A6%82%E5%BF%B5/" title="2.3 拓展知识了解 TypeScript 中的高级概念">2.3 拓展知识了解 TypeScript 中的高级概念</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.3-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E5%AD%A6%E4%B9%A0-TypeScript-%E5%85%A8%E9%9D%A2%E6%8C%87%E5%8D%97/" title="2.3 拓展知识学习 TypeScript 指南">2.3 拓展知识学习 TypeScript 指南</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.2-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E6%9E%84%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84-UI-%E7%BB%84%E4%BB%B6%E5%BA%93/" title="2.2 拓展知识构建自己的 UI 组件库">2.2 拓展知识构建自己的 UI 组件库</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.1-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86_document.js-%E5%A6%82%E4%BD%95%E5%9C%A8-Next.js-%E4%B8%AD%E6%94%B9%E8%BF%9B-SEO/" title="2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO">2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.%E6%90%AD%E5%BB%BA-Next.js-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/" title="2.搭建 Next.js 应用程序">2.搭建 Next.js 应用程序</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/1.%E4%BD%BF%E7%94%A8-StorybookTailwindcss-%E5%92%8C-Apollo-%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%BE%E7%BD%AE-Next.Js/" title="1.使用 Storybook、Tailwindcss 和 Apollo 客户端设置 Next.Js">1.使用 Storybook、Tailwindcss 和 Apollo 客户端设置 Next.Js</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/css/CSS-%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="CSS 特性的完整指南">CSS 特性的完整指南</a>
     </li>
     
     <li>
         <a href="https://geek.zshipu.com/post/web/Web-3.0%E5%BC%80%E5%8F%91%E8%80%85%E8%B7%AF%E7%BA%BF%E5%9B%BE%E6%8C%87%E5%8D%97%E5%92%8C%E5%85%A5%E9%97%A8%E8%B5%84%E6%BA%90/" title="Web 3.0：开发者路线图、指南和入门资源">Web 3.0：开发者路线图、指南和入门资源</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/detail/ch1-async-in-netty/" title="Netty那点事（八）理解Netty中的异步">Netty那点事（八）理解Netty中的异步</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/trival-notes/" title="Netty那点事（七）层层分析Netty中的Channel(下)">Netty那点事（七）层层分析Netty中的Channel(下)</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/socks-proxy-by-netty/" title="Netty那点事（六）使用netty构建一个socks proxy">Netty那点事（六）使用netty构建一个socks proxy</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/ch5-handler/" title="Netty那点事（五）讲讲Handler">Netty那点事（五）讲讲Handler</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/ch4-reactor/" title="Netty那点事（四）Netty与Reactor模式">Netty那点事（四）Netty与Reactor模式</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/ch3-pipeline/" title="Netty那点事（三）Channel中的Pipeline">Netty那点事（三）Channel中的Pipeline</a>
     </li>
     
 </ul>
@@ -484,9 +467,9 @@ add('3', '5');
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
-    <a href="">Java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -494,15 +477,17 @@ add('3', '5');
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
-    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
     
-    <a href="">Nextjs</a>
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     
     <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/apollo/">apollo</a>
     
     <a href="https://geek.zshipu.com/tags/css/">css</a>
     
@@ -516,9 +501,11 @@ add('3', '5');
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
     
+    <a href="https://geek.zshipu.com/tags/graphql/">graphql</a>
+    
     <a href="https://geek.zshipu.com/tags/java/">java</a>
     
-    <a href="">js</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
     
@@ -535,6 +522,10 @@ add('3', '5');
     <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
     
     <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/storybook/">storybook</a>
+    
+    <a href="https://geek.zshipu.com/tags/tailwind/">tailwind</a>
     
     <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
     

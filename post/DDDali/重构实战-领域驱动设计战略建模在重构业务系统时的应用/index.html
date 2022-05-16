@@ -145,7 +145,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="post-toc" style="position: absolute; top: 188px;">
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
-        
+        <nav id="TableOfContents"></nav>
     </div>
 </div>
 <script type="text/javascript">
@@ -191,156 +191,139 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            <p>转摘：<a href="https://www.pianshen.com/article/17311939527/">https://www.pianshen.com/article/17311939527/</a></p>
-
+            <p>转摘：https://www.pianshen.com/article/17311939527/</p>
 <p>领域驱动设计战略建模在重构业务系统时的应用</p>
-
 <p>学习领域驱动设计相关的知识有一段时间了，但是一直苦恼于其中的一些概念无法理解透彻，导致无法落地实现甚至生根发芽。机缘巧合，不久前的工作内容中，需要把之前分散在若干个业务系统中（微服务）的购买相关功能进行梳理重构，在这个重构的过程中，充分运用了领域驱动设计中战略设计部分的思想，达成了目标。</p>
-
 <p>本文将结合一些文字和图片，围绕着领域驱动设计中战略部分的三个核心概念：领域通用语言（UBIQUITOUS LANGUAGE），领域模型（Domain）和限界上下文（Bounded Context），来分享下心得。</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706564.png" alt="image1.png" /></p>
-
+<p>
+        <img class="mx-auto" alt="image1.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706564.png" />   
+    </p>
 <p><strong>一、交给我的开发任务居然不能完全解决业务的问题</strong></p>
-
 <p><strong>1、订单化系统的前世</strong></p>
-
 <p>入职得到后端不久，团队交给我一份设计文档和排期计划，要求完成个开发任务，实现一个“订单化”系统。文档中，该系统的设计目标是：实现一个代理服务，对接商城平台组的订单系统和基础平台组的支付系统，然后推动近若干个业务系统改造，把原来直接调用外部系统的方式，改成调用这个新的代理服务。</p>
-
 <p>让我们看下文档中的架构图，简洁明了，而我的工作也似乎就是个“体力活”。</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706566.png" alt="image2.png" /></p>
-
+<p>
+        <img class="mx-auto" alt="image2.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706566.png" />   
+    </p>
 <p>如果是刚出道那会，拿到设计文档，也许我早就不管三七二十一撸起袖子加油干的敲代码了。但是，经历过多年在业务开发线上摸爬滚打，加上对学习OO和领域驱动设计的一些领悟，直觉告诉我没那么简单，我应该了解清楚来龙去脉再动手……</p>
-
 <p>经过调研，我终于明白了“订单化”是什么？顾名思义，就是把得到app内所有的虚拟商品在交付时用标准的订单号关联起来？你也许会好奇，一个电商平台居然没有订单？我相信“存在即合理”，当时这么做肯定有当时的原因和背景，说白了一切都是为了快速上线，快速验证得到app的商业模式，活下去比设计实现一个完美的系统优先级更高。</p>
-
 <p>没有订单的购买机制运行了一年多后，商城平台组实现了订单系统，经过财务核算部门的“努力”推动，若干后端业务方把虚拟商品的购买对接了订单系统的三个接口（创建、支付、签收），这就是最初的订单化的“萌芽”。</p>
-
 <p>如下图，以精品课系统举例，要实现精品课的售卖，该系统要和若干个外部系统直接打交道，如果把别的几个业务系统的调动关系也画上，脑补一下这个图会成为什么样子。不管怎样，财务核算部门的第一步要求是实现了，那就是用订单号串起来了所有的购买信息，实现了原始朴素的“订单化”要求。</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706567.png" alt="image3.png" /></p>
-
+<p>
+        <img class="mx-auto" alt="image3.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706567.png" />   
+    </p>
 <p>如此复杂的调用关系，和“高内聚低耦合”背道而驰，很快就暴露了问题：业务方要求在订单签收的时候增加一个签收时间字段，并且要求传递写入已购数据表的实际时间。这个很小的需求，据参与的同事说，投入了将近20多人/日才上线，因为要同步改数个业务系统呢!</p>
-
 <p>团队尝到了痛苦，决定改变，于是下决心做一个“订单化”系统，同时把财务要求的数据校验规则加上。</p>
-
 <p><strong>2、订单化系统不能完全解决业务的问题</strong></p>
-
 <p>分析业务规则并读了一些代码后，整理出了订单化系统的一些分析和设计文档，经过了团队内部确认理解正确，找业务方在沟通一下就可以开工了。如下图，是其中在第三方支付这个场景下的时序图。</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706568.png" alt="image4.png" /></p>
-
+<p>
+        <img class="mx-auto" alt="image4.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706568.png" />   
+    </p>
 <p>有个程序员能听懂的段子“我有个产品，离上线运营，只差一个程序员了”，开发工作眼看着就要开始了。我带着掌握的内容，满怀信心的去和合作部门（关注订单化系统的一些“老板”们）交流，却感觉大家关注的点甚至方向都常常不一致，越交流内心越分裂。我作为订单化系统的负责人是乙方，最关心的是：基于现有确定的需求，如何尽快上线订单化系统 。而他们甲方关心的是：一定要正确的记账（面向现在），能够高效准确的算账（面向未来），把过去的账给解释清楚（面向过去），似乎对“订单化”系统并不是那么“感兴趣”。我的目标在财务生态圈里只是个过程！ 怎么达到真正的目标？ 我该怎么办？那个时间段感受到了双重的压力，一面来自于业务方，因为交给我的开发任务居然不能完全解决业务的问题，一面来自于开发团队内部，领导们不理解为什么订单化系统迟迟不能取得显著进展……</p>
-
 <p><strong>3、转折点</strong></p>
-
 <p>带着问题，我被关进了“小黑屋”参与财务审计对账工作。开始时，可以用“身陷重围，十面埋伏”来形容，因为几乎每天都会被“拷问”，为什么这么多问题数据？谁是对应的产品经理呢？得到端谁对权益数据准确性负责呢？让你们老大招个懂财务的产品经理吧！谁都能听出来，是对我能否胜任工作的担忧和不信任……</p>
-
 <p>终于，“小黑屋”顺利出关，完成了公司的要求，自己直接和业务方的伙伴们，面对面的工作近一个月，让我收获颇丰：</p>
-
 <ul>
-<li>从财务角度，理解了和体会了正确记录数据的重要性</li>
-<li>推进已知问题的止损，理解了得到“订单化”在全局的地位</li>
-<li>“提炼”了一些“统一语言”</li>
-<li>自己下决心：不能为了“订单化”而实现“订单化”</li>
-<li>收获了些许财务思维</li>
-<li>收获了财务生态圈的信任。信任很关键，一个团队或者跨团队协作时，信任本身就是生产力。</li>
-</ul>
-
+<li>
+<p>从财务角度，理解了和体会了正确记录数据的重要性</p>
+</li>
+<li>
+<p>推进已知问题的止损，理解了得到“订单化”在全局的地位</p>
+</li>
+<li>
+<p>“提炼”了一些“统一语言”</p>
+</li>
+<li>
+<p>自己下决心：不能为了“订单化”而实现“订单化”</p>
+</li>
+<li>
+<p>收获了些许财务思维</p>
+</li>
+<li>
+<p>收获了财务生态圈的信任。信任很关键，一个团队或者跨团队协作时，信任本身就是生产力。</p>
 <p><strong>二、“订单化”系统演变为了“订单交付” 系统</strong></p>
-
 <p><strong>1、DDD思想指导的开发过程</strong></p>
-
 <p>领域驱动设计（DDD）思想指导的开发过程，是一个全程强调“领域模型”的开发过程，首先开发团队要和领域专家去针对业务需求进行充分的讨论沟通，才能确定真正的问题域和业务期望。</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706569.png" alt="image5.png" /></p>
-
-<p>下面的图，是一次找财务方向的产品经理沟通讨论时给我画的，产品经理说第一次有技术主动和她聊财务相关的业务，一高兴就给我讲了很多。</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706570.png" alt="image6.png" /></p>
-
-<p>为了让自己的理解和产品经理想要表达的不产生太大的偏差，当天结合这个草图，赶紧画了一个自己理解的图，第二天又去给产品经理讲了一遍。反述的过程，自己明白订单化在全局的位置，虽然貌似不起眼但是却担负着得到所有虚拟商品的交付。</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706571.png" alt="image7.png" /></p>
-
-<p>经过和业务方的多次交流后，我们逐渐提炼和理解了一些“统一语言”，举例如下：</p>
-
-<ul>
-<li>订单完整的生命周期：下单，支付，已支付待交付，交付（发货），签收</li>
-<li>确收：收入和交付数据核对无误，可以确认为财务收入</li>
-<li>权益：用户购买虚拟商品后，获得可以学习对应课程的权利</li>
-<li>补偿：该给权益的时候没给，要补上权益</li>
+</li>
 </ul>
-
+<p>
+        <img class="mx-auto" alt="image5.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706569.png" />   
+    </p>
+<p>下面的图，是一次找财务方向的产品经理沟通讨论时给我画的，产品经理说第一次有技术主动和她聊财务相关的业务，一高兴就给我讲了很多。</p>
+<p>
+        <img class="mx-auto" alt="image6.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706570.png" />   
+    </p>
+<p>为了让自己的理解和产品经理想要表达的不产生太大的偏差，当天结合这个草图，赶紧画了一个自己理解的图，第二天又去给产品经理讲了一遍。反述的过程，自己明白订单化在全局的位置，虽然貌似不起眼但是却担负着得到所有虚拟商品的交付。</p>
+<p>
+        <img class="mx-auto" alt="image7.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706571.png" />   
+    </p>
+<p>经过和业务方的多次交流后，我们逐渐提炼和理解了一些“统一语言”，举例如下：</p>
+<ul>
+<li>
+<p>订单完整的生命周期：下单，支付，已支付待交付，交付（发货），签收</p>
+</li>
+<li>
+<p>确收：收入和交付数据核对无误，可以确认为财务收入</p>
+</li>
+<li>
+<p>权益：用户购买虚拟商品后，获得可以学习对应课程的权利</p>
+</li>
+<li>
+<p>补偿：该给权益的时候没给，要补上权益</p>
 <p>回到领域驱动设计，扣一下字眼。首先，一个领域，解决一个核心问题，任何一个系统都会属于某个特定的领域；确定了系统所属的领域，相当于确定了系统的核心目标；确定了系统的核心业务，那么要解决的关键问题、问题的范围边界就基本确定了。驱动，我理解的是回答优先级和孰轻孰重，前面的“订单化”系统之所以不能解决业务的问题，就是因为陷入了误区之一“还没有确定自己要干什么，就陷入技术细节”。</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706572.png" alt="image8.png" /></p>
-
+</li>
+</ul>
+<p>
+        <img class="mx-auto" alt="image8.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706572.png" />   
+    </p>
 <p><strong>2、订单化系统演变为“订单交付系统”</strong></p>
-
 <p>经过继续深入调研后，把“订单化”要完成的内容，划分成了支付和交付两部分，如下图。</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706573.png" alt="image9.png" /></p>
-
+<p>
+        <img class="mx-auto" alt="image9.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706573.png" />   
+    </p>
 <p>重新确定的领域问题是：订单签约和履约，正确的交付权益。从全局角度看，就是交易与订单。交易是行为，订单是契约，交付是履约。从得到后端的角度看，核心领域问题是“订单交付”，所以一个“订单交付”系统就呼之欲出了。几乎在同时，公司也确定了要做一个交易中心的中台服务，去和若干支付系统对接，我把他们起名为“交易生态圈”。</p>
-
 <p><strong>3、“订单交付系统”的设计建模</strong></p>
-
 <p>从前面的内容中我们可以看到，“订单化”系统的设计，依然没有使得各个业务系统（诸如精品课、订阅专栏等）从购买交付的商品售卖场景摆脱出来，导致各个业务系统各自为战的重复实现了自己不擅长的商品购买交付逻辑，由于缺乏领域知识敏感度，产生的交付数据达不到财务核算的精确要求。</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706574.png" alt="image11.png" /></p>
-
+<p>
+        <img class="mx-auto" alt="image11.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706574.png" />   
+    </p>
 <p>这个其实在领域驱动设计思想中也有理论依据，原有的建模方法陷入了“以用户为中心”的误区。DDD的思想认为，建模不能以用户为中心作为出发点，在人机交互系统面前，各个系统的领域模型将变得没有差别，职责会不明，因为无论什么都可以归结为“用户的行为”，以用户为中心来思考领域模型的思维只是停留在需求的表面，而没有挖掘出真正的需求的本质。</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706575.png" alt="image12.png" /></p>
-
+<p>
+        <img class="mx-auto" alt="image12.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706575.png" />   
+    </p>
 <p>借助DDD的建模思想指导，进行了重新建模平，新模型面对的核心领域模型是“商品”，核心限界上下文是“订单交付”。</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706576.png" alt="image13.png" /></p>
-
+<p>
+        <img class="mx-auto" alt="image13.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706576.png" />   
+    </p>
 <p>实现后的订单交付系统，使得从下单到交付，业务系统无需关注，感觉不到订单的存在。</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706577.png" alt="image14.png" /></p>
-
+<p>
+        <img class="mx-auto" alt="image14.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706577.png" />   
+    </p>
 <p><strong>三、用限界上下文保卫领域</strong></p>
-
 <p>确定了领域后，就要保护ta不能随意被“侵犯”，而保护的依据，就是“限界上下文”。如下图，Eric Evans 用细胞来形容限界上下文，因为“细胞之所以能够存在，是因为细胞膜限定了什么在细胞内，什么在细胞外，并且确定了什么物质可以通过细胞膜。”这里，细胞代表上下文，而细胞膜代表了包裹上下文的边界。</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706578.png" alt="image15.png" /></p>
-
+<p>
+        <img class="mx-auto" alt="image15.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706578.png" />   
+    </p>
 <p>对业务上下文和限界的理解不足，很容易切换到以用户为中心去建立领域模型的心流模式。</p>
-
-<p>例如，人去乘坐飞机，要强调出&rdquo;机场登机流程管理&rdquo;这个上下文的重要性，不管到机场之前是什么角色，人到了登机这个场景就是乘客，是属于“登机流程”这个上下文的，要遵守这个场景上下文的业务规则和规范，接受“登机流程”的调度指挥，而不是由着自己“肆意妄为”。</p>
-
+<p>例如，人去乘坐飞机，要强调出&quot;机场登机流程管理&quot;这个上下文的重要性，不管到机场之前是什么角色，人到了登机这个场景就是乘客，是属于“登机流程”这个上下文的，要遵守这个场景上下文的业务规则和规范，接受“登机流程”的调度指挥，而不是由着自己“肆意妄为”。</p>
 <p>由机场“登机流程上下文”业务规则调度，和乘客去主动触发登记所需要的动作，完全可以表现为两种设计，伪代码如下。</p>
-
 <p><strong>前者</strong></p>
-
-<pre><code>登机流程上下文.排队(乘客)
+<pre tabindex="0"><code>登机流程上下文.排队(乘客)
 登机流程上下文.安检(乘客)
 登机流程上下文.摆渡(乘客,航班)
 登机流程上下文.登机(乘客,航班)
-</code></pre>
-
-<p><strong>后者</strong></p>
-
-<pre><code>乘客.排队(机场)
+</code></pre><p><strong>后者</strong></p>
+<pre tabindex="0"><code>乘客.排队(机场)
 乘客.我要安检(机场)
 乘客.我要坐摆渡车(摆渡车)
 乘客.我要上飞机(航班)
-</code></pre>
-
-<p><strong>前者是有序的安全的，不会给机场带来意外惊喜，后者机场是不可控的。</strong></p>
-
+</code></pre><p><strong>前者是有序的安全的，不会给机场带来意外惊喜，后者机场是不可控的。</strong></p>
 <p>在“订单交付系统”推进的过程中，由于大家立场不同，所以遇到一些来破坏领域的事情也就不足为奇，例如我推进了如下的一些动作来保卫领域，其中有些动作已经完全超越了一名“开发人员”的职责范围。一名技术人员敢于对业务内容做决策，离不开对领域知识的把握。</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706579.png" alt="image16.png" /></p>
-
+<p>
+        <img class="mx-auto" alt="image16.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/202110151706579.png" />   
+    </p>
 <p><strong>总结</strong></p>
-
 <p>DDD思想指导的开发过程，首先是开发团队要和领域专家去针对业务需求进行充分的讨论沟通，这一点很重要，业务线的开发人员有个不好的习惯：被动接受需求，回头再来抱怨业务人员或者产品经理没有表述清楚，人非圣贤孰能无过，合作的就是要互相补位。</p>
-
 <p>在一个DDD的一个讨论群里，有一位伙伴问，领域驱动设计的价值到底在什么地方？笔者在公司内做了一次关于领域驱动设计的分享后，同样有小伙伴问我，学习DDD到底能给工作带来什么？有的伙伴说，DDD难是因为它没有固定的招式？不是一个好回答的问题，因为如果好回答，也许DDD早就向敏捷思想、OO（面向对象）思想、MVC、微服务那样火遍大江南北甚至五湖四海了……但是如果你些许认真的学习过领域驱动设计，便会发现，到处都有DDD的思想。</p>
 
         </div>
@@ -473,35 +456,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </li>
     
     <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.4-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E4%BA%86%E8%A7%A3-TypeScript-%E4%B8%AD%E7%9A%84%E9%AB%98%E7%BA%A7%E6%A6%82%E5%BF%B5/" title="2.3 拓展知识了解 TypeScript 中的高级概念">2.3 拓展知识了解 TypeScript 中的高级概念</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.3-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E5%AD%A6%E4%B9%A0-TypeScript-%E5%85%A8%E9%9D%A2%E6%8C%87%E5%8D%97/" title="2.3 拓展知识学习 TypeScript 指南">2.3 拓展知识学习 TypeScript 指南</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.2-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E6%9E%84%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84-UI-%E7%BB%84%E4%BB%B6%E5%BA%93/" title="2.2 拓展知识构建自己的 UI 组件库">2.2 拓展知识构建自己的 UI 组件库</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.1-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86_document.js-%E5%A6%82%E4%BD%95%E5%9C%A8-Next.js-%E4%B8%AD%E6%94%B9%E8%BF%9B-SEO/" title="2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO">2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.%E6%90%AD%E5%BB%BA-Next.js-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/" title="2.搭建 Next.js 应用程序">2.搭建 Next.js 应用程序</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/1.%E4%BD%BF%E7%94%A8-StorybookTailwindcss-%E5%92%8C-Apollo-%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%BE%E7%BD%AE-Next.Js/" title="1.使用 Storybook、Tailwindcss 和 Apollo 客户端设置 Next.Js">1.使用 Storybook、Tailwindcss 和 Apollo 客户端设置 Next.Js</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/css/CSS-%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="CSS 特性的完整指南">CSS 特性的完整指南</a>
     </li>
     
     <li>
         <a href="https://geek.zshipu.com/post/web/Web-3.0%E5%BC%80%E5%8F%91%E8%80%85%E8%B7%AF%E7%BA%BF%E5%9B%BE%E6%8C%87%E5%8D%97%E5%92%8C%E5%85%A5%E9%97%A8%E8%B5%84%E6%BA%90/" title="Web 3.0：开发者路线图、指南和入门资源">Web 3.0：开发者路线图、指南和入门资源</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/detail/ch1-async-in-netty/" title="Netty那点事（八）理解Netty中的异步">Netty那点事（八）理解Netty中的异步</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/trival-notes/" title="Netty那点事（七）层层分析Netty中的Channel(下)">Netty那点事（七）层层分析Netty中的Channel(下)</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/socks-proxy-by-netty/" title="Netty那点事（六）使用netty构建一个socks proxy">Netty那点事（六）使用netty构建一个socks proxy</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/ch5-handler/" title="Netty那点事（五）讲讲Handler">Netty那点事（五）讲讲Handler</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/ch4-reactor/" title="Netty那点事（四）Netty与Reactor模式">Netty那点事（四）Netty与Reactor模式</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/ch3-pipeline/" title="Netty那点事（三）Channel中的Pipeline">Netty那点事（三）Channel中的Pipeline</a>
     </li>
     
 </ul>
@@ -569,9 +552,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
-    <a href="">Java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -579,15 +562,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
-    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
     
-    <a href="">Nextjs</a>
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     
     <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/apollo/">apollo</a>
     
     <a href="https://geek.zshipu.com/tags/css/">css</a>
     
@@ -601,9 +586,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
     
+    <a href="https://geek.zshipu.com/tags/graphql/">graphql</a>
+    
     <a href="https://geek.zshipu.com/tags/java/">java</a>
     
-    <a href="">js</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
     
@@ -620,6 +607,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
     
     <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/storybook/">storybook</a>
+    
+    <a href="https://geek.zshipu.com/tags/tailwind/">tailwind</a>
     
     <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
     

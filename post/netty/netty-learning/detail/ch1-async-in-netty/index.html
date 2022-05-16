@@ -146,22 +146,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-<ul>
-<li><a href="#理解netty中的异步">理解Netty中的异步</a>
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li><a href="#future-和future-listener">Future 和Future-Listener</a>
-<ul>
-<li><a href="#1-future">1. Future</a></li>
-<li><a href="#2-future-listener-机制">2. Future-Listener 机制</a></li>
-</ul></li>
-</ul></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
     </div>
 </div>
@@ -208,74 +199,91 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            
-
-<h1 id="理解netty中的异步">理解Netty中的异步</h1>
-
+            <h1 id="理解netty中的异步">理解Netty中的异步</h1>
 <p>首先，事件驱动的Handler机制本身就是异步的。其次，<code>ChannelFuture</code>为异步操作提供了同步的方式。与Future对应的还有<code>ChannelListener</code>。</p>
-
 <p>Future可以理解为化异步为同步的一个方式。JDK里的<code>Future</code>就是如此。</p>
-
 <p>异步的概念和同步相对。当一个异步过程调用发出后，调用者不能立刻得到结果。实际处理这个调
- 用的组件在完成后，通过状态、通知和回调来通知调用</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202205012023741.png" alt="image-20220501202314925" /></p>
-
+用的组件在完成后，通过状态、通知和回调来通知调用</p>
+<p>
+        <img class="mx-auto" alt="image-20220501202314925" src="https://cdn.jsdelivr.net/gh/zshipu/images/202205012023741.png" />   
+    </p>
 <p>Netty 中的 I/O 操作是异步的，包括 Bind、Write、Connect 等操作会简单的返回一个
- ChannelFuture。调用者并不能立刻获得结果，而是通过 Future-Listener 机制，用户可以方便的主动获
- 取或者通过通知机制获得IO 操作结果. Netty 的异步模型是建立在 future 和 callback 的之上的。
- callback 就是回调。重点说 Future，它的核心思想是：假设一个方法 fun，计算过程可能非常耗时，等
- 待 fun 返回显然不合适。那么可以在调用 fun 的时候，立马返回一个 Future，后续可以通过 Future 去
- 监控方法 fun 的处理过程(即 ： Future-Listener 机制)</p>
-
+ChannelFuture。调用者并不能立刻获得结果，而是通过 Future-Listener 机制，用户可以方便的主动获
+取或者通过通知机制获得IO 操作结果. Netty 的异步模型是建立在 future 和 callback 的之上的。
+callback 就是回调。重点说 Future，它的核心思想是：假设一个方法 fun，计算过程可能非常耗时，等
+待 fun 返回显然不合适。那么可以在调用 fun 的时候，立马返回一个 Future，后续可以通过 Future 去
+监控方法 fun 的处理过程(即 ： Future-Listener 机制)</p>
 <h4 id="future-和future-listener">Future 和Future-Listener</h4>
-
 <h5 id="1-future">1. Future</h5>
-
 <p>表示异步的执行结果, 可以通过它提供的方法来检测执行是否完成，ChannelFuture 是他的一
- 个子接口. ChannelFuture 是一个接口 ,可以添加监听器，当监听的事件发生时，就会通知到监听器</p>
-
+个子接口. ChannelFuture 是一个接口 ,可以添加监听器，当监听的事件发生时，就会通知到监听器</p>
 <p>当 Future 对象刚刚创建时，处于非完成状态，调用者可以通过返回的 ChannelFuture 来获取
- 操作执行的状态， 注册监听函数来执行完成后的操作。</p>
-
+操作执行的状态， 注册监听函数来执行完成后的操作。</p>
 <p>常用方法有:
- ·sync 方法, 阻塞等待程序结果反回
- ·isDone 方法来判断当前操作是否完成；
- ·isSuccess 方法来判断已完成的当前操作是否成功；
- ·getCause 方法来获取已完成的当前操作失败的原因；
- ·isCancelled 方法来判断已完成的当前操作是否被取消；
- addListener 方法来注册监听器，当操作已完成(isDone 方法返回完成)，将会通知指定的监听
- 器；如果Future 对象已完成，则通知指定的监听器</p>
-
+·sync 方法, 阻塞等待程序结果反回
+·isDone 方法来判断当前操作是否完成；
+·isSuccess 方法来判断已完成的当前操作是否成功；
+·getCause 方法来获取已完成的当前操作失败的原因；
+·isCancelled 方法来判断已完成的当前操作是否被取消；
+addListener 方法来注册监听器，当操作已完成(isDone 方法返回完成)，将会通知指定的监听
+器；如果Future 对象已完成，则通知指定的监听器</p>
 <h5 id="2-future-listener-机制">2. Future-Listener 机制</h5>
-
 <p>给Future添加监听器,监听操作结果</p>
-
-<pre><code class="language-cpp">ChannelFuture future = bootstrap.bind(9999);
- future.addListener(new ChannelFutureListener() { 
-@Override 
-public void operationComplete(ChannelFuture future) throws Exception
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp">ChannelFuture future <span style="color:#000;font-weight:bold">=</span> bootstrap.bind(<span style="color:#099">9999</span>);
+ future.addListener(<span style="color:#000;font-weight:bold">new</span> ChannelFutureListener() { 
+<span style="color:#a61717;background-color:#e3d2d2">@</span>Override 
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> operationComplete(ChannelFuture future) <span style="color:#000;font-weight:bold">throws</span> Exception
  { 
-if (future.isSuccess())
- { System.out.println(&quot;端口绑定成功!&quot;); } 
-else { System.out.println(&quot;端口绑定失败!&quot;); } } 
+<span style="color:#000;font-weight:bold">if</span> (future.isSuccess())
+ { System.out.println(<span style="color:#d14">&#34;端口绑定成功!&#34;</span>); } 
+<span style="color:#000;font-weight:bold">else</span> { System.out.println(<span style="color:#d14">&#34;端口绑定失败!&#34;</span>); } } 
 });
-</code></pre>
-
-<pre><code class="language-swift">ChannelFuture channelFuture = ctx.writeAndFlush(Unpooled.copiedBuffer(&quot;你好 
-呀,我是Netty客户端&quot;, CharsetUtil.UTF_8)); 
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-swift" data-lang="swift">ChannelFuture channelFuture = ctx.writeAndFlush(Unpooled.copiedBuffer(<span style="color:#d14">&#34;你好 
+</span><span style="color:#d14">呀,我是Netty客户端&#34;</span>, CharsetUtil.UTF_8)); 
 channelFuture.addListener(new ChannelFutureListener() { 
 @Override 
-public void operationComplete(ChannelFuture future) throws Exception { 
-if (future.isSuccess()) { 
-System.out.println(&quot;数据发送成功.&quot;); 
-} else { 
-System.out.println(&quot;数据发送失败.&quot;); 
+<span style="color:#000;font-weight:bold">public</span> void operationComplete(ChannelFuture future) <span style="color:#000;font-weight:bold">throws</span> Exception { 
+<span style="color:#000;font-weight:bold">if</span> (future.isSuccess()) { 
+System.out.<span style="color:#999">println</span>(<span style="color:#d14">&#34;数据发送成功.&#34;</span>); 
+} <span style="color:#000;font-weight:bold">else</span> { 
+System.out.<span style="color:#999">println</span>(<span style="color:#d14">&#34;数据发送失败.&#34;</span>); 
 } 
 } 
 });
-</code></pre>
-
+</code></pre></td></tr></table>
+</div>
+</div>
         </div>
 
         
@@ -406,35 +414,35 @@ System.out.println(&quot;数据发送失败.&quot;);
     </li>
     
     <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.4-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E4%BA%86%E8%A7%A3-TypeScript-%E4%B8%AD%E7%9A%84%E9%AB%98%E7%BA%A7%E6%A6%82%E5%BF%B5/" title="2.3 拓展知识了解 TypeScript 中的高级概念">2.3 拓展知识了解 TypeScript 中的高级概念</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.3-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E5%AD%A6%E4%B9%A0-TypeScript-%E5%85%A8%E9%9D%A2%E6%8C%87%E5%8D%97/" title="2.3 拓展知识学习 TypeScript 指南">2.3 拓展知识学习 TypeScript 指南</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.2-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E6%9E%84%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84-UI-%E7%BB%84%E4%BB%B6%E5%BA%93/" title="2.2 拓展知识构建自己的 UI 组件库">2.2 拓展知识构建自己的 UI 组件库</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.1-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86_document.js-%E5%A6%82%E4%BD%95%E5%9C%A8-Next.js-%E4%B8%AD%E6%94%B9%E8%BF%9B-SEO/" title="2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO">2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.%E6%90%AD%E5%BB%BA-Next.js-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/" title="2.搭建 Next.js 应用程序">2.搭建 Next.js 应用程序</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/1.%E4%BD%BF%E7%94%A8-StorybookTailwindcss-%E5%92%8C-Apollo-%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%BE%E7%BD%AE-Next.Js/" title="1.使用 Storybook、Tailwindcss 和 Apollo 客户端设置 Next.Js">1.使用 Storybook、Tailwindcss 和 Apollo 客户端设置 Next.Js</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/css/CSS-%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="CSS 特性的完整指南">CSS 特性的完整指南</a>
     </li>
     
     <li>
         <a href="https://geek.zshipu.com/post/web/Web-3.0%E5%BC%80%E5%8F%91%E8%80%85%E8%B7%AF%E7%BA%BF%E5%9B%BE%E6%8C%87%E5%8D%97%E5%92%8C%E5%85%A5%E9%97%A8%E8%B5%84%E6%BA%90/" title="Web 3.0：开发者路线图、指南和入门资源">Web 3.0：开发者路线图、指南和入门资源</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/detail/ch1-async-in-netty/" title="Netty那点事（八）理解Netty中的异步">Netty那点事（八）理解Netty中的异步</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/trival-notes/" title="Netty那点事（七）层层分析Netty中的Channel(下)">Netty那点事（七）层层分析Netty中的Channel(下)</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/socks-proxy-by-netty/" title="Netty那点事（六）使用netty构建一个socks proxy">Netty那点事（六）使用netty构建一个socks proxy</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/ch5-handler/" title="Netty那点事（五）讲讲Handler">Netty那点事（五）讲讲Handler</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/ch4-reactor/" title="Netty那点事（四）Netty与Reactor模式">Netty那点事（四）Netty与Reactor模式</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/ch3-pipeline/" title="Netty那点事（三）Channel中的Pipeline">Netty那点事（三）Channel中的Pipeline</a>
     </li>
     
 </ul>
@@ -502,9 +510,9 @@ System.out.println(&quot;数据发送失败.&quot;);
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
-    <a href="">Java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -512,15 +520,17 @@ System.out.println(&quot;数据发送失败.&quot;);
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
-    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
     
-    <a href="">Nextjs</a>
+    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     
     <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/apollo/">apollo</a>
     
     <a href="https://geek.zshipu.com/tags/css/">css</a>
     
@@ -534,9 +544,11 @@ System.out.println(&quot;数据发送失败.&quot;);
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
     
+    <a href="https://geek.zshipu.com/tags/graphql/">graphql</a>
+    
     <a href="https://geek.zshipu.com/tags/java/">java</a>
     
-    <a href="">js</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
     
@@ -553,6 +565,10 @@ System.out.println(&quot;数据发送失败.&quot;);
     <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
     
     <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/storybook/">storybook</a>
+    
+    <a href="https://geek.zshipu.com/tags/tailwind/">tailwind</a>
     
     <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
     
