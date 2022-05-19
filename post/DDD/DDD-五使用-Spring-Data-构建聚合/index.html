@@ -145,7 +145,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="post-toc" style="position: absolute; top: 188px;">
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
-        <nav id="TableOfContents"></nav>
+        <nav id="TableOfContents">
+<ul>
+<li><a href="#使用-persistable-abstractpersistable-和-abstractaggregateroot">使用<code>Persistable</code>,<code>AbstractPersistable</code>和<code>AbstractAggregateRoot</code></a></li>
+<li><a href="#建立自己的基类">建立自己的基类</a></li>
+<li><a href="#乐观锁定">乐观锁定</a></li>
+</ul>
+</nav>
     </div>
 </div>
 <script type="text/javascript">
@@ -191,19 +197,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            <p>JPA 有自己的<code>@Entity</code>概念，但远没有 DDD 中的实体概念那么严格。这既是优点也是缺点。优点是使用 JPA 实现实体和聚合非常容易。缺点是同样容易做 DDD 不允许的事情。如果您与以前广泛使用过 JPA 但不熟悉 DDD 的开发人员一起工作，这可能会特别成问题。</p>
+            
+
+<p>JPA 有自己的<code>@Entity</code>概念，但远没有 DDD 中的实体概念那么严格。这既是优点也是缺点。优点是使用 JPA 实现实体和聚合非常容易。缺点是同样容易做 DDD 不允许的事情。如果您与以前广泛使用过 JPA 但不熟悉 DDD 的开发人员一起工作，这可能会特别成问题。</p>
+
 <p>而值对象只是实现了一个空的标记接口，实体和聚合根将需要更广泛的基类。从一开始就正确设置基类很重要，因为以后更改它们将非常困难，尤其是当域模型变得很大时。为了帮助我们完成这项任务，我们将使用<a href="https://spring.io/projects/spring-data">Spring Data</a>。</p>
+
 <p>Spring Data 提供了一些开箱即用的基类，您可以根据需要使用它们，因此让我们从查看它们开始。</p>
-<h1 id="使用persistableabstractpersistable和abstractaggregateroot">使用<code>Persistable</code>,<code>AbstractPersistable</code>和<code>AbstractAggregateRoot</code></h1>
+
+<h1 id="使用-persistable-abstractpersistable-和-abstractaggregateroot">使用<code>Persistable</code>,<code>AbstractPersistable</code>和<code>AbstractAggregateRoot</code></h1>
+
 <p>Spring Data 提供了一个开箱即用的接口，称为<code>Persistable</code>. 该接口有两种方法，一种用于获取实体的 ID，另一种用于检查实体是新的还是持久的。如果一个实体实现了这个接口，Spring Data 将使用它来决定在保存它时是调用<code>persist</code>（新实体）还是<code>merge</code>（持久化实体）。但是，您不需要实现此接口。Spring Data 还可以使用乐观锁版本来判断实体是否是新的：如果有版本，则持久化；如果没有，那就是新的。当您决定如何生成实体 ID 时，您需要注意这一点。</p>
+
 <p><code>Persistable</code>Spring Data 还提供了实现接口的抽象基类： <code>AbstractPersistable</code>. 它是一个泛型类，将 ID 的类型作为其单个泛型参数。ID 字段带有注释，<code>@GeneratedValue</code>这意味着 Hibernate 等 JPA 实现将在实体首次持久化时尝试自动生成 ID。该类将具有非空 ID 的实体视为持久实体，将具有空 ID 的实体视为新实体。最后，它覆盖<code>equals</code>and<code>hashCode</code>以便在检查相等性时只考虑类和 ID。这与 DDD 一致 - 如果两个实体具有相同的 ID，则它们被视为相同。</p>
+
 <p>如果您可以在实体 ID 中使用普通 Java 类型（例如<code>Long</code>或<code>UUID</code>）并让 JPA 实现在实体首次持久化时为您生成它们，那么这个基类是实体和聚合根的绝佳起点。但是等等，还有更多。</p>
-<p>Spring Data 还提供了一个抽象基类，称为<code>AbstractAggregateRoot</code>. 这是一个类 - 你猜对了 - 旨在通过聚合根进行扩展。但是，它<em>既不</em>扩展<code>AbstractPersistable</code>也不实现<code>Persistable</code>接口。那你为什么要使用这个类？好吧，它提供了允许聚合注册域事件的方法，然后在保存实体后发布这些事件。这真的很有用，我们将在以后的文章中回到这个主题。此外，不在基类中声明 ID 字段并让聚合根声明它们自己的 ID 也有一些好处。我们还将在稍后的帖子中回到这个主题。</p>
+
+<p>Spring Data 还提供了一个抽象基类，称为<code>AbstractAggregateRoot</code>. 这是一个类 - 你猜对了 - 旨在通过聚合根进行扩展。但是，它*既不*扩展<code>AbstractPersistable</code>也不实现<code>Persistable</code>接口。那你为什么要使用这个类？好吧，它提供了允许聚合注册域事件的方法，然后在保存实体后发布这些事件。这真的很有用，我们将在以后的文章中回到这个主题。此外，不在基类中声明 ID 字段并让聚合根声明它们自己的 ID 也有一些好处。我们还将在稍后的帖子中回到这个主题。</p>
+
 <p>在实践中，您希望聚合根是<code>Persistable</code>，因此您最终实现了自己的基类的方法<code>AbstractAggregteRoot</code>或<code>AbstractPersistable</code>在您自己的基类中。接下来让我们看看如何做到这一点。</p>
+
 <h1 id="建立自己的基类">建立自己的基类</h1>
+
 <p>在我从事的几乎所有项目中，无论是在工作中还是在私人领域，我都是从创建自己的基类开始的。我的大部分领域模型都是从聚合根和值对象构建的；我很少使用所谓的本地实体（属于聚合但不是根的实体）。</p>
+
 <p>我经常从一个名为的基类开始<code>BaseEntity</code>，它看起来像这样：</p>
-<pre tabindex="0"><code>@MappedSuperclass // &lt;1&gt;
+
+<pre><code>@MappedSuperclass // &lt;1&gt;
 public abstract class BaseEntity&lt;Id extends Serializable&gt; extends AbstractPersistable&lt;Id&gt; { // &lt;2&gt;
 
     @Version // &lt;3&gt;
@@ -217,14 +237,18 @@ public abstract class BaseEntity&lt;Id extends Serializable&gt; extends Abstract
         this.version = version;
     }
 }
-</code></pre><ol>
+</code></pre>
+
+<ol>
 <li>即使该类被命名<code>BaseEntity</code>，它也不是 JPA<code>@Entity</code>而是<code>@MappedSuperclass</code>.</li>
 <li><code>Serializable</code>界直接来自<code>AbstractPersistable</code>。</li>
 <li>我对所有实体都使用乐观锁定。我们将在本文后面讨论这个问题。</li>
 <li>在极少数情况下（如果有的话）需要手动设置乐观锁定版本。但是，为了安全起见，我提供了一种受保护的方法来实现这一点。我认为大多数拥有多年经验的 Java 开发人员都经历过这样的情况：他们真的需要在超类中设置属性或调用方法，却发现它是私有的。</li>
 </ol>
+
 <p>一旦我的<code>BaseEntity</code>课程到位，我就会继续学习<code>BaseAggregateRoot</code>。这本质上是 Spring Data 的副本<code>AbstractAggregateRoot</code>，但它扩展了<code>BaseEntity</code>：</p>
-<pre tabindex="0"><code>@MappedSuperclass // &lt;1&gt;
+
+<pre><code>@MappedSuperclass // &lt;1&gt;
 public abstract class BaseAggregateRoot&lt;Id extends Serializable&gt; extends BaseEntity&lt;Id&gt; {
 
     private final @Transient List&lt;Object&gt; domainEvents = new ArrayList&lt;&gt;(); // &lt;2&gt;
@@ -243,20 +267,29 @@ public abstract class BaseAggregateRoot&lt;Id extends Serializable&gt; extends B
         return Collections.unmodifiableList(domainEvents);
     }
 }
-</code></pre><ol>
+</code></pre>
+
+<ol>
 <li>这个基类也是一个<code>@MappedSuperclass</code>.</li>
 <li>此列表将包含我们要在保存聚合时发布的所有域事件。这是<code>@Transient</code>因为我们不想将它们存储在数据库中。</li>
 <li>当您想从聚合中发布域事件时，您可以使用此受保护的方法注册它。我们将在本文后面仔细研究这一点。</li>
 <li>这是一个 Spring Data 注释。Spring Data 将在域事件发布后调用此方法。</li>
 <li>这也是一个 Spring Data 注释。Spring Data 将调用此方法来获取要发布的域事件。</li>
 </ol>
+
 <p>就像我说的，我很少使用本地实体。然而，当这种需要出现时，我经常创建一个<code>BaseLocalEntity</code>扩展<code>BaseEntity</code>但不提供任何附加功能的类（除了，可能是对拥有它的聚合根的引用）。我将把这个作为练习留给读者。</p>
+
 <h1 id="乐观锁定">乐观锁定</h1>
+
 <p>我们已经<code>@Version</code>为乐观锁定添加了一个字段，<code>BaseEntity</code>但我们还没有讨论原因。在<a href="https://geek.zshipu.com/post/%E6%88%98%E6%9C%AF%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1/">战术领域驱动设计</a>中，聚合设计的第四条准则是使用乐观锁定。但是为什么我们将<code>@Version</code>字段添加到<code>BaseEntity</code>而不是<code>BaseAggregateRoot</code>呢？毕竟，负责维护聚合完整性的不是聚合根吗？</p>
+
 <p>这个问题的答案是肯定的，但是在这里，底层的持久性技术（JPA 及其实现）再次潜入我们的领域设计。假设我们使用 Hibernate 作为我们的 JPA 实现。</p>
+
 <p>Hibernate 不知道聚合根是什么——它只处理实体和嵌入。Hibernate 还跟踪实际更改了哪些实体，并且仅将这些更改刷新到数据库中。实际上，这意味着即使您明确要求 Hibernate 保存实体，实际上也不会向数据库写入任何更改，并且乐观版本号可能保持不变。</p>
+
 <p>只要您只处理聚合根和值对象，这不是问题。对于 Hibernate，对可嵌入对象的更改始终是对其拥有实体的更改，因此实体的乐观版本（在本例中为聚合根）将按预期递增。但是，一旦您将本地实体添加到组合中，情况就会发生变化。例如：</p>
-<pre tabindex="0"><code>@Entity
+
+<pre><code>@Entity
 public class Invoice extends BaseAggregateRoot&lt;InvoiceId&gt; { // &lt;1&gt;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -264,11 +297,15 @@ public class Invoice extends BaseAggregateRoot&lt;InvoiceId&gt; { // &lt;1&gt;
 
     // The rest of the methods and fields are omitted
 }
-</code></pre><ol>
+</code></pre>
+
+<ol>
 <li><code>Invoice</code>是聚合根，因此它扩展了<code>BaseAggregateRoot</code>类。</li>
 <li><code>InvoiceItem</code>是一个本地实体，因此它根据基类层次结构扩展<code>BaseEntity</code>类或类。<code>BaseLocalEntity</code>此类的实现并不重要，因此我们将其省略，但请注意注释中的级联选项<code>@OneToMany</code>。</li>
 </ol>
+
 <p>本地实体由其聚合根所有，因此通过级联进行持久化。但是，如果仅对本地实体而不是聚合根进行了更改，则保存聚合根只会导致本地实体被刷新到数据库中。在上面的示例中，如果我们仅对发票项目进行了更改，然后保存了整个发票，则发票版本号将保持不变。如果另一个用户在我们保存发票之前对同一项目进行了更改，我们将默默地用我们的更改覆盖其他用户的更改。</p>
+
 <p>通过向 中添加乐观锁定版本字段<code>BaseEntity</code>，我们可以防止出现这种情况。聚合根和本地实体都将被乐观锁定，并且不可能意外覆盖其他人的更改。</p>
 
         </div>
@@ -393,6 +430,10 @@ public class Invoice extends BaseAggregateRoot&lt;InvoiceId&gt; { // &lt;1&gt;
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/graphql/%E5%B8%A6%E6%9C%89-Netflix-DGS-%E5%92%8C-Spring-Boot-%E7%9A%84-GraphQL-%E6%9C%8D%E5%8A%A1%E5%99%A8/" title="带有 Netflix DGS 和 Spring Boot 的 GraphQL 服务器">带有 Netflix DGS 和 Spring Boot 的 GraphQL 服务器</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/react/level01/2.-React-%E5%BE%88%E6%A3%92%E7%9A%84%E7%BB%84%E4%BB%B6/" title="2. React 很棒的组件">2. React 很棒的组件</a>
     </li>
     
@@ -426,10 +467,6 @@ public class Invoice extends BaseAggregateRoot&lt;InvoiceId&gt; { // &lt;1&gt;
     
     <li>
         <a href="https://geek.zshipu.com/post/css/CSS-%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="CSS 特性的完整指南">CSS 特性的完整指南</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/web/Web-3.0%E5%BC%80%E5%8F%91%E8%80%85%E8%B7%AF%E7%BA%BF%E5%9B%BE%E6%8C%87%E5%8D%97%E5%92%8C%E5%85%A5%E9%97%A8%E8%B5%84%E6%BA%90/" title="Web 3.0：开发者路线图、指南和入门资源">Web 3.0：开发者路线图、指南和入门资源</a>
     </li>
     
 </ul>
@@ -497,9 +534,9 @@ public class Invoice extends BaseAggregateRoot&lt;InvoiceId&gt; { // &lt;1&gt;
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="">Java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -507,9 +544,9 @@ public class Invoice extends BaseAggregateRoot&lt;InvoiceId&gt; { // &lt;1&gt;
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
-    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
+    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
     
-    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
+    <a href="">Nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
@@ -535,7 +572,7 @@ public class Invoice extends BaseAggregateRoot&lt;InvoiceId&gt; { // &lt;1&gt;
     
     <a href="https://geek.zshipu.com/tags/java/">java</a>
     
-    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    <a href="">js</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
     

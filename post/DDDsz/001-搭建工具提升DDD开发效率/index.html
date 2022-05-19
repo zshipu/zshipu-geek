@@ -146,15 +146,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-  <ul>
-    <li><a href="#传统开发模式">传统开发模式</a></li>
-    <li><a href="#ddd-开发模式">DDD 开发模式</a></li>
-    <li><a href="#ddd-在代码落地过程中的困难">DDD 在代码落地过程中的困难</a></li>
-    <li><a href="#开发框架的意义">开发框架的意义</a></li>
-    <li><a href="#开发框架的功能">开发框架的功能</a></li>
-    <li><a href="#传统工程采用-ddd-框架重构方法">传统工程采用 DDD 框架重构方法</a></li>
-    <li><a href="#总结">总结</a></li>
-  </ul>
+<ul>
+<li><a href="#为什么启动ddd">为什么启动DDD</a>
+<ul>
+<li><a href="#传统开发模式">传统开发模式</a></li>
+<li><a href="#ddd-开发模式">DDD 开发模式</a></li>
+<li><a href="#ddd-在代码落地过程中的困难">DDD 在代码落地过程中的困难</a></li>
+<li><a href="#开发框架的意义">开发框架的意义</a></li>
+<li><a href="#开发框架的功能">开发框架的功能</a></li>
+<li><a href="#传统工程采用-ddd-框架重构方法">传统工程采用 DDD 框架重构方法</a></li>
+<li><a href="#总结">总结</a></li>
+</ul></li>
+</ul>
 </nav>
     </div>
 </div>
@@ -201,74 +204,108 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            <h1 id="为什么启动ddd">为什么启动DDD</h1>
+            
+
+<h1 id="为什么启动ddd">为什么启动DDD</h1>
+
 <h2 id="传统开发模式">传统开发模式</h2>
+
 <p>传统开发模式下，我们的应用架构往往<strong>以数据为中心</strong>。</p>
+
 <p>在这种架构风格中，代码结构比较，开发人员拿到业务需求后，一般的开发流程就是：建表、按照业务流程写服务，服务操作数据库表数据，使其返回结果。这种模式最大的好处就是：学习门槛低、上手速度快，长久以来被大家所使用。</p>
+
 <p>但随着时间的推移，业务需求不断增长与业务逻辑愈加复杂，基于数据的架构往往不能够很好的匹配业务规则演进，导致业务对数据库表的访问盘综错杂，系统随时间推移急剧腐化，演变为一个复杂的大泥球。</p>
-<p>
-        <img class="mx-auto" alt="image-20211008161555299" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20211008161555299.png" />   
-    </p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20211008161555299.png" alt="image-20211008161555299" /></p>
+
 <h2 id="ddd-开发模式">DDD 开发模式</h2>
+
 <p>DDD 开发模式的革命性在于，<strong>领域模型基于业务知识来构建，能够准确的反映业务规则</strong>。这样的好处是，业务规则可以内聚在领域模型中，领域模型纯粹的成为领域知识和规则的载体，可以不再受到技术方面的制约，未来领域模型的演进仅跟随业务规则的演进而演进，彻底的分离了业务与技术。</p>
+
 <p>DDD 作为一种解决复杂问题域的方法论，其设计思想分为两个部分：战略设计与战术设计。</p>
+
 <p><strong>战略设计</strong>首先聚焦于核心域。核心域即为业务比较关注的、能为公司带来价值的部分，这部分的业务一般比较复杂，并且后续会不断演进变化，所以采用 DDD 模式来确保该领域建模的合理性。</p>
+
 <p>在确定好核心域后，首先由该领域的专家或者业务人员提供一些业务场景，然后分析其中的关键事件，构成事件风暴的输入。事件就是指我们所关注的、真实发生的、能带来价值的、会对我们系统产生影响的改变，一般以被动语态来描述（比如订单已创建，账户已锁定）。通过这些事件的分析，我们可以梳理出聚合及限界上下文，事件风暴是战略设计中最常用的领域建模方法。</p>
+
 <p>由战略设计得到聚合和限界上下文之后，就要进行到<strong>战术设计</strong>部分。这部分会细化聚合，识别其中的实体、聚合根、值对象以及领域服务，当然实体中的行为也是我们需要关注的重点，这部分可以用名词动词法来完成。另外这部分还要确定好工程的分层架构，设计好主要的 API 接口。</p>
+
 <p>完成以上这些内容，开发人员就可以开始开发了。但开发人员一定要遵照领域模型和分层架构来开发，所以从战略设计到战术设计，核心开发人员也会参与，而不仅仅是业务专家和架构师，这能够为后面代码落地节约学习成本。</p>
+
 <p>从战略到战术是一个<strong>统一语言</strong>的过程，一个是业务人员的话术到技术人员的话术，一个是领域内部各名词的统一，不能够有歧义的发生。而且统一语言还有一层含义，就是把业务人员用文档描述的领域知识和业务规则，由开发人员变成用代码描述的领域知识和业务规则。所以真正 DDD 风格的核心业务代码，业务人员是能够看得懂的，它只是换了一种形式表达。这就要求我们在实现代码时，采用面向对象的方式来编写，这样才能更好的还原领域模型。</p>
+
 <p>我们都知道，罗马不是一日建成的，从 DDD 战略设计到战术设计，最后得到领域模型，也一定是<strong>迭代</strong>出来的。我们说没有最正确的领域模型，只有最适合的领域模型。而 <strong>DDD 的魅力就是，我们建模的出发点是业务，而非技术，那我们得到的模型一定是最适合业务发展的模型，将来当业务变化，需要迭代的时候，也一定比传统开发模式更适宜进行演进</strong>。</p>
-<p>
-        <img class="mx-auto" alt="image-20211008161620406" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20211008161620406.png" />   
-    </p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20211008161620406.png" alt="image-20211008161620406" /></p>
+
 <h2 id="ddd-在代码落地过程中的困难">DDD 在代码落地过程中的困难</h2>
+
 <p>然而，DDD 在代码落地过程中会遇到以下问题：</p>
+
 <p>一、<strong>业务知识没有内聚在领域模型中</strong>。领域模型是有行为的，需要将大部分的领域知识填充到领域模型中。这就要求在写代码时，将业务知识放在模型中，而非服务中。这与传统的开发方式有一定区别，如果不注意，就容易写成贫血模型的代码，造成领域知识外漏，即聚合没有将领域知识内聚起来。</p>
+
 <p>二、<strong>聚合持久化复杂</strong>。DDD 在做模型的持久化时，会以聚合根为整体，所以会涉及较多的级联操作，这与传统开发模式的持久化操作相比要更加复杂。</p>
+
 <p>三、<strong>业务代码于技术代码未分离</strong>。DDD 讲求聚焦于业务，而对于技术方面其实是不关心的。所以在落地代码时，应该将业务代码与技术代码分离，并且业务代码一定不能依赖于技术代码，这样在后续业务演进时，业务代码才能不被技术复杂度所牵绊。</p>
+
 <p>基于上述几点，会发现 DDD 其实是有一定的学习门槛的，这对于新加入的项目成员，需要一定的学习时间，所以对项目进度需要有比较大的容忍度。</p>
-<p>
-        <img class="mx-auto" alt="image-20211008161633284" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20211008161633284.png" />   
-    </p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20211008161633284.png" alt="image-20211008161633284" /></p>
+
 <h2 id="开发框架的意义">开发框架的意义</h2>
+
 <p>应对 DDD 在代码落地方面的困难，采用中原银行 DDD 开发框架开发有两方面意义：</p>
+
 <p>一、<strong>通过约束预防问题的发生</strong>。如通过建立统一的工程架构模板，解决领域知识外漏的问题；通过分离技术复杂度与业务复杂度，解决业务代码与技术代码未分离的问题。</p>
+
 <p>二、<strong>辅助解决重复性、复杂性的工作</strong>。如通过对领域模型的管理，进而自动生成领域模型代码，来解决贫血模型的问题。通过粘合器框架及事件通知框架，解决传输模型转换的问题及聚合间依赖的问题。通过聚合持久化框架解决聚合持久化复杂的问题。</p>
-<p>
-        <img class="mx-auto" alt="image-20211008161647525" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20211008161647525.png" />   
-    </p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20211008161647525.png" alt="image-20211008161647525" /></p>
+
 <h2 id="开发框架的功能">开发框架的功能</h2>
+
 <p>我行开发框架包含以下主要功能，能够帮助我们在代码落地过程中提升开发效率：</p>
+
 <p>一、<strong>领域模型管理及代码生成</strong>。</p>
+
 <p>通过画图的方式，可以对聚合内部的聚合根、实体、值对象进行描述，进而通过领域模型元模型，来生成代码。领域模型元模型可以对领域模型进行细致的描述，所生成的代码也能保证与领域模型一致。</p>
-<p>
-        <img class="mx-auto" alt="image-20211008161707965" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20211008161707965.png" />   
-    </p>
-<p>
-        <img class="mx-auto" alt="image-20211008161727366" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20211008161727366.png" />   
-    </p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20211008161707965.png" alt="image-20211008161707965" /></p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20211008161727366.png" alt="image-20211008161727366" /></p>
+
 <p>二、<strong>开发框架分层</strong></p>
+
 <p>开发框架分层是统一工程架构模板的基础，通过分层依赖关系来保证领域层代码不依赖基础层代码，保证了业务代码不依赖技术代码。</p>
+
 <p>我们一共分为三层，分别为应用层、领域层及基础层。</p>
+
 <p><strong>领域层</strong>是整个分层架构的核心，这里包含了全部的业务知识，并且尽可能的将业务知识写在实体中，保证充血模型。领域层是技术无关的，它不能依赖于其他层，这样保证业务代码不依赖技术代码。</p>
+
 <p><strong>应用层</strong>提供整个系统的接入及面向场景的应用服务。</p>
+
 <p><strong>基础层</strong>依赖于领域层，为领域层提供技术实现。</p>
-<p>
-        <img class="mx-auto" alt="image-20211008161737513" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20211008161737513.png" />   
-    </p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20211008161737513.png" alt="image-20211008161737513" /></p>
+
 <p>三、<strong>统一工程模板</strong></p>
+
 <p>提供一整套工程模板，来定义每一层中对应的目录结构，开发人员可以将代码放置于相对应的目录下，保证分层架构不被破坏，并保证了代码符合 DDD 风格。</p>
-<p>
-        <img class="mx-auto" alt="image-20211008161756732" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20211008161756732.png" />   
-    </p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20211008161756732.png" alt="image-20211008161756732" /></p>
+
 <h2 id="传统工程采用-ddd-框架重构方法">传统工程采用 DDD 框架重构方法</h2>
+
 <p>当传统项目想采用 DDD 开发模式时，需要将已开发的代码重构为 DDD 工程结构的代码。</p>
+
 <p>Controller 层的代码一般可以重用；旧的模型则需要分为两部分，分别为业务模型及数据模型，业务模型放置到领域聚合模块，数据模型放置到技术适配模块；Service 需要进行比较大的重构，分为三个部分：一部分是业务知识无关的逻辑，需要放置到应用服务模块的应用服务中；另一部分业务知识相关的代码，尽可能的放置于领域聚合模块中的业务模型中，保证充血模型；其余无处放置的业务知识可以放置到领域服务中。最后在领域聚合模块中建立仓库接口，在技术适配模块中建立仓库实现，就完成了代码重构。</p>
-<p>
-        <img class="mx-auto" alt="image-20211008161807765" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20211008161807765.png" />   
-    </p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20211008161807765.png" alt="image-20211008161807765" /></p>
+
 <h2 id="总结">总结</h2>
+
 <p>目前 DDD 已经发展到从战略层面的应用进入到了战术层面的应用。之前我们更多的聚焦于如何利用 DDD 方法论建立领域模型、划分微服务，但其实这对于 DDD 来说才刚开始。在代码落地层面我们需要持续的保持自律，保证代码符合 DDD 风格，否则前期的领域模型就得不到守护。</p>
+
 <p>采用开发框架能够帮助我们更快的适应 DDD 开发模式，但正如 DDD 不是银弹一样，开发框架也不是银弹，开发框架只能帮助我们解决一部分问题，要想 DDD 落地的更好，需要我们大家共同的努力与学习。</p>
 
         </div>
@@ -389,6 +426,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/graphql/%E5%B8%A6%E6%9C%89-Netflix-DGS-%E5%92%8C-Spring-Boot-%E7%9A%84-GraphQL-%E6%9C%8D%E5%8A%A1%E5%99%A8/" title="带有 Netflix DGS 和 Spring Boot 的 GraphQL 服务器">带有 Netflix DGS 和 Spring Boot 的 GraphQL 服务器</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/react/level01/2.-React-%E5%BE%88%E6%A3%92%E7%9A%84%E7%BB%84%E4%BB%B6/" title="2. React 很棒的组件">2. React 很棒的组件</a>
     </li>
     
@@ -422,10 +463,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/css/CSS-%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="CSS 特性的完整指南">CSS 特性的完整指南</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/web/Web-3.0%E5%BC%80%E5%8F%91%E8%80%85%E8%B7%AF%E7%BA%BF%E5%9B%BE%E6%8C%87%E5%8D%97%E5%92%8C%E5%85%A5%E9%97%A8%E8%B5%84%E6%BA%90/" title="Web 3.0：开发者路线图、指南和入门资源">Web 3.0：开发者路线图、指南和入门资源</a>
     </li>
     
 </ul>
@@ -493,9 +530,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="">Java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -503,9 +540,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
-    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
+    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
     
-    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
+    <a href="">Nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
@@ -531,7 +568,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/java/">java</a>
     
-    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    <a href="">js</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
     

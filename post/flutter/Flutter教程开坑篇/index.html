@@ -146,13 +146,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-  <ul>
-    <li><a href="#step1">step1</a></li>
-    <li><a href="#heading"></a></li>
-    <li><a href="#step2">step2</a></li>
-    <li><a href="#heading-1"></a></li>
-    <li><a href="#step3">step3</a></li>
-  </ul>
+<ul>
+<li><a href="#创建一个flutter应用">创建一个Flutter应用</a></li>
+<li><a href="#先搞清楚在哪里写代码">先搞清楚在哪里写代码</a></li>
+<li><a href="#需求拆解">需求拆解：</a>
+<ul>
+<li><a href="#step1">step1</a></li>
+<li><a href="#step2">step2</a></li>
+<li><a href="#step3">step3</a></li>
+</ul></li>
+</ul>
 </nav>
     </div>
 </div>
@@ -199,191 +202,169 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            <ul>
+            
+
+<ul>
 <li>在开始之前，我们先来了解下Flutter的架构和渲染机制</li>
 </ul>
-<p>
-        <img class="mx-auto" alt="1650844419.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/2c52c1fecc484462a8c23b6e57be2a70.png" />   
-    </p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/2c52c1fecc484462a8c23b6e57be2a70.png" alt="1650844419.png" /></p>
+
 <p>可以看到Flutter的架构主要分为三层:Framework，Engine和Embedder。</p>
+
 <blockquote>
 <p>1.Framework使用dart实现，包括Material Design风格的Widget,Cupertino(针对iOS)风格的Widgets，文本/图片/按钮等基础Widgets，渲染，动画，手势等。此部分的核心代码是:flutter仓库下的flutter package，以及sky_engine仓库下的io,async,ui(dart:ui库提供了Flutter框架和引擎之间的接口)等package。</p>
+
 <p>2.Engine使用C++实现，主要包括:Skia,Dart和Text。Skia是开源的二维图形库，提供了适用于多种软硬件平台的通用API。</p>
+
 <p>3.Embedder是一个嵌入层，即把Flutter嵌入到各个平台上去，这里做的主要工作包括渲染Surface设置,线程设置，以及插件等。从这里可以看出，Flutter的平台相关层很低，平台(如iOS)只是提供一个画布，剩余的所有渲染相关的逻辑都在Flutter内部，这就使得它具有了很好的跨端一致性。</p>
 </blockquote>
+
 <ul>
 <li>从网上摘了一段，也是Flutter标志自己完全不同于RN类框架或其他Hybrid跨端框架的核心要素</li>
 </ul>
+
 <p><em>我试着用一句话讲明白flutter为什么可以跨端+高性能的原理</em></p>
+
 <p><strong>这货就是个跨端“游戏”引擎呀（打了引号）</strong></p>
+
 <blockquote>
 <p>一块画布（SGL），使用Dart语言编写Framework制定的API，由Framework调用Engine层实现绘制，Embedder层负责跨端运行和渲染。</p>
 </blockquote>
+
 <p>再想想那些能跨平台的游戏引擎unreal，unity3d，你想想是不是都是这么回事呀？</p>
+
 <h1 id="创建一个flutter应用">创建一个Flutter应用</h1>
+
 <p>原理就聊到这里，回到我们的课程，快速的让大家先来上个手《点不到的按钮》</p>
+
 <ul>
 <li>安装Flutter看这里：<a href="https://juejin.cn/post/6887967800799789064">安装Flutter</a></li>
 </ul>
+
 <ol>
 <li>flutter create myapp</li>
 <li>“myapp”是你应用的名称</li>
 <li>完成后用vscode打开这个目录</li>
 </ol>
+
 <h1 id="先搞清楚在哪里写代码">先搞清楚在哪里写代码</h1>
-<p>
-        <img class="mx-auto" alt="image-20220426093341010" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220426093341010.png" />   
-    </p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220426093341010.png" alt="image-20220426093341010" /></p>
+
 <p>lib/main.dart就是咱们新建的这个应用的入口代码</p>
+
 <p>先不说别的，run一下（按F5），第一次很慢，之后会快很多</p>
-<p>
-        <img class="mx-auto" alt="image-20220426093356815" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220426093356815.png" />   
-    </p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220426093356815.png" alt="image-20220426093356815" /></p>
+
 <p>你可以选择使用苹果模拟器或是安卓模拟器来调试</p>
+
 <p>随便改改代码试试看调试模式下的热重载</p>
-<pre tabindex="0"><code>比如找到这一行代码
+
+<pre><code>比如找到这一行代码
 primarySwatch: Colors.blue,
 改为
 primarySwatch: Colors.red,
 保存
-</code></pre><p>这次不需要经过编译，模拟器里的UI就实时改变了。所以热重载是一个非常高效的调试方式。<em>（这样的特性还用跟Web前端开发者说嘛？是不是太out了）</em></p>
+</code></pre>
+
+<p>这次不需要经过编译，模拟器里的UI就实时改变了。所以热重载是一个非常高效的调试方式。<em>（这样的特性还用跟Web前端开发者说嘛？是不是太out了）</em></p>
+
 <p>*
 *</p>
+
 <p>回到我们的课程案例上，需求是</p>
+
 <blockquote>
 <p>在界面里放置一个按钮，按钮上文字显示”点我呀“，点击之后按钮就跑到另外一个坐标。这就是点不到的按钮&hellip;其实原本课程里是mouseover后移动到另一个坐标，但移动端没有mouseover这个事儿啊&hellip;</p>
 </blockquote>
+
 <h1 id="需求拆解">需求拆解：</h1>
+
 <h2 id="step1">step1</h2>
+
 <p>在放按钮之前，我们需要一个承载按钮的布局容器</p>
+
 <blockquote>
 <p>这个按钮点了之后要随机变换位置，所以肯定得用自由布局的组件</p>
 </blockquote>
+
 <p>查看<a href="https://link.juejin.cn?target=https%3A%2F%2Fflutterchina.club%2Fwidgets%2Flayout%2F">所有布局组件</a></p>
-<pre tabindex="0"><code>总之看完所有布局组件的文档，我们知道要用到这个组合
+
+<pre><code>总之看完所有布局组件的文档，我们知道要用到这个组合
 Stack，一个可以随意堆放子元素的布局
 Positioned，一个绝对定位组件，改变top，left参数就可以跑来跑去啦
-</code></pre><h2 id="heading"></h2>
+</code></pre>
+
 <h2 id="step2">step2</h2>
+
 <p>我们要在这个容器里放一个按钮，按钮上文字显示”点我呀“</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dart" data-lang="dart">RaisedButton(
-     <span style="color:#900;font-weight:bold">onPressed:</span> (){
+
+<pre><code class="language-dart">RaisedButton(
+     onPressed: (){
      },
-     <span style="color:#900;font-weight:bold">color:</span> Colors.red,<span style="color:#998;font-style:italic">//红色背景
-</span><span style="color:#998;font-style:italic"></span>     <span style="color:#900;font-weight:bold">child:</span>Text(
-          <span style="color:#d14">&#39;click me&#39;</span>,<span style="color:#998;font-style:italic">//文本内容
-</span><span style="color:#998;font-style:italic"></span>          <span style="color:#900;font-weight:bold">style:</span> TextStyle(
-             <span style="color:#900;font-weight:bold">color:</span> Colors.white,<span style="color:#998;font-style:italic">//文字白色
-</span><span style="color:#998;font-style:italic"></span>             <span style="color:#900;font-weight:bold">fontSize:</span> <span style="color:#099">12</span><span style="color:#998;font-style:italic">//文字字号
-</span><span style="color:#998;font-style:italic"></span>           )
+     color: Colors.red,//红色背景
+     child:Text(
+          'click me',//文本内容
+          style: TextStyle(
+             color: Colors.white,//文字白色
+             fontSize: 12//文字字号
+           )
      )
 )
-</code></pre></td></tr></table>
-</div>
-</div><h2 id="heading-1"></h2>
+</code></pre>
+
+<p>##</p>
+
 <h2 id="step3">step3</h2>
+
 <p>按钮点击之后要更改其坐标</p>
+
 <blockquote>
 <p>在实现这个之前，我们先要了解，在Flutter中万物皆Widget，而Widget又分无状态组件（StatelessWidget）和有状态组件（StatefulWidget）。简单点说，组件在创建后，是否允许更改状态，一但状态更改，其UI就会重新渲染。</p>
+
 <p>这里显然我们要用有状态组件，接下来的代码是在组件创建时，就给与按钮一个随机屏幕坐标，那么之后只要改变状态，就会重新渲染</p>
 </blockquote>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dart" data-lang="dart">RaisedButton(
-     <span style="color:#900;font-weight:bold">onPressed:</span> (){
-          setState((){});<span style="color:#998;font-style:italic">//关键是这一句
-</span><span style="color:#998;font-style:italic"></span>     },
-     <span style="color:#900;font-weight:bold">color:</span> Colors.red,
-     <span style="color:#900;font-weight:bold">child:</span>Text(
-          <span style="color:#d14">&#39;click me&#39;</span>,
-          <span style="color:#900;font-weight:bold">style:</span> TextStyle(
-               <span style="color:#900;font-weight:bold">color:</span> Colors.white,
-               <span style="color:#900;font-weight:bold">fontSize:</span> <span style="color:#099">12</span>
+
+<pre><code class="language-dart">RaisedButton(
+     onPressed: (){
+          setState((){});//关键是这一句
+     },
+     color: Colors.red,
+     child:Text(
+          'click me',
+          style: TextStyle(
+               color: Colors.white,
+               fontSize: 12
           )
      )
 )
-</code></pre></td></tr></table>
-</div>
-</div><div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dart" data-lang="dart"><span style="color:#998;font-style:italic">//获得当前设备屏幕尺寸，需要import &#39;dart:ui&#39;
-</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">var</span> s <span style="color:#000;font-weight:bold">=</span> window.physicalSize<span style="color:#000;font-weight:bold">/</span>window.devicePixelRatio;
-<span style="color:#998;font-style:italic">//新建一个随机对象，import &#39;dart:math&#39;;
-</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">var</span> rng <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Random();
-<span style="color:#998;font-style:italic">//随机生成按钮的坐标
-</span><span style="color:#998;font-style:italic"></span><span style="color:#458;font-weight:bold">double</span> btnTop <span style="color:#000;font-weight:bold">=</span> rng.nextDouble()<span style="color:#000;font-weight:bold">*</span>(s.height<span style="color:#000;font-weight:bold">-</span><span style="color:#099">40</span>);
-<span style="color:#458;font-weight:bold">double</span> btnLeft <span style="color:#000;font-weight:bold">=</span> rng.nextDouble()<span style="color:#000;font-weight:bold">*</span>(s.width<span style="color:#000;font-weight:bold">-</span><span style="color:#099">100</span>);
-<span style="color:#000;font-weight:bold">return</span> Container(
- <span style="color:#900;font-weight:bold">color:</span> Colors.white,
- <span style="color:#900;font-weight:bold">child:</span>Stack(
-   <span style="color:#900;font-weight:bold">children:</span> [
+</code></pre>
+
+<pre><code class="language-dart">//获得当前设备屏幕尺寸，需要import 'dart:ui'
+var s = window.physicalSize/window.devicePixelRatio;
+//新建一个随机对象，import 'dart:math';
+var rng = new Random();
+//随机生成按钮的坐标
+double btnTop = rng.nextDouble()*(s.height-40);
+double btnLeft = rng.nextDouble()*(s.width-100);
+return Container(
+ color: Colors.white,
+ child:Stack(
+   children: [
      Positioned(
-       <span style="color:#900;font-weight:bold">top:</span> btnTop,
-       <span style="color:#900;font-weight:bold">left:</span> btnLeft,
-       <span style="color:#900;font-weight:bold">width:</span> <span style="color:#099">100</span>,
-       <span style="color:#900;font-weight:bold">height:</span> <span style="color:#099">40</span>,
+       top: btnTop,
+       left: btnLeft,
+       width: 100,
+       height: 40,
        )
      )
    ]
  )
 );
-</code></pre></td></tr></table>
-</div>
-</div>
+</code></pre>
+
         </div>
 
         
@@ -506,6 +487,10 @@ Positioned，一个绝对定位组件，改变top，left参数就可以跑来跑
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/graphql/%E5%B8%A6%E6%9C%89-Netflix-DGS-%E5%92%8C-Spring-Boot-%E7%9A%84-GraphQL-%E6%9C%8D%E5%8A%A1%E5%99%A8/" title="带有 Netflix DGS 和 Spring Boot 的 GraphQL 服务器">带有 Netflix DGS 和 Spring Boot 的 GraphQL 服务器</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/react/level01/2.-React-%E5%BE%88%E6%A3%92%E7%9A%84%E7%BB%84%E4%BB%B6/" title="2. React 很棒的组件">2. React 很棒的组件</a>
     </li>
     
@@ -539,10 +524,6 @@ Positioned，一个绝对定位组件，改变top，left参数就可以跑来跑
     
     <li>
         <a href="https://geek.zshipu.com/post/css/CSS-%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="CSS 特性的完整指南">CSS 特性的完整指南</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/web/Web-3.0%E5%BC%80%E5%8F%91%E8%80%85%E8%B7%AF%E7%BA%BF%E5%9B%BE%E6%8C%87%E5%8D%97%E5%92%8C%E5%85%A5%E9%97%A8%E8%B5%84%E6%BA%90/" title="Web 3.0：开发者路线图、指南和入门资源">Web 3.0：开发者路线图、指南和入门资源</a>
     </li>
     
 </ul>
@@ -610,9 +591,9 @@ Positioned，一个绝对定位组件，改变top，left参数就可以跑来跑
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="">Java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -620,9 +601,9 @@ Positioned，一个绝对定位组件，改变top，left参数就可以跑来跑
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
-    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
+    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
     
-    <a href="https://geek.zshipu.com/tags/Nextjs/">Nextjs</a>
+    <a href="">Nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
@@ -648,7 +629,7 @@ Positioned，一个绝对定位组件，改变top，left参数就可以跑来跑
     
     <a href="https://geek.zshipu.com/tags/java/">java</a>
     
-    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    <a href="">js</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
     
