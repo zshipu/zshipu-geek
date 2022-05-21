@@ -145,7 +145,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="post-toc" style="position: absolute; top: 188px;">
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
-        
+        <nav id="TableOfContents"></nav>
     </div>
 </div>
 <script type="text/javascript">
@@ -192,107 +192,157 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>Golang通过http.NewRequest实现模拟请求，添加请求头和请求参数</p>
-
 <ol>
-<li><code>func DownloadString(remoteUrl string,queryValues url.Values) (body []byte,err error){</code>
-
-2.  <code>client := &amp;http.Client{};</code>
-
-3.  <code>body = nil;</code>
-
-4.  <code>uri,err := url.Parse(remoteUrl);</code>
-
-5.  <code>if(err != nil){</code>
-
-6.  <code>return ;</code>
-
-7.  <code>}</code>
-
-8.  <code>if(queryValues != nil){</code>
-
-9.  <code>values := uri.Query();</code>
-
-10.  <code>if(values != nil){</code>
-
-11.  <code>for k,v := range values {</code>
-
-12.  <code>queryValues[k] = v;</code>
-
-13.  <code>}</code>
-
-14.  <code>}</code>
-
-15.  <code>uri.RawQuery = queryValues.Encode();</code>
-
-16.  <code>}</code>
-
-17.  <code>reqest, err := http.NewRequest(&quot;GET&quot;,uri.String(),nil);</code>
-
-18.  <code>reqest.Header.Add(&quot;Accept&quot;, &quot;text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8&quot;);</code>
-
-19.  <code>reqest.Header.Add(&quot;Accept-Encoding&quot;, &quot;gzip, deflate&quot;);</code>
-
-20.  <code>reqest.Header.Add(&quot;Accept-Language&quot;, &quot;zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3&quot;);</code>
-
-21.  <code>reqest.Header.Add(&quot;Connection&quot;, &quot;keep-alive&quot;);</code>
-
-22.  <code>reqest.Header.Add(&quot;Host&quot;, uri.Host);</code>
-
-23.  <code>reqest.Header.Add(&quot;Referer&quot;, uri.String());</code>
-
-24.  <code>reqest.Header.Add(&quot;User-Agent&quot;, &quot;Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0&quot;);</code>
-
-26.  <code>response, err := client.Do(reqest)</code>
-
-27.  <code>defer response.Body.Close();</code>
-
-28.  <code>if(err != nil){</code>
-
-29.  <code>return ;</code>
-
-30.  <code>}</code>
-
-32.  <code>if response.StatusCode == 200 {</code>
-
-33.  <code>switch response.Header.Get(&quot;Content-Encoding&quot;) {</code>
-
-34.  <code>case &quot;gzip&quot;:</code>
-
-35.  <code>reader, _ := gzip.NewReader(response.Body)</code>
-
-36.  <code>for {</code>
-
-37.  <code>buf := make([]byte, 1024)</code>
-
-38.  <code>n, err := reader.Read(buf)</code>
-
-40.  <code>if err != nil &amp;&amp; err != io.EOF {</code>
-
-41.  <code>panic(err)</code>
-
-42.  <code>}</code>
-
-44.  <code>if n == 0 {</code>
-
-45.  <code>break</code>
-
-46.  <code>}</code>
-
-47.  <code>body = append(body,buf...);</code>
-
-48.  <code>}</code>
-
-49.  <code>default:</code>
-
-50.  <code>body, _ = ioutil.ReadAll(response.Body)</code>
-
-52.  <code>}</code>
-
-53.  <code>}</code>
-
-54.  <code>return ;</code>
-
-55.  <code>}</code></li>
+<li>
+<p><code>func DownloadString(remoteUrl string,queryValues url.Values) (body []byte,err error){</code></p>
+</li>
+<li>
+<p><code>client := &amp;http.Client{};</code></p>
+</li>
+<li>
+<p><code>body = nil;</code></p>
+</li>
+<li>
+<p><code>uri,err := url.Parse(remoteUrl);</code></p>
+</li>
+<li>
+<p><code>if(err != nil){</code></p>
+</li>
+<li>
+<p><code>return ;</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
+<li>
+<p><code>if(queryValues != nil){</code></p>
+</li>
+<li>
+<p><code>values := uri.Query();</code></p>
+</li>
+<li>
+<p><code>if(values != nil){</code></p>
+</li>
+<li>
+<p><code>for k,v := range values {</code></p>
+</li>
+<li>
+<p><code>queryValues[k] = v;</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
+<li>
+<p><code>uri.RawQuery = queryValues.Encode();</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
+<li>
+<p><code>reqest, err := http.NewRequest(&quot;GET&quot;,uri.String(),nil);</code></p>
+</li>
+<li>
+<p><code>reqest.Header.Add(&quot;Accept&quot;, &quot;text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8&quot;);</code></p>
+</li>
+<li>
+<p><code>reqest.Header.Add(&quot;Accept-Encoding&quot;, &quot;gzip, deflate&quot;);</code></p>
+</li>
+<li>
+<p><code>reqest.Header.Add(&quot;Accept-Language&quot;, &quot;zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3&quot;);</code></p>
+</li>
+<li>
+<p><code>reqest.Header.Add(&quot;Connection&quot;, &quot;keep-alive&quot;);</code></p>
+</li>
+<li>
+<p><code>reqest.Header.Add(&quot;Host&quot;, uri.Host);</code></p>
+</li>
+<li>
+<p><code>reqest.Header.Add(&quot;Referer&quot;, uri.String());</code></p>
+</li>
+<li>
+<p><code>reqest.Header.Add(&quot;User-Agent&quot;, &quot;Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0&quot;);</code></p>
+</li>
+<li>
+<p><code>response, err := client.Do(reqest)</code></p>
+</li>
+<li>
+<p><code>defer response.Body.Close();</code></p>
+</li>
+<li>
+<p><code>if(err != nil){</code></p>
+</li>
+<li>
+<p><code>return ;</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
+<li>
+<p><code>if response.StatusCode == 200 {</code></p>
+</li>
+<li>
+<p><code>switch response.Header.Get(&quot;Content-Encoding&quot;) {</code></p>
+</li>
+<li>
+<p><code>case &quot;gzip&quot;:</code></p>
+</li>
+<li>
+<p><code>reader, _ := gzip.NewReader(response.Body)</code></p>
+</li>
+<li>
+<p><code>for {</code></p>
+</li>
+<li>
+<p><code>buf := make([]byte, 1024)</code></p>
+</li>
+<li>
+<p><code>n, err := reader.Read(buf)</code></p>
+</li>
+<li>
+<p><code>if err != nil &amp;&amp; err != io.EOF {</code></p>
+</li>
+<li>
+<p><code>panic(err)</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
+<li>
+<p><code>if n == 0 {</code></p>
+</li>
+<li>
+<p><code>break</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
+<li>
+<p><code>body = append(body,buf...);</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
+<li>
+<p><code>default:</code></p>
+</li>
+<li>
+<p><code>body, _ = ioutil.ReadAll(response.Body)</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
+<li>
+<p><code>return ;</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
 </ol>
 
         </div>
@@ -417,6 +467,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/nexp/level001/nexp-level-001-03-%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AB%AF%E6%B8%B2%E6%9F%93%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%B8%B2%E6%9F%93/" title="nexp-level-001 03 服务器端渲染与客户端渲染">nexp-level-001 03 服务器端渲染与客户端渲染</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nexp/level001/nexp-level-001-02-Next.js-%E4%B8%8E-React%E5%B7%AE%E5%BC%82%E5%92%8C%E6%9C%80%E4%BD%B3%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6/" title="nexp-level-001 02 Next.js 与 React：差异和最佳前端框架">nexp-level-001 02 Next.js 与 React：差异和最佳前端框架</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nexp/level001/nexp-level-001-01-Next.js-%E5%8A%9F%E8%83%BD%E5%8F%8A%E4%BB%8B%E7%BB%8D/" title="nexp-level-001 01 Next.js 功能及介绍">nexp-level-001 01 Next.js 功能及介绍</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/graphql/%E5%B8%A6%E6%9C%89-Netflix-DGS-%E5%92%8C-Spring-Boot-%E7%9A%84-GraphQL-%E6%9C%8D%E5%8A%A1%E5%99%A8/" title="带有 Netflix DGS 和 Spring Boot 的 GraphQL 服务器">带有 Netflix DGS 和 Spring Boot 的 GraphQL 服务器</a>
     </li>
     
@@ -442,18 +504,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.1-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86_document.js-%E5%A6%82%E4%BD%95%E5%9C%A8-Next.js-%E4%B8%AD%E6%94%B9%E8%BF%9B-SEO/" title="2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO">2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.%E6%90%AD%E5%BB%BA-Next.js-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/" title="2.搭建 Next.js 应用程序">2.搭建 Next.js 应用程序</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/1.%E4%BD%BF%E7%94%A8-StorybookTailwindcss-%E5%92%8C-Apollo-%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%BE%E7%BD%AE-Next.Js/" title="1.使用 Storybook、Tailwindcss 和 Apollo 客户端设置 Next.Js">1.使用 Storybook、Tailwindcss 和 Apollo 客户端设置 Next.Js</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/css/CSS-%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="CSS 特性的完整指南">CSS 特性的完整指南</a>
     </li>
     
 </ul>
@@ -521,9 +571,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
-    <a href="">Java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -531,9 +581,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
-    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
     
-    <a href="">Nextjs</a>
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
@@ -559,9 +609,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/java/">java</a>
     
-    <a href="">js</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nexp/">nexp</a>
+    
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
     

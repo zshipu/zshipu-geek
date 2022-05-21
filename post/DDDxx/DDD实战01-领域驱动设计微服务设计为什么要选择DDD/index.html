@@ -146,14 +146,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#软件架构模式的演进">软件架构模式的演进</a></li>
-<li><a href="#ddd-与微服务的关系">DDD 与微服务的关系</a></li>
-<li><a href="#总结">总结</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#软件架构模式的演进">软件架构模式的演进</a></li>
+    <li><a href="#ddd-与微服务的关系">DDD 与微服务的关系</a></li>
+    <li><a href="#总结">总结</a></li>
+  </ul>
 </nav>
     </div>
 </div>
@@ -200,56 +197,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            
-
-<p>我们知道，微服务设计过程中往往会面临边界如何划定的问题，我经常看到项目团队为微服务到底应该拆多小而争得面红耳赤。不同的人会根据自己对微服务的理解而拆分出不同的微服务，于是大家各执一词，谁也说服不了谁，都觉得自己很有道理。</p>
-
+            <p>我们知道，微服务设计过程中往往会面临边界如何划定的问题，我经常看到项目团队为微服务到底应该拆多小而争得面红耳赤。不同的人会根据自己对微服务的理解而拆分出不同的微服务，于是大家各执一词，谁也说服不了谁，都觉得自己很有道理。</p>
 <p>那在实际落地过程中，我也确实见过不少项目在面临这种微服务设计困惑时，是靠拍脑袋硬完成的，上线后运维的压力就可想而知了。那是否有合适的理论或设计方法来指导微服务设计呢？当你看到这一讲的题目时，我想你已经知道答案了。</p>
-
 <p>没错，就是 DDD。那么今天我就给你详细讲解下：“微服务设计为什么要选择领域驱动设计？”</p>
-
 <h2 id="软件架构模式的演进">软件架构模式的演进</h2>
-
 <p>在进入今天的主题之前，我们先来了解下背景。</p>
-
 <p>我们知道，这些年来随着设备和新技术的发展，软件的架构模式发生了很大的变化。软件架构模式大体来说经历了从单机、集中式到分布式微服务架构三个阶段的演进。随着分布式技术的快速兴起，我们已经进入到了微服务架构时代。</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/1628872362791.png" alt="1628872362791" /></p>
-
+<p>
+        <img class="mx-auto" alt="1628872362791" src="https://cdn.jsdelivr.net/gh/zshipu/images/1628872362791.png" />   
+    </p>
 <p><strong>我们可以用三步来划定领域模型和微服务的边界。</strong></p>
-
 <p>第一步：在事件风暴中梳理业务过程中的用户操作、事件以及外部依赖关系等，根据这些要素梳理出领域实体等领域对象。</p>
-
 <p>第二步：根据领域实体之间的业务关联性，将业务紧密相关的实体进行组合形成聚合，同时确定聚合中的聚合根、值对象和实体。在这个图里，聚合之间的边界是第一层边界，它们在同一个微服务实例中运行，这个边界是逻辑边界，所以用虚线表示。</p>
-
 <p>第三步：根据业务及语义边界等因素，将一个或者多个聚合划定在一个限界上下文内，形成领域模型。在这个图里，限界上下文之间的边界是第二层边界，这一层边界可能就是未来微服务的边界，不同限界上下文内的领域逻辑被隔离在不同的微服务实例中运行，物理上相互隔离，所以是物理边界，边界之间用实线来表示。</p>
-
 <p>有了这两层边界，微服务的设计就不是什么难事了。</p>
-
 <p>在战略设计中我们建立了领域模型，划定了业务领域的边界，建立了通用语言和限界上下文，确定了领域模型中各个领域对象的关系。到这儿，业务端领域模型的设计工作基本就完成了，这个过程同时也基本确定了应用端的微服务边界。</p>
-
 <p>在从业务模型向微服务落地的过程中，也就是从战略设计向战术设计的实施过程中，我们会将领域模型中的领域对象与代码模型中的代码对象建立映射关系，将业务架构和系统架构进行绑定。当我们去响应业务变化调整业务架构和领域模型时，系统架构也会同时发生调整，并同步建立新的映射关系。</p>
-
 <h2 id="ddd-与微服务的关系">DDD 与微服务的关系</h2>
-
 <p>有了上面的讲解，现在我们不妨再次总结下 DDD 与微服务的关系。</p>
-
 <p>DDD 是一种架构设计方法，微服务是一种架构风格，两者从本质上都是为了追求高响应力，而从业务视角去分离应用系统建设复杂度的手段。两者都强调从业务出发，其核心要义是强调根据业务发展，合理划分领域边界，持续调整现有架构，优化现有代码，以保持架构和代码的生命力，也就是我们常说的演进式架构。</p>
-
 <p>DDD 主要关注：从业务领域视角划分领域边界，构建通用语言进行高效沟通，通过业务抽象，建立领域模型，维持业务和代码的逻辑一致性。</p>
-
 <p>微服务主要关注：运行时的进程间通信、容错和故障隔离，实现去中心化数据管理和去中心化服务治理，关注微服务的独立开发、测试、构建和部署。</p>
-
 <h2 id="总结">总结</h2>
-
 <p>今天我们主要讨论了微服务设计和拆分的难题。通过 DDD 战略设计可以建立领域模型，划定领域边界，解决微服务设计过程中，边界难以划定的难题。如果你的业务焦点在领域和领域逻辑，那么你就可以选择 DDD 作为微服务的设计方法！</p>
-
 <p>更关键的一点是，DDD 不仅可以用于微服务设计，还可以很好地应用于企业中台的设计。如果你的企业正在做中台转型，DDD 将会是一把利器，它可以帮你建立一个非常好的企业级中台业务模型。有关这点你还会在后面的文章中见到详解。</p>
-
 <p>除此之外，DDD 战术设计对设计和开发人员的要求相对较高，实现起来相对复杂。不同企业的研发管理能力和个人开发水平可能会存在差异。尤其对于传统企业而言，在战术设计落地的过程中，可能会存在一定挑战和困难，我建议你和你的公司如果有这方面的想法，就一定要谨慎评估自己的能力，选择最合适的方法落地 DDD。</p>
-
 <p>也不妨根据收获权衡一下，<strong>总体来说，DDD 可以给你带来以下收获：</strong></p>
-
 <ol>
 <li>DDD 是一套完整而系统的设计方法，它能带给你从战略设计到战术设计的标准设计过程，使得你的设计思路能够更加清晰，设计过程更加规范。</li>
 <li>DDD 善于处理与领域相关的拥有高复杂度业务的产品开发，通过它可以建立一个核心而稳定的领域模型，有利于领域知识的传递与传承。</li>
@@ -383,6 +356,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/nexp/level001/nexp-level-001-03-%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AB%AF%E6%B8%B2%E6%9F%93%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%B8%B2%E6%9F%93/" title="nexp-level-001 03 服务器端渲染与客户端渲染">nexp-level-001 03 服务器端渲染与客户端渲染</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nexp/level001/nexp-level-001-02-Next.js-%E4%B8%8E-React%E5%B7%AE%E5%BC%82%E5%92%8C%E6%9C%80%E4%BD%B3%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6/" title="nexp-level-001 02 Next.js 与 React：差异和最佳前端框架">nexp-level-001 02 Next.js 与 React：差异和最佳前端框架</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nexp/level001/nexp-level-001-01-Next.js-%E5%8A%9F%E8%83%BD%E5%8F%8A%E4%BB%8B%E7%BB%8D/" title="nexp-level-001 01 Next.js 功能及介绍">nexp-level-001 01 Next.js 功能及介绍</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/graphql/%E5%B8%A6%E6%9C%89-Netflix-DGS-%E5%92%8C-Spring-Boot-%E7%9A%84-GraphQL-%E6%9C%8D%E5%8A%A1%E5%99%A8/" title="带有 Netflix DGS 和 Spring Boot 的 GraphQL 服务器">带有 Netflix DGS 和 Spring Boot 的 GraphQL 服务器</a>
     </li>
     
@@ -408,18 +393,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.1-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86_document.js-%E5%A6%82%E4%BD%95%E5%9C%A8-Next.js-%E4%B8%AD%E6%94%B9%E8%BF%9B-SEO/" title="2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO">2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.%E6%90%AD%E5%BB%BA-Next.js-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/" title="2.搭建 Next.js 应用程序">2.搭建 Next.js 应用程序</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/1.%E4%BD%BF%E7%94%A8-StorybookTailwindcss-%E5%92%8C-Apollo-%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%BE%E7%BD%AE-Next.Js/" title="1.使用 Storybook、Tailwindcss 和 Apollo 客户端设置 Next.Js">1.使用 Storybook、Tailwindcss 和 Apollo 客户端设置 Next.Js</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/css/CSS-%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="CSS 特性的完整指南">CSS 特性的完整指南</a>
     </li>
     
 </ul>
@@ -487,9 +460,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
-    <a href="">Java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -497,9 +470,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
-    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
     
-    <a href="">Nextjs</a>
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
@@ -525,9 +498,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/java/">java</a>
     
-    <a href="">js</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nexp/">nexp</a>
+    
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
     

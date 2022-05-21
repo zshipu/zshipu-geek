@@ -146,32 +146,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-<ul>
-<li><a href="#实现-构建基块">实现：构建基块</a>
-<ul>
-<li><a href="#示例领域">示例领域</a>
-<ul>
-<li><a href="#集合">集合</a></li>
-</ul></li>
-<li><a href="#聚合-聚合根原理">聚合/聚合根原理</a>
-<ul>
-<li><a href="#业务规则">业务规则</a></li>
-<li><a href="#单单元">单单元</a></li>
-<li><a href="#交易边界">交易边界</a></li>
-<li><a href="#序列化">序列化</a>
-<ul>
-<li>
-<ul>
-<li><a href="#聚合-聚合根规则和最佳实践">聚合 / 聚合根规则和最佳实践</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#聚合根-实体的主要键">聚合根 / 实体的主要键</a></li>
-<li><a href="#聚合根-实体的构造器">聚合根 / 实体的构造器</a></li>
-<li><a href="#实体属性访问器和方法">实体属性访问器和方法</a></li>
-<li><a href="#业务逻辑与实体中的例外情况">业务逻辑与实体中的例外情况</a></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#示例领域">示例领域</a>
+      <ul>
+        <li><a href="#集合">集合</a></li>
+      </ul>
+    </li>
+    <li><a href="#聚合聚合根原理">聚合/聚合根原理</a>
+      <ul>
+        <li><a href="#业务规则">业务规则</a></li>
+        <li><a href="#单单元">单单元</a></li>
+        <li><a href="#交易边界">交易边界</a></li>
+        <li><a href="#序列化">序列化</a></li>
+        <li><a href="#聚合根--实体的主要键">聚合根 / 实体的主要键</a></li>
+        <li><a href="#聚合根--实体的构造器">聚合根 / 实体的构造器</a></li>
+        <li><a href="#实体属性访问器和方法">实体属性访问器和方法</a></li>
+        <li><a href="#业务逻辑与实体中的例外情况">业务逻辑与实体中的例外情况</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
     </div>
 </div>
@@ -218,167 +211,116 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            
-
-<h1 id="实现-构建基块">实现：构建基块</h1>
-
+            <h1 id="实现构建基块">实现：构建基块</h1>
 <p>这是本系列的重要组成部分。我们将用实例介绍和解释一些明确的规则。您可以遵循这些规则，并在实施域驱动设计时应用到您的解决方案中。</p>
-
 <h2 id="示例领域">示例领域</h2>
-
 <p>示例将使用 GitHub 使用的一些概念，如问题、存储库、标签和用户，您已经熟悉。</p>
-
 <p>下图显示了一些聚合、聚合根、实体、价值对象及其之间的关系：</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--mFy2r4IE--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/w428ydlg2ipd36bklrvs.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251202096.png" alt="图像" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--mFy2r4IE--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/w428ydlg2ipd36bklrvs.png">
+        <img class="mx-auto" alt="图像" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251202096.png" />   
+    </a></p>
 <p>问题聚合包括包含注释和问题标签集合的问题聚合根。</p>
-
 <p>其他聚合显示为简单，因为我们将专注于问题聚合：</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--_mYoSm2A--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/gg1y6vvozq597h5iiprq.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251202005.png" alt="图像" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--_mYoSm2A--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/gg1y6vvozq597h5iiprq.png">
+        <img class="mx-auto" alt="图像" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251202005.png" />   
+    </a></p>
 <h3 id="集合">集合</h3>
-
 <p>如前所称，聚合是由聚合根对象结合在一起的对象（实体和值对象）集合。</p>
-
-<h2 id="聚合-聚合根原理">聚合/聚合根原理</h2>
-
+<h2 id="聚合聚合根原理">聚合/聚合根原理</h2>
 <h3 id="业务规则">业务规则</h3>
-
 <p>实体负责执行与其自身属性相关的业务规则。聚合根实体还负责其子收集实体。</p>
-
 <p>聚合体应通过实施域规则和约束来保持其完整性和有效性。</p>
-
 <p>这意味着，与 DTO 不同，实体有实现某些业务逻辑的方法。实际上，我们应该尽可能在实体中实施业务规则。</p>
-
 <h3 id="单单元">单单元</h3>
-
 <p>聚合作为单个单元检索和保存，并具有所有子集合和属性。例如，如果您要向问题添加注释，则需要添加注释。</p>
-
 <ul>
 <li>从数据库中获取问题，包括所有子集合（评论和问题实验室）。</li>
 <li>使用问题类上的方法添加新注释，如问题。</li>
 <li>将问题（所有子集合）作为单个数据库操作（更新）保存到数据库。</li>
 </ul>
-
 <p>对于以前与 EF 核心和关系数据库合作的开发人员来说，这似乎很奇怪。</p>
-
 <p>获得所有细节的问题似乎没有必要和低效。我们为什么不在不查询任何数据的情况下执行到数据库的 SQL 插入命令呢？</p>
-
 <p>答案是，我们应该实施业务规则
 ，并维护代码中的数据一致性和完整性。</p>
-
-<p>如果我们有一个业务规则，如&rdquo;用户不能评论
-锁定的问题&rdquo;，我们如何检查问题的锁定状态，而无需从数据库中检索它？</p>
-
+<p>如果我们有一个业务规则，如&quot;用户不能评论
+锁定的问题&quot;，我们如何检查问题的锁定状态，而无需从数据库中检索它？</p>
 <p>因此，只有在应用程序代码中可用的相关对象时，我们才能执行业务规则。</p>
-
 <p><strong>示例：向问题添加注释</strong></p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--sTNji5Vj--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/oyh56u1vxoopfkjt1wkf.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251203797.png" alt="图像" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--sTNji5Vj--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/oyh56u1vxoopfkjt1wkf.png">
+        <img class="mx-auto" alt="图像" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251203797.png" />   
+    </a></p>
 <p>_issueRepository.GetAsync 方法默认将问题与所有
 详细信息（子集合）作为单个单元检索。</p>
-
 <p>虽然这对 MongoDB 来说是开箱即用的，但您需要为 EF 酷睿配置您的聚合详细信息。但是，一旦配置，存储库会自动处理它。</p>
-
 <p>_issueRepository.GetAsync 方法获得一个可选参数，包括尾，您可以通过错误禁用此行为时，您需要它。</p>
-
 <p>问题.AddComment 获取用户Id 和评论文本，执行必要的业务规则，并将评论添加到问题的评论集合中。</p>
-
 <p>最后，我们使用_issueRepository.更新酶来保存数据库的更改
 。</p>
-
 <h3 id="交易边界">交易边界</h3>
-
 <p>聚合通常被视为交易边界。</p>
-
 <p>如果一个用例与单个集合配合使用，则将其读取并保存为单个单元，则对聚合对象所做的所有更改将作为原子操作保存在一起，并且您不需要进行明确的数据库交易。</p>
-
 <p>但是，在现实生活中，您可能需要在单个
 使用案例中更改多个聚合实例，并且您需要使用
 数据库交易来确保原子更新和数据
 一致性。</p>
-
 <h3 id="序列化">序列化</h3>
-
 <p>聚合（与根实体和子集合）应作为单个单元在电线上进行序列化和传输。</p>
-
 <p>例如，MongoDB 将聚合序列化为 JSON 文档，同时保存到数据库，并在从数据库中读取时从 JSON 中分离。</p>
-
 <p>以下规则已经带来了序列化。</p>
-
-<h5 id="聚合-聚合根规则和最佳实践">聚合 / 聚合根规则和最佳实践</h5>
-
+<h5 id="聚合--聚合根规则和最佳实践">聚合 / 聚合根规则和最佳实践</h5>
 <p>以下规则确保执行上述原则
 。</p>
-
 <p><strong>仅通过 ID 引用其他聚合体</strong></p>
-
 <p>第一条规则说聚合应该仅通过其 Id 引用其他聚合。这意味着您不能将导航属性添加到其他聚合体中。</p>
-
 <ul>
 <li>此规则使实施序列化原则成为可能。</li>
 <li>它还可防止不同的聚合体相互操纵，并将聚合的业务逻辑泄漏到彼此之间。</li>
 </ul>
-
 <p>在下面的示例中，您看到两个聚合根，Git 存储和问题：</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--qgTRldrN--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/okinpcduw1ltlnaywk1i.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251203941.png" alt="图像" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--qgTRldrN--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/okinpcduw1ltlnaywk1i.png">
+        <img class="mx-auto" alt="图像" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251203941.png" />   
+    </a></p>
 <ul>
 <li>Git 存储不应收集问题，因为它们是不同的聚合体。</li>
 <li>问题不应具有相关 Git 存储库的导航属性，因为它是不同的聚合体。</li>
 <li>问题可以有存储库（作为指导）。</li>
 </ul>
-
 <p>因此，当您有问题并且需要与此问题相关的 Git 存储
 时，您需要通过存储库从
 数据库中明确查询它。</p>
-
 <p><strong>保持聚合体小</strong></p>
-
 <p>一个好的做法是保持一个集合简单和小。</p>
-
 <p>这是因为聚合将加载和保存为一个单
 一的单位和读/写一个大对象有
 性能问题。请参阅下面的示例：</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--pllsSrqs--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/o1l60b5m84oem17x45so.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251203286.png" alt="图像" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--pllsSrqs--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/o1l60b5m84oem17x45so.png">
+        <img class="mx-auto" alt="图像" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251203286.png" />   
+    </a></p>
 <p>角色聚合集具有用户轨道值对象的集合，用于跟踪分配给此角色的用户。</p>
-
 <p>请注意，用户罗尔不是另一个聚合体，它不是一个问题的规则参考其他聚合仅通过 Id。</p>
-
 <p>然而，这是一个实际问题。在现实生活中，角色可能会分配给数千（甚至数百万）用户，每当您从数据库中查询 Role 时，加载数千个项目（请记住：聚合由其子集合作为单个单元加载）是一个重大的性能问题。</p>
-
-<h3 id="聚合根-实体的主要键">聚合根 / 实体的主要键</h3>
-
+<h3 id="聚合根--实体的主要键">聚合根 / 实体的主要键</h3>
 <ul>
 <li>聚合根通常具有单个 ID 属性用于其标识符（原始标记键：PK）。我们更喜欢 Guid 作为聚合根实体的 PK。</li>
 <li>聚合中的实体（不是聚合根）可以使用复合主密钥。</li>
 </ul>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--K1k3lvS0--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/v6yp0os83yjol3se5vhv.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251204365.png" alt="图像" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--K1k3lvS0--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/v6yp0os83yjol3se5vhv.png">
+        <img class="mx-auto" alt="图像" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251204365.png" />   
+    </a></p>
 <ul>
 <li>组织具有 Guid 标识符 （Id）。</li>
 <li>组织用户是组织的子集合，具有由组织Id和用户Id组成的复合主密钥。</li>
 </ul>
-
-<h3 id="聚合根-实体的构造器">聚合根 / 实体的构造器</h3>
-
+<h3 id="聚合根--实体的构造器">聚合根 / 实体的构造器</h3>
 <p>构造器位于实体生命周期开始的位置。设计精良的构造者负有一些责任：</p>
-
 <ul>
 <li>获取所需的实体属性作为创建有效实体的参数。应强制仅通过所需的参数，并可能获得非必需属性作为可选参数。</li>
 <li>检查参数的有效性。</li>
 <li>初始化子集合。</li>
 </ul>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--2hi5H-Uv--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ekseyow1j77b1y46jpbo.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251204763.png" alt="图像" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--2hi5H-Uv--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ekseyow1j77b1y46jpbo.png">
+        <img class="mx-auto" alt="图像" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251204763.png" />   
+    </a></p>
 <ul>
 <li>通过在其构造器中获取最小要求属性作为参数，正确发布类强制创建有效实体。</li>
 <li>构造器验证输入（如果给定值是空的，请检查。NotNullOrWhiteSpace（&hellip;） 抛出参数例外）。</li>
@@ -389,83 +331,67 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 将其保密，以防止意外地使用它在我们自己的
 代码。</li>
 </ul>
-
 <h3 id="实体属性访问器和方法">实体属性访问器和方法</h3>
-
 <p>上面的例子可能看起来很奇怪！例如，我们强制在构造器中传递非空标题。</p>
-
 <p>但是，开发商可以在没有任何控制的情况下将标题属性设置为无效。这是因为上面的示例代码只关注构造器。</p>
-
 <p>如果我们向公共设置者申报所有属性（如上文的示例问题类），则不能强制实体在其生命周期中的有效性和完整性。</p>
-
 <p>所以：</p>
-
 <ul>
 <li>当您在设置该属性时需要执行任何逻辑时，请使用私人设置器进行属性设置。</li>
 <li>定义操作此类属性的公共方法。</li>
 </ul>
-
 <p>示例：以受控
 方式更改属性的方法</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--ENGum2Fy--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/3cqx5uh9qoez7795n2r7.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251204100.png" alt="图像" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--ENGum2Fy--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/3cqx5uh9qoez7795n2r7.png">
+        <img class="mx-auto" alt="图像" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251204100.png" />   
+    </a></p>
 <ul>
 <li>存储库设置器是私密的，在创建问题后无法更改它，因为这是我们在这个领域想要的：问题不能移动到另一个存储库。</li>
 <li>文本和分配使用者具有公共设置器，因为对它们没有限制。它们可以是空的或任何其他值。我们认为没有必要定义单独的方法来设置它们。如果以后需要，我们可以添加方法，使设置器保密。域层的中断更改不是问题，因为域层是一个内部项目，它不会暴露给客户端。</li>
 <li>关闭和发行关闭是对属性。定义关闭和重新开机的方法，以一起更改它们。这样，我们就无法无缘无故地解决问题。</li>
 </ul>
-
 <h3 id="业务逻辑与实体中的例外情况">业务逻辑与实体中的例外情况</h3>
-
 <p>当您在实体中实施验证和业务逻辑时，您经常需要管理特殊案例。</p>
-
 <ul>
 <li>创建域特定例外。</li>
 <li>必要时将这些例外情况放入实体方法中。</li>
 </ul>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--EHmUGDfW--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/href6e8g79f6pvzu3peq.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251204604.png" alt="图像" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--EHmUGDfW--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/href6e8g79f6pvzu3peq.png">
+        <img class="mx-auto" alt="图像" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251204604.png" />   
+    </a></p>
 <p>这里有两个业务规则：</p>
-
 <ul>
 <li>锁定的问题无法重新打开。</li>
 <li>您无法锁定未结问题。</li>
 </ul>
-
 <p>在这些情况下，问题类会抛出问题状态例外，以
 强制执行业务规则：</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--8yxUq92K--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/jdegxez2djuuunoqqvp8.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251204244.png" alt="图像" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--8yxUq92K--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/jdegxez2djuuunoqqvp8.png">
+        <img class="mx-auto" alt="图像" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251204244.png" />   
+    </a></p>
 <p>抛出这种例外有两个潜在的问题：</p>
-
 <ol>
 <li>如果出现此类异常，最终用户应看到异常（错误）消息吗？如果是，您如何定位异常消息？您不能使用本地化系统，因为不能在实体中注入和使用 IString 本地化器。</li>
 <li>对于 Web 应用程序或 HTTP API，HTTP 状态代码应返回给客户端？</li>
 </ol>
-
 <p>ABP 的例外处理系统解决了这些和类似的问题。</p>
-
 <p>示例：抛出代码的业务例外</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--OYl38QFC--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/goz1yx09sln60a1zfjxy.png"><img src="../../../../../../images/goz1yx09sln60a1zfjxy.png" alt="图像" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--OYl38QFC--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/goz1yx09sln60a1zfjxy.png">
+        <img class="mx-auto" alt="图像" src="../../../../../../images/goz1yx09sln60a1zfjxy.png" />   
+    </a></p>
 <ul>
 <li>问题状态例外类继承了业务例外类。ABP 默认返回 403（禁止）HTTP 状态代码（而不是 500 - 内部服务器错误），但从业务例外中得出的例外情况。</li>
 <li>该代码用作本地化资源文件
 中的密钥，用于查找本地化消息。</li>
 </ul>
-
 <p>现在，我们可以更改以下重新开机方法：</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--HtFT28yO--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/7zvkco3jsmybjvshyigv.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251204275.png" alt="图像" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--HtFT28yO--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/7zvkco3jsmybjvshyigv.png">
+        <img class="mx-auto" alt="图像" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251204275.png" />   
+    </a></p>
 <p>并在本地化资源中添加一个条目，如下所示：</p>
-
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--qiGtLyWA--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/orwmdidiwtmdmglpfhqi.png"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251204803.png" alt="图像" /></a></p>
-
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--qiGtLyWA--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/orwmdidiwtmdmglpfhqi.png">
+        <img class="mx-auto" alt="图像" src="https://cdn.jsdelivr.net/gh/zshipu/images/202109251204803.png" />   
+    </a></p>
 <ul>
 <li>抛出异常时，ABP 会自动使用此本地化消息（基于当前语言）显示给最终用户。</li>
 <li>例外代码（问题跟踪：此处无法启动锁定问题）也发送给客户端，因此它可以按程序处理错误案例。</li>
@@ -593,6 +519,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/nexp/level001/nexp-level-001-03-%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AB%AF%E6%B8%B2%E6%9F%93%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%B8%B2%E6%9F%93/" title="nexp-level-001 03 服务器端渲染与客户端渲染">nexp-level-001 03 服务器端渲染与客户端渲染</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nexp/level001/nexp-level-001-02-Next.js-%E4%B8%8E-React%E5%B7%AE%E5%BC%82%E5%92%8C%E6%9C%80%E4%BD%B3%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6/" title="nexp-level-001 02 Next.js 与 React：差异和最佳前端框架">nexp-level-001 02 Next.js 与 React：差异和最佳前端框架</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nexp/level001/nexp-level-001-01-Next.js-%E5%8A%9F%E8%83%BD%E5%8F%8A%E4%BB%8B%E7%BB%8D/" title="nexp-level-001 01 Next.js 功能及介绍">nexp-level-001 01 Next.js 功能及介绍</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/graphql/%E5%B8%A6%E6%9C%89-Netflix-DGS-%E5%92%8C-Spring-Boot-%E7%9A%84-GraphQL-%E6%9C%8D%E5%8A%A1%E5%99%A8/" title="带有 Netflix DGS 和 Spring Boot 的 GraphQL 服务器">带有 Netflix DGS 和 Spring Boot 的 GraphQL 服务器</a>
     </li>
     
@@ -618,18 +556,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.1-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86_document.js-%E5%A6%82%E4%BD%95%E5%9C%A8-Next.js-%E4%B8%AD%E6%94%B9%E8%BF%9B-SEO/" title="2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO">2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.%E6%90%AD%E5%BB%BA-Next.js-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/" title="2.搭建 Next.js 应用程序">2.搭建 Next.js 应用程序</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/1.%E4%BD%BF%E7%94%A8-StorybookTailwindcss-%E5%92%8C-Apollo-%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%BE%E7%BD%AE-Next.Js/" title="1.使用 Storybook、Tailwindcss 和 Apollo 客户端设置 Next.Js">1.使用 Storybook、Tailwindcss 和 Apollo 客户端设置 Next.Js</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/css/CSS-%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="CSS 特性的完整指南">CSS 特性的完整指南</a>
     </li>
     
 </ul>
@@ -697,9 +623,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
-    <a href="">Java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -707,9 +633,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
-    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
     
-    <a href="">Nextjs</a>
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
@@ -735,9 +661,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/java/">java</a>
     
-    <a href="">js</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nexp/">nexp</a>
+    
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
     

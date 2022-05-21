@@ -1,0 +1,765 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>nexp-level-001 01 Next.js 功能及介绍 | 知识铺的博客</title>
+    <meta property="og:title" content="nexp-level-001 01 Next.js 功能及介绍 - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2022-05-21T10:00:00&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2022-05-21T10:00:00&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="nexp-level-001 01 Next.js 功能及介绍">
+        <meta name="author" content="知识铺">
+        
+    <meta property="og:url" content="https://geek.zshipu.com/post/nexp/level001/nexp-level-001-01-Next.js-%E5%8A%9F%E8%83%BD%E5%8F%8A%E4%BB%8B%E7%BB%8D/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1automatic-code-splitting">1.Automatic Code Splitting</a></li>
+    <li><a href="#2css">2.Css</a></li>
+    <li><a href="#3static-file-serving">3.Static File Serving</a></li>
+    <li><a href="#4populating">4.Populating</a></li>
+    <li><a href="#5fetching-data-and-componentt-lifecycle">5.Fetching Data And ComponentT LifeCycle</a></li>
+    <li><a href="#6routing">6.Routing</a>
+      <ul>
+        <li><a href="#63router-event">6.3.ROUTER EVENT</a></li>
+      </ul>
+    </li>
+    <li><a href="#7shalloww-routing">7.ShallowW Routing</a></li>
+    <li><a href="#8useing-a-high-order-component">8.Useing a High Order Component</a></li>
+    <li><a href="#9prefetching-pages">9.Prefetching Pages</a></li>
+    <li><a href="#10custom-server-and-routing">10.custom Server And Routing</a></li>
+    <li><a href="#11dynamic-import">11.Dynamic Import</a></li>
+    <li><a href="#12custom">12.Custom</a>
+      <ul>
+        <li><a href="#121-custom-error-handling">12.1 Custom Error HandLing</a></li>
+        <li><a href="#122-custom-congiuation">12.2 Custom Congiuation</a></li>
+        <li><a href="#123-customing-webpack-config">12.3 Customing Webpack Config</a></li>
+        <li><a href="#124-customizing-babel-config">12.4 CUSTOMIZING BABEL CONFIG</a></li>
+      </ul>
+    </li>
+    <li><a href="#14production-deployment">14.PRODUCTION DEPLOYMENT</a></li>
+    <li><a href="#15static-html-export">15.STATIC HTML EXPORT</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">nexp-level-001 01 Next.js 功能及介绍</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年5月21日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p>介绍</p>
+<p>在设定一个 React 项目时候，通常会使用 create-React-app 这个套件来快速产出开发样板环境，而另外一个选择 Next.js 则包好了许多功能，例如Server Side Render （SSR），Webpack，Router&hellip;. 不需要额外再多花时间在设定方面，但同时又有弹性可以扩充，非常的快速可以马上开发项目，在使用next时候因为是基于React，如果没有React基础要记得补一下，在这30天中会以Next.js的各种组合来介绍</p>
+<p>功能
+Next.js功能一直快速增加中，目前以下列出来的是 Next4 版的功能</p>
+<h2 id="1automatic-code-splitting">1.Automatic Code Splitting</h2>
+<p>CODE SPLITTING可以在切换 Router的时候把需要的代码做分割 达到最轻量化 而加快速度，因为 Next.js 的Router的目录是在pages底下使用 File-System 架构目录来替代 Router 这部分的 Code Splitting 已经内建了</p>
+<h2 id="2css">2.Css</h2>
+<p>Built-In Css Support
+Next.js之中有内建一套 style jsx 的Css In Js 的功能，如下面的风格</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#000;font-weight:bold">export</span> <span style="color:#000;font-weight:bold">default</span> () =&gt;
+  <span style="color:#000;font-weight:bold">&lt;</span>div<span style="color:#000;font-weight:bold">&gt;</span>
+    Hello world
+    <span style="color:#000;font-weight:bold">&lt;</span>p<span style="color:#000;font-weight:bold">&gt;</span>scoped<span style="color:#000;font-weight:bold">!&lt;</span><span style="color:#a61717;background-color:#e3d2d2">/p&gt;</span>
+    <span style="color:#000;font-weight:bold">&lt;</span>style jsx<span style="color:#000;font-weight:bold">&gt;</span>{<span style="color:#d14">`
+</span><span style="color:#d14">      p {
+</span><span style="color:#d14">        color: blue;
+</span><span style="color:#d14">      }
+</span><span style="color:#d14">     &lt;/style&gt;
+</span><span style="color:#d14">   &lt;/div&gt;
+</span></code></pre></td></tr></table>
+</div>
+</div><p>除了內建的 Style Jsx之外也提供了 Inline的 開發寫作</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#000;font-weight:bold">export</span> <span style="color:#000;font-weight:bold">default</span> () =&gt; <span style="color:#000;font-weight:bold">&lt;</span>p style<span style="color:#000;font-weight:bold">=</span>{{ color<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;red&#39;</span> }}<span style="color:#000;font-weight:bold">&gt;</span>hi there<span style="color:#000;font-weight:bold">&lt;</span><span style="color:#a61717;background-color:#e3d2d2">/p&gt;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>PS. Next.js是很弹性的也可以使用其他如Jss或是 styled-component&hellip;. 等等的Css In Js套件</p>
+<h2 id="3static-file-serving">3.Static File Serving</h2>
+<p>静态档案的约定目录，可以把一些静态档案都放在这里例如图档，声音档案等等都可以在根目录下的static（约定目录），也可以透过Express去指定</p>
+<h2 id="4populating">4.Populating</h2>
+<p>在Next.js中因为是使用 React Render 所有的代码都会 Render在一个DOM节点下，如果今天要改变Document 的 Head 里面的或是等等就可以使用 Next.js 提供的 Head 元件</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#000;font-weight:bold">import</span> Head from <span style="color:#d14">&#39;next/head&#39;</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="5fetching-data-and-componentt-lifecycle">5.Fetching Data And ComponentT LifeCycle</h2>
+<p>Next.js提供了 Server Side Render 功能当网站使用了SSR 的部分的时候为了SPA与SSR同步 所以提供了一个生命周期 getInitialProps 方便前后端一致</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">  <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">async</span> getInitialProps({ req }) {
+    <span style="color:#000;font-weight:bold">const</span> userAgent <span style="color:#000;font-weight:bold">=</span> req <span style="color:#000;font-weight:bold">?</span> req.headers[<span style="color:#d14">&#39;user-agent&#39;</span>] <span style="color:#000;font-weight:bold">:</span> navigator.userAgent
+    <span style="color:#000;font-weight:bold">return</span> { userAgent }
+  }
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="6routing">6.Routing</h2>
+<p>Client-Side的部分 Next.js 提供 Link 工具可以使用 import Link from &lsquo;next/link&rsquo;
+在转 Routing 时候 Next.js 绑定一些功能，例如 Prefetch 功能可以提前把指定的下一页预处理好增加ux体验
+除了Link 像使用tag A href 的方式写在 JSX 中外 ，如果要在程序中使用 API LINK 的功能可以使用
+import Router from &lsquo;next/router&rsquo; 范例如下</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#000;font-weight:bold">export</span> <span style="color:#000;font-weight:bold">default</span> () =&gt;
+  <span style="color:#000;font-weight:bold">&lt;</span>div<span style="color:#000;font-weight:bold">&gt;</span>
+    Click <span style="color:#000;font-weight:bold">&lt;</span>span onClick<span style="color:#000;font-weight:bold">=</span>{() =&gt; Router.push(<span style="color:#d14">&#39;/about&#39;</span>)}<span style="color:#000;font-weight:bold">&gt;</span>here<span style="color:#000;font-weight:bold">&lt;</span><span style="color:#a61717;background-color:#e3d2d2">/span&gt; to read more</span>
+  <span style="color:#000;font-weight:bold">&lt;</span><span style="color:#a61717;background-color:#e3d2d2">/div&gt;</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="63router-event">6.3.ROUTER EVENT</h3>
+<p>通常可以用在过场的时候，使用以下的一些EVENT管理， 常见可以用在LOADING的图样效果
+onRouteChangeStart（url） - 开始转换ROTUER时触发
+onRouteChangeComplete（url） - 完成时
+onRouteChangeError（err， url） - 有错误时
+onBeforeHistoryChange（url） - 如果有异动 BROWSER时</p>
+<h2 id="7shalloww-routing">7.ShallowW Routing</h2>
+<p>再换页的时候不去执行 getInitialProps 如果希望在同一页底下每次的参数改变时候不执行 getInitialProps 就可以打开Shallow</p>
+<h2 id="8useing-a-high-order-component">8.Useing a High Order Component</h2>
+<p>React 常用的 HOC 在 Next.js 元件中也是可以使用的</p>
+<h2 id="9prefetching-pages">9.Prefetching Pages</h2>
+<p>同上述 Router功能 ，使用 import Link from &lsquo;next/link&rsquo; LINK有提供PREFETCH功能可以预先 Preload 资料的功能</p>
+<h2 id="10custom-server-and-routing">10.custom Server And Routing</h2>
+<p>Next.js 可以客制化绑定常见的Server Express Koa2 Hapi Connect&hellip;. 等 Routing 部分也非常弹性可以完全自定义</p>
+<h2 id="11dynamic-import">11.Dynamic Import</h2>
+<p>动态加载通常可以先显示某些页面，然后组件可以再慢慢加载，通常也会使用在 Loading 效果， SSR 部分可以自己决定需不需要使用，同时也支持多组件包成同一个动态加载元件</p>
+<h2 id="12custom">12.Custom</h2>
+<p>在默认 React DOM 结点 Render 之外，如果要填加一些设定就可以在目录中的 pages 中增加一个 _document.js 的档案
+在这里就可以在编辑更多自订义的玩意儿</p>
+<h3 id="121-custom-error-handling">12.1 Custom Error HandLing</h3>
+<p>NEXT提供了 ERROR 元件可以使用
+import Error from &lsquo;next/error&rsquo;</p>
+<h3 id="122-custom-congiuation">12.2 Custom Congiuation</h3>
+<p>一般NEXT默认输出目录是在.next底下，如果要设定输出为其他目录可以在 next.config.js 底下设置</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">   module.exports <span style="color:#000;font-weight:bold">=</span> {
+    distDir<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;build&#39;</span>
+   }
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="123-customing-webpack-config">12.3 Customing Webpack Config</h3>
+<p>因为 Next.js 把基本会用倒的 Webpack 都包好了，如果要增加功能的话可以到 next.config.js 设定</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">module.exports <span style="color:#000;font-weight:bold">=</span> {
+  webpack<span style="color:#000;font-weight:bold">:</span> (config, { buildId, dev }) =&gt; {
+    <span style="color:#000;font-weight:bold">return</span> config
+  },
+  webpackDevMiddleware<span style="color:#000;font-weight:bold">:</span> config =&gt; {
+    <span style="color:#000;font-weight:bold">return</span> config
+  }
+}
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="124-customizing-babel-config">12.4 CUSTOMIZING BABEL CONFIG</h3>
+<p>如果想要挂一些BABEL的新功能 就可以在跟目录底下设定一个.babelrc的档案
+在挂入想要增加的PLUGIN 例如</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">{
+  <span style="color:#d14">&#34;presets&#34;</span><span style="color:#000;font-weight:bold">:</span> [<span style="color:#d14">&#34;next/babel&#34;</span>, <span style="color:#d14">&#34;stage-0&#34;</span>]
+}
+</code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>CDN SUPPORT WITH ASSET PREFIX
+支持CDN 设置方法如下可以替换 PREFIX 变成CDN模式</li>
+</ol>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#000;font-weight:bold">const</span> isProd <span style="color:#000;font-weight:bold">=</span> process.env.NODE_ENV <span style="color:#000;font-weight:bold">===</span> <span style="color:#d14">&#39;production&#39;</span>
+module.exports <span style="color:#000;font-weight:bold">=</span> {
+  <span style="color:#998;font-style:italic">// You may only need to add assetPrefix in the production.
+</span><span style="color:#998;font-style:italic"></span>  assetPrefix<span style="color:#000;font-weight:bold">:</span> isProd <span style="color:#000;font-weight:bold">?</span> <span style="color:#d14">&#39;https://cdn.mydomain.com&#39;</span> <span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;&#39;</span>
+}
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="14production-deployment">14.PRODUCTION DEPLOYMENT</h2>
+<p>Next.js 可以使用 now 直接发布到 now 提供的主机上 <a href="https://zeit.co/now">https://zeit.co/now</a>
+now 主机有提供 http2 功能，透过 now 提供的 cli 界面 在项目目录下直接下 now 即可部署</p>
+<h2 id="15static-html-export">15.STATIC HTML EXPORT</h2>
+<p>静态页面输出不需要 Server Part 的功能的时候使用，可以参考以下网址
+<a href="https://github.com/zeit/Next.js/tree/canary/examples/with-static-export">https://github.com/zeit/Next.js/tree/canary/examples/with-static-export</a></p>
+<p>以上是 Next.js 提供的功能</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/nexp/level001/nexp-level-001-01-Next.js-%E5%8A%9F%E8%83%BD%E5%8F%8A%E4%BB%8B%E7%BB%8D/">https://geek.zshipu.com/post/nexp/level001/nexp-level-001-01-Next.js-%E5%8A%9F%E8%83%BD%E5%8F%8A%E4%BB%8B%E7%BB%8D/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/graphql/%E5%B8%A6%E6%9C%89-Netflix-DGS-%E5%92%8C-Spring-Boot-%E7%9A%84-GraphQL-%E6%9C%8D%E5%8A%A1%E5%99%A8/">带有 Netflix DGS 和 Spring Boot 的 GraphQL 服务器</a></li>
+        
+        <li><a href="/post/react/level01/2.-React-%E5%BE%88%E6%A3%92%E7%9A%84%E7%BB%84%E4%BB%B6/">2. React 很棒的组件</a></li>
+        
+        <li><a href="/post/react/level01/1.-%E5%88%9D%E5%AD%A6%E8%80%85%E7%9A%84-React-/">1.初学者的 React</a></li>
+        
+        <li><a href="/post/nextjs/storybooktailwindnextjs/2.4-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E4%BA%86%E8%A7%A3-TypeScript-%E4%B8%AD%E7%9A%84%E9%AB%98%E7%BA%A7%E6%A6%82%E5%BF%B5/">2.3 拓展知识了解 TypeScript 中的高级概念</a></li>
+        
+        <li><a href="/post/nextjs/storybooktailwindnextjs/2.3-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E5%AD%A6%E4%B9%A0-TypeScript-%E5%85%A8%E9%9D%A2%E6%8C%87%E5%8D%97/">2.3 拓展知识学习 TypeScript 指南</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/nextjs'>nextjs</a></li>
+                
+                <li><a href='/tags/nexp'>nexp</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nexp/level001/nexp-level-001-03-%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AB%AF%E6%B8%B2%E6%9F%93%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%B8%B2%E6%9F%93/" title="nexp-level-001 03 服务器端渲染与客户端渲染">nexp-level-001 03 服务器端渲染与客户端渲染</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nexp/level001/nexp-level-001-02-Next.js-%E4%B8%8E-React%E5%B7%AE%E5%BC%82%E5%92%8C%E6%9C%80%E4%BD%B3%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6/" title="nexp-level-001 02 Next.js 与 React：差异和最佳前端框架">nexp-level-001 02 Next.js 与 React：差异和最佳前端框架</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nexp/level001/nexp-level-001-01-Next.js-%E5%8A%9F%E8%83%BD%E5%8F%8A%E4%BB%8B%E7%BB%8D/" title="nexp-level-001 01 Next.js 功能及介绍">nexp-level-001 01 Next.js 功能及介绍</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/graphql/%E5%B8%A6%E6%9C%89-Netflix-DGS-%E5%92%8C-Spring-Boot-%E7%9A%84-GraphQL-%E6%9C%8D%E5%8A%A1%E5%99%A8/" title="带有 Netflix DGS 和 Spring Boot 的 GraphQL 服务器">带有 Netflix DGS 和 Spring Boot 的 GraphQL 服务器</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/level01/2.-React-%E5%BE%88%E6%A3%92%E7%9A%84%E7%BB%84%E4%BB%B6/" title="2. React 很棒的组件">2. React 很棒的组件</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/level01/1.-%E5%88%9D%E5%AD%A6%E8%80%85%E7%9A%84-React-/" title="1.初学者的 React">1.初学者的 React</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.4-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E4%BA%86%E8%A7%A3-TypeScript-%E4%B8%AD%E7%9A%84%E9%AB%98%E7%BA%A7%E6%A6%82%E5%BF%B5/" title="2.3 拓展知识了解 TypeScript 中的高级概念">2.3 拓展知识了解 TypeScript 中的高级概念</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.3-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E5%AD%A6%E4%B9%A0-TypeScript-%E5%85%A8%E9%9D%A2%E6%8C%87%E5%8D%97/" title="2.3 拓展知识学习 TypeScript 指南">2.3 拓展知识学习 TypeScript 指南</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.2-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E6%9E%84%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84-UI-%E7%BB%84%E4%BB%B6%E5%BA%93/" title="2.2 拓展知识构建自己的 UI 组件库">2.2 拓展知识构建自己的 UI 组件库</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.1-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86_document.js-%E5%A6%82%E4%BD%95%E5%9C%A8-Next.js-%E4%B8%AD%E6%94%B9%E8%BF%9B-SEO/" title="2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO">2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/BI/">BI</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD%E5%AE%9E%E6%88%98/">DDD实战</a>
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="https://geek.zshipu.com/tags/IM/">IM</a>
+    
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    
+    <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
+    
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
+    
+    <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/apollo/">apollo</a>
+    
+    <a href="https://geek.zshipu.com/tags/css/">css</a>
+    
+    <a href="https://geek.zshipu.com/tags/flutter/">flutter</a>
+    
+    <a href="https://geek.zshipu.com/tags/game/">game</a>
+    
+    <a href="https://geek.zshipu.com/tags/github/">github</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="https://geek.zshipu.com/tags/graphql/">graphql</a>
+    
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nexp/">nexp</a>
+    
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
+    
+    <a href="https://geek.zshipu.com/tags/nodejs/">nodejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/react/">react</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/storybook/">storybook</a>
+    
+    <a href="https://geek.zshipu.com/tags/tailwind/">tailwind</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/web/">web</a>
+    
+    <a href="https://geek.zshipu.com/tags/web3/">web3</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/">人工智能</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%88%86%E8%AF%8D/">分词</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%AD%A6%E4%B9%A0/">学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%96%87%E6%91%98/">文摘</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%88%AC%E8%99%AB/">爬虫</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/">用户画像</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E8%B5%B7%E6%AD%A5/">起步</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

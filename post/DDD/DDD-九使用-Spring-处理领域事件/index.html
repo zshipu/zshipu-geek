@@ -145,7 +145,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="post-toc" style="position: absolute; top: 188px;">
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
-        
+        <nav id="TableOfContents"></nav>
     </div>
 </div>
 <script type="text/javascript">
@@ -192,16 +192,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>从 Spring 的角度来看，域事件只是另一个应用程序事件，可以使用内置的<code>ApplicationEventPublisher</code>. 换句话说，我们不需要担心构建事件总线或其他一些基础设施来发布域事件：您将事件发布者注入到您的域服务中并发布事件。但是，在大多数情况下，您希望直接从聚合中发布域事件，而不必为此目的通过域服务。幸运的是，我们可以做到这一点。</p>
-
 <p>Spring Data 提供了一种机制，可以直接从聚合中发布域事件，而无需获取事件发布者。我们在研究时已经<a href="https://dev.to/peholmst/building-aggregates-with-spring-data-2iig">触及了这种机制</a><code>BaseAggregateRoot</code>，现在我们将仔细研究它。</p>
-
-<p>在后台，Spring Boot 将为所有名称以*save*开头的存储库方法注册一个方法拦截器，例如<code>save</code>and <code>saveAndFlush</code>。此拦截器将在您的聚合中查找两种方法：一种带有注释的方法<code>@DomainEvents</code>，另一种带有注释的方法<code>@AfterDomainEventPublication</code>。</p>
-
+<p>在后台，Spring Boot 将为所有名称以<em>save</em>开头的存储库方法注册一个方法拦截器，例如<code>save</code>and <code>saveAndFlush</code>。此拦截器将在您的聚合中查找两种方法：一种带有注释的方法<code>@DomainEvents</code>，另一种带有注释的方法<code>@AfterDomainEventPublication</code>。</p>
 <p>带有注释的方法<code>@DomainEvents</code>预计会返回要发布的事件列表。拦截器将使用 Spring 应用程序事件发布者发布这些事件。<code>@AfterDomainEventPublication</code>发布事件后，将调用带有注释的方法。此方法有望清除事件列表，以防止在下次保存聚合时再次发布它们。</p>
-
 <p>以这种方式设计和发布域事件时要记住一个警告，它与包含对聚合根本身的引用的事件有关，例如：</p>
-
-<pre><code>public class PotentiallyProblematicDomainEvent {
+<pre tabindex="0"><code>public class PotentiallyProblematicDomainEvent {
     private final MyAggregate myAggregate;
 
     public PotentiallyProblematicDomainEvent(@NotNull MyAggregate myAggregate) {
@@ -212,17 +207,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         return myAggregate;
     }
 }
-</code></pre>
-
-<p>每当您设计这样的事件时，您必须了解 Spring Data 和 JPA 如何在后台工作。</p>
-
+</code></pre><p>每当您设计这样的事件时，您必须了解 Spring Data 和 JPA 如何在后台工作。</p>
 <p>当您保存现有实体时（这里我说的是 JPA 实体概念，而不是 DDD 实体概念），Spring Data 最终会调用<code>EntityManager.merge</code>. 如果实体被分离，JPA 将检索托管实体，将所有属性从分离实体复制到托管实体，保存并返回。托管实体将增加其乐观锁定版本，而分离实体保持不变。</p>
-
-<p>但是，由于域事件是在分离实体上注册的，因此域事件侦听器将获得对*分离*实体的引用。如果侦听器尝试直接在实体上执行任何操作然后保存它，这可能会导致乐观锁定错误。</p>
-
+<p>但是，由于域事件是在分离实体上注册的，因此域事件侦听器将获得对<em>分离</em>实体的引用。如果侦听器尝试直接在实体上执行任何操作然后保存它，这可能会导致乐观锁定错误。</p>
 <p>以下是一些侦听器最终会收到带有不正确乐观锁定版本的陈旧实体的示例：</p>
-
-<pre><code>public class PotentiallyProblematicApplicationService {
+<pre tabindex="0"><code>public class PotentiallyProblematicApplicationService {
 
     @Transactional
     public void firstProblematicMethod(@NotNull MyAggregate aggregate) { // &lt;1&gt;
@@ -236,18 +225,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         myAggregateRepository.saveAndFlush(aggregate);
     }
 }
-</code></pre>
-
-<ol>
+</code></pre><ol>
 <li>此方法接受聚合作为参数并直接对其执行操作。这意味着聚合是分离的，一旦保存就会变得陈旧。</li>
 <li>此方法接受聚合 ID 作为参数，并在对其执行操作之前查找聚合。但是，该方法并不<code>@Transactional</code>意味着对存储库的两个调用都将在它们自己的事务中运行，从而在它们之间分离聚合。</li>
 </ol>
-
 <p>现在我们如何解决这个问题？第二种方法很容易修复：只需制作整个方法<code>@Transactional</code>。这样，在保存聚合时仍将对其进行管理，并且域事件侦听器将获得正确的实例。</p>
-
 <p>但是第一种方法呢？一个明显的解决方案是在事件中使用聚合 ID 而不是聚合本身。但是，这有其自身的问题：如果事件在聚合被持久化之前注册，聚合没有 ID。如果您从未从非持久聚合中发布任何事件，这不是问题。但是，如果你这样做了，你可以像这样修复它：</p>
-
-<pre><code>public class SaferDomainEvent { 
+<pre tabindex="0"><code>public class SaferDomainEvent { 
     private final MyAggregate myAggregate;
 
     public SaferDomainEvent(@NotNull MyAggregate myAggregate) { // &lt;1&gt;
@@ -258,14 +242,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         return myAggregate.getIdentifier();
     }
 }
-</code></pre>
-
-<ol>
+</code></pre><ol>
 <li>我们仍然在事件中存储对聚合的引用&hellip;&hellip;</li>
 <li>&hellip;但我们只将其 ID 暴露给外界，如果他们想对它做任何事情，则强制任何侦听器从存储库中获取聚合的新副本。</li>
 </ol>
-
-<p>这又是一个底层技术悄悄潜入你的领域模型的例子——你选择的持久性技术甚至会影响你的领域事件的设计。幸运的是，在这种情况下，这没什么大不了的，但是如果您将早期设计建立在后来被证明是不正确的假设上，它仍然可能会在以后回来并咬您一口（我一直在那里做过，尤其是当涉及到 JPA 时）。底线是您需要充分了解您的工具——不仅要了解如何*使用*它们，还要了解它们是如何*工作*的。</p>
+<p>这又是一个底层技术悄悄潜入你的领域模型的例子——你选择的持久性技术甚至会影响你的领域事件的设计。幸运的是，在这种情况下，这没什么大不了的，但是如果您将早期设计建立在后来被证明是不正确的假设上，它仍然可能会在以后回来并咬您一口（我一直在那里做过，尤其是当涉及到 JPA 时）。底线是您需要充分了解您的工具——不仅要了解如何<em>使用</em>它们，还要了解它们是如何<em>工作</em>的。</p>
 
         </div>
 
@@ -389,6 +370,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/nexp/level001/nexp-level-001-03-%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AB%AF%E6%B8%B2%E6%9F%93%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%B8%B2%E6%9F%93/" title="nexp-level-001 03 服务器端渲染与客户端渲染">nexp-level-001 03 服务器端渲染与客户端渲染</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nexp/level001/nexp-level-001-02-Next.js-%E4%B8%8E-React%E5%B7%AE%E5%BC%82%E5%92%8C%E6%9C%80%E4%BD%B3%E5%89%8D%E7%AB%AF%E6%A1%86%E6%9E%B6/" title="nexp-level-001 02 Next.js 与 React：差异和最佳前端框架">nexp-level-001 02 Next.js 与 React：差异和最佳前端框架</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/nexp/level001/nexp-level-001-01-Next.js-%E5%8A%9F%E8%83%BD%E5%8F%8A%E4%BB%8B%E7%BB%8D/" title="nexp-level-001 01 Next.js 功能及介绍">nexp-level-001 01 Next.js 功能及介绍</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/graphql/%E5%B8%A6%E6%9C%89-Netflix-DGS-%E5%92%8C-Spring-Boot-%E7%9A%84-GraphQL-%E6%9C%8D%E5%8A%A1%E5%99%A8/" title="带有 Netflix DGS 和 Spring Boot 的 GraphQL 服务器">带有 Netflix DGS 和 Spring Boot 的 GraphQL 服务器</a>
     </li>
     
@@ -414,18 +407,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.1-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86_document.js-%E5%A6%82%E4%BD%95%E5%9C%A8-Next.js-%E4%B8%AD%E6%94%B9%E8%BF%9B-SEO/" title="2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO">2.1 拓展知识_document.js 如何在 Next.js 中改进 SEO</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/2.%E6%90%AD%E5%BB%BA-Next.js-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/" title="2.搭建 Next.js 应用程序">2.搭建 Next.js 应用程序</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/nextjs/storybooktailwindnextjs/1.%E4%BD%BF%E7%94%A8-StorybookTailwindcss-%E5%92%8C-Apollo-%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%BE%E7%BD%AE-Next.Js/" title="1.使用 Storybook、Tailwindcss 和 Apollo 客户端设置 Next.Js">1.使用 Storybook、Tailwindcss 和 Apollo 客户端设置 Next.Js</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/css/CSS-%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="CSS 特性的完整指南">CSS 特性的完整指南</a>
     </li>
     
 </ul>
@@ -493,9 +474,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/JS/">JS</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
-    <a href="">Java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -503,9 +484,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
-    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
     
-    <a href="">Nextjs</a>
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
@@ -531,9 +512,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/java/">java</a>
     
-    <a href="">js</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nexp/">nexp</a>
+    
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
     
