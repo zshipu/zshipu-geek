@@ -145,7 +145,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="post-toc" style="position: absolute; top: 188px;">
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
-        
+        <nav id="TableOfContents"></nav>
     </div>
 </div>
 <script type="text/javascript">
@@ -192,107 +192,157 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>Golang通过http.NewRequest实现模拟请求，添加请求头和请求参数</p>
-
 <ol>
-<li><code>func DownloadString(remoteUrl string,queryValues url.Values) (body []byte,err error){</code>
-
-2.  <code>client := &amp;http.Client{};</code>
-
-3.  <code>body = nil;</code>
-
-4.  <code>uri,err := url.Parse(remoteUrl);</code>
-
-5.  <code>if(err != nil){</code>
-
-6.  <code>return ;</code>
-
-7.  <code>}</code>
-
-8.  <code>if(queryValues != nil){</code>
-
-9.  <code>values := uri.Query();</code>
-
-10.  <code>if(values != nil){</code>
-
-11.  <code>for k,v := range values {</code>
-
-12.  <code>queryValues[k] = v;</code>
-
-13.  <code>}</code>
-
-14.  <code>}</code>
-
-15.  <code>uri.RawQuery = queryValues.Encode();</code>
-
-16.  <code>}</code>
-
-17.  <code>reqest, err := http.NewRequest(&quot;GET&quot;,uri.String(),nil);</code>
-
-18.  <code>reqest.Header.Add(&quot;Accept&quot;, &quot;text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8&quot;);</code>
-
-19.  <code>reqest.Header.Add(&quot;Accept-Encoding&quot;, &quot;gzip, deflate&quot;);</code>
-
-20.  <code>reqest.Header.Add(&quot;Accept-Language&quot;, &quot;zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3&quot;);</code>
-
-21.  <code>reqest.Header.Add(&quot;Connection&quot;, &quot;keep-alive&quot;);</code>
-
-22.  <code>reqest.Header.Add(&quot;Host&quot;, uri.Host);</code>
-
-23.  <code>reqest.Header.Add(&quot;Referer&quot;, uri.String());</code>
-
-24.  <code>reqest.Header.Add(&quot;User-Agent&quot;, &quot;Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0&quot;);</code>
-
-26.  <code>response, err := client.Do(reqest)</code>
-
-27.  <code>defer response.Body.Close();</code>
-
-28.  <code>if(err != nil){</code>
-
-29.  <code>return ;</code>
-
-30.  <code>}</code>
-
-32.  <code>if response.StatusCode == 200 {</code>
-
-33.  <code>switch response.Header.Get(&quot;Content-Encoding&quot;) {</code>
-
-34.  <code>case &quot;gzip&quot;:</code>
-
-35.  <code>reader, _ := gzip.NewReader(response.Body)</code>
-
-36.  <code>for {</code>
-
-37.  <code>buf := make([]byte, 1024)</code>
-
-38.  <code>n, err := reader.Read(buf)</code>
-
-40.  <code>if err != nil &amp;&amp; err != io.EOF {</code>
-
-41.  <code>panic(err)</code>
-
-42.  <code>}</code>
-
-44.  <code>if n == 0 {</code>
-
-45.  <code>break</code>
-
-46.  <code>}</code>
-
-47.  <code>body = append(body,buf...);</code>
-
-48.  <code>}</code>
-
-49.  <code>default:</code>
-
-50.  <code>body, _ = ioutil.ReadAll(response.Body)</code>
-
-52.  <code>}</code>
-
-53.  <code>}</code>
-
-54.  <code>return ;</code>
-
-55.  <code>}</code></li>
+<li>
+<p><code>func DownloadString(remoteUrl string,queryValues url.Values) (body []byte,err error){</code></p>
+</li>
+<li>
+<p><code>client := &amp;http.Client{};</code></p>
+</li>
+<li>
+<p><code>body = nil;</code></p>
+</li>
+<li>
+<p><code>uri,err := url.Parse(remoteUrl);</code></p>
+</li>
+<li>
+<p><code>if(err != nil){</code></p>
+</li>
+<li>
+<p><code>return ;</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
+<li>
+<p><code>if(queryValues != nil){</code></p>
+</li>
+<li>
+<p><code>values := uri.Query();</code></p>
+</li>
+<li>
+<p><code>if(values != nil){</code></p>
+</li>
+<li>
+<p><code>for k,v := range values {</code></p>
+</li>
+<li>
+<p><code>queryValues[k] = v;</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
+<li>
+<p><code>uri.RawQuery = queryValues.Encode();</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
+<li>
+<p><code>reqest, err := http.NewRequest(&quot;GET&quot;,uri.String(),nil);</code></p>
+</li>
+<li>
+<p><code>reqest.Header.Add(&quot;Accept&quot;, &quot;text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8&quot;);</code></p>
+</li>
+<li>
+<p><code>reqest.Header.Add(&quot;Accept-Encoding&quot;, &quot;gzip, deflate&quot;);</code></p>
+</li>
+<li>
+<p><code>reqest.Header.Add(&quot;Accept-Language&quot;, &quot;zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3&quot;);</code></p>
+</li>
+<li>
+<p><code>reqest.Header.Add(&quot;Connection&quot;, &quot;keep-alive&quot;);</code></p>
+</li>
+<li>
+<p><code>reqest.Header.Add(&quot;Host&quot;, uri.Host);</code></p>
+</li>
+<li>
+<p><code>reqest.Header.Add(&quot;Referer&quot;, uri.String());</code></p>
+</li>
+<li>
+<p><code>reqest.Header.Add(&quot;User-Agent&quot;, &quot;Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0&quot;);</code></p>
+</li>
+<li>
+<p><code>response, err := client.Do(reqest)</code></p>
+</li>
+<li>
+<p><code>defer response.Body.Close();</code></p>
+</li>
+<li>
+<p><code>if(err != nil){</code></p>
+</li>
+<li>
+<p><code>return ;</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
+<li>
+<p><code>if response.StatusCode == 200 {</code></p>
+</li>
+<li>
+<p><code>switch response.Header.Get(&quot;Content-Encoding&quot;) {</code></p>
+</li>
+<li>
+<p><code>case &quot;gzip&quot;:</code></p>
+</li>
+<li>
+<p><code>reader, _ := gzip.NewReader(response.Body)</code></p>
+</li>
+<li>
+<p><code>for {</code></p>
+</li>
+<li>
+<p><code>buf := make([]byte, 1024)</code></p>
+</li>
+<li>
+<p><code>n, err := reader.Read(buf)</code></p>
+</li>
+<li>
+<p><code>if err != nil &amp;&amp; err != io.EOF {</code></p>
+</li>
+<li>
+<p><code>panic(err)</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
+<li>
+<p><code>if n == 0 {</code></p>
+</li>
+<li>
+<p><code>break</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
+<li>
+<p><code>body = append(body,buf...);</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
+<li>
+<p><code>default:</code></p>
+</li>
+<li>
+<p><code>body, _ = ioutil.ReadAll(response.Body)</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
+<li>
+<p><code>return ;</code></p>
+</li>
+<li>
+<p><code>}</code></p>
+</li>
 </ol>
 
         </div>
@@ -417,43 +467,43 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
-        <a href="https://geek.zshipu.com/post/mybatis/Sharding-JDBC-%E5%88%86%E7%89%87%E7%AD%96%E7%95%A5%E5%9B%9BHint%E5%BC%BA%E5%88%B6%E8%B7%AF%E7%94%B1HintShardingStrategy/" title="Sharding JDBC  分片策略四：Hint强制路由HintShardingStrategy">Sharding JDBC  分片策略四：Hint强制路由HintShardingStrategy</a>
+        <a href="https://geek.zshipu.com/post/nexp/css-level-01/css-level-007-CSS%E4%B8%8D%E9%80%8F%E6%98%8E%E5%BA%A6-%E9%80%8F%E6%98%8E%E5%BA%A6/" title="css-level-007 CSS不透明度-透明度">css-level-007 CSS不透明度-透明度</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/gitlab/Docker%E9%83%A8%E7%BD%B2gitlab%E9%81%BF%E5%9D%91%E7%89%88/" title="Docker部署gitlab(避坑版)">Docker部署gitlab(避坑版)</a>
+        <a href="https://geek.zshipu.com/post/nexp/css-level-01/css-level-006-CSS-%E4%B8%ADpxemremvwvh%E5%8D%95%E4%BD%8D%E4%B9%8B%E9%97%B4%E7%9A%84%E5%8C%BA%E5%88%AB%E8%AF%A6%E8%A7%A3/" title="css-level-006 CSS 中px、em、rem、%、vw、vh单位之间的区别详解">css-level-006 CSS 中px、em、rem、%、vw、vh单位之间的区别详解</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/bi/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F-%E6%96%B9%E6%B3%95%E8%AE%BA%E4%B8%8E%E5%B7%A5%E7%A8%8B%E5%8C%96%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" title="用户画像-方法论与工程化解决方案">用户画像-方法论与工程化解决方案</a>
+        <a href="https://geek.zshipu.com/post/nexp/css-level-01/css-level-005-CSS%E9%80%89%E6%8B%A9%E5%99%A8/" title="css-level-005 CSS选择器">css-level-005 CSS选择器</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/react/level01/2.-React-%E5%BE%88%E6%A3%92%E7%9A%84%E7%BB%84%E4%BB%B6/" title="2. React 很棒的组件">2. React 很棒的组件</a>
+        <a href="https://geek.zshipu.com/post/nexp/css-level-01/css-level-004-CSS%E9%A2%9C%E8%89%B2%E4%BD%93%E7%B3%BB-HSL/" title="css-level-004 CSS颜色体系-HSL">css-level-004 CSS颜色体系-HSL</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/react/level01/1.-%E5%88%9D%E5%AD%A6%E8%80%85%E7%9A%84-React-/" title="1.初学者的 React">1.初学者的 React</a>
+        <a href="https://geek.zshipu.com/post/nexp/css-level-01/css-level-003-CSS%E9%A2%9C%E8%89%B2%E4%BD%93%E7%B3%BB/" title="css-level-003 CSS颜色体系">css-level-003 CSS颜色体系</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/css/CSS-%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="CSS 特性的完整指南">CSS 特性的完整指南</a>
+        <a href="https://geek.zshipu.com/post/nexp/css-level-01/css-level-002-CSS%E5%9F%BA%E7%A1%80/" title="css-level-002 CSS基础">css-level-002 CSS基础</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/web/Web-3.0%E5%BC%80%E5%8F%91%E8%80%85%E8%B7%AF%E7%BA%BF%E5%9B%BE%E6%8C%87%E5%8D%97%E5%92%8C%E5%85%A5%E9%97%A8%E8%B5%84%E6%BA%90/" title="Web 3.0：开发者路线图、指南和入门资源">Web 3.0：开发者路线图、指南和入门资源</a>
+        <a href="https://geek.zshipu.com/post/nexp/level002/nexp-level-002-01-Next.js-&#43;-NextUI-%E5%AE%8C%E7%BE%8E%E7%BB%84%E5%90%88%E5%BC%95%E5%85%A5CSS%E7%BB%84%E4%BB%B6%E5%BA%93/" title="nexp-level-002 01 Next.js &#43; NextUI 完美组合，引入CSS组件库">nexp-level-002 01 Next.js &#43; NextUI 完美组合，引入CSS组件库</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/graphql/%E5%BC%80%E5%A7%8B%E4%BD%BF%E7%94%A8Apollo-Graphql%E6%9C%8D%E5%8A%A1%E5%99%A8/" title="开始使用Apollo Graphql服务器">开始使用Apollo Graphql服务器</a>
+        <a href="https://geek.zshipu.com/post/nexp/css-level-01/css-level-001-%E5%AD%A6%E4%B9%A0-TailwindCSS%E5%88%B6%E4%BD%9C%E4%B8%AA%E4%BA%BA%E8%B5%84%E6%96%99%E5%8D%A1/" title="css-level-001 学习 TailwindCSS：制作个人资料卡">css-level-001 学习 TailwindCSS：制作个人资料卡</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/detail/ch1-async-in-netty/" title="Netty那点事（八）理解Netty中的异步">Netty那点事（八）理解Netty中的异步</a>
+        <a href="https://geek.zshipu.com/post/nexp/level001/nexp-level-001-06-%E6%B7%BB%E5%8A%A0%E7%BB%84%E4%BB%B6%E7%BA%A7-CSS/" title="nexp-level-001 06 添加组件级 CSS">nexp-level-001 06 添加组件级 CSS</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/trival-notes/" title="Netty那点事（七）层层分析Netty中的Channel(下)">Netty那点事（七）层层分析Netty中的Channel(下)</a>
+        <a href="https://geek.zshipu.com/post/nexp/level001/nexp-level-001-05-%E5%AD%A6%E4%B9%A0-Next.js-%E4%BD%BF%E7%94%A8%E5%85%B1%E4%BA%AB%E7%BB%84%E4%BB%B6/" title="nexp-level-001 05 学习 Next.js  使用共享组件">nexp-level-001 05 学习 Next.js  使用共享组件</a>
     </li>
     
 </ul>
@@ -521,9 +571,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="">JS</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
-    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -531,11 +581,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     
     <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/apollo/">apollo</a>
     
     <a href="https://geek.zshipu.com/tags/css/">css</a>
     
@@ -545,23 +601,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/github/">github</a>
     
-    <a href="https://geek.zshipu.com/tags/gitlab/">gitlab</a>
-    
     <a href="https://geek.zshipu.com/tags/go/">go</a>
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
     
     <a href="https://geek.zshipu.com/tags/graphql/">graphql</a>
     
-    <a href="">java</a>
-    
-    <a href="https://geek.zshipu.com/tags/jdbc/">jdbc</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/js/">js</a>
     
-    <a href="https://geek.zshipu.com/tags/mybatis/">mybatis</a>
-    
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nexp/">nexp</a>
+    
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
     
@@ -575,9 +629,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
     
-    <a href="https://geek.zshipu.com/tags/sharding/">sharding</a>
-    
     <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/storybook/">storybook</a>
+    
+    <a href="https://geek.zshipu.com/tags/tailwind/">tailwind</a>
     
     <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
     
@@ -604,6 +660,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/">用户画像</a>
     
     <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E8%B5%B7%E6%AD%A5/">起步</a>
     
 </div>
     </section>

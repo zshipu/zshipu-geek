@@ -146,16 +146,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#netty那点事-一-概述">Netty那点事（一）概述</a></li>
-<li><a href="#起-netty是什么">起：Netty是什么</a></li>
-<li><a href="#承-体验netty">承：体验Netty</a></li>
-<li><a href="#转-netty背后的事件驱动机制">转：Netty背后的事件驱动机制</a></li>
-<li><a href="#合-开启netty源码之门">合：开启Netty源码之门</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#netty那点事一概述">Netty那点事（一）概述</a></li>
+    <li><a href="#起netty是什么">起：Netty是什么</a></li>
+    <li><a href="#承体验netty">承：体验Netty</a></li>
+    <li><a href="#转netty背后的事件驱动机制">转：Netty背后的事件驱动机制</a></li>
+    <li><a href="#合开启netty源码之门">合：开启Netty源码之门</a></li>
+  </ul>
 </nav>
     </div>
 </div>
@@ -202,96 +199,109 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            
-
-<h2 id="netty那点事-一-概述">Netty那点事（一）概述</h2>
-
-<h2 id="起-netty是什么">起：Netty是什么</h2>
-
-<p>大概用Netty的，无论新手还是老手，都知道它是一个“网络通讯框架”。所谓框架，基本上都是一个作用：基于底层API，提供更便捷的编程模型。那么&rdquo;通讯框架&rdquo;到底做了什么事情呢？回答这个问题并不太容易，我们不妨反过来看看，不使用netty，直接基于NIO编写网络程序，你需要做什么(以Server端TCP连接为例，这里我们使用Reactor模型)：</p>
-
+            <h2 id="netty那点事一概述">Netty那点事（一）概述</h2>
+<h2 id="起netty是什么">起：Netty是什么</h2>
+<p>大概用Netty的，无论新手还是老手，都知道它是一个“网络通讯框架”。所谓框架，基本上都是一个作用：基于底层API，提供更便捷的编程模型。那么&quot;通讯框架&quot;到底做了什么事情呢？回答这个问题并不太容易，我们不妨反过来看看，不使用netty，直接基于NIO编写网络程序，你需要做什么(以Server端TCP连接为例，这里我们使用Reactor模型)：</p>
 <ol>
 <li>监听端口，建立Socket连接</li>
 <li>建立线程，处理内容
-
 <ol>
 <li>读取Socket内容，并对协议进行解析</li>
 <li>进行逻辑处理</li>
 <li>回写响应内容</li>
 <li>如果是多次交互的应用(SMTP、FTP)，则需要保持连接多进行几次交互</li>
-</ol></li>
+</ol>
+</li>
 <li>关闭连接</li>
 </ol>
-
 <p>建立线程是一个比较耗时的操作，同时维护线程本身也有一些开销，所以我们会需要多线程机制，幸好JDK已经有很方便的多线程框架了，这里我们不需要花很多心思。</p>
-
 <p>此外，因为TCP连接的特性，我们还要使用连接池来进行管理：</p>
-
 <ol>
 <li>建立TCP连接是比较耗时的操作，对于频繁的通讯，保持连接效果更好</li>
 <li>对于并发请求，可能需要建立多个连接</li>
 <li>维护多个连接后，每次通讯，需要选择某一可用连接</li>
 <li>连接超时和关闭机制</li>
 </ol>
-
 <p>想想就觉得很复杂了！实际上，基于NIO直接实现这部分东西，即使是老手也容易出现错误，而使用Netty之后，你只需要关注逻辑处理部分就可以了。</p>
-
-<h2 id="承-体验netty">承：体验Netty</h2>
-
+<h2 id="承体验netty">承：体验Netty</h2>
 <p>这里我们引用Netty的example包里的一个例子，一个简单的EchoServer，它接受客户端输入，并将输入原样返回。其主要代码如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">run</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#998;font-style:italic">// Configure the server.
+</span><span style="color:#998;font-style:italic"></span>        ServerBootstrap bootstrap <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> ServerBootstrap<span style="color:#000;font-weight:bold">(</span>
+                <span style="color:#000;font-weight:bold">new</span> NioServerSocketChannelFactory<span style="color:#000;font-weight:bold">(</span>
+                        Executors<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">newCachedThreadPool</span><span style="color:#000;font-weight:bold">(),</span>
+                        Executors<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">newCachedThreadPool</span><span style="color:#000;font-weight:bold">()));</span>
 
-<pre><code class="language-java">    public void run() {
-        // Configure the server.
-        ServerBootstrap bootstrap = new ServerBootstrap(
-                new NioServerSocketChannelFactory(
-                        Executors.newCachedThreadPool(),
-                        Executors.newCachedThreadPool()));
+        <span style="color:#998;font-style:italic">// Set up the pipeline factory.
+</span><span style="color:#998;font-style:italic"></span>        bootstrap<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setPipelineFactory</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> ChannelPipelineFactory<span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">public</span> ChannelPipeline <span style="color:#900;font-weight:bold">getPipeline</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">throws</span> Exception <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#000;font-weight:bold">return</span> Channels<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">pipeline</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> EchoServerHandler<span style="color:#000;font-weight:bold">());</span>
+            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">});</span>
 
-        // Set up the pipeline factory.
-        bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
-            public ChannelPipeline getPipeline() throws Exception {
-                return Channels.pipeline(new EchoServerHandler());
-            }
-        });
+        <span style="color:#998;font-style:italic">// Bind and start to accept incoming connections.
+</span><span style="color:#998;font-style:italic"></span>        bootstrap<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">bind</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> InetSocketAddress<span style="color:#000;font-weight:bold">(</span>port<span style="color:#000;font-weight:bold">));</span>
+    <span style="color:#000;font-weight:bold">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这里<code>EchoServerHandler</code>是其业务逻辑的实现者，大致代码如下：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">EchoServerHandler</span> <span style="color:#000;font-weight:bold">extends</span> SimpleChannelUpstreamHandler <span style="color:#000;font-weight:bold">{</span>
 
-        // Bind and start to accept incoming connections.
-        bootstrap.bind(new InetSocketAddress(port));
-    }
-</code></pre>
-
-<p>这里<code>EchoServerHandler</code>是其业务逻辑的实现者，大致代码如下：</p>
-
-<pre><code class="language-java">	public class EchoServerHandler extends SimpleChannelUpstreamHandler {
-
-	    @Override
-	    public void messageReceived(
-	            ChannelHandlerContext ctx, MessageEvent e) {
-	        // Send back the received message to the remote peer.
-	        e.getChannel().write(e.getMessage());
-	    }
-	}
-</code></pre>
-
-<p>还是挺简单的，不是吗？</p>
-
-<h2 id="转-netty背后的事件驱动机制">转：Netty背后的事件驱动机制</h2>
-
+	    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+	    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">messageReceived</span><span style="color:#000;font-weight:bold">(</span>
+	            ChannelHandlerContext ctx<span style="color:#000;font-weight:bold">,</span> MessageEvent e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+	        <span style="color:#998;font-style:italic">// Send back the received message to the remote peer.
+</span><span style="color:#998;font-style:italic"></span>	        e<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getChannel</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">write</span><span style="color:#000;font-weight:bold">(</span>e<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getMessage</span><span style="color:#000;font-weight:bold">());</span>
+	    <span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#000;font-weight:bold">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>还是挺简单的，不是吗？</p>
+<h2 id="转netty背后的事件驱动机制">转：Netty背后的事件驱动机制</h2>
 <p>完成了以上一段代码，我们算是与Netty进行了第一次亲密接触。如果想深入学习呢？</p>
-
 <p>阅读源码是了解一个开源工具非常好的手段，但是Java世界的框架大多追求大而全，功能完备，如果逐个阅读，难免迷失方向，Netty也并不例外。相反，抓住几个重点对象，理解其领域概念及设计思想，从而理清其脉络，相当于打通了任督二脉，以后的阅读就不再困难了。</p>
-
 <p>理解Netty的关键点在哪呢？我觉得，除了NIO的相关知识，另一个就是事件驱动的设计思想。什么叫事件驱动？我们回头看看<code>EchoServerHandler</code>的代码，其中的参数：<code>public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)</code>，MessageEvent就是一个事件。这个事件携带了一些信息，例如这里<code>e.getMessage()</code>就是消息的内容，而<code>EchoServerHandler</code>则描述了处理这种事件的方式。一旦某个事件触发，相应的Handler则会被调用，并进行处理。这种事件机制在UI编程里广泛应用，而Netty则将其应用到了网络编程领域。</p>
-
 <p>在Netty里，所有事件都来自<code>ChannelEvent</code>接口，这些事件涵盖监听端口、建立连接、读写数据等网络通讯的各个阶段。而事件的处理者就是<code>ChannelHandler</code>，这样，不但是业务逻辑，连网络通讯流程中底层的处理，都可以通过实现<code>ChannelHandler</code>来完成了。事实上，Netty内部的连接处理、协议编解码、超时等机制，都是通过handler完成的。当博主弄明白其中的奥妙时，不得不佩服这种设计！</p>
-
 <p>下图描述了Netty进行事件处理的流程。<code>Channel</code>是连接的通道，是ChannelEvent的产生者，而<code>ChannelPipeline</code>可以理解为ChannelHandler的集合。</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202205011954702.png" alt="event driven in Netty" /></p>
-
-<h2 id="合-开启netty源码之门">合：开启Netty源码之门</h2>
-
+<p>
+        <img class="mx-auto" alt="event driven in Netty" src="https://cdn.jsdelivr.net/gh/zshipu/images/202205011954702.png" />   
+    </p>
+<h2 id="合开启netty源码之门">合：开启Netty源码之门</h2>
 <p>理解了Netty的事件驱动机制，我们现在可以来研究Netty的各个模块了。Netty的包结构如下：</p>
-
 <pre><code>org
 └── jboss
     └── netty
@@ -304,34 +314,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         ├── logging 日志
         └── util 工具类
 </code></pre>
-
 <p>在这里面，<code>channel</code>和<code>handler</code>两部分比较复杂。我们不妨与Netty官方的结构图对照一下，来了解其功能。</p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202205011955539.png" alt="components in Netty" /></p>
-
+<p>
+        <img class="mx-auto" alt="components in Netty" src="https://cdn.jsdelivr.net/gh/zshipu/images/202205011955539.png" />   
+    </p>
 <p>具体的解释可以看这里：<a href="http://netty.io/3.7/guide/#architecture">http://netty.io/3.7/guide/#architecture</a>。图中可以看到，除了之前说到的事件驱动机制之外，Netty的核心功能还包括两部分：</p>
-
 <ul>
-<li><p>Zero-Copy-Capable Rich Byte Buffer</p>
-
+<li>
+<p>Zero-Copy-Capable Rich Byte Buffer</p>
 <p>零拷贝的Buffer。为什么叫零拷贝？因为在数据传输时，最终处理的数据会需要对单个传输层的报文，进行组合或者拆分。NIO原生的ByteBuffer无法做到这件事，而Netty通过提供Composite(组合)和Slice(切分)两种Buffer来实现零拷贝。这部分代码在<code>org.jboss.netty.buffer</code>包中。
-这里需要额外注意，不要和操作系统级别的Zero-Copy混淆了, 操作系统中的零拷贝主要是用户空间和内核空间之间的数据拷贝, NIO中通过DirectBuffer做了实现.</p></li>
-
-<li><p>Universal Communication API</p>
-
-<p>统一的通讯API。这个是针对Java的Old I/O和New I/O，使用了不同的API而言。Netty则提供了统一的API(<code>org.jboss.netty.channel.Channel</code>)来封装这两种I/O模型。这部分代码在<code>org.jboss.netty.channel</code>包中。</p></li>
+这里需要额外注意，不要和操作系统级别的Zero-Copy混淆了, 操作系统中的零拷贝主要是用户空间和内核空间之间的数据拷贝, NIO中通过DirectBuffer做了实现.</p>
+</li>
+<li>
+<p>Universal Communication API</p>
+<p>统一的通讯API。这个是针对Java的Old I/O和New I/O，使用了不同的API而言。Netty则提供了统一的API(<code>org.jboss.netty.channel.Channel</code>)来封装这两种I/O模型。这部分代码在<code>org.jboss.netty.channel</code>包中。</p>
+</li>
 </ul>
-
 <p>此外，Protocol Support功能通过handler机制实现。</p>
-
 <p>接下来的文章，我们会根据模块，详细的对Netty源码进行分析。</p>
-
 <p>参考资料：</p>
-
 <ul>
-<li><p>Netty 3.7 User Guide <a href="http://netty.io/3.7/guide/">http://netty.io/3.7/guide/</a></p></li>
-
-<li><p>What is Netty? <a href="http://ayedo.github.io/netty/2013/06/19/what-is-netty.html">http://ayedo.github.io/netty/2013/06/19/what-is-netty.html</a></p></li>
+<li>
+<p>Netty 3.7 User Guide <a href="http://netty.io/3.7/guide/">http://netty.io/3.7/guide/</a></p>
+</li>
+<li>
+<p>What is Netty? <a href="http://ayedo.github.io/netty/2013/06/19/what-is-netty.html">http://ayedo.github.io/netty/2013/06/19/what-is-netty.html</a></p>
+</li>
 </ul>
 
         </div>
@@ -456,43 +464,43 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
-        <a href="https://geek.zshipu.com/post/mybatis/Sharding-JDBC-%E5%88%86%E7%89%87%E7%AD%96%E7%95%A5%E5%9B%9BHint%E5%BC%BA%E5%88%B6%E8%B7%AF%E7%94%B1HintShardingStrategy/" title="Sharding JDBC  分片策略四：Hint强制路由HintShardingStrategy">Sharding JDBC  分片策略四：Hint强制路由HintShardingStrategy</a>
+        <a href="https://geek.zshipu.com/post/nexp/css-level-01/css-level-007-CSS%E4%B8%8D%E9%80%8F%E6%98%8E%E5%BA%A6-%E9%80%8F%E6%98%8E%E5%BA%A6/" title="css-level-007 CSS不透明度-透明度">css-level-007 CSS不透明度-透明度</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/gitlab/Docker%E9%83%A8%E7%BD%B2gitlab%E9%81%BF%E5%9D%91%E7%89%88/" title="Docker部署gitlab(避坑版)">Docker部署gitlab(避坑版)</a>
+        <a href="https://geek.zshipu.com/post/nexp/css-level-01/css-level-006-CSS-%E4%B8%ADpxemremvwvh%E5%8D%95%E4%BD%8D%E4%B9%8B%E9%97%B4%E7%9A%84%E5%8C%BA%E5%88%AB%E8%AF%A6%E8%A7%A3/" title="css-level-006 CSS 中px、em、rem、%、vw、vh单位之间的区别详解">css-level-006 CSS 中px、em、rem、%、vw、vh单位之间的区别详解</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/bi/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F-%E6%96%B9%E6%B3%95%E8%AE%BA%E4%B8%8E%E5%B7%A5%E7%A8%8B%E5%8C%96%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" title="用户画像-方法论与工程化解决方案">用户画像-方法论与工程化解决方案</a>
+        <a href="https://geek.zshipu.com/post/nexp/css-level-01/css-level-005-CSS%E9%80%89%E6%8B%A9%E5%99%A8/" title="css-level-005 CSS选择器">css-level-005 CSS选择器</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/react/level01/2.-React-%E5%BE%88%E6%A3%92%E7%9A%84%E7%BB%84%E4%BB%B6/" title="2. React 很棒的组件">2. React 很棒的组件</a>
+        <a href="https://geek.zshipu.com/post/nexp/css-level-01/css-level-004-CSS%E9%A2%9C%E8%89%B2%E4%BD%93%E7%B3%BB-HSL/" title="css-level-004 CSS颜色体系-HSL">css-level-004 CSS颜色体系-HSL</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/react/level01/1.-%E5%88%9D%E5%AD%A6%E8%80%85%E7%9A%84-React-/" title="1.初学者的 React">1.初学者的 React</a>
+        <a href="https://geek.zshipu.com/post/nexp/css-level-01/css-level-003-CSS%E9%A2%9C%E8%89%B2%E4%BD%93%E7%B3%BB/" title="css-level-003 CSS颜色体系">css-level-003 CSS颜色体系</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/css/CSS-%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="CSS 特性的完整指南">CSS 特性的完整指南</a>
+        <a href="https://geek.zshipu.com/post/nexp/css-level-01/css-level-002-CSS%E5%9F%BA%E7%A1%80/" title="css-level-002 CSS基础">css-level-002 CSS基础</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/web/Web-3.0%E5%BC%80%E5%8F%91%E8%80%85%E8%B7%AF%E7%BA%BF%E5%9B%BE%E6%8C%87%E5%8D%97%E5%92%8C%E5%85%A5%E9%97%A8%E8%B5%84%E6%BA%90/" title="Web 3.0：开发者路线图、指南和入门资源">Web 3.0：开发者路线图、指南和入门资源</a>
+        <a href="https://geek.zshipu.com/post/nexp/level002/nexp-level-002-01-Next.js-&#43;-NextUI-%E5%AE%8C%E7%BE%8E%E7%BB%84%E5%90%88%E5%BC%95%E5%85%A5CSS%E7%BB%84%E4%BB%B6%E5%BA%93/" title="nexp-level-002 01 Next.js &#43; NextUI 完美组合，引入CSS组件库">nexp-level-002 01 Next.js &#43; NextUI 完美组合，引入CSS组件库</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/graphql/%E5%BC%80%E5%A7%8B%E4%BD%BF%E7%94%A8Apollo-Graphql%E6%9C%8D%E5%8A%A1%E5%99%A8/" title="开始使用Apollo Graphql服务器">开始使用Apollo Graphql服务器</a>
+        <a href="https://geek.zshipu.com/post/nexp/css-level-01/css-level-001-%E5%AD%A6%E4%B9%A0-TailwindCSS%E5%88%B6%E4%BD%9C%E4%B8%AA%E4%BA%BA%E8%B5%84%E6%96%99%E5%8D%A1/" title="css-level-001 学习 TailwindCSS：制作个人资料卡">css-level-001 学习 TailwindCSS：制作个人资料卡</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/detail/ch1-async-in-netty/" title="Netty那点事（八）理解Netty中的异步">Netty那点事（八）理解Netty中的异步</a>
+        <a href="https://geek.zshipu.com/post/nexp/level001/nexp-level-001-06-%E6%B7%BB%E5%8A%A0%E7%BB%84%E4%BB%B6%E7%BA%A7-CSS/" title="nexp-level-001 06 添加组件级 CSS">nexp-level-001 06 添加组件级 CSS</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/trival-notes/" title="Netty那点事（七）层层分析Netty中的Channel(下)">Netty那点事（七）层层分析Netty中的Channel(下)</a>
+        <a href="https://geek.zshipu.com/post/nexp/level001/nexp-level-001-05-%E5%AD%A6%E4%B9%A0-Next.js-%E4%BD%BF%E7%94%A8%E5%85%B1%E4%BA%AB%E7%BB%84%E4%BB%B6/" title="nexp-level-001 05 学习 Next.js  使用共享组件">nexp-level-001 05 学习 Next.js  使用共享组件</a>
     </li>
     
 </ul>
@@ -560,9 +568,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="">JS</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
-    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -570,11 +578,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     
     <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/apollo/">apollo</a>
     
     <a href="https://geek.zshipu.com/tags/css/">css</a>
     
@@ -584,23 +598,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/github/">github</a>
     
-    <a href="https://geek.zshipu.com/tags/gitlab/">gitlab</a>
-    
     <a href="https://geek.zshipu.com/tags/go/">go</a>
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
     
     <a href="https://geek.zshipu.com/tags/graphql/">graphql</a>
     
-    <a href="">java</a>
-    
-    <a href="https://geek.zshipu.com/tags/jdbc/">jdbc</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/js/">js</a>
     
-    <a href="https://geek.zshipu.com/tags/mybatis/">mybatis</a>
-    
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nexp/">nexp</a>
+    
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
     
@@ -614,9 +626,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
     
-    <a href="https://geek.zshipu.com/tags/sharding/">sharding</a>
-    
     <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/storybook/">storybook</a>
+    
+    <a href="https://geek.zshipu.com/tags/tailwind/">tailwind</a>
     
     <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
     
@@ -643,6 +657,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/">用户画像</a>
     
     <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E8%B5%B7%E6%AD%A5/">起步</a>
     
 </div>
     </section>
