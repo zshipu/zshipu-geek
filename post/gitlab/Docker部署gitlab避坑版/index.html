@@ -146,18 +146,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#1-下载docker">1 下载docker</a></li>
-<li><a href="#2-下载gitlab镜像">2 下载gitlab镜像</a></li>
-<li><a href="#3-运行">3 运行</a></li>
-<li><a href="#4-进入容器内部修改">4 进入容器内部修改</a></li>
-<li><a href="#5-在浏览器里访问">5 在浏览器里访问</a></li>
-<li><a href="#6-修改root密码-如果忘记请修改">6 修改root密码（如果忘记请修改）</a></li>
-<li><a href="#7-创建项目">7 创建项目</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#1-下载docker">1 下载docker</a></li>
+    <li><a href="#2-下载gitlab镜像">2 下载gitlab镜像</a></li>
+    <li><a href="#3-运行">3 运行</a></li>
+    <li><a href="#4-进入容器内部修改">4 进入容器内部修改</a></li>
+    <li><a href="#5-在浏览器里访问">5 在浏览器里访问</a></li>
+    <li><a href="#6-修改root密码如果忘记请修改">6 修改root密码（如果忘记请修改）</a></li>
+    <li><a href="#7-创建项目">7 创建项目</a></li>
+  </ul>
 </nav>
     </div>
 </div>
@@ -204,135 +201,248 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            
-
-<h2 id="1-下载docker">1 下载docker</h2>
-
-<pre><code class="language-python"># 安装依赖
-yum install -y yum-utils device-mapper-persistent-data lvm2
-
-# 设置yum源
-yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-
-# 安装docker
-yum install -y docker-ce
-
-# 设置开机启动
-systemctl enable docker
-
-# 启动 Docker
-systemctl start docker
-
-# 查看版本
-docker version
-</code></pre>
-
-<h2 id="2-下载gitlab镜像">2 下载gitlab镜像</h2>
-
-<pre><code class="language-bash">docker pull gitlab/gitlab-ce:latest
-</code></pre>
-
-<h2 id="3-运行">3 运行</h2>
-
-<pre><code class="language-python">mkdir gitlab gitlab/etc gitlab/log gitlab/opt  
-
-docker run -id -p 3000:80 -p 9922:22 -v /root/gitlab/etc:/etc/gitlab  -v /root/gitlab/log:/var/log/gitlab -v /root/gitlab/opt:/var/opt/gitlab --restart always --privileged=true --name gitlab gitlab/gitlab-ce
-          
-'''
-命令解释：
--i  以交互模式运行容器，通常与 -t 同时使用命令解释：
-
--d  后台运行容器，并返回容器ID
-
--p 3000:80  将容器内80端口映射至宿主机9980端口，这是访问gitlab的端口
-
--p 9922:22  将容器内22端口映射至宿主机9922端口，这是访问ssh的端口
-
--v ./gitlab/etc:/etc/gitlab  将容器/etc/gitlab目录挂载到宿主机./gitlab/etc目录下，若宿主机内此目录不存在将会自动创建，其他两个挂载同这个一样
-
---restart always  容器自启动
-
---privileged=true  让容器获取宿主机root权限
-
---name gitlab-test  设置容器名称为gitlab
-
-gitlab/gitlab-ce  镜像的名称，这里也可以写镜像ID
-'''
-</code></pre>
-
-<h2 id="4-进入容器内部修改">4 进入容器内部修改</h2>
-
-<pre><code class="language-python">docker exec -it gitlab /bin/bash
-
-# 修改gitlab.rb
-vi /etc/gitlab/gitlab.rb
-## 加入如下
-# gitlab访问地址，可以写域名。如果端口不写的话默认为80端口
-external_url 'http://101.133.225.166'
-# ssh主机ip
-gitlab_rails['gitlab_ssh_host'] = '101.133.225.166'
-# ssh连接端口
-gitlab_rails['gitlab_shell_ssh_port'] = 9922
-
-# 让配置生效
-gitlab-ctl reconfigure
-
-### 注意不要重启，/etc/gitlab/gitlab.rb文件的配置会映射到gitlab.yml这个文件，由于咱们在docker中运行，在gitlab上生成的http地址应该是http://101.133.225.166:3000,所以，要修改下面文件
-
-# 修改http和ssh配置
-vi /opt/gitlab/embedded/service/gitlab-rails/config/gitlab.yml
-
-  gitlab:
-    host: 101.133.225.166
-    port: 3000 # 这里改为3000
-    https: false
-
-
-# 重启
-gitlab-ctl restart
-# 退出容器
-exit
-</code></pre>
-
-<p>[<img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220517200041464.png" alt="" /></p>
-
+            <h2 id="1-下载docker">1 下载docker</h2>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 安装依赖</span>
+</span></span><span style="display:flex;"><span>yum install <span style="color:#000;font-weight:bold">-</span>y yum<span style="color:#000;font-weight:bold">-</span>utils device<span style="color:#000;font-weight:bold">-</span>mapper<span style="color:#000;font-weight:bold">-</span>persistent<span style="color:#000;font-weight:bold">-</span>data lvm2
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 设置yum源</span>
+</span></span><span style="display:flex;"><span>yum<span style="color:#000;font-weight:bold">-</span>config<span style="color:#000;font-weight:bold">-</span>manager <span style="color:#000;font-weight:bold">--</span>add<span style="color:#000;font-weight:bold">-</span>repo https:<span style="color:#000;font-weight:bold">//</span>download<span style="color:#000;font-weight:bold">.</span>docker<span style="color:#000;font-weight:bold">.</span>com<span style="color:#000;font-weight:bold">/</span>linux<span style="color:#000;font-weight:bold">/</span>centos<span style="color:#000;font-weight:bold">/</span>docker<span style="color:#000;font-weight:bold">-</span>ce<span style="color:#000;font-weight:bold">.</span>repo
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 安装docker</span>
+</span></span><span style="display:flex;"><span>yum install <span style="color:#000;font-weight:bold">-</span>y docker<span style="color:#000;font-weight:bold">-</span>ce
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 设置开机启动</span>
+</span></span><span style="display:flex;"><span>systemctl enable docker
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 启动 Docker</span>
+</span></span><span style="display:flex;"><span>systemctl start docker
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 查看版本</span>
+</span></span><span style="display:flex;"><span>docker version
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="2-下载gitlab镜像">2 下载gitlab镜像</h2>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>docker pull gitlab/gitlab-ce:latest
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="3-运行">3 运行</h2>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>mkdir gitlab gitlab<span style="color:#000;font-weight:bold">/</span>etc gitlab<span style="color:#000;font-weight:bold">/</span>log gitlab<span style="color:#000;font-weight:bold">/</span>opt  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>docker run <span style="color:#000;font-weight:bold">-</span><span style="color:#0086b3">id</span> <span style="color:#000;font-weight:bold">-</span>p <span style="color:#099">3000</span>:<span style="color:#099">80</span> <span style="color:#000;font-weight:bold">-</span>p <span style="color:#099">9922</span>:<span style="color:#099">22</span> <span style="color:#000;font-weight:bold">-</span>v <span style="color:#000;font-weight:bold">/</span>root<span style="color:#000;font-weight:bold">/</span>gitlab<span style="color:#000;font-weight:bold">/</span>etc:<span style="color:#000;font-weight:bold">/</span>etc<span style="color:#000;font-weight:bold">/</span>gitlab  <span style="color:#000;font-weight:bold">-</span>v <span style="color:#000;font-weight:bold">/</span>root<span style="color:#000;font-weight:bold">/</span>gitlab<span style="color:#000;font-weight:bold">/</span>log:<span style="color:#000;font-weight:bold">/</span>var<span style="color:#000;font-weight:bold">/</span>log<span style="color:#000;font-weight:bold">/</span>gitlab <span style="color:#000;font-weight:bold">-</span>v <span style="color:#000;font-weight:bold">/</span>root<span style="color:#000;font-weight:bold">/</span>gitlab<span style="color:#000;font-weight:bold">/</span>opt:<span style="color:#000;font-weight:bold">/</span>var<span style="color:#000;font-weight:bold">/</span>opt<span style="color:#000;font-weight:bold">/</span>gitlab <span style="color:#000;font-weight:bold">--</span>restart always <span style="color:#000;font-weight:bold">--</span>privileged<span style="color:#000;font-weight:bold">=</span>true <span style="color:#000;font-weight:bold">--</span>name gitlab gitlab<span style="color:#000;font-weight:bold">/</span>gitlab<span style="color:#000;font-weight:bold">-</span>ce
+</span></span><span style="display:flex;"><span>          
+</span></span><span style="display:flex;"><span><span style="color:#d14">&#39;&#39;&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">命令解释：
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">-i  以交互模式运行容器，通常与 -t 同时使用命令解释：
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">-d  后台运行容器，并返回容器ID
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">-p 3000:80  将容器内80端口映射至宿主机9980端口，这是访问gitlab的端口
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">-p 9922:22  将容器内22端口映射至宿主机9922端口，这是访问ssh的端口
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">-v ./gitlab/etc:/etc/gitlab  将容器/etc/gitlab目录挂载到宿主机./gitlab/etc目录下，若宿主机内此目录不存在将会自动创建，其他两个挂载同这个一样
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">--restart always  容器自启动
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">--privileged=true  让容器获取宿主机root权限
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">--name gitlab-test  设置容器名称为gitlab
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">gitlab/gitlab-ce  镜像的名称，这里也可以写镜像ID
+</span></span></span><span style="display:flex;"><span><span style="color:#d14">&#39;&#39;&#39;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="4-进入容器内部修改">4 进入容器内部修改</h2>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>docker exec <span style="color:#000;font-weight:bold">-</span>it gitlab <span style="color:#000;font-weight:bold">/</span><span style="color:#0086b3">bin</span><span style="color:#000;font-weight:bold">/</span>bash
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 修改gitlab.rb</span>
+</span></span><span style="display:flex;"><span>vi <span style="color:#000;font-weight:bold">/</span>etc<span style="color:#000;font-weight:bold">/</span>gitlab<span style="color:#000;font-weight:bold">/</span>gitlab<span style="color:#000;font-weight:bold">.</span>rb
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic">## 加入如下</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># gitlab访问地址，可以写域名。如果端口不写的话默认为80端口</span>
+</span></span><span style="display:flex;"><span>external_url <span style="color:#d14">&#39;http://101.133.225.166&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># ssh主机ip</span>
+</span></span><span style="display:flex;"><span>gitlab_rails[<span style="color:#d14">&#39;gitlab_ssh_host&#39;</span>] <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;101.133.225.166&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># ssh连接端口</span>
+</span></span><span style="display:flex;"><span>gitlab_rails[<span style="color:#d14">&#39;gitlab_shell_ssh_port&#39;</span>] <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">9922</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 让配置生效</span>
+</span></span><span style="display:flex;"><span>gitlab<span style="color:#000;font-weight:bold">-</span>ctl reconfigure
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic">### 注意不要重启，/etc/gitlab/gitlab.rb文件的配置会映射到gitlab.yml这个文件，由于咱们在docker中运行，在gitlab上生成的http地址应该是http://101.133.225.166:3000,所以，要修改下面文件</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 修改http和ssh配置</span>
+</span></span><span style="display:flex;"><span>vi <span style="color:#000;font-weight:bold">/</span>opt<span style="color:#000;font-weight:bold">/</span>gitlab<span style="color:#000;font-weight:bold">/</span>embedded<span style="color:#000;font-weight:bold">/</span>service<span style="color:#000;font-weight:bold">/</span>gitlab<span style="color:#000;font-weight:bold">-</span>rails<span style="color:#000;font-weight:bold">/</span>config<span style="color:#000;font-weight:bold">/</span>gitlab<span style="color:#000;font-weight:bold">.</span>yml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  gitlab:
+</span></span><span style="display:flex;"><span>    host: <span style="color:#099">101.133.225.166</span>
+</span></span><span style="display:flex;"><span>    port: <span style="color:#099">3000</span> <span style="color:#998;font-style:italic"># 这里改为3000</span>
+</span></span><span style="display:flex;"><span>    https: false
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 重启</span>
+</span></span><span style="display:flex;"><span>gitlab<span style="color:#000;font-weight:bold">-</span>ctl restart
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 退出容器</span>
+</span></span><span style="display:flex;"><span>exit
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>[
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220517200041464.png" />   
+    </p>
 <h2 id="5-在浏览器里访问">5 在浏览器里访问</h2>
-
-<pre><code class="language-python"># 机器配置要大于4g，否则很容易启动不了，报502
-http://101.133.225.166:3000/
-
-# 第一次访问，会让修改root密码
-# 修改后以root用户登录即可
-</code></pre>
-
-<p>[<img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220517200051315.png" alt="" /></p>
-
-<h2 id="6-修改root密码-如果忘记请修改">6 修改root密码（如果忘记请修改）</h2>
-
-<pre><code class="language-python"># 进入容器内部
-docker exec -it gitlab /bin/bash
-
-# 进入控制台
-gitlab-rails console -e production
-
-# 查询id为1的用户，id为1的用户是超级管理员
-user = User.where(id:1).first
-# 修改密码为lqz123456
-user.password='lqz123456'
-# 保存
-user.save!
-# 退出
-exit
-</code></pre>
-
-<h2 id="7-创建项目">7 创建项目</h2>
-
-<p>[<img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220517200114327.png" alt="" /><a href="https://tva1.sinaimg.cn/large/008i3skNgy1guqoxyevwwj61re0tmwhf02.jpg"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220517200126918.png" alt="" /></a></p>
-
-<p><a href="https://tva1.sinaimg.cn/large/008i3skNgy1guqp0e9zf0j61c50u077a02.jpg"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220517200134211.png" alt="" /></a></p>
-
-<p><a href="https://tva1.sinaimg.cn/large/008i3skNgy1guqpdewug8j610c0u0tca02.jpg"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220517200142434.png" alt="" /></a></p>
-
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 机器配置要大于4g，否则很容易启动不了，报502</span>
+</span></span><span style="display:flex;"><span>http:<span style="color:#000;font-weight:bold">//</span><span style="color:#099">101.133.225.166</span>:<span style="color:#099">3000</span><span style="color:#000;font-weight:bold">/</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 第一次访问，会让修改root密码</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 修改后以root用户登录即可</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>[
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220517200051315.png" />   
+    </p>
+<h2 id="6-修改root密码如果忘记请修改">6 修改root密码（如果忘记请修改）</h2>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 进入容器内部</span>
+</span></span><span style="display:flex;"><span>docker exec <span style="color:#000;font-weight:bold">-</span>it gitlab <span style="color:#000;font-weight:bold">/</span><span style="color:#0086b3">bin</span><span style="color:#000;font-weight:bold">/</span>bash
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 进入控制台</span>
+</span></span><span style="display:flex;"><span>gitlab<span style="color:#000;font-weight:bold">-</span>rails console <span style="color:#000;font-weight:bold">-</span>e production
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 查询id为1的用户，id为1的用户是超级管理员</span>
+</span></span><span style="display:flex;"><span>user <span style="color:#000;font-weight:bold">=</span> User<span style="color:#000;font-weight:bold">.</span>where(<span style="color:#0086b3">id</span>:<span style="color:#099">1</span>)<span style="color:#000;font-weight:bold">.</span>first
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 修改密码为lqz123456</span>
+</span></span><span style="display:flex;"><span>user<span style="color:#000;font-weight:bold">.</span>password<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;lqz123456&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 保存</span>
+</span></span><span style="display:flex;"><span>user<span style="color:#000;font-weight:bold">.</span>save<span style="color:#a61717;background-color:#e3d2d2">!</span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># 退出</span>
+</span></span><span style="display:flex;"><span>exit
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="7-创建项目">7 创建项目</h2>
+<p>[
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220517200114327.png" />   
+    <a href="https://tva1.sinaimg.cn/large/008i3skNgy1guqoxyevwwj61re0tmwhf02.jpg">
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220517200126918.png" />   
+    </a></p>
+<p><a href="https://tva1.sinaimg.cn/large/008i3skNgy1guqp0e9zf0j61c50u077a02.jpg">
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220517200134211.png" />   
+    </a></p>
+<p><a href="https://tva1.sinaimg.cn/large/008i3skNgy1guqpdewug8j610c0u0tca02.jpg">
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/images/image-20220517200142434.png" />   
+    </a></p>
 <p><strong>后续操作就是git基本操作</strong></p>
 
         </div>
@@ -362,9 +472,9 @@ exit
         
         <li><a href="/post/react/level01/1.-%E5%88%9D%E5%AD%A6%E8%80%85%E7%9A%84-React-/">1.初学者的 React</a></li>
         
-        <li><a href="/post/css/CSS-%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/">CSS 特性的完整指南</a></li>
+        <li><a href="/post/nextjs/storybooktailwindnextjs/2.4-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E4%BA%86%E8%A7%A3-TypeScript-%E4%B8%AD%E7%9A%84%E9%AB%98%E7%BA%A7%E6%A6%82%E5%BF%B5/">2.3 拓展知识了解 TypeScript 中的高级概念</a></li>
         
-        <li><a href="/post/web/Web-3.0%E5%BC%80%E5%8F%91%E8%80%85%E8%B7%AF%E7%BA%BF%E5%9B%BE%E6%8C%87%E5%8D%97%E5%92%8C%E5%85%A5%E9%97%A8%E8%B5%84%E6%BA%90/">Web 3.0：开发者路线图、指南和入门资源</a></li>
+        <li><a href="/post/nextjs/storybooktailwindnextjs/2.3-%E6%8B%93%E5%B1%95%E7%9F%A5%E8%AF%86%E5%AD%A6%E4%B9%A0-TypeScript-%E5%85%A8%E9%9D%A2%E6%8C%87%E5%8D%97/">2.3 拓展知识学习 TypeScript 指南</a></li>
         
     </ul>
 </div>
@@ -457,43 +567,43 @@ exit
 <ul class="widget-list">
     
     <li>
-        <a href="https://geek.zshipu.com/post/mybatis/Sharding-JDBC-%E5%88%86%E7%89%87%E7%AD%96%E7%95%A5%E5%9B%9BHint%E5%BC%BA%E5%88%B6%E8%B7%AF%E7%94%B1HintShardingStrategy/" title="Sharding JDBC  分片策略四：Hint强制路由HintShardingStrategy">Sharding JDBC  分片策略四：Hint强制路由HintShardingStrategy</a>
+        <a href="https://geek.zshipu.com/post/css/%E5%89%8D%E7%AB%AF%E7%9F%A5%E8%AF%86%E7%82%B9%E5%A4%A7%E5%85%A8/" title="前端知识点大全">前端知识点大全</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/gitlab/Docker%E9%83%A8%E7%BD%B2gitlab%E9%81%BF%E5%9D%91%E7%89%88/" title="Docker部署gitlab(避坑版)">Docker部署gitlab(避坑版)</a>
+        <a href="https://geek.zshipu.com/post/web3.0/%E5%85%A8%E6%A0%88-Web3-%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="web3.0 全栈 Web3 开发完整指南">web3.0 全栈 Web3 开发完整指南</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/bi/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F-%E6%96%B9%E6%B3%95%E8%AE%BA%E4%B8%8E%E5%B7%A5%E7%A8%8B%E5%8C%96%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" title="用户画像-方法论与工程化解决方案">用户画像-方法论与工程化解决方案</a>
+        <a href="https://geek.zshipu.com/post/web3.0/%E5%85%A8%E6%A0%88%E4%BB%A5%E5%A4%AA%E5%9D%8A%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="web3.0 全栈以太坊开发完整指南">web3.0 全栈以太坊开发完整指南</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/react/level01/2.-React-%E5%BE%88%E6%A3%92%E7%9A%84%E7%BB%84%E4%BB%B6/" title="2. React 很棒的组件">2. React 很棒的组件</a>
+        <a href="https://geek.zshipu.com/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%825Truffle-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8%E4%BD%93%E9%AA%8C%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6/" title="以太坊从零到略懂5：Truffle 快速入门体验智能合约">以太坊从零到略懂5：Truffle 快速入门体验智能合约</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/react/level01/1.-%E5%88%9D%E5%AD%A6%E8%80%85%E7%9A%84-React-/" title="1.初学者的 React">1.初学者的 React</a>
+        <a href="https://geek.zshipu.com/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%8242021-%E5%B9%B4-Web3.0-%E5%92%8C-Solidity-%E5%BC%80%E5%8F%91%E8%B7%AF%E7%BA%BF%E5%9B%BE/" title="以太坊从零到略懂4： Web3.0 和 Solidity 开发路线图">以太坊从零到略懂4： Web3.0 和 Solidity 开发路线图</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/css/CSS-%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="CSS 特性的完整指南">CSS 特性的完整指南</a>
+        <a href="https://geek.zshipu.com/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%823%E5%BC%80%E5%8F%91%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%90%88%E7%BA%A6/" title="web3.0 以太坊从零到略懂3：开发第一个合约">web3.0 以太坊从零到略懂3：开发第一个合约</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/web/Web-3.0%E5%BC%80%E5%8F%91%E8%80%85%E8%B7%AF%E7%BA%BF%E5%9B%BE%E6%8C%87%E5%8D%97%E5%92%8C%E5%85%A5%E9%97%A8%E8%B5%84%E6%BA%90/" title="Web 3.0：开发者路线图、指南和入门资源">Web 3.0：开发者路线图、指南和入门资源</a>
+        <a href="https://geek.zshipu.com/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%822%E8%AE%BE%E7%BD%AE%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/" title="web3.0 以太坊从零到略懂2：设置开发环境">web3.0 以太坊从零到略懂2：设置开发环境</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/graphql/%E5%BC%80%E5%A7%8B%E4%BD%BF%E7%94%A8Apollo-Graphql%E6%9C%8D%E5%8A%A1%E5%99%A8/" title="开始使用Apollo Graphql服务器">开始使用Apollo Graphql服务器</a>
+        <a href="https://geek.zshipu.com/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%821%E7%AE%80%E4%BB%8B/" title="web3.0 以太坊从零到略懂1：简介">web3.0 以太坊从零到略懂1：简介</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/detail/ch1-async-in-netty/" title="Netty那点事（八）理解Netty中的异步">Netty那点事（八）理解Netty中的异步</a>
+        <a href="https://geek.zshipu.com/post/nexp/css-level-01/css-level-007-CSS%E4%B8%8D%E9%80%8F%E6%98%8E%E5%BA%A6-%E9%80%8F%E6%98%8E%E5%BA%A6/" title="css-level-007 CSS不透明度-透明度">css-level-007 CSS不透明度-透明度</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/trival-notes/" title="Netty那点事（七）层层分析Netty中的Channel(下)">Netty那点事（七）层层分析Netty中的Channel(下)</a>
+        <a href="https://geek.zshipu.com/post/nexp/css-level-01/css-level-006-CSS-%E4%B8%ADpxemremvwvh%E5%8D%95%E4%BD%8D%E4%B9%8B%E9%97%B4%E7%9A%84%E5%8C%BA%E5%88%AB%E8%AF%A6%E8%A7%A3/" title="css-level-006 CSS 中px、em、rem、%、vw、vh单位之间的区别详解">css-level-006 CSS 中px、em、rem、%、vw、vh单位之间的区别详解</a>
     </li>
     
 </ul>
@@ -561,9 +671,9 @@ exit
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="">JS</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
-    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -571,11 +681,17 @@ exit
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     
     <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/apollo/">apollo</a>
     
     <a href="https://geek.zshipu.com/tags/css/">css</a>
     
@@ -593,7 +709,7 @@ exit
     
     <a href="https://geek.zshipu.com/tags/graphql/">graphql</a>
     
-    <a href="">java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/jdbc/">jdbc</a>
     
@@ -602,6 +718,10 @@ exit
     <a href="https://geek.zshipu.com/tags/mybatis/">mybatis</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nexp/">nexp</a>
+    
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
     
@@ -618,6 +738,10 @@ exit
     <a href="https://geek.zshipu.com/tags/sharding/">sharding</a>
     
     <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/storybook/">storybook</a>
+    
+    <a href="https://geek.zshipu.com/tags/tailwind/">tailwind</a>
     
     <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
     
@@ -644,6 +768,8 @@ exit
     <a href="https://geek.zshipu.com/tags/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/">用户画像</a>
     
     <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E8%B5%B7%E6%AD%A5/">起步</a>
     
 </div>
     </section>

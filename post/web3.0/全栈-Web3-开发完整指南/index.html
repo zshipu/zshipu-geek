@@ -309,20 +309,20 @@ ipfs-http-client @emotion/css @openzeppelin/contracts
 <p>这应该搭建出我们将使用的基本 Solidity 开发环境。您应该会看到创建了一些新文件和文件夹，包括<strong>contracts</strong>、<strong>scripts</strong>、<strong>test</strong>和<strong>hardhat.config.js</strong>。</p>
 <p>接下来，让我们在<strong>hardhat.config.js</strong>更新安全帽配置。</p>
 <p>使用以下代码更新此文件：</p>
-<pre tabindex="0"><code>require(&quot;@nomiclabs/hardhat-waffle&quot;);
+<pre tabindex="0"><code>require(&#34;@nomiclabs/hardhat-waffle&#34;);
 
 module.exports = {
-  solidity: &quot;0.8.4&quot;,
+  solidity: &#34;0.8.4&#34;,
   networks: {
     hardhat: {
       chainId: 1337
     },
     // mumbai: {
-    //   url: &quot;https://rpc-mumbai.matic.today&quot;,
+    //   url: &#34;https://rpc-mumbai.matic.today&#34;,
     //   accounts: [process.env.pk]
     // },
     // polygon: {
-    //   url: &quot;https://polygon-rpc.com/&quot;,
+    //   url: &#34;https://polygon-rpc.com/&#34;,
     //   accounts: [process.env.pk]
     // }
   }
@@ -358,7 +358,7 @@ blockquote {
   margin-left: 0px;
 }
 </code></pre><p>接下来，我们将为应用图像创建几个<strong>SVG</strong>文件，一个用于徽标，一个用于箭头按钮。</p>
-<p>在<strong>public</strong>文件夹中创建**<a href="https://gist.github.com/dabit3/28ab34ed85b1b1036d9b28c03fa6361b?short_path=0f62324">logo.svg</a>**和**<a href="https://gist.github.com/dabit3/06cefe57313c22082a2836065a9ec25e?short_path=6b7ad37">right-arrow.svg</a>**并将链接的 SVG 代码复制到每个文件中。</p>
+<p>在<strong>public</strong>文件夹中创建**<a href="https://gist.github.com/dabit3/28ab34ed85b1b1036d9b28c03fa6361b?short_path=0f62324">logo.svg</a><strong>和</strong><a href="https://gist.github.com/dabit3/06cefe57313c22082a2836065a9ec25e?short_path=6b7ad37">right-arrow.svg</a>**并将链接的 SVG 代码复制到每个文件中。</p>
 <h2 id="智能合约">智能合约</h2>
 <p>接下来，让我们创建将为我们的博客和 CMS 提供动力的智能合约。</p>
 <p>在名为<strong>Blog.sol的****contracts</strong>文件夹中创建一个新文件。</p>
@@ -367,8 +367,8 @@ blockquote {
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import &quot;hardhat/console.sol&quot;;
-import &quot;@openzeppelin/contracts/utils/Counters.sol&quot;;
+import &#34;hardhat/console.sol&#34;;
+import &#34;@openzeppelin/contracts/utils/Counters.sol&#34;;
 
 contract Blog {
     string public name;
@@ -396,7 +396,7 @@ contract Blog {
     /* when the blog is deployed, give it a name */
     /* also set the creator as the owner of the contract */
     constructor(string memory _name) {
-        console.log(&quot;Deploying Blog with name:&quot;, _name);
+        console.log(&#34;Deploying Blog with name:&#34;, _name);
         name = _name;
         owner = msg.sender;
     }
@@ -466,40 +466,40 @@ contract Blog {
 </blockquote>
 <p>接下来，让我们编写一个基本测试来测试我们将使用的最重要的功能。</p>
 <p>为此，请打开<strong>test/sample-test.js</strong>并使用以下代码对其进行更新：</p>
-<pre tabindex="0"><code>const { expect } = require(&quot;chai&quot;)
-const { ethers } = require(&quot;hardhat&quot;)
+<pre tabindex="0"><code>const { expect } = require(&#34;chai&#34;)
+const { ethers } = require(&#34;hardhat&#34;)
 
-describe(&quot;Blog&quot;, async function () {
-  it(&quot;Should create a post&quot;, async function () {
-    const Blog = await ethers.getContractFactory(&quot;Blog&quot;)
-    const blog = await Blog.deploy(&quot;My blog&quot;)
+describe(&#34;Blog&#34;, async function () {
+  it(&#34;Should create a post&#34;, async function () {
+    const Blog = await ethers.getContractFactory(&#34;Blog&#34;)
+    const blog = await Blog.deploy(&#34;My blog&#34;)
     await blog.deployed()
-    await blog.createPost(&quot;My first post&quot;, &quot;12345&quot;)
+    await blog.createPost(&#34;My first post&#34;, &#34;12345&#34;)
 
     const posts = await blog.fetchPosts()
-    expect(posts[0].title).to.equal(&quot;My first post&quot;)
+    expect(posts[0].title).to.equal(&#34;My first post&#34;)
   })
 
-  it(&quot;Should edit a post&quot;, async function () {
-    const Blog = await ethers.getContractFactory(&quot;Blog&quot;)
-    const blog = await Blog.deploy(&quot;My blog&quot;)
+  it(&#34;Should edit a post&#34;, async function () {
+    const Blog = await ethers.getContractFactory(&#34;Blog&#34;)
+    const blog = await Blog.deploy(&#34;My blog&#34;)
     await blog.deployed()
-    await blog.createPost(&quot;My Second post&quot;, &quot;12345&quot;)
+    await blog.createPost(&#34;My Second post&#34;, &#34;12345&#34;)
 
-    await blog.updatePost(1, &quot;My updated post&quot;, &quot;23456&quot;, true)
+    await blog.updatePost(1, &#34;My updated post&#34;, &#34;23456&#34;, true)
 
     posts = await blog.fetchPosts()
-    expect(posts[0].title).to.equal(&quot;My updated post&quot;)
+    expect(posts[0].title).to.equal(&#34;My updated post&#34;)
   })
 
-  it(&quot;Should add update the name&quot;, async function () {
-    const Blog = await ethers.getContractFactory(&quot;Blog&quot;)
-    const blog = await Blog.deploy(&quot;My blog&quot;)
+  it(&#34;Should add update the name&#34;, async function () {
+    const Blog = await ethers.getContractFactory(&#34;Blog&#34;)
+    const blog = await Blog.deploy(&#34;My blog&#34;)
     await blog.deployed()
 
-    expect(await blog.name()).to.equal(&quot;My blog&quot;)
-    await blog.updateName('My new blog')
-    expect(await blog.name()).to.equal(&quot;My new blog&quot;)
+    expect(await blog.name()).to.equal(&#34;My blog&#34;)
+    await blog.updateName(&#39;My new blog&#39;)
+    expect(await blog.name()).to.equal(&#34;My new blog&#34;)
   })
 })
 </code></pre><p>接下来，通过打开终端并运行以下命令来运行测试：</p>
@@ -516,22 +516,22 @@ describe(&quot;Blog&quot;, async function () {
 <p>接下来，我们需要将合约部署到测试网络。首先将<strong>scripts/sample-script.js</strong>的名称更新为<strong>scripts/deploy.js</strong>。</p>
 <p>接下来，使用这个新的部署脚本更新文件：</p>
 <pre tabindex="0"><code>/* scripts/deploy.js */
-const hre = require(&quot;hardhat&quot;);
-const fs = require('fs');
+const hre = require(&#34;hardhat&#34;);
+const fs = require(&#39;fs&#39;);
 
 async function main() {
   /* these two lines deploy the contract to the network */
-  const Blog = await hre.ethers.getContractFactory(&quot;Blog&quot;);
-  const blog = await Blog.deploy(&quot;My blog&quot;);
+  const Blog = await hre.ethers.getContractFactory(&#34;Blog&#34;);
+  const blog = await Blog.deploy(&#34;My blog&#34;);
 
   await blog.deployed();
-  console.log(&quot;Blog deployed to:&quot;, blog.address);
+  console.log(&#34;Blog deployed to:&#34;, blog.address);
 
   /* this code writes the contract addresses to a local */
   /* file named config.js that we can use in the app */
-  fs.writeFileSync('./config.js', `
-  export const contractAddress = &quot;${blog.address}&quot;
-  export const ownerAddress = &quot;${blog.signer.address}&quot;
+  fs.writeFileSync(&#39;./config.js&#39;, `
+  export const contractAddress = &#34;${blog.address}&#34;
+  export const ownerAddress = &#34;${blog.signer.address}&#34;
   `)
 }
 
@@ -580,30 +580,30 @@ Private Key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 <p>接下来，让我们编写应用程序的代码。</p>
 <p>我们要做的第一件事是设置几个环境变量，我们将使用它们在本地测试环境、孟买测试网和 Polygon 主网之间切换。</p>
 <p>在项目的根目录中创建一个名为**.env.local**的新文件，并添加以下配置以开始：</p>
-<pre tabindex="0"><code>ENVIRONMENT=&quot;local&quot;
-NEXT_PUBLIC_ENVIRONMENT=&quot;local&quot;
+<pre tabindex="0"><code>ENVIRONMENT=&#34;local&#34;
+NEXT_PUBLIC_ENVIRONMENT=&#34;local&#34;
 </code></pre><p>我们将能够在 、 和 之间<code>local</code>切换<code>testnet</code>这些<code>mainnet</code>变量</p>
 <p>这将允许我们在客户端和服务器上引用我们的环境。要了解有关 Next.js 中环境变量如何工作的更多信息，请查看<a href="https://nextjs.org/docs/basic-features/environment-variables">此处</a>的文档。</p>
 <h3 id="上下文js">上下文.js</h3>
 <p>接下来，让我们创建应用<a href="https://reactjs.org/docs/context.html">上下文</a>。上下文将为我们提供一种在整个应用程序中共享状态的简单方法。</p>
 <p>创建一个名为<strong>context.js</strong>的文件并添加以下代码：</p>
-<pre tabindex="0"><code>import { createContext } from 'react'
+<pre tabindex="0"><code>import { createContext } from &#39;react&#39;
 
 export const AccountContext = createContext(null)
 </code></pre><h3 id="布局和导航">布局和导航</h3>
 <p>接下来，让我们打开<strong>pages/_app.js</strong>。在这里，我们将更新代码以包括导航、钱包连接、上下文和一些基本样式。</p>
 <p>此页面用作应用程序其余部分的包装器或布局。</p>
 <pre tabindex="0"><code>/* pages/__app.js */
-import '../styles/globals.css'
-import { useState } from 'react'
-import Link from 'next/link'
-import { css } from '@emotion/css'
-import { ethers } from 'ethers'
-import Web3Modal from 'web3modal'
-import WalletConnectProvider from '@walletconnect/web3-provider'
-import { AccountContext } from '../context.js'
-import { ownerAddress } from '../config'
-import 'easymde/dist/easymde.min.css'
+import &#39;../styles/globals.css&#39;
+import { useState } from &#39;react&#39;
+import Link from &#39;next/link&#39;
+import { css } from &#39;@emotion/css&#39;
+import { ethers } from &#39;ethers&#39;
+import Web3Modal from &#39;web3modal&#39;
+import WalletConnectProvider from &#39;@walletconnect/web3-provider&#39;
+import { AccountContext } from &#39;../context.js&#39;
+import { ownerAddress } from &#39;../config&#39;
+import &#39;easymde/dist/easymde.min.css&#39;
 
 function MyApp({ Component, pageProps }) {
   /* create local state to save account information after signin */
@@ -616,7 +616,7 @@ function MyApp({ Component, pageProps }) {
         walletconnect: {
           package: WalletConnectProvider,
           options: { 
-            infuraId: &quot;your-infura-id&quot;
+            infuraId: &#34;your-infura-id&#34;
           },
         },
       },
@@ -624,7 +624,7 @@ function MyApp({ Component, pageProps }) {
     return web3Modal
   }
 
-  /* the connect function uses web3 modal to connect to the user's wallet */
+  /* the connect function uses web3 modal to connect to the user&#39;s wallet */
   async function connect() {
     try {
       const web3Modal = await getWeb3Modal()
@@ -633,7 +633,7 @@ function MyApp({ Component, pageProps }) {
       const accounts = await provider.listAccounts()
       setAccount(accounts[0])
     } catch (err) {
-      console.log('error:', err)
+      console.log(&#39;error:&#39;, err)
     }
   }
 
@@ -641,16 +641,16 @@ function MyApp({ Component, pageProps }) {
     &lt;div&gt;
       &lt;nav className={nav}&gt;
         &lt;div className={header}&gt;
-          &lt;Link href=&quot;/&quot;&gt;
+          &lt;Link href=&#34;/&#34;&gt;
             &lt;a&gt;
               &lt;img
-                src='/logo.svg'
-                alt=&quot;React Logo&quot;
-                style={{ width: '50px' }}
+                src=&#39;/logo.svg&#39;
+                alt=&#34;React Logo&#34;
+                style={{ width: &#39;50px&#39; }}
               /&gt;
             &lt;/a&gt;
           &lt;/Link&gt;
-          &lt;Link href=&quot;/&quot;&gt;
+          &lt;Link href=&#34;/&#34;&gt;
             &lt;a&gt;
               &lt;div className={titleContainer}&gt;
                 &lt;h2 className={title}&gt;Full Stack&lt;/h2&gt;
@@ -670,7 +670,7 @@ function MyApp({ Component, pageProps }) {
           }
         &lt;/div&gt;
         &lt;div className={linkContainer}&gt;
-          &lt;Link href=&quot;/&quot; &gt;
+          &lt;Link href=&#34;/&#34; &gt;
             &lt;a className={link}&gt;
               Home
             &lt;/a&gt;
@@ -679,7 +679,7 @@ function MyApp({ Component, pageProps }) {
             /* if the signed in user is the contract owner, we */
             /* show the nav link to create a new post */
             (account === ownerAddress) &amp;&amp; (
-              &lt;Link href=&quot;/create-post&quot;&gt;
+              &lt;Link href=&#34;/create-post&#34;&gt;
                 &lt;a className={link}&gt;
                   Create Post
                 &lt;/a&gt;
@@ -770,20 +770,20 @@ export default MyApp
 <p>现在我们已经设置了布局，让我们创建应用程序的入口点。</p>
 <p>此页面将从网络中获取帖子列表并在列表视图中呈现帖子标题。当用户点击帖子时，我们会将他们导航到另一个页面以查看详细信息（接下来将创建页面）。</p>
 <pre tabindex="0"><code>/* pages/index.js */
-import { css } from '@emotion/css'
-import { useContext } from 'react'
-import { useRouter } from 'next/router'
-import { ethers } from 'ethers'
-import Link from 'next/link'
-import { AccountContext } from '../context'
+import { css } from &#39;@emotion/css&#39;
+import { useContext } from &#39;react&#39;
+import { useRouter } from &#39;next/router&#39;
+import { ethers } from &#39;ethers&#39;
+import Link from &#39;next/link&#39;
+import { AccountContext } from &#39;../context&#39;
 
 /* import contract address and contract owner address */
 import {
   contractAddress, ownerAddress
-} from '../config'
+} from &#39;../config&#39;
 
 /* import Application Binary Interface (ABI) */
-import Blog from '../artifacts/contracts/Blog.sol/Blog.json'
+import Blog from &#39;../artifacts/contracts/Blog.sol/Blog.json&#39;
 
 export default function Home(props) {
   /* posts are fetched server side and passed in as props */
@@ -793,7 +793,7 @@ export default function Home(props) {
 
   const router = useRouter()
   async function navigate() {
-    router.push('/create-post')
+    router.push(&#39;/create-post&#39;)
   }
 
   return (
@@ -808,8 +808,8 @@ export default function Home(props) {
                   &lt;p className={postTitle}&gt;{post[1]}&lt;/p&gt;
                   &lt;div className={arrowContainer}&gt;
                   &lt;img
-                      src='/right-arrow.svg'
-                      alt='Right arrow'
+                      src=&#39;/right-arrow.svg&#39;
+                      alt=&#39;Right arrow&#39;
                       className={smallArrow}
                     /&gt;
                   &lt;/div&gt;
@@ -827,8 +827,8 @@ export default function Home(props) {
             &lt;button className={buttonStyle} onClick={navigate}&gt;
               Create your first post
               &lt;img
-                src='/right-arrow.svg'
-                alt='Right arrow'
+                src=&#39;/right-arrow.svg&#39;
+                alt=&#39;Right arrow&#39;
                 className={arrow}
               /&gt;
             &lt;/button&gt;
@@ -841,14 +841,14 @@ export default function Home(props) {
 
 export async function getServerSideProps() {
   /* here we check to see the current environment variable */
-  /* and render a provider based on the environment we're in */
+  /* and render a provider based on the environment we&#39;re in */
   let provider
-  if (process.env.ENVIRONMENT === 'local') {
+  if (process.env.ENVIRONMENT === &#39;local&#39;) {
     provider = new ethers.providers.JsonRpcProvider()
-  } else if (process.env.ENVIRONMENT === 'testnet') {
-    provider = new ethers.providers.JsonRpcProvider('https://rpc-mumbai.matic.today')
+  } else if (process.env.ENVIRONMENT === &#39;testnet&#39;) {
+    provider = new ethers.providers.JsonRpcProvider(&#39;https://rpc-mumbai.matic.today&#39;)
   } else {
-    provider = new ethers.providers.JsonRpcProvider('https://polygon-rpc.com/')
+    provider = new ethers.providers.JsonRpcProvider(&#39;https://polygon-rpc.com/&#39;)
   }
 
   const contract = new ethers.Contract(contractAddress, Blog.abi, provider)
@@ -919,30 +919,30 @@ const smallArrow = css`
 <p>我们还可以选择将封面图像上传并保存到 IPFS，将 ipfs 上传的哈希值与其余大部分数据锚定在链上。</p>
 <p>将以下代码添加到该文件中：</p>
 <pre tabindex="0"><code>/* pages/create-post.js */
-import { useState, useRef, useEffect } from 'react' // new
-import { useRouter } from 'next/router'
-import dynamic from 'next/dynamic'
-import { css } from '@emotion/css'
-import { ethers } from 'ethers'
-import { create } from 'ipfs-http-client'
+import { useState, useRef, useEffect } from &#39;react&#39; // new
+import { useRouter } from &#39;next/router&#39;
+import dynamic from &#39;next/dynamic&#39;
+import { css } from &#39;@emotion/css&#39;
+import { ethers } from &#39;ethers&#39;
+import { create } from &#39;ipfs-http-client&#39;
 
 /* import contract address and contract owner address */
 import {
   contractAddress
-} from '../config'
+} from &#39;../config&#39;
 
-import Blog from '../artifacts/contracts/Blog.sol/Blog.json'
+import Blog from &#39;../artifacts/contracts/Blog.sol/Blog.json&#39;
 
 /* define the ipfs endpoint */
-const client = create('https://ipfs.infura.io:5001/api/v0')
+const client = create(&#39;https://ipfs.infura.io:5001/api/v0&#39;)
 
 /* configure the markdown editor to be client-side import */
 const SimpleMDE = dynamic(
-  () =&gt; import('react-simplemde-editor'),
+  () =&gt; import(&#39;react-simplemde-editor&#39;),
   { ssr: false }
 )
 
-const initialState = { title: '', content: '' }
+const initialState = { title: &#39;&#39;, content: &#39;&#39; }
 
 function CreatePost() {
   /* configure initial state to be used in the component */
@@ -979,24 +979,24 @@ function CreatePost() {
       const added = await client.add(JSON.stringify(post))
       return added.path
     } catch (err) {
-      console.log('error: ', err)
+      console.log(&#39;error: &#39;, err)
     }
   }
 
   async function savePost(hash) {
     /* anchor post to smart contract */
-    if (typeof window.ethereum !== 'undefined') {
+    if (typeof window.ethereum !== &#39;undefined&#39;) {
       const provider = new ethers.providers.Web3Provider(window.ethereum)
       const signer = provider.getSigner()
       const contract = new ethers.Contract(contractAddress, Blog.abi, signer)
-      console.log('contract: ', contract)
+      console.log(&#39;contract: &#39;, contract)
       try {
         const val = await contract.createPost(post.title, hash)
         /* optional - wait for transaction to be confirmed before rerouting */
         /* await provider.waitForTransaction(val.hash) */
-        console.log('val: ', val)
+        console.log(&#39;val: &#39;, val)
       } catch (err) {
-        console.log('Error: ', err)
+        console.log(&#39;Error: &#39;, err)
       }
     }    
   }
@@ -1024,14 +1024,14 @@ function CreatePost() {
       }
       &lt;input
         onChange={onChange}
-        name='title'
-        placeholder='Give it a title ...'
+        name=&#39;title&#39;
+        placeholder=&#39;Give it a title ...&#39;
         value={post.title}
         className={titleStyle}
       /&gt;
       &lt;SimpleMDE
         className={mdEditor}
-        placeholder=&quot;What's on your mind?&quot;
+        placeholder=&#34;What&#39;s on your mind?&#34;
         value={post.content}
         onChange={value =&gt; setPost({ ...post, content: value })}
       /&gt;
@@ -1040,7 +1040,7 @@ function CreatePost() {
           &lt;&gt;
             &lt;button
               className={button}
-              type='button'
+              type=&#39;button&#39;
               onClick={createNewPost}
             &gt;Publish&lt;/button&gt;
             &lt;button
@@ -1051,9 +1051,9 @@ function CreatePost() {
         )
       }
       &lt;input
-        id='selectImage'
+        id=&#39;selectImage&#39;
         className={hiddenInput} 
-        type='file'
+        type=&#39;file&#39;
         onChange={handleFileChange}
         ref={fileRef}
       /&gt;
@@ -1109,21 +1109,21 @@ export default CreatePost
 <p><a href="https://nextjs.org/docs/basic-features/data-fetching/get-static-paths">我们将使用getStaticPaths</a>和<a href="https://nextjs.org/docs/basic-features/data-fetching/get-static-props">getStaticProps</a>来利用服务器端数据获取，这将在构建时使用从网络查询的帖子数组创建这些页面。</p>
 <p>为此，请在<strong>pages</strong>目录中创建一个名为<strong>post</strong>的新文件夹，并在该文件夹中创建一个名为**[id].js**的文件。在那里，添加以下代码：</p>
 <pre tabindex="0"><code>/* pages/post/[id].js */
-import ReactMarkdown from 'react-markdown'
-import { useContext } from 'react'
-import { useRouter } from 'next/router'
-import Link from 'next/link'
-import { css } from '@emotion/css'
-import { ethers } from 'ethers'
-import { AccountContext } from '../../context'
+import ReactMarkdown from &#39;react-markdown&#39;
+import { useContext } from &#39;react&#39;
+import { useRouter } from &#39;next/router&#39;
+import Link from &#39;next/link&#39;
+import { css } from &#39;@emotion/css&#39;
+import { ethers } from &#39;ethers&#39;
+import { AccountContext } from &#39;../../context&#39;
 
 /* import contract and owner addresses */
 import {
   contractAddress, ownerAddress
-} from '../../config'
-import Blog from '../../artifacts/contracts/Blog.sol/Blog.json'
+} from &#39;../../config&#39;
+import Blog from &#39;../../artifacts/contracts/Blog.sol/Blog.json&#39;
 
-const ipfsURI = 'https://ipfs.io/ipfs/'
+const ipfsURI = &#39;https://ipfs.io/ipfs/&#39;
 
 export default function Post({ post }) {
   const account = useContext(AccountContext)
@@ -1174,12 +1174,12 @@ export default function Post({ post }) {
 export async function getStaticPaths() {
   /* here we fetch the posts from the network */
   let provider
-  if (process.env.ENVIRONMENT === 'local') {
+  if (process.env.ENVIRONMENT === &#39;local&#39;) {
     provider = new ethers.providers.JsonRpcProvider()
-  } else if (process.env.ENVIRONMENT === 'testnet') {
-    provider = new ethers.providers.JsonRpcProvider('https://rpc-mumbai.matic.today')
+  } else if (process.env.ENVIRONMENT === &#39;testnet&#39;) {
+    provider = new ethers.providers.JsonRpcProvider(&#39;https://rpc-mumbai.matic.today&#39;)
   } else {
-    provider = new ethers.providers.JsonRpcProvider('https://polygon-rpc.com/')
+    provider = new ethers.providers.JsonRpcProvider(&#39;https://polygon-rpc.com/&#39;)
   }
 
   const contract = new ethers.Contract(contractAddress, Blog.abi, provider)
@@ -1243,24 +1243,24 @@ const contentContainer = css`
 <p>此页面将继承<strong>pages/create-post.js</strong>和<strong>pages/post/[id].js</strong>的一些功能。我们将能够在查看和编辑帖子之间切换。</p>
 <p><strong>在pages</strong>目录中创建一个名为<strong>edit-post</strong>的新文件夹和一个名为**[id].js**的文件。接下来，添加以下代码：</p>
 <pre tabindex="0"><code>/* pages/edit-post/[id].js */
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/router'
-import ReactMarkdown from 'react-markdown'
-import { css } from '@emotion/css'
-import dynamic from 'next/dynamic'
-import { ethers } from 'ethers'
-import { create } from 'ipfs-http-client'
+import { useState, useEffect } from &#39;react&#39;
+import { useRouter } from &#39;next/router&#39;
+import ReactMarkdown from &#39;react-markdown&#39;
+import { css } from &#39;@emotion/css&#39;
+import dynamic from &#39;next/dynamic&#39;
+import { ethers } from &#39;ethers&#39;
+import { create } from &#39;ipfs-http-client&#39;
 
 import {
   contractAddress
-} from '../../config'
-import Blog from '../../artifacts/contracts/Blog.sol/Blog.json'
+} from &#39;../../config&#39;
+import Blog from &#39;../../artifacts/contracts/Blog.sol/Blog.json&#39;
 
-const ipfsURI = 'https://ipfs.io/ipfs/'
-const client = create('https://ipfs.infura.io:5001/api/v0')
+const ipfsURI = &#39;https://ipfs.io/ipfs/&#39;
+const client = create(&#39;https://ipfs.infura.io:5001/api/v0&#39;)
 
 const SimpleMDE = dynamic(
-  () =&gt; import('react-simplemde-editor'),
+  () =&gt; import(&#39;react-simplemde-editor&#39;),
   { ssr: false }
 )
 
@@ -1277,12 +1277,12 @@ export default function Post() {
     /* we first fetch the individual post by ipfs hash from the network */
     if (!id) return
     let provider
-    if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'local') {
+    if (process.env.NEXT_PUBLIC_ENVIRONMENT === &#39;local&#39;) {
       provider = new ethers.providers.JsonRpcProvider()
-    } else if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'testnet') {
-      provider = new ethers.providers.JsonRpcProvider('https://rpc-mumbai.matic.today')
+    } else if (process.env.NEXT_PUBLIC_ENVIRONMENT === &#39;testnet&#39;) {
+      provider = new ethers.providers.JsonRpcProvider(&#39;https://rpc-mumbai.matic.today&#39;)
     } else {
-      provider = new ethers.providers.JsonRpcProvider('https://polygon-rpc.com/')
+      provider = new ethers.providers.JsonRpcProvider(&#39;https://polygon-rpc.com/&#39;)
     }
     const contract = new ethers.Contract(contractAddress, Blog.abi, provider)
     const val = await contract.fetchPost(id)
@@ -1307,7 +1307,7 @@ export default function Post() {
       const added = await client.add(JSON.stringify(post))
       return added.path
     } catch (err) {
-      console.log('error: ', err)
+      console.log(&#39;error: &#39;, err)
     }
   }
 
@@ -1317,7 +1317,7 @@ export default function Post() {
     const signer = provider.getSigner()
     const contract = new ethers.Contract(contractAddress, Blog.abi, signer)
     await contract.updatePost(post.id, post.title, hash, true)
-    router.push('/')
+    router.push(&#39;/&#39;)
   }
 
   if (!post) return null
@@ -1333,14 +1333,14 @@ export default function Post() {
           &lt;div&gt;
             &lt;input
               onChange={e =&gt; setPost({ ...post, title: e.target.value })}
-              name='title'
-              placeholder='Give it a title ...'
+              name=&#39;title&#39;
+              placeholder=&#39;Give it a title ...&#39;
               value={post.title}
               className={titleStyle}
             /&gt;
             &lt;SimpleMDE
               className={mdEditor}
-              placeholder=&quot;What's on your mind?&quot;
+              placeholder=&#34;What&#39;s on your mind?&#34;
               value={post.content}
               onChange={value =&gt; setPost({ ...post, content: value })}
             /&gt;
@@ -1366,7 +1366,7 @@ export default function Post() {
           &lt;/div&gt;
         )
       }
-      &lt;button className={button} onClick={() =&gt; setEditing(editing ? false : true)}&gt;{ editing ? 'View post' : 'Edit post'}&lt;/button&gt;
+      &lt;button className={button} onClick={() =&gt; setEditing(editing ? false : true)}&gt;{ editing ? &#39;View post&#39; : &#39;Edit post&#39;}&lt;/button&gt;
     &lt;/div&gt;
   )
 }
@@ -1445,7 +1445,7 @@ const contentContainer = css`
 <p>在任何情况下，私钥都不应该公开共享。建议永远不要在文件中硬编码私钥。如果您确实选择这样做，请务必使用测试钱包，并且在任何情况下都不要将包含私钥的文件推送到源代码控制或公开公开。</p>
 </blockquote>
 <p>如果您在 Mac 上，您可以像这样从命令行设置环境变量（确保从同一终端和会话运行部署脚本）：</p>
-<pre tabindex="0"><code>export pk=&quot;your-private-key&quot;
+<pre tabindex="0"><code>export pk=&#34;your-private-key&#34;
 </code></pre><h3 id="配置网络">配置网络</h3>
 <p>接下来，我们需要从本地测试网络切换到<a href="https://docs.polygon.technology/docs/develop/network-details/network/">孟买</a>测试网络。</p>
 <p>为此，我们需要创建和设置网络配置。</p>
@@ -1470,7 +1470,7 @@ const contentContainer = css`
 <p>为此，请确保与您部署合约的私钥关联的地址已收到一些代币，以支付交易的汽油费。</p>
 <p>接下来，取消注释<code>mumbai</code>hardhat.config.js 中的配置：</p>
 <pre tabindex="0"><code>mumbai: {
-  url: &quot;https://rpc-mumbai.matic.today&quot;,
+  url: &#34;https://rpc-mumbai.matic.today&#34;,
   accounts: [process.env.pk]
 },
 </code></pre><p>要部署到 Polygon 测试网，请运行以下命令：</p>
@@ -1479,8 +1479,8 @@ const contentContainer = css`
 <p>如果您遇到此错误：<code>ProviderError: RPCError</code>，公共 RPC 可能会拥塞。在生产环境中，建议使用<a href="https://infura.io/">Infura</a>、<a href="https://www.alchemy.com/">Alchemy</a>或<a href="https://www.quicknode.com/">Quicknode</a>等 RPC 提供程序。</p>
 </blockquote>
 <p><strong>接下来，将.env.local</strong>中的环境变量更新为<code>testnet</code>：</p>
-<pre tabindex="0"><code>ENVIRONMENT=&quot;testnet&quot;
-NEXT_PUBLIC_ENVIRONMENT=&quot;testnet&quot;
+<pre tabindex="0"><code>ENVIRONMENT=&#34;testnet&#34;
+NEXT_PUBLIC_ENVIRONMENT=&#34;testnet&#34;
 </code></pre><p>接下来，重新启动服务器以注册环境变量中的更改：</p>
 <pre tabindex="0"><code>npm run dev
 </code></pre><p>您现在应该可以在新网络上测试应用了🎉！</p>
@@ -1547,10 +1547,10 @@ $ yarn global add @graphprotocol/graph-cli
 <p>为此，请使用以下代码更新<strong>schema.graphql ：</strong></p>
 <pre tabindex="0"><code>type _Schema_
   @fulltext(
-    name: &quot;postSearch&quot;
+    name: &#34;postSearch&#34;
     language: en
     algorithm: rank
-    include: [{ entity: &quot;Post&quot;, fields: [{ name: &quot;title&quot; }, { name: &quot;postContent&quot; }] }]
+    include: [{ entity: &#34;Post&#34;, fields: [{ name: &#34;title&#34; }, { name: &#34;postContent&#34; }] }]
   )
 
 type Post @entity {
@@ -1573,7 +1573,7 @@ type Post @entity {
 </code></pre><p>接下来，我们需要找到部署合约的区块（可选）。我们需要这个，以便我们可以设置索引器开始同步的起始块，这样它就不需要从创世块同步。<a href="https://mumbai.polygonscan.com/">您可以通过访问https://mumbai.polygonscan.com/</a>并粘贴您的合约地址来找到起始块。</p>
 <p>最后，更新配置以添加<code>startBlock</code>：</p>
 <pre tabindex="0"><code>source:
-  address: &quot;your-contract-adddress&quot;
+  address: &#34;your-contract-adddress&#34;
   abi: Blog
   startBlock: your-start-block
 </code></pre><h2 id="汇编脚本映射">汇编脚本映射</h2>
@@ -1582,11 +1582,11 @@ type Post @entity {
 <pre tabindex="0"><code>import {
   PostCreated as PostCreatedEvent,
   PostUpdated as PostUpdatedEvent
-} from &quot;../generated/Blog/Blog&quot;
+} from &#34;../generated/Blog/Blog&#34;
 import {
   Post
-} from &quot;../generated/schema&quot;
-import { ipfs, json } from '@graphprotocol/graph-ts'
+} from &#34;../generated/schema&#34;
+import { ipfs, json } from &#39;@graphprotocol/graph-ts&#39;
 
 export function handlePostCreated(event: PostCreatedEvent): void {
   let post = new Post(event.params.id.toString());
@@ -1596,7 +1596,7 @@ export function handlePostCreated(event: PostCreatedEvent): void {
   if (data) {
     let value = json.fromBytes(data).toObject()
     if (value) {
-      const content = value.get('content')
+      const content = value.get(&#39;content&#39;)
       if (content) {
         post.postContent = content.toString()
       }
@@ -1616,7 +1616,7 @@ export function handlePostUpdated(event: PostUpdatedEvent): void {
     if (data) {
       let value = json.fromBytes(data).toObject()
       if (value) {
-        const content = value.get('content')
+        const content = value.get(&#39;content&#39;)
         if (content) {
           post.postContent = content.toString()
         }
@@ -1674,7 +1674,7 @@ export function handlePostUpdated(event: PostUpdatedEvent): void {
 </code></pre><p>我们还可以对帖子标题或内容进行全文搜索：</p>
 <pre tabindex="0"><code>{
   postSearch(
-    text: &quot;Hello&quot;
+    text: &#34;Hello&#34;
   ) {
     id
     title
@@ -1719,13 +1719,13 @@ export function handlePostUpdated(event: PostUpdatedEvent): void {
         
         <li><a href="/post/web3.0/%E5%85%A8%E6%A0%88%E4%BB%A5%E5%A4%AA%E5%9D%8A%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/">web3.0 全栈以太坊开发完整指南</a></li>
         
-        <li><a href="/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%826%E4%BB%80%E4%B9%88%E6%98%AF%E5%8C%BA%E5%9D%97%E9%93%BE/">以太坊从零到略懂5：什么是区块链</a></li>
-        
         <li><a href="/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%825Truffle-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8%E4%BD%93%E9%AA%8C%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6/">以太坊从零到略懂5：Truffle 快速入门体验智能合约</a></li>
         
         <li><a href="/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%8242021-%E5%B9%B4-Web3.0-%E5%92%8C-Solidity-%E5%BC%80%E5%8F%91%E8%B7%AF%E7%BA%BF%E5%9B%BE/">以太坊从零到略懂4： Web3.0 和 Solidity 开发路线图</a></li>
         
         <li><a href="/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%823%E5%BC%80%E5%8F%91%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%90%88%E7%BA%A6/">web3.0 以太坊从零到略懂3：开发第一个合约</a></li>
+        
+        <li><a href="/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%822%E8%AE%BE%E7%BD%AE%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/">web3.0 以太坊从零到略懂2：设置开发环境</a></li>
         
     </ul>
 </div>
@@ -1818,15 +1818,15 @@ export function handlePostUpdated(event: PostUpdatedEvent): void {
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/css/%E5%89%8D%E7%AB%AF%E7%9F%A5%E8%AF%86%E7%82%B9%E5%A4%A7%E5%85%A8/" title="前端知识点大全">前端知识点大全</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/web3.0/%E5%85%A8%E6%A0%88-Web3-%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="web3.0 全栈 Web3 开发完整指南">web3.0 全栈 Web3 开发完整指南</a>
     </li>
     
     <li>
         <a href="https://geek.zshipu.com/post/web3.0/%E5%85%A8%E6%A0%88%E4%BB%A5%E5%A4%AA%E5%9D%8A%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="web3.0 全栈以太坊开发完整指南">web3.0 全栈以太坊开发完整指南</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%826%E4%BB%80%E4%B9%88%E6%98%AF%E5%8C%BA%E5%9D%97%E9%93%BE/" title="以太坊从零到略懂5：什么是区块链">以太坊从零到略懂5：什么是区块链</a>
     </li>
     
     <li>
@@ -1952,6 +1952,8 @@ export function handlePostUpdated(event: PostUpdatedEvent): void {
     
     <a href="https://geek.zshipu.com/tags/github/">github</a>
     
+    <a href="https://geek.zshipu.com/tags/gitlab/">gitlab</a>
+    
     <a href="https://geek.zshipu.com/tags/go/">go</a>
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
@@ -1960,7 +1962,11 @@ export function handlePostUpdated(event: PostUpdatedEvent): void {
     
     <a href="https://geek.zshipu.com/tags/java/">java</a>
     
+    <a href="https://geek.zshipu.com/tags/jdbc/">jdbc</a>
+    
     <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mybatis/">mybatis</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
     
@@ -1979,6 +1985,8 @@ export function handlePostUpdated(event: PostUpdatedEvent): void {
     <a href="https://geek.zshipu.com/tags/react/">react</a>
     
     <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sharding/">sharding</a>
     
     <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
     

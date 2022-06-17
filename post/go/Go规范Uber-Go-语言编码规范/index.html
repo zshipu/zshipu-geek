@@ -444,7 +444,7 @@ var f2 F:= &amp;S2{}</p>
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 type Handler struct {
 // &hellip;
 }
@@ -571,12 +571,12 @@ i = s2Ptr</p>
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 var mu sync.Mutex
 mu.Lock()</p>
 <p>|</p>
 <p>如果你使用结构体指针，mutex 可以非指针形式作为结构体的组成字段，或者更好的方式是直接嵌入到结构体中。 如果是私有结构体类型或是要实现 Mutex 接口的类型，我们可以使用嵌入 mutex 的方法：</p>
-<p>| 
+<p>|
 type smap struct {
 sync.Mutex // only for unexported types（仅适用于非导出类型）</p>
 <p>data map[string]string
@@ -591,7 +591,7 @@ m.Lock()
 defer m.Unlock()</p>
 <p>return m.data[k]
 }</p>
-<p>| 
+<p>|
 type SMap struct {
 mu sync.Mutex // 对于导出类型，请使用私有锁</p>
 <p>data map[string]string
@@ -642,7 +642,7 @@ defer m.mu.Unlock()</p>
 d1.SetTrips(trips)</p>
 <p>// 你是要修改 d1.trips 吗？
 trips[0] = &hellip;</p>
-<p>| 
+<p>|
 func (d *Driver) SetTrips(trips []Trip) {
 d.trips = make([]Trip, len(trips))
 copy(d.trips, trips)
@@ -688,7 +688,7 @@ defer s.mu.Unlock()</p>
 // 因此对 snapshot 的任何访问都将受到数据竞争的影响
 // 影响 stats.counters
 snapshot := stats.Snapshot()</p>
-<p>| 
+<p>|
 type Stats struct {
 mu sync.Mutex</p>
 <p>counters map[string]int
@@ -746,7 +746,7 @@ newCount := p.count
 p.Unlock()</p>
 <p>return newCount</p>
 <p>// 当有多个 return 分支时，很容易遗忘 unlock</p>
-<p>| 
+<p>|
 p.Lock()
 defer p.Unlock()</p>
 <p>if p.count &lt; 10 {
@@ -781,7 +781,7 @@ return p.count</p>
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 // 大小：1
 c := make(chan int, 1) // 或者
 // 无缓冲 channel，大小为 0
@@ -813,7 +813,7 @@ Subtract
 Multiply
 )</p>
 <p>// Add=0, Subtract=1, Multiply=2</p>
-<p>| 
+<p>|
 type Operation int</p>
 <p>const (
 Add Operation = iota + 1
@@ -869,7 +869,7 @@ LogToRemote
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 func isActive(now, start, stop time.Time) bool {
 return (start.Before(now) || start.Equal(now)) &amp;&amp; now.Before(stop)
 }</p>
@@ -918,7 +918,7 @@ return (start.Before(now) || start.Equal(now)) &amp;&amp; now.Before(stop)
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 func poll(delay time.Duration) {
 for {
 // &hellip;
@@ -928,7 +928,7 @@ time.Sleep(delay)
 poll(10*time.Second)</p>
 <p>|</p>
 <p>回到第一个例子，在一个时间瞬间加上 24 小时，我们用于添加时间的方法取决于意图。如果我们想要下一个日历日(当前天的下一天)的同一个时间点，我们应该使用 <a href="https://zshipu.com/t?url=https://golang.org/pkg/time/#Time.AddDate"><code>Time.AddDate</code></a>。但是，如果我们想保证某一时刻比前一时刻晚 24 小时，我们应该使用 <a href="https://zshipu.com/t?url=https://golang.org/pkg/time/#Time.Add"><code>Time.Add</code></a>。</p>
-<p>newDay := t.AddDate(0 /* years */, 0, /* months */, 1 /* days */)
+<p>newDay := t.AddDate(0 /* years <em>/, 0, /</em> months <em>/, 1 /</em> days */)
 maybeNewDay := t.Add(24 * time.Hour)</p>
 <h4 id="对外部系统使用-timetime-和-timeduration对外部系统使用-timetime-和-timeduration"><a href="#%E5%AF%B9%E5%A4%96%E9%83%A8%E7%B3%BB%E7%BB%9F%E4%BD%BF%E7%94%A8-timetime-%E5%92%8C-timeduration"></a>对外部系统使用 <code>time.Time</code> 和 <code>time.Duration</code></h4>
 <p>尽可能在与外部系统的交互中使用 <code>time.Duration</code> 和 <code>time.Time</code> 例如 :</p>
@@ -970,7 +970,7 @@ maybeNewDay := t.Add(24 * time.Hour)</p>
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 // {&ldquo;intervalMillis&rdquo;: 2000}
 type Config struct {
 IntervalMillis int <code>json:&quot;intervalMillis&quot;</code>
@@ -1025,7 +1025,7 @@ panic(&ldquo;unknown error&rdquo;)
 }
 }
 }</p>
-<p>| 
+<p>|
 // package foo</p>
 <p>var ErrCouldNotOpen = errors.New(&ldquo;could not open&rdquo;)</p>
 <p>func Open() error {
@@ -1076,7 +1076,7 @@ panic(&ldquo;unknown error&rdquo;)
 }
 }
 }</p>
-<p>| 
+<p>|
 type errNotFound struct {
 file string
 }</p>
@@ -1162,7 +1162,7 @@ panic(&ldquo;unknown error&rdquo;)
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 s, err := store.New()
 if err != nil {
 return fmt.Errorf(
@@ -1192,7 +1192,7 @@ return fmt.Errorf(
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 t, ok := i.(string)
 if !ok {
 // 优雅地处理错误
@@ -1241,7 +1241,7 @@ if !ok {
 <p>func main() {
 run(os.Args[1:])
 }</p>
-<p>| 
+<p>|
 func run(args []string) error {
 if len(args) == 0 {
 return errors.New(&ldquo;an argument is required&rdquo;)
@@ -1281,7 +1281,7 @@ os.Exit(1)
 if err != nil {
 panic(&ldquo;failed to set up test&rdquo;)
 }</p>
-<p>| 
+<p>|
 // func TestFoo(t *testing.T)</p>
 <p>f, err := ioutil.TempFile(&quot;&quot;, &ldquo;test&rdquo;)
 if err != nil {
@@ -1327,7 +1327,7 @@ return
 <p>func (f *foo) isRunning() bool {
 return f.running == 1  // race!
 }</p>
-<p>| 
+<p>|
 type foo struct {
 running atomic.Bool
 }</p>
@@ -1382,7 +1382,7 @@ return f.running.Load()
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 // sign.go
 type signer struct {
 now func() time.Time
@@ -1397,7 +1397,7 @@ now := s.now()
 return signWithTime(msg, now)
 }</p>
 <p>|
-| 
+|
 // sign_test.go
 func TestSign(t *testing.T) {
 oldTimeNow := _timeNow
@@ -1407,7 +1407,7 @@ return someFixedTime
 defer func() { _timeNow = oldTimeNow }()
 assert.Equal(t, want, sign(give))
 }</p>
-<p>| 
+<p>|
 // sign_test.go
 func TestSigner(t *testing.T) {
 s := newSigner()
@@ -1459,7 +1459,7 @@ func (l *AbstractList) Remove(e Entity) {
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 // ConcreteList 是一个实体列表。
 type ConcreteList struct {
 list *AbstractList
@@ -1527,7 +1527,7 @@ return l.list.Remove(e)
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 // ConcreteList 是一个实体列表。
 type ConcreteList struct {
 list *AbstractList
@@ -1577,7 +1577,7 @@ return l.list.Remove(e)
 <p>func handleErrorMessage(error string) {
 // <code>error</code> 作用域隐式覆盖
 }</p>
-<p>| 
+<p>|
 var errorMessage string
 // <code>error</code> 指向内置的非覆盖</p>
 <p>// or</p>
@@ -1585,7 +1585,7 @@ var errorMessage string
 // <code>error</code> 指向内置的非覆盖
 }</p>
 <p>|
-| 
+|
 type Foo struct {
 // 虽然这些字段在技术上不构成阴影，但<code>error</code>或<code>string</code>字符串的重映射现在是不明确的。
 error  error
@@ -1599,7 +1599,7 @@ return f.error
 // <code>string</code> and <code>f.string</code> 在视觉上是相似的
 return f.string
 }</p>
-<p>| 
+<p>|
 type Foo struct {
 // <code>error</code> and <code>string</code> 现在是明确的。
 err error
@@ -1672,7 +1672,7 @@ return f.str
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 var _defaultFoo = Foo{
 // &hellip;
 }
@@ -1684,7 +1684,7 @@ return Foo{
 }
 }</p>
 <p>|
-| 
+|
 type Config struct {
 // &hellip;
 }
@@ -1698,7 +1698,7 @@ path.Join(cwd, &ldquo;config&rdquo;, &ldquo;config.yaml&rdquo;),
 )
 yaml.Unmarshal(raw, &amp;_config)
 }</p>
-<p>| 
+<p>|
 type Config struct {
 // &hellip;
 }
@@ -1761,7 +1761,7 @@ return config
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 for n := 0; n &lt; b.N; n++ {
 data := make([]int, 0, size)
 for k := 0; k &lt; size; k++{
@@ -1800,7 +1800,7 @@ data = append(data, k)
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 for i := 0; i &lt; b.N; i++ {
 s := strconv.Itoa(rand.Int())
 }</p>
@@ -1834,7 +1834,7 @@ s := strconv.Itoa(rand.Int())
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 data := []byte(&ldquo;Hello world&rdquo;)
 for i := 0; i &lt; b.N; i++ {
 w.Write(data)
@@ -1870,7 +1870,7 @@ w.Write(data)
 for _, f := range files {
 m[f.Name()] = f
 }</p>
-<p>| 
+<p>|
 files, _ := ioutil.ReadDir(&quot;./files&quot;)</p>
 <p>m := make(map[string]os.FileInfo, len(files))
 for _, f := range files {
@@ -1924,7 +1924,7 @@ m[f.Name()] = f
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 for n := 0; n &lt; b.N; n++ {
 data := make([]int, 0, size)
 for k := 0; k &lt; size; k++{
@@ -1964,7 +1964,7 @@ data = append(data, k)
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 import (
 &ldquo;a&rdquo;
 &ldquo;b&rdquo;
@@ -1997,7 +1997,7 @@ import (
 var b = 2</p>
 <p>type Area float64
 type Volume float64</p>
-<p>| 
+<p>|
 const (
 a = 1
 b = 2
@@ -2036,7 +2036,7 @@ Subtract
 Multiply
 ENV_VAR = &ldquo;MY_ENV&rdquo;
 )</p>
-<p>| 
+<p>|
 type Operation int</p>
 <p>const (
 Add Operation = iota + 1
@@ -2078,7 +2078,7 @@ Multiply
 </table>
 <p>&hellip;
 }</p>
-<p>| 
+<p>|
 func f() string {
 var (
 red   = color.New(0xff0000)
@@ -2133,7 +2133,7 @@ blue  = color.New(0x0000ff)
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 import (
 &ldquo;fmt&rdquo;
 &ldquo;os&rdquo;</p>
@@ -2189,7 +2189,7 @@ trace &ldquo;example.com/trace/v2&rdquo;
 </table>
 <p>nettrace &ldquo;golang.net/x/trace&rdquo;
 )</p>
-<p>| 
+<p>|
 import (
 &ldquo;fmt&rdquo;
 &ldquo;os&rdquo;
@@ -2237,7 +2237,7 @@ import (
 <p>func newSomething() *something {
 return &amp;something{}
 }</p>
-<p>| 
+<p>|
 type something struct{ &hellip; }</p>
 <p>func newSomething() *something {
 return &amp;something{}
@@ -2312,7 +2312,7 @@ return calcCost(s.weights)
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 for _, v := range data {
 if v.F1 != 1 {
 log.Printf(&ldquo;Invalid v: %v&rdquo;, v)
@@ -2365,7 +2365,7 @@ v.Send()
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 a := 10
 if b {
 a = 100
@@ -2392,7 +2392,7 @@ a = 100
 </tbody>
 </table>
 <p>func F() string { return &ldquo;A&rdquo; }</p>
-<p>| 
+<p>|
 var _s = F()
 // 由于 F 已经明确了返回一个字符串类型，因此我们没有必要显式指定_s 的类型
 // 还是那种类型</p>
@@ -2438,7 +2438,7 @@ fmt.Println(&ldquo;Default port&rdquo;, defaultPort)</p>
 <p>// We will not see a compile error if the first line of
 // Bar() is deleted.
 }</p>
-<p>| 
+<p>|
 // foo.go</p>
 <p>const (
 _defaultPort = 8080
@@ -2477,7 +2477,7 @@ _defaultUser = &ldquo;user&rdquo;
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 type Client struct {
 http.Client</p>
 <p>version int
@@ -2533,7 +2533,7 @@ http.Client</p>
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 type countingWriteCloser struct {
 // Good: Write() 在外层提供用于特定目的，
 // 并且委托工作到内部类型的Write()中。
@@ -2545,7 +2545,7 @@ w.count += len(bs)
 return w.WriteCloser.Write(bs)
 }</p>
 <p>|
-| 
+|
 type Book struct {
 // Bad: 指针更改零值的有用性
 io.ReadWriter
@@ -2556,7 +2556,7 @@ var b Book
 b.Read(&hellip;)  // panic: nil pointer
 b.String()   // panic: nil pointer
 b.Write(&hellip;) // panic: nil pointer</p>
-<p>| 
+<p>|
 type Book struct {
 // Good: 有用的零值
 bytes.Buffer
@@ -2568,14 +2568,14 @@ b.Read(&hellip;)  // ok
 b.String()   // ok
 b.Write(&hellip;) // ok</p>
 <p>|
-| 
+|
 type Client struct {
 sync.Mutex
 sync.WaitGroup
 bytes.Buffer
 url.URL
 }</p>
-<p>| 
+<p>|
 type Client struct {
 mtx sync.Mutex
 wg  sync.WaitGroup
@@ -2603,7 +2603,7 @@ url url.URL
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 k := User{
 FirstName: &ldquo;John&rdquo;,
 LastName: &ldquo;Doe&rdquo;,
@@ -2638,7 +2638,7 @@ want string
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 s := &ldquo;foo&rdquo;</p>
 <p>|</p>
 <p>但是，在某些情况下，<code>var</code> 使用关键字时默认值会更清晰。例如，声明空切片。</p>
@@ -2688,7 +2688,7 @@ s := &ldquo;foo&rdquo;</p>
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 func f(list []int) {
 var filtered []int
 for _, v := range list {
@@ -2729,7 +2729,7 @@ filtered = append(filtered, v)
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 if x == &quot;&quot; {
 return nil
 }</p>
@@ -2763,7 +2763,7 @@ return nil
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 func isEmpty(s []string) bool {
 return len(s) == 0
 }</p>
@@ -2799,7 +2799,7 @@ nums = append(nums, 1)
 <p>if add2 {
 nums = append(nums, 2)
 }</p>
-<p>| 
+<p>|
 var nums []int</p>
 <p>if add1 {
 nums = append(nums, 1)
@@ -2843,7 +2843,7 @@ nums = append(nums, 2)
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 if err := ioutil.WriteFile(name, data, 0644); err != nil {
 return err
 }</p>
@@ -2888,7 +2888,7 @@ return nil
 } else {
 return err
 }</p>
-<p>| 
+<p>|
 data, err := ioutil.ReadFile(name)
 if err != nil {
 return err
@@ -2920,9 +2920,9 @@ return nil</p>
 </tbody>
 </table>
 <p>printInfo(&ldquo;foo&rdquo;, true, true)</p>
-<p>| 
+<p>|
 // func printInfo(name string, isLocal, done bool)</p>
-<p>printInfo(&ldquo;foo&rdquo;, true /* isLocal */, true /* done */)</p>
+<p>printInfo(&ldquo;foo&rdquo;, true /* isLocal <em>/, true /</em> done */)</p>
 <p>|</p>
 <p>对于上面的示例代码，还有一种更好的处理方式是将上面的 <code>bool</code> 类型换成自定义类型。将来，该参数可以支持不仅仅局限于两个状态（true/false）。</p>
 <p>type Region int</p>
@@ -2958,7 +2958,7 @@ StatusDone
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 wantError := <code>unknown error:&quot;test&quot;</code></p>
 <p>|</p>
 <h3 id="初始化-struct-引用初始化-struct-引用"><a href="#%E5%88%9D%E5%A7%8B%E5%8C%96-struct-%E5%BC%95%E7%94%A8"></a>初始化 Struct 引用</h3>
@@ -2984,7 +2984,7 @@ wantError := <code>unknown error:&quot;test&quot;</code></p>
 <p>// inconsistent
 sptr := new(T)
 sptr.Name = &ldquo;bar&rdquo;</p>
-<p>| 
+<p>|
 sval := T{Name: &ldquo;foo&rdquo;}</p>
 <p>sptr := &amp;T{Name: &ldquo;bar&rdquo;}</p>
 <p>|</p>
@@ -3028,7 +3028,7 @@ sval := T{Name: &ldquo;foo&rdquo;}</p>
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 var (
 // m1 读写安全;
 // m2 在写入时会 panic
@@ -3073,7 +3073,7 @@ m2 map[T1]T2
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 m := map[T1]T2{
 k1: v1,
 k2: v2,
@@ -3106,7 +3106,7 @@ k3: v3,
 </tr>
 </tbody>
 </table>
-<p>| 
+<p>|
 const msg = &ldquo;unexpected values %v, %v\n&rdquo;
 fmt.Printf(msg, 1, 2)</p>
 <p>|</p>
@@ -3153,7 +3153,7 @@ assert.Equal(t, &ldquo;8000&rdquo;, port)</p>
 require.NoError(t, err)
 assert.Equal(t, &ldquo;1&rdquo;, host)
 assert.Equal(t, &ldquo;8&rdquo;, port)</p>
-<p>| 
+<p>|
 // func TestSplitHostPort(t *testing.T)</p>
 <p>tests := []struct{
 give     string
@@ -3230,7 +3230,7 @@ logger *zap.Logger
 ) (*Connection, error) {
 // &hellip;
 }</p>
-<p>| 
+<p>|
 // package db</p>
 <p>type Option interface {
 // &hellip;
@@ -3253,8 +3253,8 @@ opts &hellip;Option,
 <p>必须始终提供缓存和记录器参数，即使用户希望使用默认值。</p>
 <p>db.Open(addr, db.DefaultCache, zap.NewNop())
 db.Open(addr, db.DefaultCache, log)
-db.Open(addr, false /* cache */, zap.NewNop())
-db.Open(addr, false /* cache */, log)</p>
+db.Open(addr, false /* cache <em>/, zap.NewNop())
+db.Open(addr, false /</em> cache */, log)</p>
 <p>|</p>
 <p>只有在需要时才提供选项。</p>
 <p>db.Open(addr)
@@ -3451,15 +3451,15 @@ o.apply(&amp;options)
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/css/%E5%89%8D%E7%AB%AF%E7%9F%A5%E8%AF%86%E7%82%B9%E5%A4%A7%E5%85%A8/" title="前端知识点大全">前端知识点大全</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/web3.0/%E5%85%A8%E6%A0%88-Web3-%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="web3.0 全栈 Web3 开发完整指南">web3.0 全栈 Web3 开发完整指南</a>
     </li>
     
     <li>
         <a href="https://geek.zshipu.com/post/web3.0/%E5%85%A8%E6%A0%88%E4%BB%A5%E5%A4%AA%E5%9D%8A%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="web3.0 全栈以太坊开发完整指南">web3.0 全栈以太坊开发完整指南</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%826%E4%BB%80%E4%B9%88%E6%98%AF%E5%8C%BA%E5%9D%97%E9%93%BE/" title="以太坊从零到略懂5：什么是区块链">以太坊从零到略懂5：什么是区块链</a>
     </li>
     
     <li>
@@ -3585,6 +3585,8 @@ o.apply(&amp;options)
     
     <a href="https://geek.zshipu.com/tags/github/">github</a>
     
+    <a href="https://geek.zshipu.com/tags/gitlab/">gitlab</a>
+    
     <a href="https://geek.zshipu.com/tags/go/">go</a>
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
@@ -3593,7 +3595,11 @@ o.apply(&amp;options)
     
     <a href="https://geek.zshipu.com/tags/java/">java</a>
     
+    <a href="https://geek.zshipu.com/tags/jdbc/">jdbc</a>
+    
     <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mybatis/">mybatis</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
     
@@ -3612,6 +3618,8 @@ o.apply(&amp;options)
     <a href="https://geek.zshipu.com/tags/react/">react</a>
     
     <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sharding/">sharding</a>
     
     <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
     

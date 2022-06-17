@@ -229,117 +229,117 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="三层梦境深入channelpipeline内部">三层梦境：深入ChannelPipeline内部</h2>
 <h3 id="defaultchannelpipeline的内部结构">DefaultChannelPipeline的内部结构</h3>
 <p><code>ChannelPipeline</code>的主要的实现代码在<code>DefaultChannelPipeline</code>类里。列一下DefaultChannelPipeline的主要字段：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">DefaultChannelPipeline</span> <span style="color:#000;font-weight:bold">implements</span> ChannelPipeline <span style="color:#000;font-weight:bold">{</span>
-    
-        <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">volatile</span> Channel channel<span style="color:#000;font-weight:bold">;</span>
-        <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">volatile</span> ChannelSink sink<span style="color:#000;font-weight:bold">;</span>
-        <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">volatile</span> DefaultChannelHandlerContext head<span style="color:#000;font-weight:bold">;</span>
-        <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">volatile</span> DefaultChannelHandlerContext tail<span style="color:#000;font-weight:bold">;</span>
-        <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">final</span> Map<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> DefaultChannelHandlerContext<span style="color:#000;font-weight:bold">&gt;</span> name2ctx <span style="color:#000;font-weight:bold">=</span>
-            <span style="color:#000;font-weight:bold">new</span> HashMap<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> DefaultChannelHandlerContext<span style="color:#000;font-weight:bold">&gt;(</span>4<span style="color:#000;font-weight:bold">);</span>
-    <span style="color:#000;font-weight:bold">}</span>
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">DefaultChannelPipeline</span> <span style="color:#000;font-weight:bold">implements</span> ChannelPipeline <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">volatile</span> Channel channel<span style="color:#000;font-weight:bold">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">volatile</span> ChannelSink sink<span style="color:#000;font-weight:bold">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">volatile</span> DefaultChannelHandlerContext head<span style="color:#000;font-weight:bold">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">volatile</span> DefaultChannelHandlerContext tail<span style="color:#000;font-weight:bold">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">final</span> Map<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> DefaultChannelHandlerContext<span style="color:#000;font-weight:bold">&gt;</span> name2ctx <span style="color:#000;font-weight:bold">=</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">new</span> HashMap<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> DefaultChannelHandlerContext<span style="color:#000;font-weight:bold">&gt;(</span>4<span style="color:#000;font-weight:bold">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>这里需要介绍一下<code>ChannelHandlerContext</code>这个接口。顾名思义，ChannelHandlerContext保存了Netty与Handler相关的的上下文信息。而咱们这里的<code>DefaultChannelHandlerContext</code>，则是对<code>ChannelHandler</code>的一个包装。一个<code>DefaultChannelHandlerContext</code>内部，除了包含一个<code>ChannelHandler</code>，还保存了&quot;next&quot;和&quot;prev&quot;两个指针，从而形成一个双向链表。</p>
 <p>因此，在<code>DefaultChannelPipeline</code>中，我们看到的是对<code>DefaultChannelHandlerContext</code>的引用，而不是对<code>ChannelHandler</code>的直接引用。这里包含&quot;head&quot;和&quot;tail&quot;两个引用，分别指向链表的头和尾。而name2ctx则是一个按名字索引DefaultChannelHandlerContext用户的一个map，主要在按照名称删除或者添加ChannelHandler时使用。</p>
 <h3 id="sendupstream和senddownstream">sendUpstream和sendDownstream</h3>
 <p>前面提到了，<code>ChannelPipeline</code>接口的两个重要的方法：<code>sendUpstream(ChannelEvent e)</code>和<code>sendDownstream(ChannelEvent e)</code>。<strong>所有事件</strong>的发起都是基于这两个方法进行的。<code>Channels</code>类有一系列<code>fireChannelBound</code>之类的<code>fireXXXX</code>方法，其实都是对这两个方法的facade包装。</p>
 <p>下面来看一下这两个方法的实现。先看sendUpstream(对代码做了一些简化，保留主逻辑)：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">sendUpstream</span><span style="color:#000;font-weight:bold">(</span>ChannelEvent e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-        DefaultChannelHandlerContext head <span style="color:#000;font-weight:bold">=</span> getActualUpstreamContext<span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">head</span><span style="color:#000;font-weight:bold">);</span>
-        head<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getHandler</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">handleUpstream</span><span style="color:#000;font-weight:bold">(</span>head<span style="color:#000;font-weight:bold">,</span> e<span style="color:#000;font-weight:bold">);</span>
-    <span style="color:#000;font-weight:bold">}</span>
-    
-    <span style="color:#000;font-weight:bold">private</span> DefaultChannelHandlerContext <span style="color:#900;font-weight:bold">getActualUpstreamContext</span><span style="color:#000;font-weight:bold">(</span>DefaultChannelHandlerContext ctx<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-        DefaultChannelHandlerContext realCtx <span style="color:#000;font-weight:bold">=</span> ctx<span style="color:#000;font-weight:bold">;</span>
-        <span style="color:#000;font-weight:bold">while</span> <span style="color:#000;font-weight:bold">(!</span>realCtx<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">canHandleUpstream</span><span style="color:#000;font-weight:bold">())</span> <span style="color:#000;font-weight:bold">{</span>
-            realCtx <span style="color:#000;font-weight:bold">=</span> realCtx<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">next</span><span style="color:#000;font-weight:bold">;</span>
-            <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>realCtx <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-                <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
-            <span style="color:#000;font-weight:bold">}</span>
-        <span style="color:#000;font-weight:bold">}</span>
-        <span style="color:#000;font-weight:bold">return</span> realCtx<span style="color:#000;font-weight:bold">;</span>
-    <span style="color:#000;font-weight:bold">}</span>
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">sendUpstream</span><span style="color:#000;font-weight:bold">(</span>ChannelEvent e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>        DefaultChannelHandlerContext head <span style="color:#000;font-weight:bold">=</span> getActualUpstreamContext<span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">head</span><span style="color:#000;font-weight:bold">);</span>
+</span></span><span style="display:flex;"><span>        head<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getHandler</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">handleUpstream</span><span style="color:#000;font-weight:bold">(</span>head<span style="color:#000;font-weight:bold">,</span> e<span style="color:#000;font-weight:bold">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> DefaultChannelHandlerContext <span style="color:#900;font-weight:bold">getActualUpstreamContext</span><span style="color:#000;font-weight:bold">(</span>DefaultChannelHandlerContext ctx<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>        DefaultChannelHandlerContext realCtx <span style="color:#000;font-weight:bold">=</span> ctx<span style="color:#000;font-weight:bold">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">while</span> <span style="color:#000;font-weight:bold">(!</span>realCtx<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">canHandleUpstream</span><span style="color:#000;font-weight:bold">())</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>            realCtx <span style="color:#000;font-weight:bold">=</span> realCtx<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">next</span><span style="color:#000;font-weight:bold">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>realCtx <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> realCtx<span style="color:#000;font-weight:bold">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>这里最终调用了<code>ChannelUpstreamHandler.handleUpstream</code>来处理这个ChannelEvent。有意思的是，这里我们看不到任何&quot;将Handler向后移一位&quot;的操作，但是我们总不能每次都用同一个Handler来进行处理啊？实际上，我们更为常用的是<code>ChannelHandlerContext.handleUpstream</code>方法(实现是<code>DefaultChannelHandlerContext.sendUpstream</code>方法)：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">sendUpstream</span><span style="color:#000;font-weight:bold">(</span>ChannelEvent e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-		DefaultChannelHandlerContext next <span style="color:#000;font-weight:bold">=</span> getActualUpstreamContext<span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">next</span><span style="color:#000;font-weight:bold">);</span>
-		DefaultChannelPipeline<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">sendUpstream</span><span style="color:#000;font-weight:bold">(</span>next<span style="color:#000;font-weight:bold">,</span> e<span style="color:#000;font-weight:bold">);</span>
-	<span style="color:#000;font-weight:bold">}</span>
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">sendUpstream</span><span style="color:#000;font-weight:bold">(</span>ChannelEvent e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>		DefaultChannelHandlerContext next <span style="color:#000;font-weight:bold">=</span> getActualUpstreamContext<span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">next</span><span style="color:#000;font-weight:bold">);</span>
+</span></span><span style="display:flex;"><span>		DefaultChannelPipeline<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">sendUpstream</span><span style="color:#000;font-weight:bold">(</span>next<span style="color:#000;font-weight:bold">,</span> e<span style="color:#000;font-weight:bold">);</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>可以看到，这里最终仍然调用了<code>ChannelPipeline.sendUpstream</code>方法，但是<strong>它会将Handler指针后移</strong>。</p>
 <p>我们接下来看看<code>DefaultChannelHandlerContext.sendDownstream</code>:</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">sendDownstream</span><span style="color:#000;font-weight:bold">(</span>ChannelEvent e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-		DefaultChannelHandlerContext prev <span style="color:#000;font-weight:bold">=</span> getActualDownstreamContext<span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">prev</span><span style="color:#000;font-weight:bold">);</span>
-		<span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>prev <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-			<span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
-				getSink<span style="color:#000;font-weight:bold">().</span><span style="color:#008080">eventSunk</span><span style="color:#000;font-weight:bold">(</span>DefaultChannelPipeline<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">this</span><span style="color:#000;font-weight:bold">,</span> e<span style="color:#000;font-weight:bold">);</span>
-			<span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>Throwable t<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-				notifyHandlerException<span style="color:#000;font-weight:bold">(</span>e<span style="color:#000;font-weight:bold">,</span> t<span style="color:#000;font-weight:bold">);</span>
-			<span style="color:#000;font-weight:bold">}</span>
-		<span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">{</span>
-			DefaultChannelPipeline<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">sendDownstream</span><span style="color:#000;font-weight:bold">(</span>prev<span style="color:#000;font-weight:bold">,</span> e<span style="color:#000;font-weight:bold">);</span>
-		<span style="color:#000;font-weight:bold">}</span>
-	<span style="color:#000;font-weight:bold">}</span>
-</code></pre></td></tr></table>
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>	<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">sendDownstream</span><span style="color:#000;font-weight:bold">(</span>ChannelEvent e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>		DefaultChannelHandlerContext prev <span style="color:#000;font-weight:bold">=</span> getActualDownstreamContext<span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">prev</span><span style="color:#000;font-weight:bold">);</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>prev <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>				getSink<span style="color:#000;font-weight:bold">().</span><span style="color:#008080">eventSunk</span><span style="color:#000;font-weight:bold">(</span>DefaultChannelPipeline<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">this</span><span style="color:#000;font-weight:bold">,</span> e<span style="color:#000;font-weight:bold">);</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>Throwable t<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>				notifyHandlerException<span style="color:#000;font-weight:bold">(</span>e<span style="color:#000;font-weight:bold">,</span> t<span style="color:#000;font-weight:bold">);</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>			DefaultChannelPipeline<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">sendDownstream</span><span style="color:#000;font-weight:bold">(</span>prev<span style="color:#000;font-weight:bold">,</span> e<span style="color:#000;font-weight:bold">);</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></td></tr></table>
 </div>
 </div><p>与sendUpstream好像不大相同哦？这里有两点：一是到达末尾时，就如梦境二所说，会调用ChannelSink进行处理；二是这里指针是<strong>往前移</strong>的，所以我们知道了：</p>
 <p>**UpstreamHandler是从前往后执行的，DownstreamHandler是从后往前执行的。**在ChannelPipeline里添加时需要注意顺序了！</p>
@@ -481,15 +481,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/css/%E5%89%8D%E7%AB%AF%E7%9F%A5%E8%AF%86%E7%82%B9%E5%A4%A7%E5%85%A8/" title="前端知识点大全">前端知识点大全</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/web3.0/%E5%85%A8%E6%A0%88-Web3-%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="web3.0 全栈 Web3 开发完整指南">web3.0 全栈 Web3 开发完整指南</a>
     </li>
     
     <li>
         <a href="https://geek.zshipu.com/post/web3.0/%E5%85%A8%E6%A0%88%E4%BB%A5%E5%A4%AA%E5%9D%8A%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="web3.0 全栈以太坊开发完整指南">web3.0 全栈以太坊开发完整指南</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%826%E4%BB%80%E4%B9%88%E6%98%AF%E5%8C%BA%E5%9D%97%E9%93%BE/" title="以太坊从零到略懂5：什么是区块链">以太坊从零到略懂5：什么是区块链</a>
     </li>
     
     <li>
@@ -615,6 +615,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/github/">github</a>
     
+    <a href="https://geek.zshipu.com/tags/gitlab/">gitlab</a>
+    
     <a href="https://geek.zshipu.com/tags/go/">go</a>
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
@@ -623,7 +625,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/java/">java</a>
     
+    <a href="https://geek.zshipu.com/tags/jdbc/">jdbc</a>
+    
     <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mybatis/">mybatis</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
     
@@ -642,6 +648,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/react/">react</a>
     
     <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sharding/">sharding</a>
     
     <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
     

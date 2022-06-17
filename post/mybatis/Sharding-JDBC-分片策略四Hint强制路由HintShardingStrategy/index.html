@@ -146,16 +146,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-<ul>
-<li><a href="#一-hint强制路由hintshardingstrategy"><strong>一、Hint强制路由HintShardingStrategy</strong></a></li>
-<li><a href="#二-hint强制路由hintshardingstrategy配置实现"><strong>二、Hint强制路由HintShardingStrategy配置实现</strong></a>
-<ul>
-<li><a href="#分库分表最核心的两点sql-路由-sql-改写"><strong>分库分表最核心的两点SQL 路由  、 SQL 改写</strong></a></li>
-<li><a href="#application-properties-配置"><strong>application.properties 配置</strong></a></li>
-<li><a href="#自定义hintshardingkeyalgorithm"><strong>自定义HintShardingKeyAlgorithm</strong></a></li>
-<li><a href="#编写测试类hintapplicationtests"><strong>编写测试类HintApplicationTests</strong></a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#分库分表最核心的两点sql-路由---sql-改写"><strong>分库分表最核心的两点SQL 路由  、 SQL 改写</strong></a></li>
+    <li><a href="#applicationproperties-配置"><strong>application.properties 配置</strong></a></li>
+    <li><a href="#自定义hintshardingkeyalgorithm"><strong>自定义HintShardingKeyAlgorithm</strong></a></li>
+    <li><a href="#编写测试类hintapplicationtests"><strong>编写测试类HintApplicationTests</strong></a></li>
+  </ul>
 </nav>
     </div>
 </div>
@@ -202,179 +198,267 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            
-
-<h1 id="一-hint强制路由hintshardingstrategy"><strong>一、Hint强制路由HintShardingStrategy</strong></h1>
-
+            <h1 id="一hint强制路由hintshardingstrategy"><strong>一、Hint强制路由HintShardingStrategy</strong></h1>
 <p>在分库分区中，有些特定的SQL，Sharding-jdbc、Mycat、Vitess都不支持（可以查看相关文档各自对哪些SQL不支持）,例如：insert into table1 select * from table2 where &hellip;.这种SQL 路由很麻烦，需要解析table2的路由（是在ds0 /ds1 table2_0/table_1）,结果集归并，insert 语句也需要同样的路由解析。这种情况Sharding-jdbc可以使用Hint分片策略来实现各种Sharding-jdbc不支持语法的限制</p>
-
 <ul>
 <li>通过Hint而非SQL解析的方式分片的策略。对于分片字段非SQL决定，而由其他外置条件决定的场景，可使用SQL Hint灵活的注入分片字段</li>
 <li>Hint分片策略是绕过SQL解析的，所以对于这些比较复杂的需要分片的查询，采用Hint分片策略性能可能会更好</li>
 <li>在读写分离数据库中，Hint 可以通过HintManager.setMasterRouteOnly()方法，强制读主库（主从复制存在一定延时，但在某些特定的业务场景中，可能更需要保证数据的实时性）</li>
 <li>在读写分离中，Hint 可以强制读主库（主从复制是存在一定延时，但在业务场景中，可能更需要保证数据的实时性）</li>
 </ul>
-
-<h1 id="二-hint强制路由hintshardingstrategy配置实现"><strong>二、Hint强制路由HintShardingStrategy配置实现</strong></h1>
-
+<h1 id="二hint强制路由hintshardingstrategy配置实现"><strong>二、Hint强制路由HintShardingStrategy配置实现</strong></h1>
 <p>Sharding -jdbc 在使用分片策略的时候，与分片算法是成对出现的，每种策略都对应一到两种分片算法（不分片策略NoneShardingStrategy除外）</p>
-
-<h2 id="分库分表最核心的两点sql-路由-sql-改写"><strong>分库分表最核心的两点SQL 路由  、 SQL 改写</strong></h2>
-
+<h2 id="分库分表最核心的两点sql-路由---sql-改写"><strong>分库分表最核心的两点SQL 路由  、 SQL 改写</strong></h2>
 <p><strong>SQL 路由:解析原生SQL，确定需要使用哪些数据库，哪些数据表</strong></p>
-
 <p>Route （路由）引擎：为什么要用Route 引擎呢？</p>
-
 <p>在实际查询当中，数据可能不只是存在一台MYSQL服务器上，</p>
-
 <blockquote>
 <p>SELECT *  FROM t_order WHERE order _id IN(1,3,6)</p>
 </blockquote>
-
 <p>数据分布：</p>
-
 <blockquote>
 <p>ds0.t_order0 (1,3,5,7)</p>
-
 <p>ds1.t_order0(2,4,6)</p>
 </blockquote>
-
 <p>这个SELECT 查询就需要走2个database,如果这个SQL原封不动的执行，肯定会报错（表不存在），Sharding-jdbc 必须要对这个sql进行改写，将库名和表名 2个路由加上</p>
-
 <blockquote>
 <p>SELECT *  FROM ds0.t_order0  WHERE order _id IN(1,3)</p>
-
 <p>SELECT *  FROM ds0.t_order1  WHERE order _id IN(6)</p>
 </blockquote>
-
 <p><strong>SQL 改写：将SQL 按照一定规则，重写FROM 的数据库和表名（Route 返回路由决定需要去哪些库表中执行SQL）</strong></p>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dvbWVueWlxaWxhbGFsYQ==,size_16,color_FFFFFF,t_70.png" alt="img" /></p>
-
-<h2 id="application-properties-配置"><strong>application.properties 配置</strong></h2>
-
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/zshipu/images/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dvbWVueWlxaWxhbGFsYQ==,size_16,color_FFFFFF,t_70.png" />   
+    </p>
+<h2 id="applicationproperties-配置"><strong>application.properties 配置</strong></h2>
 <p><strong>配置主要分为三个部分</strong></p>
-
 <ol>
 <li>配置数据源</li>
-<li>分库配置<br /></li>
+<li>分库配置</li>
 <li>分表配置</li>
 </ol>
-
 <blockquote>
-<pre><code class="language-html"># Hint 强制路由分片策略
-sharding.jdbc.datasource.names=ds0,ds1
- 
-sharding.jdbc.datasource.ds0.type=com.alibaba.druid.pool.DruidDataSource
-sharding.jdbc.datasource.ds0.driver-class-name=com.mysql.jdbc.Driver
-sharding.jdbc.datasource.ds0.url=jdbc:mysql://127.0.0.1:5306/ds0?useUnicode=yes&amp;characterEncoding=utf8
-sharding.jdbc.datasource.ds0.username=root
-sharding.jdbc.datasource.ds0.password=root
- 
-sharding.jdbc.datasource.ds1.type=com.alibaba.druid.pool.DruidDataSource
-sharding.jdbc.datasource.ds1.driver-class-name=com.mysql.jdbc.Driver
-sharding.jdbc.datasource.ds1.url=jdbc:mysql://127.0.0.1:5306/ds1?useUnicode=yes&amp;characterEncoding=utf8
-sharding.jdbc.datasource.ds1.username=root
-sharding.jdbc.datasource.ds1.password=root
- 
-# 分库配置
-sharding.jdbc.config.sharding.default-database-strategy.inline.sharding-column=user_id
-sharding.jdbc.config.sharding.default-database-strategy.inline.algorithm-expression=ds$-&gt;{user_id % 2}
- 
-# t_order强制分片配置
-sharding.jdbc.config.sharding.tables.t_order.actual-data-nodes=ds$-&gt;{0..1}.t_order$-&gt;{0..1}
-# 和其他3种不同的是，Hint 需要指定分片表 的数据库分片算法 + 表分片算法
-sharding.jdbc.config.sharding.tables.t_order.database-strategy.hint.algorithm-class-name=ai.yunxi.sharding.config.HintShardingKeyAlgorithm
-sharding.jdbc.config.sharding.tables.t_order.table-strategy.hint.algorithm-class-name=ai.yunxi.sharding.config.HintShardingKeyAlgorithm
- 
- 
-sharding.jdbc.config.props.sql.show=true
-</code></pre>
-</blockquote>
-
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span># Hint 强制路由分片策略
+</span></span><span style="display:flex;"><span>sharding.jdbc.datasource.names=ds0,ds1
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>sharding.jdbc.datasource.ds0.type=com.alibaba.druid.pool.DruidDataSource
+</span></span><span style="display:flex;"><span>sharding.jdbc.datasource.ds0.driver-class-name=com.mysql.jdbc.Driver
+</span></span><span style="display:flex;"><span>sharding.jdbc.datasource.ds0.url=jdbc:mysql://127.0.0.1:5306/ds0?useUnicode=yes<span style="color:#a61717;background-color:#e3d2d2">&amp;</span>characterEncoding=utf8
+</span></span><span style="display:flex;"><span>sharding.jdbc.datasource.ds0.username=root
+</span></span><span style="display:flex;"><span>sharding.jdbc.datasource.ds0.password=root
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>sharding.jdbc.datasource.ds1.type=com.alibaba.druid.pool.DruidDataSource
+</span></span><span style="display:flex;"><span>sharding.jdbc.datasource.ds1.driver-class-name=com.mysql.jdbc.Driver
+</span></span><span style="display:flex;"><span>sharding.jdbc.datasource.ds1.url=jdbc:mysql://127.0.0.1:5306/ds1?useUnicode=yes<span style="color:#a61717;background-color:#e3d2d2">&amp;</span>characterEncoding=utf8
+</span></span><span style="display:flex;"><span>sharding.jdbc.datasource.ds1.username=root
+</span></span><span style="display:flex;"><span>sharding.jdbc.datasource.ds1.password=root
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span># 分库配置
+</span></span><span style="display:flex;"><span>sharding.jdbc.config.sharding.default-database-strategy.inline.sharding-column=user_id
+</span></span><span style="display:flex;"><span>sharding.jdbc.config.sharding.default-database-strategy.inline.algorithm-expression=ds$-&gt;{user_id % 2}
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span># t_order强制分片配置
+</span></span><span style="display:flex;"><span>sharding.jdbc.config.sharding.tables.t_order.actual-data-nodes=ds$-&gt;{0..1}.t_order$-&gt;{0..1}
+</span></span><span style="display:flex;"><span># 和其他3种不同的是，Hint 需要指定分片表 的数据库分片算法 + 表分片算法
+</span></span><span style="display:flex;"><span>sharding.jdbc.config.sharding.tables.t_order.database-strategy.hint.algorithm-class-name=ai.yunxi.sharding.config.HintShardingKeyAlgorithm
+</span></span><span style="display:flex;"><span>sharding.jdbc.config.sharding.tables.t_order.table-strategy.hint.algorithm-class-name=ai.yunxi.sharding.config.HintShardingKeyAlgorithm
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>sharding.jdbc.config.props.sql.show=true
+</span></span></code></pre></td></tr></table>
+</div>
+</div></blockquote>
 <h2 id="自定义hintshardingkeyalgorithm"><strong>自定义HintShardingKeyAlgorithm</strong></h2>
-
 <blockquote>
-<pre><code class="language-html">import com.alibaba.druid.util.StringUtils;
-import io.shardingsphere.api.algorithm.sharding.ListShardingValue;
-import io.shardingsphere.api.algorithm.sharding.ShardingValue;
-import io.shardingsphere.api.algorithm.sharding.hint.HintShardingAlgorithm;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
- 
-public class HintShardingKeyAlgorithm implements HintShardingAlgorithm {
- 
-    /**
-     * 自定义Hint 实现算法
-     * 能够保证绕过Sharding-JDBC SQL解析过程
-     * @param availableTargetNames
-     * @param shardingValue 不再从SQL 解析中获取值，而是直接通过hintManager.addTableShardingValue(&quot;t_order&quot;, 1)参数指定
-     * @return
-     */
-    @Override
-    public Collection&lt;String&gt; doSharding(Collection&lt;String&gt; availableTargetNames,
-                                         ShardingValue shardingValue) {
-        System.out.println(&quot;shardingValue=&quot; + shardingValue);
-        System.out.println(&quot;availableTargetNames=&quot; + availableTargetNames);
-        List&lt;String&gt; shardingResult = new ArrayList&lt;&gt;();
-        for (String targetName : availableTargetNames) {
-            String suffix = targetName.substring(targetName.length() - 1);
-            if (StringUtils.isNumber(suffix)) {
-                // hint分片算法的ShardingValue有两种具体类型:
-                // ListShardingValue和RangeShardingValue
-             // 使用哪种取决于HintManager.addDatabaseShardingValue(String, String, ShardingOperator,...),ShardingOperator的类型
-        
-                ListShardingValue&lt;Integer&gt; tmpSharding = (ListShardingValue&lt;Integer&gt;) shardingValue;
-                for (Integer value : tmpSharding.getValues()) {
-                    if (value % 2 == Integer.parseInt(suffix)) {
-                        shardingResult.add(targetName);
-                    }
-                }
-            }
-        }
-        return shardingResult;
-    }
-}
-</code></pre>
-</blockquote>
-
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>import com.alibaba.druid.util.StringUtils;
+</span></span><span style="display:flex;"><span>import io.shardingsphere.api.algorithm.sharding.ListShardingValue;
+</span></span><span style="display:flex;"><span>import io.shardingsphere.api.algorithm.sharding.ShardingValue;
+</span></span><span style="display:flex;"><span>import io.shardingsphere.api.algorithm.sharding.hint.HintShardingAlgorithm;
+</span></span><span style="display:flex;"><span>import java.util.ArrayList;
+</span></span><span style="display:flex;"><span>import java.util.Collection;
+</span></span><span style="display:flex;"><span>import java.util.List;
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>public class HintShardingKeyAlgorithm implements HintShardingAlgorithm {
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    /**
+</span></span><span style="display:flex;"><span>     * 自定义Hint 实现算法
+</span></span><span style="display:flex;"><span>     * 能够保证绕过Sharding-JDBC SQL解析过程
+</span></span><span style="display:flex;"><span>     * @param availableTargetNames
+</span></span><span style="display:flex;"><span>     * @param shardingValue 不再从SQL 解析中获取值，而是直接通过hintManager.addTableShardingValue(&#34;t_order&#34;, 1)参数指定
+</span></span><span style="display:flex;"><span>     * @return
+</span></span><span style="display:flex;"><span>     */
+</span></span><span style="display:flex;"><span>    @Override
+</span></span><span style="display:flex;"><span>    public Collection&lt;<span style="color:#000080">String</span>&gt; doSharding(Collection&lt;<span style="color:#000080">String</span>&gt; availableTargetNames,
+</span></span><span style="display:flex;"><span>                                         ShardingValue shardingValue) {
+</span></span><span style="display:flex;"><span>        System.out.println(&#34;shardingValue=&#34; + shardingValue);
+</span></span><span style="display:flex;"><span>        System.out.println(&#34;availableTargetNames=&#34; + availableTargetNames);
+</span></span><span style="display:flex;"><span>        List&lt;<span style="color:#000080">String</span>&gt; shardingResult = new ArrayList<span style="color:#a61717;background-color:#e3d2d2">&lt;</span>&gt;();
+</span></span><span style="display:flex;"><span>        for (String targetName : availableTargetNames) {
+</span></span><span style="display:flex;"><span>            String suffix = targetName.substring(targetName.length() - 1);
+</span></span><span style="display:flex;"><span>            if (StringUtils.isNumber(suffix)) {
+</span></span><span style="display:flex;"><span>                // hint分片算法的ShardingValue有两种具体类型:
+</span></span><span style="display:flex;"><span>                // ListShardingValue和RangeShardingValue
+</span></span><span style="display:flex;"><span>             // 使用哪种取决于HintManager.addDatabaseShardingValue(String, String, ShardingOperator,...),ShardingOperator的类型
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>                ListShardingValue&lt;<span style="color:#000080">Integer</span>&gt; tmpSharding = (ListShardingValue&lt;<span style="color:#000080">Integer</span>&gt;) shardingValue;
+</span></span><span style="display:flex;"><span>                for (Integer value : tmpSharding.getValues()) {
+</span></span><span style="display:flex;"><span>                    if (value % 2 == Integer.parseInt(suffix)) {
+</span></span><span style="display:flex;"><span>                        shardingResult.add(targetName);
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        return shardingResult;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></td></tr></table>
+</div>
+</div></blockquote>
 <h2 id="编写测试类hintapplicationtests"><strong>编写测试类HintApplicationTests</strong></h2>
-
 <blockquote>
-<pre><code class="language-html">import ai.yunxi.sharding.service.OrderService;
-import io.shardingsphere.api.HintManager;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
- 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = VipShardingApplication.class)
-public class HintApplicationTests {
-    @Autowired
-    private OrderService orderService;
- 
-    @Test
-    public void test() {
-        // Hint分片策略必须要使用 HintManager工具类
-        HintManager hintManager = HintManager.getInstance();
-        //
-        hintManager.addDatabaseShardingValue(&quot;t_order&quot;, 0);
-        hintManager.addTableShardingValue(&quot;t_order&quot;, 1);
- 
-        // 直接指定对应具体的数据库
-        //hintManager.setDatabaseShardingValue(1);
-        //在读写分离数据库中，Hint 可以强制读主库（主从复制是存在一定延时，但在业务场景中，可能更需要保证数据的实时性）
-        //hintManager.setMasterRouteOnly();
-        System.out.println(orderService.findHint());
-    }
-}
-</code></pre>
-</blockquote>
-
-<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/20200514111902435.png" alt="img" /></p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>import ai.yunxi.sharding.service.OrderService;
+</span></span><span style="display:flex;"><span>import io.shardingsphere.api.HintManager;
+</span></span><span style="display:flex;"><span>import org.junit.Test;
+</span></span><span style="display:flex;"><span>import org.junit.runner.RunWith;
+</span></span><span style="display:flex;"><span>import org.springframework.beans.factory.annotation.Autowired;
+</span></span><span style="display:flex;"><span>import org.springframework.boot.test.context.SpringBootTest;
+</span></span><span style="display:flex;"><span>import org.springframework.test.context.junit4.SpringRunner;
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>@RunWith(SpringRunner.class)
+</span></span><span style="display:flex;"><span>@SpringBootTest(classes = VipShardingApplication.class)
+</span></span><span style="display:flex;"><span>public class HintApplicationTests {
+</span></span><span style="display:flex;"><span>    @Autowired
+</span></span><span style="display:flex;"><span>    private OrderService orderService;
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    @Test
+</span></span><span style="display:flex;"><span>    public void test() {
+</span></span><span style="display:flex;"><span>        // Hint分片策略必须要使用 HintManager工具类
+</span></span><span style="display:flex;"><span>        HintManager hintManager = HintManager.getInstance();
+</span></span><span style="display:flex;"><span>        //
+</span></span><span style="display:flex;"><span>        hintManager.addDatabaseShardingValue(&#34;t_order&#34;, 0);
+</span></span><span style="display:flex;"><span>        hintManager.addTableShardingValue(&#34;t_order&#34;, 1);
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>        // 直接指定对应具体的数据库
+</span></span><span style="display:flex;"><span>        //hintManager.setDatabaseShardingValue(1);
+</span></span><span style="display:flex;"><span>        //在读写分离数据库中，Hint 可以强制读主库（主从复制是存在一定延时，但在业务场景中，可能更需要保证数据的实时性）
+</span></span><span style="display:flex;"><span>        //hintManager.setMasterRouteOnly();
+</span></span><span style="display:flex;"><span>        System.out.println(orderService.findHint());
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></td></tr></table>
+</div>
+</div></blockquote>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/zshipu/images/20200514111902435.png" />   
+    </p>
 
         </div>
 
@@ -397,15 +481,15 @@ public class HintApplicationTests {
     <h2>See Also</h2>
     <ul class="listing">
         
-        <li><a href="/post/gitlab/Docker%E9%83%A8%E7%BD%B2gitlab%E9%81%BF%E5%9D%91%E7%89%88/">Docker部署gitlab(避坑版)</a></li>
+        <li><a href="/post/nexp/css-level-01/css-level-001-%E5%AD%A6%E4%B9%A0-TailwindCSS%E5%88%B6%E4%BD%9C%E4%B8%AA%E4%BA%BA%E8%B5%84%E6%96%99%E5%8D%A1/">css-level-001 学习 TailwindCSS：制作个人资料卡</a></li>
         
-        <li><a href="/post/bi/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F-%E6%96%B9%E6%B3%95%E8%AE%BA%E4%B8%8E%E5%B7%A5%E7%A8%8B%E5%8C%96%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">用户画像-方法论与工程化解决方案</a></li>
+        <li><a href="/post/nexp/level001/nexp-level-001-06-%E6%B7%BB%E5%8A%A0%E7%BB%84%E4%BB%B6%E7%BA%A7-CSS/">nexp-level-001 06 添加组件级 CSS</a></li>
         
-        <li><a href="/post/react/level01/2.-React-%E5%BE%88%E6%A3%92%E7%9A%84%E7%BB%84%E4%BB%B6/">2. React 很棒的组件</a></li>
+        <li><a href="/post/nexp/level001/nexp-level-001-05-%E5%AD%A6%E4%B9%A0-Next.js-%E4%BD%BF%E7%94%A8%E5%85%B1%E4%BA%AB%E7%BB%84%E4%BB%B6/">nexp-level-001 05 学习 Next.js  使用共享组件</a></li>
         
-        <li><a href="/post/react/level01/1.-%E5%88%9D%E5%AD%A6%E8%80%85%E7%9A%84-React-/">1.初学者的 React</a></li>
+        <li><a href="/post/nexp/level001/nexp-level-001-04-Next-%E7%9A%84%E6%9C%80%E4%BD%B3%E6%A0%B7%E5%BC%8F%E9%80%89%E9%A1%B9/">nexp-level-001 04 Next 的最佳样式选项</a></li>
         
-        <li><a href="/post/css/CSS-%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/">CSS 特性的完整指南</a></li>
+        <li><a href="/post/nexp/level001/nexp-level-001-03-%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AB%AF%E6%B8%B2%E6%9F%93%E4%B8%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%B8%B2%E6%9F%93/">nexp-level-001 03 服务器端渲染与客户端渲染</a></li>
         
     </ul>
 </div>
@@ -502,43 +586,43 @@ public class HintApplicationTests {
 <ul class="widget-list">
     
     <li>
-        <a href="https://geek.zshipu.com/post/mybatis/Sharding-JDBC-%E5%88%86%E7%89%87%E7%AD%96%E7%95%A5%E5%9B%9BHint%E5%BC%BA%E5%88%B6%E8%B7%AF%E7%94%B1HintShardingStrategy/" title="Sharding JDBC  分片策略四：Hint强制路由HintShardingStrategy">Sharding JDBC  分片策略四：Hint强制路由HintShardingStrategy</a>
+        <a href="https://geek.zshipu.com/post/css/%E5%89%8D%E7%AB%AF%E7%9F%A5%E8%AF%86%E7%82%B9%E5%A4%A7%E5%85%A8/" title="前端知识点大全">前端知识点大全</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/gitlab/Docker%E9%83%A8%E7%BD%B2gitlab%E9%81%BF%E5%9D%91%E7%89%88/" title="Docker部署gitlab(避坑版)">Docker部署gitlab(避坑版)</a>
+        <a href="https://geek.zshipu.com/post/web3.0/%E5%85%A8%E6%A0%88-Web3-%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="web3.0 全栈 Web3 开发完整指南">web3.0 全栈 Web3 开发完整指南</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/bi/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F-%E6%96%B9%E6%B3%95%E8%AE%BA%E4%B8%8E%E5%B7%A5%E7%A8%8B%E5%8C%96%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" title="用户画像-方法论与工程化解决方案">用户画像-方法论与工程化解决方案</a>
+        <a href="https://geek.zshipu.com/post/web3.0/%E5%85%A8%E6%A0%88%E4%BB%A5%E5%A4%AA%E5%9D%8A%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="web3.0 全栈以太坊开发完整指南">web3.0 全栈以太坊开发完整指南</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/react/level01/2.-React-%E5%BE%88%E6%A3%92%E7%9A%84%E7%BB%84%E4%BB%B6/" title="2. React 很棒的组件">2. React 很棒的组件</a>
+        <a href="https://geek.zshipu.com/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%825Truffle-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8%E4%BD%93%E9%AA%8C%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6/" title="以太坊从零到略懂5：Truffle 快速入门体验智能合约">以太坊从零到略懂5：Truffle 快速入门体验智能合约</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/react/level01/1.-%E5%88%9D%E5%AD%A6%E8%80%85%E7%9A%84-React-/" title="1.初学者的 React">1.初学者的 React</a>
+        <a href="https://geek.zshipu.com/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%8242021-%E5%B9%B4-Web3.0-%E5%92%8C-Solidity-%E5%BC%80%E5%8F%91%E8%B7%AF%E7%BA%BF%E5%9B%BE/" title="以太坊从零到略懂4： Web3.0 和 Solidity 开发路线图">以太坊从零到略懂4： Web3.0 和 Solidity 开发路线图</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/css/CSS-%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="CSS 特性的完整指南">CSS 特性的完整指南</a>
+        <a href="https://geek.zshipu.com/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%823%E5%BC%80%E5%8F%91%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%90%88%E7%BA%A6/" title="web3.0 以太坊从零到略懂3：开发第一个合约">web3.0 以太坊从零到略懂3：开发第一个合约</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/web/Web-3.0%E5%BC%80%E5%8F%91%E8%80%85%E8%B7%AF%E7%BA%BF%E5%9B%BE%E6%8C%87%E5%8D%97%E5%92%8C%E5%85%A5%E9%97%A8%E8%B5%84%E6%BA%90/" title="Web 3.0：开发者路线图、指南和入门资源">Web 3.0：开发者路线图、指南和入门资源</a>
+        <a href="https://geek.zshipu.com/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%822%E8%AE%BE%E7%BD%AE%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/" title="web3.0 以太坊从零到略懂2：设置开发环境">web3.0 以太坊从零到略懂2：设置开发环境</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/graphql/%E5%BC%80%E5%A7%8B%E4%BD%BF%E7%94%A8Apollo-Graphql%E6%9C%8D%E5%8A%A1%E5%99%A8/" title="开始使用Apollo Graphql服务器">开始使用Apollo Graphql服务器</a>
+        <a href="https://geek.zshipu.com/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%821%E7%AE%80%E4%BB%8B/" title="web3.0 以太坊从零到略懂1：简介">web3.0 以太坊从零到略懂1：简介</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/detail/ch1-async-in-netty/" title="Netty那点事（八）理解Netty中的异步">Netty那点事（八）理解Netty中的异步</a>
+        <a href="https://geek.zshipu.com/post/nexp/css-level-01/css-level-007-CSS%E4%B8%8D%E9%80%8F%E6%98%8E%E5%BA%A6-%E9%80%8F%E6%98%8E%E5%BA%A6/" title="css-level-007 CSS不透明度-透明度">css-level-007 CSS不透明度-透明度</a>
     </li>
     
     <li>
-        <a href="https://geek.zshipu.com/post/netty/netty-learning/trival-notes/" title="Netty那点事（七）层层分析Netty中的Channel(下)">Netty那点事（七）层层分析Netty中的Channel(下)</a>
+        <a href="https://geek.zshipu.com/post/nexp/css-level-01/css-level-006-CSS-%E4%B8%ADpxemremvwvh%E5%8D%95%E4%BD%8D%E4%B9%8B%E9%97%B4%E7%9A%84%E5%8C%BA%E5%88%AB%E8%AF%A6%E8%A7%A3/" title="css-level-006 CSS 中px、em、rem、%、vw、vh单位之间的区别详解">css-level-006 CSS 中px、em、rem、%、vw、vh单位之间的区别详解</a>
     </li>
     
 </ul>
@@ -606,9 +690,9 @@ public class HintApplicationTests {
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="">JS</a>
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
     
-    <a href="https://geek.zshipu.com/tags/Java/">Java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -616,11 +700,17 @@ public class HintApplicationTests {
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     
     <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/apollo/">apollo</a>
     
     <a href="https://geek.zshipu.com/tags/css/">css</a>
     
@@ -638,7 +728,7 @@ public class HintApplicationTests {
     
     <a href="https://geek.zshipu.com/tags/graphql/">graphql</a>
     
-    <a href="">java</a>
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
     
     <a href="https://geek.zshipu.com/tags/jdbc/">jdbc</a>
     
@@ -647,6 +737,10 @@ public class HintApplicationTests {
     <a href="https://geek.zshipu.com/tags/mybatis/">mybatis</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nexp/">nexp</a>
+    
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
     
@@ -663,6 +757,10 @@ public class HintApplicationTests {
     <a href="https://geek.zshipu.com/tags/sharding/">sharding</a>
     
     <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/storybook/">storybook</a>
+    
+    <a href="https://geek.zshipu.com/tags/tailwind/">tailwind</a>
     
     <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
     
@@ -689,6 +787,8 @@ public class HintApplicationTests {
     <a href="https://geek.zshipu.com/tags/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/">用户画像</a>
     
     <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E8%B5%B7%E6%AD%A5/">起步</a>
     
 </div>
     </section>

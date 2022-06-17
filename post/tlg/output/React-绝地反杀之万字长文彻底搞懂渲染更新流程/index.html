@@ -301,8 +301,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 &lt;li&gt;1&lt;li&gt;        -&gt;       &lt;li&gt;2&lt;li&gt;
 &lt;li&gt;2&lt;li&gt;        -&gt;       &lt;li&gt;4&lt;li&gt;
 &lt;li&gt;3&lt;li&gt;        -&gt;       &lt;li&gt;6&lt;li&gt;
-
-
 </code></pre><p>当点击 button 后，列表从左边的 1、2、3 变为右边的 2、4、6。每个节点的更新过程对用户来说基本是同步，但实际上他们是顺序遍历的。具体步骤如下：</p>
 <ul>
 <li>
@@ -324,8 +322,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 &lt;li&gt;1&lt;li&gt;        -&gt;       &lt;li&gt;2&lt;li&gt;
 &lt;li&gt;2&lt;li&gt;        -&gt;       &lt;li&gt;2&lt;li&gt;
 &lt;li&gt;3&lt;li&gt;        -&gt;       &lt;li&gt;3&lt;li&gt;
-
-
 </code></pre><p>这种情况是 React 绝对不希望出现的。但是这种应用场景又是十分必须的。想象一下，用户在某个时间点进行了输入事件，此时应该更新 input 内的内容，但是因为一个不在当前可视区域的列表的更新导致用户的输入更新被滞后，那么给用户的体验就是卡顿的。因此 React 团队需要寻找一个办法，来解决这个缺陷。</p>
 <h2 id="react-16">React 16</h2>
 <h3 id="架构分层-1">架构分层</h3>
@@ -354,15 +350,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         workInProgress = performUnitOfWork(workInProgress);
     }
 }
-
-
 </code></pre><p>前面有分析到 React 15 中断执行会导致页面更新不完全，原因是因为 Reconciler 和 Renderer 是交替工作的，因此在 React 16 中，Reconciler 与 Renderer 不再是交替工作。当 Scheduler 将任务交给 Reconciler 后，Reconciler 只是会为变化的 Virtual DOM 打上代表增 / 删 / 更新的标记，而不会发生通知 Renderer 去渲染。类似这样</p>
 <pre tabindex="0"><code>export const Placement = /*             */ 0b0000000000010;
 export const Update = /*                */ 0b0000000000100;
 export const PlacementAndUpdate = /*    */ 0b0000000000110;
 export const Deletion = /*              */ 0b0000000001000;
-
-
 </code></pre><p>只有当所有组件都完成 Reconciler 的工作，才会统一交给 Renderer 进行渲染更新。</p>
 <h3 id="renderercommit">Renderer(Commit)</h3>
 <p>Renderer 根据 Reconciler 为 Virtual DOM 打的标记，同步执行对应的渲染操作。对于我们在上一节使用过的例子，在 React 16 架构中整个更新流程为：</p>
@@ -453,8 +445,6 @@ export const Deletion = /*              */ 0b0000000001000;
   mode: TypeOfMode,
   // ...
 };
-
-
 </code></pre><h3 id="fiberroot">FiberRoot</h3>
 <p>每一次通过 ReactDom.render 渲染的一棵树或者一个应用都会初始化一个对应的 FiberRoot 对象作为应用的起点。其数据结构如下 ReactFiberRoot。</p>
 <pre tabindex="0"><code>type BaseFiberRootProperties = {
@@ -480,8 +470,6 @@ lastPingedTime: ExpirationTime,
 lastExpiredTime: ExpirationTime,
 // ...
 };
-
-
 </code></pre><h3 id="fiber-类型">Fiber 类型</h3>
 <pre tabindex="0"><code>export const FunctionComponent = 0;
 export const ClassComponent = 1;
@@ -491,8 +479,6 @@ export const HostPortal = 4; // 一颗子树
 export const HostComponent = 5; // 原生节点；根据环境而定，浏览器环境就是div等
 export const HostText = 6; // 纯文本节点
 export const Fragment = 7;
-
-
 </code></pre><h3 id="模式">模式</h3>
 <p>到 React 16.13.1 版本为止，内置的开发模式有如下几种：</p>
 <pre tabindex="0"><code>export type TypeOfMode = number;
@@ -506,8 +492,6 @@ export const BlockingMode = 0b0010;
 export const ConcurrentMode = 0b0100;
 // 性能测试模式，用来检测哪里存在性能问题，React16-17开发环境使用
 export const ProfileMode = 0b1000;
-
-
 </code></pre><p>本文只分析 ConcurrentMode 模式</p>
 <h2 id="jsx-与-reactcreateelement">JSX 与 React.createElement</h2>
 <p>先来看一个最简单的 JSX 格式编码的组件，这里借助 babel 进行代码转换，代码看这</p>
@@ -531,20 +515,18 @@ var App = /*#__PURE__*/function (_React$Component) {
  }
 
  _createClass(App, [{
-     key: &quot;render&quot;,
+     key: &#34;render&#34;,
      value: function render() {
-         return /*#__PURE__*/React.createElement(&quot;div&quot;, null);
+         return /*#__PURE__*/React.createElement(&#34;div&#34;, null);
      }
  }]);
 
  return App;
 }(React.Component);
-
-
 </code></pre><p>关键点在于 render 方法实际上是调用了 React.createElement 方法。那么接下来我们只需要分析 createElement 做了啥即可。我们先看看 ReactElement 的结构:</p>
 <pre tabindex="0"><code>let REACT_ELEMENT_TYPE = 0xeac7;
-if (typeof Symbol === 'function' &amp;&amp; Symbol.for) {
- REACT_ELEMENT_TYPE = Symbol.for('react.element');
+if (typeof Symbol === &#39;function&#39; &amp;&amp; Symbol.for) {
+ REACT_ELEMENT_TYPE = Symbol.for(&#39;react.element&#39;);
 }
 
 const ReactElement = function (type, key, ref, props) {
@@ -559,8 +541,6 @@ const ReactElement = function (type, key, ref, props) {
  }
  return element;
 }
-
-
 </code></pre><p>很简单的一个数据结构，每个属性的作用都一目了然，就不一一解释了。然后分析 React.createElement 源码。</p>
 <h3 id="防-xss-攻击">防 XSS 攻击</h3>
 <p>如果你不清楚 XSS 攻击，建议先读这篇文章如何防止 XSS 攻击？。</p>
@@ -589,7 +569,7 @@ function createElement(type, config, children) {
          ref = config.ref;
      }
      if (hasValidKey(config)) {
-         key = '' + config.key;
+         key = &#39;&#39; + config.key;
      }
  }
 
@@ -624,8 +604,6 @@ function createElement(type, config, children) {
 
  return ReactElement(type, key, ref, props);
 }
-
-
 </code></pre><p>注释应该已经够清楚了哈。总结下来就是根据参数来生成一个 ReactElement 对象，并绑定对应的 props、key、ref 等；</p>
 <h2 id="render-流程">render 流程</h2>
 <p>ReactDOM.render 使用参考这里</p>
@@ -646,8 +624,6 @@ function createElement(type, config, children) {
        callback,
    );
 }
-
-
 </code></pre><p>实际上调用的是 legacyRenderSubtreeIntoContainer 方法，再来看看这个咯</p>
 <pre tabindex="0"><code>function legacyRenderSubtreeIntoContainer(
  parentComponent: ?React$Component&lt;any, any&gt;, // 一般为null
@@ -667,7 +643,7 @@ function createElement(type, config, children) {
      );
      // FiberRoot; 应用的起点
      fiberRoot = root._internalRoot;
-     if (typeof callback === 'function') {
+     if (typeof callback === &#39;function&#39;) {
          const originalCallback = callback;
          callback = function () {
              const instance = getPublicRootInstance(fiberRoot);
@@ -685,8 +661,6 @@ function createElement(type, config, children) {
  }
  return getPublicRootInstance(fiberRoot);
 }
-
-
 </code></pre><p>根据官网的使用文档可知，在这一步会先清空容器里现有的节点，如果有异步回调 callback 会先保存起来，并绑定对应 FiberRoot 引用关系，以用于后续传递正确的根节点。</p>
 <p>注释里我标注了两个 [Q] 代表两个问题。我们先来仔细分析这两个问题</p>
 <h3 id="初始化">初始化</h3>
@@ -714,8 +688,6 @@ options: void | RootOptions,
 // !!! look here
 this._internalRoot = createRootImpl(container, tag, options);
 }
-
-
 </code></pre><p>一连串的函数调用，其实就是还回了一个 ReactDOMBlockingRoot 实例。其中重点在于属性_internalRoot 是通过 createRootImpl 创建的产物。</p>
 <pre tabindex="0"><code>function createRootImpl(
 container: Container,
@@ -772,8 +744,6 @@ const queue: UpdateQueue&lt;State&gt; = {
 };
 fiber.updateQueue = queue;
 }
-
-
 </code></pre><p>大致逻辑就是生成了一个 FiberRoot 对象 root。并生成了 root 对应的 Fiber 对象，同时生成了该 fiber 的更新队列。从这里清楚的知道了 FiberRoot 是在何时初始化的，我们得先记住这个 FiberRoot，可以认为他是整个 React 应用的起点。</p>
 <h3 id="unbatchedupdates">unbatchedUpdates</h3>
 <p>源码中的英文注释说明这里是无需批处理，应该立即执行。其传入参数是一个执行 updateContainer 的包装函数。但是在 else 判断中实际上也执行了 updateContainer。那么 unbatchedUpdates 有啥奥秘呢？</p>
@@ -831,8 +801,6 @@ if (!isFlushingSyncQueue &amp;&amp; syncQueue !== null) {
  }
 }
 }
-
-
 </code></pre><p>在 unbatchedUpdates 中，其实就是多了一段 finally 中的逻辑。其中的逻辑主要是刷新同步任务队列。想一想，为啥呢？那么说明在 fn(a) 的执行过程中肯定产生了同步任务呗！那么接下来继续跟进到 updateContainer 中瞧一瞧。</p>
 <h3 id="updatecontainer">updateContainer</h3>
 <p>注意，这里 updateContainer 已经是属于 Reconciler 流程了哦。继续跟进：</p>
@@ -877,8 +845,6 @@ if (!isFlushingSyncQueue &amp;&amp; syncQueue !== null) {
 
     return expirationTime;
 }
-
-
 </code></pre><p>这一步看上去代码贼多，其实就是先计算出当前更新的过期时间 expirationTime，然后通过 createUpdate 创建了一个 update 更新任务，接着通过 enqueueUpdate 插入 循环任务队列，最后使用 scheduleUpdateOnFiber 来调度任务。</p>
 <h3 id="expirationtime-计算">expirationTime 计算</h3>
 <p>expirationTime 是一个非常重要的概念。React 中，为防止某个 update 因为优先级的原因一直被打断而未能执行。React 会设置一个 expirationTime，当时间到了 expirationTime 的时候，如果某个 update 还未执行的话，React 将会强制执行该 update，这就是 expirationTime 的作用。</p>
@@ -902,8 +868,6 @@ export function requestCurrentTimeForUpdate() {
    // 省略...
    return msToExpirationTime(now());
 }
-
-
 </code></pre><p>再来看看 computeExpirationForFiber 具体的计算逻辑</p>
 <pre tabindex="0"><code>export function computeExpirationForFiber(
    currentTime: ExpirationTime,
@@ -942,7 +906,7 @@ export function requestCurrentTimeForUpdate() {
            expirationTime = Idle;
            break;
        default:
-           invariant(false, 'Expected a valid priority level');
+           invariant(false, &#39;Expected a valid priority level&#39;);
    }
 }
 
@@ -977,14 +941,10 @@ function computeExpirationBucket(
        )
    );
 }
-
-
 </code></pre><p>汇总起来，计算公式如下:</p>
 <pre tabindex="0"><code>// current = MAGIC_NUMBER_OFFSET - ((now() / UNIT_SIZE) | 0);
 // expirationTime = MAGIC_NUMBER_OFFSET - ((((MAGIC_NUMBER_OFFSET - currentTime + 500) / 25) | 0) + 1) * 25
 // =&gt; MAGIC_NUMBER_OFFSET - ((((((now() / UNIT_SIZE) | 0) + 500) / 25) | 0) + 1) * 25
-
-
 </code></pre><p>其中 | 0 是用于取整的。注意到 + 1 这个操作，说明了啥？说明了两个不同的 expirationTime 之间的差距为 25 的倍数，即 25ms 内的任务都是同一个 expirationTime。那么连续 25ms 内的更新操作会合并成一个任务咯！</p>
 <p>正如官网介绍，legacy 模式在合成事件中有自动批处理的功能，但仅限于一个浏览器任务。非 React 事件想使用这个功能必须使用 unstable_batchedUpdates。在 blocking 模式和 concurrent 模式下，所有的 setState 在默认情况下都是批处理的。这里写了两个例子便于理解：</p>
 <ul>
@@ -1014,8 +974,6 @@ function computeExpirationBucket(
  }
  // 省略...
 }
-
-
 </code></pre><p>scheduleUpdateOnFiber 只是用于 更新以当前节点为 Root 的整个 &ldquo;树&rdquo; 的过期时间。其中重点在 ensureRootIsScheduled 这个方法</p>
 <pre tabindex="0"><code>// 此函数用于调度任务。 一个root(fiber节点)只能有一个任务在执行 
 // 如果已经有任务在调度中，将检查已有任务的到期时间与下一级别任务的到期时间相同。
@@ -1093,8 +1051,6 @@ function ensureRootIsScheduled(root: FiberRoot) {
    // 更新Fiber的当前回调节点
    root.callbackNode = callbackNode;
 }
-
-
 </code></pre><p>ensureRootIsScheduled 中的主要逻辑分三步：</p>
 <ul>
 <li>
@@ -1139,10 +1095,8 @@ function Component(props, context, updater) {
 }
 
 Component.prototype.setState = function (partialState, callback) {
-    this.updater.enqueueSetState(this, partialState, callback, 'setState');
+    this.updater.enqueueSetState(this, partialState, callback, &#39;setState&#39;);
 };
-
-
 </code></pre><p>Component 的初始结构很简单。我们看到其 setState 方法就是调用了 this.updater.enqueueSetState 方法，但是 update 默认是空的无用对象，我们一般也没有在构造方法里传入一个 update 参数，那么说明这个方法肯定是后续注入的咯。与是我找啊找，找到了一个差不多的东西 classComponentUpdater</p>
 <pre tabindex="0"><code>const classComponentUpdater = {
     isMounted,
@@ -1172,8 +1126,6 @@ Component.prototype.setState = function (partialState, callback) {
         // 同上类似
     },
 };
-
-
 </code></pre><p>嘿嘿，是不是发现了 enqueueSetState 里的逻辑有点似曾相识。其实就是我们之前分析 render 流程中遇到的 updateContainer 的流程是一样的啦。不记得的话回头再看看咯。那么接下来我们只要分析下 classComponentUpdater 是怎么注入为 Component 的 update 属性即可了。</p>
 <p>前面分析 render 流程的时候，我们还只分析到了生成任务分片并推入调度队列，还没有对组件的初始化有过分析。从 Component 的构造函数中猜测是不是在初始化 Component 的时候 React 帮我们注入的呢？顺着这个思路进行下一步的分析。首先我们先来看 beginWork 方法中的一段代码，beginWork 方法在后面会具体分析。这里先知道他是用于创建子组件的 Fiber 对象即可。</p>
 <pre tabindex="0"><code>function beginWork(
@@ -1206,8 +1158,6 @@ Component.prototype.setState = function (partialState, callback) {
         // 省略...
     }
 }
-
-
 </code></pre><p>beginWork 中的代码分为两部分。分别用于处理 mount 和 update 的逻辑。我们分析的流程是第一次初始化，那么走的是 mount 流程。beginWork 会根据不同的 tag 调用不同的方法，这里我们先来看看 updateClassComponent</p>
 <pre tabindex="0"><code>function updateClassComponent(
     current: Fiber | null,
@@ -1254,8 +1204,6 @@ Component.prototype.setState = function (partialState, callback) {
     );
     return nextUnitOfWork;
 }
-
-
 </code></pre><pre tabindex="0"><code>function constructClassInstance(
     workInProgress: Fiber,
     ctor: any,
@@ -1274,16 +1222,12 @@ Component.prototype.setState = function (partialState, callback) {
     // 省略 context 相关逻辑...
     return instance;
 }
-
-
 </code></pre><pre tabindex="0"><code>function adoptClassInstance(workInProgress: Fiber, instance: any): void {
   instance.updater = classComponentUpdater;
   workInProgress.stateNode = instance;
   // 绑定实例与Fiber，方便后续更新使用
   setInstance(instance, workInProgress);
 }
-
-
 </code></pre><p>可以看到当 instance 为 null 的时候，会执行以下几个流程</p>
 <ul>
 <li>
@@ -1390,9 +1334,6 @@ function compare(a, b) {
   const diff = a.sortIndex - b.sortIndex;
   return diff !== 0 ? diff : a.id - b.id;
 }
-
-
-
 </code></pre><p>具体实现就是用数组模拟了一个最小堆的结构。可以看到，每次任务的插入或者移除都会重新回复最小堆结构，排序规则以 sortIndex，taskId 为辅。在 React 中 sortIndex 对应的其实就是过期时间，taskId 则为递增任务序列。这一点后续会分析到。</p>
 <h3 id="开启任务调度">开启任务调度</h3>
 <p>前面有分析到在 ensureRootIsScheduled 中会生成一个任务节点，然后通过 scheduleCallback 将任务推入 Scheduler 中。那么我们先从这个任务进队的方法来逐步分析</p>
@@ -1406,16 +1347,16 @@ function unstable_scheduleCallback(priorityLevel, callback, options) {
   var startTime;
   var timeout;
   // 根据是否有延迟来确定开始时间
-  if (typeof options === 'object' &amp;&amp; options !== null) {
+  if (typeof options === &#39;object&#39; &amp;&amp; options !== null) {
     var delay = options.delay;
-    if (typeof delay === 'number' &amp;&amp; delay &gt; 0) {
+    if (typeof delay === &#39;number&#39; &amp;&amp; delay &gt; 0) {
       startTime = currentTime + delay;
     } else {
       startTime = currentTime;
     }
     // [Q1]:有超时配置直接用。否则根据优先级计算
     timeout =
-      typeof options.timeout === 'number'
+      typeof options.timeout === &#39;number&#39;
         ? options.timeout
         : timeoutForPriorityLevel(priorityLevel);
   } else {
@@ -1477,8 +1418,6 @@ function unstable_scheduleCallback(priorityLevel, callback, options) {
   // [A]：还回这个task的引用
   return newTask;
 }
-
-
 </code></pre><p>从这段代码可以看到一个调度任务的数据结构是怎样的，以及任务的排序依据 sortIndex 其实就是任务的过期时间 expirationTime，而 id 则是一个递增序列。注释中标注了几个问题，下面一一具体分析</p>
 <h3 id="timeout-计算">timeout 计算</h3>
 <pre tabindex="0"><code>// 立即执行
@@ -1506,8 +1445,6 @@ function timeoutForPriorityLevel(priorityLevel) {
       return NORMAL_PRIORITY_TIMEOUT;
   }
 }
-
-
 </code></pre><p>可以看到，这里将优先级转换成了常量级的具体时间，优先级越高的 timeout 时间越低。</p>
 <h3 id="taskqueue--timerqueue">taskQueue &amp; timerQueue</h3>
 <p>在 startTime &gt; currentTime 的条件分支中，分别将任务推入了 taskQueue 和 timerQueue。而这两个队列其实就是我们前面分析到的一个最小堆的结构。taskQueue 代表当前正在调度的任务，而 timerQueue 代表延迟任务队列。在任务调度的过程中，会不停的将 timerQueue 中的任务转移到 taskQueue 中，这一步后续会分析到。</p>
@@ -1522,16 +1459,12 @@ if (!isMessageLoopRunning) {
  port.postMessage(null);
 }
 };
-
-
 </code></pre><p>从代码看似乎 rHC 的作用只是缓存了 callback 即 flushwork 这个入参函数。并发送了一个空的 message。那么重点就在与这个 port 是为何物了。其实这里就是 React 如何模拟 requestIdleCallback 的地方了。</p>
 <h3 id="messagechannel-模拟-ric-实现循环调度">MessageChannel 模拟 rIC 实现循环调度</h3>
 <p>不熟悉 MessageChannel 的可以先了解一下。先来看看 Scheduler 中是如何用的。</p>
 <pre tabindex="0"><code>const channel = new MessageChannel();
 const port = channel.port2;
 channel.port1.onmessage = performWorkUntilDeadline;
-
-
 </code></pre><p>可以得知，当使用 port.postMessage 发生消息的时候，实际处理消息的函数为 performWorkUntilDeadline。</p>
 <pre tabindex="0"><code>let isMessageLoopRunning = false;
 let scheduledHostCallback = null;
@@ -1569,8 +1502,6 @@ const performWorkUntilDeadline = () =&gt; {
  // [Q]: 目前不知道这是啥
  needsPaint = false;
 };
-
-
 </code></pre><p>老样子，这里有几个问题需要仔细分析下。</p>
 <h3 id="yieldinterval">yieldInterval</h3>
 <p>从名字和使用方法上来看，我觉着应该是代表任务的执行时间。</p>
@@ -1580,9 +1511,9 @@ let yieldInterval = 5;
 forceFrameRate = function (fps) {
  // ？？？ 看不起我144hz
  if (fps &lt; 0 || fps &gt; 125) {
-   console['error'](
-     'forceFrameRate takes a positive int between 0 and 125, ' +
-     'forcing framerates higher than 125 fps is not unsupported',
+   console[&#39;error&#39;](
+     &#39;forceFrameRate takes a positive int between 0 and 125, &#39; +
+     &#39;forcing framerates higher than 125 fps is not unsupported&#39;,
    );
    return;
  }
@@ -1592,8 +1523,6 @@ forceFrameRate = function (fps) {
    yieldInterval = 5;
  }
 };
-
-
 </code></pre><p>forceFrameRate 是一个对外提供的 api 接口，用于动态配置调度任务的执行周期。</p>
 <h3 id="deadline--needspaint">deadline &amp; needsPaint</h3>
 <pre tabindex="0"><code>let deadline = 0;
@@ -1636,8 +1565,6 @@ if (
 
  requestPaint = function () { };
 }
-
-
 </code></pre><p>首先需要明确的是 shouldYieldToHost 与 requestPaint 是 Scheduler 对外提供的接口函数。具体的使用后续会分析到位。</p>
 <p>从代码可知，deadline 的用途是用于在 shouldYieldToHost 中 检测调度是否超时。默认清空下是直接对比当前时间 currentTime 与 deadline 的值。但是，在支持 navigator.scheduling 的环境下，React 会有更多的考虑，也就是浏览器绘制与用户输入要有限响应，否则可以适当的延长调度时间。</p>
 <p>到这里先总结下调度启动的过程，免得脑子糊了。</p>
@@ -1665,10 +1592,10 @@ if (
     markSchedulerUnsuspended(initialTime);
   }
 
-  // We'll need a host callback the next time work is scheduled.
+  // We&#39;ll need a host callback the next time work is scheduled.
   isHostCallbackScheduled = false;
   if (isHostTimeoutScheduled) {
-    // We scheduled a timeout but it's no longer needed. Cancel it.
+    // We scheduled a timeout but it&#39;s no longer needed. Cancel it.
     isHostTimeoutScheduled = false;
     cancelHostTimeout();
   }
@@ -1702,8 +1629,6 @@ if (
     }
   }
 }
-
-
 </code></pre><p>flushWork 的工作比较简单。只是重置了一些标志符，最终返回了 workLoop 的执行结果。那么重点肯定在这个函数了。</p>
 <pre tabindex="0"><code>function workLoop(hasTimeRemaining, initialTime) {
   let currentTime = initialTime;
@@ -1734,7 +1659,7 @@ if (
       // [Q]: 执行callback，比如前面render流程分析到的 performConcurrentWorkOnRoot
       const continuationCallback = callback(didUserCallbackTimeout);
       currentTime = getCurrentTime();
-      if (typeof continuationCallback === 'function') {
+      if (typeof continuationCallback === &#39;function&#39;) {
         // continuationCallback 成立，则取代当前任务的callback
         currentTask.callback = continuationCallback;
         markTaskYield(currentTask, currentTime);
@@ -1772,8 +1697,6 @@ if (
     return false;
   }
 }
-
-
 </code></pre><p>大致流程注释已经很详细了。老规矩，分析标注的几个问题。</p>
 <h3 id="advancetimers">advanceTimers</h3>
 <pre tabindex="0"><code>function advanceTimers(currentTime) {
@@ -1799,8 +1722,6 @@ if (
     timer = peek(timerQueue);
   }
 }
-
-
 </code></pre><p>wookLoop 函数入口第一次调用 advanceTimers 是将任务重新梳理一下，刷新任务队列。而之后每次在 while 调用是 因为任务的执行是需要消耗一定的时间的，所有在执行完后需要重新刷新任务队列。</p>
 <h3 id="continuationcallback">continuationCallback</h3>
 <p>首先 continuationCallback 的产生是有 callback 决定的。callback 的返回值可能是一个函数，这代表着当前任务应该被重新处理一次。这里先留个问题，后续在分析 callback 的具体实现的时候，我们再进一步分析</p>
@@ -1832,8 +1753,6 @@ function handleTimeout(currentTime) {
     }
   }
 }
-
-
 </code></pre><p>可以看出，其实就是在任务队列中的任务执行完成后。通过递归的方法从延迟队列中查询是否有过期任务，有的话则转移到任务队列中，并执行。</p>
 <p>到这里，Scheduler 从任务入列，到循环调度，到任务执行的完整过程就已经分析完成了。做个简单的流程总结:</p>
 <ul>
@@ -1924,8 +1843,6 @@ function performConcurrentWorkOnRoot(root, didTimeout) {
   }
   return null;
 }
-
-
 </code></pre><p>首先会判断任务是否超时，如果超时则以同步的方式执行该任务，防止任务被中断。如果没有超时，则先在 prepareFreshStack 中做一些初始化的工作。然后进入了 workLoopConcurrent 循环。</p>
 <h3 id="preparefreshstack">prepareFreshStack</h3>
 <pre tabindex="0"><code>// 本次渲染的到期时间
@@ -1948,8 +1865,6 @@ function prepareFreshStack(root, expirationTime) {
     renderExpirationTime = expirationTime;
     // 省略...
 }
-
-
 </code></pre><p>如果当前 wip 不为空，说明上次有中断的任务，通过不停向上回溯直到 root 节点来取消中断的任务。然后从 同时将前面从 FiberRoot 中获取下一个任务的到期时间，赋值给 renderExpirationTime 作为本次渲染的到期时间。</p>
 <h3 id="workloopconcurrent">workLoopConcurrent</h3>
 <pre tabindex="0"><code>workLoopConcurrent的代码在本文开头就贴出来过，这里重新看下
@@ -1960,8 +1875,6 @@ function workLoopConcurrent() {
     workInProgress = performUnitOfWork(workInProgress);
   }
 }
-
-
 </code></pre><p>workLoopConcurrent 的工作主要是循环对比 current 和 workInProgress 两颗 Fiber 树。在 wip 中为变化的 Fiber 打上 effectTag。同时会从下往上更新 / 创建 DOM 节点，构成一颗离屏 DOM 树，最后交由 Renderer 处理。</p>
 <h3 id="基于循环的-递归">基于循环的 &ldquo;递归&rdquo;</h3>
 <p>在熟悉流程之前，先贴出一个删减版的代码流程。这里不按套路出牌，先根据个人理解做个总结。这样带着大致的思路结构可能会更好的去理解后续的源码。</p>
@@ -2023,8 +1936,6 @@ function completeUnitOfWork(unitOfWork: Fiber): Fiber | null {
     }
     return null;
 }
-
-
 </code></pre><p>首先执行 beginWork 进行节点操作，以及创建子节点，子节点会返回成为 next，如果有 next 就返回。返回到 workLoopConcurrent 之后，workLoopConcurrent 会判断是否过期之类的，如果没过期则再次调用该方法。</p>
 <p>如果 next 不存在，说明当前节点向下遍历子节点已经到底了，说明这个子树侧枝已经遍历完，可以完成这部分工作了。执行 completeUnitOfWork，主要分一下几个步骤</p>
 <ul>
@@ -2058,8 +1969,6 @@ function completeUnitOfWork(unitOfWork: Fiber): Fiber | null {
 6. p Fiber beginWork
 7. p Fiber completeWork
 8. App Fiber completeWork
-
-
 </code></pre><h3 id="beginwork">beginWork</h3>
 <p>beginWork 在前面分析 setState 的时候已经分析过其中 mount 阶段对应的逻辑了。那么这里就只分析 update 的逻辑了。先来看下 beginWork 的大致工作。</p>
 <pre tabindex="0"><code>/**
@@ -2115,8 +2024,6 @@ function beginWork(
         // 省略...    
     }
 }
-
-
 </code></pre><p>我们接着之前分析过的 updateClassComponent 来分析 update 的流程。</p>
 <pre tabindex="0"><code>function updateClassComponent(
 
@@ -2239,8 +2146,6 @@ export function reconcileChildren(
         );
     }
 }
-
-
 </code></pre><p>最后还回的就是 workInProgress.child，跟 beginWork 一样，根据 current === null 来区分 mount 和 update。</p>
 <p>实际上 mountChildFibers 和 reconcileChildFibers 均指向同一个函数 reconcileChildFibers。差别在于第二个参数 currentFirstChild。如果为 null，则会去创建一个新的 Fiber 对象，否则复用并更新 props。比如 reconcileSingleElement 用于处理只有单个节点的情况。</p>
 <h3 id="completework">completeWork</h3>
@@ -2322,8 +2227,6 @@ export function reconcileChildren(
     }
 
 }
-
-
 </code></pre><p>首先和 beginWork 一样，根据 current === null 判断是 mount 还是 update。update 时，主要做了如下几件事情，具体源码 diffProperties：</p>
 <ul>
 <li>
@@ -2382,8 +2285,6 @@ if (
         returnFiber.lastEffect = workInProgress;
     }
 }
-
-
 </code></pre><p>至此，Reconciler 流程结束。回头再看看开头的总结，是不是清楚一些了呢~</p>
 <h2 id="renderercommit-1">Renderer(Commit)</h2>
 <p>Commit 阶段的代码相对另外两个来说是较为简单的。其入口在前面分析过的任务调度入口函数 performConcurrentWorkOnRoot 中的结尾 finishConcurrentRender。最终调用的函数为 commitRootImpl。看看代码:</p>
@@ -2455,8 +2356,6 @@ function commitRootImpl(root, renderPriorityLevel) {
     // 省略...
     return null;
 }
-
-
 </code></pre><p>省略了许多的代码，留下主要的内容。主要逻辑就是拿到 Reconciler 维护的 effectList 链表后，三次遍历该链表，分别做的是：</p>
 <ul>
 <li>
@@ -2539,8 +2438,6 @@ function commitMutationEffects(root: FiberRoot, renderPriorityLevel) {
       nextEffect = nextEffect.nextEffect;
   }
 }
-
-
 </code></pre><p>好像也没啥好说的。值得注意的是，开始前会先调用 commitDetachRef 将 ref 的引用清除。然后针对不同的 effectTag 执行不同的 DOM 操作。</p>
 <ul>
 <li>
@@ -2620,8 +2517,6 @@ function commitLifeCycles(
         // ...
     }
 }
-
-
 </code></pre><p>还是遍历每个 Fiber 节点。如果是 ClassComponent，需要调用生命周期方法。同时对于更新的 ClassComponent，需要判断调用的 setState 是否有回调函数，如果有的话需要在这里一起调用。最后会调用 commitAttachRef 更新 ref 引用。</p>
 <p>Commit 阶段的流程到这里也就结束了。</p>
 
@@ -2646,11 +2541,11 @@ function commitLifeCycles(
     <h2>See Also</h2>
     <ul class="listing">
         
+        <li><a href="/post/css/%E5%89%8D%E7%AB%AF%E7%9F%A5%E8%AF%86%E7%82%B9%E5%A4%A7%E5%85%A8/">前端知识点大全</a></li>
+        
         <li><a href="/post/web3.0/%E5%85%A8%E6%A0%88-Web3-%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/">web3.0 全栈 Web3 开发完整指南</a></li>
         
         <li><a href="/post/web3.0/%E5%85%A8%E6%A0%88%E4%BB%A5%E5%A4%AA%E5%9D%8A%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/">web3.0 全栈以太坊开发完整指南</a></li>
-        
-        <li><a href="/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%826%E4%BB%80%E4%B9%88%E6%98%AF%E5%8C%BA%E5%9D%97%E9%93%BE/">以太坊从零到略懂5：什么是区块链</a></li>
         
         <li><a href="/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%825Truffle-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8%E4%BD%93%E9%AA%8C%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6/">以太坊从零到略懂5：Truffle 快速入门体验智能合约</a></li>
         
@@ -2743,15 +2638,15 @@ function commitLifeCycles(
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/css/%E5%89%8D%E7%AB%AF%E7%9F%A5%E8%AF%86%E7%82%B9%E5%A4%A7%E5%85%A8/" title="前端知识点大全">前端知识点大全</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/web3.0/%E5%85%A8%E6%A0%88-Web3-%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="web3.0 全栈 Web3 开发完整指南">web3.0 全栈 Web3 开发完整指南</a>
     </li>
     
     <li>
         <a href="https://geek.zshipu.com/post/web3.0/%E5%85%A8%E6%A0%88%E4%BB%A5%E5%A4%AA%E5%9D%8A%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="web3.0 全栈以太坊开发完整指南">web3.0 全栈以太坊开发完整指南</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%826%E4%BB%80%E4%B9%88%E6%98%AF%E5%8C%BA%E5%9D%97%E9%93%BE/" title="以太坊从零到略懂5：什么是区块链">以太坊从零到略懂5：什么是区块链</a>
     </li>
     
     <li>
@@ -2877,6 +2772,8 @@ function commitLifeCycles(
     
     <a href="https://geek.zshipu.com/tags/github/">github</a>
     
+    <a href="https://geek.zshipu.com/tags/gitlab/">gitlab</a>
+    
     <a href="https://geek.zshipu.com/tags/go/">go</a>
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
@@ -2885,7 +2782,11 @@ function commitLifeCycles(
     
     <a href="https://geek.zshipu.com/tags/java/">java</a>
     
+    <a href="https://geek.zshipu.com/tags/jdbc/">jdbc</a>
+    
     <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mybatis/">mybatis</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
     
@@ -2904,6 +2805,8 @@ function commitLifeCycles(
     <a href="https://geek.zshipu.com/tags/react/">react</a>
     
     <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sharding/">sharding</a>
     
     <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
     

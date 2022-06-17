@@ -305,9 +305,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>由于<a href="https://hardhat.org/metamask-issue.html">MetaMask 配置问题</a>，我们需要将 HardHat 配置上的链 ID 更新为<strong>1337</strong>。我们还需要更新已编译合约的<a href="https://hardhat.org/guides/compile-contracts.html#artifacts">工件</a>位置，使其位于React 应用程序的<strong>src目录中。</strong></p>
 <p>要进行这些更新，请打开<strong>hardhat.config.js</strong>并将其更新<code>module.exports</code>为如下所示：</p>
 <pre tabindex="0"><code>module.exports = {
-  solidity: &quot;0.8.4&quot;,
+  solidity: &#34;0.8.4&#34;,
   paths: {
-    artifacts: './src/artifacts',
+    artifacts: &#39;./src/artifacts&#39;,
   },
   networks: {
     hardhat: {
@@ -320,14 +320,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <pre tabindex="0"><code>//SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import &quot;hardhat/console.sol&quot;;
+import &#34;hardhat/console.sol&#34;;
 
 
 contract Greeter {
   string greeting;
 
   constructor(string memory _greeting) {
-    console.log(&quot;Deploying a Greeter with greeting:&quot;, _greeting);
+    console.log(&#34;Deploying a Greeter with greeting:&#34;, _greeting);
     greeting = _greeting;
   }
 
@@ -336,7 +336,7 @@ contract Greeter {
   }
 
   function setGreeting(string memory _greeting) public {
-    console.log(&quot;Changing greeting from '%s' to '%s'&quot;, greeting, _greeting);
+    console.log(&#34;Changing greeting from &#39;%s&#39; to &#39;%s&#39;&#34;, greeting, _greeting);
     greeting = _greeting;
   }
 }
@@ -354,9 +354,9 @@ contract Greeter {
 <p>为此，请转到命令行并运行以下命令：</p>
 <pre tabindex="0"><code>npx hardhat compile
 </code></pre><p>现在，您应该在<strong>src</strong>目录中看到一个名为<strong>artifacts的新文件夹。****artifacts/contracts/Greeter.json</strong>文件包含 ABI 作为属性之一。当我们需要使用 ABI 时，我们可以从我们的 JavaScript 文件中导入它：</p>
-<pre tabindex="0"><code>import Greeter from './artifacts/contracts/Greeter.sol/Greeter.json'
+<pre tabindex="0"><code>import Greeter from &#39;./artifacts/contracts/Greeter.sol/Greeter.json&#39;
 </code></pre><p>然后我们可以像这样引用 ABI：</p>
-<pre tabindex="0"><code>console.log(&quot;Greeter ABI: &quot;, Greeter.abi)
+<pre tabindex="0"><code>console.log(&#34;Greeter ABI: &#34;, Greeter.abi)
 </code></pre><blockquote>
 <p>请注意，Ethers.js 还启用了<a href="https://blog.ricmoo.com/human-readable-contract-abis-in-ethers-js-141902f4d917">人类可读的 ABI</a>，但在本教程中不会涉及到这一点。</p>
 </blockquote>
@@ -421,33 +421,33 @@ Private Key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 <li>创建用于读取和写入智能合约的函数</li>
 </ol>
 <p>为此，请<code>src/App.js</code>使用以下代码打开并更新它，将 的值设置<code>greeterAddress</code>为您的智能合约的地址：</p>
-<pre tabindex="0"><code>import './App.css';
-import { useState } from 'react';
-import { ethers } from 'ethers'
-import Greeter from './artifacts/contracts/Greeter.sol/Greeter.json'
+<pre tabindex="0"><code>import &#39;./App.css&#39;;
+import { useState } from &#39;react&#39;;
+import { ethers } from &#39;ethers&#39;
+import Greeter from &#39;./artifacts/contracts/Greeter.sol/Greeter.json&#39;
 
 // Update with the contract address logged out to the CLI when it was deployed 
-const greeterAddress = &quot;your-contract-address&quot;
+const greeterAddress = &#34;your-contract-address&#34;
 
 function App() {
   // store greeting in local state
   const [greeting, setGreetingValue] = useState()
 
-  // request access to the user's MetaMask account
+  // request access to the user&#39;s MetaMask account
   async function requestAccount() {
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
+    await window.ethereum.request({ method: &#39;eth_requestAccounts&#39; });
   }
 
   // call the smart contract, read the current greeting value
   async function fetchGreeting() {
-    if (typeof window.ethereum !== 'undefined') {
+    if (typeof window.ethereum !== &#39;undefined&#39;) {
       const provider = new ethers.providers.Web3Provider(window.ethereum)
       const contract = new ethers.Contract(greeterAddress, Greeter.abi, provider)
       try {
         const data = await contract.greet()
-        console.log('data: ', data)
+        console.log(&#39;data: &#39;, data)
       } catch (err) {
-        console.log(&quot;Error: &quot;, err)
+        console.log(&#34;Error: &#34;, err)
       }
     }    
   }
@@ -455,7 +455,7 @@ function App() {
   // call the smart contract, send an update
   async function setGreeting() {
     if (!greeting) return
-    if (typeof window.ethereum !== 'undefined') {
+    if (typeof window.ethereum !== &#39;undefined&#39;) {
       await requestAccount()
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner()
@@ -467,11 +467,11 @@ function App() {
   }
 
   return (
-    &lt;div className=&quot;App&quot;&gt;
-      &lt;header className=&quot;App-header&quot;&gt;
+    &lt;div className=&#34;App&#34;&gt;
+      &lt;header className=&#34;App-header&#34;&gt;
         &lt;button onClick={fetchGreeting}&gt;Fetch Greeting&lt;/button&gt;
         &lt;button onClick={setGreeting}&gt;Set Greeting&lt;/button&gt;
-        &lt;input onChange={e =&gt; setGreetingValue(e.target.value)} placeholder=&quot;Set greeting&quot; /&gt;
+        &lt;input onChange={e =&gt; setGreetingValue(e.target.value)} placeholder=&#34;Set greeting&#34; /&gt;
       &lt;/header&gt;
     &lt;/div&gt;
   );
@@ -505,18 +505,18 @@ export default App;
 </blockquote>
 <p>接下来，添加<code>networks</code>具有以下配置的属性：</p>
 <pre tabindex="0"><code>module.exports = {
-  defaultNetwork: &quot;hardhat&quot;,
+  defaultNetwork: &#34;hardhat&#34;,
   paths: {
-    artifacts: './src/artifacts',
+    artifacts: &#39;./src/artifacts&#39;,
   },
   networks: {
     hardhat: {},
     ropsten: {
-      url: &quot;https://ropsten.infura.io/v3/your-project-id&quot;,
+      url: &#34;https://ropsten.infura.io/v3/your-project-id&#34;,
       accounts: [`0x${your-private-key}`]
     }
   },
-  solidity: &quot;0.8.4&quot;,
+  solidity: &#34;0.8.4&#34;,
 };
 </code></pre><p>要部署，请运行以下脚本：</p>
 <pre tabindex="0"><code>npx hardhat run scripts/deploy.js --network ropsten
@@ -528,11 +528,11 @@ export default App;
 <pre tabindex="0"><code>//SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import &quot;hardhat/console.sol&quot;;
+import &#34;hardhat/console.sol&#34;;
 
 contract Token {
-  string public name = &quot;Nader Dabit Token&quot;;
-  string public symbol = &quot;NDT&quot;;
+  string public name = &#34;Nader Dabit Token&#34;;
+  string public symbol = &#34;NDT&#34;;
   uint public totalSupply = 1000000;
   mapping(address =&gt; uint) balances;
 
@@ -541,7 +541,7 @@ contract Token {
   }
 
   function transfer(address to, uint amount) external {
-    require(balances[msg.sender] &gt;= amount, &quot;Not enough tokens&quot;);
+    require(balances[msg.sender] &gt;= amount, &#34;Not enough tokens&#34;);
     balances[msg.sender] -= amount;
     balances[to] += amount;
   }
@@ -557,27 +557,27 @@ contract Token {
 <p>接下来，编译这个合约：</p>
 <pre tabindex="0"><code>npx hardhat compile
 </code></pre><p><strong>现在，更新scripts/deploy.js</strong>中的部署脚本以包含这个新的 Token 合约：</p>
-<pre tabindex="0"><code>const hre = require(&quot;hardhat&quot;);
+<pre tabindex="0"><code>const hre = require(&#34;hardhat&#34;);
 
 async function main() {
   const [deployer] = await hre.ethers.getSigners();
 
   console.log(
-    &quot;Deploying contracts with the account:&quot;,
+    &#34;Deploying contracts with the account:&#34;,
     deployer.address
   );
 
-  const Greeter = await hre.ethers.getContractFactory(&quot;Greeter&quot;);
-  const greeter = await Greeter.deploy(&quot;Hello, World!&quot;);
+  const Greeter = await hre.ethers.getContractFactory(&#34;Greeter&#34;);
+  const greeter = await Greeter.deploy(&#34;Hello, World!&#34;);
 
-  const Token = await hre.ethers.getContractFactory(&quot;Token&quot;);
+  const Token = await hre.ethers.getContractFactory(&#34;Token&#34;);
   const token = await Token.deploy();
 
   await greeter.deployed();
   await token.deployed();
 
-  console.log(&quot;Greeter deployed to:&quot;, greeter.address);
-  console.log(&quot;Token deployed to:&quot;, token.address);
+  console.log(&#34;Greeter deployed to:&#34;, greeter.address);
+  console.log(&#34;Token deployed to:&#34;, token.address);
 }
 
 main()
@@ -590,14 +590,14 @@ main()
 <pre tabindex="0"><code>npx hardhat run scripts/deploy.js --network localhost
 </code></pre><p>部署合约后，您可以开始将这些代币发送到其他地址。</p>
 <p>为此，让我们更新我们需要的客户端代码以使其工作：</p>
-<pre tabindex="0"><code>import './App.css';
-import { useState } from 'react';
-import { ethers } from 'ethers'
-import Greeter from './artifacts/contracts/Greeter.sol/Greeter.json'
-import Token from './artifacts/contracts/Token.sol/Token.json'
+<pre tabindex="0"><code>import &#39;./App.css&#39;;
+import { useState } from &#39;react&#39;;
+import { ethers } from &#39;ethers&#39;
+import Greeter from &#39;./artifacts/contracts/Greeter.sol/Greeter.json&#39;
+import Token from &#39;./artifacts/contracts/Token.sol/Token.json&#39;
 
-const greeterAddress = &quot;your-contract-address&quot;
-const tokenAddress = &quot;your-contract-address&quot;
+const greeterAddress = &#34;your-contract-address&#34;
+const tokenAddress = &#34;your-contract-address&#34;
 
 function App() {
   const [greeting, setGreetingValue] = useState()
@@ -605,36 +605,36 @@ function App() {
   const [amount, setAmount] = useState()
 
   async function requestAccount() {
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
+    await window.ethereum.request({ method: &#39;eth_requestAccounts&#39; });
   }
 
   async function fetchGreeting() {
-    if (typeof window.ethereum !== 'undefined') {
+    if (typeof window.ethereum !== &#39;undefined&#39;) {
       const provider = new ethers.providers.Web3Provider(window.ethereum)
       console.log({ provider })
       const contract = new ethers.Contract(greeterAddress, Greeter.abi, provider)
       try {
         const data = await contract.greet()
-        console.log('data: ', data)
+        console.log(&#39;data: &#39;, data)
       } catch (err) {
-        console.log(&quot;Error: &quot;, err)
+        console.log(&#34;Error: &#34;, err)
       }
     }    
   }
 
   async function getBalance() {
-    if (typeof window.ethereum !== 'undefined') {
-      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+    if (typeof window.ethereum !== &#39;undefined&#39;) {
+      const [account] = await window.ethereum.request({ method: &#39;eth_requestAccounts&#39; })
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const contract = new ethers.Contract(tokenAddress, Token.abi, provider)
       const balance = await contract.balanceOf(account);
-      console.log(&quot;Balance: &quot;, balance.toString());
+      console.log(&#34;Balance: &#34;, balance.toString());
     }
   }
 
   async function setGreeting() {
     if (!greeting) return
-    if (typeof window.ethereum !== 'undefined') {
+    if (typeof window.ethereum !== &#39;undefined&#39;) {
       await requestAccount()
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       console.log({ provider })
@@ -647,7 +647,7 @@ function App() {
   }
 
   async function sendCoins() {
-    if (typeof window.ethereum !== 'undefined') {
+    if (typeof window.ethereum !== &#39;undefined&#39;) {
       await requestAccount()
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
@@ -659,17 +659,17 @@ function App() {
   }
 
   return (
-    &lt;div className=&quot;App&quot;&gt;
-      &lt;header className=&quot;App-header&quot;&gt;
+    &lt;div className=&#34;App&#34;&gt;
+      &lt;header className=&#34;App-header&#34;&gt;
         &lt;button onClick={fetchGreeting}&gt;Fetch Greeting&lt;/button&gt;
         &lt;button onClick={setGreeting}&gt;Set Greeting&lt;/button&gt;
-        &lt;input onChange={e =&gt; setGreetingValue(e.target.value)} placeholder=&quot;Set greeting&quot; /&gt;
+        &lt;input onChange={e =&gt; setGreetingValue(e.target.value)} placeholder=&#34;Set greeting&#34; /&gt;
 
         &lt;br /&gt;
         &lt;button onClick={getBalance}&gt;Get Balance&lt;/button&gt;
         &lt;button onClick={sendCoins}&gt;Send Coins&lt;/button&gt;
-        &lt;input onChange={e =&gt; setUserAccount(e.target.value)} placeholder=&quot;Account ID&quot; /&gt;
-        &lt;input onChange={e =&gt; setAmount(e.target.value)} placeholder=&quot;Amount&quot; /&gt;
+        &lt;input onChange={e =&gt; setUserAccount(e.target.value)} placeholder=&#34;Account ID&#34; /&gt;
+        &lt;input onChange={e =&gt; setAmount(e.target.value)} placeholder=&#34;Amount&#34; /&gt;
       &lt;/header&gt;
     &lt;/div&gt;
   );
@@ -698,7 +698,7 @@ export default App;
 <pre tabindex="0"><code>//SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import &quot;@openzeppelin/contracts/token/ERC20/ERC20.sol&quot;;
+import &#34;@openzeppelin/contracts/token/ERC20/ERC20.sol&#34;;
 
 contract NDToken is ERC20 {
     constructor(string memory name, string memory symbol) ERC20(name, symbol) {
@@ -708,8 +708,8 @@ contract NDToken is ERC20 {
 </code></pre><p>构造函数允许您设置代币名称和符号，该<code>_mint</code>函数允许您铸造代币并设置数量。</p>
 <p>默认情况下，ERC20 将小数位数设置为 18，因此在我们的<code>_mint</code>函数中，我们将 100,000 乘以 10 的 18 次方来铸造总共 100,000 个代币，每个代币有 18 位小数（类似于 1 Eth 由 10 到十八<a href="https://www.investopedia.com/terms/w/wei.asp">卫</a>。</p>
 <p>要进行部署，我们需要传入构造函数值（<code>name</code>和<code>symbol</code>），因此我们可以在部署脚本中执行以下操作：</p>
-<pre tabindex="0"><code>const NDToken = await hre.ethers.getContractFactory(&quot;NDToken&quot;);
-const ndToken = await NDToken.deploy(&quot;Nader Dabit Token&quot;, &quot;NDT&quot;);
+<pre tabindex="0"><code>const NDToken = await hre.ethers.getContractFactory(&#34;NDToken&#34;);
+const ndToken = await NDToken.deploy(&#34;Nader Dabit Token&#34;, &#34;NDT&#34;);
 </code></pre><p>通过扩展原始 ERC20 代币，您的代币将继承以下所有功能和功能：</p>
 <pre tabindex="0"><code>function name() public view returns (string)
 function symbol() public view returns (string)
@@ -747,8 +747,6 @@ function allowance(address _owner, address _spender) public view returns (uint25
     <h2>See Also</h2>
     <ul class="listing">
         
-        <li><a href="/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%826%E4%BB%80%E4%B9%88%E6%98%AF%E5%8C%BA%E5%9D%97%E9%93%BE/">以太坊从零到略懂5：什么是区块链</a></li>
-        
         <li><a href="/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%825Truffle-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8%E4%BD%93%E9%AA%8C%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6/">以太坊从零到略懂5：Truffle 快速入门体验智能合约</a></li>
         
         <li><a href="/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%8242021-%E5%B9%B4-Web3.0-%E5%92%8C-Solidity-%E5%BC%80%E5%8F%91%E8%B7%AF%E7%BA%BF%E5%9B%BE/">以太坊从零到略懂4： Web3.0 和 Solidity 开发路线图</a></li>
@@ -756,6 +754,8 @@ function allowance(address _owner, address _spender) public view returns (uint25
         <li><a href="/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%823%E5%BC%80%E5%8F%91%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%90%88%E7%BA%A6/">web3.0 以太坊从零到略懂3：开发第一个合约</a></li>
         
         <li><a href="/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%822%E8%AE%BE%E7%BD%AE%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/">web3.0 以太坊从零到略懂2：设置开发环境</a></li>
+        
+        <li><a href="/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%821%E7%AE%80%E4%BB%8B/">web3.0 以太坊从零到略懂1：简介</a></li>
         
     </ul>
 </div>
@@ -848,15 +848,15 @@ function allowance(address _owner, address _spender) public view returns (uint25
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/css/%E5%89%8D%E7%AB%AF%E7%9F%A5%E8%AF%86%E7%82%B9%E5%A4%A7%E5%85%A8/" title="前端知识点大全">前端知识点大全</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/web3.0/%E5%85%A8%E6%A0%88-Web3-%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="web3.0 全栈 Web3 开发完整指南">web3.0 全栈 Web3 开发完整指南</a>
     </li>
     
     <li>
         <a href="https://geek.zshipu.com/post/web3.0/%E5%85%A8%E6%A0%88%E4%BB%A5%E5%A4%AA%E5%9D%8A%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="web3.0 全栈以太坊开发完整指南">web3.0 全栈以太坊开发完整指南</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/web3.0/%E4%BB%A5%E5%A4%AA%E5%9D%8A%E4%BB%8E%E9%9B%B6%E5%88%B0%E7%95%A5%E6%87%826%E4%BB%80%E4%B9%88%E6%98%AF%E5%8C%BA%E5%9D%97%E9%93%BE/" title="以太坊从零到略懂5：什么是区块链">以太坊从零到略懂5：什么是区块链</a>
     </li>
     
     <li>
@@ -982,6 +982,8 @@ function allowance(address _owner, address _spender) public view returns (uint25
     
     <a href="https://geek.zshipu.com/tags/github/">github</a>
     
+    <a href="https://geek.zshipu.com/tags/gitlab/">gitlab</a>
+    
     <a href="https://geek.zshipu.com/tags/go/">go</a>
     
     <a href="https://geek.zshipu.com/tags/golang/">golang</a>
@@ -990,7 +992,11 @@ function allowance(address _owner, address _spender) public view returns (uint25
     
     <a href="https://geek.zshipu.com/tags/java/">java</a>
     
+    <a href="https://geek.zshipu.com/tags/jdbc/">jdbc</a>
+    
     <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mybatis/">mybatis</a>
     
     <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
     
@@ -1009,6 +1015,8 @@ function allowance(address _owner, address _spender) public view returns (uint25
     <a href="https://geek.zshipu.com/tags/react/">react</a>
     
     <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sharding/">sharding</a>
     
     <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
     
