@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title> | 知识铺的博客</title>
+    <meta property="og:title" content=" - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="">
+        
+    <meta name="author" content="知识铺">
+    <meta property="og:url" content="https://geek.zshipu.com/post/pytorch/003-Pytorch-torch.autograd-%E8%87%AA%E5%8A%A8%E5%B7%AE%E5%88%86%E5%BC%95%E6%93%8E/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#背景httpspytorchapachecnorgdocs1704id背景"><a href="https://pytorch.apachecn.org/#/docs/1.7/04?id=%E8%83%8C%E6%99%AF">背景</a></a></li>
+    <li><a href="#在-pytorch-中的用法httpspytorchapachecnorgdocs1704id在-pytorch-中的用法"><a href="https://pytorch.apachecn.org/#/docs/1.7/04?id=%E5%9C%A8-pytorch-%E4%B8%AD%E7%9A%84%E7%94%A8%E6%B3%95">在 PyTorch 中的用法</a></a></li>
+    <li><a href="#autograd-的微分httpspytorchapachecnorgdocs1704idautograd-的微分"><a href="https://pytorch.apachecn.org/#/docs/1.7/04?id=autograd-%E7%9A%84%E5%BE%AE%E5%88%86">Autograd 的微分</a></a>
+      <ul>
+        <li><a href="#可选阅读-使用autograd的向量微积分httpspytorchapachecnorgdocs1704id可选阅读-使用autograd的向量微积分"><a href="https://pytorch.apachecn.org/#/docs/1.7/04?id=%E5%8F%AF%E9%80%89%E9%98%85%E8%AF%BB-%E4%BD%BF%E7%94%A8autograd%E7%9A%84%E5%90%91%E9%87%8F%E5%BE%AE%E7%A7%AF%E5%88%86">可选阅读-使用<code>autograd</code>的向量微积分</a></a></li>
+      </ul>
+    </li>
+    <li><a href="#计算图httpspytorchapachecnorgdocs1704id计算图"><a href="https://pytorch.apachecn.org/#/docs/1.7/04?id=%E8%AE%A1%E7%AE%97%E5%9B%BE">计算图</a></a>
+      <ul>
+        <li><a href="#从-dag-中排除httpspytorchapachecnorgdocs1704id从-dag-中排除"><a href="https://pytorch.apachecn.org/#/docs/1.7/04?id=%E4%BB%8E-dag-%E4%B8%AD%E6%8E%92%E9%99%A4">从 DAG 中排除</a></a></li>
+      </ul>
+    </li>
+    <li><a href="#进一步阅读httpspytorchapachecnorgdocs1704id进一步阅读"><a href="https://pytorch.apachecn.org/#/docs/1.7/04?id=%E8%BF%9B%E4%B8%80%E6%AD%A5%E9%98%85%E8%AF%BB%EF%BC%9A">进一步阅读：</a></a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title"></h1>
+        </header>
+        <date class="post-meta meta-date">
+            1年1月1日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p><code>torch.autograd</code>是 PyTorch 的自动差分引擎，可为神经网络训练提供支持。 在本节中，您将获得有关 Autograd 如何帮助神经网络训练的概念性理解。</p>
+<h2 id="背景httpspytorchapachecnorgdocs1704id背景"><a href="https://pytorch.apachecn.org/#/docs/1.7/04?id=%E8%83%8C%E6%99%AF">背景</a></h2>
+<p>神经网络（NN）是在某些输入数据上执行的嵌套函数的集合。 这些函数由<em>参数</em>（由权重和偏差组成）定义，这些参数在 PyTorch 中存储在张量中。</p>
+<p>训练 NN 分为两个步骤：</p>
+<p><strong>正向传播</strong>：在正向传播中，NN 对正确的输出进行最佳猜测。 它通过其每个函数运行输入数据以进行猜测。</p>
+<p><strong>反向传播</strong>：在反向传播中，NN 根据其猜测中的误差调整其参数。 它通过从输出向后遍历，收集有关函数参数（<em>梯度</em>）的误差导数并使用梯度下降来优化参数来实现。 有关反向传播的更详细的演练，请查看 3Blue1Brown 的<a href="https://www.youtube.com/watch?v=tIeHLnjs5U8">视频</a>。</p>
+<h2 id="在-pytorch-中的用法httpspytorchapachecnorgdocs1704id在-pytorch-中的用法"><a href="https://pytorch.apachecn.org/#/docs/1.7/04?id=%E5%9C%A8-pytorch-%E4%B8%AD%E7%9A%84%E7%94%A8%E6%B3%95">在 PyTorch 中的用法</a></h2>
+<p>让我们来看一个训练步骤。 对于此示例，我们从<code>torchvision</code>加载了经过预训练的 resnet18 模型。 我们创建一个随机数据张量来表示具有 3 个通道的单个图像，高度&amp;宽度为 64，其对应的<code>label</code>初始化为一些随机值。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">torch</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#555">torchvision</span>
+</span></span><span style="display:flex;"><span>model <span style="color:#000;font-weight:bold">=</span> torchvision<span style="color:#000;font-weight:bold">.</span>models<span style="color:#000;font-weight:bold">.</span>resnet18(pretrained<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>)
+</span></span><span style="display:flex;"><span>data <span style="color:#000;font-weight:bold">=</span> torch<span style="color:#000;font-weight:bold">.</span>rand(<span style="color:#099">1</span>, <span style="color:#099">3</span>, <span style="color:#099">64</span>, <span style="color:#099">64</span>)
+</span></span><span style="display:flex;"><span>labels <span style="color:#000;font-weight:bold">=</span> torch<span style="color:#000;font-weight:bold">.</span>rand(<span style="color:#099">1</span>, <span style="color:#099">1000</span>)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>接下来，我们通过模型的每一层运行输入数据以进行预测。 这是<strong>正向传播</strong>。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span>prediction <span style="color:#000;font-weight:bold">=</span> model(data) <span style="color:#998;font-style:italic"># forward pass</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>我们使用模型的预测和相应的标签来计算误差（<code>loss</code>）。 下一步是通过网络反向传播此误差。 当我们在误差张量上调用<code>.backward()</code>时，开始反向传播。 然后，Autograd 会为每个模型参数计算梯度并将其存储在参数的<code>.grad</code>属性中。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span>loss <span style="color:#000;font-weight:bold">=</span> (prediction <span style="color:#000;font-weight:bold">-</span> labels)<span style="color:#000;font-weight:bold">.</span>sum()
+</span></span><span style="display:flex;"><span>loss<span style="color:#000;font-weight:bold">.</span>backward() <span style="color:#998;font-style:italic"># backward pass</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>接下来，我们加载一个优化器，在本例中为 SGD，学习率为 0.01，动量为 0.9。 我们在优化器中注册模型的所有参数。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span>optim <span style="color:#000;font-weight:bold">=</span> torch<span style="color:#000;font-weight:bold">.</span>optim<span style="color:#000;font-weight:bold">.</span>SGD(model<span style="color:#000;font-weight:bold">.</span>parameters(), lr<span style="color:#000;font-weight:bold">=</span><span style="color:#099">1e-2</span>, momentum<span style="color:#000;font-weight:bold">=</span><span style="color:#099">0.9</span>)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>最后，我们调用<code>.step()</code>启动梯度下降。 优化器通过<code>.grad</code>中存储的梯度来调整每个参数。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span>optim<span style="color:#000;font-weight:bold">.</span>step() <span style="color:#998;font-style:italic">#gradient descent</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>至此，您已经具备了训练神经网络所需的一切。 以下各节详细介绍了 Autograd 的工作原理-随时跳过它们。</p>
+<hr>
+<h2 id="autograd-的微分httpspytorchapachecnorgdocs1704idautograd-的微分"><a href="https://pytorch.apachecn.org/#/docs/1.7/04?id=autograd-%E7%9A%84%E5%BE%AE%E5%88%86">Autograd 的微分</a></h2>
+<p>让我们来看看<code>autograd</code>如何收集梯度。 我们用<code>requires_grad=True</code>创建两个张量<code>a</code>和<code>b</code>。 这向<code>autograd</code>发出信号，应跟踪对它们的所有操作。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">torch</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>a <span style="color:#000;font-weight:bold">=</span> torch<span style="color:#000;font-weight:bold">.</span>tensor([<span style="color:#099">2.</span>, <span style="color:#099">3.</span>], requires_grad<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>)
+</span></span><span style="display:flex;"><span>b <span style="color:#000;font-weight:bold">=</span> torch<span style="color:#000;font-weight:bold">.</span>tensor([<span style="color:#099">6.</span>, <span style="color:#099">4.</span>], requires_grad<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>我们从<code>a</code>和<code>b</code>创建另一个张量<code>Q</code>。</p>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/zshipu/images/tex4-1.gif" />   
+    </p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span>Q <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">3</span><span style="color:#000;font-weight:bold">*</span>a<span style="color:#000;font-weight:bold">**</span><span style="color:#099">3</span> <span style="color:#000;font-weight:bold">-</span> b<span style="color:#000;font-weight:bold">**</span><span style="color:#099">2</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>假设<code>a</code>和<code>b</code>是神经网络的参数，<code>Q</code>是误差。 在 NN 训练中，我们想要相对于参数的误差，即</p>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/zshipu/images/tex4-2.gif" />   
+    </p>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/zshipu/images/tex4-3.gif" />   
+    </p>
+<p>当我们在<code>Q</code>上调用<code>.backward()</code>时，Autograd 将计算这些梯度并将其存储在各个张量的<code>.grad</code>属性中。</p>
+<p>我们需要在<code>Q.backward()</code>中显式传递<code>gradient</code>参数，因为它是向量。 <code>gradient</code>是与<code>Q</code>形状相同的张量，它表示<code>Q</code>相对于本身的梯度，即</p>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/zshipu/images/tex4-4.gif" />   
+    </p>
+<p>同样，我们也可以将<code>Q</code>聚合为一个标量，然后隐式地向后调用，例如<code>Q.sum().backward()</code>。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span>external_grad <span style="color:#000;font-weight:bold">=</span> torch<span style="color:#000;font-weight:bold">.</span>tensor([<span style="color:#099">1.</span>, <span style="color:#099">1.</span>])
+</span></span><span style="display:flex;"><span>Q<span style="color:#000;font-weight:bold">.</span>backward(gradient<span style="color:#000;font-weight:bold">=</span>external_grad)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>梯度现在沉积在<code>a.grad</code>和<code>b.grad</code>中</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># check if collected gradients are correct</span>
+</span></span><span style="display:flex;"><span><span style="color:#0086b3">print</span>(<span style="color:#099">9</span><span style="color:#000;font-weight:bold">*</span>a<span style="color:#000;font-weight:bold">**</span><span style="color:#099">2</span> <span style="color:#000;font-weight:bold">==</span> a<span style="color:#000;font-weight:bold">.</span>grad)
+</span></span><span style="display:flex;"><span><span style="color:#0086b3">print</span>(<span style="color:#000;font-weight:bold">-</span><span style="color:#099">2</span><span style="color:#000;font-weight:bold">*</span>b <span style="color:#000;font-weight:bold">==</span> b<span style="color:#000;font-weight:bold">.</span>grad)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>出：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span>tensor([<span style="color:#000;font-weight:bold">True</span>, <span style="color:#000;font-weight:bold">True</span>])
+</span></span><span style="display:flex;"><span>tensor([<span style="color:#000;font-weight:bold">True</span>, <span style="color:#000;font-weight:bold">True</span>])
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="可选阅读-使用autograd的向量微积分httpspytorchapachecnorgdocs1704id可选阅读-使用autograd的向量微积分"><a href="https://pytorch.apachecn.org/#/docs/1.7/04?id=%E5%8F%AF%E9%80%89%E9%98%85%E8%AF%BB-%E4%BD%BF%E7%94%A8autograd%E7%9A%84%E5%90%91%E9%87%8F%E5%BE%AE%E7%A7%AF%E5%88%86">可选阅读-使用<code>autograd</code>的向量微积分</a></h3>
+<p>从数学上讲，如果您具有向量值函数<code>y = f(x)</code>，则<code>y</code>相对于<code>x</code>的雅可比矩阵<code>J</code>：</p>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/zshipu/images/tex4-5.gif" />   
+    </p>
+<p>一般来说，<code>torch.autograd</code>是用于计算向量雅可比积的引擎。 也就是说，给定任何向量<code>v</code>，计算乘积<code>J^T · v</code></p>
+<p>如果<code>v</code>恰好是标量函数的梯度</p>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/zshipu/images/tex4-6.gif" />   
+    </p>
+<p>然后根据链式规则，向量-雅可比积将是<code>l</code>相对于<code>x</code>的梯度：</p>
+<p>
+        <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/zshipu/images/tex4-7.gif" />   
+    </p>
+<p>上面的示例中使用的是 vector-Jacobian 乘积的这一特征。 <code>external_grad</code>表示<code>v</code>。</p>
+<h2 id="计算图httpspytorchapachecnorgdocs1704id计算图"><a href="https://pytorch.apachecn.org/#/docs/1.7/04?id=%E8%AE%A1%E7%AE%97%E5%9B%BE">计算图</a></h2>
+<p>从概念上讲，Autograd 在由<a href="https://pytorch.org/docs/stable/autograd.html#torch.autograd.Function">函数</a>对象组成的有向无环图（DAG）中记录数据（张量）和所有已执行的操作（以及由此产生的新张量）。 在此 DAG 中，叶子是输入张量，根是输出张量。 通过从根到叶跟踪此图，可以使用链式规则自动计算梯度。</p>
+<p>在正向传播中，Autograd 同时执行两项操作：</p>
+<ul>
+<li>运行请求的操作以计算结果张量，并且</li>
+<li>在 DAG 中维护操作的<em>梯度函数</em>。</li>
+</ul>
+<p>当在 DAG 根目录上调用<code>.backward()</code>时，反向传递开始。 <code>autograd</code>然后：</p>
+<ul>
+<li>从每个<code>.grad_fn</code>计算梯度，</li>
+<li>将它们累积在各自的张量的<code>.grad</code>属性中，然后</li>
+<li>使用链式规则，一直传播到叶子张量。</li>
+</ul>
+<p>下面是我们示例中 DAG 的直观表示。 在图中，箭头指向前进的方向。 节点代表正向传播中每个操作的反向函数。 蓝色的叶节点代表我们的叶张量<code>a</code>和<code>b</code>。</p>
+<p>
+        <img class="mx-auto" alt="../../_img/dag_autograd.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/1270bde38f2cfccd4900a5df8ac70a7d.png" />   
+    </p>
+<p>注意</p>
+<p><strong>DAG 在 PyTorch 中是动态的</strong>。要注意的重要一点是，图是从头开始重新创建的； 在每个<code>.backward()</code>调用之后，Autograd 开始填充新图。 这正是允许您在模型中使用控制流语句的原因。 您可以根据需要在每次迭代中更改形状，大小和操作。</p>
+<h3 id="从-dag-中排除httpspytorchapachecnorgdocs1704id从-dag-中排除"><a href="https://pytorch.apachecn.org/#/docs/1.7/04?id=%E4%BB%8E-dag-%E4%B8%AD%E6%8E%92%E9%99%A4">从 DAG 中排除</a></h3>
+<p><code>torch.autograd</code>跟踪所有将其<code>requires_grad</code>标志设置为<code>True</code>的张量的操作。 对于不需要梯度的张量，将此属性设置为<code>False</code>会将其从梯度计算 DAG 中排除。</p>
+<p>即使只有一个输入张量具有<code>requires_grad=True</code>，操作的输出张量也将需要梯度。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span>x <span style="color:#000;font-weight:bold">=</span> torch<span style="color:#000;font-weight:bold">.</span>rand(<span style="color:#099">5</span>, <span style="color:#099">5</span>)
+</span></span><span style="display:flex;"><span>y <span style="color:#000;font-weight:bold">=</span> torch<span style="color:#000;font-weight:bold">.</span>rand(<span style="color:#099">5</span>, <span style="color:#099">5</span>)
+</span></span><span style="display:flex;"><span>z <span style="color:#000;font-weight:bold">=</span> torch<span style="color:#000;font-weight:bold">.</span>rand((<span style="color:#099">5</span>, <span style="color:#099">5</span>), requires_grad<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>a <span style="color:#000;font-weight:bold">=</span> x <span style="color:#000;font-weight:bold">+</span> y
+</span></span><span style="display:flex;"><span><span style="color:#0086b3">print</span>(<span style="color:#d14">f</span><span style="color:#d14">&#34;Does `a` require gradients? : </span><span style="color:#d14">{</span>a<span style="color:#000;font-weight:bold">.</span>requires_grad<span style="color:#d14">}</span><span style="color:#d14">&#34;</span>)
+</span></span><span style="display:flex;"><span>b <span style="color:#000;font-weight:bold">=</span> x <span style="color:#000;font-weight:bold">+</span> z
+</span></span><span style="display:flex;"><span><span style="color:#0086b3">print</span>(<span style="color:#d14">f</span><span style="color:#d14">&#34;Does `b` require gradients?: </span><span style="color:#d14">{</span>b<span style="color:#000;font-weight:bold">.</span>requires_grad<span style="color:#d14">}</span><span style="color:#d14">&#34;</span>)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>出：</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span>Does <span style="color:#a61717;background-color:#e3d2d2">`</span>a<span style="color:#a61717;background-color:#e3d2d2">`</span> require gradients<span style="color:#a61717;background-color:#e3d2d2">?</span> : <span style="color:#000;font-weight:bold">False</span>
+</span></span><span style="display:flex;"><span>Does <span style="color:#a61717;background-color:#e3d2d2">`</span>b<span style="color:#a61717;background-color:#e3d2d2">`</span> require gradients<span style="color:#a61717;background-color:#e3d2d2">?</span>: <span style="color:#000;font-weight:bold">True</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>在 NN 中，不计算梯度的参数通常称为<strong>冻结参数</strong>。 如果事先知道您不需要这些参数的梯度，则“冻结”模型的一部分很有用（通过减少自动梯度计算，这会带来一些性能优势）。</p>
+<p>从 DAG 中排除很重要的另一个常见用例是<a href="https://pytorch.org/tutorials/beginner/finetuning_torchvision_models_tutorial.html">调整预训练网络</a></p>
+<p>在微调中，我们冻结了大部分模型，通常仅修改分类器层以对新标签进行预测。 让我们来看一个小例子来说明这一点。 和以前一样，我们加载一个预训练的 resnet18 模型，并冻结所有参数。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">from</span> <span style="color:#555">torch</span> <span style="color:#000;font-weight:bold">import</span> nn, optim
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>model <span style="color:#000;font-weight:bold">=</span> torchvision<span style="color:#000;font-weight:bold">.</span>models<span style="color:#000;font-weight:bold">.</span>resnet18(pretrained<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Freeze all the parameters in the network</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">for</span> param <span style="color:#000;font-weight:bold">in</span> model<span style="color:#000;font-weight:bold">.</span>parameters():
+</span></span><span style="display:flex;"><span>    param<span style="color:#000;font-weight:bold">.</span>requires_grad <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">False</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>假设我们要在具有 10 个标签的新数据集中微调模型。 在 resnet 中，分类器是最后一个线性层<code>model.fc</code>。 我们可以简单地将其替换为充当我们的分类器的新线性层（默认情况下未冻结）。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span>model<span style="color:#000;font-weight:bold">.</span>fc <span style="color:#000;font-weight:bold">=</span> nn<span style="color:#000;font-weight:bold">.</span>Linear(<span style="color:#099">512</span>, <span style="color:#099">10</span>)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>现在，除了<code>model.fc</code>的参数外，模型中的所有参数都将冻结。 计算梯度的唯一参数是<code>model.fc</code>的权重和偏差。</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Optimize only the classifier</span>
+</span></span><span style="display:flex;"><span>optimizer <span style="color:#000;font-weight:bold">=</span> optim<span style="color:#000;font-weight:bold">.</span>SGD(model<span style="color:#000;font-weight:bold">.</span>fc<span style="color:#000;font-weight:bold">.</span>parameters(), lr<span style="color:#000;font-weight:bold">=</span><span style="color:#099">1e-2</span>, momentum<span style="color:#000;font-weight:bold">=</span><span style="color:#099">0.9</span>)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>请注意，尽管我们在优化器中注册了所有参数，但唯一可计算梯度的参数（因此会在梯度下降中进行更新）是分类器的权重和偏差。</p>
+<p><a href="https://pytorch.org/docs/stable/generated/torch.no_grad.html"><code>torch.no_grad()</code></a>中的上下文管理器可以使用相同的排除功能。</p>
+<hr>
+<h2 id="进一步阅读httpspytorchapachecnorgdocs1704id进一步阅读"><a href="https://pytorch.apachecn.org/#/docs/1.7/04?id=%E8%BF%9B%E4%B8%80%E6%AD%A5%E9%98%85%E8%AF%BB%EF%BC%9A">进一步阅读：</a></h2>
+<ul>
+<li><a href="https://pytorch.org/docs/stable/notes/autograd.html">原地操作&amp;多线程 Autograd</a></li>
+<li><a href="https://colab.research.google.com/drive/1VpeE6UvEPRz9HmsHh1KS0XxXjYu533EC">反向模式自动微分</a> 的示例实现</li>
+</ul>
+<p><strong>脚本的总运行时间</strong>：（0 分钟 5.184 秒）</p>
+<p><a href="https://pytorch.org/tutorials/_downloads/00a1ac60985c7481f4250bafeae15ffa/autograd_tutorial.py">下载 Python 源码：<code>autograd_tutorial.py</code></a></p>
+<p><a href="https://pytorch.org/tutorials/_downloads/009cea8b0f40dfcb55e3280f73b06cc2/autograd_tutorial.ipynb">下载 Jupyter 笔记本：<code>autograd_tutorial.ipynb</code></a></p>
+<p><a href="https://sphinx-gallery.readthedocs.io/">由 Sphinx 画廊</a>生成的画廊</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/pytorch/003-Pytorch-torch.autograd-%E8%87%AA%E5%8A%A8%E5%B7%AE%E5%88%86%E5%BC%95%E6%93%8E/">https://geek.zshipu.com/post/pytorch/003-Pytorch-torch.autograd-%E8%87%AA%E5%8A%A8%E5%B7%AE%E5%88%86%E5%BC%95%E6%93%8E/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/bi/doris/002-Apache-Doris-%E5%88%9B%E5%BB%BA%E8%A1%A8/">002 Apache Doris 创建表</a></li>
+        
+        <li><a href="/post/bi/doris/001-Apache-Doris-%E5%88%9B%E5%BB%BA%E6%95%B0%E6%8D%AE%E5%BA%93/">001 Apache Doris 创建数据库</a></li>
+        
+        <li><a href="/post/bi/%E5%A4%A7%E6%95%B0%E6%8D%AE/%E6%95%B0%E6%8D%AE%E4%BD%93%E7%B3%BB%E7%9A%84%E8%A6%81%E4%B9%89%E8%B4%B4%E6%BA%90%E8%A7%84%E8%8C%83%E5%BB%BA%E6%A8%A1%E6%A0%87%E7%AD%BE%E8%AE%BE%E8%AE%A1%E5%BB%BA%E8%AE%BE/">BI-数据仓-数据体系的要义：贴源、规范、建模、标签、设计、建设</a></li>
+        
+        <li><a href="/post/bi/doris/Apache-Doris-%E6%98%AF%E4%B8%80%E4%B8%AA%E5%9F%BA%E4%BA%8E-MPP-%E6%9E%B6%E6%9E%84%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E5%AE%9E%E6%97%B6%E7%9A%84%E5%88%86%E6%9E%90%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93/">Apache Doris 是一个基于 MPP 架构的高性能、实时的分析型数据库</a></li>
+        
+        <li><a href="/post/react/level01/4.%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1-Next.js-%E6%96%87%E7%AB%A0%E7%B3%BB%E5%88%97/">4.完全掌握 Next.js 文章系列</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            没有标签
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/bi/doris/002-Apache-Doris-%E5%88%9B%E5%BB%BA%E8%A1%A8/" title="002 Apache Doris 创建表">002 Apache Doris 创建表</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/bi/doris/001-Apache-Doris-%E5%88%9B%E5%BB%BA%E6%95%B0%E6%8D%AE%E5%BA%93/" title="001 Apache Doris 创建数据库">001 Apache Doris 创建数据库</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/bi/%E5%A4%A7%E6%95%B0%E6%8D%AE/%E6%95%B0%E6%8D%AE%E4%BD%93%E7%B3%BB%E7%9A%84%E8%A6%81%E4%B9%89%E8%B4%B4%E6%BA%90%E8%A7%84%E8%8C%83%E5%BB%BA%E6%A8%A1%E6%A0%87%E7%AD%BE%E8%AE%BE%E8%AE%A1%E5%BB%BA%E8%AE%BE/" title="BI-数据仓-数据体系的要义：贴源、规范、建模、标签、设计、建设">BI-数据仓-数据体系的要义：贴源、规范、建模、标签、设计、建设</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/bi/doris/Apache-Doris-%E6%98%AF%E4%B8%80%E4%B8%AA%E5%9F%BA%E4%BA%8E-MPP-%E6%9E%B6%E6%9E%84%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E5%AE%9E%E6%97%B6%E7%9A%84%E5%88%86%E6%9E%90%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93/" title="Apache Doris 是一个基于 MPP 架构的高性能、实时的分析型数据库">Apache Doris 是一个基于 MPP 架构的高性能、实时的分析型数据库</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/level01/4.%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1-Next.js-%E6%96%87%E7%AB%A0%E7%B3%BB%E5%88%97/" title="4.完全掌握 Next.js 文章系列">4.完全掌握 Next.js 文章系列</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/level01/3.Github1000%E4%B8%AA%E9%A1%B6%E7%BA%A7%E7%BB%84%E4%BB%B6%E5%BA%94%E5%AF%B9%E5%90%84%E7%A7%8D%E4%B8%9A%E5%8A%A1%E5%9C%BA%E6%99%AF/" title="3.Github1000个顶级组件应对各种业务场景">3.Github1000个顶级组件应对各种业务场景</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/save01/React.js-%E4%B8%AD%E4%BB%A5%E6%AD%A3%E7%A1%AE%E7%9A%84%E6%96%B9%E5%BC%8F%E5%88%9B%E5%BB%BA%E8%A1%A8%E5%8D%95/" title="React.js 中以正确的方式创建表单">React.js 中以正确的方式创建表单</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/css/%E5%89%8D%E7%AB%AF%E7%9F%A5%E8%AF%86%E7%82%B9%E5%A4%A7%E5%85%A8/" title="前端知识点大全">前端知识点大全</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/web3.0/%E5%85%A8%E6%A0%88-Web3-%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="web3.0 全栈 Web3 开发完整指南">web3.0 全栈 Web3 开发完整指南</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/web3.0/%E5%85%A8%E6%A0%88%E4%BB%A5%E5%A4%AA%E5%9D%8A%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="web3.0 全栈以太坊开发完整指南">web3.0 全栈以太坊开发完整指南</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/BI/">BI</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD%E5%AE%9E%E6%88%98/">DDD实战</a>
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="https://geek.zshipu.com/tags/Doris/">Doris</a>
+    
+    <a href="https://geek.zshipu.com/tags/IM/">IM</a>
+    
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    
+    <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
+    
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
+    
+    <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/apollo/">apollo</a>
+    
+    <a href="https://geek.zshipu.com/tags/css/">css</a>
+    
+    <a href="https://geek.zshipu.com/tags/flutter/">flutter</a>
+    
+    <a href="https://geek.zshipu.com/tags/game/">game</a>
+    
+    <a href="https://geek.zshipu.com/tags/github/">github</a>
+    
+    <a href="https://geek.zshipu.com/tags/gitlab/">gitlab</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="https://geek.zshipu.com/tags/graphql/">graphql</a>
+    
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    
+    <a href="https://geek.zshipu.com/tags/jdbc/">jdbc</a>
+    
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mybatis/">mybatis</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nexp/">nexp</a>
+    
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
+    
+    <a href="https://geek.zshipu.com/tags/nodejs/">nodejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/react/">react</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sharding/">sharding</a>
+    
+    <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/storybook/">storybook</a>
+    
+    <a href="https://geek.zshipu.com/tags/tailwind/">tailwind</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/web/">web</a>
+    
+    <a href="https://geek.zshipu.com/tags/web3/">web3</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/">人工智能</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%88%86%E8%AF%8D/">分词</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%AD%A6%E4%B9%A0/">学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%96%87%E6%91%98/">文摘</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%88%AC%E8%99%AB/">爬虫</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/">用户画像</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E8%B5%B7%E6%AD%A5/">起步</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

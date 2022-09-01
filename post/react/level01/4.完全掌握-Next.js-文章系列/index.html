@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>4.完全掌握 Next.js 文章系列 | 知识铺的博客</title>
+    <meta property="og:title" content="4.完全掌握 Next.js 文章系列 - 知识铺的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2022-08-07T09:07:31&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2022-08-07T09:07:31&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,知识铺,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="4.完全掌握 Next.js 文章系列">
+        <meta name="author" content="知识铺">
+        
+    <meta property="og:url" content="https://geek.zshipu.com/post/react/level01/4.%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1-Next.js-%E6%96%87%E7%AB%A0%E7%B3%BB%E5%88%97/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-2874221941555456" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-WLWJSST');</script>
+    
+</head>
+
+
+<body>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLWJSST"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://geek.zshipu.com/">
+                        知识铺的博客
+                    </a>
+                
+                <p class="description">专注于Android、Java、Go语言(golang)、移动互联网、项目管理、软件架构</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://geek.zshipu.com/">首页</a>
+                    
+                    <a  href="https://geek.zshipu.com/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://geek.zshipu.com/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#社区">社区</a></li>
+    <li><a href="#基本会话">基本会话</a></li>
+    <li><a href="#文章">文章</a></li>
+    <li><a href="#样板">样板</a></li>
+    <li><a href="#扩展">扩展</a></li>
+    <li><a href="#应用程序">应用程序</a></li>
+    <li><a href="#书">书</a></li>
+    <li><a href="#视频">视频</a></li>
+    <li><a href="#通讯">通讯</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">4.完全掌握 Next.js 文章系列</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022年8月7日
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <h2 id="社区">社区</h2>
+<ul>
+<li><a href="https://github.com/vercel/next.js">GitHub Next</a></li>
+<li><a href="https://github.com/vercel/next.js/discussions">GitHub 讨论Next.js</a></li>
+</ul>
+<h2 id="基本会话">基本会话</h2>
+<ul>
+<li><a href="https://nextjs.org/blog">博客</a></li>
+<li><a href="https://nextjs.org/learn">学习</a></li>
+<li><a href="https://vercel.com/tv">韦尔塞尔电视</a></li>
+<li><a href="https://getstarted.sh/bulletproof-next">防弹 Next</a></li>
+</ul>
+<h2 id="文章">文章</h2>
+<ul>
+<li><a href="https://snipcart.com/blog/nextjs-faunadb">将 Next.js 与 FaunaDB 配合使用：如何从您的应用程序中查询数据库</a></li>
+<li><a href="https://buttercms.com/blog/next-js-cms-tutorial">如何使用ButterCMS构建无服务器Next.js博客</a></li>
+<li><a href="https://auth0.com/blog/building-universal-apps-with-nextjs">使用 Next 构建通用 JavaScript 应用.js</a></li>
+<li><a href="https://labs.redantler.com/getting-started-with-next-js-article-one-a1d9780ea9e0#.863nl4wnq">Next.js — 设置应用</a></li>
+<li><a href="https://labs.redantler.com/getting-started-with-next-js-bringing-data-in-bf40558698e2#.twjv5xk5w">“Next.js — 引入数据</a></li>
+<li><a href="https://medium.com/cosmicjs/how-to-build-a-next-js-react-universal-app-e610a0bc2124#.b8ayt9f39">如何构建 Next.js React 通用应用</a></li>
+<li><a href="https://web.archive.org/web/20170202170122if_/https://jsmantra.com/next-on-next-js-1a134505f346#.bhihzecyc">Next到Next.js</a></li>
+<li><a href="https://hackernoon.com/accept-payments-on-your-site-with-nextjs-stripe-and-micro-371de95b22d5?source=activity---post_recommended">在您的网站上接受带有 nextjs、stripe 和 micro 的付款</a></li>
+<li><a href="https://medium.com/@jthegedus/next-js-on-cloud-functions-for-firebase-with-firebase-hosting-7911465298f2">Next.js Firebase 托管的 Firebase 云函数</a></li>
+<li><a href="https://timber.io/blog/building-a-blog-with-next-js">与Next一起构建博客.js</a></li>
+<li><a href="https://malloc.fi/using-google-analytics-with-next-js">将 Google Analytics 与 Next 一起使用.js</a></li>
+<li>[使用Next.js和Redux构建通用JavaScript应用程序*<a href="https://habrahabr.ru/post/323588/">俄语]*</a></li>
+<li><a href="https://www.codementor.io/tgreco/5-of-the-many-things-to-love-about-zeit-s-next-js-bpszu99g1">5（众多理由）爱Vercel的Next.js</a></li>
+<li><a href="https://nextjs.org/blog/next-5">Next.js 5：通用Webpack，CSS导入，插件和区域</a></li>
+<li><a href="https://pusher.com/tutorials/realtime-data-visualization-nextjs">使用“Next.js和图表实现实时数据可视化.js</a></li>
+<li><a href="https://pusher.com/tutorials/chat-sentiment-analysis-nextjs">使用 Next 构建具有情感分析功能的聊天应用.js</a></li>
+<li><a href="https://pusher.com/tutorials/realtime-tables-nextjs">使用 Next.js 构建实时表</a></li>
+<li><a href="https://www.garymeehan.ie/blog/server-side-rendered-blog-with-nextjs-and-prismic">带有 Next.js 和 Prismic.io 的 SSR 博客</a></li>
+<li><a href="https://www.garymeehan.ie/blog/handling-seo-with-nextjs-and-prismic">NextSEO.js和Prismic</a></li>
+<li><a href="https://www.garymeehan.ie/blog/seo-in-nextjs-with-next-seo">SEO在Next.js与Nextseo</a></li>
+<li><a href="https://nextjs.org/blog/next-7">Next.js 7</a></li>
+<li><a href="https://blog.hasura.io/create-next-js-sites-using-graphql-on-postgres-199224ad1a39">创建 SSR Next.js网站使用 GraphQL 和 Postgres</a></li>
+<li><a href="https://blog.strapi.io/strapi-next-setup">使用 Next.js （React）、GraphQL、Strapi 和 Stripe 烹饪 Deliveroo 克隆 - 设置（第 1/7 部分）</a></li>
+<li><a href="https://snipcart.com/blog/next-js-ecommerce-tutorial">Next.js电子商务教程：快速购物车集成</a></li>
+<li><a href="https://ghost.org/docs/api/nextjs/">使用 Ghost 和 Next.js</a></li>
+<li><a href="https://statickit.com/guides/next-js-tailwind">将 Tailwind CSS 与 Next 一起使用.js</a></li>
+<li><a href="https://medium.com/frontend-digest/using-feature-flags-in-next-js-c5c8d0795a2?source=friends_link&amp;sk=d846a29f376acf9cfa41e926883923ab">在Next中使用功能标志.js</a></li>
+<li>[使用 react-syntax-highlighter 将代码片段添加到 Next.js](<a href="https://thetombomb.com/posts/adding-code-snippets-to-static-markdown-in-Next">https://thetombomb.com/posts/adding-code-snippets-to-static-markdown-in-Next</a> js)</li>
+</ul>
+<h2 id="样板">样板</h2>
+<ul>
+<li><a href="https://www.cosmicjs.com/apps/nextjs-static-blog">Next.js静态博客</a> - Next.js由Cosmic Headless CMS提供支持的静态博客</li>
+<li><a href="https://github.com/ButterCMS/react-cms-blog-with-next-js">NextJS无头CMS驱动的博客入门</a></li>
+<li><a href="https://github.com/mattdamon108/nextjs-with-lambda">Next.js AWS Lambda 的应用程序</a> - 使用 Apex Up 将Next.js应用程序部署到 AWS Lambda。</li>
+<li><a href="https://github.com/williamluke4/nitro">硝基🚀</a>- 使用Nextjs，Material-UI，Typescript和Auth0的PWA示例💗</li>
+<li><a href="https://github.com/alepacheco/landing-template">Next &amp; Now 2.0 Typescript template</a> - Serverless， Typescript， Jest， Github CI， SCSS， prettier boilerplate</li>
+<li><a href="https://github.com/UnlyEd/next-right-now">Next Right Now</a> - 灵活的<strong>生产级样板</strong>，具有Next.js 9和Versel，具有预配置的Sentry，Cookie，Amplitude，Emotion，FontAwesome，GraphQL / GraphCMS（Apollo），Bootstrap（Reactstrap），i18next（Locize），Jest，Cypress（E2E测试）和CI / CD（GH Actions），具有完整的TypeScript<strong>支持和支持B2B多租户Web应用程序（monorepo）</strong></li>
+<li><a href="https://github.com/Sebastp/Next-react-graphql-apollo_Boostrap">Next Graphql Apollo Typescript_Boostrap - Pobocha</a> - React + GraphQL + Next.js + Apollo + Scss + Typescript + Prettier &amp; EsLint 样板</li>
+<li><a href="https://github.com/alepacheco/landing-template">Next &amp; Vercel Typescript template</a> - Serverless， Typescript， Jest， Github CI， SCSS， prettier boilerplate</li>
+<li><a href="https://github.com/ananddayalan/nextjs-in-firebase-with-bootstrap">Firebase 中的 NextJS with Bootstrap - 在</a> Firebase 中使用 Cloud Functions 托管带有 Bootstrap 的 NextJS 应用。</li>
+<li><a href="https://github.com/ooade/NextSimpleStarter">Next简单入门</a> - 带有 Next.js 和 Redux 的简单 PWA 样板。</li>
+<li><a href="https://github.com/iaincollins/nextjs-starter">NextJS Starter</a> - Next.js的Starter项目，以及电子邮件和oAuth身份验证。</li>
+<li><a href="https://github.com/pbteja1998/nextjs-starter">nextjs-starter</a> - 一个SEO优化的Next.js 10个初学者工具包模板，使用React 17 + Typescript + Tailwind CSS 2 + React Query 3 +（GitHub Auth + Passwordless Auth）使用（NextAuth.js和Fauna DB），ESLint，Prettier，Pre-commit hook with Husky。可以为不同的页面提供不同的布局。</li>
+<li><a href="https://github.com/sly777/ran">跑！</a>- 生产就绪的样板，支持 GraphQL、SSR、热重载、CSS-in-JS、缓存等。</li>
+<li><a href="https://github.com/tscanlin/next-blog">Next简单博客</a> - 基于简单Markdown的博客，使用Next.js构建，具有静态导出。</li>
+<li><a href="https://github.com/herschel666/phox">phox</a> - 创建静态照片博客。</li>
+<li><a href="https://github.com/MustansirZia/next-express-bootstrap-boilerplate">Next Express Bootstrap Boilerplate</a> - 使用Next，Express，react-bootstrap，SCSS和SSR与eslint构建的完整堆栈应用程序的样板。</li>
+<li><a href="https://github.com/suevalov/next-blog-firestore">Next Blog Firestore</a> - 使用Next.js，Firebase Firestore，styled-components和moxx-state-tree构建的简单CMS的博客。</li>
+<li><a href="https://github.com/CodementorIO/nextjs-redux-starter">Next Redux Starter</a> - Next.js Express、Redux 和 PostCSS 的 Starter。</li>
+<li><a href="https://github.com/joaopaulomoraes/nextjs-with-redux-and-material-ui">NextJS Redux-Wrapper Material-UI</a> - 🤓带有 Redux 和 Material UI 的样板 NextJS。</li>
+<li><a href="https://github.com/nmaro/staart">斯塔特</a> - 😎积极维护 Next.js组件库<em>和</em>最小样板，以快速获得具有基于 Ooth 的工作用户帐户的应用。</li>
+<li><a href="https://github.com/deptno/next.js-typescript-starter-kit">NextJS TypeScript Starter Kit</a> - 🎉TypeScript + NextJS， Styled-jsx， Redux， PostCSS， 可配置的SEO</li>
+<li><a href="https://arefaslani.github.io/next-boilerplate">Next样板</a> - 外部CSS和Sass +从任何地方导入图像+更漂亮和Eslint +环境变量以及更多功能。</li>
+<li><a href="https://github.com/YuriBrunetto/next-starter">Next启动器</a> - 一个完整而简单的样板，内置并内置。<code>sass (.scss)``postcss</code></li>
+<li><a href="https://github.com/deptno/typescript-monorepo-next-example">Typescript Monorepo Next Example</a> - A minimalistic next.js + typescript monorepo.</li>
+<li><a href="https://github.com/tomimick/tm-nextjs-starter">tomimick/tm-nextjs-starter</a> - 一个最小的启动器/演示，带有基本的CRUD，axios/localstorage，MobX，SASS，静态站点导出，现场演示</li>
+<li><a href="https://github.com/csprance/next-smrt">csprance/next-smrt</a> - 一个最小的样板，带有redux，样式组件，material-ui和typescript，带有自定义的express server。</li>
+<li><a href="https://github.com/saltyshiomix/nextron">Nextron</a> - 带有Next的电子.js应用程序生成器⚡</li>
+<li><a href="https://github.com/pankod/next-boilerplate">next-boilerplate</a> - 一个结构良好的生产就绪Next.js样板，带有Typescript，Redux，Express.js，Sass，Css，EnvConfig，Reverse Proxy，Bundle</li>
+<li><a href="https://github.com/oh-my-c0de/oh-my-fullstack">Oh My Fullstack</a> - Full stack Web Application Skeleton （Next.js， Redux， RxJS， Immutable， Express）</li>
+<li><a href="https://github.com/brandontle/next-postgres-with-typescript">Next-Postgres-with-Typescript</a> - 类似论坛的fullstack Web应用程序，带有Next 7.0.2 +Sequelize 4 / Postgres + Typescript + Redux + Passport Local Auth + Emotion</li>
+<li><a href="https://github.com/pd-smith/next-express-babel">接下来.js Express和Babel</a> - 对于那些想要使用Babel转译Express以及Next.js代码的人来说，这是一个应用程序框架。</li>
+<li><a href="https://github.com/hasura/graphql-engine/tree/master/community/sample-apps/nextjs-postgres-graphql">next-postgres-graphql</a> - 使用 GraphQL 和 Postgres 创建 SSR Next.js网站 （Next.js， Postgres， GraphQL）</li>
+<li><a href="https://github.com/hoangvvo/nextjs-mongodb-app">nextjs-mongodb-app</a> - 使用Next.JS和MongoDB制作的成熟应用程序，具有身份验证和更多功能（Next.js 9，MongoDB）</li>
+<li><a href="https://github.com/react-next-boilerplate/react-next-boilerplate">react-next-boilerplate</a> - 🚀使用 nextJS、最佳开发实践和开发人员社区中的流行库来减少项目配置的基础。</li>
+<li><a href="https://github.com/novellito/the-nextjs-starter">The-Nextjs-starter</a> - typescript + redux + styled-components + react-testing-library + eslint + fontawesome</li>
+<li><a href="https://github.com/tudorconstantin/knests/">The Knests Stack</a> - Full stack boilerplate/hackathon starter with： PostgreSQL， Knex.js， NestJS， Next.js （显然）， GraphQL， React （带有钩子和 typescript）， Material-UI， Docker 多阶段映像， Docker compose 和一个完全配置的 Gitlab CI/CD 流水线。</li>
+<li><a href="https://github.com/vriad/devii">Devii</a> - 一个受Medium启发的开发博客启动器，使用Next.js，React和TypeScript构建，具有Markdown渲染，语法突出显示，SEO / 元标记和RSS提要生成开箱即用。</li>
+<li><a href="https://creativedesignsguru.com/demo/Nextjs-Blog-Boilerplate/">Nextjs Blog Starter</a> - 🚀基于Next.js框架的博客的完美入门代码。⚡️Made with Next.js， TypeScript， ESLint， Prettier， PostCSS， Tailwind CSS.</li>
+<li><a href="https://github.com/wutali/nextjs-netlify-blog-template">Next.js和Netlify博客模板</a> - 在Netlify堆栈上构建博客网站的完美样板，具有标记，CMS和短代码等标准功能。</li>
+<li><a href="https://github.com/inblack67/GraphQL-Next-Setup">Nextjs Apollo Nexus</a> - GraphQL Apollo Client-Server integration in Next.js与Nexus Schema（代码优先方法）。&lt;</li>
+<li><a href="https://github.com/vickOnRails/next-starter-peacock">Nextjs Starter Peacock</a> - 🦚美丽的Nextjs产品组合入门版，供软件工程师和设计师展示他们引以为豪的工作。</li>
+<li><a href="https://github.com/tancredi/nextatic">Next</a> - 🌍静态网站多语言样板，具有用户可编辑的页面，并使用Netlify CMS + Next.js + SCSS + Typescript进行导航。</li>
+<li><a href="https://github.com/stovv/next-strapi-sitemap">NextJS &amp; StrAPI 的 Sitemap generator</a> - 🦾Express上的一个附加服务器，与nextjs一起运行，并根据STR API的请求重新生成站点地图（带有索引站点地图）和机器人.txt文件。</li>
+<li><a href="https://github.com/pankod/superplate">超级板</a> - 超级板在几秒钟内使用TypeScript，样式组件，SWR，Storybook和35 +插件创建Next.js应用程序。</li>
+</ul>
+<h2 id="扩展">扩展</h2>
+<ul>
+<li><a href="https://github.com/UnlyEd/universal-language-detector">Next通用语言检测器</a> - 通用工作的语言检测器（浏览器+服务器） - 旨在与通用框架一起使用，例如Next.js <a href="https://universal-language-detector.now.sh/">DEMO</a></li>
+<li><a href="https://github.com/fridays/next-routes">Next路由</a> - Next.js的通用命名路由。</li>
+<li><a href="https://github.com/onready/next-pkg">Next-Pkg</a> - Extended Next.js支持 <a href="https://github.com/vercel/pkg">pkg</a> 的服务器。</li>
+<li><a href="https://github.com/lfades/next-plugin-graphql">Next Plugin Graphql</a> - Next.js使用 graphql-tag 的 .graphql 和 .gql 文件的插件</li>
+<li><a href="https://github.com/lfades/next-with-apollo">Next与阿波罗</a> - 阿波罗 Graphql 集成为Next.js</li>
+<li><a href="https://github.com/garmeeh/next-seo">NextSEO</a> - SEO变得容易Next.js</li>
+<li><a href="https://github.com/tokuda109/next-useragent">Next UserAgent</a> - Next 的 UserAgent 解析器.js</li>
+<li><a href="https://github.com/tokuda109/next-cookie">Next Cookie</a> - Next.js Cookie 序列化程序和反序列化程序库。</li>
+<li><a href="https://github.com/elmasse/nextein">Nextein</a> - 基于 Next.js 的静态站点生成器。</li>
+<li><a href="https://github.com/hipstersmoothie/next-mdx-blog">next-mdx-blog</a> - 轻松地将博客添加到任何基于 next.js 的项目</li>
+<li><a href="https://github.com/isaachinman/next-i18next">next-i18next</a> - 翻译 NextJs 应用的最简单方法。</li>
+<li><a href="https://github.com/revskill10/next-routes-middleware">Next路由中间件</a> - Next JS 路由中间件</li>
+<li><a href="https://github.com/danielcondemarin/serverless-nextjs-plugin">Next.js的无服务器框架插件</a> - 轻松部署无服务器应用程序。</li>
+<li><a href="https://github.com/ematipico/terraform-nextjs-plugin">Terraform For Next.js</a> - 使用 Terraform 部署您的应用程序</li>
+<li><a href="https://github.com/hoangvvo/next-session">Next会话</a> - Next会话的会话中间件.js</li>
+<li><a href="https://github.com/vvo/next-iron-session">next-iron-session</a> - Next.js无状态会话实用程序，使用签名和加密的 cookie 来存储数据</li>
+<li><a href="https://github.com/lucleray/next-purgecss">Next PurgeCSS</a> - 轻松集成 <a href="https://www.purgecss.com/">Purgecss</a>，这有助于您从捆绑包中删除未使用的 CSS。</li>
+<li><a href="https://github.com/shadowwalker/next-pwa">Next PWA</a> - 零配置 PWA 插件Next.js与工作框</li>
+<li><a href="https://github.com/piglovesyou/flow-middleware">流中间件</a> - 在 Next.js 上运行任何 Express 中间件，而不会污染本机对象。</li>
+<li><a href="https://github.com/hoangvvo/next-connect">next-connect</a> - Next.js的高速/连接兼容路由器和中间件层。</li>
+<li><a href="https://github.com/humaans/next-img/">next-img</a> - 一个用于轻松嵌入优化图像的插件。</li>
+<li><a href="https://github.com/iaincollins/next-auth">Next身份验证</a> - Next.js和无服务器的简易身份验证</li>
+<li><a href="https://github.com/lone-cloud/next-deploy">Next部署</a> - 🚀轻松部署到 AWS 和 GitHub 页面。</li>
+<li><a href="https://github.com/codecoolture/next-joi">next-joi</a> - 使用<em>joi</em>验证Next.js API Routes。</li>
+<li><a href="https://github.com/martpie/next-transpile-modules">next-transpile-modules</a> - Next.js插件，用于从node_modules转译代码。对单核细胞很有用。</li>
+<li><a href="https://github.com/liveduo/destack">Next.js的Destack</a> - Next.js扩展，可以在本地直观地构建登录页面。</li>
+</ul>
+<h2 id="应用程序">应用程序</h2>
+<ul>
+<li><a href="https://github.com/codelit/courselit">CourseLit</a> - Thinkific，Teachable等的开源替代品。</li>
+<li><a href="https://github.com/feednext/feednext">Feednext</a> - 一个开源的社交媒体应用程序。</li>
+<li><a href="https://github.com/auth0-blog/nextjs-got">NextJS GOT</a> - Simple Next.js展示《权力的游戏》角色的应用程序。</li>
+<li><a href="https://github.com/RelateNow/relate">关联</a> - 正念社区 - React，GraphQL，Next.js。</li>
+<li><a href="https://github.com/now-examples/next-news">Next News</a> - HackerNews 写在 Next.js.</li>
+<li><a href="https://github.com/dotcypress/password">密码</a> - 一个密码，正确的方式。</li>
+<li><a href="https://github.com/lipp/next-todos">Next Todos</a> - 在 Next.js 中写入的 Todo 列表。</li>
+<li><a href="https://github.com/lipp/hackernews">黑客新闻</a> - 另一个黑客新闻写在Next.js。</li>
+<li><a href="https://github.com/lipp/jet-chat">Jet Chat</a> - Jet 和 Next.js支持的 Chat 演示。</li>
+<li><a href="https://github.com/arunoda/nextgram">Nextgram</a> - 示例 Next.js用于展示其功能的 v2 应用。</li>
+<li><a href="https://github.com/rauchg/blog">Rauchg博客</a> - 由Next.js核心维护者构建的博客。</li>
+<li><a href="https://github.com/renatorib/next-jph">Next JPH</a> - 使用 Next.js 制作的 JsonPlaceholder 示例应用。</li>
+<li><a href="https://github.com/dawsbot/mailto">Mailto</a> - HTML mailto&rsquo;s make easy.</li>
+<li><a href="https://github.com/knipferrc/plate">板</a>块 - 任务管理应用程序，用于统治它们。</li>
+<li><a href="https://github.com/danielbayerlein/dashboard">仪表板</a> - 使用自定义小组件创建您自己的团队仪表板。</li>
+<li><a href="https://github.com/ritz078/snape">Snape</a> - 一个洪流客户端，用于搜索，流式传输和下载种子。</li>
+<li><a href="https://github.com/juliandavidmr/TrelloResume">Trello Resume</a> - 将 Trello 数据转换为快速读取的信息。</li>
+<li><a href="https://github.com/estrada9166/server-authentication-next.js">使用 JWT 进行</a>服务器身份验证 - 服务器身份验证，防止在验证之前进行渲染。</li>
+<li><a href="https://gitlab.com/kachkaev/website-frontend/">Alexander Kachkaev的网站</a> - 使用Next.js，GraphQL，Docker和Kubernetes构建的个人主页。使用 apollo 客户端、react-intl、styled-components 和 recompose。Docker 镜像由 GitLab CI 自动构建。</li>
+<li><a href="https://github.com/estrada9166/cookie-handler-next.js">具有服务器呈现的 Cookie 处理程序</a> - 具有服务器呈现的 Cookie 处理程序，在呈现之前访问 Cookie。</li>
+<li><a href="https://github.com/OrangeXC/gank">Gank</a> - Next.js应用程序使用gank-api，mobx和antd</li>
+<li><a href="https://github.com/janit/decoupled-cms-nextjs-graphql">将 CMS 示例与 GraphQL 和 Next 分离.js</a></li>
+<li><a href="https://vr.mozilla.org/">Mozilla VR Home</a> - Mozilla VR Home</li>
+<li><a href="https://www.eltonjohn.com/">艾尔顿·约翰的网站</a> - 艾尔顿·约翰的网站</li>
+<li><a href="https://data.iota.org/">IOTA的数据市场</a> - IOTA市场</li>
+<li><a href="https://www.magicleap.com/">magicleap.com</a> - 神奇的飞跃</li>
+<li><a href="https://www.npmjs.com/search">NPM.js搜索页面</a> - NPM的搜索页面</li>
+<li><a href="https://success.docker.com/">Docker 成功中心</a> - Docker 成功中心</li>
+<li><a href="https://github.com/neo-search/urteile-gesetze-web">Urteile &amp; Gesetze</a> - 德国法律信息系统，根据 GPLv3 获得许可。</li>
+<li><a href="https://www.tiktok.com/">TikTok的主页</a> - TikTok的主页</li>
+<li><a href="https://njt.now.sh/">njt.now.sh</a> - npm 跳转到🐸（您梦寐以求的包导航快捷方式）。部分静态呈现，部分部署为 lambda。在每次提交到 <a href="https://github.com/kachkaev/njt">github 存储库</a>时自动更新，这要归功于 Now 集成。</li>
+<li><a href="https://caseconverter.pro/">caseconverter.pro</a> - 文本大小写转换器。</li>
+<li><a href="https://github.com/poulainv/tottem">Tottem</a> - 使用NextJs / Auth0 / Apollo Tools / Prisma2构建的类固醇上的书签管理器</li>
+<li><a href="https://slowtvmap.com/">慢速电视地图</a> - 发现轻松虚拟体验的有趣方式。接下来.js + Chakra UI + MySQL托管在Vercel上。</li>
+</ul>
+<h2 id="书">书</h2>
+<ul>
+<li><a href="https://www.honext.io/">Hands On Next.js</a> - 一本实用的全栈书，介绍 react 应用程序的通用（服务器）渲染。</li>
+<li><a href="https://www.packtpub.com/web-development/nextjs-quick-start-guide">Next.js快速入门指南</a> - 使用 Next 创建、构建和部署通用 JavaScript 应用程序.js</li>
+<li><a href="https://flaviocopes.com/page/nextjs-handbook/">Next.js手册</a> - 构建一个前端 React 应用程序，以透明的方式为您处理服务器端渲染。</li>
+</ul>
+<h2 id="视频">视频</h2>
+<ul>
+<li>[使用 NextJS 创建您的第一个 ReactJS 应用程序 *<a href="https://www.youtube.com/watch?v=-7Ft5LxPeWs">西班牙语]*</a></li>
+<li><a href="https://www.youtube.com/watch?v=JEBkh_vleTs&amp;t">React Server Side Rendering with NextJS</a></li>
+<li><a href="https://www.youtube.com/watch?v=DLGJfa3Xv-0">吉列尔莫·劳赫 - Next.js按示例</a></li>
+<li><a href="https://www.youtube.com/watch?v=evaMpdSiZKk">吉列尔莫·劳赫 - Next.js：通用反应变得简单易行</a></li>
+<li><a href="https://www.youtube.com/watch?v=Fnw3lNeH-XI">Next简介.js</a></li>
+<li><a href="https://www.youtube.com/watch?v=h6rETZH6Ym0">Next.js生产中</a></li>
+<li><a href="https://www.youtube.com/watch?v=2cJya4h5ync">参数化路由与Next.js</a></li>
+<li><a href="https://www.youtube.com/watch?v=lLNJsuXB4CI">JS英雄 2017 |吉列尔莫·劳赫 - 静态和动态 Next.js</a></li>
+<li><a href="https://www.youtube.com/watch?v=w9Or7B4kTRY">用Next.js规划通用未来 - 吉列尔莫·劳赫 ·2017年中国国际医疗器械博览会</a></li>
+<li><a href="https://www.youtube.com/watch?v=4cfozXTyjWQ">BPJS：特别 - Next介绍.js</a></li>
+<li><a href="https://www.youtube.com/watch?v=ms2aOV06_qk">Next，Next.js</a></li>
+<li><a href="https://www.youtube.com/watch?v=g_LA1quUIi8">使用 Next.js 和 GraphQL 进行数据管理</a></li>
+<li><a href="https://www.youtube.com/watch?v=oQ60Grn4RYQ">Next.js 注册用户</a></li>
+<li><a href="https://www.youtube.com/watch?v=IkOVe40Sy0U">Next.js速成课程 - 服务器端反应</a></li>
+<li><a href="https://masteringnextjs.com/">掌握 Next.js</a> - 50 多节课视频课程，用于使用 Next.js 和 React 构建应用程序。</li>
+<li><a href="https://www.youtube.com/watch?v=7J4iL1HDshQ&amp;list=PLYSZyzpwBEWSQsrukurP09ksi49H9Yj40">Next.js教程</a> - 深入了解 Next.js教程。</li>
+<li><a href="https://www.youtube.com/playlist?list=PLBnKlKpPeagnT2Cmv4giCbosfrbKnuYTD">Next.js 2020</a>年会议 -2020年的所有视频 Next.js会议</li>
+</ul>
+<h2 id="通讯">通讯</h2>
+<ul>
+<li><a href="https://nextjsnews.com/">Next.js新闻</a> - 每月Next.js时事通讯，展示新的和即将推出的功能，最好的文章，工具和插件。</li>
+<li><a href="https://nextjsnotes.com/">Next.js Notes</a> - 每月Next.js和JavaScript平台新闻。</li>
+</ul>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://geek.zshipu.com/">知识铺</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://geek.zshipu.com/post/react/level01/4.%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1-Next.js-%E6%96%87%E7%AB%A0%E7%B3%BB%E5%88%97/">https://geek.zshipu.com/post/react/level01/4.%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1-Next.js-%E6%96%87%E7%AB%A0%E7%B3%BB%E5%88%97/</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+        <li><strong>免责声明：</strong>本页面内容均来源于站内编辑发布，部分信息来源互联网，并不意味着本站赞同其观点或者证实其内容的真实性，如涉及版权等问题，请立即联系客服进行更改或删除，保证您的合法权益。转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。也可以邮件至 sblig@126.com</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/react/level01/3.Github1000%E4%B8%AA%E9%A1%B6%E7%BA%A7%E7%BB%84%E4%BB%B6%E5%BA%94%E5%AF%B9%E5%90%84%E7%A7%8D%E4%B8%9A%E5%8A%A1%E5%9C%BA%E6%99%AF/">3.Github1000个顶级组件应对各种业务场景</a></li>
+        
+        <li><a href="/post/nexp/css-level-01/css-level-007-CSS%E4%B8%8D%E9%80%8F%E6%98%8E%E5%BA%A6-%E9%80%8F%E6%98%8E%E5%BA%A6/">css-level-007 CSS不透明度-透明度</a></li>
+        
+        <li><a href="/post/nexp/css-level-01/css-level-006-CSS-%E4%B8%ADpxemremvwvh%E5%8D%95%E4%BD%8D%E4%B9%8B%E9%97%B4%E7%9A%84%E5%8C%BA%E5%88%AB%E8%AF%A6%E8%A7%A3/">css-level-006 CSS 中px、em、rem、%、vw、vh单位之间的区别详解</a></li>
+        
+        <li><a href="/post/nexp/css-level-01/css-level-005-CSS%E9%80%89%E6%8B%A9%E5%99%A8/">css-level-005 CSS选择器</a></li>
+        
+        <li><a href="/post/nexp/css-level-01/css-level-004-CSS%E9%A2%9C%E8%89%B2%E4%BD%93%E7%B3%BB-HSL/">css-level-004 CSS颜色体系-HSL</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/react'>react</a></li>
+                
+                <li><a href='/tags/nextjs'>nextjs</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "zshipu/zshipu-geek"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        
+        | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://geek.zshipu.com/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://geek.zshipu.com/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/bi/doris/002-Apache-Doris-%E5%88%9B%E5%BB%BA%E8%A1%A8/" title="002 Apache Doris 创建表">002 Apache Doris 创建表</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/bi/doris/001-Apache-Doris-%E5%88%9B%E5%BB%BA%E6%95%B0%E6%8D%AE%E5%BA%93/" title="001 Apache Doris 创建数据库">001 Apache Doris 创建数据库</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/bi/%E5%A4%A7%E6%95%B0%E6%8D%AE/%E6%95%B0%E6%8D%AE%E4%BD%93%E7%B3%BB%E7%9A%84%E8%A6%81%E4%B9%89%E8%B4%B4%E6%BA%90%E8%A7%84%E8%8C%83%E5%BB%BA%E6%A8%A1%E6%A0%87%E7%AD%BE%E8%AE%BE%E8%AE%A1%E5%BB%BA%E8%AE%BE/" title="BI-数据仓-数据体系的要义：贴源、规范、建模、标签、设计、建设">BI-数据仓-数据体系的要义：贴源、规范、建模、标签、设计、建设</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/bi/doris/Apache-Doris-%E6%98%AF%E4%B8%80%E4%B8%AA%E5%9F%BA%E4%BA%8E-MPP-%E6%9E%B6%E6%9E%84%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E5%AE%9E%E6%97%B6%E7%9A%84%E5%88%86%E6%9E%90%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93/" title="Apache Doris 是一个基于 MPP 架构的高性能、实时的分析型数据库">Apache Doris 是一个基于 MPP 架构的高性能、实时的分析型数据库</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/level01/4.%E5%AE%8C%E5%85%A8%E6%8E%8C%E6%8F%A1-Next.js-%E6%96%87%E7%AB%A0%E7%B3%BB%E5%88%97/" title="4.完全掌握 Next.js 文章系列">4.完全掌握 Next.js 文章系列</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/level01/3.Github1000%E4%B8%AA%E9%A1%B6%E7%BA%A7%E7%BB%84%E4%BB%B6%E5%BA%94%E5%AF%B9%E5%90%84%E7%A7%8D%E4%B8%9A%E5%8A%A1%E5%9C%BA%E6%99%AF/" title="3.Github1000个顶级组件应对各种业务场景">3.Github1000个顶级组件应对各种业务场景</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/react/save01/React.js-%E4%B8%AD%E4%BB%A5%E6%AD%A3%E7%A1%AE%E7%9A%84%E6%96%B9%E5%BC%8F%E5%88%9B%E5%BB%BA%E8%A1%A8%E5%8D%95/" title="React.js 中以正确的方式创建表单">React.js 中以正确的方式创建表单</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/css/%E5%89%8D%E7%AB%AF%E7%9F%A5%E8%AF%86%E7%82%B9%E5%A4%A7%E5%85%A8/" title="前端知识点大全">前端知识点大全</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/web3.0/%E5%85%A8%E6%A0%88-Web3-%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="web3.0 全栈 Web3 开发完整指南">web3.0 全栈 Web3 开发完整指南</a>
+    </li>
+    
+    <li>
+        <a href="https://geek.zshipu.com/post/web3.0/%E5%85%A8%E6%A0%88%E4%BB%A5%E5%A4%AA%E5%9D%8A%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" title="web3.0 全栈以太坊开发完整指南">web3.0 全栈以太坊开发完整指南</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://promotion.aliyun.com/ntms/yunparter/invite.html?source=5176.11533457&amp;userCode=tzm8r4hc" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://geek.zshipu.com/categories/flutter/">flutter (30)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/iOS/">iOS (7)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/unix/">unix (9)</a></li>
+    
+    <li><a href="https://geek.zshipu.com/categories/%E7%AE%97%E6%B3%95/">算法 (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://geek.zshipu.com/tags/BI/">BI</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD/">DDD</a>
+    
+    <a href="https://geek.zshipu.com/tags/DDD%E5%AE%9E%E6%88%98/">DDD实战</a>
+    
+    <a href="https://geek.zshipu.com/tags/DevOps/">DevOps</a>
+    
+    <a href="https://geek.zshipu.com/tags/Doris/">Doris</a>
+    
+    <a href="https://geek.zshipu.com/tags/IM/">IM</a>
+    
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    
+    <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
+    
+    <a href="https://geek.zshipu.com/tags/Monorepo/">Monorepo</a>
+    
+    <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
+    
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
+    
+    <a href="https://geek.zshipu.com/tags/android/">android</a>
+    
+    <a href="https://geek.zshipu.com/tags/apollo/">apollo</a>
+    
+    <a href="https://geek.zshipu.com/tags/css/">css</a>
+    
+    <a href="https://geek.zshipu.com/tags/flutter/">flutter</a>
+    
+    <a href="https://geek.zshipu.com/tags/game/">game</a>
+    
+    <a href="https://geek.zshipu.com/tags/github/">github</a>
+    
+    <a href="https://geek.zshipu.com/tags/gitlab/">gitlab</a>
+    
+    <a href="https://geek.zshipu.com/tags/go/">go</a>
+    
+    <a href="https://geek.zshipu.com/tags/golang/">golang</a>
+    
+    <a href="https://geek.zshipu.com/tags/graphql/">graphql</a>
+    
+    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    
+    <a href="https://geek.zshipu.com/tags/jdbc/">jdbc</a>
+    
+    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    
+    <a href="https://geek.zshipu.com/tags/mybatis/">mybatis</a>
+    
+    <a href="https://geek.zshipu.com/tags/mysql/">mysql</a>
+    
+    <a href="https://geek.zshipu.com/tags/nexp/">nexp</a>
+    
+    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
+    
+    <a href="https://geek.zshipu.com/tags/nodejs/">nodejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/npm/">npm</a>
+    
+    <a href="https://geek.zshipu.com/tags/python/">python</a>
+    
+    <a href="https://geek.zshipu.com/tags/react/">react</a>
+    
+    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    
+    <a href="https://geek.zshipu.com/tags/sharding/">sharding</a>
+    
+    <a href="https://geek.zshipu.com/tags/sqllit/">sqllit</a>
+    
+    <a href="https://geek.zshipu.com/tags/storybook/">storybook</a>
+    
+    <a href="https://geek.zshipu.com/tags/tailwind/">tailwind</a>
+    
+    <a href="https://geek.zshipu.com/tags/vuejs/">vuejs</a>
+    
+    <a href="https://geek.zshipu.com/tags/web/">web</a>
+    
+    <a href="https://geek.zshipu.com/tags/web3/">web3</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%B9%A6%E7%B1%8D/">书籍</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/">人工智能</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%88%86%E8%AF%8D/">分词</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E5%AD%A6%E4%B9%A0/">学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%96%87%E6%91%98/">文摘</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%88%AC%E8%99%AB/">爬虫</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/">用户画像</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E7%BA%BF%E7%A8%8B/">线程</a>
+    
+    <a href="https://geek.zshipu.com/tags/%E8%B5%B7%E6%AD%A5/">起步</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://blog.zshipu.com//" title="知识铺的博客">知识铺的博客</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://geek.zshipu.com/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
