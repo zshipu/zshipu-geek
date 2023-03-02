@@ -146,9 +146,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-  <ul>
-    <li><a href="#让我们-geth-去吧">让我们 GETH 去吧</a></li>
-  </ul>
+<ul>
+<li><a href="#第-0-步-要求">第 0 步：要求</a></li>
+<li><a href="#第一步-设置测试网">第一步：设置测试网</a>
+<ul>
+<li><a href="#让我们-geth-去吧">让我们 GETH 去吧</a></li>
+</ul></li>
+<li><a href="#第-2-步-创世区块">第 2 步：创世区块</a></li>
+<li><a href="#第-3-步-运行本地节点">第 3 步：运行本地节点</a></li>
+<li><a href="#第-4-步-创建帐户">第 4 步：创建帐户</a></li>
+<li><a href="#第-5-步-让我们进行-geth-挖矿">第 5 步：让我们进行 Geth 挖矿</a></li>
+</ul>
 </nav>
     </div>
 </div>
@@ -195,7 +203,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            <h1 id="第-0-步要求">第 0 步：要求</h1>
+            
+
+<h1 id="第-0-步-要求">第 0 步：要求</h1>
+
 <ul>
 <li>您正在使用<strong>MacOS</strong></li>
 <li>您对软件开发有基本的了解</li>
@@ -203,18 +214,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>您对MacOS 终端的使用</strong>有基本的了解。</li>
 <li>你已经安装了<strong>自制软件</strong></li>
 </ul>
-<h1 id="第一步设置测试网">第一步：设置测试网</h1>
+
+<h1 id="第一步-设置测试网">第一步：设置测试网</h1>
+
 <p>虽然我们正在学习以太坊开发的来龙去脉，但我们可能不想用真实的以太币来测试真实的生产网络。</p>
+
 <p>例如，为此目的，有几个以太坊测试网用于此目的； <strong>Rinkeby</strong>和<strong>Morden</strong>；然而，与这个网络进行交互仍然需要我们通过挖矿或从其他用户那里获取以太币来获取以太坊。</p>
+
 <p>虽然我们最终将与公共测试网络合作，但对于像我们这样刚刚起步的初学者来说，这远非理想，而且很难获得大量的以太币。</p>
+
 <p>更好的选择是建立我们的<strong>私人测试网</strong>，我们可以弯曲和扭曲；它还将让我们更深入地了解以太坊网络的内部运作。</p>
+
 <h2 id="让我们-geth-去吧">让我们 GETH 去吧</h2>
+
 <p>我们需要安装 geth，一个 go CLI 客户端，它允许我们在本地运行完整的以太坊节点。</p>
-<pre tabindex="0"><code>brew tap ethereum/ethereum brew install ethereum
-</code></pre><p>我们可以通过键入以下内容来验证所有内容是否正确安装：</p>
-<pre tabindex="0"><code>geth version
-</code></pre><p>这应该为您提供类似于以下内容的输出：</p>
-<pre tabindex="0"><code>Geth
+
+<pre><code>brew tap ethereum/ethereum brew install ethereum
+</code></pre>
+
+<p>我们可以通过键入以下内容来验证所有内容是否正确安装：</p>
+
+<pre><code>geth version
+</code></pre>
+
+<p>这应该为您提供类似于以下内容的输出：</p>
+
+<pre><code>Geth
 Version: 1.7.3-stable
 Architecture: amd64
 Protocol Versions: [63 62]
@@ -223,60 +248,84 @@ Go Version: go1.9.2
 Operating System: darwin
 GOPATH=
 GOROOT=/usr/local/Cellar/go/1.9.2/libexec
-</code></pre><h1 id="第-2-步创世区块">第 2 步：创世区块</h1>
-<p>
-        <img class="mx-auto" alt="image-20220611200010405" src="https://cdn.jsdelivr.net/gh/zshipu/images/202206112000438.png" />   
-    </p>
+</code></pre>
+
+<h1 id="第-2-步-创世区块">第 2 步：创世区块</h1>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202206112000438.png" alt="image-20220611200010405" /></p>
+
 <p>为了开始我们的私人测试网，我们需要一个创世块。每个区块链都需要一个创世块，它本质上是我们区块链的配置文件。</p>
+
 <blockquote>
 <p>创世块是区块链的开始——第一个块，块 0，也是唯一不指向前驱块的块。该协议确保没有其他节点会同意您的区块链版本，除非它们具有相同的创世块，因此您可以创建任意数量的私有测试网区块链！</p>
 </blockquote>
+
 <ol>
 <li>创建项目目录，例如<code>ethereum_0hero</code></li>
 <li>打开您喜欢的编辑器并创建一个名为<code>HeroGenesis.json</code></li>
-<li>复制以下内容并保存文件：</li>
-</ol>
-<pre tabindex="0"><code>{
-    &#34;config&#34;: {
-        &#34;chainId&#34;: 24,
-        &#34;homesteadBlock&#34;: 0,
-        &#34;eip155Block&#34;: 0,
-        &#34;eip158Block&#34;: 0
-    },
-    &#34;nonce&#34;: &#34;0x0000000000000042&#34;,     
-    &#34;timestamp&#34;: &#34;0x0&#34;,
-    &#34;parentHash&#34;: &#34;0x0000000000000000000000000000000000000000000000000000000000000000&#34;,
-    &#34;extraData&#34;: &#34;0x0&#34;,     
-    &#34;gasLimit&#34;: &#34;0x8000000&#34;,     
-    &#34;difficulty&#34;: &#34;0x400&#34;,
-    &#34;mixhash&#34;: &#34;0x0000000000000000000000000000000000000000000000000000000000000000&#34;,
-    &#34;coinbase&#34;: &#34;0x3333333333333333333333333333333333333333&#34;,     
-    &#34;alloc&#34;: {     }
+
+<li><p>复制以下内容并保存文件：</p>
+
+<pre><code>{
+&quot;config&quot;: {
+    &quot;chainId&quot;: 24,
+    &quot;homesteadBlock&quot;: 0,
+    &quot;eip155Block&quot;: 0,
+    &quot;eip158Block&quot;: 0
+},
+&quot;nonce&quot;: &quot;0x0000000000000042&quot;,     
+&quot;timestamp&quot;: &quot;0x0&quot;,
+&quot;parentHash&quot;: &quot;0x0000000000000000000000000000000000000000000000000000000000000000&quot;,
+&quot;extraData&quot;: &quot;0x0&quot;,     
+&quot;gasLimit&quot;: &quot;0x8000000&quot;,     
+&quot;difficulty&quot;: &quot;0x400&quot;,
+&quot;mixhash&quot;: &quot;0x0000000000000000000000000000000000000000000000000000000000000000&quot;,
+&quot;coinbase&quot;: &quot;0x3333333333333333333333333333333333333333&quot;,     
+&quot;alloc&quot;: {     }
 }
-</code></pre><p>如您所见，文件内容是 json 格式，大部分内容是不言自明的，但让我们快速回顾一下每个参数以阐明它们的用途。</p>
+</code></pre></li>
+</ol>
+
+<p>如您所见，文件内容是 json 格式，大部分内容是不言自明的，但让我们快速回顾一下每个参数以阐明它们的用途。</p>
+
 <ul>
 <li><strong>coinbase</strong>：从成功挖掘该区块中收集的所有奖励（以太币）已转移到的 160 位地址。这可以是创世块中的任何内容，因为该值是由矿工在创建新块时设置的。</li>
 <li><strong>timestamp</strong>：一个标量值，等于 Unix time() 函数在此块开始时的合理输出。最后两个块之间的较小周期导致难度级别增加，因此需要额外的计算来找到下一个有效块。</li>
 <li><strong>难度</strong>：定义了挖矿目标，可以根据前一个区块的难度等级和时间戳计算得出。难度越高，矿工为了发现有效区块必须执行的统计计算就越多。该值用于控制区块链的出块时间，使出块频率保持在目标范围内。在测试网络上，我们将此值保持在较低水平以避免在测试期间等待，因为在区块链上执行交易需要发现有效块。</li>
 <li><strong>gasLimit</strong>：一个标量值，等于当前链范围内每个区块的 Gas 支出限制。在我们的例子中，高以避免在测试期间受到此阈值的限制。</li>
 </ul>
+
 <p>最后，配置参数可以确保从一开始就可以进行某些<strong>协议升级</strong>。</p>
+
 <p>有关完整说明，请在<a href="https://ethereum.stackexchange.com/questions/2376/what-does-each-genesis-json-parameter-mean">stackexchange中查看此答案</a></p>
+
 <p>接下来，我们需要通过运行以下命令来初始化我们的链：</p>
-<pre tabindex="0"><code>geth --datadir ./TestNetData init HeroGenesis.json
-</code></pre><p>设置数据目录很重要，否则我们将覆盖<strong>真实以太坊网络</strong>的默认数据目录。</p>
+
+<pre><code>geth --datadir ./TestNetData init HeroGenesis.json
+</code></pre>
+
+<p>设置数据目录很重要，否则我们将覆盖<strong>真实以太坊网络</strong>的默认数据目录。</p>
+
 <p>输出应返回类似于以下内容：</p>
-<pre tabindex="0"><code>WARN [12-22|15:32:55] No etherbase set and no accounts found as default
+
+<pre><code>WARN [12-22|15:32:55] No etherbase set and no accounts found as default
 INFO [12-22|15:32:55] Allocated cache and file handles         database=/Users/.../ethereum_0hero/TestNetData/geth/chaindata cache=16 handles=16
 INFO [12-22|15:32:55] Writing custom genesis block
 INFO [12-22|15:32:55] Successfully wrote genesis state         database=chaindata                                                                 hash=6231b0…a0300b
 INFO [12-22|15:32:55] Allocated cache and file handles         database=/Users/.../ethereum_0hero/TestNetData/geth/lightchaindata cache=16 handles=16
 INFO [12-22|15:32:55] Writing custom genesis block
 INFO [12-22|15:32:55] Successfully wrote genesis state         database=lightchaindata       
-</code></pre><h1 id="第-3-步运行本地节点">第 3 步：运行本地节点</h1>
+</code></pre>
+
+<h1 id="第-3-步-运行本地节点">第 3 步：运行本地节点</h1>
+
 <p>现在我们创建了初始链，我们可以通过执行以下命令来运行它：</p>
-<pre tabindex="0"><code>geth --datadir ./TestNetData --identity &#34;HeroNode1&#34; --rpc --rpcport &#34;8080&#34; --rpccorsdomain &#34;*&#34; --port &#34;30303&#34; --nodiscover --rpcapi &#34;db,eth,net,web3&#34; --maxpeers 0 --networkid 24 console
-</code></pre><p>这个命令做了一些事情：</p>
+
+<pre><code>geth --datadir ./TestNetData --identity &quot;HeroNode1&quot; --rpc --rpcport &quot;8080&quot; --rpccorsdomain &quot;*&quot; --port &quot;30303&quot; --nodiscover --rpcapi &quot;db,eth,net,web3&quot; --maxpeers 0 --networkid 24 console
+</code></pre>
+
+<p>这个命令做了一些事情：</p>
+
 <ol>
 <li>利用我们之前创建的<strong>创世区块</strong></li>
 <li>它使用自定义数据目录而不是默认目录</li>
@@ -285,53 +334,83 @@ INFO [12-22|15:32:55] Successfully wrote genesis state         database=lightcha
 <li>通过将 maxpeers 设置为 0 来禁用网络</li>
 <li>启动 geth 控制台，以便我们可以与区块链/节点进行交互</li>
 </ol>
+
 <p>输出应该类似于以下内容：</p>
-<pre tabindex="0"><code>
+
+<pre><code>
 WARN [12-22|16:10:27] No etherbase set and no accounts found as default
 INFO [12-22|16:10:27] Starting peer-to-peer node               instance=Geth/HeroNode1/v1.7.3-stable/darwin-amd64/go1.9.2
 INFO [12-22|16:10:27] Allocated cache and file handles         database=/Users/.../ethereum_0hero/TestNetData/geth/chaindata cache=128 handles=1024
-INFO [12-22|16:10:27] Initialised chain configuration          config=&#34;{ChainID: 24 Homestead: 0 DAO: &lt;nil&gt; DAOSupport: false EIP150: &lt;nil&gt; EIP155: 0 EIP158: 0 Byzantium: &lt;nil&gt; Engine: unknown}&#34;
+INFO [12-22|16:10:27] Initialised chain configuration          config=&quot;{ChainID: 24 Homestead: 0 DAO: &lt;nil&gt; DAOSupport: false EIP150: &lt;nil&gt; EIP155: 0 EIP158: 0 Byzantium: &lt;nil&gt; Engine: unknown}&quot;
 INFO [12-22|16:10:27] Disk storage enabled for ethash caches   dir=/Users/.../ethereum_0hero/TestNetData/geth/ethash count=3
 INFO [12-22|16:10:27] Disk storage enabled for ethash DAGs     dir=/Users/.../.ethash                                              count=2
-INFO [12-22|16:10:27] Initialising Ethereum protocol           versions=&#34;[63 62]&#34; network=24
+INFO [12-22|16:10:27] Initialising Ethereum protocol           versions=&quot;[63 62]&quot; network=24
 INFO [12-22|16:10:27] Loaded most recent local header          number=0 hash=6231b0…a0300b td=1024
 INFO [12-22|16:10:27] Loaded most recent local full block      number=0 hash=6231b0…a0300b td=1024
 INFO [12-22|16:10:27] Loaded most recent local fast block      number=0 hash=6231b0…a0300b td=1024
 INFO [12-22|16:10:27] Loaded local transaction journal         transactions=0 dropped=0
 INFO [12-22|16:10:27] Regenerated local transaction journal    transactions=0 accounts=0
 INFO [12-22|16:10:27] Starting P2P networking
-INFO [12-22|16:10:27] RLPx listener up                         self=&#34;enode://...f?discport=0&#34;
+INFO [12-22|16:10:27] RLPx listener up                         self=&quot;enode://...f?discport=0&quot;
 INFO [12-22|16:10:27] IPC endpoint opened: /Users/.../ethereum_0hero/TestNetData/geth.ipc
 INFO [12-22|16:10:27] HTTP endpoint opened: http://127.0.0.1:8080
 Welcome to the Geth JavaScript console!
-</code></pre><p>此时，您应该已启动并运行，并且在 geth 控制台中准备好做一些事情，但是什么？</p>
+</code></pre>
+
+<p>此时，您应该已启动并运行，并且在 geth 控制台中准备好做一些事情，但是什么？</p>
+
 <p>好吧，让我们将注意力转移到以下警告：</p>
+
 <blockquote>
 <p>WARN 未设置 etherbase 且未找到默认帐户</p>
 </blockquote>
+
 <p>我们已经启动并运行了节点，但没有任何帐户它不会有太大用处。</p>
-<h1 id="第-4-步创建帐户">第 4 步：创建帐户</h1>
+
+<h1 id="第-4-步-创建帐户">第 4 步：创建帐户</h1>
+
 <p>由于我们已经在 Geth 控制台中，因此更容易直接从那里创建一个帐户，因此在终端中键入以下内容：</p>
-<pre tabindex="0"><code>personal.newAccount()
-</code></pre><p>控制台将要求输入密码<strong>不要丢失！</strong>，并返回 a 如下所示：</p>
-<pre tabindex="0"><code>0xe857331e4e3354bb72b3751cce419c8444e89e17
-</code></pre><p>让我们通过运行来验证该帐户是否存在：</p>
-<pre tabindex="0"><code>&gt; eth.getBalance(&#34;0xe857331e4e3354bb72b3751cce419c8444e89e17&#34;) 0
-</code></pre><p>现在，让我们在该帐户中存入一些以太币。</p>
-<h1 id="第-5-步让我们进行-geth-挖矿">第 5 步：让我们进行 Geth 挖矿</h1>
+
+<pre><code>personal.newAccount()
+</code></pre>
+
+<p>控制台将要求输入密码<strong>不要丢失！</strong>，并返回 a 如下所示：</p>
+
+<pre><code>0xe857331e4e3354bb72b3751cce419c8444e89e17
+</code></pre>
+
+<p>让我们通过运行来验证该帐户是否存在：</p>
+
+<pre><code>&gt; eth.getBalance(&quot;0xe857331e4e3354bb72b3751cce419c8444e89e17&quot;) 0
+</code></pre>
+
+<p>现在，让我们在该帐户中存入一些以太币。</p>
+
+<h1 id="第-5-步-让我们进行-geth-挖矿">第 5 步：让我们进行 Geth 挖矿</h1>
+
 <p>快速回顾：</p>
+
 <ul>
 <li>我们有一个有效的专用网络，其中一个节点在本地运行</li>
 <li>我们在所述专用网络上创建一个测试帐户</li>
 <li>我们在那个账户里没有任何以太币，我们需要修复它</li>
 </ul>
+
 <p><strong>现在，虽然我们可以使用创世区块</strong>轻松地向我们的帐户发行以太币，但让我们玩得开心，并在我们的私人网络上挖掘以太币。</p>
+
 <p>打开一个新的终端选项卡并运行以下命令：</p>
-<pre tabindex="0"><code>get attach ./&lt;DirectoryName&gt;/geth.ipc
-</code></pre><p>这会将我们的第二个终端连接到现有的 geth 实例并打开<strong>Javascript</strong>控制台。在控制台内运行以下命令：</p>
-<pre tabindex="0"><code>miner.setEtherbase(&#34;0xe857331e4e3354bb72b3751cce419c8444e89e17&#34;) miner.start()
-</code></pre><p>如果我们回到我们的第一个终端，我们应该会看到以下情况：</p>
-<pre tabindex="0"><code>INFO [12-22|17:07:55] Updated mining threads                   threads=0
+
+<pre><code>get attach ./&lt;DirectoryName&gt;/geth.ipc
+</code></pre>
+
+<p>这会将我们的第二个终端连接到现有的 geth 实例并打开<strong>Javascript</strong>控制台。在控制台内运行以下命令：</p>
+
+<pre><code>miner.setEtherbase(&quot;0xe857331e4e3354bb72b3751cce419c8444e89e17&quot;) miner.start()
+</code></pre>
+
+<p>如果我们回到我们的第一个终端，我们应该会看到以下情况：</p>
+
+<pre><code>INFO [12-22|17:07:55] Updated mining threads                   threads=0
 INFO [12-22|17:07:55] Transaction pool price threshold updated price=18000000000
 INFO [12-22|17:07:55] Starting mining operation
 INFO [12-22|17:07:55] Commit new mining work                   number=1 txs=0 uncles=0 elapsed=981.307µs
@@ -339,9 +418,16 @@ INFO [12-22|17:07:57] Generating DAG in progress               epoch=0 percentag
 INFO [12-22|17:07:57] Generating DAG in progress               epoch=0 percentage=1 elapsed=1.168s
 INFO [12-22|17:07:58] Generating DAG in progress               epoch=0 percentage=2 elapsed=1.985s
 INFO [12-22|17:07:59] Generating DAG in progress               epoch=0 percentage=3 elapsed=2.586s
-</code></pre><p>让我们回到第二个终端并停止矿机并检查我们的余额：</p>
-<pre tabindex="0"><code>miner.stop() eth.getBalance(&#39;0xe857331e4e3354bb72b3751cce419c8444e89e17&#39;) 75000000000000000000
-</code></pre><p>恭喜！我们现在已经创建了我们的私有网络并开采了我们少量的以太币，并且我们拥有一个有效的网络，我们可以使用它来开发我们的<strong>智能合约</strong>和<strong>DApps</strong>。</p>
+
+</code></pre>
+
+<p>让我们回到第二个终端并停止矿机并检查我们的余额：</p>
+
+<pre><code>miner.stop() eth.getBalance('0xe857331e4e3354bb72b3751cce419c8444e89e17') 75000000000000000000
+</code></pre>
+
+<p>恭喜！我们现在已经创建了我们的私有网络并开采了我们少量的以太币，并且我们拥有一个有效的网络，我们可以使用它来开发我们的<strong>智能合约</strong>和<strong>DApps</strong>。</p>
+
 <p>在本系列的下一篇文章中，我们将开始使用 Solidity 和智能合约进行开发。</p>
 
         </div>
@@ -408,7 +494,7 @@ INFO [12-22|17:07:59] Generating DAG in progress               epoch=0 percentag
 
                     <footer id="footer">
     <div>
-        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        &copy; 2023 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
         
         | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
         
@@ -572,9 +658,9 @@ INFO [12-22|17:07:59] Generating DAG in progress               epoch=0 percentag
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    <a href="">JS</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="">Java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -582,11 +668,11 @@ INFO [12-22|17:07:59] Generating DAG in progress               epoch=0 percentag
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
-    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
     
-    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    <a href="">Nextjs</a>
     
-    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    <a href="https://geek.zshipu.com/tags/ReactJS/">ReactJS</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
@@ -624,7 +710,7 @@ INFO [12-22|17:07:59] Generating DAG in progress               epoch=0 percentag
     
     <a href="https://geek.zshipu.com/tags/nexp/">nexp</a>
     
-    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    <a href="">nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
     
@@ -636,7 +722,7 @@ INFO [12-22|17:07:59] Generating DAG in progress               epoch=0 percentag
     
     <a href="https://geek.zshipu.com/tags/react/">react</a>
     
-    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    <a href="">reactjs</a>
     
     <a href="https://geek.zshipu.com/tags/sharding/">sharding</a>
     

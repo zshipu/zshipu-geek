@@ -146,22 +146,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-  <ul>
-    <li><a href="#netty那点事二netty中的buffer">Netty那点事（二）Netty中的buffer</a></li>
-    <li><a href="#whatbuffer二三事">What：buffer二三事</a></li>
-    <li><a href="#when--wheretcpip协议与buffer">When &amp; Where：TCP/IP协议与buffer</a></li>
-    <li><a href="#whybuffer中的分层思想">Why：Buffer中的分层思想</a></li>
-    <li><a href="#hownetty中的channelbuffer及实现">How：Netty中的ChannelBuffer及实现</a>
-      <ul>
-        <li><a href="#channelbuffer中的readerindex和writerindex">ChannelBuffer中的readerIndex和writerIndex</a></li>
-        <li><a href="#字节序endianness与heapchannelbuffer">字节序Endianness与HeapChannelBuffer</a></li>
-        <li><a href="#dynamicchannelbuffer">DynamicChannelBuffer</a></li>
-        <li><a href="#compositechannelbuffer">CompositeChannelBuffer</a></li>
-        <li><a href="#bytebufferbackedchannelbuffer">ByteBufferBackedChannelBuffer</a></li>
-        <li><a href="#wrappedchannelbuffer">WrappedChannelBuffer</a></li>
-      </ul>
-    </li>
-  </ul>
+<ul>
+<li>
+<ul>
+<li><a href="#netty那点事-二-netty中的buffer">Netty那点事（二）Netty中的buffer</a></li>
+<li><a href="#what-buffer二三事">What：buffer二三事</a></li>
+<li><a href="#when-where-tcp-ip协议与buffer">When &amp; Where：TCP/IP协议与buffer</a></li>
+<li><a href="#why-buffer中的分层思想">Why：Buffer中的分层思想</a></li>
+<li><a href="#how-netty中的channelbuffer及实现">How：Netty中的ChannelBuffer及实现</a>
+<ul>
+<li><a href="#channelbuffer中的readerindex和writerindex">ChannelBuffer中的readerIndex和writerIndex</a></li>
+<li><a href="#字节序endianness与heapchannelbuffer">字节序Endianness与HeapChannelBuffer</a></li>
+<li><a href="#dynamicchannelbuffer">DynamicChannelBuffer</a></li>
+<li><a href="#compositechannelbuffer">CompositeChannelBuffer</a></li>
+<li><a href="#bytebufferbackedchannelbuffer">ByteBufferBackedChannelBuffer</a></li>
+<li><a href="#wrappedchannelbuffer">WrappedChannelBuffer</a></li>
+</ul></li>
+</ul></li>
+</ul>
 </nav>
     </div>
 </div>
@@ -208,225 +210,220 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            <h2 id="netty那点事二netty中的buffer">Netty那点事（二）Netty中的buffer</h2>
+            
+
+<h2 id="netty那点事-二-netty中的buffer">Netty那点事（二）Netty中的buffer</h2>
+
 <p>上一篇文章我们概要介绍了Netty的原理及结构，下面几篇文章我们开始对Netty的各个模块进行比较详细的分析。Netty的结构最底层是buffer机制，这部分也相对独立，我们就先从buffer讲起。</p>
-<h2 id="whatbuffer二三事">What：buffer二三事</h2>
-<p>buffer中文名又叫缓冲区，按照维基百科的解释，是&quot;在数据传输时，在内存里开辟的一块临时保存数据的区域&quot;。它其实是一种化同步为异步的机制，可以解决数据传输的速率不对等以及不稳定的问题。</p>
+
+<h2 id="what-buffer二三事">What：buffer二三事</h2>
+
+<p>buffer中文名又叫缓冲区，按照维基百科的解释，是&rdquo;在数据传输时，在内存里开辟的一块临时保存数据的区域&rdquo;。它其实是一种化同步为异步的机制，可以解决数据传输的速率不对等以及不稳定的问题。</p>
+
 <p>根据这个定义，我们可以知道涉及I/O(特别是I/O写)的地方，基本会有Buffer了。就Java来说，我们非常熟悉的Old I/O&ndash;<code>InputStream</code>&amp;<code>OutputStream</code>系列API，基本都是在内部使用到了buffer。Java课程老师就教过，必须调用<code>OutputStream.flush()</code>，才能保证数据写入生效！</p>
+
 <p>而NIO中则直接将buffer这个概念封装成了对象，其中最常用的大概是ByteBuffer了。于是使用方式变为了：将数据写入Buffer，flip()一下，然后将数据读出来。于是，buffer的概念更加深入人心了！</p>
-<p>Netty中的buffer也不例外。不同的是，Netty的buffer专为网络通讯而生，所以它又叫ChannelBuffer(好吧其实没有什么因果关系…)。我们下面就来讲讲Netty中得buffer。当然，关于Netty，我们必须讲讲它的所谓&quot;Zero-Copy-Capable&quot;机制。</p>
-<h2 id="when--wheretcpip协议与buffer">When &amp; Where：TCP/IP协议与buffer</h2>
+
+<p>Netty中的buffer也不例外。不同的是，Netty的buffer专为网络通讯而生，所以它又叫ChannelBuffer(好吧其实没有什么因果关系…)。我们下面就来讲讲Netty中得buffer。当然，关于Netty，我们必须讲讲它的所谓&rdquo;Zero-Copy-Capable&rdquo;机制。</p>
+
+<h2 id="when-where-tcp-ip协议与buffer">When &amp; Where：TCP/IP协议与buffer</h2>
+
 <p>TCP/IP协议是目前的主流网络协议。它是一个多层协议，最下层是物理层，最上层是应用层(HTTP协议等)，而做Java应用开发，一般只接触TCP以上，即传输层和应用层的内容。这也是Netty的主要应用场景。</p>
-<p>TCP报文有个比较大的特点，就是它传输的时候，会先把应用层的数据项拆开成字节，然后按照自己的传输需要，选择合适数量的字节进行传输。什么叫&quot;自己的传输需要&quot;？首先TCP包有最大长度限制，那么太大的数据项肯定是要拆开的。其次因为TCP以及下层协议会附加一些协议头信息，如果数据项太小，那么可能报文大部分都是没有价值的头信息，这样传输是很不划算的。因此有了收集一定数量的小数据，并打包传输的Nagle算法(这个东东在HTTP协议里会很讨厌，Netty里可以用setOption(&ldquo;tcpNoDelay&rdquo;, true)关掉它)。</p>
+
+<p>TCP报文有个比较大的特点，就是它传输的时候，会先把应用层的数据项拆开成字节，然后按照自己的传输需要，选择合适数量的字节进行传输。什么叫&rdquo;自己的传输需要&rdquo;？首先TCP包有最大长度限制，那么太大的数据项肯定是要拆开的。其次因为TCP以及下层协议会附加一些协议头信息，如果数据项太小，那么可能报文大部分都是没有价值的头信息，这样传输是很不划算的。因此有了收集一定数量的小数据，并打包传输的Nagle算法(这个东东在HTTP协议里会很讨厌，Netty里可以用setOption(&ldquo;tcpNoDelay&rdquo;, true)关掉它)。</p>
+
 <p>这么说可能太学院派了一点，我们举个例子吧：</p>
-<p>发送时，我们这样分3次写入(&rsquo;|&lsquo;表示两个buffer的分隔):</p>
+
+<p>发送时，我们这样分3次写入(&lsquo;|&lsquo;表示两个buffer的分隔):</p>
+
 <pre><code>   +-----+-----+-----+
    | ABC | DEF | GHI |
    +-----+-----+-----+
 </code></pre>
+
 <p>接收时，可能变成了这样:</p>
+
 <pre><code>   +----+-------+---+---+
    | AB | CDEFG | H | I |
    +----+-------+---+---+
 </code></pre>
+
 <p>很好懂吧？可是，说了这么多，跟buffer有个什么关系呢？别急，我们来看下面一部分。</p>
-<h2 id="whybuffer中的分层思想">Why：Buffer中的分层思想</h2>
+
+<h2 id="why-buffer中的分层思想">Why：Buffer中的分层思想</h2>
+
 <p>我们先回到之前的<code>messageReceived</code>方法：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">messageReceived</span><span style="color:#000;font-weight:bold">(</span>
-</span></span><span style="display:flex;"><span>            ChannelHandlerContext ctx<span style="color:#000;font-weight:bold">,</span> MessageEvent e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#998;font-style:italic">// Send back the received message to the remote peer.
-</span></span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"></span>        transferredBytes<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addAndGet</span><span style="color:#000;font-weight:bold">(((</span>ChannelBuffer<span style="color:#000;font-weight:bold">)</span> e<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getMessage</span><span style="color:#000;font-weight:bold">()).</span><span style="color:#008080">readableBytes</span><span style="color:#000;font-weight:bold">());</span>
-</span></span><span style="display:flex;"><span>        e<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getChannel</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">write</span><span style="color:#000;font-weight:bold">(</span>e<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getMessage</span><span style="color:#000;font-weight:bold">());</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>这里<code>MessageEvent.getMessage()</code>默认的返回值是一个<code>ChannelBuffer</code>。我们知道，业务中需要的&quot;Message&quot;，其实是一条应用层级别的完整消息，而一般的buffer工作在传输层，与&quot;Message&quot;是不能对应上的。那么这个ChannelBuffer是什么呢？</p>
+
+<pre><code class="language-java">    public void messageReceived(
+            ChannelHandlerContext ctx, MessageEvent e) {
+        // Send back the received message to the remote peer.
+        transferredBytes.addAndGet(((ChannelBuffer) e.getMessage()).readableBytes());
+        e.getChannel().write(e.getMessage());
+    }
+</code></pre>
+
+<p>这里<code>MessageEvent.getMessage()</code>默认的返回值是一个<code>ChannelBuffer</code>。我们知道，业务中需要的&rdquo;Message&rdquo;，其实是一条应用层级别的完整消息，而一般的buffer工作在传输层，与&rdquo;Message&rdquo;是不能对应上的。那么这个ChannelBuffer是什么呢？</p>
+
 <p>来一个官方给的图，我想这个答案就很明显了：</p>
-<p>
-        <img class="mx-auto" alt="image-20220501195555213" src="https://cdn.jsdelivr.net/gh/zshipu/images/202205011955385.png" />   
-    </p>
-<p>这里可以看到，TCP层HTTP报文被分成了两个ChannelBuffer，这两个Buffer对我们上层的逻辑(HTTP处理)是没有意义的。但是两个ChannelBuffer被组合起来，就成为了一个有意义的HTTP报文，这个报文对应的ChannelBuffer，才是能称之为&quot;Message&quot;的东西。这里用到了一个词&quot;Virtual Buffer&quot;，也就是所谓的&quot;Zero-Copy-Capable Byte Buffer&quot;了。顿时觉得豁然开朗了有没有！</p>
-<p>我这里总结一下，**如果说NIO的Buffer和Netty的ChannelBuffer最大的区别的话，就是前者仅仅是传输上的Buffer，而后者其实是传输Buffer和抽象后的逻辑Buffer的结合。**延伸开来说，NIO仅仅是一个网络传输框架，而Netty是一个网络应用框架，包括网络以及应用的分层结构。</p>
-<p>当然，在Netty里，默认使用<code>ChannelBuffer</code>表示&quot;Message&quot;，不失为一个比较实用的方法，但是<code>MessageEvent.getMessage()</code>是可以存放一个POJO的，这样子抽象程度又高了一些，这个我们在以后讲到<code>ChannelPipeline</code>的时候会说到。</p>
-<h2 id="hownetty中的channelbuffer及实现">How：Netty中的ChannelBuffer及实现</h2>
-<p>好了，终于来到了代码实现部分。之所以啰嗦了这么多，因为我觉得，关于&quot;Zero-Copy-Capable Rich Byte Buffer&quot;，理解为什么需要它，比理解它是怎么实现的，可能要更重要一点。</p>
-<p>我想可能很多朋友跟我一样，喜欢&quot;顺藤摸瓜&quot;式读代码&ndash;找到一个入口，然后顺着查看它的调用，直到理解清楚。很幸运，<code>ChannelBuffers</code>(注意有s!)就是这样一根&quot;藤&quot;，它是所有ChannelBuffer实现类的入口，它提供了很多静态的工具方法来创建不同的Buffer，靠“顺藤摸瓜”式读代码方式，大致能把各种ChannelBuffer的实现类摸个遍。先列一下ChannelBuffer相关类图。</p>
-<p>
-        <img class="mx-auto" alt="image-20220501195629780" src="https://cdn.jsdelivr.net/gh/zshipu/images/202205011956102.png" />   
-    </p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202205011955385.png" alt="image-20220501195555213" /></p>
+
+<p>这里可以看到，TCP层HTTP报文被分成了两个ChannelBuffer，这两个Buffer对我们上层的逻辑(HTTP处理)是没有意义的。但是两个ChannelBuffer被组合起来，就成为了一个有意义的HTTP报文，这个报文对应的ChannelBuffer，才是能称之为&rdquo;Message&rdquo;的东西。这里用到了一个词&rdquo;Virtual Buffer&rdquo;，也就是所谓的&rdquo;Zero-Copy-Capable Byte Buffer&rdquo;了。顿时觉得豁然开朗了有没有！</p>
+
+<p>我这里总结一下，<strong>如果说NIO的Buffer和Netty的ChannelBuffer最大的区别的话，就是前者仅仅是传输上的Buffer，而后者其实是传输Buffer和抽象后的逻辑Buffer的结合。</strong>延伸开来说，NIO仅仅是一个网络传输框架，而Netty是一个网络应用框架，包括网络以及应用的分层结构。</p>
+
+<p>当然，在Netty里，默认使用<code>ChannelBuffer</code>表示&rdquo;Message&rdquo;，不失为一个比较实用的方法，但是<code>MessageEvent.getMessage()</code>是可以存放一个POJO的，这样子抽象程度又高了一些，这个我们在以后讲到<code>ChannelPipeline</code>的时候会说到。</p>
+
+<h2 id="how-netty中的channelbuffer及实现">How：Netty中的ChannelBuffer及实现</h2>
+
+<p>好了，终于来到了代码实现部分。之所以啰嗦了这么多，因为我觉得，关于&rdquo;Zero-Copy-Capable Rich Byte Buffer&rdquo;，理解为什么需要它，比理解它是怎么实现的，可能要更重要一点。</p>
+
+<p>我想可能很多朋友跟我一样，喜欢&rdquo;顺藤摸瓜&rdquo;式读代码&ndash;找到一个入口，然后顺着查看它的调用，直到理解清楚。很幸运，<code>ChannelBuffers</code>(注意有s!)就是这样一根&rdquo;藤&rdquo;，它是所有ChannelBuffer实现类的入口，它提供了很多静态的工具方法来创建不同的Buffer，靠“顺藤摸瓜”式读代码方式，大致能把各种ChannelBuffer的实现类摸个遍。先列一下ChannelBuffer相关类图。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202205011956102.png" alt="image-20220501195629780" /></p>
+
 <p>此外还有<code>WrappedChannelBuffer</code>系列也是继承自<code>AbstractChannelBuffer</code>，图放到了后面。</p>
+
 <h3 id="channelbuffer中的readerindex和writerindex">ChannelBuffer中的readerIndex和writerIndex</h3>
+
 <p>开始以为Netty的ChannelBuffer是对NIO ByteBuffer的一个封装，其实不是的，<strong>它是把ByteBuffer重新实现了一遍</strong>。</p>
+
 <p>以最常用的<code>HeapChannelBuffer</code>为例，其底层也是一个byte[]，与ByteBuffer不同的是，它是可以同时进行读和写的，而不需要使用flip()进行读写切换。ChannelBuffer读写的核心代码在<code>AbstactChannelBuffer</code>里，这里通过readerIndex和writerIndex两个整数，分别指向当前读的位置和当前写的位置，并且，readerIndex总是小于writerIndex的。贴两段代码，让大家能看的更明白一点：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">writeByte</span><span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">int</span> value<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>        setByte<span style="color:#000;font-weight:bold">(</span>writerIndex <span style="color:#000;font-weight:bold">++,</span> value<span style="color:#000;font-weight:bold">);</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">byte</span> <span style="color:#900;font-weight:bold">readByte</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>readerIndex <span style="color:#000;font-weight:bold">==</span> writerIndex<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> IndexOutOfBoundsException<span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;Readable byte limit exceeded: &#34;</span>
-</span></span><span style="display:flex;"><span>                    <span style="color:#000;font-weight:bold">+</span> readerIndex<span style="color:#000;font-weight:bold">);</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> getByte<span style="color:#000;font-weight:bold">(</span>readerIndex <span style="color:#000;font-weight:bold">++);</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">writableBytes</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> capacity<span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">-</span> writerIndex<span style="color:#000;font-weight:bold">;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>    
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">readableBytes</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> writerIndex <span style="color:#000;font-weight:bold">-</span> readerIndex<span style="color:#000;font-weight:bold">;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>我倒是觉得这样的方式非常自然，比单指针与flip()要更加好理解一些。AbstactChannelBuffer还有两个相应的mark指针<code>markedReaderIndex</code>和<code>markedWriterIndex</code>，跟NIO的原理是一样的，这里不再赘述了。</p>
+
+<pre><code class="language-java">    public void writeByte(int value) {
+        setByte(writerIndex ++, value);
+    }
+
+    public byte readByte() {
+        if (readerIndex == writerIndex) {
+            throw new IndexOutOfBoundsException(&quot;Readable byte limit exceeded: &quot;
+                    + readerIndex);
+        }
+        return getByte(readerIndex ++);
+    }
+
+    public int writableBytes() {
+        return capacity() - writerIndex;
+    }
+    
+    public int readableBytes() {
+        return writerIndex - readerIndex;
+    }
+</code></pre>
+
+<p>我倒是觉得这样的方式非常自然，比单指针与flip()要更加好理解一些。AbstactChannelBuffer还有两个相应的mark指针<code>markedReaderIndex</code>和<code>markedWriterIndex</code>，跟NIO的原理是一样的，这里不再赘述了。</p>
+
 <h3 id="字节序endianness与heapchannelbuffer">字节序Endianness与HeapChannelBuffer</h3>
+
 <p>在创建Buffer时，我们注意到了这样一个方法：<code>public static ChannelBuffer buffer(ByteOrder endianness, int capacity);</code>，其中<code>ByteOrder</code>是什么意思呢？</p>
+
 <p>这里有个很基础的概念：字节序(ByteOrder/Endianness)。它规定了多余一个字节的数字(int啊long什么的)，如何在内存中表示。BIG_ENDIAN(大端序)表示高位在前，整型数<code>12</code>会被存储为<code>0 0 0 12</code>四字节，而LITTLE_ENDIAN则正好相反。可能搞C/C++的程序员对这个会比较熟悉，而Javaer则比较陌生一点，因为Java已经把内存给管理好了。但是在网络编程方面，根据协议的不同，不同的字节序也可能会被用到。目前大部分协议还是采用大端序，可参考<a href="http://tools.ietf.org/html/rfc1700">RFC1700</a>。</p>
+
 <p>了解了这些知识，我们也很容易就知道为什么会有<code>BigEndianHeapChannelBuffer</code>和<code>LittleEndianHeapChannelBuffer</code>了！</p>
+
 <h3 id="dynamicchannelbuffer">DynamicChannelBuffer</h3>
+
 <p>DynamicChannelBuffer是一个很方便的Buffer，之所以叫Dynamic是因为它的长度会根据内容的长度来扩充，你可以像使用ArrayList一样，无须关心其容量。实现自动扩容的核心在于<code>ensureWritableBytes</code>方法，算法很简单：在写入前做容量检查，容量不够时，新建一个容量x2的buffer，跟ArrayList的扩容是相同的。贴一段代码吧(为了代码易懂，这里我删掉了一些边界检查，只保留主逻辑)：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">writeByte</span><span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">int</span> value<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>        ensureWritableBytes<span style="color:#000;font-weight:bold">(</span>1<span style="color:#000;font-weight:bold">);</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">super</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">writeByte</span><span style="color:#000;font-weight:bold">(</span>value<span style="color:#000;font-weight:bold">);</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">ensureWritableBytes</span><span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">int</span> minWritableBytes<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>minWritableBytes <span style="color:#000;font-weight:bold">&lt;=</span> writableBytes<span style="color:#000;font-weight:bold">())</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">return</span><span style="color:#000;font-weight:bold">;</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#458;font-weight:bold">int</span> newCapacity <span style="color:#000;font-weight:bold">=</span> capacity<span style="color:#000;font-weight:bold">();</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#458;font-weight:bold">int</span> minNewCapacity <span style="color:#000;font-weight:bold">=</span> writerIndex<span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">+</span> minWritableBytes<span style="color:#000;font-weight:bold">;</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">while</span> <span style="color:#000;font-weight:bold">(</span>newCapacity <span style="color:#000;font-weight:bold">&lt;</span> minNewCapacity<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>            newCapacity <span style="color:#000;font-weight:bold">&lt;&lt;=</span> 1<span style="color:#000;font-weight:bold">;</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        ChannelBuffer newBuffer <span style="color:#000;font-weight:bold">=</span> factory<span style="color:#000;font-weight:bold">().</span><span style="color:#008080">getBuffer</span><span style="color:#000;font-weight:bold">(</span>order<span style="color:#000;font-weight:bold">(),</span> newCapacity<span style="color:#000;font-weight:bold">);</span>
-</span></span><span style="display:flex;"><span>        newBuffer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">writeBytes</span><span style="color:#000;font-weight:bold">(</span>buffer<span style="color:#000;font-weight:bold">,</span> 0<span style="color:#000;font-weight:bold">,</span> writerIndex<span style="color:#000;font-weight:bold">());</span>
-</span></span><span style="display:flex;"><span>        buffer <span style="color:#000;font-weight:bold">=</span> newBuffer<span style="color:#000;font-weight:bold">;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="compositechannelbuffer">CompositeChannelBuffer</h3>
-<p><code>CompositeChannelBuffer</code>是由多个ChannelBuffer组合而成的，可以看做一个整体进行读写。这里有一个技巧：CompositeChannelBuffer并不会开辟新的内存并直接复制所有ChannelBuffer内容，而是直接保存了所有ChannelBuffer的引用，并在子ChannelBuffer里进行读写，从而实现了&quot;Zero-Copy-Capable&quot;了。来段简略版的代码吧：</p>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>	<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">CompositeChannelBuffer</span><span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	    <span style="color:#998;font-style:italic">//components保存所有内部ChannelBuffer
-</span></span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"></span>	    <span style="color:#000;font-weight:bold">private</span> ChannelBuffer<span style="color:#000;font-weight:bold">[]</span> components<span style="color:#000;font-weight:bold">;</span>
-</span></span><span style="display:flex;"><span>	    <span style="color:#998;font-style:italic">//indices记录在整个CompositeChannelBuffer中，每个components的起始位置
-</span></span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"></span>	    <span style="color:#000;font-weight:bold">private</span> <span style="color:#458;font-weight:bold">int</span><span style="color:#000;font-weight:bold">[]</span> indices<span style="color:#000;font-weight:bold">;</span>
-</span></span><span style="display:flex;"><span>	    <span style="color:#998;font-style:italic">//缓存上一次读写的componentId
-</span></span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"></span>	    <span style="color:#000;font-weight:bold">private</span> <span style="color:#458;font-weight:bold">int</span> lastAccessedComponentId<span style="color:#000;font-weight:bold">;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">byte</span> <span style="color:#900;font-weight:bold">getByte</span><span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">int</span> index<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>	        <span style="color:#998;font-style:italic">//通过indices中记录的位置索引到对应第几个子Buffer
-</span></span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"></span>	        <span style="color:#458;font-weight:bold">int</span> componentId <span style="color:#000;font-weight:bold">=</span> componentId<span style="color:#000;font-weight:bold">(</span>index<span style="color:#000;font-weight:bold">);</span>
-</span></span><span style="display:flex;"><span>	        <span style="color:#000;font-weight:bold">return</span> components<span style="color:#000;font-weight:bold">[</span>componentId<span style="color:#000;font-weight:bold">].</span><span style="color:#008080">getByte</span><span style="color:#000;font-weight:bold">(</span>index <span style="color:#000;font-weight:bold">-</span> indices<span style="color:#000;font-weight:bold">[</span>componentId<span style="color:#000;font-weight:bold">]);</span>
-</span></span><span style="display:flex;"><span>	    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setByte</span><span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">int</span> index<span style="color:#000;font-weight:bold">,</span> <span style="color:#458;font-weight:bold">int</span> value<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>	        <span style="color:#458;font-weight:bold">int</span> componentId <span style="color:#000;font-weight:bold">=</span> componentId<span style="color:#000;font-weight:bold">(</span>index<span style="color:#000;font-weight:bold">);</span>
-</span></span><span style="display:flex;"><span>	        components<span style="color:#000;font-weight:bold">[</span>componentId<span style="color:#000;font-weight:bold">].</span><span style="color:#008080">setByte</span><span style="color:#000;font-weight:bold">(</span>index <span style="color:#000;font-weight:bold">-</span> indices<span style="color:#000;font-weight:bold">[</span>componentId<span style="color:#000;font-weight:bold">],</span> value<span style="color:#000;font-weight:bold">);</span>
-</span></span><span style="display:flex;"><span>	    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#000;font-weight:bold">}</span>		
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>查找componentId的算法再次不作介绍了，大家自己实现起来也不会太难。值得一提的是，基于ChannelBuffer连续读写的特性，使用了顺序查找(而不是二分查找)，并且用<code>lastAccessedComponentId</code>来进行缓存。</p>
+
+<pre><code class="language-java">    public void writeByte(int value) {
+        ensureWritableBytes(1);
+        super.writeByte(value);
+    }
+
+    public void ensureWritableBytes(int minWritableBytes) {
+        if (minWritableBytes &lt;= writableBytes()) {
+            return;
+        }
+
+        int newCapacity = capacity();
+        int minNewCapacity = writerIndex() + minWritableBytes;
+        while (newCapacity &lt; minNewCapacity) {
+            newCapacity &lt;&lt;= 1;
+        }
+
+        ChannelBuffer newBuffer = factory().getBuffer(order(), newCapacity);
+        newBuffer.writeBytes(buffer, 0, writerIndex());
+        buffer = newBuffer;
+    }
+</code></pre>
+
+<h3 id="compositechannelbuffer">CompositeChannelBuffer</h3>
+
+<p><code>CompositeChannelBuffer</code>是由多个ChannelBuffer组合而成的，可以看做一个整体进行读写。这里有一个技巧：CompositeChannelBuffer并不会开辟新的内存并直接复制所有ChannelBuffer内容，而是直接保存了所有ChannelBuffer的引用，并在子ChannelBuffer里进行读写，从而实现了&rdquo;Zero-Copy-Capable&rdquo;了。来段简略版的代码吧：</p>
+
+<pre><code class="language-java">	public class CompositeChannelBuffer{
+
+	    //components保存所有内部ChannelBuffer
+	    private ChannelBuffer[] components;
+	    //indices记录在整个CompositeChannelBuffer中，每个components的起始位置
+	    private int[] indices;
+	    //缓存上一次读写的componentId
+	    private int lastAccessedComponentId;
+
+	    public byte getByte(int index) {
+	        //通过indices中记录的位置索引到对应第几个子Buffer
+	        int componentId = componentId(index);
+	        return components[componentId].getByte(index - indices[componentId]);
+	    }
+
+	    public void setByte(int index, int value) {
+	        int componentId = componentId(index);
+	        components[componentId].setByte(index - indices[componentId], value);
+	    }
+
+	}		
+</code></pre>
+
+<p>查找componentId的算法再次不作介绍了，大家自己实现起来也不会太难。值得一提的是，基于ChannelBuffer连续读写的特性，使用了顺序查找(而不是二分查找)，并且用<code>lastAccessedComponentId</code>来进行缓存。</p>
+
 <h3 id="bytebufferbackedchannelbuffer">ByteBufferBackedChannelBuffer</h3>
+
 <p>前面说ChannelBuffer是自己的实现的，其实只说对了一半。<code>ByteBufferBackedChannelBuffer</code>就是封装了NIO ByteBuffer的类，用于实现堆外内存的Buffer(使用NIO的<code>DirectByteBuffer</code>)。当然，其实它也可以放其他的ByteBuffer的实现类。代码实现就不说了，也没啥可说的。</p>
+
 <h3 id="wrappedchannelbuffer">WrappedChannelBuffer</h3>
-<p>
-        <img class="mx-auto" alt="image-20220501195653920" src="https://cdn.jsdelivr.net/gh/zshipu/images/202205011956144.png" />   
-    </p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/202205011956144.png" alt="image-20220501195653920" /></p>
+
 <p><code>WrappedChannelBuffer</code>都是几个对已有ChannelBuffer进行包装，完成特定功能的类。代码不贴了，实现都比较简单，列一下功能吧。</p>
-<!-- raw HTML omitted -->
+
+<table>
+    <tr>
+        <td width="100">类名</td>
+        <td width="100">入口</td>
+        <td>功能</td>
+    </tr>
+    <tr>
+        <td width="100">SlicedChannelBuffer</td>
+        <td>ChannelBuffer.slice()<br>
+        ChannelBuffer.slice(int,int)</td>
+        <td>某个ChannelBuffer的一部分</td>
+    </tr>
+    <tr>
+        <td width="100">TruncatedChannelBuffer</td>
+        <td>ChannelBuffer.slice()<br>        
+        ChannelBuffer.slice(int,int)</td>
+        <td>某个ChannelBuffer的一部分，
+        可以理解为其实位置为0的SlicedChannelBuffer</td>
+    </tr>
+    <tr>
+        <td width="100">DuplicatedChannelBuffer</td>
+        <td>ChannelBuffer.duplicate()</td>
+        <td>与某个ChannelBuffer使用同样的存储，
+        区别是有自己的index</td>
+    </tr>
+    <tr>
+        <td width="100">ReadOnlyChannelBuffer</td>
+        <td>ChannelBuffers.unmodifiableBuffer(ChannelBuffer)</td>
+        <td>只读，你懂的</td>
+    </tr>
+</table>
+
 <p>可以看到，关于实现方面，Netty 3.7的buffer相关内容还是比较简单的，也没有太多费脑细胞的地方。</p>
+
 <p>而Netty 4.0之后就不同了。4.0，ChannelBuffer改名ByteBuf，成了单独项目buffer，并且为了性能优化，加入了BufferPool之类的机制，已经变得比较复杂了(本质倒没怎么变)。性能优化是个很复杂的事情，研究源码时，建议先避开这些东西，除非你对算法情有独钟。举个例子，Netty4.0里为了优化，将Map换成了Java 8里6000行的<a href="https://github.com/netty/netty/blob/master/common/src/main/java/io/netty/util/internal/chmv8/ConcurrentHashMapV8.java">ConcurrentHashMapV8</a>，你们感受一下…</p>
+
 <p>参考资料：</p>
+
 <ul>
 <li>TCP/IP协议 <a href="http://zh.wikipedia.org/zh-cn/TCP/IP%E5%8D%8F%E8%AE%AE">http://zh.wikipedia.org/zh-cn/TCP/IP%E5%8D%8F%E8%AE%AE</a></li>
 <li>Data_buffer <a href="http://en.wikipedia.org/wiki/Data_buffer">http://en.wikipedia.org/wiki/Data_buffer</a></li>
@@ -497,7 +494,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                     <footer id="footer">
     <div>
-        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        &copy; 2023 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
         
         | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
         
@@ -661,9 +658,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    <a href="">JS</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="">Java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -671,11 +668,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
-    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
     
-    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    <a href="">Nextjs</a>
     
-    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    <a href="https://geek.zshipu.com/tags/ReactJS/">ReactJS</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
@@ -713,7 +710,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/nexp/">nexp</a>
     
-    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    <a href="">nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
     
@@ -725,7 +722,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/react/">react</a>
     
-    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    <a href="">reactjs</a>
     
     <a href="https://geek.zshipu.com/tags/sharding/">sharding</a>
     

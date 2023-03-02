@@ -146,15 +146,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-  <ul>
-    <li><a href="#2-数据获取">2. 数据获取</a>
-      <ul>
-        <li><a href="#http-请求">HTTP 请求</a></li>
-        <li><a href="#http-响应">HTTP 响应</a></li>
-        <li><a href="#tcp-慢启动和拥塞算法">TCP 慢启动和拥塞算法</a></li>
-      </ul>
-    </li>
-  </ul>
+<ul>
+<li>
+<ul>
+<li><a href="#2-数据获取">2. 数据获取</a>
+<ul>
+<li><a href="#http-请求">HTTP 请求</a></li>
+<li><a href="#tcp-慢启动和拥塞算法">TCP 慢启动和拥塞算法</a></li>
+</ul></li>
+</ul></li>
+</ul>
 </nav>
     </div>
 </div>
@@ -201,75 +202,99 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            <p>在上一篇文章中，我们谈到<code>navigation</code>了浏览器显示网站的第一步。今天我们将进入下一步，看看如何<code>resources get fetched</code>。</p>
+            
+
+<p>在上一篇文章中，我们谈到<code>navigation</code>了浏览器显示网站的第一步。今天我们将进入下一步，看看如何<code>resources get fetched</code>。</p>
+
 <h2 id="2-数据获取">2. 数据获取</h2>
+
 <h3 id="http-请求">HTTP 请求</h3>
+
 <p>在我们与服务器建立安全连接后，浏览器将发送一个初始的<code>HTTP GET request</code>. 首先，浏览器将请求<code>HTML</code>页面的标记 ( ) 文档。它将使用 HTTP 协议执行此操作。</p>
+
 <blockquote>
-<pre tabindex="0"><code>HTTP (Hypertext Transfer Protocol) is a protocol for fetching resources such as HTML documents. It is the foundation of any data exchange on the Web and it is a client-server protocol, which means requests are initiated by the recipient, usually the Web browser.
-</code></pre></blockquote>
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--lEYcHGlH--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/c842u6z95fugi51kkxgo.png">
-        <img class="mx-auto" alt="图片描述" src="https://cdn.jsdelivr.net/gh/zshipu/images/c842u6z95fugi51kkxgo.png" />   
-    </a></p>
-<p><strong>该方法</strong>- 例如：POST、GET、PUT、PATCH、DELETE 等
-<strong>URI</strong> - 代表<code>Uniform Resource Identifier</code>. URI 用于识别 Internet 上的抽象或物理资源，如网站或电子邮件地址等资源。一个 URI 最多可以包含 5 个部分：</p>
-<ul>
-<li>scheme：用来表示正在使用什么协议</li>
-<li>权限：用于标识域</li>
-<li>path：用于显示资源的确切路径</li>
-<li>查询：用于表示请求动作</li>
-<li>片段：用于引用资源的一部分</li>
-</ul>
-<pre tabindex="0"><code>// URI parts
-scheme :// authority path ? query # fragment
+<pre><code>&gt; HTTP (Hypertext Transfer Protocol) is a protocol for fetching resources such as HTML documents. It is the foundation of any data exchange on the Web and it is a client-server protocol, which means requests are initiated by the recipient, usually the Web browser.
+&gt; ```
 
-//URI example
-https://example.com/users/user?name=Alice#address
+[![图片描述](https://cdn.jsdelivr.net/gh/zshipu/images/c842u6z95fugi51kkxgo.png)](https://res.cloudinary.com/practicaldev/image/fetch/s--lEYcHGlH--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/c842u6z95fugi51kkxgo.png)
 
-https: // scheme name
+**该方法**- 例如：POST、GET、PUT、PATCH、DELETE 等
+**URI** - 代表`Uniform Resource Identifier`. URI 用于识别 Internet 上的抽象或物理资源，如网站或电子邮件地址等资源。一个 URI 最多可以包含 5 个部分：
+
+- scheme：用来表示正在使用什么协议
+- 权限：用于标识域
+- path：用于显示资源的确切路径
+- 查询：用于表示请求动作
+- 片段：用于引用资源的一部分
+
+</code></pre>
+
+<p>// URI parts
+scheme :// authority path ? query # fragment</p>
+</blockquote>
+
+<p>//URI example
+<a href="https://example.com/users/user?name=Alice#address">https://example.com/users/user?name=Alice#address</a></p>
+
+<p>https: // scheme name
 example.com // authority
 users/user // path
 name=Alice // query
-address // fragment
-</code></pre><p><strong>HTTP 标头字段</strong>- 是客户端程序和服务器在每个 HTTP 请求和响应上发送和接收的字符串列表（它们通常对最终用户不可见）。在请求的情况下，它们包含有关要获取的资源或请求资源的浏览器的更多信息。</p>
-<p>如果您想查看这些标头的外观，请转到 Chrome 并打开开发人员工具 (F12)。转到网络选项卡并选择<code>FETCH/XHR</code>。在下面的屏幕截图中，我刚刚进行了 Google 搜索，<code>Palm Springs</code>请求标头如下所示：</p>
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--8ebzn6sx--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ls9p1hjw8n3q328d72qu.PNG">
-        <img class="mx-auto" alt="图片描述" src="https://cdn.jsdelivr.net/gh/zshipu/images/ls9p1hjw8n3q328d72qu.PNG" />   
-    </a></p>
-<h3 id="http-响应">HTTP 响应</h3>
-<p>服务器收到请求后，将对其进行处理并以<code>HTTP response</code>. 附加到响应的正文中，我们可以找到所有相关的标题和我们请求的 HTML 文档的内容。</p>
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--imajKMhp--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/e4s4md4r02wmb3t8y9ef.png">
-        <img class="mx-auto" alt="图片描述" src="https://cdn.jsdelivr.net/gh/zshipu/images/e4s4md4r02wmb3t8y9ef.png" />   
-    </a></p>
-<p><strong>状态码</strong>- 例如：200、400、401、504 网关超时等（我们的目标是<code>200</code>状态码，因为它告诉我们一切正常，请求成功）
-<strong>响应头字段</strong>- 保存有关响应的附加信息，例如其位置或关于提供它的服务器。</p>
-<p>文档示例<code>HTML</code>可能类似于：</p>
-<pre tabindex="0"><code>&lt;!doctype HTML&gt;
-&lt;html&gt;
- &lt;head&gt;
-  &lt;meta charset=&#34;UTF-8&#34;&gt;
-    &lt;meta name=&#34;viewport&#34; content=&#34;width=device-width, initial-scale=1.0&#34;&gt;
-  &lt;meta http-equiv=&#34;X-UA-Compatible&#34; content=&#34;ie=edge&#34;&gt;
-  &lt;title&gt;This is my page&lt;/title&gt;
-  &lt;link rel=&#34;stylesheet&#34; src=&#34;styles.css&#34;/&gt;
-  &lt;script src=&#34;mainScripts.js&#34;&gt;&lt;/script&gt;
-&lt;/head&gt;
-&lt;body&gt;
-  &lt;h1 class=&#34;heading&#34;&gt;This is my page&lt;/h1&gt;
-  &lt;p&gt;A paragraph with a &lt;a href=&#34;https://example.com/about&#34;&gt;link&lt;/a&gt;&lt;/p&gt;
-  &lt;div&gt;
-    &lt;img src=&#34;myImage.jpg&#34; alt=&#34;image description&#34;/&gt;
-  &lt;/div&gt;
-  &lt;script src=&#34;sideEffectsScripts.js&#34;&gt;&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><p>对于我之前提到的同一个谷歌搜索，它是<code>reponse headers</code>这样的：</p>
-<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--tqqcphXR--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/2ekbshftg82362sbalaj.PNG">
-        <img class="mx-auto" alt="图片描述" src="https://cdn.jsdelivr.net/gh/zshipu/images/2ekbshftg82362sbalaj.PNG" />   
-    </a></p>
+address // fragment</p>
+
+<pre><code>
+
+
+**HTTP 标头字段**- 是客户端程序和服务器在每个 HTTP 请求和响应上发送和接收的字符串列表（它们通常对最终用户不可见）。在请求的情况下，它们包含有关要获取的资源或请求资源的浏览器的更多信息。
+
+如果您想查看这些标头的外观，请转到 Chrome 并打开开发人员工具 (F12)。转到网络选项卡并选择`FETCH/XHR`。在下面的屏幕截图中，我刚刚进行了 Google 搜索，`Palm Springs`请求标头如下所示：
+
+[![图片描述](https://cdn.jsdelivr.net/gh/zshipu/images/ls9p1hjw8n3q328d72qu.PNG)](https://res.cloudinary.com/practicaldev/image/fetch/s--8ebzn6sx--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ls9p1hjw8n3q328d72qu.PNG)
+
+### HTTP 响应
+
+服务器收到请求后，将对其进行处理并以`HTTP response`. 附加到响应的正文中，我们可以找到所有相关的标题和我们请求的 HTML 文档的内容。
+
+[![图片描述](https://cdn.jsdelivr.net/gh/zshipu/images/e4s4md4r02wmb3t8y9ef.png)](https://res.cloudinary.com/practicaldev/image/fetch/s--imajKMhp--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/e4s4md4r02wmb3t8y9ef.png)
+
+**状态码**- 例如：200、400、401、504 网关超时等（我们的目标是`200`状态码，因为它告诉我们一切正常，请求成功）
+**响应头字段**- 保存有关响应的附加信息，例如其位置或关于提供它的服务器。
+
+文档示例`HTML`可能类似于：
+
+</code></pre>
+
+<p>&lt;!doctype HTML&gt;
+<html>
+ <head>
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>This is my page</title>
+  <link rel="stylesheet" src="styles.css"/>
+  <script src="mainScripts.js"></script>
+</head>
+<body>
+  <h1 class="heading">This is my page</h1>
+  <p>A paragraph with a <a href="https://example.com/about">link</a></p>
+  <div>
+    <img src="myImage.jpg" alt="image description"/>
+  </div>
+  <script src="sideEffectsScripts.js"></script>
+</body>
+</html>
+```</p>
+
+<p>对于我之前提到的同一个谷歌搜索，它是<code>reponse headers</code>这样的：</p>
+
+<p><a href="https://res.cloudinary.com/practicaldev/image/fetch/s--tqqcphXR--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/2ekbshftg82362sbalaj.PNG"><img src="https://cdn.jsdelivr.net/gh/zshipu/images/2ekbshftg82362sbalaj.PNG" alt="图片描述" /></a></p>
+
 <p>如果我们看一下 HTML 文档，我们会看到它引用了不同<code>CSS</code>的<code>Javascript</code>文件。在浏览器不会遇到这些链接之前，不会请求这些文件，但这不会发生在这一步，而是在<code>parsing</code>我们将在下一篇文章中讨论的阶段。此时，仅从服务器请求和接收 HTML。</p>
+
 <p>此初始请求的响应包含接收到的第一个数据字节。<code>Time to First Byte</code>(TTFB) 是从用户提出请求（通过在地址栏中输入网站名称）到收到第一个 HTML 数据包（通常为 14kb）之间的时间。</p>
+
 <h3 id="tcp-慢启动和拥塞算法">TCP 慢启动和拥塞算法</h3>
+
 <p><code>TCP slow start</code>是一种平衡网络连接速度的算法。第一个数据包为 14kb（或更小），其工作方式是逐渐增加传输的数据量，直到达到预定阈值。从服务器接收到每个数据包后，客户端以<code>ACK message</code>. 由于连接的容量有限，如果服务器发送太多数据包太快，它们将被丢弃。客户端不会发送任何内容<code>ACK messages</code>，因此服务器会将其解释为拥塞。这就是<code>congestion algorithms</code>发挥作用的地方。它们监视此已发送数据包和 ACK 消息流，以确定将流量发送到网络的速率并创建稳定的流量流。</p>
 
         </div>
@@ -336,7 +361,7 @@ address // fragment
 
                     <footer id="footer">
     <div>
-        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        &copy; 2023 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
         
         | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
         
@@ -500,9 +525,9 @@ address // fragment
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    <a href="">JS</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="">Java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -510,11 +535,11 @@ address // fragment
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
-    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
     
-    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    <a href="">Nextjs</a>
     
-    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    <a href="https://geek.zshipu.com/tags/ReactJS/">ReactJS</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
@@ -552,7 +577,7 @@ address // fragment
     
     <a href="https://geek.zshipu.com/tags/nexp/">nexp</a>
     
-    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    <a href="">nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
     
@@ -564,7 +589,7 @@ address // fragment
     
     <a href="https://geek.zshipu.com/tags/react/">react</a>
     
-    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    <a href="">reactjs</a>
     
     <a href="https://geek.zshipu.com/tags/sharding/">sharding</a>
     

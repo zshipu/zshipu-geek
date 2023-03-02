@@ -146,14 +146,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-  <ul>
-    <li><a href="#23-建表">2.3 建表</a>
-      <ul>
-        <li><a href="#231-单分区">2.3.1 单分区</a></li>
-        <li><a href="#232-复合分区">2.3.2 复合分区</a></li>
-      </ul>
-    </li>
-  </ul>
+<ul>
+<li>
+<ul>
+<li><a href="#2-3-建表">2.3 建表</a>
+<ul>
+<li><a href="#2-3-1-单分区">2.3.1 单分区</a></li>
+<li><a href="#2-3-2-复合分区">2.3.2 复合分区</a></li>
+</ul></li>
+</ul></li>
+</ul>
 </nav>
     </div>
 </div>
@@ -200,85 +202,117 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            <h2 id="23-建表">2.3 建表</h2>
+            
+
+<h2 id="2-3-建表">2.3 建表</h2>
+
 <p>使用 CREATE TABLE 命令建立一个表(Table)。更多详细参数可以查看:</p>
-<pre tabindex="0"><code>HELP CREATE TABLE;
-</code></pre><p>首先切换数据库:</p>
-<pre tabindex="0"><code>USE example_db;
-</code></pre><p>Doris支持支持单分区和复合分区两种建表方式。</p>
-<h3 id="231-单分区">2.3.1 单分区</h3>
+
+<pre><code>HELP CREATE TABLE;
+</code></pre>
+
+<p>首先切换数据库:</p>
+
+<pre><code>USE example_db;
+</code></pre>
+
+<p>Doris支持支持单分区和复合分区两种建表方式。</p>
+
+<h3 id="2-3-1-单分区">2.3.1 单分区</h3>
+
 <p>建立一个名字为 table1 的逻辑表。分桶列为 siteid，桶数为 10。</p>
+
 <p>这个表的 schema 如下：</p>
-<pre tabindex="0"><code>siteid：类型是INT（4字节）, 默认值为10
+
+<pre><code>siteid：类型是INT（4字节）, 默认值为10
 citycode：类型是SMALLINT（2字节）
 username：类型是VARCHAR, 最大长度为32, 默认值为空字符串
 pv：类型是BIGINT（8字节）, 默认值是0; 这是一个指标列, Doris内部会对指标列做聚合操作, 这个列的聚合方法是求和（SUM）
-</code></pre><p>建表语句如下:</p>
-<pre tabindex="0"><code>CREATE TABLE table1
+</code></pre>
+
+<p>建表语句如下:</p>
+
+<pre><code>CREATE TABLE table1
 (
-    siteid INT DEFAULT &#39;10&#39;,
+    siteid INT DEFAULT '10',
     citycode SMALLINT,
-    username VARCHAR(32) DEFAULT &#39;&#39;,
-    pv BIGINT SUM DEFAULT &#39;0&#39;
+    username VARCHAR(32) DEFAULT '',
+    pv BIGINT SUM DEFAULT '0'
 )
 AGGREGATE KEY(siteid, citycode, username)
 DISTRIBUTED BY HASH(siteid) BUCKETS 10
-PROPERTIES(&#34;replication_num&#34; = &#34;1&#34;);
-</code></pre><p>
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/238f326f4a97277209b94e52cf89881e.png" />   
-    </p>
-<p>
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/fae6baccf42b0729bb9e14f783d7bc51.png" />   
-    </p>
-<h3 id="232-复合分区">2.3.2 复合分区</h3>
+PROPERTIES(&quot;replication_num&quot; = &quot;1&quot;);
+</code></pre>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/238f326f4a97277209b94e52cf89881e.png" alt="image.png" /></p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/fae6baccf42b0729bb9e14f783d7bc51.png" alt="image.png" /></p>
+
+<h3 id="2-3-2-复合分区">2.3.2 复合分区</h3>
+
 <p>在复合分区中</p>
+
 <ol>
 <li>第一级称为 Partition，即分区。用户可以指定某一维度列作为分区列（当前只支持整型和时间类型的列），并指定每个分区的取值范围。</li>
 <li>第二级称为 Distribution，即分桶。用户可以指定一个或多个维度列以及桶数对数据进行 HASH 分布。</li>
 </ol>
+
 <p>以下场景推荐使用复合分区:</p>
+
 <ol>
 <li>有时间维度或类似带有有序值的维度，可以以这类维度列作为分区列。分区粒度可以根据导入频次、分区数据量等进行评估。</li>
 <li>历史数据删除需求：如有删除历史数据的需求（比如仅保留最近N 天的数据）。使用复合分区，可以通过删除历史分区来达到目的。也可以通过在指定分区内发送 DELETE 语句进行数据删除。</li>
 <li>解决数据倾斜问题：每个分区可以单独指定分桶数量。如按天分区，当每天的数据量差异很大时，可以通过指定分区的分桶数，合理划分不同分区的数据,分桶列建议选择区分度大的列。</li>
 </ol>
+
 <p>用户也可以不使用复合分区，即使用单分区。则数据只做 HASH 分布。</p>
+
 <p><strong>复合分区建表</strong>
 建立一个名字为 table2 的逻辑表。</p>
+
 <p>这个表的 schema 如下：</p>
-<pre tabindex="0"><code>event_day：类型是DATE，无默认值
+
+<pre><code>event_day：类型是DATE，无默认值
 siteid：类型是INT（4字节）, 默认值为10
 citycode：类型是SMALLINT（2字节）
 username：类型是VARCHAR, 最大长度为32, 默认值为空字符串
 pv：类型是BIGINT（8字节）, 默认值是0; 这是一个指标列, Doris 内部会对指标列做聚合操作, 这个列的聚合方法是求和（SUM）
-</code></pre><p>我们使用 event_day 列作为分区列，建立3个分区: p201706, p201707, p201708
+</code></pre>
+
+<p>我们使用 event_day 列作为分区列，建立3个分区: p201706, p201707, p201708
 p201706：范围为 [最小值, 2017-07-01)
 p201707：范围为 [2017-07-01, 2017-08-01)
 p201708：范围为 [2017-08-01, 2017-09-01)</p>
+
 <p>注意区间为左闭右开。</p>
+
 <p>每个分区使用 siteid 进行哈希分桶，桶数为10</p>
+
 <p>建表语句如下:</p>
-<pre tabindex="0"><code>CREATE TABLE table2
+
+<pre><code>CREATE TABLE table2
 (
     event_day DATE,
-    siteid INT DEFAULT &#39;10&#39;,
+    siteid INT DEFAULT '10',
     citycode SMALLINT,
-    username VARCHAR(32) DEFAULT &#39;&#39;,
-    pv BIGINT SUM DEFAULT &#39;0&#39;
+    username VARCHAR(32) DEFAULT '',
+    pv BIGINT SUM DEFAULT '0'
 )
 AGGREGATE KEY(event_day, siteid, citycode, username)
 PARTITION BY RANGE(event_day)
 (
-    PARTITION p201706 VALUES LESS THAN (&#39;2017-07-01&#39;),
-    PARTITION p201707 VALUES LESS THAN (&#39;2017-08-01&#39;),
-    PARTITION p201708 VALUES LESS THAN (&#39;2017-09-01&#39;)
+    PARTITION p201706 VALUES LESS THAN ('2017-07-01'),
+    PARTITION p201707 VALUES LESS THAN ('2017-08-01'),
+    PARTITION p201708 VALUES LESS THAN ('2017-09-01')
 )
 DISTRIBUTED BY HASH(siteid) BUCKETS 10
-PROPERTIES(&#34;replication_num&#34; = &#34;1&#34;);
-</code></pre><p>
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/3267b19cb893e04c19030a51d20f7b15.png" />   
-    </p>
+PROPERTIES(&quot;replication_num&quot; = &quot;1&quot;);
+</code></pre>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/3267b19cb893e04c19030a51d20f7b15.png" alt="image.png" /></p>
+
 <p><strong>注意事项：</strong></p>
+
 <ol>
 <li>上述表通过设置 replication_num 建的都是单副本的表，Doris建议用户采用默认的 3 副本设置，以保证高可用。</li>
 <li>可以对复合分区表动态的增删分区。详见 HELP ALTER TABLE 中 Partition 相关部分。</li>
@@ -354,7 +388,7 @@ PROPERTIES(&#34;replication_num&#34; = &#34;1&#34;);
 
                     <footer id="footer">
     <div>
-        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        &copy; 2023 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
         
         | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
         
@@ -518,9 +552,9 @@ PROPERTIES(&#34;replication_num&#34; = &#34;1&#34;);
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    <a href="">JS</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="">Java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -528,11 +562,11 @@ PROPERTIES(&#34;replication_num&#34; = &#34;1&#34;);
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
-    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
     
-    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    <a href="">Nextjs</a>
     
-    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    <a href="https://geek.zshipu.com/tags/ReactJS/">ReactJS</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
@@ -570,7 +604,7 @@ PROPERTIES(&#34;replication_num&#34; = &#34;1&#34;);
     
     <a href="https://geek.zshipu.com/tags/nexp/">nexp</a>
     
-    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    <a href="">nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
     
@@ -582,7 +616,7 @@ PROPERTIES(&#34;replication_num&#34; = &#34;1&#34;);
     
     <a href="https://geek.zshipu.com/tags/react/">react</a>
     
-    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    <a href="">reactjs</a>
     
     <a href="https://geek.zshipu.com/tags/sharding/">sharding</a>
     

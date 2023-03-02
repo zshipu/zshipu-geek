@@ -145,7 +145,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="post-toc" style="position: absolute; top: 188px;">
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
-        <nav id="TableOfContents"></nav>
+        
     </div>
 </div>
 <script type="text/javascript">
@@ -192,7 +192,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>定义 SSLSocketFactoryCompat，在创建 Socket 的时候如果是 4.x 的设备则启用 TLSv1.2</p>
-<pre tabindex="0"><code>import android.os.Build;
+
+<pre><code>import android.os.Build;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -205,12 +206,12 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 public class SSLSocketFactoryCompat extends SSLSocketFactory{
-    private static final String[] TLS_V12_ONLY = {&#34;TLSv1.2&#34;};
+    private static final String[] TLS_V12_ONLY = {&quot;TLSv1.2&quot;};
 
     private final SSLSocketFactory delegate;
 
     public SSLSocketFactoryCompat() throws KeyManagementException, NoSuchAlgorithmException {
-        SSLContext sc = SSLContext.getInstance(&#34;TLS&#34;);
+        SSLContext sc = SSLContext.getInstance(&quot;TLS&quot;);
         sc.init(null, null, null);
         delegate = sc.getSocketFactory();
     }
@@ -266,10 +267,15 @@ public class SSLSocketFactoryCompat extends SSLSocketFactory{
         return enableTls12(delegate.createSocket(address, port, localAddress, localPort));
     }
 }
-</code></pre><p>如果客户端自己有提供 SSLSocketFactory 的情况（比如，客户端加载自己的证书会提供 SSLSocketFactory），则使用 SSLSocketFactoryCompat 包裹自身的 SSLSocketFactory 然后进行设置，如果没有的话，则使用 SSLSocketFactoryCompat 的无参构造函数。</p>
+</code></pre>
+
+<p>如果客户端自己有提供 SSLSocketFactory 的情况（比如，客户端加载自己的证书会提供 SSLSocketFactory），则使用 SSLSocketFactoryCompat 包裹自身的 SSLSocketFactory 然后进行设置，如果没有的话，则使用 SSLSocketFactoryCompat 的无参构造函数。</p>
+
 <p>上述类可以用于 OkHttp，也可用于其他 HTTPS 需要设置 SSLSocketFactory 的情况。</p>
+
 <p>OkHttp 使用</p>
-<pre tabindex="0"><code>// 自己不提供额外证书的情况
+
+<pre><code>// 自己不提供额外证书的情况
 public static OkHttpClient getOkHttpClient() {
     OkHttpClient.Builder builder = new OkHttpClient.Builder();
     try {
@@ -282,13 +288,16 @@ public static OkHttpClient getOkHttpClient() {
     }
     return builder.build();
 }
-</code></pre><p>提供额外证书的情况：</p>
-<pre tabindex="0"><code>// 测试在assets目录下包含了gank.cer证书，你可以根据自己的情况处理
+</code></pre>
+
+<p>提供额外证书的情况：</p>
+
+<pre><code>// 测试在assets目录下包含了gank.cer证书，你可以根据自己的情况处理
 private static OkHttpClient getOkHttpClientSSL() {
     OkHttpClient.Builder builder = new OkHttpClient.Builder();
     InputStream cerInputStream;
     try {
-        cerInputStream = App.getInstance().getAssets().open(&#34;gank.cer&#34;);
+        cerInputStream = App.getInstance().getAssets().open(&quot;gank.cer&quot;);
         SSLSocketFactory socketFactory = getSocketFactory(cerInputStream);
         builder.sslSocketFactory(new SSLSocketFactoryCompat(socketFactory));
     } catch (IOException e) {
@@ -301,7 +310,7 @@ private static OkHttpClient getOkHttpClientSSL() {
 private static SSLSocketFactory getSocketFactory(InputStream... certificates) {
     KeyStore keyStore;
     try {
-        CertificateFactory certificateFactory = CertificateFactory.getInstance(&#34;X.509&#34;);
+        CertificateFactory certificateFactory = CertificateFactory.getInstance(&quot;X.509&quot;);
         keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
         keyStore.load(null);
         int index = 0;
@@ -309,7 +318,7 @@ private static SSLSocketFactory getSocketFactory(InputStream... certificates) {
             String certificateAlias = Integer.toString(index++);
             keyStore.setCertificateEntry(certificateAlias, certificateFactory.generateCertificate(certificate));
         }
-        SSLContext sslContext = SSLContext.getInstance(&#34;TLS&#34;);
+        SSLContext sslContext = SSLContext.getInstance(&quot;TLS&quot;);
         TrustManagerFactory trustManagerFactory =
                 TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         trustManagerFactory.init(keyStore);
@@ -336,12 +345,15 @@ private static SSLSocketFactory getSocketFactory(InputStream... certificates) {
     }
     return null;
 }
-</code></pre><p>HttpsURLConnection 简单测试</p>
-<pre tabindex="0"><code>new Thread(new Runnable() {
+</code></pre>
+
+<p>HttpsURLConnection 简单测试</p>
+
+<pre><code>new Thread(new Runnable() {
     @Override
     public void run() {
         try {
-            URL url = new URL(&#34;https://gank.io/api/today&#34;);
+            URL url = new URL(&quot;https://gank.io/api/today&quot;);
             HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
             connection.setSSLSocketFactory(new SSLSocketFactoryCompat());
             InputStream inputStream = connection.getInputStream();
@@ -360,6 +372,7 @@ private static SSLSocketFactory getSocketFactory(InputStream... certificates) {
     }
 }).start();
 </code></pre>
+
         </div>
 
         
@@ -424,7 +437,7 @@ private static SSLSocketFactory getSocketFactory(InputStream... certificates) {
 
                     <footer id="footer">
     <div>
-        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        &copy; 2023 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
         
         | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
         
@@ -588,9 +601,9 @@ private static SSLSocketFactory getSocketFactory(InputStream... certificates) {
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    <a href="">JS</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="">Java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -598,11 +611,11 @@ private static SSLSocketFactory getSocketFactory(InputStream... certificates) {
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
-    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
     
-    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    <a href="">Nextjs</a>
     
-    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    <a href="https://geek.zshipu.com/tags/ReactJS/">ReactJS</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
@@ -640,7 +653,7 @@ private static SSLSocketFactory getSocketFactory(InputStream... certificates) {
     
     <a href="https://geek.zshipu.com/tags/nexp/">nexp</a>
     
-    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    <a href="">nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
     
@@ -652,7 +665,7 @@ private static SSLSocketFactory getSocketFactory(InputStream... certificates) {
     
     <a href="https://geek.zshipu.com/tags/react/">react</a>
     
-    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    <a href="">reactjs</a>
     
     <a href="https://geek.zshipu.com/tags/sharding/">sharding</a>
     

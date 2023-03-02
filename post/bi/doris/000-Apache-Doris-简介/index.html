@@ -146,34 +146,38 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
         <nav id="TableOfContents">
-  <ul>
-    <li><a href="#21-doris-整体架构简介">2.1 Doris 整体架构简介</a></li>
-    <li><a href="#22-doris-数据分布">2.2 Doris 数据分布</a></li>
-    <li><a href="#23-doris-的使用方式">2.3 Doris 的使用方式</a></li>
-  </ul>
-
-  <ul>
-    <li><a href="#31-数据可靠性">3.1 数据可靠性</a></li>
-    <li><a href="#32-易运维">3.2 易运维</a></li>
-    <li><a href="#33-mysql-兼容性">3.3 MySQL 兼容性</a></li>
-    <li><a href="#34-支持-mpp">3.4 支持 MPP</a></li>
-  </ul>
-
-  <ul>
-    <li><a href="#41-doris-数据模型特点">4.1 Doris 数据模型特点</a>
-      <ul>
-        <li><a href="#411-键值对存储形式">4.1.1 键值对存储形式</a></li>
-        <li><a href="#412-key-列全局有序排列">4.1.2 Key 列全局有序排列</a></li>
-      </ul>
-    </li>
-    <li><a href="#42-聚合计算说明">4.2 聚合计算说明</a></li>
-    <li><a href="#42-按列存储">4.2 按列存储</a></li>
-    <li><a href="#44-物化视图">4.4 物化视图</a></li>
-    <li><a href="#45-两层分区与分级存储">4.5 两层分区与分级存储</a></li>
-    <li><a href="#46-doris-在-elasticsearch-的应用">4.6 Doris 在 Elasticsearch 的应用</a></li>
-    <li><a href="#47-kafka-消息队列加载">4.7 Kafka 消息队列加载</a></li>
-    <li><a href="#48-doris-其他特性">4.8 Doris 其他特性</a></li>
-  </ul>
+<ul>
+<li><a href="#一-doris简介">一. Doris简介</a></li>
+<li><a href="#二-doris-整体架构">二. Doris 整体架构</a>
+<ul>
+<li><a href="#2-1-doris-整体架构简介">2.1 Doris 整体架构简介</a></li>
+<li><a href="#2-2-doris-数据分布">2.2 Doris 数据分布</a></li>
+<li><a href="#2-3-doris-的使用方式">2.3 Doris 的使用方式</a></li>
+</ul></li>
+<li><a href="#三-doris关键技术">三. Doris关键技术</a>
+<ul>
+<li><a href="#3-1-数据可靠性">3.1 数据可靠性</a></li>
+<li><a href="#3-2-易运维">3.2 易运维</a></li>
+<li><a href="#3-3-mysql-兼容性">3.3 MySQL 兼容性</a></li>
+<li><a href="#3-4-支持-mpp">3.4 支持 MPP</a></li>
+</ul></li>
+<li><a href="#四-doris-数据模型">四. Doris 数据模型</a>
+<ul>
+<li><a href="#4-1-doris-数据模型特点">4.1 Doris 数据模型特点</a>
+<ul>
+<li><a href="#4-1-1-键值对存储形式">4.1.1 键值对存储形式</a></li>
+<li><a href="#4-1-2-key-列全局有序排列">4.1.2 Key 列全局有序排列</a></li>
+</ul></li>
+<li><a href="#4-2-聚合计算说明">4.2 聚合计算说明</a></li>
+<li><a href="#4-2-按列存储">4.2 按列存储</a></li>
+<li><a href="#4-4-物化视图">4.4 物化视图</a></li>
+<li><a href="#4-5-两层分区与分级存储">4.5 两层分区与分级存储</a></li>
+<li><a href="#4-6-doris-在-elasticsearch-的应用">4.6 Doris 在 Elasticsearch 的应用</a></li>
+<li><a href="#4-7-kafka-消息队列加载">4.7 Kafka 消息队列加载</a></li>
+<li><a href="#4-8-doris-其他特性">4.8 Doris 其他特性</a></li>
+</ul></li>
+<li><a href="#参考">参考:</a></li>
+</ul>
 </nav>
     </div>
 </div>
@@ -220,102 +224,127 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            <h1 id="一-doris简介">一. Doris简介</h1>
-<p>
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/c119b20f8e0f64995aa540dcf5ea83e5.png" />   
-    </p>
+            
+
+<h1 id="一-doris简介">一. Doris简介</h1>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/c119b20f8e0f64995aa540dcf5ea83e5.png" alt="image.png" /></p>
+
 <p>Apache Doris是一个现代化的MPP分析型数据库产品。仅需亚秒级响应时间即可获得查询结果，有效地支持实时数据分析。Apache Doris的分布式架构非常简洁，易于运维，并且可以支持10PB以上的超大数据集。</p>
+
 <p>Apache Doris可以满足多种数据分析需求，例如固定历史报表，实时数据分析，交互式数据分析和探索式数据分析等。令您的数据分析工作更加简单高效！</p>
+
 <p>Apache Doris 核心特性：
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/006b8942abb950f84a5d48516178ec01.png" alt="image.png" /></p>
 
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/006b8942abb950f84a5d48516178ec01.png" />   
-    </p>
 <h1 id="二-doris-整体架构">二. Doris 整体架构</h1>
-<h2 id="21-doris-整体架构简介">2.1 Doris 整体架构简介</h2>
-<p>
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/ab923a1dfbf1fcb88dc9b57d3473067d.png" />   
-    </p>
-<p>Doris 的整体架构和 TiDB 类似，借助 MySQL 协议，用户使用任意 MySQL 的 ODBC/JDBC以及MySQL 的客户端，都可以直接访问 Doris。Doris 中的模块包括 FE 和 BE 两类：FE 主要负责元数据的管理、存储，以及查询的解析等；一个用户请求经过 FE 解析、规划后，具体的执行计划会发送给 BE，BE 则会完成查询的具体执行。BE 节点主要负责数据的存储、以及查询计划的执行。目前平台的 FE 部分主要使用 Java，BE 部分主要使用 C++。</p>
-<h2 id="22-doris-数据分布">2.2 Doris 数据分布</h2>
-<p>如果从表的角度来看数据结构，用户的一张 Table 会拆成多个 Tablet，Tablet 会存成多副本，存储在不同的 BE 中，从而保证数据的高可用和高可靠。</p>
-<p>
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/d5fe3623dfef76befaee8a13d2016da0.png" />   
-    </p>
-<h2 id="23-doris-的使用方式">2.3 Doris 的使用方式</h2>
-<p>Doris 的使用方式和 MySQL 类似，创建 database，创建 table，导入数据、执行查询等。具体详见下图：
 
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/dfa42bf37fdded9c2714e07bf60acbfd.png" />   
-    </p>
+<h2 id="2-1-doris-整体架构简介">2.1 Doris 整体架构简介</h2>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/ab923a1dfbf1fcb88dc9b57d3473067d.png" alt="image.png" /></p>
+
+<p>Doris 的整体架构和 TiDB 类似，借助 MySQL 协议，用户使用任意 MySQL 的 ODBC/JDBC以及MySQL 的客户端，都可以直接访问 Doris。Doris 中的模块包括 FE 和 BE 两类：FE 主要负责元数据的管理、存储，以及查询的解析等；一个用户请求经过 FE 解析、规划后，具体的执行计划会发送给 BE，BE 则会完成查询的具体执行。BE 节点主要负责数据的存储、以及查询计划的执行。目前平台的 FE 部分主要使用 Java，BE 部分主要使用 C++。</p>
+
+<h2 id="2-2-doris-数据分布">2.2 Doris 数据分布</h2>
+
+<p>如果从表的角度来看数据结构，用户的一张 Table 会拆成多个 Tablet，Tablet 会存成多副本，存储在不同的 BE 中，从而保证数据的高可用和高可靠。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/d5fe3623dfef76befaee8a13d2016da0.png" alt="image.png" /></p>
+
+<h2 id="2-3-doris-的使用方式">2.3 Doris 的使用方式</h2>
+
+<p>Doris 的使用方式和 MySQL 类似，创建 database，创建 table，导入数据、执行查询等。具体详见下图：
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/dfa42bf37fdded9c2714e07bf60acbfd.png" alt="image.png" /></p>
+
 <h1 id="三-doris关键技术">三. Doris关键技术</h1>
-<h2 id="31-数据可靠性">3.1 数据可靠性</h2>
+
+<h2 id="3-1-数据可靠性">3.1 数据可靠性</h2>
+
 <ol>
 <li>元数据使用 Memory+Checkpoint+Journal ( 分别是什么？)，使用 BTBJE ( 类似于 Raft ) 协议实现高可用性和高可靠性。</li>
 <li>Doris 内部自行管理数据的多副本和自动修复。保证数据的高可用、高可靠。在服务器宕机的情况下，服务依然可用，数据也不会丢失。</li>
 </ol>
-<p>
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/00ecf65689c4bbe65d8160e1cf1279be.png" />   
-    </p>
-<h2 id="32-易运维">3.2 易运维</h2>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/00ecf65689c4bbe65d8160e1cf1279be.png" alt="image.png" /></p>
+
+<h2 id="3-2-易运维">3.2 易运维</h2>
+
 <p>无外部依赖：</p>
+
 <ol>
 <li>Doris 部署无外部依赖，只需要部署 BE 和 IBE 即可搭建起一个集群。</li>
 <li>支持 Online Schema Change</li>
 <li>支持在线更改表模式 ( 加减列，创建 Rollup )，不会影响当前服务，不会阻塞读、写等操作；这种执行是异步的 ( 用户不需要一直盯在那里 )</li>
 </ol>
+
 <p>数据库同步操作和异步操作：
 同步，是所有的操作都做完，才返回给用户结果；即写完数据库之后，再响应用户，用户体验不好；</p>
+
 <p>异步，不用等所有操作等做完，就响应用户请求；即先相应用户请求，然后慢慢去写数据库，用户体验较好。缓存机制（也就是消息队列），就是异步操作的一个典型应用。</p>
+
 <ol>
 <li>副本自动均衡
 传统数据库的扩（缩）容比较麻烦，有时甚至需要重做数据；而 Doris 数据库只需要一条 SQL ( 无须额外操作 ) 即可实现扩（缩）容。</li>
 <li>内置监控
 使用 Prometheus、Grafana 将监控项指标列出。</li>
 </ol>
-<p>下图为 Doris 默认配置面板：
 
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/80099ae44caa44ecb63591cf2a8dce4a.png" />   
-    </p>
-<h2 id="33-mysql-兼容性">3.3 MySQL 兼容性</h2>
+<p>下图为 Doris 默认配置面板：
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/80099ae44caa44ecb63591cf2a8dce4a.png" alt="image.png" /></p>
+
+<h2 id="3-3-mysql-兼容性">3.3 MySQL 兼容性</h2>
+
 <p>MySQL 的兼容性从两方面体现：</p>
+
 <ol>
 <li>兼容 MySQL 的网络协议 ( MySQL Network Protocol )</li>
 <li>兼容 MySQL 语法，使用 MySQL 语法可对 Doris 数据库进行查询
 2.1 关于 MySQL 语法的兼容性，前文已经描述过，这里不再赘述；
 2.2 关于 MySQL 的网络协议的兼容性，举个简单的例子：MySQL 的调度服务器 Proxy，可以直接用作 Doris 的 Proxy。
-
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/74126e4da42d498f1850794e363cead5.png" />   
-    
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/74126e4da42d498f1850794e363cead5.png" alt="image.png" />
 2.3 Doris 的前端展示，可以使用 MySQL 专属展示器 Tableu。下图就是使用 Tableu 将 Doris 数据可视化的一个范例。
 2.4 Doris 与 R 语言可以实现无缝对接，用 R 语言可直接操作 Doris 数据库，进行数据分析、数据挖掘等工作。</li>
 </ol>
-<h2 id="34-支持-mpp">3.4 支持 MPP</h2>
+
+<h2 id="3-4-支持-mpp">3.4 支持 MPP</h2>
+
 <p>MPP 即 Massively Parallel Processing，大规模并行处理，即海量数据并发查询。以下图为例：</p>
+
 <p>执行语句:</p>
-<pre tabindex="0"><code>SELECT k1,SUM(v1) FROM A,B WHERE A.k2=B.k2 GROUP BY k1 ORDER BY SUM(v1)
-</code></pre><p>该语句包含了合并、聚合计算、排序等多种操作；在执行计划的时候，MPP 将其拆分成多份，分布到每台机器执行，最后再将结果汇总。假如有10台机器，在大数据量下，这种查询执行方式可以使得查询性能达到10倍的提升。</p>
-<p>
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/c57364be0155976f8c9bc6087816fbe6.png" />   
-    </p>
+
+<pre><code>SELECT k1,SUM(v1) FROM A,B WHERE A.k2=B.k2 GROUP BY k1 ORDER BY SUM(v1)
+</code></pre>
+
+<p>该语句包含了合并、聚合计算、排序等多种操作；在执行计划的时候，MPP 将其拆分成多份，分布到每台机器执行，最后再将结果汇总。假如有10台机器，在大数据量下，这种查询执行方式可以使得查询性能达到10倍的提升。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/c57364be0155976f8c9bc6087816fbe6.png" alt="image.png" /></p>
+
 <h1 id="四-doris-数据模型">四. Doris 数据模型</h1>
-<h2 id="41-doris-数据模型特点">4.1 Doris 数据模型特点</h2>
-<h3 id="411-键值对存储形式">4.1.1 键值对存储形式</h3>
+
+<h2 id="4-1-doris-数据模型特点">4.1 Doris 数据模型特点</h2>
+
+<h3 id="4-1-1-键值对存储形式">4.1.1 键值对存储形式</h3>
+
 <p>类似于字典搜索查询的键值对格式，Doris 中所有数据分成两列：Key 列和 Value 列。如下图所示，Time、Id、Country 列共同组成 Key 列，Clicks、Cost 列为 Value 列。Key 列有序可进行快速查找，Value 列可以按照具体聚合类型内部完成数据聚合。
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/ee2c77a37a71320cbbd3898e0576bb1a.png" alt="image.png" /></p>
 
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/ee2c77a37a71320cbbd3898e0576bb1a.png" />   
-    </p>
-<h3 id="412-key-列全局有序排列">4.1.2 Key 列全局有序排列</h3>
+<h3 id="4-1-2-key-列全局有序排列">4.1.2 Key 列全局有序排列</h3>
+
 <p>Key 列全局有序排列，查询时方便快速定位查找。</p>
-<p>Doris 数据模型的一个显著特点是 Key 列全局唯一，因此存在相同 Key 值的不同 Value，则后面的数据与前面的数据自动做 ( SUM，MIN，MAX，REPLACE ) 等聚合处理。例如，下图中绿色方框中的两行，相同的 Key 值对应不同的 Value；因此，新的 Value 到达后，与前数据作 SUM 处理，得到最新的数据，不仅提升效率，还可提高数据处理的准确性。</p>
-<p>
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/1dd3f7b2281b0f90d7cab8c064c4cb18.png" />   
-    </p>
-<h2 id="42-聚合计算说明">4.2 聚合计算说明</h2>
-<p>本部分具体描述相同 Key 值下 Value 值的聚合。</p>
-<p>数据的导入是分版本的（例如下图右侧91，92版本），每一个版本之间 Key 相同的数据汇总到中间表中，通过聚合处理最终输出为左侧的 base。
 
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/9b42f09a2e8f0fc0c02095574f661917.png" />   
-    </p>
-<h2 id="42-按列存储">4.2 按列存储</h2>
+<p>Doris 数据模型的一个显著特点是 Key 列全局唯一，因此存在相同 Key 值的不同 Value，则后面的数据与前面的数据自动做 ( SUM，MIN，MAX，REPLACE ) 等聚合处理。例如，下图中绿色方框中的两行，相同的 Key 值对应不同的 Value；因此，新的 Value 到达后，与前数据作 SUM 处理，得到最新的数据，不仅提升效率，还可提高数据处理的准确性。</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/zshipu/images/1dd3f7b2281b0f90d7cab8c064c4cb18.png" alt="image.png" /></p>
+
+<h2 id="4-2-聚合计算说明">4.2 聚合计算说明</h2>
+
+<p>本部分具体描述相同 Key 值下 Value 值的聚合。</p>
+
+<p>数据的导入是分版本的（例如下图右侧91，92版本），每一个版本之间 Key 相同的数据汇总到中间表中，通过聚合处理最终输出为左侧的 base。
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/9b42f09a2e8f0fc0c02095574f661917.png" alt="image.png" /></p>
+
+<h2 id="4-2-按列存储">4.2 按列存储</h2>
+
 <ol>
 <li>Doris 的数据是按列存储的，每一列单独存放。</li>
 <li>查询时，只访问查询涉及的列，大量降低 I/O。</li>
@@ -323,66 +352,71 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>数据包建索引，数据即索引。</li>
 <li>利用原始过滤条件以及 min、max 和 sum 等智能索引技术，将数据集查询范围尽可能地缩小，大大减少 I/O，提升查询效率。</li>
 </ol>
-<h2 id="44-物化视图">4.4 物化视图</h2>
+
+<h2 id="4-4-物化视图">4.4 物化视图</h2>
+
 <p>物化视图是提取某些维度的组合建立对用户透明的却有真实数据的视图表格。Doris 的物化视图可以保证用户在更新时，直接更新原始表，Doris 会保证原表、物化视图原子生效。在查询的时候用户也只需指定原始表，Doris 会根据查询的具体条件，选择适合的物化视图完成查询。</p>
+
 <p>通常用户可以通过物化视图功能完成以下两种功能。</p>
+
 <ol>
 <li>更换索引列进行重排列</li>
 <li>针对指定列做聚合查询
-
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/ac52282d153fb8762f0addbb88e83044.png" />   
-    </li>
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/ac52282d153fb8762f0addbb88e83044.png" alt="image.png" /></li>
 </ol>
-<h2 id="45-两层分区与分级存储">4.5 两层分区与分级存储</h2>
+
+<h2 id="4-5-两层分区与分级存储">4.5 两层分区与分级存储</h2>
+
 <p><strong>两层分区：</strong></p>
+
 <ol>
 <li>方便新旧数据分离，使用不同的存储介质（例如新数据使用 SSD，历史数据 SATA）</li>
 <li>分区减少了大量历史数据不必要的重复 BE/CE，节省了大量的 IO 和 CPU 开销</li>
 <li>两层分区的方法简化了表的扩容，便于 shard 调整（例如，前期不必建立过多 shard，后期随着业务增长客随时调整 shard 数）</li>
 </ol>
+
 <p><strong>分级存储:</strong>
 用户可以指定数据放到 SSD 上或者 SATA 盘上，也支持根据 TTL 将冷数据从 SSD 迁移到 SATA 上，高效利用 SSD 提高查询性能。
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/f23fdf8125965abc8ea5dfada4c0682c.png" alt="image.png" /></p>
 
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/f23fdf8125965abc8ea5dfada4c0682c.png" />   
-    </p>
-<h2 id="46-doris-在-elasticsearch-的应用">4.6 Doris 在 Elasticsearch 的应用</h2>
+<h2 id="4-6-doris-在-elasticsearch-的应用">4.6 Doris 在 Elasticsearch 的应用</h2>
+
 <p><strong>简介：</strong></p>
+
 <ol>
 <li>ES 的优点是索引，可支持多列索引，甚至可支持全文语义索引（如 term，match，fuzzy 等）；然而其缺点是没有分布式计算引擎，不支持 join 等操作</li>
 <li>与 ES 相反，Palo 具备丰富的 SQL 计算能力，以及分布式查询能力；然而其索引性能较低，不支持全文索引。</li>
 <li>Doris 在 ES 开发的过程中，分别借鉴 ES 和 Palo 的长处，支持了 Elasticsearch 多表 Join 操作，同时引入 Elasticsearch 的语义搜索功能，扩充了 Doris 的查询能力。</li>
 </ol>
+
 <p><strong>使用方式：</strong>
 第一步：建立一张 ES 的外部表。
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/af0a757c76553a86ef2e7fba08eee497.png" alt="image.png" /></p>
 
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/af0a757c76553a86ef2e7fba08eee497.png" />   
-    </p>
 <p>第二步：在 ES 外部表中导入一些数据：
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/72f3109dbb4ef4d44536ba82d937786a.png" alt="image.png" /></p>
 
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/72f3109dbb4ef4d44536ba82d937786a.png" />   
-    </p>
 <p>第三步：使用和 ES 一样的搜索语句，进行全文检索查询：
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/f591cc4426cf151154326438eecd88bb.png" alt="image.png" /></p>
 
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/f591cc4426cf151154326438eecd88bb.png" />   
-    </p>
 <p>类似于上图这样的搜索语句，在 SQL 中比较难以表达，但是在 ES 中较容易实现。</p>
-<h2 id="47-kafka-消息队列加载">4.7 Kafka 消息队列加载</h2>
+
+<h2 id="4-7-kafka-消息队列加载">4.7 Kafka 消息队列加载</h2>
+
 <ol>
 <li>Doris 内部支持订阅 Kafka 数据流，实现直接对接 Kafka：
-
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/63b768e4424514301cce147ded38ef26.png" />   
-    </li>
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/63b768e4424514301cce147ded38ef26.png" alt="image.png" /></li>
 <li>用户数据源经 Kafka 消息队列收集后，可以依次进入到 Doris 中，通过 Doris 做报表展示和决策分析等工作。
-
-        <img class="mx-auto" alt="image.png" src="https://cdn.jsdelivr.net/gh/zshipu/images/7fcc0ebcc7a918a6c57345d710dd69c5.png" />   
-    </li>
+<img src="https://cdn.jsdelivr.net/gh/zshipu/images/7fcc0ebcc7a918a6c57345d710dd69c5.png" alt="image.png" /></li>
 <li>优点
 3.1 无需额外组件，用户可直接通过命令实现 Kafka 消息订阅。
 3.2 精确传输，秒级延迟。
 3.3 Doris 可自动感知 Kafka 中 partition 变化，合理调度并发导入。
 3.4 在数据导入这一过程中，支持对 Kafka 原始数据做二次处理（如转换，过滤等）。</li>
 </ol>
-<h2 id="48-doris-其他特性">4.8 Doris 其他特性</h2>
+
+<h2 id="4-8-doris-其他特性">4.8 Doris 其他特性</h2>
+
 <ol>
 <li>原子性——即一批数据要么都生效，要么都不生效。</li>
 <li>支持单机多盘</li>
@@ -390,7 +424,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>UDF ( User Defined Function 用户自定义函数 )</li>
 <li>内置 HLL 类型，快速计算 UV</li>
 </ol>
+
 <h1 id="参考">参考:</h1>
+
 <ol>
 <li><a href="https://doris.apache.org/master/zh-CN/">https://doris.apache.org/master/zh-CN/</a></li>
 <li><a href="https://www.jianshu.com/p/d3742af8ecce">https://www.jianshu.com/p/d3742af8ecce</a></li>
@@ -462,7 +498,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                     <footer id="footer">
     <div>
-        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        &copy; 2023 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
         
         | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
         
@@ -626,9 +662,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    <a href="">JS</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="">Java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -636,11 +672,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
-    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
     
-    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    <a href="">Nextjs</a>
     
-    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    <a href="https://geek.zshipu.com/tags/ReactJS/">ReactJS</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
@@ -678,7 +714,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/nexp/">nexp</a>
     
-    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    <a href="">nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
     
@@ -690,7 +726,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/react/">react</a>
     
-    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    <a href="">reactjs</a>
     
     <a href="https://geek.zshipu.com/tags/sharding/">sharding</a>
     

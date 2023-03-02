@@ -141,7 +141,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="post-toc" style="position: absolute; top: 188px;">
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
-        <nav id="TableOfContents"></nav>
+        <nav id="TableOfContents">
+<ul>
+<li><a href="#心率算法">心率算法</a></li>
+</ul>
+</nav>
     </div>
 </div>
 <script type="text/javascript">
@@ -187,560 +191,285 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         
         <div class="post-content">
-            <h1 id="心率算法">心率算法</h1>
-<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  1
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  2
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  3
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  4
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  5
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  6
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  7
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  8
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">  9
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 10
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 11
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 12
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 13
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 14
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 15
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 16
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 17
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 18
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 19
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 20
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 21
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 22
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 23
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 24
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 25
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 26
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 27
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 28
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 29
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 30
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 31
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 32
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 33
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 34
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 35
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 36
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 37
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 38
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 39
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 40
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 41
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 42
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 43
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 44
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 45
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 46
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 47
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 48
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 49
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 50
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 51
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 52
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 53
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 54
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 55
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 56
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 57
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 58
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 59
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 60
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 61
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 62
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 63
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 64
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 65
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 66
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 67
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 68
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 69
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 70
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 71
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 72
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 73
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 74
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 75
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 76
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 77
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 78
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 79
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 80
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 81
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 82
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 83
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 84
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 85
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 86
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 87
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 88
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 89
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 90
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 91
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 92
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 93
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 94
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 95
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 96
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 97
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 98
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 99
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">100
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">101
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">102
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">103
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">104
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">105
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">106
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">107
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">108
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">109
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">110
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">111
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">112
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">113
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">114
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">115
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">116
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">117
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">118
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">119
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">120
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">121
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">122
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">123
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">124
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">125
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">126
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">127
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">128
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">129
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">130
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">131
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">132
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">133
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">134
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">135
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">136
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">137
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">138
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">139
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">140
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">141
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">142
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">143
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">144
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">145
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">146
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">147
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">148
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">149
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">150
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">151
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">152
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">153
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">154
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">155
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">156
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">157
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">158
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">159
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">160
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">161
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">162
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">163
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">164
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">165
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">166
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">167
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">168
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">169
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">170
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">171
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">172
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">173
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">174
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">175
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">176
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">177
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">178
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">179
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">180
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">181
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">182
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">183
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">184
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">185
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">186
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">187
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">188
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">189
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">190
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">191
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">192
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">193
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">194
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">195
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">196
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">197
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">198
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">199
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">200
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">201
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">202
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">203
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">204
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">205
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">206
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">207
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">208
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">209
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">210
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">211
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">212
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">213
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">214
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">215
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">216
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">217
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">218
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">219
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">220
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">221
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">222
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">223
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">224
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">225
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">226
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">227
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">228
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">229
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">230
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">231
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">232
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">233
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">234
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">235
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">236
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">237
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">238
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">239
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">240
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">241
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">242
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">243
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">244
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">245
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">246
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">247
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">248
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">249
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">250
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">251
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">252
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">253
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">254
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">255
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">256
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">257
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">258
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">259
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">260
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">261
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">262
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">263
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">264
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">265
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">266
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">267
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">268
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">269
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">270
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">271
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">272
-</span><span style="white-space:pre;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">273
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">HeartUtils</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> var lastMaxPos <span style="color:#000;font-weight:bold">=</span> 0
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> var running <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span>
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> var index <span style="color:#000;font-weight:bold">=</span>0
-</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">private</span>  var maxPos <span style="color:#000;font-weight:bold">=</span> 0
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> var maxValue <span style="color:#000;font-weight:bold">=</span> 0f
-</span></span><span style="display:flex;"><span>    fun <span style="color:#900;font-weight:bold">init</span><span style="color:#000;font-weight:bold">(</span>index<span style="color:#000;font-weight:bold">:</span>Int<span style="color:#000;font-weight:bold">,</span>value<span style="color:#000;font-weight:bold">:</span>Float<span style="color:#000;font-weight:bold">):</span>Boolean<span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(</span>maxValue<span style="color:#000;font-weight:bold">&lt;</span>value<span style="color:#000;font-weight:bold">){</span>
-</span></span><span style="display:flex;"><span>            maxPos <span style="color:#000;font-weight:bold">=</span> index
-</span></span><span style="display:flex;"><span>            maxValue <span style="color:#000;font-weight:bold">=</span> value
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">false</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span>  val size <span style="color:#000;font-weight:bold">=</span> 128
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span>  val sizeX <span style="color:#000;font-weight:bold">=</span> 127
-</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic">/**
-</span></span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic">     * 原始数据
-</span></span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic">     */</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> val src <span style="color:#000;font-weight:bold">=</span> FloatArray<span style="color:#000;font-weight:bold">(</span>size<span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic">/**
-</span></span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic">     * 平滑之后的数据
-</span></span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic">     */</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> val base <span style="color:#000;font-weight:bold">=</span> FloatArray<span style="color:#000;font-weight:bold">(</span>size<span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> val arg16 <span style="color:#000;font-weight:bold">=</span> FloatArray<span style="color:#000;font-weight:bold">(</span>size<span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> val sub <span style="color:#000;font-weight:bold">=</span> FloatArray<span style="color:#000;font-weight:bold">(</span>size<span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> val subtractsAbs <span style="color:#000;font-weight:bold">=</span> FloatArray<span style="color:#000;font-weight:bold">(</span>size<span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> val line <span style="color:#000;font-weight:bold">=</span> FloatArray<span style="color:#000;font-weight:bold">(</span>size<span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> var bIndex <span style="color:#000;font-weight:bold">=</span> 0<span style="color:#000;font-weight:bold">;</span>
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> var argIndex <span style="color:#000;font-weight:bold">=</span> size<span style="color:#000;font-weight:bold">-</span>16
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> var nowIndex <span style="color:#000;font-weight:bold">=</span> 64
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> val sm32 <span style="color:#000;font-weight:bold">=</span> Smooth16<span style="color:#000;font-weight:bold">()</span>
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> val sm16<span style="color:#000;font-weight:bold">=</span> Smooth16<span style="color:#000;font-weight:bold">()</span>
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> val xmf <span style="color:#000;font-weight:bold">=</span> CMidXFilter<span style="color:#000;font-weight:bold">()</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> val rf <span style="color:#000;font-weight:bold">=</span> CMidRFilter<span style="color:#000;font-weight:bold">()</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> val lf <span style="color:#000;font-weight:bold">=</span> CMidLFilter<span style="color:#000;font-weight:bold">()</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> var flag <span style="color:#000;font-weight:bold">=</span> 0
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> var rrDis<span style="color:#000;font-weight:bold">=</span>0<span style="color:#000;font-weight:bold">;</span>
-</span></span><span style="display:flex;"><span>    fun <span style="color:#900;font-weight:bold">heart</span><span style="color:#000;font-weight:bold">():</span>Int<span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(</span>rrDis<span style="color:#000;font-weight:bold">!=</span>0<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">(</span>60 <span style="color:#000;font-weight:bold">*</span> 250f<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">div</span><span style="color:#000;font-weight:bold">(</span>rrDis<span style="color:#000;font-weight:bold">)).</span><span style="color:#008080">roundToInt</span><span style="color:#000;font-weight:bold">()</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span><span style="color:#000;font-weight:bold">else</span><span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">return</span> 0
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>    fun <span style="color:#900;font-weight:bold">init</span><span style="color:#000;font-weight:bold">(</span>v<span style="color:#000;font-weight:bold">:</span>Float<span style="color:#000;font-weight:bold">){</span>
-</span></span><span style="display:flex;"><span>        val a <span style="color:#000;font-weight:bold">=</span> initData<span style="color:#000;font-weight:bold">(</span>v<span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>        val x <span style="color:#000;font-weight:bold">=</span> sm16<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">init</span><span style="color:#000;font-weight:bold">(</span>a<span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>        arg16<span style="color:#000;font-weight:bold">[</span>argIndex<span style="color:#000;font-weight:bold">]=</span>x
-</span></span><span style="display:flex;"><span>        <span style="color:#900;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(++</span>argIndex<span style="color:#000;font-weight:bold">==</span>size<span style="color:#000;font-weight:bold">)</span>argIndex<span style="color:#000;font-weight:bold">=</span>0
-</span></span><span style="display:flex;"><span>        <span style="color:#900;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(++</span>nowIndex<span style="color:#000;font-weight:bold">==</span>size<span style="color:#000;font-weight:bold">)</span>nowIndex<span style="color:#000;font-weight:bold">=</span>0
-</span></span><span style="display:flex;"><span>        index<span style="color:#000;font-weight:bold">++</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(</span>running<span style="color:#000;font-weight:bold">){</span>
-</span></span><span style="display:flex;"><span>            init<span style="color:#000;font-weight:bold">(</span>index<span style="color:#000;font-weight:bold">,</span>subtractsAbs<span style="color:#000;font-weight:bold">[</span>nowIndex<span style="color:#000;font-weight:bold">])</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(</span>line<span style="color:#000;font-weight:bold">[</span>nowIndex<span style="color:#000;font-weight:bold">]&lt;</span>subtractsAbs<span style="color:#000;font-weight:bold">[</span>nowIndex<span style="color:#000;font-weight:bold">]){</span><span style="color:#998;font-style:italic">//大于阈值
-</span></span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"></span>            running <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span>
-</span></span><span style="display:flex;"><span>            flag<span style="color:#000;font-weight:bold">=</span>30
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">return</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span><span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(</span>flag<span style="color:#000;font-weight:bold">==</span>0<span style="color:#000;font-weight:bold">){</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(</span>line<span style="color:#000;font-weight:bold">[</span>getI<span style="color:#000;font-weight:bold">(</span>30<span style="color:#000;font-weight:bold">)]&lt;</span>subtractsAbs<span style="color:#000;font-weight:bold">[</span>getI<span style="color:#000;font-weight:bold">(</span>30<span style="color:#000;font-weight:bold">)]){</span>
-</span></span><span style="display:flex;"><span>                running<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">true</span>
-</span></span><span style="display:flex;"><span>                flag <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">-</span>30
-</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">return</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span><span style="color:#000;font-weight:bold">else</span><span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(</span>flag<span style="color:#000;font-weight:bold">&lt;</span>0<span style="color:#000;font-weight:bold">)</span>flag<span style="color:#000;font-weight:bold">++</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">else</span> flag<span style="color:#000;font-weight:bold">--</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">return</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(</span>running<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>            running <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">false</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#900;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(</span>lastMaxPos<span style="color:#000;font-weight:bold">!=</span>0<span style="color:#000;font-weight:bold">){</span>
-</span></span><span style="display:flex;"><span>                var rr <span style="color:#000;font-weight:bold">=</span> maxPos<span style="color:#000;font-weight:bold">-</span>lastMaxPos
-</span></span><span style="display:flex;"><span>               rrDis<span style="color:#000;font-weight:bold">=</span>  <span style="color:#000;font-weight:bold">(</span>rf<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">init</span><span style="color:#000;font-weight:bold">(</span>rr<span style="color:#000;font-weight:bold">))</span>
-</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic">//                LogUtils.d(&#34;hreat = &#34;+heart())
-</span></span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"></span>            <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>            maxValue<span style="color:#000;font-weight:bold">=</span>0f
-</span></span><span style="display:flex;"><span>            lastMaxPos<span style="color:#000;font-weight:bold">=</span>maxPos
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> fun <span style="color:#900;font-weight:bold">getA</span><span style="color:#000;font-weight:bold">():</span>Float<span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">((</span>sub<span style="color:#000;font-weight:bold">[</span>nowIndex<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">*</span>8<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">+</span>sub<span style="color:#000;font-weight:bold">[</span>getI<span style="color:#000;font-weight:bold">(-</span>1<span style="color:#000;font-weight:bold">)]+</span>sub<span style="color:#000;font-weight:bold">[</span>getI<span style="color:#000;font-weight:bold">(</span>1<span style="color:#000;font-weight:bold">)]+</span>sub<span style="color:#000;font-weight:bold">[</span>getI<span style="color:#000;font-weight:bold">(-</span>2<span style="color:#000;font-weight:bold">)]+</span>sub<span style="color:#000;font-weight:bold">[</span>getI<span style="color:#000;font-weight:bold">(</span>2<span style="color:#000;font-weight:bold">)]).</span><span style="color:#008080">div</span><span style="color:#000;font-weight:bold">(</span>12<span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> fun <span style="color:#900;font-weight:bold">getB</span><span style="color:#000;font-weight:bold">(</span>tag<span style="color:#000;font-weight:bold">:</span>Int <span style="color:#000;font-weight:bold">=</span> 0<span style="color:#000;font-weight:bold">):</span>Float<span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span>        val t <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(</span>tag<span style="color:#000;font-weight:bold">&lt;</span>0<span style="color:#000;font-weight:bold">)</span> 30<span style="color:#000;font-weight:bold">+</span>tag <span style="color:#000;font-weight:bold">else</span> tag
-</span></span><span style="display:flex;"><span>        <span style="color:#900;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">(</span>t<span style="color:#000;font-weight:bold">*</span>getA<span style="color:#000;font-weight:bold">()+</span> <span style="color:#000;font-weight:bold">(</span>30<span style="color:#000;font-weight:bold">-</span>t<span style="color:#000;font-weight:bold">)*</span>arg16<span style="color:#000;font-weight:bold">[</span>nowIndex<span style="color:#000;font-weight:bold">]).</span><span style="color:#008080">div</span><span style="color:#000;font-weight:bold">(</span>30<span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> fun <span style="color:#900;font-weight:bold">initData</span><span style="color:#000;font-weight:bold">(</span>v<span style="color:#000;font-weight:bold">:</span>Float<span style="color:#000;font-weight:bold">):</span>Float<span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>        val b<span style="color:#000;font-weight:bold">=</span>sm32<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">init</span><span style="color:#000;font-weight:bold">(</span>v<span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>        val s<span style="color:#000;font-weight:bold">=</span>sm32<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">v</span><span style="color:#000;font-weight:bold">()</span>
-</span></span><span style="display:flex;"><span>        val m <span style="color:#000;font-weight:bold">=</span> s<span style="color:#000;font-weight:bold">-</span>b
-</span></span><span style="display:flex;"><span>        val n <span style="color:#000;font-weight:bold">=</span> abs<span style="color:#000;font-weight:bold">(</span>m<span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>        val l <span style="color:#000;font-weight:bold">=</span> xmf<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">init</span><span style="color:#000;font-weight:bold">(</span>n<span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>        sub<span style="color:#000;font-weight:bold">[</span>bIndex<span style="color:#000;font-weight:bold">]=</span>m
-</span></span><span style="display:flex;"><span>        line<span style="color:#000;font-weight:bold">[</span>bIndex<span style="color:#000;font-weight:bold">]=</span>l
-</span></span><span style="display:flex;"><span>        base<span style="color:#000;font-weight:bold">[</span>bIndex<span style="color:#000;font-weight:bold">]=</span>b
-</span></span><span style="display:flex;"><span>        src<span style="color:#000;font-weight:bold">[</span>bIndex<span style="color:#000;font-weight:bold">]=</span>s
-</span></span><span style="display:flex;"><span>        subtractsAbs<span style="color:#000;font-weight:bold">[</span>bIndex<span style="color:#000;font-weight:bold">]=</span>n
-</span></span><span style="display:flex;"><span>        <span style="color:#900;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(++</span>bIndex<span style="color:#000;font-weight:bold">==</span>size<span style="color:#000;font-weight:bold">)</span>bIndex<span style="color:#000;font-weight:bold">=</span>0
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">return</span> m
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span> 
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">private</span> fun <span style="color:#900;font-weight:bold">getI</span><span style="color:#000;font-weight:bold">(</span>v<span style="color:#000;font-weight:bold">:</span>Int<span style="color:#000;font-weight:bold">):</span>Int<span style="color:#000;font-weight:bold">=((</span>nowIndex<span style="color:#000;font-weight:bold">+</span>v<span style="color:#000;font-weight:bold">+</span>size<span style="color:#000;font-weight:bold">).</span><span style="color:#008080">and</span><span style="color:#000;font-weight:bold">(</span>sizeX<span style="color:#000;font-weight:bold">))</span>
-</span></span><span style="display:flex;"><span>    internal <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Smooth16</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> var index <span style="color:#000;font-weight:bold">=</span> 0
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> val data<span style="color:#000;font-weight:bold">=</span>FloatArray<span style="color:#000;font-weight:bold">(</span>15<span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> var sum <span style="color:#000;font-weight:bold">=</span> 0f
-</span></span><span style="display:flex;"><span>        fun <span style="color:#900;font-weight:bold">init</span><span style="color:#000;font-weight:bold">(</span>v<span style="color:#000;font-weight:bold">:</span>Float<span style="color:#000;font-weight:bold">):</span>Float<span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>            sum<span style="color:#000;font-weight:bold">-=</span>data<span style="color:#000;font-weight:bold">[</span>index<span style="color:#000;font-weight:bold">]</span>
-</span></span><span style="display:flex;"><span>            sum<span style="color:#000;font-weight:bold">+=</span>v
-</span></span><span style="display:flex;"><span>            data<span style="color:#000;font-weight:bold">[</span>index<span style="color:#000;font-weight:bold">++]=</span>v
-</span></span><span style="display:flex;"><span>            <span style="color:#900;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(</span>index<span style="color:#000;font-weight:bold">==</span>15<span style="color:#000;font-weight:bold">)</span>index<span style="color:#000;font-weight:bold">=</span>0
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">return</span> sum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">div</span><span style="color:#000;font-weight:bold">(</span>15<span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>        fun <span style="color:#900;font-weight:bold">v</span><span style="color:#000;font-weight:bold">():</span>Float<span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">return</span> data<span style="color:#000;font-weight:bold">[(</span>index<span style="color:#000;font-weight:bold">+</span>7<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">%</span> 15<span style="color:#000;font-weight:bold">]</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>    internal
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">class</span> <span style="color:#900;font-weight:bold">CMidLFilter</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">private</span> val SIZE<span style="color:#000;font-weight:bold">:</span>Int<span style="color:#000;font-weight:bold">=</span>5<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> var medIndex<span style="color:#000;font-weight:bold">=</span>2
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> var index <span style="color:#000;font-weight:bold">=</span> 0
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> val data<span style="color:#000;font-weight:bold">=</span>IntArray<span style="color:#000;font-weight:bold">(</span>SIZE<span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> val dataFlag<span style="color:#000;font-weight:bold">=</span>BooleanArray<span style="color:#000;font-weight:bold">(</span>SIZE<span style="color:#000;font-weight:bold">){</span>
-</span></span><span style="display:flex;"><span>            it<span style="color:#000;font-weight:bold">&lt;</span>medIndex
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> var medValue <span style="color:#000;font-weight:bold">=</span> 0
-</span></span><span style="display:flex;"><span>        fun <span style="color:#900;font-weight:bold">init</span><span style="color:#000;font-weight:bold">(</span>v<span style="color:#000;font-weight:bold">:</span>Int<span style="color:#000;font-weight:bold">):</span>Int<span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>            data<span style="color:#000;font-weight:bold">[</span>index<span style="color:#000;font-weight:bold">]=</span>v
-</span></span><span style="display:flex;"><span>            <span style="color:#900;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>v <span style="color:#000;font-weight:bold">&lt;</span> medValue<span style="color:#000;font-weight:bold">&amp;&amp;(</span>dataFlag<span style="color:#000;font-weight:bold">[</span>index<span style="color:#000;font-weight:bold">]||</span>index<span style="color:#000;font-weight:bold">==</span>medIndex<span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>dataFlag<span style="color:#000;font-weight:bold">[</span>index<span style="color:#000;font-weight:bold">])</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>                    dataFlag<span style="color:#000;font-weight:bold">[</span>index<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">false</span>
-</span></span><span style="display:flex;"><span>                    dataFlag<span style="color:#000;font-weight:bold">[</span>medIndex<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>                medValue <span style="color:#000;font-weight:bold">=</span> v
-</span></span><span style="display:flex;"><span>                data<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">forEachIndexed</span> <span style="color:#000;font-weight:bold">{</span> i<span style="color:#000;font-weight:bold">,</span> v <span style="color:#000;font-weight:bold">-&gt;</span>
-</span></span><span style="display:flex;"><span>                    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>dataFlag<span style="color:#000;font-weight:bold">[</span>i<span style="color:#000;font-weight:bold">].</span><span style="color:#008080">not</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">&amp;&amp;</span> v <span style="color:#000;font-weight:bold">&gt;</span> medValue<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>                        medIndex <span style="color:#000;font-weight:bold">=</span> i
-</span></span><span style="display:flex;"><span>                        medValue <span style="color:#000;font-weight:bold">=</span> v
-</span></span><span style="display:flex;"><span>                    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>v <span style="color:#000;font-weight:bold">&gt;</span> medValue<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>                    dataFlag<span style="color:#000;font-weight:bold">[</span>index<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span>
-</span></span><span style="display:flex;"><span>                    medValue <span style="color:#000;font-weight:bold">=</span> v
-</span></span><span style="display:flex;"><span>                    medIndex <span style="color:#000;font-weight:bold">=</span> index
-</span></span><span style="display:flex;"><span>                    data<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">forEachIndexed</span> <span style="color:#000;font-weight:bold">{</span> i<span style="color:#000;font-weight:bold">,</span> v <span style="color:#000;font-weight:bold">-&gt;</span>
-</span></span><span style="display:flex;"><span>                        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>dataFlag<span style="color:#000;font-weight:bold">[</span>i<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">&amp;&amp;</span> v <span style="color:#000;font-weight:bold">&lt;</span> medValue<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>                            medIndex <span style="color:#000;font-weight:bold">=</span> i
-</span></span><span style="display:flex;"><span>                            medValue <span style="color:#000;font-weight:bold">=</span> v
-</span></span><span style="display:flex;"><span>                        <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>                    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>                    dataFlag<span style="color:#000;font-weight:bold">[</span>medIndex<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">false</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>            index<span style="color:#000;font-weight:bold">++</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(</span>index<span style="color:#000;font-weight:bold">==</span>SIZE<span style="color:#000;font-weight:bold">){</span>
-</span></span><span style="display:flex;"><span>                index<span style="color:#000;font-weight:bold">=</span>0
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">return</span> medValue
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>    internal
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">class</span> <span style="color:#900;font-weight:bold">CMidRFilter</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">private</span> val SIZE<span style="color:#000;font-weight:bold">:</span>Int<span style="color:#000;font-weight:bold">=</span>11<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> var medIndex<span style="color:#000;font-weight:bold">=</span>5
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> var index <span style="color:#000;font-weight:bold">=</span> 0
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> val data<span style="color:#000;font-weight:bold">=</span>IntArray<span style="color:#000;font-weight:bold">(</span>SIZE<span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> val dataFlag<span style="color:#000;font-weight:bold">=</span>BooleanArray<span style="color:#000;font-weight:bold">(</span>SIZE<span style="color:#000;font-weight:bold">){</span>
-</span></span><span style="display:flex;"><span>            it<span style="color:#000;font-weight:bold">&lt;</span>medIndex
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> var medValue <span style="color:#000;font-weight:bold">=</span> 0
-</span></span><span style="display:flex;"><span>        fun <span style="color:#900;font-weight:bold">init</span><span style="color:#000;font-weight:bold">(</span>v<span style="color:#000;font-weight:bold">:</span>Int<span style="color:#000;font-weight:bold">):</span>Int<span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>            data<span style="color:#000;font-weight:bold">[</span>index<span style="color:#000;font-weight:bold">]=</span>v
-</span></span><span style="display:flex;"><span>            <span style="color:#900;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>v <span style="color:#000;font-weight:bold">&lt;</span> medValue<span style="color:#000;font-weight:bold">&amp;&amp;(</span>dataFlag<span style="color:#000;font-weight:bold">[</span>index<span style="color:#000;font-weight:bold">]||</span>index<span style="color:#000;font-weight:bold">==</span>medIndex<span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>dataFlag<span style="color:#000;font-weight:bold">[</span>index<span style="color:#000;font-weight:bold">])</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>                    dataFlag<span style="color:#000;font-weight:bold">[</span>index<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">false</span>
-</span></span><span style="display:flex;"><span>                    dataFlag<span style="color:#000;font-weight:bold">[</span>medIndex<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>                medValue <span style="color:#000;font-weight:bold">=</span> v
-</span></span><span style="display:flex;"><span>                data<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">forEachIndexed</span> <span style="color:#000;font-weight:bold">{</span> i<span style="color:#000;font-weight:bold">,</span> v <span style="color:#000;font-weight:bold">-&gt;</span>
-</span></span><span style="display:flex;"><span>                    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>dataFlag<span style="color:#000;font-weight:bold">[</span>i<span style="color:#000;font-weight:bold">].</span><span style="color:#008080">not</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">&amp;&amp;</span> v <span style="color:#000;font-weight:bold">&gt;</span> medValue<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>                        medIndex <span style="color:#000;font-weight:bold">=</span> i
-</span></span><span style="display:flex;"><span>                        medValue <span style="color:#000;font-weight:bold">=</span> v
-</span></span><span style="display:flex;"><span>                    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>v <span style="color:#000;font-weight:bold">&gt;</span> medValue<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>                    dataFlag<span style="color:#000;font-weight:bold">[</span>index<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span>
-</span></span><span style="display:flex;"><span>                    medValue <span style="color:#000;font-weight:bold">=</span> v
-</span></span><span style="display:flex;"><span>                    medIndex <span style="color:#000;font-weight:bold">=</span> index
-</span></span><span style="display:flex;"><span>                    data<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">forEachIndexed</span> <span style="color:#000;font-weight:bold">{</span> i<span style="color:#000;font-weight:bold">,</span> v <span style="color:#000;font-weight:bold">-&gt;</span>
-</span></span><span style="display:flex;"><span>                        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>dataFlag<span style="color:#000;font-weight:bold">[</span>i<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">&amp;&amp;</span> v <span style="color:#000;font-weight:bold">&lt;</span> medValue<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>                            medIndex <span style="color:#000;font-weight:bold">=</span> i
-</span></span><span style="display:flex;"><span>                            medValue <span style="color:#000;font-weight:bold">=</span> v
-</span></span><span style="display:flex;"><span>                        <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>                    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>                    dataFlag<span style="color:#000;font-weight:bold">[</span>medIndex<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">false</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>            index<span style="color:#000;font-weight:bold">++</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(</span>index<span style="color:#000;font-weight:bold">==</span>SIZE<span style="color:#000;font-weight:bold">){</span>
-</span></span><span style="display:flex;"><span>                index<span style="color:#000;font-weight:bold">=</span>0
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">return</span> medValue
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>    internal
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">class</span> <span style="color:#900;font-weight:bold">CMidXFilter</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">private</span> val SIZE<span style="color:#000;font-weight:bold">:</span>Int<span style="color:#000;font-weight:bold">=</span>256<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> var medIndex<span style="color:#000;font-weight:bold">=</span>10
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> var index <span style="color:#000;font-weight:bold">=</span> 0
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> val data<span style="color:#000;font-weight:bold">=</span>FloatArray<span style="color:#000;font-weight:bold">(</span>SIZE<span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> val dataFlag<span style="color:#000;font-weight:bold">=</span>BooleanArray<span style="color:#000;font-weight:bold">(</span>SIZE<span style="color:#000;font-weight:bold">){</span>
-</span></span><span style="display:flex;"><span>            it<span style="color:#000;font-weight:bold">&lt;</span>medIndex
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">private</span> var medValue <span style="color:#000;font-weight:bold">=</span> 0f
-</span></span><span style="display:flex;"><span>        fun <span style="color:#900;font-weight:bold">init</span><span style="color:#000;font-weight:bold">(</span>v<span style="color:#000;font-weight:bold">:</span>Float<span style="color:#000;font-weight:bold">):</span>Float<span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>            data<span style="color:#000;font-weight:bold">[</span>index<span style="color:#000;font-weight:bold">]=</span>v
-</span></span><span style="display:flex;"><span>            <span style="color:#900;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>v <span style="color:#000;font-weight:bold">&lt;</span> medValue<span style="color:#000;font-weight:bold">&amp;&amp;(</span>dataFlag<span style="color:#000;font-weight:bold">[</span>index<span style="color:#000;font-weight:bold">]||</span>index<span style="color:#000;font-weight:bold">==</span>medIndex<span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>dataFlag<span style="color:#000;font-weight:bold">[</span>index<span style="color:#000;font-weight:bold">])</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>                    dataFlag<span style="color:#000;font-weight:bold">[</span>index<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">false</span>
-</span></span><span style="display:flex;"><span>                    dataFlag<span style="color:#000;font-weight:bold">[</span>medIndex<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>                medValue <span style="color:#000;font-weight:bold">=</span> v
-</span></span><span style="display:flex;"><span>                data<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">forEachIndexed</span> <span style="color:#000;font-weight:bold">{</span> i<span style="color:#000;font-weight:bold">,</span> v <span style="color:#000;font-weight:bold">-&gt;</span>
-</span></span><span style="display:flex;"><span>                    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>dataFlag<span style="color:#000;font-weight:bold">[</span>i<span style="color:#000;font-weight:bold">].</span><span style="color:#008080">not</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">&amp;&amp;</span> v <span style="color:#000;font-weight:bold">&gt;</span> medValue<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>                        medIndex <span style="color:#000;font-weight:bold">=</span> i
-</span></span><span style="display:flex;"><span>                        medValue <span style="color:#000;font-weight:bold">=</span> v
-</span></span><span style="display:flex;"><span>                    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>v <span style="color:#000;font-weight:bold">&gt;</span> medValue<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>                    dataFlag<span style="color:#000;font-weight:bold">[</span>index<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span>
-</span></span><span style="display:flex;"><span>                    medValue <span style="color:#000;font-weight:bold">=</span> v
-</span></span><span style="display:flex;"><span>                    medIndex <span style="color:#000;font-weight:bold">=</span> index
-</span></span><span style="display:flex;"><span>                    data<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">forEachIndexed</span> <span style="color:#000;font-weight:bold">{</span> i<span style="color:#000;font-weight:bold">,</span> v <span style="color:#000;font-weight:bold">-&gt;</span>
-</span></span><span style="display:flex;"><span>                        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>dataFlag<span style="color:#000;font-weight:bold">[</span>i<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">&amp;&amp;</span> v <span style="color:#000;font-weight:bold">&lt;</span> medValue<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>                            medIndex <span style="color:#000;font-weight:bold">=</span> i
-</span></span><span style="display:flex;"><span>                            medValue <span style="color:#000;font-weight:bold">=</span> v
-</span></span><span style="display:flex;"><span>                        <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>                    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>                    dataFlag<span style="color:#000;font-weight:bold">[</span>medIndex<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">false</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>            index<span style="color:#000;font-weight:bold">++</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(</span>index<span style="color:#000;font-weight:bold">==</span>SIZE<span style="color:#000;font-weight:bold">){</span>
-</span></span><span style="display:flex;"><span>                index<span style="color:#000;font-weight:bold">=</span>0
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">return</span> medValue
-</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
-</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div>
+            
+
+<h1 id="心率算法">心率算法</h1>
+
+<pre><code class="language-java">class HeartUtils {
+ 
+    private var lastMaxPos = 0
+ 
+ 
+    private var running = true
+ 
+    private var index =0
+  private  var maxPos = 0
+    private var maxValue = 0f
+    fun init(index:Int,value:Float):Boolean{
+        if(maxValue&lt;value){
+            maxPos = index
+            maxValue = value
+            return true
+        }
+        return false
+    }
+    private  val size = 128
+    private  val sizeX = 127
+    /**
+     * 原始数据
+     */
+    private val src = FloatArray(size)
+    /**
+     * 平滑之后的数据
+     */
+    private val base = FloatArray(size)
+ 
+ 
+    private val arg16 = FloatArray(size)
+ 
+    private val sub = FloatArray(size)
+ 
+    private val subtractsAbs = FloatArray(size)
+ 
+ 
+    private val line = FloatArray(size)
+ 
+    private var bIndex = 0;
+ 
+    private var argIndex = size-16
+ 
+    private var nowIndex = 64
+ 
+    private val sm32 = Smooth16()
+ 
+    private val sm16= Smooth16()
+ 
+    private val xmf = CMidXFilter()
+    private val rf = CMidRFilter()
+    private val lf = CMidLFilter()
+    private var flag = 0
+    private var rrDis=0;
+    fun heart():Int{
+        if(rrDis!=0) {
+            return (60 * 250f.div(rrDis)).roundToInt()
+        }else{
+            return 0
+        }
+    }
+    fun init(v:Float){
+        val a = initData(v)
+        val x = sm16.init(a)
+        arg16[argIndex]=x
+        if(++argIndex==size)argIndex=0
+        if(++nowIndex==size)nowIndex=0
+        index++
+        if(running){
+            init(index,subtractsAbs[nowIndex])
+        }
+        if(line[nowIndex]&lt;subtractsAbs[nowIndex]){//大于阈值
+            running = true
+            flag=30
+            return
+        }else if(flag==0){
+            if(line[getI(30)]&lt;subtractsAbs[getI(30)]){
+                running=true
+                flag = -30
+                return
+            }
+        }else{
+            if(flag&lt;0)flag++
+            else flag--
+            return
+        }
+        if(running) {
+            running = false
+            if(lastMaxPos!=0){
+                var rr = maxPos-lastMaxPos
+               rrDis=  (rf.init(rr))
+//                LogUtils.d(&quot;hreat = &quot;+heart())
+            }
+            maxValue=0f
+            lastMaxPos=maxPos
+        }
+ 
+    }
+    private fun getA():Float{
+ 
+        return ((sub[nowIndex] *8) +sub[getI(-1)]+sub[getI(1)]+sub[getI(-2)]+sub[getI(2)]).div(12)
+    }
+    private fun getB(tag:Int = 0):Float{
+ 
+        val t = if(tag&lt;0) 30+tag else tag
+        return (t*getA()+ (30-t)*arg16[nowIndex]).div(30)
+    }
+ 
+ 
+    private fun initData(v:Float):Float{
+        val b=sm32.init(v)
+        val s=sm32.v()
+        val m = s-b
+        val n = abs(m)
+        val l = xmf.init(n)
+        sub[bIndex]=m
+        line[bIndex]=l
+        base[bIndex]=b
+        src[bIndex]=s
+        subtractsAbs[bIndex]=n
+        if(++bIndex==size)bIndex=0
+        return m
+    }
+ 
+    private fun getI(v:Int):Int=((nowIndex+v+size).and(sizeX))
+    internal class Smooth16 {
+        private var index = 0
+        private val data=FloatArray(15)
+        private var sum = 0f
+        fun init(v:Float):Float{
+            sum-=data[index]
+            sum+=v
+            data[index++]=v
+            if(index==15)index=0
+            return sum.div(15)
+        }
+        fun v():Float{
+            return data[(index+7) % 15]
+        }
+    }
+    internal
+    class CMidLFilter(private val SIZE:Int=5) {
+        private var medIndex=2
+        private var index = 0
+        private val data=IntArray(SIZE)
+        private val dataFlag=BooleanArray(SIZE){
+            it&lt;medIndex
+        }
+        private var medValue = 0
+        fun init(v:Int):Int{
+            data[index]=v
+            if (v &lt; medValue&amp;&amp;(dataFlag[index]||index==medIndex)) {
+                if (dataFlag[index]) {
+                    dataFlag[index] = false
+                    dataFlag[medIndex] = true
+                }
+                medValue = v
+                data.forEachIndexed { i, v -&gt;
+                    if (dataFlag[i].not() &amp;&amp; v &gt; medValue) {
+                        medIndex = i
+                        medValue = v
+                    }
+                }
+            } else {
+                if (v &gt; medValue) {
+                    dataFlag[index] = true
+                    medValue = v
+                    medIndex = index
+                    data.forEachIndexed { i, v -&gt;
+                        if (dataFlag[i] &amp;&amp; v &lt; medValue) {
+                            medIndex = i
+                            medValue = v
+                        }
+                    }
+                    dataFlag[medIndex] = false
+                }
+            }
+            index++
+            if(index==SIZE){
+                index=0
+            }
+            return medValue
+        }
+    }
+    internal
+    class CMidRFilter(private val SIZE:Int=11) {
+        private var medIndex=5
+        private var index = 0
+        private val data=IntArray(SIZE)
+        private val dataFlag=BooleanArray(SIZE){
+            it&lt;medIndex
+        }
+        private var medValue = 0
+        fun init(v:Int):Int{
+            data[index]=v
+            if (v &lt; medValue&amp;&amp;(dataFlag[index]||index==medIndex)) {
+                if (dataFlag[index]) {
+                    dataFlag[index] = false
+                    dataFlag[medIndex] = true
+                }
+                medValue = v
+                data.forEachIndexed { i, v -&gt;
+                    if (dataFlag[i].not() &amp;&amp; v &gt; medValue) {
+                        medIndex = i
+                        medValue = v
+                    }
+                }
+            } else {
+                if (v &gt; medValue) {
+                    dataFlag[index] = true
+                    medValue = v
+                    medIndex = index
+                    data.forEachIndexed { i, v -&gt;
+                        if (dataFlag[i] &amp;&amp; v &lt; medValue) {
+                            medIndex = i
+                            medValue = v
+                        }
+                    }
+                    dataFlag[medIndex] = false
+                }
+            }
+            index++
+            if(index==SIZE){
+                index=0
+            }
+            return medValue
+        }
+    }
+    internal
+    class CMidXFilter(private val SIZE:Int=256) {
+        private var medIndex=10
+        private var index = 0
+        private val data=FloatArray(SIZE)
+        private val dataFlag=BooleanArray(SIZE){
+            it&lt;medIndex
+        }
+        private var medValue = 0f
+        fun init(v:Float):Float{
+            data[index]=v
+            if (v &lt; medValue&amp;&amp;(dataFlag[index]||index==medIndex)) {
+                if (dataFlag[index]) {
+                    dataFlag[index] = false
+                    dataFlag[medIndex] = true
+                }
+                medValue = v
+                data.forEachIndexed { i, v -&gt;
+                    if (dataFlag[i].not() &amp;&amp; v &gt; medValue) {
+                        medIndex = i
+                        medValue = v
+                    }
+                }
+            } else {
+                if (v &gt; medValue) {
+                    dataFlag[index] = true
+                    medValue = v
+                    medIndex = index
+                    data.forEachIndexed { i, v -&gt;
+                        if (dataFlag[i] &amp;&amp; v &lt; medValue) {
+                            medIndex = i
+                            medValue = v
+                        }
+                    }
+                    dataFlag[medIndex] = false
+                }
+            }
+            index++
+            if(index==SIZE){
+                index=0
+            }
+            return medValue
+        }
+    }
+}
+</code></pre>
+
         </div>
 
         
@@ -801,7 +530,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                     <footer id="footer">
     <div>
-        &copy; 2022 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
+        &copy; 2023 <a href="https://geek.zshipu.com/">知识铺的博客 By 知识铺</a>
         
         | <a rel="nofollow" target="_blank" href="https://beian.miit.gov.cn/">浙 ICP 备19032823号-1</a>
         
@@ -965,9 +694,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/IM/">IM</a>
     
-    <a href="https://geek.zshipu.com/tags/js/">js</a>
+    <a href="">JS</a>
     
-    <a href="https://geek.zshipu.com/tags/java/">java</a>
+    <a href="">Java</a>
     
     <a href="https://geek.zshipu.com/tags/JavaScript/">JavaScript</a>
     
@@ -975,11 +704,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/Netty/">Netty</a>
     
-    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    <a href="https://geek.zshipu.com/tags/NextJS/">NextJS</a>
     
-    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    <a href="">Nextjs</a>
     
-    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    <a href="https://geek.zshipu.com/tags/ReactJS/">ReactJS</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
     
@@ -1017,7 +746,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/nexp/">nexp</a>
     
-    <a href="https://geek.zshipu.com/tags/nextjs/">nextjs</a>
+    <a href="">nextjs</a>
     
     <a href="https://geek.zshipu.com/tags/nifi/">nifi</a>
     
@@ -1029,7 +758,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <a href="https://geek.zshipu.com/tags/react/">react</a>
     
-    <a href="https://geek.zshipu.com/tags/reactjs/">reactjs</a>
+    <a href="">reactjs</a>
     
     <a href="https://geek.zshipu.com/tags/sharding/">sharding</a>
     
