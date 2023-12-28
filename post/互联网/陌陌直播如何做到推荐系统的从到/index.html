@@ -220,12 +220,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在实际推荐的过程中，希望除了满足用户本身在内容消费上的需求以外，更希望能够去推动用户和主播发生更多的互动。直播产品本身就具有一定的社交属性，陌陌直播依托于开放式社交平台，这里的社交因素其实是放大的。</p>
 <p>所以可以认为陌陌直播是一款社交+直播的产品， <strong>连接的更多的是人和内容</strong>，而不是单纯的内容项分发产品。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/57fd695563734aaeb82652730378ca8a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281943859.webp" />   
     </p>
 <p>在业务目标上，我们会关注CTR、观看时长这样的内容项的指标；同时，也会重点考虑社交关系达成方面的指标，如关注转化；陌陌直播本身也承担了非常大的营收职能，所以付费转化为代表的营收指标同样是重点；除此之外，我们会从整个生态的角度来兼顾生产者（主播侧）和消费者（用户侧）的留存问题。</p>
 <h1 id="二直播推荐逻辑架构">二、直播推荐逻辑架构</h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/19f18c27968b4e59b04f377f1a4e2847.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281943884.webp" />   
     </p>
 <p>在直播整体的架构逻辑上，在线主播候选池会经过过滤和召回阶段产生千量级的主播候选，然后会经过策略Rank阶段进行精排产生推荐算法认为可展示的队列，最后业务Rank做业务层的干后进行用户展示。</p>
 <p>整体的架构和传统的推荐场景没有太大的区别，都包括了内容分析、召回、Rank等环节；但是，针对陌陌直播的业务场景我们做了一些特殊的调整，比如在策略Rank的最后加入负反馈策略，进行推荐展示的最后一个环节的质量控制。</p>
@@ -235,40 +235,40 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>直播产品在整体展示的素材中文本信息非常匮乏。那么，如何去对用户以及主播进行更好的表征？Embedding在这个场景中是一个非常适用的表示方法。从信息出发，来看一下我们能够拿到哪些方面的信息。首先，用户在直播场景中的行为信息，这是能拿到的最直接的用户以及主播的信息。内容上的信息呢？除了文本以外，直播是一种视频流产品，具有大量的图像以及视频流信息，这是最底层的内容信息。除此之外，陌陌是一家社交平台，有非常丰富的社交上的关系数据，我们会沿着这些方向来分别介绍一下在Embedding表征上的一些工作。</p>
 <h2 id="1基于行为的embedding">1、基于行为的embedding</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d24d01bef93f411cab3bc9c8a59a2668.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281943798.webp" />   
     </p>
 <p>首先，在基于用户行为的建模中，拿两个简单的模型来做开始介绍。我们会建立这样的一个简单模型，对用户ID进行直接User Embedding编码，对点击观看过的一些主播来进行预测，这样就能得到用户和主播的 Embedding。这是一个非常简单的模型，但是它没有去考虑用户本身的观看序列信息，没法准确的建模出用户观看主播过程中的协同信息。怎么办呢？考虑另外一种模型，结合用户ID本身的Embedding以及观看过的主播序列来进行User Embedding的编码，去预测用户下一次行为的主播。这两种模型是Paragraph Vector的两种模型泛式。</p>
 <p>模型的架构往往共性非常强，我们希望通过这些模型能够去学到用户的Embedding、主播的Embedding。有了这些Embedding之后我们能够在直播推荐的各个环节去做相似推荐，去快速抓住相似的主播比如打游戏、跳舞以及书法的主播，已达到行为相关的目的。</p>
 <h2 id="2解决冷启动问题">2、解决冷启动问题</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a2dd8d5c6cd044fcb99b5de60dc0a9ca.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281943725.webp" />   
     </p>
 <p>但是会面临另外一个问题，基于行为的Embedding不可避免会遇到一个数据充分性的问题，能学到的是往往只是那些有充分行为的用户以及主播的表征。对于一些长尾主播或者是冷启动用户是没办法表征的，怎么办？我们的解决方案和Airbnb房屋租赁推荐中的思路比较一致，希望能够利用用户或者主播的profile信息来对用户和主播进行一个type的编码，然后再代入之前的模型中，希望能够去学习到user type和star type的Embedding。Type类的Embedding能够帮助我们去解决一些线上冷启动的问题，对于行为类Embedding来说是一个非常有效的补充。</p>
 <h2 id="3视频内容理解">3、视频内容理解</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/35bfd0017d4d4a818dab17f185fcf0cb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281943776.webp" />   
     </p>
 <p>在直播推荐业务中，视频流数据是非常基础的内容项数据，除了对视频流本身去做更好的表征以外，我们还希望基于这种表征能够去做一些抽象，能够把一些关键信息表达出来。这个时候我们会利用如时空混合模型去构建模型，希望针对视频流进行动作识别，比如识别一些视频的亮点时刻，如正在弹琴、正在跳舞、正在做瑜伽、正在绘画以及正在游戏。在实际推荐过程中，会把这些精彩时刻做一些凸显。整个视频流在线上是实时的，我们需要在线上进行实时预测才能保证动作类识别的结果不会延迟。</p>
 <h2 id="4违规识别">4、违规识别</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b509ff80280a4db28f57ebc430b10445.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281943791.jpeg" />   
     </p>
 <p>内容侧除了视频流以外，能获取的更多的是图片本身，无论是直播还是短视频，都是由一帧一帧组成，每一帧都是一张图片。在过去的几年时间，在技术上，我们对图片本身的表征能力变得越来越好，越来越高效。这里我们利用DenseNet来对图片、直播视频流的每一帧去做更好的表示。在视频直播安全审核环节，我们会实时给直播打上环境类、人物类、动作类等等一系列标签，会针对性的对违规主播进行实时识别和屏蔽；如主播正在进行开车、躺床、抽烟等行为，我们会实时监测和协同运营进行处理。</p>
 <h2 id="5人脸识别">5、人脸识别</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2839ec0f9a89445388661935e52dba16.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281943821.jpeg" />   
     </p>
 <p>陌陌直播整体偏向秀场直播，秀场直播中大部分都会有主播正面对着镜头进行才艺展示。针对这种普遍场景，一些业务应用中需要考虑到人脸识别的情况。人脸识别是一个较为系统性的工程，大概包括三个阶段：人脸检测，人脸校正，以及人脸匹配。人脸校正之后，会用各种各样的模型来对人脸本身的Embedding进行表示，最后会利用如Triplet loss（实际应用效果一般比较好）的方式进行匹配一致性的建模训练。</p>
 <p>人脸识别能得到一个副产物是人脸本身的Embedding。在实际应用中，可以做的第一个落地应用是判定主播上传的封面和真人的一致性检测，有些主播本身颜值没有那么高，封面经过大幅的PS或者是非本人，利用封面吸引用户点击，造成用户秒退等不好体验。除此之外，存在一些用户在实际观看直播的过程中考虑了主播长相的因素；这里，我们希望能够从颜值类型或者长相相似的角度出发给用户进行一些相似推荐。</p>
 <h2 id="6graph-embedding平台用户理解">6、Graph Embedding平台用户理解</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3ff3f1c54ce84a928695182f95febfac.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281943016.webp" />   
     </p>
 <p>陌陌是一家社交平台，能获取到丰富的社交关系信息，用户之间的关注关系、好友关系、同点击关系，会构造成一张巨大的社交网络的graph，每个节点都是一个用户，我们希望利用Graph Embedding的方式对每个节点进行编码。Graph Embedding领域目前有效模型有很多，不一一列举。在得到Node Embedding之后，除了可以做相似用户推荐、link prediction等常规任务以外，还能去做其他业务的场景冷启动。具体来说，针对平台入口直播固定位这种类型的场景，可以利用平台用户Embedding的辅助信息来在直播业务上进行粗粒度的冷启动个性化推荐，在实际业务落地过程中，这种策略是比较好的冷启动策略。</p>
 <h1 id="四直播rank解决方案">四、直播Rank解决方案</h1>
 <h2 id="1rank直播面临的问题和挑战">1、Rank直播面临的问题和挑战</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/921228ca14d24066af6856540aec7706.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281943965.webp" />   
     </p>
 <p>直播推荐相对来说是一个较为复杂的业务，在实际的Rank模型的构建过程中，会遇到各种各样的困难和挑战。</p>
 <p>首先，陌陌直播依托于陌陌APP这样的社交平台而存在，陌陌直播本身在整个APP内拥有非常丰富和多样化的入口和展示样式，不同入口的产品职能和用户心智存在较大的差异（如以推荐为主和以附近为主的场景存在本质的差异），在Rank策略上需要考虑这种差异性。</p>
@@ -277,19 +277,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>除此之外，由于业务形态的复杂性，用户和主播构成了相对复杂的社交网络，不能单纯的将用户和主播分开来看待。</p>
 <h2 id="2rank架构">2、Rank架构</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7b75dfbe79d8462589eb179cec4a537c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281943032.webp" />   
     </p>
 <p>从整个Rank架构的pipeline来看，用户展示结果往前倒推，用户会产生大量的实时行为，实时行为随着时间会变会蜕变成用户历史行为；在历史行为基础上，经过FeatureMake产生一系列特征，和行为样本做join后扔到分布式机器学习平台上做模型训练，产生模型后灌入到线上打分平台（Rank Platform）。Rank Platform自动化的检测和对接多版本多任务的打分模型，进行多目标打分，打分结束后进行Rerank和业务逻辑干预，最后提供给用户展示。实时模型和实时特征的逻辑一样。</p>
 <p>整个Rank阶段包括了数据收集、特征制作、模型训练、线上打分、多目标融合等等环节，是一个相对系统性的工程策略问题。</p>
 <h2 id="3特征框架">3、特征框架</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/71e1e303c7e34c1aafcf4770929d2db3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281943023.webp" />   
     </p>
 <p>陌陌直播整体的特征框架主要包括三个部分，用户特征、主播特征、以及交叉特征，希望通过特定的特征设计来解决具体的业务问题。</p>
 <p>在用户特征上，主要包括profile类特征（性别、年龄、地域等基础信息特征）、行为类特征（用户曝光行为、点击行为、session行为等）以及偏好类特征（用户对于类别的偏好、对于标签的偏好，还有颜值的偏好等等）。主播特征方面，包括profile特征、基础类特征（类别、标签等）、受众类特征和一些展示相关的特征；展示特征包括两方面内容，一方面是封面展示相关信息，另一方面是直播间动态的展示信息。在交叉特征层面上，考虑了用户-主播交叉、context-主播交叉以及用户-context交叉，希望能够通过对不同的特征挖掘去解决特定的问题。特征体系的设计在实际Rank环节是一个非常重要的工作。</p>
 <h2 id="4预估模型演进">4、预估模型演进</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/94b9a4f2c9ff4b049f66e4406f1c125b.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281943123.jpeg" />   
     </p>
 <p>陌陌直播预估模型的演进上，经历了几个阶段：LR、LR+GBDT、Deep，属于较为常规化的推进路线。</p>
 <p>LR模型是一个较为简单的线性模型，模型本身无非线性能力，带来的问题是模型复杂程度、天花板比较低，提升效果的一个途径是投入大量的人力去做特征工程，去挖掘更细粒度以及非线性的特征来进行用户&amp;主播的描述以提升模型非线性能力，费时费力。但是我们一贯的看法是，特征挖掘在实际的业务中是一个非常有必要的环节，它能够帮助我们对业务进行更深入的理解。</p>
@@ -297,12 +297,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在Deep模型的推进中，我们的上线了Wide&amp;Deep，除了希望利用Wide部分的特征刻画来进行目标拟合以外，希望借助Deep部分的Embedding来进行模型的泛化，在实际的落地过程中Wide&amp;Deep模型相对LR+GBDT在业务指标上提升明显。现阶段，在直播业务上随着Deep模型的深入推进，我们希望模型往更加多样化和更宽的方向发展。</p>
 <h2 id="5widedeep">5、Wide&amp;Deep</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/31c04dbf60c94fe9a1f2106c9b9028c1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281943226.webp" />   
     </p>
 <p>在实际的Rank模型迭代过程中，希望在模型上尽可能的存在一定的延续性且改动的变量尽可能的小来方便单变量观察对比。如果在特征层面和模型层面都发生了较大变化，变量太多，一旦实验效果差，很难定位效果差的具体原因和问题在哪。在LR+GBDT往Wide&amp;Deep模型迁移的过程中，我们相当于只做了Deep侧的增量，Wide部分直接将之前的LR的原始离散特征进行平移。在实际的效果观察对比中，Wide&amp;Deep模型较LR+GBDT效果稳定提升明显。</p>
 <h2 id="6multitask预估">6、Multitask预估</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6cc0201818e740dc96e6da3fbb7764ff.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281943317.jpeg" />   
     </p>
 <p>之前提到过，陌陌直播推荐是一个典型的多目标场景。在一个用户典型的行为路径中，会经过点击、观看、关注和付费等过程，每个环节都需要进行问题的抽象建模。相对来说，点击、关注、付费，这几部分较为一致，都可以把它们认为是分类问题；但是，时长预估不太一致，我们在时长预估上进行了一系列的探索。</p>
 <p>时长预估的第一个阶段，我们考虑了截断分类的方式，希望能够把时长预估看成一种分类模型，能够直接和之前的模型结构做一些兼容。但是这样处理会存在一些问题，对一些偏时长的类别上会有偏差，如户外、游戏等类别；我们会花大量的时间在Rerank阶段做模型融合的调整，费时费力，而且可操作空间比较小。后续的优化中，结合业务实际问题，我们将时长预估的模型抽象建模为截断回归的方式，高于60s认为是60s，最后调整为0-1的回归问题。调整之后的预估目标能够更好的与其他目标进行融合。</p>
@@ -432,6 +432,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -465,10 +469,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -847,6 +847,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

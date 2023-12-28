@@ -245,7 +245,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>问题</strong></p>
 <p>前一个版本在 pure deep 模型上拿到不错的收益。很自然的想法是尝试各种点击率深度积木模型，比如 DCN，DeepFM，XDeepFM，PNN，Autoint，FGCNN 等，但是经过几版实现以及调优，发现这些 model 结构和上一个版本相比提升微弱，如下图。本来以为是模型复杂度高了，于是对于 FGCNN 多训练了 20k 步，发现模型处于收敛状态。猜想原因为目前 pure deep 模型中已经包含了大量高阶特征，特征不变的情况下，特征的隐式高阶组合已经足够了，显示的高阶组合带来的收益较少。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b34f06ca834a4011a8549700ddb12b86.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281939083.webp" />   
     </p>
 <p>但是模型还是要继续迭代的，于是切换了思路，通过引入原始特征体系中没有的更多复杂结构特征来实现模型的性能提升。这一版主要添加了用户短期全网实时宝贝点击序列以及用户短期场景内宝贝曝光未点击序列特征，序列中的宝贝考虑 Id，目的地，类目， Poi，Tag 以及行为类型和行为次数等属性。模型结构上没有太多的创新，对于两组序列特征，以待推荐宝贝的 Id，目的地，类目，Poi，Tag 综合起来作为 query，对两组序列进行 attention pooling。然后将 pooling 的结果加入 Pure deep 的输入层，其他结构不变。其中对离线指标提升较明显的几个点如下：</p>
 <ol>
@@ -255,49 +255,49 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>模型结构</strong></p>
 <p>最终的网络结构如图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-d198779cb56040e9911c405f5cb63a8c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281939146.webp" />   
     </p>
 <p>下面对模型的核心部分进行详细描述：</p>
 <ol>
 <li>对于宝贝维度，模型存在三类信息，包括点击宝贝行为，曝光未点击的宝贝行为以及待推荐宝贝。除了宝贝 id 以外，我们将行为类型，目的地，类目，tag，poi 等 side information 加入模型中。这里融合采用 concat 的方式。令待推荐宝贝的多个特征经过 embedding 之后得到的向量分别为：
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-a7ad8cefc7a94ce389f6efa4be26c5e8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281939198.webp" />   
      ，其中 L 为特征的类型数，则可以得到待推荐宝贝的表达为：</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-270362710ec04ae5b03ac5a7089d2516.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281939072.webp" />   
     </p>
 <p>类似的可以得到点击宝贝行为以及曝光未点击宝贝行为的表达为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-d83beff677914e1aa7a229d84839fbc1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281939913.webp" />   
       和
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-e805661939844414a0fdffdbac709ddf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281939763.webp" />   
      ，其中 M 和 N 分别为点击宝贝行为和曝光未点击宝贝行为的个数。</p>
 <ol>
 <li>通过待推荐宝贝作为 query，对点击宝贝行为以及曝光未点击宝贝行为进行 attention pooling。这里由于维度不一致的原因，采用复杂度较高的加性 attention。attention 的过程如下，其中函数 H 为多层前馈神经网络。这里以点击宝贝行为为例，曝光未点击宝贝行为类似。需要注意的是由于这两类序列信息意义相差较大，所以两个 attention pooling 操作参数是不 sharing 的。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-a54f1e6f8407400da6f7c0803cbcdaa4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281939559.webp" />   
     </p>
 <ol>
 <li>最后将点击宝贝行为以及曝光未点击宝贝行为的 pooling 结果
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5fe56309ceb64eba921b353cefd42458.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281939451.webp" />   
       和
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-06001aedf49543489b2a23b68c90e627.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281939398.webp" />   
       与 pure deep 模型的输入层特征进行 concat 一起送入到多层前馈神经网络，输出最后的打分 logit，并进行相应 loss 计算。</li>
 </ol>
 <p><strong>模型效果分析</strong></p>
 <p>同样的时间窗口，采用 30 天数据训练，T + 1 评测，离线指标如下，提升还是很明显的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0b6baf0befd14ac3979cad05b2c427b3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281939384.webp" />   
     </p>
 <p><strong>效果</strong></p>
 <p>上线实验观察 7 天，包括三天正向桶以及四天反向桶，相较于 pure deep 模型，uctr 平均提升 1.0%，pctr 平均提升 1.5%。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-58c8b35beb114b9b9e827d51c2c14520.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281939453.webp" />   
     </p>
 <p><strong>GLA(Global Local Attention-PALM) 模型</strong></p>
 <p><strong>问题</strong></p>
@@ -314,41 +314,41 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="模型结构"><strong>模型结构</strong></h2>
 <p>最终的网络结构如图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5a5a4280d2f54385b8234dd42b2bcbe1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281939772.webp" />   
     </p>
 <p>下面对模型的核心部分进行详细描述，一些通用性的模块的细节不详细介绍。</p>
 <ol>
 <li>对于用户全网行为序列，我们只考虑行为类型，目的地，类目，tag，poi 等覆盖度高的粗粒度属性，不考虑 id 这一维属性，防止过拟合。融合的方式采用 concat 的方式。</li>
 <li>用户全网行为序列的 pooling 方式采用 Multi-CNN + attention 的方式。通过 Multi-CNN 抽取不同区间范围内的局部特征（units），同时考虑 local 和 global 信息。区间越小，更加关注于局部，区间越大，更加关注于全局。比如区间为 1 时，考虑的是 point level。unit 中包含多种目的地类型，包括酒店，宝贝，火车票，机票等。通过 d 个形状为 d ∗ h 的 filters 对输入
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-1393ea91def54b1db7128dd8321b22d6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281939006.webp" />   
       进行步长为 1 的卷积，卷积方式为 SAME。经过 m 次类似的操作，每一次操作 filter 的形状为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-a1ed1aa8d35543a79b4fe6ae03b4609d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281939764.webp" />   
      ，最后输出为 m 个和输入形状一致的序列向量，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-89581067341e4f5e9ce9964536c699ae.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281939605.webp" />   
      。因为混合序列的形式，序列长度过长，如果采用 RNN 的形式一方面计算量大，另一方面长时依赖较弱。然后复用上一版模型中的加性 attention 对 Multi-CNN 抽取出来的多组序列进行 attention pooling，并将 pooling 的结果和 pure deep 模型的输入层 concat。需要注意的是这里多组序列的 attention pooling 参数是共享的。</li>
 </ol>
 <p>对于点击宝贝行为，曝光未点击的宝贝行为的 pooling 过程，在 attention 之前添加一层 transformer 操作，通过 self-attention 来捕获序列内个体之间的关系，然后再进行加性 attention pooling。其他的操作不变。</p>
 <p><strong>模型效果分析</strong></p>
 <p>同样的时间窗口，采用 30 天数据训练，T + 1 评测，离线指标如下，提升还是很明显的。这里和上一版模型的离线结果图在 AUC 范围上有所不同是因为切换了时间窗口。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-267019808b424a37924e9c9bf5d2c9a4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281939341.webp" />   
     </p>
 <h2 id="效果"><strong>效果</strong></h2>
 <p>上线实验观察，相较于 FB-PALM 模型，uctr 平均提升 1.0%，pctr 平均提升 3.0%。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-d49ae22c2efd4488b37e9dbcbccb647f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281939462.webp" />   
     </p>
 <p><strong>宝贝的一阶近邻信息和宝贝 pretrain embedding</strong></p>
 <h2 id="其他的尝试"><strong>其他的尝试</strong></h2>
 <p>前面后两版模型是在用户侧增加了复杂序列特征，而宝贝侧一直很薄弱。因此考虑增加宝贝的一阶近邻信息和宝贝的 pretrain embedding 向量。一阶近邻通过统计历史一年用户 session 行为中宝贝的共现关系来获得。而宝贝的 pretrain embedding 向量包括文本向量，图像向量以及基于随机游走产出的 deepwalk 向量。实验下来单独增加这些 trick 和 pure deep 模型相比能拿到很大的提升，但是叠加到后续的模型版本上效果不明显。应该需要再探索更加精细的融合方式，而不是直接都 concat 到输入层。两次实验结果如下，确实很微弱，因此没有上线验证。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-e3279d871dee4a338c7b07f28c197242.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281939232.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-655b03e07d874393aa9fb697d7db55a3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281939343.webp" />   
     </p>
 <p><strong>time-aware attention</strong></p>
 <p>前几个版本的模型中 time 的信息都是通过 side information 的方式加入，类似于 pos embedding。但是 time 的信息在行为序列刻画过程中十分重要。调研了一些方法，包括 time-LSTM 等，但是由于 RNN 的计算复杂度太高，也放弃了。后续尝试将 time 的信息后置，直接加到 attention 的过程中，在离线表现上有一些收益，但是也不明显，暂时没有上线，后续这个也是值得探索的。</p>
@@ -482,6 +482,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -515,10 +519,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -897,6 +897,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

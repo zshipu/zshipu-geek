@@ -192,7 +192,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/06/image-d74eee3f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281855391.png" />   
     </p>
 <blockquote>
 <p>分享嘉宾：王金海 趣头条</p>
@@ -209,25 +209,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>未来规划</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-7feeb5ad94d84911bb6b9640a2802237.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281855793.png" />   
     </p>
 <p>趣头条的查询页面，分为离线查询和实时查询。离线查询有 presto，spark，hive 等，实时查询则引入了 ClickHouse 计算引擎。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-7332fa16621541e786b332381f903351.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281855673.png" />   
     </p>
 <p>上图为实时数据报表，左边为数据指标的曲线图，右边为详细数据指标，目前数据指标的采集和计算，每五分钟一个时间窗口，当然也会有三分钟或者一分钟的特殊情况。数据都是从 Kafka 实时导入 ClickHouse 进行计算的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-d2838f1454d840e098d509b41deb1e64.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281855212.png" />   
     </p>
 <p><strong>1. 小时级实现架构图</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-d09418df09c94ea49650a9e2bd3b28ff.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281855783.png" />   
     </p>
 <p>Flink-to-Hive 小时级实现架构图如图所示，架构实现的思路如下：</p>
 <p>Database 中的 Binlog 抽数据到 Kafka，同时 Log server 数据也会上报到 Kafka，所有的实时数据落地到 Kafka 之后，通过 Flink 抽取到 HDFS 上。HDFS 到 Hive 之间有条虚线，即 Flink 落地到 HDFS 后，通过程序监控，Flink 在消费完成时，数据落地到 Hive 中可能是小时级的或者是半小时级的，甚至是分钟级的，此时需要知道数据的 Event time 已经到了什么时间，然后再去触发比如 alert table、add partition、 add location 等，把分区写进 Hive 中。这时还需要看一下当前的 Flink 任务的数据时间消费到了什么时间，如 9 点的数据要落地时，需要看一下 Kafka 里 Flink 数据消费是否到了 9 点，然后在 Hive 中触发分区写入。</p>
 <p><strong>2. 实现原理</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-44b80b4adeb943f28d48903f919a31c5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281855962.png" />   
     </p>
 <p>这块的实现原理主要是使用 Flink 高阶版本的特性 StreamingFileSink。</p>
 <p>StreamingFileSink 的主要功能如下：</p>
@@ -240,12 +240,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>下面来具体说一下 Exactly-Once 是如何实现的。</p>
 <p>\<em>\</em> ① Exactly-Once**</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-559d7aa528db484c9133af36b4dbbec0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281855281.png" />   
     </p>
 <p>具体实现 Exactly-Once 的方式，如上图所示，左侧是一个二阶段的模型，Coordinator 发一个 perpare，所有的参与者或者执行者开始触发 ack 动作，Coordinator 收到所有人的 ack 动作后，就开始执行 commit，所有的执行者就把左右的数据进行落地。到了 Flink 这块，Source 收到了 checkpoint barrier 流的时候，开始触发 snapshorState 发送到 Job Manager，Job Manager 把所有的 CheckPoint 都完成以后，会发送一个 notifyCheckpointComplete，Flink 这块跟上图左边的二阶段提交协议是一致的，Flink 也是可以实现二阶段提交协议的。</p>
 <p>\<em>\</em> ② 如何使用 Flink 实现二阶段提交协议**</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-302ee268d7a149f0b16a9a7efc4b2ae8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281855762.png" />   
     </p>
 <p>首先 StramingFileSink 实现了两个接口，分别是 CheckpointedFunction 和 CheckpointListener。</p>
 <ul>
@@ -260,27 +260,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>第四步 notifyCheckPoint Complete 会触发 pending 动作到 finished 状态的数据写入，实现的方式直接使用 rename，Streaming 会不断的写入 HDFS 中的临时文件，等到 notifyCheckPoint 结束之后，直接做一个 rename 动作，写成正式文件。</p>
 <p><strong>3. 跨集群多 nameservices</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-462200ec2a0d4e0fabb815675dde4f91.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281855291.png" />   
     </p>
 <p>趣头条的实时集群跟离线集群是独立的，实时集群目前是一套，离线集群是有多套。通过实时集群要写入到离线集群，这样就会遇到一个问题，HDFS nameservices 问题，如果在实时集群中把所有的离线集群的 nameservice 用 namenode HA 的方式全部打入到实时集群，是不太合适的。所以使用 Flink 任务中 resource 下边把 HDFS 中的 XML 文件中间加 final 标签，设置为 true。此处的 value 标签中，stream 是一个实时集群，date 是一个离线集群，这样把两个 HA 配置在 value 标签，从而达到实时集群是实时集群，离线集群是离线集群，中间的 HDFS 中 set 不需要相互修改，直接在客户端时间就行了。</p>
 <p><strong>4. 多用户写入权限</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-2d6a06b2614d463abe66355168b42adc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281856834.png" />   
     </p>
 <p>针对多用户权限写入的问题，实时写入离线 HDFS 中的时候，会涉及到用户权限。遇到用户权限时，也会有一个问题，Flink 实时提交的用户，是定义好的，所有的程序里用户是同一个，但是离线是多个用户，Flink 目前对于这块用户的权限做的还不够好，所以我们自己改造了一下，在 API 中添加了 withBucketUser，上边已经配置好了 nameServices，然后通过该参数来配置具体是那个用户来写入 HDFS 中，这是 API 层级的。</p>
 <p>API 层级的好处是一个 Flink 程序可以写多个，可以指定不同的 HDFS 的不同的用户就可以。具体实现就是在 Hadoop file system 中加一个 ugi.do as，代理用户。以上是趣头条用 Flink 在实时数据同步到 Hive 做的一些工作。其中会有一些小文件的问题，针对小文件，我们通过后台程序定期的 merge，如果 CheckPoint 的时间很短，就会出现大量的小文件的问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-91f1cacea02344069e0f18b1ee7218a3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281856370.png" />   
     </p>
 <p><strong>1. 秒级实现架构图</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5b40732b174641d885201ccd8244c9f4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281856869.png" />   
     </p>
 <p>首先来解释一下趣头条使用 Flink+ClickHouse 的场景，最开始展示的很多实时指标，可能是每五分钟计算一次，也可能是每三分钟计算一次。如果每一个实时指标用一个 Flink 任务，即使是 FlinkSQL 来写，比如消费一个 Kafka Topic，计算它的日活、新增、流程等，当用户提出一个新的需求，那这个 Flink 任务是需要修改还是再启动一个 Flink 任务来消费这个 Topic，这样的话就会出现 Flink 任务在不断的修改或者不断的启动新的 Flink 新的任务。为了解决这个问题，就让 Flink 后边接一个套 ClickHouse 实现整体的 OLAP。</p>
 <p>上图为秒级实现架构图，从 Kafka 到 Flink 到 Hive 然后再到 ClickHouse 集群，对接外部 Horizon ( 实时报表 )、QE ( 实时 adhoc 查询 )、千寻 ( 数据分析 )、用户画像 ( 实时的用户画像 )。</p>
 <p><strong>2. Why Flink+ClickHouse</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-9a6a29c7b2c6403c999a5c39972f568f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281856086.png" />   
     </p>
 <p>具体来说为什么要用 Flink+ClickHouse，主要有以下几点：</p>
 <ul>
@@ -292,11 +292,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>目前趣头条 Flink 集群有 100+ 台 32 核 128 G 3.5T SSD，日数据量 2000+ 亿，日查询量 21w+ 次，80% 查询在 1s 内完成。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-453cb4472f3c4570b8b90a1e9e99a5f9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281856529.png" />   
     </p>
 <p>上图为单表测试结果。ClickHouse 单表测试速度快。但受制于架构，ClickHouse 的 Join 较弱。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-2a4357eb9f68477a86be4dbbf175d5bc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281856997.png" />   
     </p>
 <p>上图是处理相对较为复杂的 SQL，count+group by+order by，ClickHouse 在 3.6s 内完成 26 亿数据计算。</p>
 <p><strong>3. Why ClickHouse so Fast</strong></p>
@@ -309,18 +309,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>SQL 语法、UDF 完善：在这块有很大的需求，比如数据分析以及维度下坠，常规的 horizon 数据报表可能就是 count、sum、以及 group by、order by 等，但是在一些维度下坠或者是数据分析领域，可能会有一个窗口期的概念，在一段窗口期内的留存，所以要用到一些更高的特性，类如时间窗口的功能。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-752b0840608d4c9588c8025fda916082.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281856069.png" />   
     </p>
 <p>上图是 MergeTree 的运行原理图解，最上边的第一层是数据一个 batch 一个 batch 的实时写入，后台会做每一个层级的数据 merge，这块跟 HBase 差不多的实现，merge 的时候会进行数据的排序，然后做一个数据索引。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-413e22fa67e0485aaebfffb3b008e6ca.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281856384.png" />   
     </p>
 <p>上图是 ClickHouse Connector，ClickHouse 有两个概念，local table 和 distribute table。local table 是用来写的，当然 distribute table 也可以写入，但是会出现很大的 io 问题，所以尽量不要写 distribute table。但是可以读 distribute table。5-10w 一个 batch 进行数据写入，正常的情况下，是 5 秒一个周期。</p>
 <p>RoundRobinClickHouse DataSource 这块是趣头条自己实现的；</p>
 <p>ClickHouse 官方 API 使用：</p>
 <p>BalancedClickHouseDataSource 实现的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5888554e3e194ff5b6c1998b10fcaf32.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281856590.png" />   
     </p>
 <p>上图是 ClickHouse 官方 API 使用：</p>
 <p>BalancedClickHouseDataSource</p>
@@ -333,13 +333,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>第一个是指 100 台机器配置了 100 个 ip 或者端口号，可能会有一些机器出现 ping 不通或者服务无响应，这块是定时的做一个 Actualiza 来发现这些机器哪些无法连接，触发一个下限来把这些 ip 删除掉。</p>
 <p>第二个 scheduleConnectionsCleaning，因为 ClickHouse 是 http 的方式，定期的会把一些没用的 http 的请求清理掉。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-9260b823123e4ed1a30ac432cee05a43.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281856826.png" />   
     </p>
 <p>针对于官方提供的 API，趣头条对这方面做了一个加强，开发了一个 RoundRobinClickHouseDataSource，实现了三个语义，分别是 testOnBorrow、testOnReturn、testWhileldle。</p>
 <p>第一个 testOnBorrow 取链接的时候，设置 为 true，然后去 ping 一下这个链接能不能拿到，ClickHouse 写入的时候，使用的 batch，所以尽量就是拿链接的时候要拿到成功的链接；第二个 testOnReturn 设置为 false，testWhileldle 设置为 true，把上边官方的两个 schedule 功能集成进去了。为什么要实现 RoundRobin，主要是因为假如有 100 台机器，ClickHouse 相对于 Hadoop 来说，还是需要好好维护一下，如果是 insert 的话，后台是不断 merge 的过程，insert 速度大于 merge 速度时候，会导致 merge 速度永远跟不上，所以就写完这台机器接下来写别的机器，以及 5 秒一个间隔的写，使 merge 的速度尽量跟上 insert 的速度，这块是整个部分最需要注意的地方。</p>
 <p><strong>4. Backfill</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b6a86081726e4d31abbcd637f29f963f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281856332.png" />   
     </p>
 <p>趣头条针对集群容错做了一些优化，主要包括两点：</p>
 <ul>
@@ -474,6 +474,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -507,10 +511,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -889,6 +889,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

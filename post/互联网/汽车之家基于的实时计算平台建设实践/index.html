@@ -205,7 +205,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <h2 id="一应用场景"><strong>一、应用场景</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/65e96999fbbf4a61a34cbb020ca61cc0.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272111237.jpeg" />   
     </p>
 <p>我们的应用场景与其他公司很类似，涵盖了实时指标统计、监控预警、实时数据处理、实时用户行为、实时入湖、实时数据传输这几个方面：</p>
 <ul>
@@ -217,18 +217,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>最后是基础的实时数据传输场景，用户可以将业务库或 Kafka 中的数据便捷地分发到多种存储引擎中应对不同的业务需求，比如分发到 ES 中支持快速检索。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/adbc78730b8c41dfb3afaeaedf401adb.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112519.jpeg" />   
     </p>
 <p>我们最早是使用 Storm平台，基于 Spout、Bolt 开发模型，实现了基础的实时计算开发，这个阶段是完全基于 Java 编码方式实现开发，开发门槛及学习成本都比较高。</p>
 <p>第二阶段，我们在 18、19 年引入 Flink，并建设了 AutoStream 1.0 平台。这个阶段我们主要的目标是提效、降低开发门槛和学习成本。将之前纯 Java 开发方式转变为基于 SQL + UDF 的开发方式。由于 Flink 早期还不支持 DDL，所以我们很大一部分工作就是建设自己的 meta server，并通过 DDL 定义 source sink 组件，同时完善业务库数据的实时接入，并将公司内部常用的存储引擎集成到平台上，完成整个实时开发链路的打通。</p>
 <p>第三阶段，我们将 Flink 升级到 1.9 版本，并将平台升级为 AutoStream 2.0 版本，支持原生 DDL，同时支持自助上传 UDF，简化了 UDF 使用流程。同时随着任务数及平台用户的增加，我们的日常 on call 时间也随之增加，所以我们上线了任务的健康评分机制，从多个方面分析任务的健康度，帮助用户了解任务可以优化的点并附带解决方案。我们还上线了在线诊断功能，支持动态修改日志级别，查看线程栈和火焰图，提升用户定位问题的效率，同时也降低了我们平台方的日常 on call 成本。</p>
 <p>AutoStream 3.0 代表了我们今年主要的工作，首先是将 Flink 升级到 1.12 版本，这次升级带给我们的最直接的收益就是支持湖仓一体、 Native on K8S、PyFlink。同时本着降本提效的思路，新增了智能伸缩容的功能，一方面可以提升实时计算资源的利用率，另一方面也进一步降低用户优化任务资源的难度。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/60b1360f15824a5a8af10981b149d199.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112728.jpeg" />   
     </p>
 <p>上图是 AutoStream 2.0 的架构，它包含了很多内容，涵盖了平台整体的功能与定位。但不可避免地存在诸多痛点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ce1699f7f43c4a1b83d9d49f0b63de7e.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112494.jpeg" />   
     </p>
 <p>由于实时计算离线的存储资源是混用的，离线 Hadoop 集群单独为实时计算拆出了一部分服务器并单独部署了一套 Yarn 供实时计算使用，这部分服务器的磁盘用来支持离线数据的存储，CPU 内存主要用来支持运行 Flink 任务，所以 Flink 计算资源并没有独占服务器，我们也没有对计算资源作严格的管控，所以导致有很多任务分配的资源是不合理的，通常是申请了过多的 CPU 资源但实际的利用率却比较低。</p>
 <p>随着公司容器化建设的逐步推进，今年我们已经支持了离线和在线混部并错峰分配资源的方式。也就意味着 Hadoop 集群的 CPU 内存除了支持 Flink 实时计算，也可以支持在线业务的部署，对 Flink 计算资源管控的重要性及紧迫程度就凸显出来了。</p>
@@ -236,30 +236,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>现有的基于 Hive 的数仓架构需要升级，t+1 或 h+1 的时效性已经无法满足很多业务场景的需求，我们最终选定 Flink 和 Iceberg 来构建实时湖仓一体的架构。</p>
 <p>最后是实时计算支持的生态不够完善。我们的人工智能团队主要以 Python 语言为主，基于 SQL + UDF 的方式显然对他们不够友好，所以我们做了 PyFlink 的集成工作，解决了这一痛点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bc4a6a7f631c4995bfba6a0f2e9c7dce.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112586.jpeg" />   
     </p>
 <p>上图是 AutoStream 3.0 的整体介绍。</p>
 <p>基于 2.0 版本的痛点，除了功能和应用性升级之外，我们主要还做了以下几个方面的工作：</p>
 <p>首先是加强了预算管控，上线了自动伸缩容功能，建设并落地了实时湖仓的架构，并上线了 PyFlink，支持 Python 开发实时任务。同时我们还基于 Flink + StarRocks 引擎，对实时多维分析的链路做了进一步简化。</p>
 <h2 id="二预算资源管控"><strong>二、预算资源管控</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2f4c84104c5740c6be95ab4d6e85da14.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112645.jpeg" />   
     </p>
 <p>为什么需要做预算资源管控策略？</p>
 <p>首先是服务器资源没有按团队做预算划分，先用先得，没有上限，任务资源利用率低，个别团队存在严重的资源浪费情况。同时没有外力的推动，大部分用户主动优化资源的意识很薄弱。</p>
 <p>我们做的第一步就是启用预算的强控机制。与内部的资产云系统做对接初始化团队的可用预算，超出预算后任务将无法启动。还对此定义了规范，用户需要先优化团队内的低利用率任务来释放预算，原则上资源利用率低的任务数应该控制在 10% 以内，如果无法优化，可以在资产云系统上发起团队间预算调拨的流程，也就是借资源；如果还是失败，则会由平台开白名单临时支持业务。</p>
 <p>平台规范里，我们对资源利用率低的任务也进行了定义，同时展示出低利用率的原因及解决方案。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cf3c4f0b4f954b68902ead30cb3b0d46.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112809.jpeg" />   
     </p>
 <p>目前我们主要是针对 CPU 使用率、内存使用率和空闲 slot 这几个核心规则来识别低利用率任务。早在 AutoStream 2.0 版本，我们就上线了 Flink 任务的健康评分机制，得到了丰富的细粒度得分数据，所以可以很容易地识别低利用率任务。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a406ebbfa5c44840a599ee9935974a13.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112774.jpeg" />   
     </p>
 <p>我们通过引入强控流程来严控计算资源的用量，通过制定规范来提升用户主动优化资源的意识，通过开发自动伸缩容功能降低用户的调优成本。由此达到的收益是，在实时计算业务稳步增长的前提下我们全年没有新增服务器。</p>
 <h2 id="三flink-伸缩容"><strong>三、Flink 伸缩容</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/870d8bfe6d1f4c20b3169d91e505bb2d.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112938.jpeg" />   
     </p>
 <p>为什么需要自动伸缩容功能？</p>
 <ul>
@@ -268,33 +268,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>最后是降低资源调优过程本身对任务稳定性的影响。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a6c516364e584f2f92f63a62ac5b796f.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112960.jpeg" />   
     </p>
 <p>上图是自动伸缩容配置的页面，可以指定自动伸缩容的触发时间，比如可以指定在夜里低峰时期执行，降低伸缩容对业务的影响，支持指定 CPU 并行度、内存维度伸缩容的策略，每次执行伸缩容都会通过钉钉和邮件通知任务负责人，并且会记录伸缩容的触发原因和伸缩容之后的最新资源配置。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/10bd2fd6214d46e287d6fa82d9f0e3ac.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112143.jpeg" />   
     </p>
 <p>上图是自动伸缩容功能的整体设计。我们在 jobmanager 中增加了一个新的组件 RescaleCoordinator，它使用 ha 维护其生命周期，且与 dispatcher 之间彼此通信。RescaleCoordinator 会定期访问 AutoStream 提供的接口，AutoStream 平台会根据用户配置的伸缩容策略判断是否需要执行伸缩容。</p>
 <p>整体的流程如下：RescaleCoordinator 获取到 leader 后会定期检查是否需要伸缩容，如果需要则向 dispatcher 通知 jobmanager 开始伸缩容。jobmaster 会向 resourcemanager 请求 taskmanager，待所有请求的 taskmanager 都准备就绪，就会将旧的 taskmanager 释放掉，然后基于新的 taskmanager 重新调度，最终把这次结果持久化到 zk 和 HDFS 上。</p>
 <p>平台的 Flink 本就使用了 zk 和 HDFS 做 ha，所以我们不需要引入新的组件。此外，因为新的 container 是提前申请好的，又能省去 container 申请的时间，避免了因为资源不够而申请不到 slot 导致任务 recover 失败。如果是做并行度的伸缩容，需要在发起调度前修改 jobgraph 的并行度来实现。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/63f64c5fd336485ea0011b2946481d10.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112345.jpeg" />   
     </p>
 <p>以 CPU 内存为例，第一步是向 ResourceManager 申请 container 并为之打标记。新的 taskmanager container 通过 slot pool 向 resultmanager 请求，这一步需要在 slot pool 中维护新的资源配置，对应上图中的 CPU 2 核，内存 2GB，且需要支持回滚机制。如果这次伸缩容失败，资源设置回滚到 CPU 1 核，内存 1G。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/520c5c282022402498f1806b61a3138a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112276.jpeg" />   
     </p>
 <p>第二步，停掉任务，删除 ExecutionGraph。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a98b2edb813c4d05b6df8029778d55e6.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112367.jpeg" />   
     </p>
 <p>第三步，释放旧 taskmanager，重新构建 ExecutionGraph，并在标记的 taskmanager 上从保存点恢复任务。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f552efa3f38f4c5db697fbae735b3f6e.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112488.jpeg" />   
     </p>
 <p>第四步，将此次伸缩容的资源设置持久化到 zk 和 HDFS，如果 jobmanager 在这里挂掉，那么之前伸缩容的配置都会丢失，所以需要将伸缩容后的配置保存在 zk 和 HDFS 上，数据存在基于 HDFS 的 block server 中，在 zk 中会保存 block server 的 key。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/afe9d8ddf8b54272b46143e3b5d16ddd.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112379.jpeg" />   
     </p>
 <p>最后，对伸缩容策略进行一个粗略的总结：</p>
 <ul>
@@ -314,7 +314,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h2 id="四湖仓一体"><strong>四、湖仓一体</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/47d88f5bd7334e1bb16eb2241ce64ebc.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112362.jpeg" />   
     </p>
 <p>基于 Hive 的数据仓库主要存在以下几个痛点：</p>
 <ul>
@@ -324,25 +324,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>经过一番选型，我们决定选择基于 Iceberg 来构建湖仓一体架构，解决基于 Hive 的数据仓库的痛点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/aaad50b382704b6e83d97e4258a74ac2.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112493.jpeg" />   
     </p>
 <p>Iceberg 的定位是开放的表格，不绑定某一种存储或计算引擎，同时它能提供增量快照机制，可以轻松实现准实时的数据写入和读取。Iceberg 的 v2 格式支持 acid 语义，可以满足 upsert 需求，为后续做存储层面的批流一体提供了可能性。读取型的 schema 对 schema 的变更也十分友好。目前主要的查询引擎都和 Iceberg 做了集成，读写路径上也都支持了流和批的方式，从流批一体的角度来看，也是十分友好的。</p>
 <p>上图右侧是 Iceberg 增量快照机制的基本原理。每次针对表的 commit 操作都会产生一个新的快照，比如针对表的第一次数据写入的 commit 会生成 snapshot0 快照 (上图中的 s0)，第二次写入的 commit 会生成 s1。每个快照对应一个 manifest list 对象，会指向多个 manifest file，每个 manifest file 又会指向多个 data file，也就是存储数据的文件。图中的 current metadata pointer 会为每一个 Iceberg 表指向一个最新的 metadata file，即最新生成的快照。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0fb8ce8d3393481b8a63de7930f50417.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112646.jpeg" />   
     </p>
 <p>上图是 Iceberg 目前在我们内部的集成情况，最底层是基于 Hive Metastore 来统一 Hive 表和 Iceberg 表的元数据，基于 HDFS 来统一 Hive 表和 Iceberg 表的存储，这也是湖仓一体的基础。往上一层是表格式，即 Iceberg 对自身的定位：介于存储引擎和计算引擎之间的开放的表格式。再往上是计算引擎，目前 Flink 主要负责数据的实时入湖工作， Spark 和 Hive 作为主要的产品引擎。最上面是计算平台，Autostream 支持点击流和日志类的数据实时入湖，AutoDTS 支持关系型数据库中的数据实时入湖，离线平台与 Iceberg 做了集成，支持像使用 Hive 表一样来使用 Iceberg，在提升数据时效性的同时，尽量避免增加额外的使用成本。</p>
 <p><strong>下面是我们在湖仓一体架构落地过程中的一些典型的实践。</strong></p>
 <p><strong>实时数据入湖方面</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0c1133c56e9e441d9f6616426805a080.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112619.jpeg" />   
     </p>
 <p>在 Iceberg 场景中，需要确保主键相同的数据写入到同一个 bucket 的下。由于 Flink 表的 DDL 并不支持 Iceberg 的 bucket 的定义，所以我们做的第一件事就是支持在 Flink DDL 的 property 中定义 bucket。</p>
 <p>第二个问题是 Iceberg 表本身无法直接反映数据的写入进度，离线调度难以精确地触发下游任务，所以我们借助 Flink 良好的 watermark 机制，直接在入湖的阶段将 watermark 持久化到 Iceberg 表的元数据中，这样可以通过简单的脚本调用，就能知道 Iceberg 表的数据写入进度，从而精确地触发下游的调度任务。</p>
 <p>第三个问题是实时入湖阶段和离线团队账号体系的打通。Flink 向 Iceberg 写入数据的时候，需要访问 HDFS 和 Hivemetastore，所以必然要和离线既有的团队账号体系打通。一个离线的 HDFS 目录只能给一个用户分配写入权限，所以在引入 Iceberg 之前，所有的 Flink 任务都是通过一个固定的 Hadoop 账号运行的，这样的好处就是方便我们做统一的资源管理，包括 checkpoint 目录的统一管理。我们通过修改 Iceberg 创建 Hadoop Filesystem 实例的代码，增加了账号代理的机制，实现使用自定义账号向 Iceberg 写入数据，同时扩展 HiveMetaStoreClient 增加代理机制来打通对 HiveMetaStore 的访问。</p>
 <p><strong>可用性和稳定性方面的实践</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/617c702e7b88432aaf8da044dd226cdc.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112742.jpeg" />   
     </p>
 <p>为了湖仓一体元数据的统一，我们坚持和离线数仓复用同一套 HiveMetaStore 服务，期间也遇到了很多稳定性和数据正确性的问题。</p>
 <p>首先是访问 HiveMetaStore 异常，这是因为我们的 Hadoop 集群启用了 kerberos 机制，并且 Hive config 的过渡方法被误用，导致 Hive 客户端 kerberos 相关配置被覆盖，造成访问 HiveMetaStore 异常。我们做了相应做的修复，也已反馈给社区。</p>
@@ -351,7 +351,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>还有 Iceberg 表元数据文件被误删的问题，这个问题会导致出现找不到数据文件的异常，直接影响 Iceberg 表无法被访问。解决方法就是在修改 metadata_location 属性的时候，增加容错机制，优先尝试重试并检查是否修改成功，仅在确认元数据未保存成功的情况下，才会对 metadata.json 文件做删除操作。</p>
 <p><strong>对 v2 格式小文件合并方面的一些改进</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3957120c98b24ccd855174dd3b53f354.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112018.jpeg" />   
     </p>
 <p>Iceberg 实现 upsert 语义的原理是，它的 v2 格式通过引入 sequence number 并结合 position delete file 和 equality delete file 来实现的，写入思路是首先将 delete 行写在 equality delete file 中，如果 delete 行在当前的事务中 insert 过，就把 insert 行所在的文件行号和地址给 position delete file。</p>
 <p>举个例子，假设有两个事务：</p>
@@ -361,26 +361,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>这三条 SQL 产生的行为如下：首先生成了一个 data file2，里面包括了新写入的 ID 为 3 的数据即 I (3,300)，还包含了 ID 为 3 的数据 update 之后的数据即 I (300,301)，并把 I (3,300) 写入到 equality delete file 中。由于 ID 为 3 的数据在当前的事务中写入过，所以还会生成一个 position delete file，然后把 (3,300) 这条数据对应的 position 标记为删除。而因为 ID 为 2 的数据不是在当前事务中写入的，所以把 ID 为 2 的数据即 I (2,200) 追加到 equality delete file，并标记为删除即可。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e0ab5c68a2c144c9a89a1b81408bae89.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112656.jpeg" />   
     </p>
 <p>upsert 语义在读路径上的实现思路如下：首先 position delete file 与不大于自己 sequence number 的 datafile 做 join，equality delete file 则与小于自己 sequence number 的 datafile 做 join。因为上图中，position delete file 会把 datafile2 中的第零条数据即 I (3，300) 删除， equality delete file 会把 datafile1 中 I (2,200) 删除掉，最终查询结果只有 ID 为 1 和 3 的两条数据。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ea1c2cf0fb0247688d6ebe882e5ad471.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112788.jpeg" />   
     </p>
 <p>由于 delete file 越来越多，查询性能也会随之降低。为了保证查询性能，我们每个小时都会对 Iceberg 表进行小文件合并。</p>
 <p>但是在引入 sequence number 之前，针对 v1 格式的小文件合并无法保证 v2 格式数据在合并后的正确性。所以在实践的过程中，我们针对 v2 格式的小文件合并做了一些改造。</p>
 <p>针对 v1 格式的小文件合并思路和读取思路完全一致，即将两种 delete file apply 到合适的 datafile 上，合并后删除对旧文件的引用，改为引用新生成的 datafile。根据之前 sequence number 的定义，它会一直递增，所以合并后的 datafile 对应的 sequence number 也会变大，会导致 v2 格式的数据在合并小文件场景下的冲突。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cd0062d9ba4e421f87aeba1004d0ce19.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112227.jpeg" />   
     </p>
 <p>首先小文件合并过程中，修改 sequence number 会导致 Flink 实时写入的事务冲突，导致上图中事务 3 的 delete 语句失效。事务 3 将主键 3 的数据 delete，但事务 4 的小文件合并成功后会把这条数据又加回来，因为这条数据的 sequence number 变成 4，此时 delete file 的 sequence number 是 3，不会再把 sequence number 为 4 的数据删掉。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ca22a20f400e4b8095564b91160233ed.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112293.jpeg" />   
     </p>
 <p>针对上述冲突，我们对 Iceberg 的小文件合并做了改造，改造的思路是合并小文件本质上并不会对最终的数据做修改，仅仅是优化文件的存储。所以在合并过程中，复用被合并的文件中最大的 sequence number 即可。</p>
 <p>按照新的思路，事务 4 之后的 datafile 对应的新 sequence number 为 2，也就是复用了被合并的文件中的最大的 sequence number。sequence numbe2 依旧小于事务 3 的 sequence number3，所以可以保证 delete file 的语义正确性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/abd019e1f6fb495d8f9ce6719ba42729.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112555.jpeg" />   
     </p>
 <p>湖仓一体架构的落地为我们带来了不少的收益：</p>
 <ul>
@@ -390,15 +390,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h2 id="五pyflink-实践"><strong>五、PyFlink 实践</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/73a432ab7f6f42b9b0498d1f05e8e289.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272112590.jpeg" />   
     </p>
 <p>引入 PyFlink，主要因为我们想把 Flink 强大的实时计算能力输出给人工智能团队。人工智能团队由于技术本身的特点，大部分开发人员都是基于 Python 语言开发，而 Python 本身的分布式和多线程支持比较弱，他们需要一个能快速上手又具备分布式计算能力的框架，来简化他们日常的程序开发和维护。我们正好也需要补全平台上对 Python 生态的支持不足，所以很自然地想到了把 PyFlink 集成到我们的平台上。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a143e810afb04db6ad1f80685f0ba1b9.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272113510.jpeg" />   
     </p>
 <p>上图是 PyFlink 的基本架构。python vm 和 jvm 双向通讯的架构，实现了 Python API 和 Java API 的一一映射，用户可以通过编写 Python 代码来实现 Flink 任务的开发。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f28c6a34a35f423e8ceafa509a8e35a8.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272113686.jpeg" />   
     </p>
 <p>通过对比，我们最终选择了用 Kubernetes 方式来部署 PyFlink 环境。Kubernetes 除了可以较好地支持资源隔离，也可以方便地集成 Python 环境和其他机器学习的依赖。</p>
 <p>![](<a href="https://img.6aiq.com/e/">https://img.6aiq.com/e/</a></p>
@@ -529,6 +529,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -562,10 +566,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -944,6 +944,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

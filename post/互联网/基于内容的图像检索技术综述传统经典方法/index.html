@@ -198,22 +198,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>今天我们来介绍一下图片检索技术，图片检索就是拿一张待识别图片，去从海量的图片库中找到和待识别图片最相近的图片。这种操作在以前依靠图片名搜图的时代是难以想象的，直到出现了CBIR(Content-based image retrieval)技术，依靠图片的内容去搜图。比较常见的图搜平台有百度、谷歌、拍立淘等，有些图搜技术已经能达到非常不错的效果。接下来我们做个测试，给出一个柯基宝宝的图片，分别用三家搜索引擎进行搜索：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/08978fcd02ff40feab5925510b8eac96.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747987.jpeg" />   
     </p>
 <p>图1 原图</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b1bc0d63563e48fe896f897b88dee3b3.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747720.jpeg" />   
     </p>
 <p>图2 百度搜索结果</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ab360c7114cd4854a90c33c84d9f9f25.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747516.jpeg" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/561e71fce1f34a35945841b34fbe71a8.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747564.jpeg" />   
     </p>
 <p>图3 谷歌搜索结果</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bda436cf193044a8b2efbcd38564a457.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747328.jpeg" />   
     </p>
 <p>图4 拍立淘搜索结果</p>
 <p>早期的图片检索技术都是基于文本的，需要按照图片的名称去搜索对应的图片，而这样有个很明显的缺陷就是：大量的图片需要人为事先去命名，这个工作量太大了。随后渐渐出现了基于内容的图片检索技术，较早出现的有哈希算法LSH(Locality-Sensitive Hashing)，随后图搜这一块逐渐丰富，从BOF -&gt; SPM -&gt; ScSPm -&gt;LLC 使传统的图搜技术逐渐成熟。下面我们就来巴拉一下传统图搜技术的前世今生。</p>
@@ -258,7 +258,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>BOW(Bag of Words) 模型最初被用在文本分类中，将文档表示成特征矢量。它的基本思想是假定对于一个文本，忽略其词序和语法、句法，仅仅将其看做是一些不同类别词汇的集合，而文本中的每个词汇都是独立的。简单说就是将每篇文档都看成一个袋子，这个袋子里面装的是各种类别的词汇，我们按照类别把整篇文档的词汇归为不同的类，比如这些词汇的类可以是枪、银行、船、人、桌子等，然后依据每个类别中词汇出现的频率来判断整篇文档所描述的大致内容。比如一篇文档中枪、银行这两类词汇出现的概率比较高，我们就可以判断这篇文档和武装押运有关，或者是关于土匪抢银行的，兄台们可自行发挥自己的脑洞。</p>
 <p>类比到图像就是BOF(Bag of Features)了，以上所述的“袋子”就相当于是一副完整的图像，而“词汇”则相当于图像的局部特征(如SIFT、SURF)，先用这些局部特征来训练出图像的聚类中心，训练聚类中心的过程即相当于按照类别把文档的词汇归为不同的类。在图片检索的时候，对图片的每一个局部特征用近邻查找法找到距离它最近的聚类中心，并把此聚类中心上局部特征的数目加一，依次遍历每一个局部特征后就把一副图片映射到一个聚类中心上，即图片的量化。最后以这些聚类中心为横坐标，以每个聚类中心的局部特征个数为纵坐标可以得到一个直方图，该直方图表示的向量就是一副图片映射到聚类中心的BOF向量。图片检索的时候只要依次比较图像的BOF向量即可找到最相似的图片。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dbbcb0092f1148d483c29949bf6fb458.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747400.jpeg" />   
     </p>
 <p>图5 基于单词包模型的图片特征示意图</p>
 <p>三、指数权重VLAD</p>
@@ -266,30 +266,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>因为PCA降维矩阵是按照特征值从大到小排列的，所以经过PCA降维处理后特征向量的前几个数据所占的比重会比较大，要远大于平均值，如图6所示。这样对特征的提取会造成较大干扰，因为若是前几个数据出现了差错，其引起的数据波动也往往比较大，在比较特征向量相似度时就容易产生较大误差，所以理想情况是使特征向量中前几个过大的数据按一定比例缩小，而使后面变化不大的数据尽量保持不变。</p>
 <p>通过观察特征向量直方图可以发现它在二维坐标上的分布类似于指数函数，如图7a)所示为指数函数 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/106ab2362d804aa7970789d735174b80.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747045.svg&#43;xml" />   
     
 ，所以考虑用图7b)所示的指数函数 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0f072c81ecb648748ae45adfad98b27d.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747457.svg&#43;xml" />   
     </p>
 <p>作为权重和特征向量的每一个数据相乘。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8053b3de71c5493b8f4bc9a9627dc0cc.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747962.jpeg" />   
     </p>
 <p>图6 PCA降维后的VLAD向量</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9d16f708b1f74234a5b2ccaaa2f7ce3e.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747464.jpeg" />   
     </p>
 <p>图7 指数函数</p>
 <p>但是在权重和数据相乘的时候还会有一个问题：当x取值很接近0的时候权重值g(x)也很接近0，当权重过小时会抹掉特征向量的前几个数据，这样会造成特征向量的部分数据无效，在度量特征向量相似度时反而会增大误差，所以在取离散g(x)值作权重的时候不能从0开始取值而应当有一个初始值。</p>
 <p>将图6的特征向量和离散权重相乘可得到新的特征向量直方图，如图8所示，可见特征向量的前几个较大的数据被削减，而后续数据基本维持不变。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3ab6fbe9acd24229b1538c658eda74c3.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747111.jpeg" />   
     </p>
 <p>图8 指数权重VLAD</p>
 <p>针对权重VLAD的提升效果，我们用6类图片做了识别率的对比：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/675fe7ba38e54b43972aad2cf620c03a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748806.jpeg" />   
     </p>
 <p>表1 VLAD与权重VLAD的识别率对比</p>
 <p>但是用VLAD向量做图片检索也存在很多缺点：首先，作为传统的图像识别方法，它需要手动提取特征，再加上K-means聚类时间长，会使得算法很繁琐；其次在向量量化的过程中会损失特征的精度，模板图片的设计也显得很粗糙，而且整个过程没有设计反馈系统，系统无法自动升级，迁移性很差。</p>
@@ -301,12 +301,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>五、SPM</p>
 <p>由于BOW模型完全缺失了空间位置信息，会使特征的精度降低很多，而SPM(Spatial Pyramid Matching)就在BOW的基础上加了一个空间位置信息，也相当于在BOW的基础上加了一个多尺度，盗用一下论文的图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7bc8393681e6483596ac2050ae3fe89f.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748379.jpeg" />   
     </p>
 <p>图9 SPM三个尺度示意图</p>
 <p>上图中的点、菱形和十字架分别代表不同的局部特征。左边相当于原图，中间把原图分成了四小块，右边把原图分成了16小块，各图的小块大小是不一样的，所以能体现出多尺度信息，而各小块的位置体现出空间信息。然后对每一个小块单独进行聚类和量化，即相当于在多个尺度上进行BOW操作：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/461089f9afbc4a47995a90b0476b7fcd.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748025.jpeg" />   
     </p>
 <p>K是维度信息，比如单通道图像只有行和列两个维度，那么K就是2。L是尺度的个数，X_m_和Y_m_代表点集中的点，当L=0时，上式就退化为BOW了。在识别的时候我们把L=0、1、2三个尺度的图片总共21个小块的特征串接起来，1+4+16=21。</p>
 <p>关于图像的稀疏编码</p>
@@ -314,19 +314,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>(一)、VQ(vector quantization)</p>
 <p>首先我们来巴拉一下VQ，其实VQ就是上面提到的BOW特征量化，只不过VQ常常被用来稀疏SPM特征：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4cc640af9fe34f568f28f18690062971.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748570.jpeg" />   
     </p>
 <p>上式中，Xi表示第i个局部特征(如SIFT特征)，B为聚类中心，Ci表示第i个局部特征特征所对应聚类中心的编码系数。Card (Ci)=1表示每个Xi只用一个B来表示，即Ci只有一个非零分量，其余分量全为零。虽然VQ方法得到的编码系数足够稀疏，但由于它把局部特征只量化到一个聚类中心上，没有考虑特征的多层语义信息，导致很大的编码误差。</p>
 <p>(二)、SC(Sparse coding)</p>
 <p>为了减少向量量化的信息损失，在基于SPM模型的稀疏编码中提出ScSPM，通过使用B的L2范数松弛约束条件，ScSPM的目标函数为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/629635003d6a4b988ddcf860900478d2.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748269.jpeg" />   
     </p>
 <p>上式取消了中Ci &gt;= 0的约束条件，因此每个特征可以用多个聚类中心进行表示。</p>
 <p>(三)、LLC(locality-constrained linear coding)</p>
 <p>在ScSPM之后是LLC，LLC对ScSPM的改进，在于引入了局部约束，其实也就是上文提到的VLAD向量，LLC是把特征量化到附近的多个聚类中心，所以才有局部约束这种提法。盗用一下Jinjun Wang 论文里的图直观说明VQ、ScSPM和LLC三者的区别：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ad1518226c9a4b0eaf69c757065c0ef3.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748866.jpeg" />   
     </p>
 <p>图10 VQ、SC、LLC对比</p>
 <p>上述列举的只是传统的图片搜索方法，而目前主流的CBIR系统都是结合深度学习去做的，深度学习相对于传统方法是一个质的提升。</p>
@@ -515,6 +515,10 @@ SIGAI 2018.6.27</p>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -548,10 +552,6 @@ SIGAI 2018.6.27</p>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -930,6 +930,8 @@ SIGAI 2018.6.27</p>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

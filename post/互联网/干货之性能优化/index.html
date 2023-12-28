@@ -245,7 +245,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>4、对多次操作的RDD进行持久化或CheckPoint</strong></p>
 <p>如果在程序中，对某一个RDD，基于它进行了多次transformation或action操作，那么就非常有必要进行持久化操作，以避免对一个RDD反复进行计算。此外，如果要保证RDD的持久化数据可能丢失的情况下，还要保证高性能，那么可以对RDD进行CheckPoint操作。整个过程及详细说明，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d43c52a8eee5446cb0c1594d82b4439f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271834498.webp" />   
     </p>
 <p>除了对多次使用的RDD进行持久化操作之外，还可以进一步优化其性能，因为很可能，RDD的数据是持久化到内存或者磁盘中的。那么，此时，如果内存大小不是特别充足，完全可以使用序列化的持久化级别，比如MEMORY_ONLY_SER、MEMORY_AND_DISK_SER等，使用RDD.persist(StorageLevel.MEMORY_ONLY_SER)这样的语法即可。这样的话，将数据序列化之后，再持久化，可以大大减小对内存的消耗。此外，数据量小了之后，如果要写入磁盘，那么磁盘io性能消耗也比较小。</p>
 <p>对RDD持久化序列化后，RDD的每个partition的数据，都是序列化为一个巨大的字节数组，这样，对于内存的消耗就小得多了。但是唯一的缺点就是，获取RDD数据时，需要对其进行反序列，会增大其性能开销。因此，对于序列化的持久化级别，还可以进一步优化，就是说，使用Kryo序列化类库，这样可以获得更快的序列化速度，并且占用更小的内存空间。但是要记住，如果RDD的元素（如RDD的泛型类型），是自定义类型的话，在Kryo中需要提前注册该自定义类型。</p>
@@ -273,7 +273,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>7、广播共享数据</strong></p>
 <p>如果算子函数中使用到了特别大的数据，那么这个时候推荐将该数据进行广播。这样的话，就不至于将一个大数据拷贝到每一个task中，而是给每个节点拷贝一份该大数据，然后节点上的task共享该数据。如此，就可以减少大数据在节点上的内存消耗，并且可以减少数据到节点的网络传输开销。广播共享数据的原理，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/776f98d745604341919e6ef959f18562.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271834399.webp" />   
     </p>
 <p><strong>8、数据本地化</strong></p>
 <p>数据本地化对于Spark Job的性能有着巨大的影响，如果数据以及要计算它的代码是在一起的，那么性能当然会非常高。但是，如果数据和计算它的代码是分开的，那么其中之一必须到另外一方的机器上。通常来说，移动代码到其他节点，会比移动数据到代码所在的节点上去，速度要快得多，因为代码比较小。Spark也正是基于这个数据本地化的原则来构建task调度算法的。</p>
@@ -286,7 +286,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Spark倾向于使用最好的本地化级别来调度task，但是这是不可能的。如果没有任何未处理的数据在空闲的executor上，那么Spark就会放低本地化级别。这时有两个选择：第一，等待，直到executor上的cpu释放出来，那么就分配task过去；第二，立即在任意一个executor上启动一个task。</p>
 <p>Spark默认会等待一会儿，来期望task要处理的数据所在的节点上的executor空闲出一个cpu，从而将task分配过去。只要超过了时间，那么Spark就会将task分配到其他任意一个空闲的executor上。可以设置spark.locality系列参数，来调节Spark等待task可以进行数据本地化的时间，最好是采用分层设置的方式，对于最好的本地化级别，可以设置等待的时间长些，毕竟本地化级别越好数据传输的效率也越高。spark.locality.wait（默认3000毫秒）、spark.locality.wait.node、spark.locality.wait.process、spark.locality.wait.rack。数据本地化的原理，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b10fc751c4754373b90c2718e147dad4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271834274.webp" />   
     </p>
 <p><strong>9、用reduceByKey替代groupByKey</strong></p>
 <p>对于单词计数WordCount程序来说，同样可以使用groupByKey算子来实现对应的功能，但是它的效率会远远低于reduceByKey，程序代码参考如下：</p>
@@ -296,18 +296,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>val counts = pairs.groupByKey().map(wordCounts =&gt; (wordCounts._1, wordCounts._2.sum))</p>
 <p>如果能用reduceByKey，那就用reduceByKey，因为它会在map端，先进行本地combine，可以大大减少要传输到reduce端的数据量，减小网络传输的开销。只有在reduceByKey处理不了时，才用groupByKey().map()来替代。groupByKey算子的原理，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/90230b3b6d404beea3d46e0864b13585.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271836962.webp" />   
     </p>
 <p>reduceByKey算子的原理，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9149895a4f77454eb6ca948672913c27.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271836918.webp" />   
     </p>
 <p><strong>10、shuffle性能优化</strong></p>
 <p>大多数Spark作业的性能主要消耗在了shuffle环节，因为该环节包含了大量的磁盘IO、序列化、网络数据传输等操作。因此，如果要让作业的性能更上一层楼，就有必要对shuffle过程进行调优。但是也必须提醒的是，影响一个Spark作业性能的因素，主要还是代码开发、资源参数以及数据倾斜，shuffle调优只能在整个Spark的性能调优中占到一小部分而已。因此务必把握住调优的基本原则，千万不要舍本逐末。下面详细讲解shuffle的原理，以及相关参数的说明，同时给出各个参数的调优建议。</p>
 <p><strong>A、未经优化的HashShuffleManager</strong></p>
 <p>下图说明了未经优化的HashShuffleManager的原理，这里先明确一个假设前提：每个executor只有1个cpu core，也就是说，无论这个executor上分配多少个task线程，同一时间都只能执行一个task线程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/10e2d8cf2c544462833cc1f664a538d9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271836815.webp" />   
     </p>
 <p>从shuffle write说起，shuffle write阶段，主要就是在一个stage结束计算之后，为了下一个stage可以执行shuffle类的算子（比如reduceByKey），而将每个task处理的数据按key进行“分类”。所谓“分类”，就是对相同的key执行hash算法，从而将相同key都写入同一个磁盘文件中，而每一个磁盘文件都只属于下游stage的一个task。在将数据写入磁盘之前，会先将数据写入内存缓冲中，当内存缓冲填满之后，才会溢写到磁盘文件中去。</p>
 <p>那么每个执行shuffle write的task，要为下一个stage创建多少个磁盘文件呢？很简单，下一个stage的task有多少个，当前stage的每个task就要创建多少份磁盘文件。比如下一个stage总共有100个task，那么当前stage的每个task都要创建100份磁盘文件。如果当前stage有50个task，总共有10个executor，每个executor执行5个Task，那么每个executor上总共就要创建500个磁盘文件，所有executor上会创建5000个磁盘文件。由此可见，未经优化的shuffle write操作所产生的磁盘文件的数量是极其惊人的。</p>
@@ -316,7 +316,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>B、优化后的HashShuffleManager</strong></p>
 <p>下图说明了优化后的HashShuffleManager的原理，这里说的优化，是指可以设置一个参数，spark.shuffle.consolidateFiles。该参数默认值为false，将其设置为true即可开启优化机制。通常来说，如果使用HashShuffleManager，那么都建议开启这个选项。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f2610bddd5294f10ac2b4d5ce5f1c750.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271836613.webp" />   
     </p>
 <p>开启consolidate机制之后，在shuffle write过程中，task就不是为下游stage的每个task创建一个磁盘文件了。此时会出现shuffleFileGroup的概念，每个shuffleFileGroup会对应一批磁盘文件，磁盘文件的数量与下游stage的task数量是相同的。一个executor上有多少个cpu core，就可以并行执行多少个task。而第一批并行执行的每个task都会创建一个shuffleFileGroup，并将数据写入对应的磁盘文件中。</p>
 <p>当executor的cpu core执行完一批task，接着执行下一批task时，下一批task就会复用之前已有的shuffleFileGroup，包括其中的磁盘文件。也就是说，此时task会将数据写入已有的磁盘文件中，而不会写入新的磁盘文件中。因此，consolidate机制允许不同的task复用同一批磁盘文件，这样就可以有效地将多个task的磁盘文件进行一定程度上的合并，从而大幅度减少磁盘文件的数量，进而提升shuffle write的性能。</p>
@@ -324,7 +324,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>C、SortShuffleManager运行原理</strong></p>
 <p>下图说明了普通的SortShuffleManager的原理，在该模式下，数据会先写入一个内存数据结构中，此时根据不同的shuffle算子，可能选用不同的数据结构。如果是reduceByKey这种聚合类的shuffle算子，那么会选用Map数据结构，一边通过Map进行聚合，一边写入内存；如果是join这种普通的shuffle算子，那么会选用Array数据结构，直接写入内存。接着，每写一条数据进入内存数据结构之后，就会判断一下，是否达到了某个临界阈值。如果达到临界阈值的话，那么就会尝试将内存数据结构中的数据溢写到磁盘，然后清空内存数据结构。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2c23773dc04742f3935b91146379ab38.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271836337.webp" />   
     </p>
 <p>在溢写到磁盘文件之前，会先根据key对内存数据结构中已有的数据进行排序。排序过后，会分批将数据写入磁盘文件。默认的batch数量是10000条，也就是说，排序好的数据，会以每批1万条数据的形式分批写入磁盘文件。写入磁盘文件是通过Java的BufferedOutputStream实现的。BufferedOutputStream是Java的缓冲输出流，首先会将数据缓冲在内存中，当内存缓冲满溢之后再一次写入磁盘文件中，这样可以减少磁盘IO次数，提升性能。</p>
 <p>一个task将所有数据写入内存数据结构的过程中，会发生多次磁盘溢写操作，也就会产生多个临时文件。最后会将之前所有的临时磁盘文件都进行合并，这就是merge过程，此时会将之前所有临时磁盘文件中的数据读取出来，然后依次写入最终的磁盘文件之中。此外，由于一个task就只对应一个磁盘文件，也就意味着该task为下游stage的task准备的数据都在这一个文件中，因此还会单独写一份索引文件，其中标识了下游各个task的数据在文件中的start offset与end offset。</p>
@@ -334,7 +334,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>lshuffle map task数量小于spark.shuffle.sort.bypassMergeThreshold参数的值；</p>
 <p>l不是聚合类的shuffle算子（比如reduceByKey）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a9b1bd74b9d54220b9349df3712c27d7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271836197.webp" />   
     </p>
 <p>此时task会为每个下游task都创建一个临时磁盘文件，并将数据按key进行hash然后根据key的hash值，将key写入对应的磁盘文件之中。当然，写入磁盘文件时也是先写入内存缓冲，缓冲写满之后再溢写到磁盘文件。最后，同样会将所有临时磁盘文件都合并成一个磁盘文件，并创建一个单独的索引文件。</p>
 <p>该过程的磁盘写机制其实跟未经优化的HashShuffleManager是一模一样的，因为都要创建数量惊人的磁盘文件，只是在最后会做一个磁盘文件的合并而已。因此少量的最终磁盘文件，也让该机制相对未经优化的HashShuffleManager来说，shuffle read的性能会更好。</p>
@@ -489,6 +489,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -522,10 +526,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -904,6 +904,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

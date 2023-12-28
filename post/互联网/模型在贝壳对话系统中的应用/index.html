@@ -217,71 +217,71 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="11-何为对话管理">1.1 何为对话管理</h2>
 <p>对话管理是对话系统中的一个关键环节，它在整个对话系统中的位置如下图所示：
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/790fe97e22fd442db46a226434c87424.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272107112.webp" />   
      在上图中的对话系统流程中，首先是语音识别，产生语音识别结果；语言理解模块将语音识别结果映射成用户的意图、情感等信息；基于语言理解结果，对话管理模块决策需要执行的系统动作；基于对话管理模块的决策结果，语言生成模块生成适当的自然语言；语音合成模块将语言生成结果转化成语音反馈给用户这样就完成了对话系统的整个流程。由上述内容可知，对话管理模块是对话系统中的关键一环，它决定着后续内容的方向，因此，在对话系统中需要不断的优化对话管理模块的效果。</p>
 <h2 id="12-我们面临的问题">1.2 我们面临的问题</h2>
 <p>在贝壳找房 APP 中，客户和经纪人之间的对话大多是在不断的发掘客户对于房子的各项需求，如果在对话过程中，客户将其联系方式（电话、微信）主动告诉了经纪人，则我们称之为“转委托”，“转委托”是客户与经纪人建立线下关系的关键标志，“转委托”一旦发生，就意味着客户愿意从线上走到线下，进行实地看房，因此，提高转委托率是对话系统的优化目标之一。因为对话过程可以看做是客户对经纪人建立信任的过程，信任程度越高，转委托几率就越大。因此，针对客户的对话内容，如果将客户当前对话内容对应的信任程度定义成一个“状态”，那么在不同的“状态”下，经纪人应该做出什么样的动作才能提升客户的信任程度，并促使“转委托”发生呢？上述问题简单来说就是需要我们的系统指导经纪人在“正确的时间”作出“正确的动作”，这也是我们对话系统面临的问题之一。</p>
 <p>举个例子：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fe84934595f842a1ac1fb2deff2fae84.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272107128.webp" />   
      在上述表格中，针对不同的客户消息，经纪人需要给出合适的回答。在现实中，有些对话完成了转委托，有些对话则无果而终，简单来看如下图所示：
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d23319ba79f34b8a96a3c3da93a024ee.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272107871.webp" />   
      上述的“语句 1”“语句 2”&hellip;表示的是客户说的话或者是客户当前所处的“状态”，“动作 1”“动作 2”&hellip;表示的是经纪人作出的动作，由此可见，经纪人不同的动作类型可以促使客户状态的转移，最终会影响转委托是否成功。因此，分析经纪人的什么动作类型能够促使转委托就十分重要。在多轮对话中解决动作决策的方法比较多，下面将详细讲解 HMM 模型在对话管理中的应用。</p>
 <h1 id="2hmm-模型简介">2.HMM 模型简介</h1>
 <h2 id="21-何为-hmm-模型">2.1 何为 HMM 模型</h2>
 <p>隐马尔科夫模型（Hidden Markov Model，HMM）是统计模型，它用来描述一个含有隐含未知参数的马尔科夫过程，其目的是从可观察的序列结果来确定隐含的参数，然后根据这些隐含参数确定的模型对数据进一步分析。所谓的马尔科夫过程是不具备记忆特质的，换言之，马尔科夫过程的条件概率仅与系统的当前状态相关，而与它的历史或未来的状态是独立、不相关的，用数学语言可以描述为：
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/db8ed4de0d72447ebdf7bde876db9553.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272107866.webp" />   
      具备离散状态的马尔科夫过程通常被称为马尔科夫链，一个马尔科夫链的结构如图：
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7d4ffafb72c440bdacec1e82468885e9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272107579.webp" />   
     </p>
 <p>如上图所示，对于 HMM 模型，，假设 S 是所有可能的隐状态集合，O 是所有可能的观测状态的集合，即：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d165fd9f1d5e4bd48b82dfbb84a8cc40.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272107648.webp" />   
     </p>
 <p>其中，k 是隐藏状态数，m 是可能的观测状态数。</p>
 <p>对于一个长度 T 的序列，I 为对应的隐状态序列，O 为对应的观测序列，即：
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/60063e8bcf034b7dbcca53fb9514ca46.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272107291.webp" />   
     </p>
 <p>HMM 模型做了两个很重要的假设：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2020/2/a3f9137329e54c46861bba36f315fee9-image.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272107978.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2020/2/99a2157d12054142980d175f4e031c8a-image.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272107426.png" />   
     </p>
 <h2 id="22-hmm-模型可以解决什么问题">2.2 HMM 模型可以解决什么问题</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2020/2/dccac9d8b62444b788e6a47352536c42-image.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272107767.png" />   
     </p>
 <p>法解决。下一节将从理论层面介绍 EM 算法。</p>
 <h1 id="3em-算法简介">3.EM 算法简介</h1>
 <h2 id="31-何为-em-算法">3.1 何为 EM 算法</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2020/2/9afcd164386044418eacc23dafb8f7ea-image.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272107674.png" />   
     </p>
 <h2 id="32-em-算法的理论推导">3.2 EM 算法的理论推导</h2>
 <p><strong>E 步</strong>：建立参数的似然函数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/144845d789a44f85af610ef877af8b9c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272107854.webp" />   
     </p>
 <p><strong>M 步</strong>: 求使得上式极大化的λ：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6819d83f84754abba23786b7a7592231.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272107599.webp" />   
     </p>
 <p>将似然函数展开：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/49fa2cbd66ce4f44a6c5495aa3905f6e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272107395.webp" />   
     </p>
 <p>接下来根据极大似然估计求参数π,A,B：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4264ccfec7144e80a4a09be685dbed09.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272108044.webp" />   
     
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3878801673b8427aae30a68f20b91a8d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272108995.webp" />   
     </p>
 <h1 id="4实验过程">4.实验过程</h1>
 <p>上面三个章节分别讲述了问题的背景和 HMM 模型、EM 算法的理论背景，接下来将从建模过程上介绍为什么我们的问题可以选用 HMM 模型，并通过实验结果分析我们是如何在 DM 中做动作决策的。</p>
@@ -291,16 +291,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="42-建模">4.2 建模</h2>
 <p>我们将对话中客户的消息序列抽象成一个马尔科夫链，直观来看可以这样理解：
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f29f82e49d9546b5bc47bdd66094a770.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272108114.webp" />   
     </p>
 <p>我们将隐状态定义成 0~49 共 50 种状态，上图中的 6,16,26,36,5,8,10 就是一个 <strong>隐状态序列</strong>，第二排的汉字就是客户的消息序列，我们会将该消息序列的自然语言理解（Natural Language Understanding，NLU）模块的结果编码成计算机可以理解的形式，形成新的序列作为 <strong>观测序列</strong>，a_1,a_2,&hellip;表示经纪人的动作类型。 <strong>隐状态之间的状态转移原因可以理解成经纪人的动作类型，因此，我们可以通过分析优秀经纪人（转委托率 &gt; γ1）和一般经纪人(转委托率 &lt; γ2)在不同状态给出的动作类型的差异来指导一般经纪人在正确时间给出正确动作反应，以提高他们的转委托率。</strong></p>
 <p>观测序列将 NLU 的解析结果（emotion（情感类型）、sentence（句式类型）、skills（技能类型））结合其可信度（confidence）的值，按照 0.1 的间隔进行离散化，举个例子：对 emotion、sentence、skills 的类型进行编号：
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/44885668c6f3437ca7b681c99565e4cd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272108078.webp" />   
     </p>
 <p>NLU 的解析结果为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0fe916db1fa240f19e6c9d68988a7afe.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272108968.webp" />   
     </p>
 <p>其观测值编码为：“emotion:19-sentence:19-skills:10”</p>
 <h2 id="43-实验过程">4.3 实验过程</h2>
@@ -311,7 +311,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们将隐状态设置成 50 种，因为观测序列也是离散的序列，因此我们将其认为服从多项式分布。在实验中，设置 10 轮训练，选得分最高的一轮得到的模型作为预测模型，这里的得分是指预测结果的对数似然函数。</p>
 <p>经纪人的动作是根据动作分类模型得到的，动作共分为 19 种，动作和其 id 的对应关系：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2020/2/cffc6920015e4b429166b0922f82968c-image.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272108858.png" />   
     </p>
 <ul>
 <li>实验过程</li>
@@ -320,22 +320,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在上述分析中，我们所要解决的问题中观测序列、隐藏序列都是离散的，因此这里我们选用 hmmlearn.hmm.MultinomialHMM（n_components=n_states,n_iter=30,tol=0.001,covariance_type=&lsquo;diag&rsquo;），即多项式分布的隐马尔科夫模型，设置迭代收敛阈值为 0.001，指定每个状态的的方差矩阵为对角矩阵。</p>
 <p>在模型训练中，我们训练 10 轮，选取其中得分最大的一轮训练结果作为预测的
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8c08444c1e2a4bd0a17176d79d0a648c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272108064.webp" />   
      模型：例如上述图片展示的训练过程，选取第 4 轮训练的模型作为预测模型。</p>
 <ul>
 <li>结果分析</li>
 </ul>
 <p>分析数据中客户说的话所处的状态的分布为：
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c69eb9d162d1478e947ea50bf79f8ef4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272108195.webp" />   
      将保存下来的模型分别用于优秀经纪人和一般经纪人对话中客户说话状态的预测，分析相同状态下，优秀经纪人和一般经纪人给出的动作的差异。下图表示在客户状态为 20 时，优秀经纪人和一般经纪人做出的 19 种动作的分布：
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/08fa22065baf47d080173f07020b2096.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272108056.webp" />   
     </p>
 <p>从上图中可以看出，在客户状态为 20 时，优秀经纪人作出动作 9 和 11 相对较多，而一般经纪人在该状态下，动作 9 和 11 的出现率相对较低，因此，可以根据这一分析结果，在客户状态为 20 时，除了 1,3 动作出现概率较高外，可以指导经纪人提高 9,11 动作的出现率。</p>
 <p>举个例子：
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/92ea6d31e07b4b6fa3bab1a198aea62a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272108864.webp" />   
     </p>
 <p>如上图所示，两个例子中，当前客户消息都处于状态 20，优秀经纪人和一般经纪人的回复是存在差异的，因此，可根据这些差异来指导一般经纪人进行合适动作选择。</p>
 <h1 id="5参考资料">5.参考资料</h1>
@@ -466,6 +466,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -499,10 +503,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -881,6 +881,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

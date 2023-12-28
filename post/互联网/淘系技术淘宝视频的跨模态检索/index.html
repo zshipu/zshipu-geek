@@ -215,7 +215,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="背景">背景</h2>
 <p>近年来短视频应用大火，视频媒体逐渐成为用户消费的主要内容载体之一，对视频内容的精准检索成为重要的技术需求。自然文本描述和视频进行跨模态检索（Cross-Modal Text-Video Retrieval）是最符合自然人机交互的方式之一，通过描述文本语义特征和视频理解多模态特征的相关性计算，满足用户对视频内容的检索需求。本文工作针对淘宝首猜全屏页、逛逛等内容场景，采用文本-视频跨模态检索的方法，实现淘宝大规模内容标签和视频的挂靠[1,3]。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4567bf45715f4857a21b01ea80b29b32.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137411.webp" />   
     </p>
 <p>淘宝内容社区中，商家及用户上传视频有较大内容随意性，内容发散性和内容多模态的特点，对内容搜索及推荐结果准确性的衡量，用户更多通过视觉内容判断是否符合自身需求兴趣，视觉信息对于视频内容语义表征十分重要。视频检索文本标签主要有3种方式：</p>
 <ol>
@@ -225,7 +225,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>如下图视频内容文本与主题标签内容存在显著差异，视频内容文本检索标签的方式由于视频文本信息不足，难以匹配精准的主题标签满足用户的内容消费需求。视频图像分析主要理解视觉画面信息，缺少对文本语义的挖掘，语义信息不足以准确检索出符合的主题标签。考虑到标题文本信息不足语义缺失的问题以及视频多模态内容信息互补性的优势，视频多模态内容检索标签的方法更加贴合内容标签和淘宝视频挂靠的任务。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/08/image-9ee2a3ed.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137610.png" />   
     </p>
 <h2 id="相关工作">相关工作</h2>
 <p>跨模态检索的主要技术挑战在于底层特征异构，高层语义相关。当前跨模态检索主流的技术方法是编码不同模态数据到共同的隐空间，消除不同模态数据的语义gap实现语义特征的对齐，计算不同模态数据之间的特征相似度实现准确的检索。早期工作主要采用RNN类模型对文本侧进行特征编码，采用CNN类模型对视频图像侧进行特诊编码，接着结合ranking loss进行度量学习[10-13]。下一阶段工作着重于语义局部对齐，主要有几个思路：</p>
@@ -252,7 +252,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>针对上述技术挑战，本文的算法模型设计结合图神经网络GraphSAGE[15]的双塔检索框架，该框架的优点：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ebea4b9cff1d476fb373d7644e84b828.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137351.png" />   
     </p>
 <ol>
 <li>通过图网络构建缓解训练样本稀疏和均衡问题。样本1和样本2有点击Pairs标签，样本3和样本2内容表达一致但没有点击Pairs标签，在图网络中拉近样本1和样本3的特征距离来间接拉近样本2和样本3的特征距离。</li>
@@ -261,24 +261,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>该模型主要包括文本编码模型、视频多模态编码模型、图网络算法模型、度量学习模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/772eeed6af20487484bb3a5ff5149448.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137345.png" />   
     </p>
 <h4 id="文本编码"><strong>▐文本编码</strong></h4>
 <p>文本编码将主题标签文本转为定长实数向量，该向量能够反映主题内容信息，与视频编码向量进行相似度计算。本文在实验中尝试过通用预训练BERT、淘内预训练RoBert、Transformer等结构，最后综合考虑性能和效率采用了从头开始训练的6层Transformer结构。其首先对query进行分词，每个分词的word embedding初始参数随机；分词长度固定，不足补零，过长直接截断；整个文本所有参数random初始化，和检索模型一起端到端训练参数更新。</p>
 <h4 id="视频编码"><strong>▐视频编码</strong></h4>
 <p>视频编码模型主要是将视频多模态数据转化成反映视频内容的特征向量。为了提升训练效率，本文的视频多模态表征向量采用淘内数据预训练的视频多模态预训练模型离线提取的特征，尝试的模型包括双流网络结构LXMERT[3,13]和单流网络结构UniterVideo[4,5,14]。多模态模型输入每个视频帧提取的inception V4图像特征以及视频对应的描述信息，例如视频标题，summary等信息，设计了4个task，Mask Language Model(MLM), Mask Region Model(MRM), Video Text Match(VTM)以及商品类目分类模型(CLS)，整体模型结构如下。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d309d55854364697838a1d32e633b231.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137760.png" />   
     </p>
 <p>LXMERT双流架构</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8819161767134a18b3446d58bc7cc688.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137056.png" />   
     </p>
 <p>Uniter单流架构</p>
 <h4 id="图网络模型"><strong>▐图网络模型</strong></h4>
 <p>本文工作在经典双塔模型的技术上嵌入GraphSAGE图神经网络模型，在大规模图上学习结点embedding，集团的GraphLearning图学习框架为本文的算法提供了框架基础。整体的图网络学习框架如下，其中输入特征分别来自文本编码和视频编码的输出特征。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d11fd67c3928479e810d74dd13564497.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137158.png" />   
     </p>
 <ul>
 <li>
@@ -287,7 +287,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>建图的合理性和准确性是影响图结点特征学习的重要因素，从提升结点覆盖率和构边置信度两个目标出发，本文采用先验特征相似和后验点击行为对视频和主题标签构建图网络。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8026a3909d9c45adbaf46615bb9305fa.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137296.png" />   
     </p>
 <p><strong>基于用户点击行为建图</strong></p>
 <ol>
@@ -304,33 +304,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3b87b51854f4430c8a3b27b2a5749a00.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137051.png" />   
     </p>
 <p>图结点邻居采样的方式常用包括：随机采样，随机广度采度，随机游走采样Random Walk。考虑到经典随机游走算法对于度大节点的偏向性问题，本文采用修正改进版本的游走策略，降低度大节点的游走概率， 结点
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6f6a9c82248846048c38883909214b56.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137642.webp" />   
      对邻居结点采样概率为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ce586979cc9742b18683a3f83cb0b6a7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137524.png" />   
     </p>
 <p>其中，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6c2fd3d1637d4cf09c4935d521e7e566.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137239.png" />   
      表示结点
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8330df79aecb403d894e831eb9ed1c03.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137928.webp" />   
      的邻结点集，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d915442d24ef41f9b93a4e3f47ccfe74.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137629.png" />   
      、
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/48697a6360de4895abd16ef249df2aa2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137356.png" />   
      分别表示结点
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7b1d70291bd247d397535ff6d5b9a2a4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137176.webp" />   
      和
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0f4b0a3bd2dc4ba192383e5ade68fbff.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137271.webp" />   
      的度数。</p>
 <ul>
 <li>
@@ -339,7 +339,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>在图结点特征聚合上本文采用pooling聚合，先对每个邻居结点上一层embedding进行非线性转换，再按维度应用 max/mean pooling，捕获邻居集上的显著特征以此表示目标结点embedding。具体pipeline如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/001d60fd780e41fb88b1db6f62332c61.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137933.png" />   
     </p>
 <p>在特征聚合策略上，考虑跨模态检索的目的是实现不同模态数据在高维空间的语义对齐，消除数据模态差异的存在，因此本文根据聚合邻结点的类型，尝试采用实验了三种不同的聚合策略：</p>
 <ol>
@@ -349,7 +349,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>在第四小节的实验对比可以看出同构聚合策略性能最佳。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/31c38b4d9a134a4a9e957b2fda66c875.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137162.png" />   
     </p>
 <h4 id="度量学习"><strong>▐度量学习</strong></h4>
 <ul>
@@ -374,62 +374,62 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>本文采用自适应五元组损失损失，自适应调整正样本对、在线负样本对、离线负样本对的更新权重，达到在相似度方面正样本对&gt;在线负样本对&gt;离线负样本对的目的。</p>
 <p>损失公式表达：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/271b5837d28847809906521d05096936.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137388.webp" />   
     </p>
 <p>同模态度量损失：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a54e2926d64a455a99c7eab4b6bd9e83.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137064.png" />   
     </p>
 <p>同模态有无边二分类损失：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d414c4c1ab3147169e83ab9803d1a63c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137871.png" />   
     </p>
 <p>跨模态度量损失:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a362fcceca1e4cb19ff18a043066c597.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137837.png" />   
     </p>
 <p>其中
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/52907c6b88a1431d8b0d5c332008f6fc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137707.webp" />   
      表示文本768维特征向量，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dccbcb1fa4a2462293dade5ccb05fec4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137452.webp" />   
      表示视频768维特征向量，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9d3841a2f79849dd92d306771ec8afc0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137119.webp" />   
      表示文本正样本，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f2fe4f2a10f04bff897120fb759b1bd5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272137868.png" />   
      表示视频正样本，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/114e28dbd2c54c209e4d056fbbb5a5b3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272138590.webp" />   
      表示文本局部负样本，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/08cf73457bf740d98e003f60742dab3d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272138448.webp" />   
      表示视频局部负样本，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c28e7c038583449c9a8eeffe173f1e1f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272138242.webp" />   
      表示文本全局负样本，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5071416d72924ebba77936a8f3f55b6c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272138045.png" />   
      表示视频全局负样本，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fed6c0b6d0044972b6cc03ba30a33ac2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272138585.png" />   
      、为超参数,
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7eb5cff0754141b6953d78e3e68cc3bd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272138322.png" />   
      表示文本同构边,
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7c4e911fdc9c4f3d963c3814ddc86420.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272138011.png" />   
      表示文本同构边,
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5ac4968e449b4813bab97dab07e4cb6f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272138721.webp" />   
      表示指示函数，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2a9afdff99df4d3cbf5c3c65fc4f0d71.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272138366.png" />   
      表示距离间隔，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4e941ec837f44d3ab184d449ae8dd86f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272138069.png" />   
      表示负样本数量。</p>
 <ul>
 <li>
@@ -442,12 +442,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="度量学习-1"><strong>▐度量学习</strong></h4>
 <p>检索衡量指标采用检索召回准确率Top1，Top5，Top20 以及Mean Rank值。1K淘宝样本对检索性能如下。基于预训练Roberta文本特征的视频文本-标签文本检索方式与基于多模态特征的视频多模态-标签文本的检索方式性能有明显差距，视频多模态信息的互补增益更好地实现淘宝视频内容理解。视频多模态-标签文本的检索方式在引入图神经网络算法后在Top1准确率上有超过9.0%的性能提升，图结构信息的引入进一步提升了视频和文本结点的语义表征能力。模型在度量学习上结合离线全局负样本采样和在线局部负样本采样的方式在Top1准确率上提升2.0%，采样不同难度的负样本使模型收敛到更优点。本文尝试通过半监督的方式扩量训练集召回更多伪匹配样本，对模型性能有更佳的增益。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b08bf2c51de046d4bb6eea54bf8ddf37.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272138802.png" />   
     </p>
 <h4 id="公开数据集实验"><strong>▐公开数据集实验</strong></h4>
 <p>本文算法应用于MSCOCO Retrieval数据集做性能测试。MSCOCO Retrieval数据集的5K检索任务性能结果对比如下，其中对比方法主要限定采用双塔模型结构、特征提取无需模态间交互对齐计算、适用于大规模检索的方法。本文工作达到了于同期前沿工作具有竞争力的性能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6b048a6772b74126b12b7d3ce68c603a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272138012.png" />   
     </p>
 <h4 id="消融对比及可视化"><strong>▐消融对比及可视化</strong></h4>
 <ul>
@@ -460,21 +460,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>不同模态数据在聚合过程中非线性变换处理没有根据模态差异设置不同的优化参数，目前采用的聚合过程的线性层采用共享参数。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ab4a3d81d3a54f5593b348b048cd9ff9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272138727.png" />   
     </p>
 <ul>
 <li><strong>样本可视化</strong></li>
 </ul>
 <p>本文抽取部分测试样本，模型提取文本特征和视频特征并进行进行T-SNE处理可视化，如下图所示，其中蓝色表示文本样本，红色表示视频样本，可以看出同内容语义的文本视频来高维空间得到很好的聚类效应，并且同其他不同内容语义的样本保持一定间隔距离。GNN的引入使得同模态正样本之间的距离更加拉近。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/137ef5cb72ab441f96a69293d00180f0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272138575.png" />   
     </p>
 <ul>
 <li><strong>主题标签召回示</strong></li>
 </ul>
 <p>主题标签在千万级首猜精品视频池进行向量检索，手淘全屏页[3]主题标签召回示例case：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/063449eda57f401abe20262598e619a8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272138250.png" />   
     </p>
 <h2 id="讨论和展望">讨论和展望</h2>
 <p>本文对淘宝内容场景下的文本视频跨模态检索问题进行了研究和讨论，指出跨模态检索当前存在的训练样本稀疏均衡问题、跨模态度量学习的技术挑战和高效检索问题，并对此做出了深入分析，提出了结合GraphSAGE图网络算法的双塔跨模态检索模型，分别对同模态和跨模态进行多目标学习，保证同模态判别性的同时，实现跨模态特征的对齐，线下实验验证和业务评测验证了本文算法有效性。本文对文本-视频跨模态检索技术的研究主要通过文本和视频全局特征构建双塔度量模型，后续会继续深耕：</p>
@@ -618,6 +618,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -651,10 +655,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1033,6 +1033,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

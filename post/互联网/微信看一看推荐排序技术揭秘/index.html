@@ -214,7 +214,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="二看一看整体架构">二、看一看整体架构</h3>
 <p>看一看的整体架构如图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/764290b6f94f477cb3e3b0bada9d40bb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910097.webp" />   
     </p>
 <p>和大多数的推荐系统一样，我们最底层采用了经典的召回、粗排、精排三层结构，各阶段处理的候选集数量逐层递减，主要考虑是需要在实时性能和效果之间做 tradeoff。比较特别的一点是，我们在精排之后接了一层异构内容混排，主要是考虑到不同内容源的点击率、优化目标不尽相同，难以放在一起比较。目前，混排侧引入了强化学习模型，优化长期收益，实现快速实时反馈。</p>
 <h3 id="三基础数据和召回">三、基础数据和召回</h3>
@@ -228,11 +228,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>精排阶段需要对粗排候选池中的 ItemList 进行打分，这个分数是针对每个用户对候选文章点击概率的预测，即 Ctr 预估。看一看业务中每天有海量活跃用户，这些海量日志可以用来进行模型训练以建模喜好。</p>
 <p>LR/FM 大规模的 Ctr 预估系统中，Logistic Regression 因简单、易扩展、可解释的特性成为初期阶段使用最为广泛的一种模型。其 Ctr 预估模型公式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/831790ae3f9042d886183452856ac03c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910823.jpeg" />   
     </p>
 <p>我们第一阶段的模型采用大规模分布式的 LR，使用自研的分布式训练平台 PanguX，通过人工特征工程提取十亿级的特征用于离线训练。但 LR 属于 Memorization 比较强的 model，主要记忆每个特征的历史点击率，在 Generalization 上有很大的缺陷，需要大量的人工特征工程来提高泛化能力。另外，这种线性模型特征与特征之间在模型中是独立的，无法学到在训练集中未出现过的交叉信息。因此第二阶段我们切换到了 FM(Factorization Machines)，该模型可以在很少特征工程的情况下通过学习特征的 embedding 表示来学习训练集中从未见过的组合特征，FM 的模型公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/94908b244aa7458c8a2890a264055e66.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910377.jpeg" />   
     </p>
 <p>虽然理论上讲 FM 可以对高阶特征进行组合建模，但是我们一般在使用中受计算复杂度和参数维度的限制都是只用到了二阶特征。很自然的，对于更高阶的特征组合可以用多层神经网络去解决。</p>
 <p><strong>wide&amp;deep</strong></p>
@@ -243,11 +243,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>DeepFM</strong></p>
 <p>wide&amp;deep 模型全量之后相比 FM 这种浅层模型点击率提升明显，但 wide 部分仍需要大量的人工特征工程来引入低阶组合信息。我们参考 DeepFM 在网络结构上引入因子分解机部分,通过 FM 的特征交叉学习浅层组合，dnn 部分挖掘特征间的深层非线性关联。标准的 DeepFM 网络结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bd6661b236f545dc8d92d8751d1cdd56.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910106.jpeg" />   
     </p>
 <p>我们在引入 FM Layer 时，不同 field 间的交叉不再使用点积操作，而是通过哈达马积得到一个向量，用于上层的多模块融合。同时，引入 field-wise 的 Wide Layer 以防止共享 embedding 的训练有偏。对于 Show/Clk/Ctr 等统计特征，我们放弃了离线单独统计载入字典的模式，直接在 PanguX 训练平台框架层面引入该类型统计信息，server 针对每个特征保存一份实时的全局 show clk 信息，并且该数据随着训练的进行持续累计和随时间衰减。最后的模型框架结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a4d6d2038ca3432781e937d5f8036287.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910091.png" />   
      目前该优化过的 DeepFM 已经全量应用于看一看精排业务中，取得了非常不错的效果。</p>
 <h3 id="五多目标">五、多目标</h3>
 <p>除了前述 ctr 预估，在微信看一看的排序中，我们非常重视多目标的推荐效果优化。这里多目标是指包括了点击目标之外的时长、分享、点赞、评论等其他跟用户体验息息相关的推荐指标。单纯以 pctr 为目标，会带来标题党问题。站在平台的角度，我们不仅希望在打造一款大众化的阅读产品，同时希望提升产品的社交属性，因此用户阅读外的其他互动行为，也是用户体验的重要衡量准则。站在内容的角度，被用户点赞、分享、评论的内容以及停留时长长的内容，往往质量比较高，因此引入这些目标有利于推荐过程中避免标题党等低质量内容的展现。站在用户的角度，从阅读、分享、点赞、评论等多个角度提升用户综合体验，有利于增加产品对用户的使用黏性。在创作者角度，作者会希望在多元的指标上看到自己微信平台上的内容作品的反馈效果的提升。</p>
@@ -260,13 +260,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>一些通过修改样本权重体现多目标重要性的方法，以及一些通过增加正则项在损失函数中体现多目标价值的方法，因为在迭代的灵活性和模型效果上均不具有优势，此处不再详述。</p>
 <p>看一看的推荐场景和其他推荐产品有相似之处，也有自己独特的一面。例如，点击目标和阅读时长、分享、乃至关注公众号等目标构成业务场景上的递进关系，这一点是共通的；但在“好看”上线以后，用户的点赞和评论行为则不必须依赖于点击也可以发生，这些目标和点击目标既有递进关系，也有平行的关系。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5c25a8a3620746e18622d45bc49a9042.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271911072.webp" />   
     </p>
 <p>此外，用户在阅读中的社交互动行为数据也是微信看一看的特色，共同阅读一篇文章、观看一个视频的好友上下文信息，对用户行为的引导起到了很大的作用。</p>
 <p>看一看中多目标优化方法：</p>
 <p>1.多目标模型的网络结构：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/446ac170cd924047bb47fc9cdd97d2db.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271911501.webp" />   
     </p>
 <p>整体的多目标建模方法论层面，我们也采用了多任务联合建模的方案，各个任务共享底层特征 embedding 表示，独享各自的神经网络和目标输出。</p>
 <p>在对多目标之间的联结方式上，我们在对点击目标和点击后的递进行为进行全空间建模之外，增加了对非依赖点击行为目标的独立输出。以“好看”业务为例，即对图中的点击（A+B），点击并点赞（B），点赞（B+C）做三路输出。这样做的好处是既能受益于点击目标和递进的 postclick 目标互相借用信息，又能通过独立网络将非依赖点击的行为目标完整的考虑进来。</p>
@@ -283,32 +283,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>我们尝试了通过 pctr 来统一排序：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/da5c7f6c4e6e4cd98253bb6f0d1b46e1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271911250.png" />   
      看一看中，视频点击率最高，新闻最低。当我们提高视频的展现占比，整体点击数并不是持续升高，而是会有一个拐点。同样，不断降低新闻的占比，点击数也会迎来拐点。因此，提高高点击率业务，降低低点击率业务，整体的内容点击率会提高，但不会提高整体的点击数。</p>
 <p>基于上面的考虑，我们选择使用强化学习来进行多业务混排。用户在推荐场景浏览可以建模成 ov Progress，Agent 是我们的推荐系统，Action 是我们推荐了什么内容，Reward 是用户的反馈信息，包括点击、负反馈、退出等，每次我们的推荐系统 Agent 采取某个 Action，给用户推荐了内容，用户给到我们相应的反馈，通过最优化总点击数来获得最佳效果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/392b17829ac042c698e23c895c17438e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271911201.webp" />   
     </p>
 <p>未来有不确定因素，所以要对未来的收益做衰减：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/87d6b34f938346ceb72536cda10f6a03.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271911949.webp" />   
      DQN</p>
 <p>梯度下降求解 MSE 的 LOSS：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a9ba6d47d06e4c7b9a12fc45bf96cd8c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271911478.webp" />   
     </p>
 <p>初版 DQN 上线后，对比 baseline 规则，总点击数有大幅提高。为了利用 Session 内短期信息，我们将 DQN 内的 state 用 RNN 的 hidden 来描述，结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7882d59df73d420d891d4812b5476160.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271911176.jpeg" />   
     
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c12c0a5d10854831b6ba62fae9fa057e.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271911904.jpeg" />   
     </p>
 <p>采用 RNN 结构的强化学习模型上线后效果得到了进一步提升。基于 RL 混排，我们在 reward 的设计上也进行了多轮迭代，如加入时长、负反馈、多样性。下面重点介绍一下多样性。</p>
 <p>多样性在推荐系统中是一个重要的优化目标，但是相比于 ctr 等指标，学术界、工业界都并没有一个明确指标来指导多样性优化。为了更好的理解、分析和优化多样性策略，我们设计了 10+中多样性相关指标，如展示/点击类目数、展示类目熵，用户主兴趣覆盖率，符合用户主兴趣文章比例等。</p>
 <p>第一版的多样性策略采用启发式的方法，限制相同类目/Topic/Tag 等个数上限，结合离线平台/abtest 数据调整参数。这里最大的问题是个性化策略是全局的，没有个性化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e55544410847480191a000fc8e22ef56.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271911675.webp" />   
     </p>
 <p>通过 Submodular 的边际效应递减特性，对重复度高的类目、关键词进行打压，同时引入 pctr，体现了一定的个性化，上线取得了不错的效果，在损失较少的 ctr 的情况下大幅提</p>
 
@@ -438,6 +438,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -471,10 +475,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -853,6 +853,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

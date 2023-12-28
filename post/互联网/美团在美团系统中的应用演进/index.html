@@ -216,19 +216,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>LruCache采用的缓存算法为LRU(Least Recently Used)，即最近最少使用算法。这一算法的核心思想是当缓存数据达到预设上限后，会优先淘汰近期最少使用的缓存对象。</p>
 <p>LruCache内部维护一个双向链表和一个映射表。链表按照使用顺序存储缓存数据，越早使用的数据越靠近链表尾部，越晚使用的数据越靠近链表头部；映射表通过Key-Value结构，提供高效的查找操作，通过键值可以判断某一数据是否缓存，如果缓存直接获取缓存数据所属的链表节点，进一步获取缓存数据。LruCache结构图如下所示，上半部分是双向链表，下半部分是映射表（不一定有序）。双向链表中value_1所处位置为链表头部，value_N所处位置为链表尾部。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f25d51c698e547e6834532ae066dad45.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659562.svg&#43;xml" />   
     </p>
 <p>LruCache读操作，通过键值在映射表中查找缓存数据是否存在。如果数据存在，则将缓存数据所处节点从链表中当前位置取出，移动到链表头部；如果不存在，则返回查找失败，等待新数据写入。下图为通过LruCache查找key_2后LruCache结构的变化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/df0854903538402188aabdac38098bb6.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659258.svg&#43;xml" />   
     </p>
 <p>LruCache没有达到预设上限情况下的写操作，直接将缓存数据加入到链表头部，同时将缓存数据键值与缓存数据所处的双链表节点作为键值对插入到映射表中。下图是LruCache预设上限大于N时，将数据M写入后的数据结构。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4787b0af4bd0416bbe7b2076ce0bc894.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659017.svg&#43;xml" />   
     </p>
 <p>LruCache达到预设上限情况下的写操作，首先将链表尾部的缓存数据在映射表中的键值对删除，并删除链表尾部数据，再将新的数据正常写入到缓存中。下图是LruCache预设上限为N时，将数据M写入后的数据结构。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d589e8fcf6ba47538c42b0fd9e3c1555.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659773.svg&#43;xml" />   
     </p>
 <p>线程安全的LruCache在读写操作中，全部使用锁做临界区保护，确保缓存使用是线程安全的。</p>
 <h1 id="lrucache在美团dsp系统的应用场景">LruCache在美团DSP系统的应用场景</h1>
@@ -240,7 +240,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>引入LruCache，将远端存放于Redis的信息本地化存储。LruCache可以预设缓存上限，这个上限可以根据服务所在机器内存与服务本身内存占用来确定，确保增加LruCache后，服务本身内存占用在安全范围内；同时可以根据查询操作统计缓存数据在实际使用中的命中率。</p>
 <p>下图是增加LruCache结构前后，且增加LruCache后命中率高于95%的情况下，针对持续增长的QPS得出的数据获取平均耗时(ms)对比图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/74db0be64ce446a3bdc75b34a90d68f0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659789.png" />   
     </p>
 <p>根据平均耗时图显示可以得出结论：</p>
 <ol>
@@ -249,7 +249,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>下图是增加LruCache结构前后，且增加LruCache后命中率高于95%的情况下，针对持续增长的QPS得出的数据获取Top999耗时(ms)对比图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/24541b3aa03d4610825bd18969eccafb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659952.png" />   
     </p>
 <p>根据Top999耗时图可以得出以下结论：</p>
 <ol>
@@ -270,7 +270,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>HashLruCache引入某种哈希算法，将缓存数据分散到N个LruCache上。最简单的哈希算法即使用取模算法，将广告信息按照其ID取模，分散到N个LruCache上。查询时也按照相同的哈希算法，先获取数据可能存在的分片，然后再去对应的分片上查询数据。这样可以增加LruCache的读写操作的并行度，减小同步等待的耗时。</p>
 <p>下图是使用16分片的HashLruCache结构前后，且命中率高于95%的情况下，针对持续增长的QPS得出的数据获取平均耗时(ms)对比图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/773557c6ee6e4babb14ab02071b8ccd7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659220.png" />   
     </p>
 <p>根据平均耗时图可以得出以下结论：</p>
 <ol>
@@ -279,7 +279,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>下图是使用16分片的HashLruCache结构前后，且命中率高于95%的情况下，针对持续增长的QPS得出的数据获取Top999耗时(ms)对比图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/666ef943cd364b88966eda8104d7c195.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659512.png" />   
     </p>
 <p>根据Top999耗时图可以得出以下结论：</p>
 <ol>
@@ -291,12 +291,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>根据以上分析，进一步提高HashLruCache性能的一个方法是确定最合理的分片数量，增加足够的并行度，减少同步等待消耗。所以分片数量可以与CPU数量一致。由于超线程技术的使用，可以将分片数量进一步提高，增加并行性。</p>
 <p>下图是使用HashLruCache机制后，命中率高于95%，不同分片数量在不同QPS下得出的数据获取平均耗时(ms)对比图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/390209fc0dd946b79eb031da6f51e715.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659676.png" />   
     </p>
 <p>平均耗时图显示，在较高的QPS下，平均耗时并没有随着分片数量的增加而有明显的减少，基本维持稳定的状态。</p>
 <p>下图是使用HashLruCache机制后，命中率高于95%，不同分片数量在不同QPS下得出的数据获取Top999耗时(ms)对比图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/aa19fc867e8946a9b72a886fb1fb9cf0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659999.png" />   
     </p>
 <p>Top999耗时图显示，QPS为750时，分片数量从8增长到16再增长到24时，Top999耗时有一定的下降，并不显著；QPS为1000时，分片数量从8增长到16有明显下降，但是从16增长到24时，基本维持了稳定状态。明显与实际使用的机器CPU数量有较强的相关性。</p>
 <p>HashLruCache机制在实际使用中，可以根据机器性能并结合实际场景的QPS来调节分片数量，以达到最好的性能。</p>
@@ -431,6 +431,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -464,10 +468,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -846,6 +846,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

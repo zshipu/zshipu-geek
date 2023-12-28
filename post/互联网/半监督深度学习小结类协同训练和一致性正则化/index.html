@@ -218,10 +218,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>注：以下工作的推荐，是我自认为其思想类似于 co-training，因此称为类协同训练，不是说下面的工作就一定是 co-training。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4e1d6feab85240c19cc1beb1b05a1c5f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271643043.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3d2833e0794941ef9441c0dde6a1b2ef.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271643610.webp" />   
     </p>
 <p>这是一篇 ECCV 2018 的文章，论文首先指出， <strong>直接对同一个数据集训练两个网络，会有两个弊端：</strong></p>
 <ul>
@@ -235,27 +235,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>为了解决上述问题，论文主要做了两个工作：</strong></p>
 <p>1. 提出了一个新的代价函数，进行协同训练，其形式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/df79a2c2b04649b4b510ba1e9c9d0dfd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271643121.webp" />   
     </p>
 <p>信息论学得不好请多见谅，大概就是均匀分布的熵最大，当两个预测分布不一致时，这两个预测分布求和取平均会使得熵增大。相反，如果预测一致熵就不会增加多少。</p>
 <p>论文中还明确强调，该代价函数只用在无标签数据上，因为有标签数据的监督代价函数（论文用的交叉熵）已经使得预测趋于一致（趋于真实标签），用在有标签数据上没有必要，但是好像没说明也用在有标签数据上的后果。</p>
 <p>2. （关键）提出了 View Difference Constraint。其思路是：我们只有一个数据集 D，但我们不能再同一个数据集上训练两个网络，因此需要从 D 中派生出另一个数据集 D&rsquo;，而这个派生方法就是计算 D 的对抗样本。具体即使用对方的对抗样本来训练自己：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e820d587284347ec8507ffaea75e5571.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271643594.webp" />   
     </p>
 <p>其中， g1(x) 表示网络 p1 的对抗样本， H(·) 是某种代价函数（KL 散度），该约束的设计期望是使得两个网络具备不同却互补信息。我个人觉得这是一个 very amazing 的想法。尽管我不知道理论上是否能保证两个网络不同却互补，但直观上……</p>
 <p>实验效果非常好，两个（或多个）网络使用的是同一种架构，就是感觉没有和集成方法比较感觉有点遗憾，毕竟论文用了多个网络。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/189959027a1f481d9d0ce048009adea1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271643018.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4458198f53664418b3876314455cda51.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271643616.webp" />   
     </p>
 <p>Tri-net 是 IJCAI 2018 的论文，挂着周志华大大的名字，用的思想也是周志华提出来的 tri-training，可谓阵容豪华。</p>
 <p>论文称类协同训练为 disagreement-based semi-supervised learning，其关键在于训练多个分类器，已经对不同视图上的不一致性的探索。为此，论文从三个方面改进：model initialization，diversity augmentation 和 pseudo-label editing。</p>
 <p>在展开这三个贡献点之前，我们先来看看 Tri-net 的网络架构：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2087acdb92934e2f80298636ab1ccec7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271643147.webp" />   
     </p>
 <p>按照把网络架构分为低层抽象和高层抽象部分，Tri-net 架构中的 Ms 是一个共享的低层抽象部分，而 Tri-net 的高层抽象部分是用三个不同的网络架构组成。</p>
 <p>刚开始我看到这个架构时，一脸懵逼，但后来想想，这样设计也有一定道理。</p>
@@ -271,10 +271,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>本身 Tri-training 这种类协同训练挑选的样本就具有很强的可靠，论文提出一个的方法 Pseudo-label editing：通过 Dropout 的随机性，对样本进行多次预测，如果多次预测的结果都几乎一样，则认为是稳定的。</p>
 <p>模型的缺点也相对明显，训练过程相对复杂，感觉靠经验设计；Pseudo-label editing 需要进行多次预测，估计计算负担也挺重的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/77492873d70d436c95bc2afa9762c0a5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271644735.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ab9af719c829435094cbec7e9cabc74a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271644503.webp" />   
     </p>
 <p><strong>这篇 ECCV 2018 的论文是做人脸识别的，主要提出了一个 Consensus-driven propagation 的算法</strong>，该算法主要由三部分：Committee，Mediator 和 Pseudo Label Propagation 组成。</p>
 <p>**1. Commitee：**需要用有标签数据训练一个 base model 和 N 个 committee models，而且这些 models 都需要使用不同的网络架构，以保证 diversity （信息的多样性）。然后使用这些 models 提取深度特征，构建 KNN 图，并进一步获取三种信息：</p>
@@ -297,61 +297,61 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>例如，某人的裸照（干净的输入）和其有穿衣服的照片（受到干扰的照片），你也应该能知道这是同一个人（一致性）。 当然，这个干扰不能太大（例如衣服把整个人都遮住了）。</p>
 <p>Consistency Regularization 虽然做法简单，但是却具有很多良好的作用，将会在下面的文章中阐述。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/51f5642283484f4aa85fcd5fb82ae3aa.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271644997.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2334efdd9c1b486886e4410c8d18c8f2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271644954.webp" />   
     </p>
 <p>这是 NIPS 2014 年发表的工作，其提出了一个概念：pseudo-ensemble，一个 pseudo-ensemble 是一系列子模型（child model），这些子模型通过某种噪声过程（noise process）扰动父模型（parent model）得到。</p>
 <p>Pseudo-ensemble 与其他的有关扰动的方法的区别在于：其他的方法只考虑在输入空间的扰动，而 pseudo-ensemble 还考虑在模型空间（model space）上的扰动。</p>
 <p>一个典型的 pseudo-ensemble 就是 Dropout。 但是，除了dropout 以外，我没怎么想到其他的模型空间上的扰动，看论文的公式貌似是在网络的中间表示添加噪声？论文有代码，但我没怎么看，有不同意见的同学可以评论里提出。</p>
 <p>其有监督代价函数如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0e741a394e5440b48e20a4fbb881757f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271644531.webp" />   
     </p>
 <p>其中 θ 是网络参数，ξ 表示某种噪声过程，该有监督代价函数就是让扰动得到的子模型与标签 y 一致。</p>
 <p>论文中还提出其半监督形式： <strong>The Pseudo-Ensemble Agreement regularizer (PEA)</strong>，其形式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8a106956ecbf464ca95098f876eb5f2b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271644006.webp" />   
     </p>
 <p>其中 d 是网络的层数，其含义应该是把父模型的每一层中间表示，与子模型的进行一致正则， V 是某种惩罚函数，如 MSE 代价（注：最后一层的中间表示即网络的预测）。</p>
 <p>现在回顾一下 Consistency regularization 的思想：对于一个输入，受扰微小扰动后，其预测应该是一致的。</p>
 <p>PEA 的含义我认为就是，对于一个输入，受到扰动后，其所有的中间表示，都应该一致。其实根据后面更多的论文，这个约束可能强力些。</p>
 <p>PEA 的目的是，使得模型对扰动具有鲁棒性，因为鲁棒的模型泛化性能更好，同时还能学习数据的内在不变性（ <strong>作用 1</strong>）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/118c0a417b194579949b716ce1161008.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271644656.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7f29469ba9c04d0c9b2a2d4cac7c884e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271644709.webp" />   
     </p>
 <p>这是 NIPS 2016 年发表的工作。随机性在大部分的学习系统中起到重要的作用，深度学习系统也如此。一些随机技术，如随机数据增强、Dropout、随机最大池化等，可以使得使用 SGD 训练的分类器具有更好的泛化性和鲁棒性。</p>
 <p>而且这种不确定性的存在，使得模型对同一个样本的多次预测结果可能不同。因此论文提出一个无监督代价（即我说的半监督正则），其通过最小化对同一个样本的多次预测，利用这种随机性来达到更好的泛化性能。该无监督代价形式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fef5a2aafde640febe24b5ebbe78ce7a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271644284.webp" />   
     </p>
 <p>其中
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/effc7ceee5c746859da355bb1e11eaae.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271644673.webp" />   
      代表对输入
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/669d07581ebc467b86095e5042cc83f9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271644088.webp" />   
      的第 j 次预测， T 表示某种数据变换。除了对样本做变换，在网络内也使用类似 Dropout 或随机池化等技术产生随机性。</p>
 <p>似泥？Pseudo-Ensemble！对不起，你俩有点像。</p>
 <p>虽然感觉很类似，但是这两篇论文很值得一读啊，论文里提出许多的观点和想法，一直延续至今，信息量挺大。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/875bf771ec18404db046cc84b080dff4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271644419.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cd70ccbc438d47b19173c89e7eeca1be.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271644993.webp" />   
     </p>
 <p>这篇在 ICLR 2017 年的工作提出了一个我称之为 <strong>peer-consistency</strong> 的正则项，即 π 模型，也是我最开始对 Consistency Regularization 的认知的由来。</p>
 <p>π 模型认为，同一个输入，在不同的正则和数据增强条件下，网络对其预测应该是一致的。其无监督代价部分如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6b63fcc2016a4fa0af55f30df4048877.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271644639.webp" />   
     </p>
 <p>其中 zi 是网络的一个预测，而
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/94ee3c898ea14648869c7c320830978c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271644128.webp" />   
      是网络对同一个样本在不同的正则和数据增强条件下的一个预测，然后让着两个预测一致。看起来很像前面两篇文章的简化版，但是效果好啊，这也是我说前面的约束太强的原因。</p>
 <p>w(t) 是权重函数，是迭代次数的函数。由于在网络的初始阶段，网络的预测十分不准（尤其是半监督中有标签数据有限的情况），这时的网络预测靠不住的，因此这无监督代价在初始时的权重应该设置得比较小，到后期再慢慢增大。</p>
 <p>w(t) 非常关键，论文中使用了一个高斯爬升函数，具体可以看论文。我的理解是，这种 peer-consistency 鼓励一个样本点的扰动不变性，其实鼓励了预测函数（即网络）对样本的邻域具有光滑性（ <strong>作用 2</strong>）。</p>
@@ -486,6 +486,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -519,10 +523,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -901,6 +901,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

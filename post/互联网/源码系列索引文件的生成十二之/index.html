@@ -211,11 +211,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <p>本文承接 <a href="https://www.6aiq.com/article/1586693854370">索引文件的生成（十一）</a>，继续介绍剩余的内容，为了便于下文的介绍，先给出 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2Fsuoyinwenjian%2F2019%2F0424%2F53.html">生成索引文件.dim&amp;&amp;.dii</a> 的流程图以及流程点构建BKD树的节点值（node value）的流程图：</p>
 <p>图1：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/1-17e6731a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221268.png" />   
     </p>
 <p>图2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/2-3ab961b0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221086.png" />   
     </p>
 <p>  在前面的文章中，我们介绍了图2中处理内部节点的所有流程点，在介绍处理叶子节点前，我们先填个坑，即当某个内部节点划分后生成的左右子树为叶子节点时，内部节点为左右子树提供哪些准备数据，即流程点 <code>设置左子树的准备数据</code>、 <code>设置右子树的准备数据</code>。</p>
 <h2 id="设置左子树的准备数据设置右子树的准备数据">设置左子树的准备数据、设置右子树的准备数据</h2>
@@ -223,7 +223,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>  在文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2020%2F0410%2F131.html">索引文件的生成（十一）之dim&amp;&amp;dii</a> 中我们提到，处理节点（叶子节点或者内部节点）需要的准备数据有好几个，这些准备数据在源码中其实就是 <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2FLuXugang%2FLucene-7.5.0%2Fblob%2Fmaster%2Fsolr-8.4.0%2Flucene%2Fcore%2Fsrc%2Fjava%2Forg%2Fapache%2Flucene%2Futil%2Fbkd%2FBKDWriter.java">https://github.com/LuXugang/Lucene-7.5.0/blob/master/solr-8.4.0/lucene/core/src/java/org/apache/lucene/util/bkd/BKDWriter.java</a> 类中的build(&hellip;)方法的参数：</p>
 <p>图3：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/3-afd84806.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221880.png" />   
     </p>
 <p>  对于左右子树为叶子节点的情况，我们只需要关心图3中的leafBlockFPs数组。</p>
 <h4 id="leafblockfps数组">leafBlockFPs数组</h4>
@@ -231,7 +231,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="选出叶子节点的排序维度">选出叶子节点的排序维度</h2>
 <p>图4：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/4-840ed41f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221568.png" />   
     </p>
 <p>  选出叶子节点的排序维度前需要先计算两个数组：commonPrefixLengths数组以及usedBytes数组。</p>
 <h3 id="commonprefixlengths数组">commonPrefixLengths数组</h3>
@@ -240,24 +240,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>  usedBytes为 <a href="https://www.6aiq.com/article/1586728053601">FixedBitSet</a> 类型数组，如果你不熟悉FixedBitSet对象也没关系，我们只需要知道usedBytes数组的下标同样用来表示维度编号，数组元素描述的是维度编号的对应的所有维度值的公共前缀后的 <strong>下一个字节</strong> 的种类数量（按照字节的不同值作为种类的划分），只是种类数量用FixedBitSet来统计而已。</p>
 <p>图5：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/5-2e49bb8b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221703.png" />   
     </p>
 <p>  假设叶子节点中有3个点数据，我们以维度编号2为例，图4中，点数据蓝色部分的字节是相同的，即点数据在这个维度的维度值的最长公共前缀的长度为2（2个字节），即在commonPrefixLengths数组中，下标值为2的数组元素的值为3，其他维度同理，故commonPrefixLengths数组如下所示：</p>
 <p>图6：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/6-84c8f37c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221377.png" />   
     </p>
 <p>  同样以维度编号2为例，除去相同的2个前缀字节的下一个字节的种类数量如图4中绿框与红框标注共有2个种类，即有两种，其他维度同理，故usedBytes数组如下所示：</p>
 <p>图7：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/7-eb9aa0e2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221702.png" />   
     </p>
 <p>  在源码实现上，需要先计算出commonPrefixLengths数组，利用该数组再计算出usedBytes数组。</p>
 <p>  在计算出usedBytes数组之后，遍历该数组，找到 <strong>第一个</strong> 数组元素最小的值，对应的数组下标，即维度编号，作为叶子节点的排序维度，在图6中，编号维度1将作为排序维度。</p>
 <h2 id="叶子节点的排序">叶子节点的排序</h2>
 <p>图8：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/8-8d3370df.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221735.png" />   
     </p>
 <p>  使用 <strong>内省排序（IntroSorter）对叶子节点中的点数据进行排序，而不是在文章 <a href="https://www.6aiq.com/article/1586693685146">索引文件的生成（十）之dim&amp;&amp;dii</a> 中提到的内部节点排序使用的最大有效位的基数排序(MSB radix sort)</strong>，源码中也给出了注释：</p>
 <div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
@@ -284,12 +284,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="更新leafblockfps数组">更新leafBlockFPs数组</h2>
 <p>图9：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/9-16631a3a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221666.png" />   
     </p>
 <p>  到此流程点，我们即将开始把叶子节点的信息写入到索引文件.dim中，故需要将索引文件.dim当前可写入的位置记录到leafBlockFPs数组中，在读取阶段，就可以通过leafBlockFPs数组找到当前叶子节点的信息在索引文件.dim中的起始读取位置，如下所示：</p>
 <p>图10：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/10-bde70b74.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221788.png" />   
     </p>
 <p>  图10中，leafNodeData为叶子节点的信息，leafBlockFPs数组的下标值为叶子节点的 <strong>差值节点编号</strong>。</p>
 <p><strong>差值节点编号是什么</strong></p>
@@ -306,7 +306,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="写入文档号信息到索引文件dim中">写入文档号信息到索引文件.dim中</h2>
 <p>图11：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/11-ac1af07a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221994.png" />   
     </p>
 <p>  该流程点描述是将叶子节点中的点数据对应的文档号写入到索引文件.dim中。</p>
 <p><strong>如果获得每个点数据对应的文档号</strong></p>
@@ -434,6 +434,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -467,10 +471,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -849,6 +849,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -214,7 +214,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Bandit算法来源于历史悠久的赌博学，它要解决的问题是这样的：</p>
 <p>一个赌徒，要去摇老虎机，走进赌场一看，一排老虎机，外表一模一样，但是每个老虎机吐钱的概率可不一样，他不知道每个老虎机吐钱的概率分布是什么，那么每次该选择哪个老虎机可以做到最大化收益呢？这就是多臂赌博机问题（Multi-armed bandit problem, K-armed bandit problem, MAB）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/50a38a88dacb4a639e41e856af1c258d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003881.png" />   
     </p>
 <p>怎么解决这个问题呢？最好的办法是去试一试，不是盲目地试，而是有策略地快速试一试，这些策略就是Bandit算法。</p>
 <p>Bandit算法如何同推荐系统中的EE问题联系起来呢？假设我们已经经过一些试验，得到了当前每个老虎机的吐钱的概率，如果想要获得最大的收益，我们会一直摇哪个吐钱概率最高的老虎机，这就是Exploitation。但是，当前获得的信息并不是老虎机吐钱的真实概率，可能还有更好的老虎机吐钱概率更高，因此还需要进一步探索，这就是Exploration问题。</p>
@@ -223,7 +223,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="31-累积遗憾">3.1 累积遗憾</h2>
 <p>Bandit算法需要量化一个核心问题：错误的选择到底有多大的遗憾？能不能遗憾少一些？所以我们便有了衡量Bandit算法的一个指标：累积遗憾：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/5326338724714475948ec30fcc54db48.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003119.png" />   
     </p>
 <p>这里 t 表示轮数, r表示回报。公式右边的第一项表示第t轮的期望最大收益，而右边的第二项表示当前选择的arm获取的收益，把每次差距累加起来就是总的遗憾。</p>
 <p>对应同样的问题，采用不同bandit算法来进行实验相同的次数，那么看哪个算法的总regret增长最慢，那么哪个算法的效果就是比较好的。</p>
@@ -231,11 +231,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>有关Beta分布，可以参考帖子： <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.zhihu.com%2Fquestion%2F30269898">https://www.zhihu.com/question/30269898</a>。这里只做一个简单的介绍。</p>
 <p>beta分布可以看作一个概率的概率分布。它是对二项分布中成功概率p的概率分布的描述。它的形式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/bdbb6c02b8534029bee8503662cfa298.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003019.png" />   
     </p>
 <p>其中，a和b分别代表在a+b次伯努利试验中成功和失败的次数。我们用下面的图来说明一下Beta分布的含义：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/c3c4232345f246ecab5a965a93a012d9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003957.png" />   
     </p>
 <p>上图中一共有三条线，我们忽略中间的一条线，第一条线中a=81，b=219。也就是说在我们进行了300次伯努利试验中，成功81次，失败219次的情况下，成功概率p的一个分布，可以看到，p的概率在0.27左右概率最大，但我们不能说成功的概率就是0.27，这也就是频率派和贝叶斯派的区别，哈哈。此时，我们又做了300次试验，此时在总共600次伯努利试验中，成功了181次，失败了419次，此时成功概率p的概率分布变为了蓝色的线，在0.3左右概率最大。</p>
 <h1 id="4经典bandit算法原理及实现">4、经典Bandit算法原理及实现</h1>
@@ -258,12 +258,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>2）对于没有被选中的老虎机，∆会随着轮数的增大而增加，最终会大于其他被选中的老虎机。</p>
 <p>因此，当进行了一定的轮数的时候，每个老虎机都有机会得到探索的机会。UCB算法中p&rsquo; + ∆的计算公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/d5e6f91d61dc40f6a3cdfa7d7d7df7e0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003053.png" />   
     </p>
 <p>其中加号前面是第j个老虎机到目前的收益均值，后面的叫做bonus，本质上是均值的标准差，T是目前的试验次数，n是该老虎机被试次数。</p>
 <p>为什么选择上面形式的∆呢，还得从Chernoff-Hoeffding Bound说起：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/6aeab3b1cdb546d4a97f5149de302858.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003964.png" />   
     </p>
 <p>因此(下面的截图来自于知乎[ [https://zhuanlan.zhihu.com/p/32356077](https://zhuanlan.zhihu.com/p/323](<a href="https://www.6aiq.com/fo">https://www.6aiq.com/fo</a></p>
 
@@ -395,6 +395,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -428,10 +432,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -810,6 +810,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

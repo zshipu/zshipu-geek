@@ -192,7 +192,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2020/1/f69bc2a8b63b4c07a0ce1a9cab870695-image.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272245686.png" />   
     </p>
 <blockquote>
 <p>分享嘉宾：方宽 知乎 算法工程师</p>
@@ -203,7 +203,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>导读：</strong> 随着用户规模和产品的发展， 知乎搜索面临着越来越大的 query 长尾化挑战，query 理解是提升搜索召回质量的关键。本次分享将介绍知乎搜索在 query term weighting，同义词扩展，query 改写，以及语义召回等方向上的实践方法和落地情况。</p>
 <p>▌ <strong>知乎搜索的历史</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/949fec5f63d84b989bd1eba324ca000d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272245102.webp" />   
     </p>
 <p>首先回顾下知乎搜索的历史。现有的知乎搜索16年开始内部研发，17年中完全替换外部支持的系统。算法团队从 18 年初开始成立，规模5人左右，之后开始了快速的迭代过程。</p>
 <p>主要进展有: 18年 4 月份上线 Term Weight；6 月份上线自研的 Rust 引擎并已对外开源；后续上线一系列的算法模型如纠错、语义相关性，以及今天会重点分享的语义索引和 query 改写；今年下半年工作主要集中在排序侧，主要为用 DNN 替换了树排序模型，并在此基础上继续上线了若干项收益不错的优化。由于今天分享的内容主要是在 NLP 范围，排序侧的内容可以后续有机会再分享。</p>
@@ -211,7 +211,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>从我们内部实际数据来看，近一年知乎搜索的长尾化趋势也越来越明显。如上图右上部分是头腰尾部搜索比例，可以看到长尾 query 增长趋势明显。但在我们搜索团队的努力下，用户的搜索满意度并没有随着 query 难度的增加而下降。</p>
 <p>▌ <strong>长尾 query 特点</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fb508475fd554b8aa93be3dc4865b9a5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272245175.webp" />   
     </p>
 <p>长尾 query 的多样性对于搜索系统来说是一个很大的挑战，原因有：</p>
 <p>❶ 存在输入错误。例如上图中的错误 query &ldquo;塞尔维雅&rdquo; ( 塞尔维亚 )，对于这种错误我们希望系统能够自动的纠错；</p>
@@ -224,7 +224,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>所以在传统的搜索领域中的查询模块，往往包含这些子任务：纠错、分词、紧密度、同义词、词权重，以及其他的如实体词识别、意图识别等等。这些查询理解会生成一个结构化的数据，检索模块就可以通过结构化的查询串去召回相关的文档。</p>
 <p>▌ <strong>知乎搜索的召回和排序</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ff15f88ca7e443c2ac87f88f798adb7e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272245180.webp" />   
     </p>
 <p>知乎的召回系统主要分为两部分：</p>
 <p>❶ 基于词的传统的倒排索引召回；</p>
@@ -233,7 +233,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>最终参与排序的就是这三个队列，并进行合并和精排，在精排之后会进行上下文排序。下面来介绍下各个模块具体的实现方法。</p>
 <p>▌ <strong>Query Term Weight</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a86681213218445fb6724e5f88b23737.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272245088.webp" />   
     </p>
 <p>对于 term weight，最简单的实现方式是用 IDF 逆文档频率算出，即看这个词在语料里的出现次数，如果次数较少，则认为其包含的信息量是相对较多。</p>
 <p>这个方法的局限是无法根据 query 上下文语境动态适应，因为其在不同的上下文中 weight 是一致的。所以我们再通过统计点击数据中进行调整。如图，如果用户的 query 包含 a，b 两个 term，并且点击了 Doc1 和 Doc4，其中 Doc1 包含 a，b， Doc4 只包含a，即 a 出现2次，b 出现1次。一个朴素的想法就是 a 的权重就是1，b 是0.5，这样就可以从历史日志里把每个 query 里的 term 权重统计出来。</p>
@@ -246,7 +246,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们的解法是把 ngram 基于词典的泛化方法变为基于 embedding 的模型泛化方法。目标是想得到根据 query 语境动态自适应的 term weight。如果可以获取跟 query 上下文相关的动态词向量，那么在词向量的基础上再接 MLP 就可以预测出词权重了。目前的方法是通过 term 词本身的词向量减去 query 所有词 pooling 之后的词向量获得，今后也会尝试替换成 ELMo 或者 Transformer 的结构以获得更好的效果。</p>
 <p>▌ <strong>同义词扩展</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/af5dee58c9db4d449539611c37b46ff6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272245719.webp" />   
     </p>
 <p>对于同义词扩展策略，首先需要一个同义词词表。现在有可以直接应用的公开数据集。但是数据集的词与知乎搜索里的词可能由于分词粒度不一致而不匹配，并且同义词无法保证更新。所以我们主要用内部语料进行数据挖掘，主要方向为：</p>
 <p>❶ User logs: session</p>
@@ -256,14 +256,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>❸ Doc：pretrain embedding</p>
 <p>Doc 本身的语料。主要利用知乎内部数据去训练 word embedding 的模型，用 embedding 的值计算相关性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a099fcb92b444a608ab4ae047b114158.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272245468.webp" />   
     </p>
 <p>Word2vec 这一类的 embedding 计算方法，核心假设是拥有相似上下文的词相似。需要注意该方法无法区分同义词和反义词/同位词，例如最大/最小，苹果/香蕉。我们这里利用监督学习的信号，对训练完成的词向量空间进行微调。</p>
 <p>❹ 外部数据</p>
 <p>用一些规则如百科里 &ldquo;XXX 又名XXX&rdquo; 句式进行挖掘。</p>
 <p>▌ <strong>Query 改写</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6289376d9b5c423bbee090ec55e8059a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272245382.webp" />   
     </p>
 <p>接下来分享的是 query 改写部分。为什么要做 query 改写？</p>
 <p>在传统搜索里，一个 query 进来需要做多个子任务的处理。假如每个任务只能做到90%，那么积累起来的损失会非常大。我们需要一个方法一次性完成多个任务去减小损失，比如把 &ldquo;苹果手机价格多少&rdquo; 直接改写为 &ldquo;苹果手机售价&rdquo;。</p>
@@ -279,24 +279,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>用的是 BPE 的 Subword 方法。未用知乎内部的切词是因为未登录词无法预测，同时词表较大，训练速度较慢。</p>
 <p>▌ <strong>Query 改写 – 强化学习</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5af29e44427d495996f2b7c1dc1a7c3e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272245183.webp" />   
     </p>
 <p>具体来说，改写模型是拿共现数据做训练语料，但不能保证改写出来的结果一定可以召回有用的文档。我们参考了谷歌 2018 ICLR 的工作，为了将用户输入的 query 改写为更容易检索出答案的 query，把 QA 系统当做一个 environment，改写模型当做 agent，CNN 是对所有召回结果做选择的模块。</p>
 <p>在我们的场景中，将图中灰色框里的 QA 对应一套倒排索引，CNN 对应在线排序服务模块。</p>
 <p>首先会把原始 query 的召回结果和改写 query 的召回结果一并送入排序服务模块，然后得到 topK 的排序；之后统计这 topK 结果里有多少是改写 query 召回队列里的结果，将其作为 reward。</p>
 <p>接下来，我们用强化学习 policy gradient 方法来 finetune 改写模型。利用强化学习的一个好处是，不再需要对齐文本语料，只需要随机的 query 即可。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/362e0c1ecab140189f2f3c157e513be9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272245966.webp" />   
     </p>
 <p>在利用强化学习训练时遇到的问题之一是 reward 稀疏问题。我们发送了很多 NMT 模型的结果给线上系统，但在返回来的 topK 列表里并不包含改写队列的召回。这导致了训练的过程非常的缓慢，也对线上系统造成了很大的开销。</p>
 <p>为了缓解 reward 稀疏问题，参照 alphago 里面的模式，即由策略网络，价值网络和蒙特卡洛树搜索三个组件完成。我们可以把 NMT 当成是一个策略网络，然后这里主要添加了价值网络。价值网络用来评估一次改写完成以后，其实际能从系统当中拿到多少 reward。他的输入是两个拼接在一起的 query，输出是一个浮点值。用强化学习的经验来学习这个价值网络，然后将其后面的训练过程中来加速训练。</p>
 <p>最后的优化效果非常明显，在加入价值网络以后 reward 比例提升了50%以上。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0238b46790544da1855451119a8f407c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272246090.webp" />   
     </p>
 <p>同时，这个价值网络还可以用于在线改写触发 rerank。如下图所示，线上覆盖率有了明显提升， top20 包含 rewrite 比例的 query 数量占到了24%，query doc 数量占到了4%。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/082201af6fa84c238288165acf8133e0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272246941.webp" />   
     </p>
 <p>在改写中我们还训练了从 title 到 query 的模型，解决了检索中的重要字段 clicked query 的覆盖率有限和展现偏置两个问题。Clicked query 字段是记录点击过这个文档的 query，就是说尽管这个 doc 不含 query 里的词，但如果有别的用户搜了类似的 query 所点击的 doc，也会将其召回。</p>
 <p>记录 clicked query 会遇到点击噪音和展示偏置的问题。因为有点击的文档比没有点击的文档要多一个字段，使得在召回时有一定优势，从而形成正向循环，导致了展示偏置。</p>
@@ -304,7 +304,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>以上就是基于词的一些算法阶段的过程，最后分享一下语义召回。</p>
 <p>▌ <strong>语义召回</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/24541d3816a84cdf85646aaca4753782.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272246744.webp" />   
     </p>
 <p>语义召回就是把 query 和 doc 都表示为向量，然后在向量空间中做最近邻的搜索。相对于图像领域，在 NLP 领域还不够成熟，因为用户输入的表达可能差一个字含义完全不同提高了语义召回难度。</p>
 <p>在模型上需要训练深度语义模型，主要分为两种：</p>
@@ -315,7 +315,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>按照经验来说，interaction based model 效果会好于 representation based model。但是在向量召回这个任务当中，我们需要离线计算好所有文档的 embedding 并建成向量索引，所以语义召回采用的的是 representation based 模型。</p>
 <p>▌ <strong>语义召回 – BERT 模型</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d7323813d2534882b85c9b9ba98cf2a5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272246650.webp" />   
     </p>
 <p>在 NLP 领域，做 embedding 召回难度大，原因为：</p>
 <p>❶ Query 长尾，难以捕捉细粒度的差异</p>
@@ -325,12 +325,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在 BERT 模型的基础上，我们还做了两项优化：</p>
 <p>❶ 优化预训练模型， mask token pretrain</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e750c301b41245af93b7a16edff7df5c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272246573.webp" />   
     </p>
 <p>这里主要是参考 百度 ernie 的做法，在知乎的语料上，用中文的分词粒度的数据继续做了 mask token pretrain，使得预训练模型能够更好的适应中文的词关系</p>
 <p>❷ 数据增强，增加一些对于模型来说更难区分的负样本</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cb9e1a97b5344c8aa10fff47241edc56.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272246495.webp" />   
     </p>
 <p>具体采样方法为：</p>
 <p>用原始的脚本数据去微调一个模型，计算 doc 的 embedding 和 query 的 embedding。对 doc embedding 进行聚类，此时 doc 和 query 的 embedding 就在同一空间里，所以 query embedding 就可以对应到某一个类别。这时候即可从 doc 里直接采样一些负样本了。</p>
@@ -462,6 +462,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -495,10 +499,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -877,6 +877,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

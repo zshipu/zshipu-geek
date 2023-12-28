@@ -192,7 +192,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/552f466e822b4e3488383bad311d02cc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813416.webp" />   
     </p>
 <blockquote>
 <p>分享嘉宾：陈戊超、高赟 阿里 技术专家</p>
@@ -209,96 +209,96 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>Flink 在流运行模式下迭代的架构设计</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-c48aa5b19cfe40f39dfacceea92af3f1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813784.webp" />   
     </p>
 <p>首先向大家介绍 Flink 构建 AI 系统的背景。</p>
 <p><strong>1. Lambda 架构及批流统一数据处理</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-991a6e22d9594a29a47c1558b9d307c3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813536.webp" />   
     </p>
 <p>Lambda 架构是大数据处理领域中一种典型的架构。如上图所示，图中上方蓝色线代表的是离线批处理的数据流，下方黑色线代表的是实时流模式的数据流。为了兼顾整个大数据处理中的吞吐和实时性，我们通常会将离线的数据处理和实时的数据处理结果进行合并后对外提供服务。</p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-cf1c720be1a64ce6b8c22ecf7cacf6f6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813191.webp" />   
     </p>
 <p>在 Lambda 架构里，在离线数据处理和实时数据处理过程中，我们会用到两种不同的计算引擎，同时维护两份代码。但这两个流程对数据的处理逻辑其实是一样的，这样会导致两个问题：</p>
 <p>① 维护代价高 ( 包括代码的维护代价，及不同的计算引擎对部署的维护代价 )</p>
 <p>② 很难保证在线离线处理逻辑一致</p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-62e6cbb6493f45179ccb603f9fa70f30.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813902.webp" />   
     </p>
 <p>为了解决这两个问题，实现批和流的数据统一，就有了 Flink 和 Spark。Flink 和 Spark 都可以处理批数据，对流数据的处理可以由 Flink 和 Spark streaming 来完成。这样就避免了上述维护两套代码和两套系统及逻辑一致性的问题。</p>
 <p><strong>2. 机器学习在线离线处理</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-7d4f26327cea4abcab7a1c3062576e24.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813415.webp" />   
     </p>
 <p>在机器学习场景下，在线离线处理也会面临一些问题。上图是一个典型的机器学习处理过程。首先会将离线的数据进行预处理和特征工程（如红框标注所示），然后进行离线的模型训练，训练好的模型会推到线上做推理。推理模块加载模型后，在线的数据也会有进行预处理和特征工程的过程，将处理之后的数据喂给模型做在线推理。</p>
 <p>这样的过程也会面临如上述大数据处理中的问题，我们同样会维护离线的数据处理和在线推理的数据处理两份代码。</p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-467f912b70a144508681362074c7932f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813061.webp" />   
     </p>
 <p>在机器学习领域除了离线的模型训练以外，还有在线的模型训练。如下图所示，我们通常会将预处理的数据写到一个 Message Queue 中（如 Kafka），然后进行 Online training，training 的过程是持续不断的，期间会不断的产生动态的模型，然后推送给在线的推理模块进行推理。在线的机器学习的特点就是模型的动态更新、持续训练和不断验证。同时需要比较复杂的模型监控，模型部署和模型回滚等策略。</p>
 <p>于是就产生了机器学习中的 Lambda 架构：</p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-ac8ec5dc197c454c89a80e0f05aea00f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813700.webp" />   
     </p>
 <p>一般来说，在线的模型训练并不是从头训练一个模型，而是通过离线训练出一个基准的模型，然后推给在线，在线流程再在这个基准模型上进行在线的训练。这样同样存在离线和在线两份代码，涉及两套不同的系统。也会增加维护的复杂度。</p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-620e50c4b25c44cfba377609c37696df.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813408.webp" />   
     </p>
 <p>那么 Flink 在这套架构中有什么样的价值。Flink 是天生支持批流一体的计算引擎，在在线机器学习领域的预处理过程中，我们很自然地会使用 Flink 进行数据处理，在离线的机器学习训练中也可以使用 Flink 进行批次的预处理。同时，在在线推理的过程中，也会使用 Flink 进行推理（因为推理是一个对时间比较敏感的过程）。所以 Flink 在机器学习 Lambda 架构中的价值体现在在线的数据的预处理，离线数据的预处理，在线的推理。</p>
 <p>所以是否能将机器学习中的 Lambda 架构进行批流统一？</p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-6e66879707d641f69b6df0ca4bfe2008.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813076.webp" />   
     </p>
 <p>如上图所示，除了数据处理和推理可以使用 Flink 外，Online training 和 offline training 的过程也可以用 Flink 计算引擎替代。这样做的好处一是，用户只需要写一份代码就可以同时实现在线和离线的训练，并且避免了逻辑的不一致性和维护的难度。在线和离线训练中我们通常会使用比如一些深度学习的计算框架比如 TensorFlow 或者 Pytorch 运行在 Flink 上进行模型训练。第二个好处是，我们可以通过使用 Flink 形成一站式的数据处理解决方案。如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-b63ed48025ea4f8aaffdfa0fe10357bd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813600.webp" />   
     </p>
 <p>在整个数据上，Flink 提供了丰富的接口，包括 SQL，DataStream，CEP，如果再加上 ML 的接口就可以共享整个数据集，不会涉及到不同的系统之间数据拷贝的过程。此外，在将数据打通之后，我们可以使用 SQL，DataStream 这些丰富的 API 来处理数据。</p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-e45046009b9d4499b4fb1733844bd60e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813043.webp" />   
     </p>
 <p><strong>1. Flink AI 生态系统架构</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-6db99597c6e641288b9311555a13a018.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813614.webp" />   
     </p>
 <p>上图是整个机器学习的 Lambda 架构图。对应机器学习任务中的不同阶段：首先是数据的管理和获取阶段（Data Acquisition），在这个阶段 Flink 提供了非常丰富的 connector（包括对 hdfs，Kafka 等多种存储的支持），Flink 目前还没有提供对整个数据集的管理。下一个阶段是整个数据的预处理（Preprocessing）及特征工程部分，在这个阶段 Flink 已经是一个批流统一的计算引擎，并且提供了较强的 SQL 支持。之后是模型训练过程（Model Training），在这个过程中，Flink 提供了 Iterator 的支持，并且有如 ALink，MLlib 这样丰富的机器学习库支持，且支持 TensorFlow，Pytorch 这样的深度学习框架。模型产出之后是模型验证和管理阶段（Model Validation &amp; Serving），这个阶段 Flink 目前还没有涉足。最后是线上推理阶段（Inference），这个阶段 Flink 还没有形成一套完整的方案。同时形成了 Flink ML Pipeline，以及目前正在做的 Flink AI Flow。</p>
 <p><strong>2. Flink ML Pipeline</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-ed25bc3385a1432bb0b7ae494565f467.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813277.webp" />   
     </p>
 <p>上图是 Flink ML Pipeline 的介绍，该 Pipeline 主要涉及两个抽象，第一个是 Transformer 抽象，是对数据预处理和在线推理的抽象。第二个抽象是 Estimator 抽象，主要是对整个模型训练的抽象。两个抽象最大的差异是 Transformer 是将一份数据转化为另一份处理后的数据，而 Estimator 是将数据进行训练转化为模型。</p>
 <p><strong>3. 算法库 Alink</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-0b0e1a6d3ab9463f8a2ec676532d747c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813814.webp" />   
     </p>
 <p>Alink 主要是重写了 Flink 中很多机器学习库。其有两个重要的特点，一是 Alink 是基于 Flink 的 ML Pipeline。第二是基于 Flink Table API。Flink Table API 天然就是批流统一的。</p>
 <p><strong>ML Pipeline 简单案例：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-cad941f06a8340b69d2d12d30bd356a6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813538.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-bee4c1b629da46dab5d54414186fd423.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813149.webp" />   
     </p>
 <p><strong>4. ML Pipeline 价值</strong></p>
 <p>Flink ML Pipeline 最大的价值在于为最终用户统一了模型训练和推理的 API，用户只需要关心 Estimator 的 Transformer 里面的逻辑即可。此外，Pipeline 将整个训练过程进行了持久化，确保了训练和推理之间的逻辑一致性，解决了之前 Lambda 架构中维护两份代码可能会导致的逻辑不一致问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-770687ca1d9d43e4b6ec1a7af2342af7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813782.webp" />   
     </p>
 <p><strong>1. AI Flow 背景</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-4ac053e8ea8b492390c6300a896c7eb6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813464.webp" />   
     </p>
 <p>在整个机器学习任务中，有一部分是和模型训练相关的，还有一部分是数据分析，特征工程相关的。因此 AI Flow 的目标是将这整个流程串起来，提供一个端到端的解决方案。</p>
 <p><strong>2. AI Flow 概述</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-b3a713741b274897874926b3192966d6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813122.webp" />   
     </p>
 <p>AI Flow 的 API 中包含了 Example（对数据的 API），Transformer（对预处理流程及推理的 API），Trainer（训练流程的 API），Model（模型管理的 API）等。在每个模块中都会产生一些中间 meta 数据，AI Flow 将这些数据存储在 Meta Store 中。这些 API 只是定义了机器学习中的一些处理逻辑，AI Flow 中的 Translator 则将这些逻辑转化为真正可执行的任务。</p>
 <p>我们的目标是实现整个机器学习 lambda 架构的批流统一，用户写一份机器学习处理逻辑，可以同时作用于离线的学习过程，同时也可以支持在线的学习过程。Translator 的作用就是将用户通过 AI Flow API 写好的 code 转化为可执行的任务。目前 AI Flow 中包含两类 Translator，第一类是 Batch Translator，第二类是 Stream Translator。在 Translator 中还有一个抽象是 Components，包含与 AI Flow API 相对应的一些 Components。这些 Components 可以对应地解析 AI Flow API 中用户定义的逻辑。通过 Translator 将用户定义好的逻辑处理完之后，通过 Deployer 把生成的任务部署到不同的环境，包括本地环境，K8S，Yarn 等。</p>
 <p>\<em>\</em> 3. AI Flow 原理**</p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-deeb63262b614d11bb2503e7a109e21a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813987.webp" />   
     </p>
 <p>用户通过 AI Flow API 写的代码在编译之后会生成一个逻辑的执行计划，这些逻辑执行计划由很多节点组成，每个节点都有对应的 Translator 中的 Component 解析，解析过程有可能会将其解析为单个的 job，或者一个 job 的一部分（即多个节点生成一个 job）。这个逻辑执行计划会传递给 Translator，如果是流式任务，Translator 会将其翻译为流式的一些 job，同样的批式任务会翻译成批相关的一些 job。之后会将一组 job 组成一个 Execution，传递给 Deployer 通过配置运行在本地，K8S 或 Yarn 上，最后生成一些可以运行的任务。</p>
 <p><strong>4. AI Flow 的特点和 Flink AI Flow</strong></p>
@@ -313,59 +313,59 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>② TensorFlow / Pytorch 作为机器学习引擎</p>
 <p><strong>5. 图片分类简单案例</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-a046605a40874bcb9d9f02dab9403fab.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813805.webp" />   
     </p>
 <p>首先通过 Example 对象定义处理前的图片数据，然后通过 Transformer 对象定义预处理过程和模型的预测过程，最后将两个 Transformer 合起来组成一个 Execution 逻辑。</p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-84b2eeb8d9c1429d9e46aa11d743c217.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813362.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-adbe701e861a47818046199db4363e9c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813367.webp" />   
     </p>
 <ol>
 <li><strong>AI Flow 总结</strong></li>
 </ol>
 <p>AI Flow 提供了部署生产环境数据分析和机器学习流水线的端到端 API，同时 AI Flow 还提供了批流一体的数据分析和机器学习工作流 API。</p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-a10c4ef2f1dd420d8427d0c565665a2e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813205.webp" />   
     </p>
 <p><strong>1. 背景与动机</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-cccefd75adee4070be72813b4cae7cbb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813977.webp" />   
     </p>
 <p>Flink 在机器学习中有一个整体的端到端的框架，目前 Flink 是通过 DataStream 和 DataSet 两套接口分别提供了流处理和批处理的能力。通过前面的讲述，我们可以看到 Flink 流处理和批处理的能力可以用于机器学习的数据预处理阶段。其实除了这些通用的流和批的处理之外，Flink 对于机器学习中的模型训练和图计算这些复杂的分析场景也提供了原生支持。这些场景的特点是对数据的迭代计算要求较高，目前 Flink 对迭代计算的支持主要是在 DataSet 接口部分，因为 DataSet 整体上是一个批处理的接口，所以 Flink 对迭代分析的支持主要是有限数据迭代分析。</p>
 <p><strong>例：基于 DataSet 迭代的 K-Means</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-83bc3f7e3cbe4170b8dd31be67812204.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813650.webp" />   
     </p>
 <p>以常见的 K-Means 为例，K-Means 算法的两个输入为待聚类的点和初始类中心，在 DataSet 迭代时，它会在整个计算图中添加一个特殊节点来维护待求中心点当前的结果，在每轮迭代中，对待求中心点进行一次更新（将每个点分配到较近的中心点，之后重新计算中心点，将计算结果通过一个回边发送到维护的待求中心点算子，从而支持超过 DAG 计算能力的处理形式），重复多轮迭代直到收敛，输出最终的中心点。</p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-b5baf9be60e841f0a6a62bd8d179403e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813430.webp" />   
     </p>
 <p>为了表示这种迭代的计算图，Flink 中有几个通用的概念，首先“迭代变量”是在迭代中需要更新的变量，“静态数据集”是在迭代过程中会多次使用但是不会发生变化的数据，在计算过程中该数据实际上只会发送一次，Flink 对该数据做了一个基于磁盘的缓存，在每轮迭代时做了一个重放。他们都是普通的 DataSet 对象，代表来一个有限的数据集，在某一个数据集上调用 Iteration 方法，指定迭代终止条件。Flink 会自动将每一轮的迭代逻辑扩展到所有轮，用户在写迭代逻辑时不需要考虑收到多轮数据的情况。</p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-f7cdffa0651a451d8ae126a5471958bf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813229.webp" />   
     </p>
 <p>为了实现流批一体，Flink 将批处理的能力从 DataSet 的接口迁移到 DataStream 的接口之上，在 DataStream 接口之上，Flink 会引入一个 BoundedStream 的特殊子类，来实现批处理的能力。相应的，如果把批处理的能力迁移过去，DataSet 的迭代的处理能力也要进行迁移，一个选择是直接平移相应的 DataSet 的实现，但是从前面的介绍可以发现，DataSet 目前的实现有一些问题：</p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-930c0bcc44d4440a81934310a8dc0bc1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813280.webp" />   
     </p>
 <p>首先它不支持多迭代变量或者嵌套迭代的形式，但是在一些算法（如 boosting 算法）中对这两种迭代也是有需求的。第二点是对于静态数据，Flink 现在是做了一个基于磁盘的重放，在这种情况下，用户是有可能基于业务逻辑做一个更高效的缓存的，但是现在在 DataSet 的迭代上无法实现这一点。最后，在 DataSet 上很难实现针对在线算法的模型训练或者在线流处理的支持。</p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-3c63429bed154e5e8c6e0853ff36ef47.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813931.webp" />   
     </p>
 <p>比如使用每一个小时的数据做一次 K-Means。</p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-512de62d8cfd45a79b452e1efcbfe59e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813669.webp" />   
     </p>
 <p>利用每小时的数据更新聚类点。</p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-f9bc0e483c0545f281dd4e58bd993ab7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813473.webp" />   
     </p>
 <p>因此我们需要引入一种新的迭代机制，可以兼容在有限数据上的迭代，并且支持“无限流上每一部分数据分别进行迭代”的语义。</p>
 <p><strong>2. Mini-batch 流式 Iteration</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-2f5c4751fd8045f9bf1a6fb0b5a30df6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271813169.webp" />   
     </p>
 <p>上图是 Mini-batch 流式 Iteration 示例，对于静态数据集，�</p>
 
@@ -493,6 +493,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -526,10 +530,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -908,6 +908,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -208,24 +208,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="一整体架构"><strong>一、整体架构</strong></h1>
 <p>搜索引擎分为数据源聚合(俗称dump)、全量/增量/实时索引构建及在线服务等部分，以Tisplus为入口经由Bahamut（Maat进行工作流调度）-&gt;Blink-&gt;Hdfs/Swift-&gt;BuildService-&gt;Ha3-&gt;SP-&gt;SW等阶段对客户提供高可用/高性能的搜索服务。其中数据源聚合在tisplus平台和Blink平台完成，Build service和Ha3在suez平台完成，SP和SW通过drogo进行部署。具体架构图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ad3fdda8edb34d4089cd046be75874f7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271856025.webp" />   
     </p>
 <h1 id="二tisplus"><strong>二、Tisplus</strong></h1>
 <p>1688目前有spu、cspu，company，buyoffer和feed等引擎及offer离线在tisplus运维，该平台主要ha3和sp的搭建和维护，大体架构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/366d80f6e5574dfd97be07fb17cf353b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271856839.webp" />   
     </p>
 <p>在日常维护中偶尔会遇到数据源产出失败的问题，主要是由于数据源表权限过期及zk抖动等原因。性能方面，在集团内搜索中台团队的引入Blink Batch模型后，dump执行时间被缩短，具体指标如下（以buyoffer引擎为例）：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1acb926b810b4e3db35afad78c4bdb00.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271856618.webp" />   
     </p>
 <p>在tisplus平台，离线dump的入口如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/eae9f347b6cc4b2192f25fa244896b33.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271856076.webp" />   
     </p>
 <p>DAG数据源图示例：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9e4525402bf8447e80dcd5568f3e0616.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271856670.webp" />   
     </p>
 <p>下面主要说下离线dump数据源处理流程，包括Bahamut、Maat和数据输出。</p>
 <h2 id="21-bahamut数据源图处理"><strong>2.1 Bahamut——数据源图处理</strong></h2>
@@ -246,23 +246,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>对数据源的处理过程，描述如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/42ff083c556340f883584b39a5d6eddc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271856479.webp" />   
     </p>
 <p>by 敬明</p>
 <p>而对于Bahamut-&gt;blink过程可以陈述如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/96ffb8866edd4868ace42f3822754eda.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271856502.webp" />   
     </p>
 <p>其中，Bahamut将任务拆解后扔给JobManager进行逻辑节点到物理节点的转换，形成若干节点后再归并组合成一个完整的SQL语句，例如上图Kratos_SQL就是一个增量Join的完整SQL，配合资源文件一起通过BayesSDK提交任务。此外，平台增加了一个弱个性化配置的功能，可以通过个性化配置来实现控制某个具体任务的并发度、节点内存、cpu等等参数。</p>
 <h2 id="22-maat分布式流程调度系统"><strong>2.2 Maat——分布式流程调度系统</strong></h2>
 <p>Maat是基于开源项目Airflow再次开发的分布式流程调度系统，具有可视化编辑及通用的节点类型，Drogo化部署，分集群管理及完善的监控&amp;报警机制等优点。</p>
 <p>关于Airflow及其他工作流系统，对比陈列如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d2e4a879f8904b99b83e2a07b41fde7a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271856317.webp" />   
     </p>
 <p>eed引擎为例，maat调度页面如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e1dd793fc53e49549d40bd941ae812b1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271856265.webp" />   
     </p>
 <p>当任务错误时，可以通过该页面进行“将指定步骤置fail”然后重跑全量任务，也可以通过查看某个步骤的log获悉任务失败原因。</p>
 <h2 id="23-ha3-doc数据输出"><strong>2.3 Ha3 doc——数据输出</strong></h2>
@@ -284,11 +284,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>然后由Build service完成全量/增量/实时索引的构建，然后分发到Ha3在线集群提供服务。</p>
 <p>suez的离线表构建逻辑如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bb3940bfe685424d9155de86eb21b640.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271856012.webp" />   
     </p>
 <p>suez在线服务逻辑如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a20d6ddd24004aa49f37230ac45a95b0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271856949.webp" />   
     </p>
 <p>下面针对离线（buildservice）和在线（ha3）进行简述：</p>
 <h2 id="31-build-service索引构建"><strong>3.1 Build Service——索引构建</strong></h2>
@@ -320,7 +320,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>**</p>
 <p>Ha3是一套基于suez框架的全文检索引擎，提供丰富的在线查询子句，过滤子句，排序子句，聚合子句且支持用户自定义开发排序插件。服务架构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/292dc33489144162a9bd4e01308a6661.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271856918.webp" />   
     </p>
 <p>1688主搜引擎由一组Qrs、searcher和summary组成：</p>
 <ul>
@@ -337,7 +337,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>qrs/searcher/summary等机器通过挂载到cm2提供服务，比如qrs有对外cm2，可以对SP等调用方提供服务，searcher和summary有对内cm2，可以接收从qrs来的请求并完成召回排序取详情等服务。</p>
 <p>一次调用方的query服务，要经由qrs-&gt;query解析-&gt;seek-&gt;filter-&gt;rank(粗排)-&gt;agg(聚合)-&gt;rerank(精排)-&gt;extraRank(最终排)-&gt;merger-&gt;summary(取详情)的过程，具体描述如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/78d410ea08c543d3af063e9ebbdeadff.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271856638.webp" />   
     </p>
 <p>其中，ReRank和ExtraRank由Hobbit插件及基于Hobbit的战马插件完成，业务方可以根据自身需求开发战马特征并指定各特征权重得到商品的最终分。</p>
 <h1 id="四drogo"><strong>四、Drogo</strong></h1>
@@ -470,6 +470,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -503,10 +507,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -885,6 +885,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

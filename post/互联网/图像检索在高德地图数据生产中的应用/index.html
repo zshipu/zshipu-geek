@@ -208,7 +208,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/61920dd1785d4d6f8321f25344a54b46.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271732504.webp" />   
     </p>
 <p>作者 | 灵笼、怀迩</p>
 <blockquote>
@@ -218,7 +218,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>POI 是 Point of Interest 的缩写。在电子地图上，POI 代表餐厅、超市、政府机关、旅游景点、交通设施等等 。POI是电子地图的核心数据。对普通用户而言，POI 数据包含的名称和位置信息，能够满足其使用电子地图“查找目的地”，进而唤起导航服务的基本需求；对电子地图而言，通过提供“搜索附近”、“点评”等服务，可提高用户的活跃时长。另外，POI数据是线上线下连接互动的一个纽带，是基于位置服务（Location Based Service）产业的一个重要组件。</p>
 <p>高德通过自有海量的图像源，来保证现实世界的每一个新增的POI及时制作成数据。在较短时间间隔内（小于月度），同一个地方的POI 的变化量是很低的，如下图所示，只有“汤火功夫”POI是一个新增的挂牌。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5c28916d3ccd4c6182e83810f8470b47.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271732228.png" />   
     </p>
 <p>图1. 同一地方上不同时间的POI牌匾对比</p>
 <p>如果对全部POI进行处理的话，则会带来高昂的作业成本，因此需要对其中没有变化的POI进行自动化过滤，其中关键技术能力就是图像匹配，该场景是一个较为典型的图像检索任务。</p>
@@ -230,14 +230,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>异源数据</strong></p>
 <p>行人重识别任务也存在异源数据问题，但是该任务的异源更多是不同相机拍摄以及不同场景的区别。而在POI牌匾检索场景中，存在更严重的异源数据问题，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a374ebc481b34e55b23f1ff01eb42056.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271732838.png" />   
     </p>
 <p>图2. 不同拍摄条件下的异源图像</p>
 <p>左图来自低质量相机，并且是前向拍摄；右图来自高质量相机，并且是侧向拍摄；因为相机拍摄质量以及拍摄视角不同，这就导致POI牌匾的亮度、形状、清晰度等都存在非常大的差异。而如何在差异较大的异源数据中实现POI牌匾检索，是一个非常具有挑战性的问题。</p>
 <p><strong>遮挡严重</strong></p>
 <p>在道路场景中，经常存在树木以及车辆等干扰信息，并且由于拍摄视角原因，拍摄到的POI牌匾经常会面临严重的遮挡问题，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ee17a010fefe49069caf817e46b4ac4e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271732321.png" />   
     </p>
 <p>图3. 遮挡严重的POI牌匾示例</p>
 <p>而且该遮挡场景还是不规则的，导致很难对两个牌匾进行较好地特征对齐，这给POI牌匾检索带来巨大的挑战。</p>
@@ -245,14 +245,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>POI牌匾还有一个独有特性就是对文本强依赖，主要是对POI名称文本的依赖。在下图场景中，两个牌匾的整体布局以及颜色都非常相似，但是其中POI名称发生了变化。而在该场景下，我们希望两个牌匾不要匹配，这就需要引入文本特征来增强特征区分性。</p>
 <p>不过，由于遮挡原因也会导致文本特征不同，因此需要结合图像特征进行权衡。而且，文本特征和图像特征来自多个模态，如何将多模信息进行融合也是该业务特有的技术难点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6e061f88b33f4b7e940975e64bf5ab42.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271732393.png" />   
     </p>
 <p>图4. 仅文本变化的POI牌匾示例</p>
 <h1 id="二-技术方案"><strong>二 技术方案</strong></h1>
 <p>牌匾检索的技术方案主要包括数据迭代和模型优化两块。在数据生成部分，我们分为了冷启动自动生成数据以及模型迭代生成数据两个步骤。在模型优化部分，我们设计了一个多模态检索模型，包括视觉分支和文本分支两部分，主要是考虑到牌匾的文本信息比较丰富，因此将视觉信息与文本信息进行融合。</p>
 <p>针对视觉信息特征的提取，我们进一步设计了全局特征分支与局部特征分支，并分别进行了优化。整体技术框架如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3cffd69a440b46b088dbc281fb671058.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271732459.png" />   
     </p>
 <p>图5. 整体技术方案</p>
 <p>首先利用传统匹配算法Sift自动生成模型所需的训练数据，完成模型的冷启动；并且在模型上线后，对线上人工作业结果进行自动挖掘，并组织成训练数据，以迭代模型优化。多模态检索模型是基于三元组损失（Triplet Los）的度量学习框架下进行设计的，输入包括了：1）POI牌匾的图像信息；2）POI牌匾的文本信息。图像信息使用双分支进行特征提取，文本信息使用BERT进行特征提取，最后再将文本特征与视觉特征进行融合。</p>
@@ -262,7 +262,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>因此，我们针对该问题进行了相应优化：1）采用多趟资料匹配结果，提升同一类别下牌匾的多样性；2）采用Batch采样策略以及MDR loss[2]来降低模型对错误标签数据的敏感性。</p>
 <p>具体来说，对于样本多样性问题，我们使用了多趟资料的匹配结果来生成训练数据，因为在不同资料中同一牌匾存在多张来自不同视角的拍摄结果，这就保证了同一类别下牌匾的多样性，避免了自动生成的样本都为简单样本问题。Batch采样策略即按类别进行采样，而数据中类别总数远远大于batch size，因此可以缓解类别冲突的问题。MDR loss是在Triplet loss基础上设计了根据不同距离区间进行正则化约束的新的度量学习框架，从而减少模型对对噪声样本的过拟合。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f6ba5227237f4e3fbf37d7c126961178.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271732531.png" />   
     </p>
 <p>图6. MDR loss示意图，和Triplet loss相比增加了距离正则约束</p>
 <p>图6 是Triplet loss和MDR loss的对比示意图。MDR loss希望正样本和anchor之间的距离不被拉到无限近，同时负样本也不希望被推到无限远。以类别错误噪声样本来说，不同牌匾被误分为同一类别，按照Triplet loss的优化目标则会强制模型将两者距离学习到无限近，这样的话，模型会过拟合到噪声样本上，从而导致最终效果较差。</p>
@@ -274,7 +274,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>因此，我们在网络中引入了注意力模块，让模型学习关键信息，以提升全局特征的辨别能力。我们采用了空间注意力机制SGE（Spatial Group-wise Enhance）[4]，SGE通过对特征图上的每个空间位置生成一个注意力因子来调整每个空间位置处特征的重要性。</p>
 <p>SGE模块如图7所示。它首先对特征图进行了分组，然后对每组特征图计算语义特征向量，使用语义特征向量和特征图进行position-wise点乘，得到注意力图，然后将注意力图与特征图进行position-wise点乘，以此来增强特征，从而获得在空间上分布更好的语义特征。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/be73755cdf3b40a69f772850d42f2c1b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271732786.png" />   
     </p>
 <p>图7. SGE示意图，引入了空间注意力机制</p>
 <p>为了减少局部特征的损失，我们对网络backbone进行了改进，取消了ResNet网络最后一个block中的下采样，使得最终的特征图中包含更多的局部信息。</p>
@@ -283,11 +283,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在针对全局特征进行优化以后，现有模型仍然在以下三个方面表现不够好：1）牌匾截断的情况，特征学习质量差，如图8(a)；2）遮挡的牌匾，特征中引入一些无关的上下文信息，如图8(b)；3）相似但不同的牌匾难以区分，如图8(c)。</p>
 <p>因此，我们进一步设计了局部特征分支[1]，让模型更加关注牌匾的几何、纹理等局部信息，与全局特征共同做牌匾检索。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c56511b9b14547b18ec90ba67cc78daf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271732088.png" />   
     </p>
 <p>针对局部特征的提取，我们主要的思路是将牌匾垂直切分成几个部分，分别关注每个部分的局部特征[7]，并对局部特征进行对齐后优化。对齐操作如下图9所示，首先将特征图进行垂直池化，得到分块的局部特征图，再计算两张图局部特征之间的相似度矩阵，然后根据公式1找到最短距离将两张图像进行对齐，其中，i，j分别表示两张图中的第i块特征和第j块特征，dij表示两张图中第i块和第j块特征的欧式距离。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e56e4256c9ad498784d23da531037264.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271732466.png" />   
     </p>
 <p>通过这种方式进行局部特征对齐，可以很好地提升牌匾在截断、遮挡、检测框不准等情况下的检索效果。</p>
 <p><strong>文本特征</strong></p>
@@ -296,11 +296,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="3-模型效果">3 模型效果</h2>
 <p>在新的技术方案下，POI牌匾图像检索取得了非常好的效果，准确率和召回率都大于95%，大幅提升了线上指标，并且模型速度也有了巨大的提升。我们随机选择了一些匹配结果，如图10所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2022/03/image-727f0908.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271732721.png" />   
     </p>
 <p>我们在优化过程中，有一些非常难的Case也在逐渐被解决，如下图11所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bbaf0ea07c2142df98b089e0970399db.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271732091.png" />   
     </p>
 <p>图(a)、(b)、(c)展示的是优化前的Bad case（左图为query图像，右图为Rank1检索结果），从Bad case中我们不难发现，牌匾检索对细粒度特征提取要求非常高，因为这些case普遍特点是具备整体相似性，但是局部特征有区别。这些Bad case就是我们设计的多模态检索模型的初衷，并且也在优化过程逐渐得以解决，如图(d)、(e)、(f)所示。我们提出的多模态检索模型通过对全局特征优化以及引入局部特征对齐，使得模型更多关注到牌匾上更有区分性的局部特征，如文字信息，文字字体、板式，牌匾纹理等，因此我们的模型对于外观相似的不同牌匾具有更好的区分能力，如图(a)和图(d)效果对比。</p>
 <p>此外，由于不同视角牌匾存在遮挡、拍摄时的光照强度不同以及不同相机色彩差异大等因素，部分牌匾只利用视觉特征检索非常困难。因此，我们通过辅助特征分支加入了OCR信息，进一步增强了特征的鲁棒性，使得牌匾检索可以综合考虑牌匾的视觉信息和牌匾中的文本信息进行检索，如图(b)和图(e)效果对比。</p>
@@ -436,6 +436,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -469,10 +473,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -851,6 +851,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

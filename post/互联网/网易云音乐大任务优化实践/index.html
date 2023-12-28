@@ -208,15 +208,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>遇到优化整个flow的情况，第一个想法肯定是优化其中执行时间最长的任务，下面介绍两个优化明显的例子。</p>
 <p><strong>例子1：优化业务逻辑实现方式</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/07/image-41d5aa3a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647685.png" />   
     </p>
 <p>看到这俩任务心里一喜
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/94758238446e4689b4cd780cdd2c1fdb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647728.png" />   
     </p>
 <p>因为这个执行时间太异常了，超过了10个小时，即使数据很大也不太可能单个job需要执行这么久，基本认定是代码写的有问题，找到这俩任务对应的代码，扫了一遍果然发现了问题，简化代码逻辑如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3d2779cd636f43e0ad4778e21e8c211d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647554.png" />   
     </p>
 <p>这段代码有两个问题：</p>
 <ul>
@@ -226,26 +226,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>针对这两个问题做了如下优化：</p>
 <p>每次for循环不触发spark job，而是生成一张TempView 再union all 所有的view表触发一次spark job，这样串行job就变成了并行的stage，而且最终结果可以用overwriter一次性写入到目的路径中。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a23ec63b54924829ac7a4c15cc2d841d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647855.png" />   
     </p>
 <p>\<em>\</em> 例子2：优化分区使用方式**</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9a31c92989dd4d99a3ffb746085a00f0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647804.png" />   
     </p>
 <p>这个任务中有一块逻辑用到了一张超大的分区表，业务只需要读取其中两个分区，简化代码实现如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8e6fe3e231084d468885a21e8f0da069.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647974.png" />   
     </p>
 <p>这块代码用了activeclick/adclick两个分区，但是用or做连接，在spark2.3.2 action = &lsquo;a&rsquo; or (action = &lsquo;b&rsquo; and ${filter})会读取所有分区的数据, 并不是只读 a b两个分区耗时很长。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1cf44cd07e9e4de3b4b1e0998d44a9c4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647814.png" />   
     </p>
 <p>优化代码如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d0454e822bd940daaa448b0d7e7f5fa8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647054.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/51eaea5d2caa44908ad838aeb372577f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647984.png" />   
     </p>
 <h2 id="2-关键节点job优化"><strong>2 关键节点Job优化</strong></h2>
 <p>什么是关键节点呢？下图中的A就是关键节点，这里的关键节点不是说任务很重要，而是在flow图的结构中很关键，优化这个节点可以直接提升整个flow的产出时间，关键节点有两个特点：</p>
@@ -254,11 +254,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>执行时间较长。也就是说有一段时间整个flow只有这一个任务在执行，优化这个任务就能很明显提升整个flow的时间。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/85e94b033aa843ceae8ad6d0589af156.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647979.png" />   
     </p>
 <p>在我优化的这个flow里面就有几个关键节点，举一个例子说一说。resource节点在8:20 - 8:53 这个时间点整个Flow只有这一个任务在执行，如果能优化这个任务就能直接提前下一级任务开始时间。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/828e6bde9d0d49729751ce58ce76a54f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647783.webp" />   
     </p>
 <p>分析任务代码和日志后发现这个任务是有优化点的，这个任务使用了动态分区，数据写入花费了将近1h时间，占了整个任务之间的2/3。然后分析了依赖这个分区表的任务，大部分任务都没用到动态的那个分区，只有一个小任务用到了第二分区，且非必须。所以打算把动态分区取消掉，只保留日期分区。</p>
 <p>![](<a href="https://img.6aiq.com/e/3a5ce7c33d9a431eb36fc719fd16f3">https://img.6aiq.com/e/3a5ce7c33d9a431eb36fc719fd16f3</a></p>
@@ -385,6 +385,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -418,10 +422,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -800,6 +800,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

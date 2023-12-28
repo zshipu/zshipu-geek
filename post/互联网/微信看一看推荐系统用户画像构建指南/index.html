@@ -216,7 +216,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>用户画像是推荐系统中非常重要的一环，用户画像刻画的是否精准直接影响后续召回和排序环节的效果。</p>
 <p>用户画像包括用户的基础信息，如性别年龄地域等。此外还有用户的行为信息，比如通过用户历史浏览的文章视频，计算出的用户的兴趣标签。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b7eceee0be664047a7b53a4ca2121896.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271911578.png" />   
     </p>
 <p>如上图所示，推荐系统会根据用户的画像把可能感兴趣的文章推送给用户。比如一个对 NBA 感兴趣的用户，他画像中有“库里”的标签，那系统很大可能会给他曝光相应的文章。</p>
 <p>用户画像建模其实就是给用户打上他感兴趣的标签。然后这些标签会作为特征，传给召回和排序，最终排序将用户最可能感兴趣的文章展现给用户。</p>
@@ -230,31 +230,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们知道 CTR 训练的方式是从底层开始喂进去各种用户和 item 的特征，然后通过模型去自动学习用户和 item 的特征交叉。但是对于画像预估来说，这种模式是性能不友好的。</p>
 <p>因为 CTR 处理的是召回后的结果，量级在千级别。而画像需要对整个标签空间（百万量级的标签）进行打分，所以我们直接把标签放到 label 侧，然后建模成一个多分类的任务，可以大大加快训练和预测效率。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a237c52e68c045239748f59be5ef13b3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271911264.png" />   
     </p>
 <h3 id="2-用户侧的特征学习"><strong>2. 用户侧的特征学习</strong></h3>
 <p>这里由于特征输入只有用户侧特征，那么如何更好的学习一个用户特征表达至关重要。这里我们使用下面的模型进行用户特征学习：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7104c26ef7d74f329493b8e447a785f8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271911567.png" />   
     </p>
 <p>主要包括两部分，一个是用户域内域间的特征融合，另一个是用户的特征交叉：</p>
 <p><strong>（1）基于层次化attention的特征融合</strong></p>
 <p>首先对每个域内的多个离散特征进行 attention 融合，每个特征域输出一个 embedding，然后多个特征域的 embedding 再通过一个 attention 进行融合最终输出融合好的 embedding。</p>
 <p>这里 attention 单元在融合多个特征时的结构如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/12/image-636de0c5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271911698.png" />   
     </p>
 <p>这里每个 attention 单元会有一个 query vector，这个向量是在模型学习中学出来的一个向量，用来衡量哪些特征对分类更有帮助。这里我们将不同域内和域间的 attention 单元的 query vector 共享，发现效果更好。我们猜想共享 query vector 可以让不同域的特征发生正向的相互影响。</p>
 <p>此外，我们将设计多头 attention 机制，每个头都是一个完整的层次化 attention 机制，用来增加模型对多兴趣的学习能力。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/12/image-73b95b5a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271911836.png" />   
     </p>
 <p>以上图为例，对于域内的标签特征，可以看出不同头侧重的兴趣不同。第一个头侧重历史兴趣，第二个则是体育和养生兴趣。</p>
 <p><strong>（2）用户特征交叉</strong></p>
 <p>当融合好用户的域内域间特征后，我们设计了一个特征交叉的模块。这个特征交叉的模块其实一个建模在稠密特征向量上面的特征交叉。</p>
 <p>我们知道稠密特征向量的每一维其实也代表一个不可解释的空间。我们对特征向量的任意两维做特征交叉，使用类似FM的交叉方法，如下面公式，任意 i 和 j 维特征的交叉结果是，他们俩的特征隐向量内积乘上他俩数值的乘积。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/12/image-b73677c0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271911148.png" />   
     </p>
 <p>这里交叉后的特征和之前的线性特征各自归一化到同一量级，然后 concat 一起喂到下一层。</p>
 <p>这里我们对比了一些别的方法，比如 AFM，NFM 这种基于 FM 的特征交叉，以及 DCN 和 AUTOINT 这种基于迭代的交叉网络的方法。</p>
@@ -262,30 +262,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="3-用户点击标签偏好"><strong>3. 用户点击标签偏好</strong></h3>
 <p>在处理用户点击展现文章的时候，每一篇文章可能有不止一个标签。传统的训练方式就是把用户点击过的文章的标签全作为正例，曝光没点击的标签全作为负例。那这样训练的方式则默认用户对点击过文章的所有标签都感兴趣，这个假设显然是片面的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/12/image-09509e12.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271911106.png" />   
     </p>
 <p>这里我们尝试过上面三种训练的方式：</p>
 <p>第一种就是传统的拆分训练的方式，将一篇文章的多个标签拆分成多个正负例子；第二种就是我们最终使用的，用户对文章中的标签感兴趣程度相加决定用户最终的点击情况，这样模型自己去学习哪些标签应该更感兴趣。第三种是加上一个 attention 机制，相当在假设二的基础上去学习一个不同标签在文章中的权重，我们发现这种方式虽然让拟合的 loss 更好，但是准确率不如第二种，分析可能是因为学习到的权重信息并不能作用到最终用户标签的预估上导致的。</p>
 <h2 id="三画像指标"><strong>三、画像指标</strong></h2>
 <p>在推荐系统中除了常用的点击率和时长之外，我们还需要考虑到画像的相关指标。这里我们主要使用画像有点数和画像有点率来衡量画像的线上准确率和覆盖情况。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/12/image-0831da7f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271911481.png" />   
     </p>
 <h2 id="四实验"><strong>四、实验</strong></h2>
 <p>我们上面提到的特性进行实验，使用的是我们自己的数据和公开数据集 movielens 构造的数据。在域内域间融合上我们做了下面的实验：</p>
 <h3 id="1-attention特征融合实验"><strong>1. attention特征融合实验</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/12/image-39aea849.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271911690.png" />   
     </p>
 <p>对比的是 youtube-dnn 模型，UTPM 是我们的画像模型（包含是否共享 query vector；使用单头还是多头 attention）。</p>
 <h3 id="2-特征交叉实验"><strong>2. 特征交叉实验</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/12/image-ab0a7bc5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271911123.png" />   
     </p>
 <p>将我们模型的特征交叉模块替换成 AFM，NFM，DCN 和 AUTOINT，在两个数据集上进行离线指标测试。</p>
 <h3 id="3-拆分训练和联合训练的效果对比"><strong>3. 拆分训练和联合训练的效果对比</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/12/image-f99b5fcb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271911557.png" />   
     </p>
 <p>其中 base 是拆分训练，joint-loss 是联合文章中的多个标签一起训练的结果。</p>
 <h3 id="4-线上ab实验"><strong>4. 线上ab实验</strong></h3>
@@ -415,6 +415,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -448,10 +452,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -830,6 +830,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

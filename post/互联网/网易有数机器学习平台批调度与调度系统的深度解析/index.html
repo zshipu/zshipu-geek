@@ -225,7 +225,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>（4）业务方无法判断夜里cpu利用率低是团队训练资源没充分利用还是资源竞争导致死锁，无法进行资源优化。</p>
 <p>出现问题的原因是当前k8s的默认调度器只支持对单个pod的调度，对tfjob这种对应多个pod并且需要同时启动的任务无法做到批调度，这些问题影响了平台资源利用率，也影响了业务方的模型训练效率，成为平台需要解决的痛点之一。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/490c0e4f15ae4e13942fef91886a462e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651298.png" />   
     </p>
 <p>由于平台整个构建在k8s集群上，在介绍平台批调度之前，需要先了解k8s原生的调度逻辑。</p>
 <h2 id="2-kube-scheduler"><strong>2 kube-scheduler</strong></h2>
@@ -233,7 +233,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>调度流程</strong></p>
 <p>下面介绍下kubernete调度程序是如何工作的：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/059776eddf5445c9b03fc4461d1ccbe8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651272.webp" />   
     </p>
 <p>（1）默认调度器根据指定的参数启动（如果使用 kubeadm 搭建的集群，启动配置文件位于 /etc/kubernetes/manifests/kube-schdueler.yaml）；</p>
 <p>（2）watch apiserver，将 spec.nodeName 为空的 Pod 放入调度器内部的调度队列中；</p>
@@ -256,7 +256,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>如何内置的Filter策略执行成功的话，scheduler通过Http调用Extender注册的webhook, 将调度所需要的Pod和Node的信息发送到到Extender，根据返回filter结果，作为最终结果。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8af49288e8674f8cb812d7ea7eff767c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651080.webp" />   
     </p>
 <p>Extender存在以下问题：</p>
 <ul>
@@ -266,7 +266,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>Multiple schedulers</strong></p>
 <p>Scheduler在Kubernetes集群中其实类似于一个特殊的Controller，通过监听Pod和Node的信息，给Pod挑选最佳的节点，更新Pod的spec.NodeName的信息来将调度结果同步到节点。所以对于部分有特殊的调度需求的用户，有些开发者通过自研Custom Scheduler来完成以上的流程，然后通过和default scheduler同时部署的方式，来支持自己特殊的调度需求。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f8085d67ee054415ace78302bd31e6be.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651948.webp" />   
     </p>
 <p>Custom Scheduler会存在以下问题：</p>
 <p>（1）如果与default scheduler同时部署，因为每个调度器所看到的资源视图都是全局的，所以在调度决策中可能会在同一时刻在同一个节点资源上调度不同的Pod，导致节点资源冲突的问题；</p>
@@ -279,7 +279,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>ps: 该调度框架需要重新编译kube-schduler。</p>
 <p><strong>具体调度过程</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9a531fe1e4cd4fb0b63742aa2e7afbdd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651785.png" />   
     </p>
 <p>Framework的调度流程是分为两个阶段scheduling cycle和binding cycle。scheduling cycle是同步执行的，同一个时间只有一个scheduling cycle，是线程安全的。binding cycle是异步执行的，同一个时间中可能会有多个binding cycle在运行，是线程不安全的。</p>
 <p><strong>Scheduling cycle</strong></p>
@@ -316,15 +316,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>默认的调度器是以 Pod 为调度单元进行依次调度，不会考虑 Pod 之间的相互关系。但是很多数据计算类的离线作业具有组合调度的特点，即要求所有的子任务都能够成功创建后，整个作业才能正常运行。如果只有部分子任务启动的话，启动的子任务将持续等待剩余的子任务被调度。这正是 Gang Scheduling 的场景。</p>
 <p>如下图所示，JobA 需要 4 个 Pod 同时启动，才能正常运行。Kube-scheduler 依次调度 3 个 Pod 并创建成功。到第 4 个 Pod 时，集群资源不足，则 JobA 的 3 个 Pod 处于空等的状态。但是它们已经占用了部分资源，如果第 4 个 Pod 不能及时启动的话，整个 JobA 无法成功运行，更糟糕的是导致集群资源浪费。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/96e43ee1121347dbbd689b2caf2bf98c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651829.webp" />   
     </p>
 <p>如果出现更坏的情况的话，如下图所示，集群其他的资源刚好被 JobB 的 3 个 Pod 所占用，同时在等待 JobB 的第 4 个 Pod 创建，此时整个集群就出现了死锁。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e25040f36cac4f148bc867153415a228.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651672.webp" />   
     </p>
 <p><strong>基于 Scheduling Framework 的实现方案</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/54e5d9c847c74e8a9b02633975576b5a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651569.webp" />   
     </p>
 <p><strong>PodGroup</strong></p>
 <p>要进行批调度，需要引入podGroup的概念，通过 label 的形式来定义 PodGroup ，拥有同样 label 的 Pod 同属于一个 PodGroup。min-available 是用来标识该 PodGroup 的作业能够正式运行时所需要的最小副本数。</p>
@@ -337,15 +337,15 @@ labels:
 <p>Framework 的 Permit 插件提供了延迟绑定的功能，即 Pod 进入到 Permit 阶段时，用户可以自定义条件来允许 Pod 通过、拒绝 Pod 通过以及让 Pod 等待状态(可设置超时时间)。Permit 的延迟绑定的功能，刚好可以让属于同一个 PodGruop 的 Pod 调度到这个节点时，进行等待，等待积累的 Pod 数目满足足够的数目时，再统一运行同一个 PodGruop 的所有 Pod 进行绑定并创建。</p>
 <p>举个实际的例子，当 JobA 调度时，需要 4 个 Pod 同时启动，才能正常运行。但此时集群仅能满足 3 个 Pod 创建，此时与 Default Scheduler 不同的是，并不是直接将 3 个 Pod 调度并创建。而是通过 Framework 的 Permit 机制进行等待。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/73914e7cdac14175bb64cd5855881758.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651452.webp" />   
     </p>
 <p>此时当集群中有空闲资源被释放后，JobA 的中 Pod 所需要的资源均可以满足。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e84affa940e3446fa0e1334e60c8815e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651367.webp" />   
     </p>
 <p>则 JobA 的 4 个 Pod 被一起调度创建出来，正常运行任务。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3a273f858d2c44e5813c9087caad90cf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651200.webp" />   
     </p>
 <p><strong>Prefilter</strong></p>
 <p>为了减少无效的调度操作，提升调度的性能，我们在 Prefilter 阶段增加一个过滤条件，当一个 Pod 调度时，会计算该 Pod 所属 PodGroup 的 Pod 的 Sum(包括 Running 状态的)，如果 Sum 小于 min-available 时，则肯定无法满足 min-available 的要求，则直接在 Prefilter 阶段拒绝掉，不再进入调度的主流程。</p>
@@ -356,7 +356,7 @@ labels:
 <p>Kubernetes默认开启的资源调度策略是LeastRequestedPriority，消耗的资源最少的节点会优先被调度，使得整体集群的资源使用在所有节点之间分配地相对均匀。但是这种调度策略往往也会在单个节点上产生较多资源碎片。</p>
 <p>下面拿一个简单的例子来说明这种问题。如下图所示，资源在节点之间平均使用，所以每个节点使用3个GPU卡，则两个节点各剩余1GPU的资源。这是有申请2GPU的新作业，提交到调度器，则因为无法提供足够的资源，导致调度失败。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/581ed7b48d854b4d94506461351e97d6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651870.webp" />   
     </p>
 <p><strong>基于 Scheduling Framework 的实现方案</strong></p>
 <p>Binpack实现已经抽象成Kubernetes Scheduler Framework的Score插件RequestedToCapacityRatio，用于优选阶段给节点打分。将节点根据自己定义的配置进行打分。具体的实现可以分为两个部分，构建打分函数和打分。</p>
@@ -379,7 +379,7 @@ resourcetoweightmap:
 <p>volcano是华为云开源的针对ai/大数据场景的批调度服务，脱胎于kube-batch, kube-batch是kubeflow原生的批调度器项目，volcano在此基础上提供了增强型的volcano scheduler，用于补充k8s默认调度器批调度的短板。</p>
 <p><strong>Volcano scheduler实现</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/315b058cc0ab48d981e6f86642ceddbd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651732.png" />   
     </p>
 <ul>
 <li>客户端提交的Job被scheduler以podGroup的形式观察到并缓存起来；</li>
@@ -394,7 +394,7 @@ resourcetoweightmap:
 <li>tf-operator增加&ndash;enable-gang-scheduling=true参数即可, 开启后tf-operator创建pod的时候会指定pod的调度器为volcano。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f3e757d496c54474bc16ace72bce7f91.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651922.png" />   
     </p>
 <p>volcano scheduler调度时监控的是podGroup，podGroup相当于tfjob的抽象，等待tf-operator创建完所有pod后，会进入上面volcano scheduler的调度流程，当判断所有pod都可调度后，volcano scheduler会将所有pod调度到具体node上, 交由node上的kubelet拉起pod。</p>
 <h3 id="43-平台适配问题"><strong>4.3 平台适配问题</strong></h3>
@@ -405,7 +405,7 @@ resourcetoweightmap:
 <p>平台当前支持提交任务的方式有三种，都会通过平台自有组件jobdashboard，jobdashboard就是平台用来管理所有训练任务的组件。</p>
 <p>为实现训练任务批调度的目的，决定在jobdashboard增加一层缓存队列，作为对k8s调度策略的扩展，在任务下发到k8s集群上之前，先对每个请求的资源进行过滤筛选才决定要不要下发，借鉴开源实现对所有tfjob进行过滤、排序、优选, 确保足够的资源供tfjob成功运行。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/76d56aa602cf4c18920926483d844673.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651065.webp" />   
     </p>
 <p>（1）入列**。**</p>
 <ul>
@@ -429,7 +429,7 @@ resourcetoweightmap:
 <p>平台后期在可视化建模里扩展了automl自动调参功能，用户可使用可视化建模方便的进行automl并可视化的比较训练指标信息。其中选用了较适合平台的katib组件来实现automl，katib自动调参过程中会自行创建tfjob直接提交到apiserver，绕过了平台的jobdashboard组件，这导致任务提交会发生冲突，katib提交的tfjob无法复用jobdashboard的批调度逻辑。</p>
 <p>为复用上述平台已有的批调度逻辑，平台自定义一个k8s admission webhook准入控制器，拦截非平台组件jobdashboard创建tfjob的请求，转发至jobdashboard继续进行批调度逻辑。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/137be5becea648a383f9207fba7d29ee.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651968.webp" />   
     </p>
 <h3 id="45-未来工作思考"><strong>4.5 未来工作思考</strong></h3>
 <p>在线推理也是机器学习平台的重要基础功能，在线推理计算资源的自动调度也一直是机器学习平台的重点之一，当前业界常见的解决方案是HPA</p>
@@ -556,6 +556,10 @@ resourcetoweightmap:
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -589,10 +593,6 @@ resourcetoweightmap:
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -971,6 +971,8 @@ resourcetoweightmap:
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

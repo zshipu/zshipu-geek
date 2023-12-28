@@ -214,121 +214,121 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <h2 id="01背景介绍"><strong>01背景介绍</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/73ee8438c1734cf892dd1922f0eaa069.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271846797.webp" />   
     </p>
 <p>58同城作为国内生活信息服务提供商，涵盖招聘、房产、车辆、兼职等海量生活服务。58首页猜你喜欢推荐，位于58同城APP首页左下方，是58 APP最大规模的一个推荐场景，日常UV千万级，帖子候选亿级别，模型训练样本上亿级别，数据体量很大，首页推荐位的推荐结果涵盖多个类目的帖子。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cc8a25a1ef354220b80584f384c00539.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271846744.webp" />   
     </p>
 <p>首页推荐的结果依赖于召回，召回的方式有多种。现在是多通道召回，分别对多种方式都进行了深入的探索。</p>
 <p>首先是兴趣标签召回，根据用户的兴趣标签，扩展兴趣标签，召回用户感兴趣的帖子列表。然后是协同过滤召回，有基于user的和基于item的协同过滤召回。协同过滤最大限度的利用了用户之间或是物品之间的相关性，基于这些信息进行推荐。再营销召回，主要是根据用户的历史行为进行再次相关推荐。再营销的方式能够有效地激发用户的转化行为。LBS召回，主要是基于用户当前所在的地理位置，召回附近用户感兴趣的帖子。搜索关键词召回，分析用户主动的搜索行为，形成相应的关键词画像，构建关键词框内进行召回。以上的召回方式任意一种都很难同时兼顾相关性和多样性，我们考虑引入向量化召回，将向量建模成向量空间内的近邻搜索问题，有效提升召回结果的相关性和多样性。</p>
 <h2 id="02-首页推荐word2vec召回实践">02 <strong>首页推荐Word2Vec召回实践</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/83444bc37a5a4300b83f3c4576b94f85.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271846399.webp" />   
     </p>
 <p>考虑到Word2Vec的训练得到的向量能够快速实践且效果比较好。所以我们引入了向量化召回通道。首页推荐Word2Vec的向量召回实践主要分为两部分：第一部分是向量训练，第二部分是在线预测。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/949b87bed9e041f98f58dda0665cc21d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271846085.webp" />   
     </p>
 <p>Word2Vec的训练方式有两种，第一种是cbow。cbow是根据上下文预测中心词，而skip- gram则是根据中心词去预测上下文，并对当前中心词的向量进行调整。</p>
 <p>在58的场景下，如果词频出现较低，skip gram能够根据上下文调整当前词的向量，虽然训练花费的时间会多于cbow，但是词向量的表征会更加准确，所以我们选择了skip- gram。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/95925fed75294923a91cc44f279e4483.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271846830.webp" />   
     </p>
 <p>先讲一下我们的训练流程：向量训练，首先可以从HDFS日志上提取出用户的点击行为，对于每个点击行为，把点击的ItemID ，UserID和时间戳提取出来，然后根据用户ID去聚合行为，并按照时间的先后顺序排列，也会对较短的序列会进行过滤。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/67af8d21026948768269e509d069b347.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271846585.webp" />   
     </p>
 <p>得到行为序列之后，我们就训练Word2Vec向量。当用Word2Vec的训练得到向量后，我们在离线评测阶段会有两个问题。第一个问题是会有非同城的帖子，比如北京的一个帖子，召回相似的Top 20个帖子，会有长沙、沈阳等非同城市的帖子出现。第二个问题是有非同业务的帖子，比如租房的帖子，它的相似帖里边可能会出现招聘的帖子。因为我们拿的是用户的点击行为序列，58是一个多业务场景，用户可能会对多个业务感兴趣，他来回点击就会导致他的行为序列之间有同业务或者同城的在一起，所以我们会做一些优化。</p>
 <p>首先是数据层面的，我们会做session切分。因为在58场景下，城市与城市之间，业务与业务之间，还是有比较大的区分性的。所以根据session切分之后，不同城市的不同业务的就会被切割成不同的序列。比如行为序列ItemID3和ItemID4，它的城市或者业务不同，我们就会切分一个新的序列出来。做完行为序列切分后，就能够保证每个帖子，它的上下文是来源于同城市或者是同业务的，但是负采样的流程还是可以继续做一些优化的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4727ab2df1e646209465419c2cd567e3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271846276.webp" />   
     </p>
 <p>原有的负采样是全局采样的过程，首页现在的量级是接近5000万的帖子，这个全局采样就是从5000万里面以一定概率选一个作为负样本，这种方式就会有一个问题，比如长沙的帖子，负样本可能是北京的，这个样本过于简单，所以我们选择的优化方式是缩小样本的采样范围，从全局缩小到同城，提高向量的表征能力。</p>
 <p>在 Word2Vec训练的时候，首先它会组织一个采样列表，这个列表会把每个帖子聚合在一段线段中。每个帖子在这个线段中的占比是不一样的，取决于帖子出现的频次，这个帖子如果出现的词频高，它的占比就会高一点。这样反映出它的被采样的概率。如果想缩小它的采样范围，可以采样列表不变，但对这个帖子有个聚合。意思是会把同城的所有帖子聚合在线段的某一段中。比如下标从1到k+1的帖子，它都是城市1的帖子，k+2到k+j的都是城市j的帖子。这样如果我们知道了城市所在的开始位置和结束位置，在这个范围内去采样的话，就能够保证负样本一定是来自于同城的。</p>
 <p>我们在采用过程中还会加一些业务的限制，所以我们需要记录一些信息。首先这两个列表是记录刚刚讲到的起始位置和下标结束位置，然后 local list主要是记录每个帖子它的地域ID，就是这个帖子是哪个地方的，然后业务ID也需要记录，因为要知道这个帖子是哪个业务下的，是招聘的还是租房的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b0af595933334c3f96bf113af39887ee.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271846173.webp" />   
     </p>
 <p>举个例子，首先我们有一个行为序列是Item1到Item6，如果我们拿当前的Item3为中心词的话，首先Item3我们给到它的训练参数窗口大小为5，负采样的个数为5，它的正样本就是Item1、Item2、Item4、Item5。</p>
 <p>负样本我们是这样选的,首先会拿到Item3的城市ID，也就是要知道 Item3是哪个城市的，然后查询刚刚记录的列表，就可以得到这个城市所在的起始位置和结束位置。确定好了采样范围之后，我们就可以在这个区间去采样。我们会在这个区间随机的选取其中的一个负样本。比如我选择了ItemF，这个ItemF是不是一个合格的负样本，我们会对它加上一些业务上的限制。</p>
 <p>首先负样本不能是中心词，其次这个负样本不能在当前的行为序列中。因为行为序列就是基于用户的点击行为，用户既然点了，说明用户对这个帖子是感兴趣的。虽然不在上下文的窗口内，但是如果在用户整个的行为序列中，说明帖子之间是有相关性。所以我们不认为这样的帖子是个合格的负样本。然后我们会加上第三个限制，我们要确保这是一个合格的负样本的话，会对业务和地域限制一下。比如是朝阳的租房，那至少这个不能是朝阳的，然后也不能是租房贴，但可以是招聘是没有问题的。这就是我们结合业务对负采样的样本的一些限制。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/12865ee769f94d2d98c38f8f35dc4945.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271846025.webp" />   
     </p>
 <p>我们做完这些数据和流程上的优化之后，上图是我们的训练参数。可以看到在优化前和优化后，训练时长有明显的增加。因为原有的负采样它是随机在全局随机的采，我们把范围缩小了，而且有一些限制，所以导致时长被拉长，但是从离线的评测和线上的效果来看，这个优化都是有效果的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/61182c2fe3bd47428a2aac66996ee212.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271846840.webp" />   
     </p>
 <p>这是我们离线评测的一个例子。中间的是来自北京朝阳酒仙桥的一个1室的整租。左边三个是在优化前，也就是全局负采样的时候，训练得到的最相似的三个帖子。这三个帖子分别来自朝阳、石景山和顺义。首先它的位置距离会比较远，而且在厅室和价格方面也不是太相似。右边这三个是我们优化后的效果。经过自适应负采样优化之后，这三个帖子都聚集在了酒仙桥附近，而且小区之间厅室和价格都比较相似。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/457a2378422543af9ef1a112d17ba7c7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271846584.webp" />   
     </p>
 <p>接下来讲下我们的在线预测流程。当接到一个推荐请求后，主体服务会调用召回服务获取召回通道的结果。其中我们有个向量化召回通道，它依赖于存储在Redis中的用户点击序列，我们拿到用户的点击序列之后，会去做向量检索。在向量检索过程中，首先要判断行为序列中的帖子，向量是否存。如果存在，就拿到这个向量后，对这些行为序列中的所有向量求和，再平均得到用户向量。拿着用户向量去召回Top50个相似的帖子，我们在faiss进行向量检索的时候用到的向量，也就是刚刚提到的Word2vec向量。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7a06695062354689b86fb2b09b286e04.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271846234.webp" />   
     </p>
 <p>我们搭建了faiss集群，faiss的索引选择的是倒排索引，能够通过聚类的方式分割成若干类，查询的时候选择距离最近的类。在类中我们采取精确的方法查询，这样既能够保证性能的同时，又能够通过调整参数来确保我们的查询精度。</p>
 <p>在倒排索引中，我们向量的个数是接近4200万个。其中nlist的参数代表向量聚类的总数，nprobe参数代表查询类的个数。开始的时候，nlist用100，nprobe用1，我们在Top50的检索需要耗费35毫秒，这个耗时还是比较高。所以我们做了一个性能优化，就是在参数上进行了调整。把nlist的由100扩充到1024，这样类的个数变多了之后，分到每一个类的数量就会减小，但是这样可能会影响到精度，所以我们同时又增大了 nprobe的个数。我们每一次查询的类个数由一个变成两个，这样在线上性能有了明显的提升，由原来的35毫秒降到了10毫秒，而且ab测向量的效果也没有受到影响，所以我们选择了性能较优的这部分参数。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ab6db96d31f04d2d9a5a4b7967d54786.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271846125.webp" />   
     </p>
 <p>这个是我们上线后的转化率效果，明显可以看出来，加了向量化召回之后，比原来的纯兴趣标签召回在转化率上提升的比较多。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e4679ecbf66e4f95a02a40b6394d3d41.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271846942.webp" />   
     </p>
 <p>我们做完Word2Vec向量召回之后，也伴随着一些问题。第一个是用户的向量表征是受限的，因为在用Word2Vec的召回的时候，用户向量是通过行为序列求平均得到，在行为之间大家的权重都一样，没有区分度，而且也不能够深入的去表征用户兴趣。我们也没有用到兴趣向量、用户的标签或者是其他的一些属性特征。另一方面，Word2Vec没有结合场景业务，因为我们使用的是用户全站的点击行为，它学习到了向量的表征，但是没有结合具体的场景拟合业务目标，所以我们尝试了双塔模型，可以从业务数据出发，对用户继续进行更深层次的建模。</p>
 <h2 id="03-双塔模型召回在首页推荐的落地及优化">03 <strong>双塔模型召回在首页推荐的落地及优化</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7aff3fbc32ba42e89155389831f47b68.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271846660.webp" />   
     </p>
 <p>双塔模型在首页推荐的落地流程及优化，主要是以下的三部分内容。首先是模型架构，其次是模型评测，然后是在线召回。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/504bc98d86984ab4bb548c7f424500e9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271846422.webp" />   
     </p>
 <p>这个是我们双塔模型的架构图，由下至上是三层，第一部分是输入层，第二部分是表示层，第三部分是匹配层。输入层主要有两部分输入。第一部分输入是用户塔的输入，第二部分是Item塔的输入。在表示层我们会对用户和item的embedding进行建模。在匹配层，我们拿到了用户和item的embedding向量之后，会离线计算cos值，在线serving的时候，会用用户向量去调用faiss的向量检索，得到Top50个相似贴。</p>
 <p>首先讲一下我们在输入层的一些优化，可以从图里看到，我们表征任意一个帖子是由三部分表征的，第一部分是InfoID，第二部分是localID，第三部分是cateID。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2424c3307e474b4f8f603c887e0ef7a8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271846153.webp" />   
     </p>
 <p>但这个时候就会有一些问题，首先我们的ItemID 7天的帖子数接近5000万，也就是说我们有5000万个ItemID,向量维度使用64的话，embedding矩阵就会非常大，得到的向量效果也不一定好。如果我们选择降低维度的话，其实也会影响向量的表征。所以我们采用预训练的方式得到ItemID embedding矩阵。预训练是使用的 Word2Ves向量。上图是我们的一个离线数据生成流程。我们拿到双塔的训练数据之后，它是三部分，user塔的输入，Item塔的输入和最后的标签。其中Item塔的输入，它又包括ItemID、LocalID、CateID。在离线的时候，我们会把ItemID过一遍Word2Vec向量，离线生成embedding，然后再生成TFRecord格式的数据，给到双塔模型作为输入。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3e1f98c73a2f451cad289da31616e8f5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271846818.webp" />   
     </p>
 <p>我们有了预训练之后，还会对向量有一个增量的过程。因为考虑到7天的向量数据所覆盖的范围是有限的，但是如果加长了训练天数，比如从7天增加到10天，训练成本就会明显增加。所以我们采用了向前增量的方式更新向量。在中间是t-1天的向量，我们会往前推t-2、t-3、t-4，一直到t-7天的向量，去融合这些向量。如果向量重合了，比如t-1天有item2，t-2也有item2，我们就会优先保留时间更靠前的向量。但如果这个是原有的向量没有的，我们就追加在后面。这样增量的方式，我们的帖子量从4100万增加到了4700万左右。这里就可能会有个问题，因为Word2Vec的向量每天都是单独的去训练，每天的向量没有相关性，因为不在向量空间中。但其实在我们的双塔模型中，刚刚讲到了，我们不仅用了ItemID，也用到了LocalID和CateID，还会有Item塔DNN的结构，其实对最终的帖子表征是没什么影响的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0426a63f6b4e4e84a7998879f6a04095.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271847730.webp" />   
     </p>
 <p>在双塔模型中，负样本的采样也是比较重要的。比较常见的是选择easy的负样本，就是通过在Batch内随机负采样得到，然后我们也会尝试选择一些的hard负样本，增加模型的学习难度。Hard负样本来自当前点击帖子的同城内，但是地域ID和业务ID都不相同。</p>
 <p>上面表格是我们在离线做的一些实验指标。我们通过调整正负样本的组成比例，样本的总个数，做一些实验。从AUC上看，我们随机负采样的效果是最好的，所以在线上最终也是全量的随机负采样的方式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bbf32f42d77b4cfea56dfd3df7ab3ecf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271847473.webp" />   
     </p>
 <p>我们在user塔也会加入用户兴趣标签。用户兴趣标签其实就是基于用户的长期历史行为得到的一些统计信息。比如我们会根据每一个业务线有不同的兴趣标签。二手房这个业务下，我们会统计用户的业务ID、地域、价格、户型和面积，这个也就是用户偏好的一些信息。比如说整租房，我们可能会拿到用户在类目下，对哪些地域、哪些房价、哪些户型、比较感兴趣，这个就是兴趣标签。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3bce5b0c28714963996fb72c22461acb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271847381.webp" />   
     </p>
 <p>有了兴趣标签后，我们会把它加到表示层去，主要的加入方式是通过和行为序列算attention。可以看到每一个行为序列就是一个Item。Item的表征是通过帖子ID、类目ID和地域ID的表征。在右侧有个用户兴趣，用户兴趣的表征就是用的类目ID和地域ID。因为每个业务下的兴趣标签是不一样的，所以我们用了大家都有的类目ID和地域ID去表征每一个兴趣。用户他可能会对多个业务，多个地域都感兴趣，所以用户的兴趣我们选的是前10个，然后会和用户的行为序列得到的向量算一个attention，最后得到用户最终的兴趣向量。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dac3295c667d42b59a78ab71ead910a3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271847109.webp" />   
     </p>
 <p>我们在user塔也会加入一些特征，这个特征主要是基于用户的一些离散值特征和连续值特征。比如一些设备特征，用户的点击次数特征，用户的偏好特征，对类目的偏好，对地域的偏好以及偏好程度等等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d38dcae3127a4d9d9fff61d99f82dc38.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271847876.webp" />   
     </p>
 <p>接下来是匹配层，就是我们得到了用户向量和Item向量之后，应该怎么去拟合目标。在离线阶段，通过对每1个正样本随机采4个负样本，得到一个这样的样本列表，然后我们会计算向量的cos值，之后做softmax，得到了每一个样本所对应的概率。训练过程中我们的正样本的概率如图所示，分子是正样本的概率，分母是正负样本的概率总和，其中有一个参数，这个是平滑因子。我们在训练的时候用的是=5，因为cos值是-1~1之间的值，如果我们适当的放大这个值，能够让正负样本最后的概率区分度更高，更精确拟合我们的目标。loss函数用的是交叉熵函数，只拟合了正样本的损失。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a7b99640d04140e0809fcb2f87f79231.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271847750.webp" />   
     </p>
 <p>接下来讲下我们的模型评测。因为离线做任何一个优化都需要有个评测指标作为参考。我们在模型评测的时候，主要用到了三部分评测指标。第一部分是AUC，第二部分是覆盖率，第三个是平均位置。我们主要讲下覆盖率和平均位置。</p>
 <p>那覆盖率是怎么计算的？我们会把t-1天的数据拿出来作为测试集。训练完双塔模型之后，把测试集中的点击数据拿出来，过一遍双塔模型，这样就能得到当前点击的 user embedding，然后去调用faiss检索最相似的Top50个帖子出来。当前点击是不是在Top50中？如果在，认为这次是覆盖了你的点击，那就在这加1。拿我们所有覆盖点击的次数除以总的条数，就是覆盖率指标。</p>
 <p>平均位置，因为我们刚刚讲了，召回Top50，点击行为在这个列表中他是否靠前，其实也是一个比较重要的参考指标。所以我们也会计算每一次点击行为在 Top50中的平均位置。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f2317b2384bc4eafbd3c9ecbb02d5ffa.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271847449.webp" />   
     </p>
 <p>这个是我们在离线评测的时候一些评测指标，可以看到不管是加入用户兴趣，再加入用户特征，较原来的双塔模型，在AUC指标上，覆盖率指标和平均位置指标都有一个比较明显的提升。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1c4d5259166244969937c877c0e6cd96.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271847248.webp" />   
     </p>
 <p>再讲下双塔模型在线召回的部分。在线召回的时候，其实我们使用的是user塔在线召回，但是它在这个过程中也使用到了Item embedding的向量，所以大家可以看到在这个图中上面这部分是user的在线召回�</p>
 
@@ -460,6 +460,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -493,10 +497,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -875,6 +875,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

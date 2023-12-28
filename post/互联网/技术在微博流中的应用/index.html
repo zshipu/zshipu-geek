@@ -205,22 +205,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>——难点与现存问题——</strong></p>
 <p>❶ <strong>博文内容大多比较短</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/db9cd3f572204a24a249addc6a85ad98.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271928960.webp" />   
     </p>
 <p>第一个问题，微博的内容都是比较短的 ( 一般都是100字符以内 )，比如右图中提到文本 &ldquo;下午茶&rdquo;，但是图片内容并不是美食 &ldquo;下午茶&rdquo;，考虑整个微博文本和图片内容应该分类到美女频道而不是美食频道更合适。另外对于短文本使用 LDA/PLSA 等 topic model 效果都不太好。</p>
 <p>❷ <strong>语言表达随意化</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d5b963c6cc03466e9cac51e457e8123f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271928732.webp" />   
     </p>
 <p>第二个问题，文本的随意化和口语化，语法结构不严谨，对于内容分析带来较大挑战。</p>
 <p>❸ <strong>用户搜索行为序列不能准确获取</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/053fa6372ebe48a0ac07d58e231692fa.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271928385.webp" />   
     </p>
 <p>第三个问题，比如：在微博搜索结果页中，由于文本简短，大部分的结果在页面中能看到全文，没必要点击进入看内容 ( 除了第二条，需要点击展开全文 )，而从停留行为来看，由于一页展示多条博文，也不能准确定位用户感兴趣的是哪条微博。</p>
 <p>❹ <strong>用户 feed 行为序列不能准确获取</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/de7e1c0ab4b7487bb9a059ceeccd61f7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271928085.webp" />   
     </p>
 <p>这个问题与搜索结果页相似，用户停留在 feed 流的页面中，不能准确区分哪条微博为用户感兴趣的。我们对点击较高的博文分析发现，点击较高的博文很多包含多张图片。由于一条微博可以包含多张图片，部分高点击的博文是由于用户想查看图片的内容才点击进入微博的正文页，但是这样的点击不能代表用户对该博文感兴趣。</p>
 <p>综上所述，目前的微博场景很难获取十分准确的用户行为序列 ( 用户行为序列包括展示页，点击，停留，转发，评论，赞，收藏等 )，导致使用 LDA/PLSA 主题的方式和用户行为序列方式建模效果都不太好。接下来，将为大家分享下我们的解决办法和思路。</p>
@@ -232,24 +232,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>博文标签，主要分为：一二级标签、实体标签、关键词标签。</p>
 <p><strong>① 一二级标签</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/97cc35ae08594f85871a7590cafb0889.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271928909.webp" />   
     </p>
 <p><strong>一级标签：</strong> 对应频道，例如财经，法律，IT 产业，军事，历史，美食等标签。</p>
 <p><strong>二级标签：</strong> 一级标签 &ldquo;财经&rdquo;，包含的二级标签：投资，众筹，货币，股票，保险，债券，基金，贷款，美股等。</p>
 <p><strong>一二级标签运用：</strong> 一级标签与少量的二级标签和垂直频道对应，打上这部分标签的博文会分发到对应的频道下，对应的博文会在该频道进行展示。其次一级和二级标签也可用于画像的构建以及推荐中的召回和排序，但是作为标签，粒度太粗，不能很好的刻画用户兴趣。比如，有的用户只对英语感兴趣，如果把大量的教育相关的博文推荐给他，用户体验会比较差。</p>
 <p><strong>一二级标签分类系统：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e87eb8c5e42947afb8af719894a9fca6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271928697.webp" />   
     </p>
 <p>目前分类系统使用 fasttext+bert 结合的方案，是由于 bert 效果好，而 fasttext 性能好。我们有如下的方案：针对关注度高 ( 明星 ) 和高质量的博文使用 bert，其他的博文先过一遍 fasttext，若标签得分高于阀值 ( 95分 )，则不再使用 bert 进行处理；若最高得分只有70分，那么使用 bert 再预测一次。Bert 是一种多层的编码器，最近的研究表明，bert 不同层的 embedding 捕获到了不同的句子知识。比如底层 embedding 捕获到词法方面特征，中间层 embedding 捕获到句法特征，高层 embedding 捕获到语义特征。因此，我们对 bert 的结构做了优化，使用对各层 embedding 加权后获得的 embedding 作为整个博文的表征，后续的博文质量模型也是这种做法。</p>
 <p><strong>② 实体标签</strong></p>
 <p>实体标签在我们的场景中也叫三级标签，实体标签的来源：人工收集、微博热搜 query 和模型识别。如下图可看到一二级标签和实体标签之间的关系。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/453c89b69f8c4741abc6503cca86e46d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271928503.webp" />   
     </p>
 <p><strong>实体识别模型：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/41187810045e44caa831599c41009b99.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271928921.webp" />   
     </p>
 <p>模型如图结构所示，首先经过 bert 层输出每个词对应每个序列标注的概率分布，再经过 crf 层输出最终的标注结果。而这些序列标注的训练数据是由人工标注的。</p>
 <p><strong>③ 关键词标签</strong></p>
@@ -257,11 +257,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>a. 名词短语抽取</strong></p>
 <p>首先我们先从名词短语抽取关键词说起，我们可从某个句子中获取依存句法相关信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a6d1f7d8ddc14a75b7597f81e02c494f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271928666.webp" />   
     </p>
 <p>如上图所示，有 Stanford NLP、哈工大 LTP 和 HanLP 等工具包可以获取句子的依存句法，可以根据多个 parser 解析出来的依存句法对名词短语进行提取，例如，击剑、比赛两个词。首先在 stanford NLP 中击剑、比赛为一个名词短语且在一个语块 ( chunker ) 下，同样其他依存句法工具也是击剑、比赛都为名词短语并且都为同一个语块 ( chunker )。这样多个句法分析工具输出结果都是一致的，我们就认为击剑比赛可以作为标签使用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/acf259b82dee47139c2b96dffa9b1472.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271928398.webp" />   
     </p>
 <p>其次也可以从不同的分词结果对名词短语进行提取和校验。通过下列方式可以获取多个不同的分词结果：</p>
 <p>❶ 同一个分词器不同的分词粒度。</p>
@@ -269,7 +269,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>❸ 不同的分词器</p>
 <p>使用不同的分词结果可以用于做名词短语提取正确性的校验。下文我们会详细阐述提取规则。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ee1de9b0f310414e98b419cfae804b30.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271928269.webp" />   
     </p>
 <p><strong>我们提取关键词短语有如下规则：</strong></p>
 <p>❶ 名词短语在多个句法 parser 中，在同一个 chunker 下，例如 &ldquo;击剑比赛&rdquo; 三个工具输出都是同一个 chunker。</p>
@@ -292,7 +292,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>❹ 使用多个分词结果校验提升关键词精度</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7f8a458b57414829a94a5cbfbd88faf7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271928979.webp" />   
     </p>
 <p>最后，我们可根据以上所说的实体识别和名词短语规则将博文中词语提取出来做为关键词的候选。</p>
 <p>**b. ** <strong>用户 query 提取</strong></p>
@@ -302,33 +302,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>❸ 另外，query 会存在边界错误的情况。可使用新词发现的方式，通过左右信息熵和紧密度进行噪音过滤。</p>
 <p><strong>c. 匹配算法：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c82a6b3d9b8c4194b3e3f2f3adcfb21b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271928719.webp" />   
     </p>
 <p>首先，我们可以使用高效匹配算法，Trie 树/Hash table、Double array trie (dat)、AC 自动机 ( 三者中 AC 匹配效率最高 )， 500w+ 的词典通过这些匹配算法，在博文上进行匹配。接着我们使用分词工具对文章进行分词，来校验分词的结果边界是否与匹配算法的结果兼容，输出最终兼容的结果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fc78f0f1306d4e91ac8ebc052cb75219.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271928515.webp" />   
     </p>
 <p>其实该方法与上文说的提取名词短语思路相似，例如：关键词为 &ldquo;史记&rdquo;，而文中为 &ldquo;历史记录&rdquo;。在使用匹配算法时会将 &ldquo;历史记录&rdquo; 中的 &ldquo;史记&rdquo; 匹配上，但是经过分词工具时，分出来历史/记录，而史记被分开，&ldquo;史&rdquo; 与 &ldquo;历&rdquo; 链接，没有单独成块，同时 &ldquo;记&rdquo; 也与 &ldquo;录&rdquo; 链接，那么可以判定与其不能兼容。</p>
 <p>有的同学会问，如果把关键词/实体词典加入分词用户词典，是不是同时解决了匹配问题和消歧问题？其实这是很难做到的，因为一般的分词词典词汇量约30-50万，分词的过程本身就是对句子消歧的过程，在分词的过程中往往借助词频、词性等其它信息，关键词/实体词 500W+，远超分词词典中词数量，如果放入分词用户词典，这些词会在匹配之后，在分词结果中保证不会被切开 ( 不同策略有所区别 )，将对分词的效果产生很大的负面影响。</p>
 <p><strong>d. 相关性</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5e558d35458c4f12a9f635b0a4718c60.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271928400.webp" />   
     </p>
 <p>使用匹配算法和分词验证兼容性得到以上关键词，其中天龙八部、新笑傲江湖等是和电影相关的词，但是与博文中的主题相关性不一致 ( 主题是旅游 )，由于关键词需要映射到用户画像上来统计用户兴趣，这些词不能代表用户的偏好。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/28eac229dc75429b9cf0af55cf44d083.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271928994.webp" />   
     </p>
 <p>标签与博文的相关性计算流程为：获取文本向量 -&gt; 向量相似度计算 -&gt; 设置阈值过滤标签。其中，我们使用 bert 获取文本向量，博文和标签 ( 关键词 ) 分别以字的形式输入至 bert 模型中，对模型最后一层的每个字相加求均值，效果最好 ( 不同文本相似度计算任务向量取法有所区别，有的任务取最后一层 cls 的向量效果较好 )。我们用于计算相似度的 bert 模型是基于博文的分类 fine-tuning 结果的模型。</p>
 <p>除了标签还进行了同义词、近义词和上下文词的挖掘，这里不展开做过多阐述。</p>
 <p><strong>④ 博文 embedding 标签</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3e23a83224cf4688b3e54b502a47f9cd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271928864.webp" />   
     </p>
 <p>Embedding 标签通过用户的点击序列建模获取。模型如图所示，特征为 f0:用户id，f1: 用户的自身属性，f2: 用户点击列表，f3: 博文的id，f4：博文自身属性，label 为是否点击博文。如前文所述，用户的行为序列不能十分精准的获取，所以 embedding 的效果并不好。</p>
 <p>以上就是基于博文的一些打标签的方式，下面我们再来讨论一下基于用户方面的标签。</p>
 <p>❷ <strong>用户兴趣标签</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/62307dfa6ba147b9b8d29141a8194e25.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271929528.webp" />   
     </p>
 <p>**① ** <strong>首先是基于模型 embedding 的用户兴趣标签：</strong> 上文中有介绍，此方法效果不太好。</p>
 <p><strong>② 基于统计的标签：</strong></p>
@@ -338,39 +338,39 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>❹ 在以上计算用户兴趣的标签时，会用到一些平滑的策略。</p>
 <p><strong>——物料库——</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0b2157d120144b0989445957b35752c0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271929261.webp" />   
     </p>
 <p>对用户发博的博文做预处理，最终构建一个统一的基础物料库，实现各业务的物料共享，构建各业务需要的物料特征。</p>
 <p>❶ <strong>段子识别模型</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b4d1b483b9264ec5bcf6496c51907375.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271929045.webp" />   
     </p>
 <p>各层的权重在训练过程中优化获得。在权重embedding的基础上进行reduce_mean操作获取到最终的embedding表示，进行sigmoid操作获取到相应的概率分数。我们基于人工标注的数据进行 bert 的 fine-turning。</p>
 <p>❷ <strong>物料评级模型</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6134d354b16840b4a61b577f87c0c5e5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271929924.webp" />   
     </p>
 <p>物料评级模型分成两块：一块是博文的内容，使用 bert 进行文本向量的抽取；另一块为博主的特征和上下文特征 ( 博主发博的上下文 )，比如博主等级，粉丝数，健康等级，博主昵称等，把相关特征拼接在一起，进行多分类。</p>
 <p><strong>——多模态——</strong></p>
 <p>上文也介绍过，对于文本较短的博文，我们没法获取太多的信息，这样需要借助多模态信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8919051a885d4e16898fd459d75d5926.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271929839.webp" />   
     </p>
 <p>比如通过图像信息对文本内容的信息进行补充。那么通过该图像模态，我们可以打上美女这样的标签。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://mmbiz.qpic.cn/mmbiz_png/zHbzQPKIBPiaELyNE35ehz7QQrbn5zbqYibf4JhFbmic9MOItlMwibJlqBHqQTgia7F18n0ejvVEAcPlfGOx9CXibdaQ/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271929718.webp" />   
     </p>
 <p>博文中出现了苹果，可能指代吃的苹果或者苹果公司。若借助图像可一目了然去除歧义。</p>
 <p>❶ <strong>多模态对偶模型</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://mmbiz.qpic.cn/mmbiz_png/zHbzQPKIBPiaELyNE35ehz7QQrbn5zbqYBMb4W4LnLfqfLf7DvsLbiaNtDzGz3bl62REwxYZ34aFQib1RFI4Ldsnw/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271929933.webp" />   
     </p>
 <p>上图是在 BERT 发布之前的做法：多模态对偶模型，其中文本编码使用 lstm 模块，图像编码则使用 Inception-Resnet-V2 模块。两者编码对齐到同一个长度进行 attention-both 计算，之后两个模块分别与文本编码和图像编码进行加权计算，然后向量 add 输出多模态向量，最后解码进行标签分类。Attention-both 可以这样理解：由于 image、文本都编码为语义向量，单独的使用文本进行解码时，可以利用图片的 attention 信息，而单独使用图片解码时，可以利用到文本的 attention 信息，Attention-both 就是这两者的结合。模型效果相对于文本模型有一定的提升，但是性能会比较慢。</p>
 <p>❷ <strong>BERT 多模态模型</strong></p>
 <p><strong>① 预训练模型</strong></p>
 <p>BERT 出来之后，微软发表了图像结合 BERT 的多模态预训练文章。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/93280e43c6b641c98b338a6b4b541f10.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271929536.webp" />   
     </p>
 <p>其预训练除了文本还加入了图像的部分。首先把完整的图像做切分 ( Fast RCNN )，每个为一个个小块图片，并且做 mask 输入到模型中进行预测还原。</p>
 <p>![](<a href="https://mmbiz.qpic.cn/mmbiz_png/zHbzQPKIBPiaELyNE35ehz7QQrbn5zbqYkr3UHnWm1GWXXQOicKSLFDr4EiaCnwW78Jphicp8z4jvBfiaTBJ1G">https://mmbiz.qpic.cn/mmbiz_png/zHbzQPKIBPiaELyNE35ehz7QQrbn5zbqYkr3UHnWm1GWXXQOicKSLFDr4EiaCnwW78Jphicp8z4jvBfiaTBJ1G</a></p>
@@ -503,6 +503,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -536,10 +540,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -918,6 +918,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

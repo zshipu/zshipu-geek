@@ -206,38 +206,38 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <p>本文承接 <a href="https://www.6aiq.com/article/1586693447949">索引文件的生成（九）</a>，继续介绍剩余的内容，下面先给出生成索引文件。dim&amp;&amp;.dii 的流程图：</p>
 <p>图 1：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/1-17e6731a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272220795.png" />   
     </p>
 <p>  在上一篇文章中，我们介绍了流程点 <code>执行处理前的初始化的工作</code>，在这个流程中涉及到的一些信息贯穿整个流程，请务必先行阅读， <strong>例如一些变量名如果没有展开说明，说明已经在上一篇文章中介绍</strong>。</p>
 <h2 id="构建-bkd-树的节点值node-value">构建 BKD 树的节点值（node value）</h2>
 <p>  先给出该流程点的流程图：</p>
 <p>图 2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/2-3ab961b0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272220621.png" />   
     </p>
 <p>  图 2 的流程中，描述的是处理一个节点的流程，该节点如果是内部节点（非叶节点），那么就划分出左右子树，即左右两个节点，随后递归处理，是一个深度遍历的过程。</p>
 <h3 id="节点">节点</h3>
 <p>图 3：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/3-3fc99968.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272220492.png" />   
     </p>
 <p>  流程图的准备数据为一个节点，该节点可能是叶子节点或者内部节点，在生成 BKD 树的开始阶段，该节点为根节点。</p>
 <h3 id="是否为叶子节点">是否为叶子节点？</h3>
 <p>图 4：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/4-bf62764a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272220300.png" />   
     </p>
 <p>  在文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2020%2F0406%2F129.html">索引文件的生成（九）之 dim&amp;&amp;dii</a> 中我们说到，在构建 BKD 树之前，我们已经能提前计算出 BKD 树中内部节点以及叶子节点的数量 numleaves，并且为每个节点都赋予了一个节点编号，如下图所示：</p>
 <p>图 5：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/5-e3f72df6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272220527.png" />   
     </p>
 <p><strong>如何判断当前节点是不是叶子节点</strong>：</p>
 <p>  源码中通过判断当前节点编号是否小于最左叶子节点的编号，如果满足，说明当前节点是内部节点，否则就是叶子节点，而最左叶子节点的编号正是 numleaves（满二叉树的性质）。</p>
 <h3 id="选出切分维度">选出切分维度</h3>
 <p>图 6：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/6-c2fdb9c8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272220765.png" />   
     </p>
 <p>  在当前流程点，我们需要 <code>选出切分维度</code>，使得在后面的流程中根据该维度值进行左右子树的划分，规则如下：</p>
 <ul>
@@ -250,7 +250,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="内部节点的排序">内部节点的排序</h3>
 <p>图 7：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/7-c0aa2c88.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221910.png" />   
     </p>
 <p>  在上一个流程点 <code>选出切分维度</code> 选出切分维度后，接着以这个维度的值作为排序规则对点数据进行排序，排序算法使用的是最大有效位的基数排序(MSB radix sort)，在源码中，先计算出 maxPackedValue、minPackedValue 中切分维度对应的维度值的相同前缀，目的在于使得在排序时只需要比较不相同的后缀值，提高排序性能。</p>
 <p>  我们在文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2020%2F0329%2F128.html">索引文件的生成（八）之 dim&amp;&amp;dii</a> 中提到，在收集阶段，已经将所有的点数据的域值（维度值）都存放在了 ByteBlockPool 对象的 <strong>字节数组 buff</strong> 中，当前流程点对点数据的排序并不会真正的在 buff 数组中移动（交换）维度值来实现排序，而是通过一个 int 类型的 ord 数组来描述点数据之间的排序关系。</p>
@@ -265,31 +265,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>  我们继续介绍上述公式：packedBytesLength 指的是一条点数据的域值占用的字节数，例如在图 10 中，一条点数据中有 3 个维度值，维度值是 int 类型，一个 int 类型的数值转化为字节数组后占用的字节数为 4（见文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2020%2F0329%2F128.html">索引文件的生成（八）之 dim&amp;&amp;dii</a>），那么 <strong>packedBytesLength</strong> 的值为 3*4 = 12，另外，假设根节点中包含了图 8 中的三个点数据，并且假设按照 <strong>维度编号 2</strong> 排序，那么 ord 数组如下所示：</p>
 <p>图 8：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/8-60f065d1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221044.png" />   
     </p>
 <p>  如果我们需要获得 numPoints 为 2 的点数据域值，根据上述公式 offset = 12 * 2 = 24，就可以将 <strong>字节数组 buff</strong> 中数组下标为 24 的位置作为起始地址，读取 packedBytesLength（12）个字节就可以获得点数据的域值，图 9 中的字节数组 buff 中存放的域值对应图 10：</p>
 <p>图 9：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/9-c72ada69.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221252.png" />   
     </p>
 <p>图 10：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/10-bd9acd38.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221817.png" />   
     </p>
 <h3 id="设置-splitpackedvalues-数组">设置 splitPackedValues 数组</h3>
 <p>图 11：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/11-40ebdfd0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221313.png" />   
     </p>
 <p>  在上一篇中我们简单的介绍了 splitPackedValues，它是一个字节数组，该值用来描述每一个节点使用哪个维度（维度编号）进行划分以及维度的值。</p>
 <p>图 12：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/12-e7b9f335.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221259.png" />   
     </p>
 <p>  splitPackedValues 数组中数组元素描述的信息如图所示：</p>
 <p>图 13：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/13-dbf50691.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221641.png" />   
     </p>
 <p><strong>我们假设当前处理的是根节点，并且图 12 为在根节点中待处理的点数据集合，同时切分维度的维度编号为 1</strong>，那么在执行了流程点 <code>内部节点的排序</code> 之后，排序后的点数据集合如下所示，为了便于描述，该集合的每个元素都有一个序号，序号是从 0 开始递增的值，例如下图中点数据{1, 2}的序号为 0，点数据{2, 8}的序号为 5：</p>
 <p>{1,2} -&gt; {4,3} -&gt; {3,4} -&gt; {4,6} -&gt; {6,7} -&gt; {2,8} -&gt; {8,9} -&gt; {7,11}  在上文有序的点数据集合中，选出序号的中位数，该例子中一共有 8 个点数据，那么根据源码中的中位数计算公式：</p>
@@ -418,6 +418,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -451,10 +455,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -833,6 +833,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

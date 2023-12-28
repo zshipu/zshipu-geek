@@ -209,7 +209,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>新闻领域的个性化推荐十分重要，传统的方法如基于内容的方法、协同过滤、深度学习方法在建模user-item交互关系时，经常面临以下三个问题：</p>
 <p>1）难以处理新闻推荐的动态变化。这种动态变化体现在两个方面，首先新闻具有很强的时效性，其次是用户对于新闻阅读的兴趣是不断变化的，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/014dd4ac3f034f2981ee2349b00614fd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272005091.png" />   
     </p>
 <p>因此，在建模过程中，不仅要考虑用户对当前推荐的反馈，还要考虑长期的影响。就好比买股票，不能只考虑眼前的收益，而是要考虑未来的预期收益。</p>
 <p>2）当前的推荐算法通常只考虑用户的点击／未点击 或者 用户的评分作为反馈，然而，用户隔多久会再次使用服务也能在一定程度上反映用户对推荐结果的满意度。</p>
@@ -220,7 +220,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>3）使用Dueling Bandit Gradient Descent方法来进行有效的探索。</p>
 <p>算法的框架如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/245095cbd12f4cd9b4a7c40eb0b5779a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272005081.png" />   
     </p>
 <p>本文的贡献主要有：</p>
 <p>1）提出了一种强化学习的框架用于在线新闻的个性化推荐</p>
@@ -230,13 +230,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="2问题定义">2、问题定义</h1>
 <p>下面是本文中的一些符号约定：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/e945db3bed8743bf949fb0088e114570.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272005250.png" />   
     </p>
 <h1 id="3模型详解">3、模型详解</h1>
 <h2 id="31-模型整体框架">3.1 模型整体框架</h2>
 <p>模型整体框架如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/eefbf6ef60e14c6cb2fd235a06f15718.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272005587.png" />   
     </p>
 <p>有几个关键的环节：</p>
 <p><strong>PUSH</strong>：在每一个时刻，用户发送请求时，agent根据当前的state产生k篇新闻推荐给用户，这个推荐结果是exploitation和exploration的结合</p>
@@ -254,40 +254,40 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>这里深度强化学习用的是Dueling-Double-DQN。之前我们介绍过DQN的三大改进，包括Double-DQN，Dueling-DQN和优先经验回放，这里用到了两个。将用户特征和上下文特征用于表示当前的state，新闻特征和交互特征用语表示当前的一个action，经过模型可以输出当前状态state采取这个action的预测Q值。</p>
 <p>Q现实值包含两个部分：立即获得的奖励和未来获得奖励的折现：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/18b9403816a24424909d33d05a841193.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272005193.png" />   
     </p>
 <p>立即的奖励可能包含两部分，即用户的点击奖励和用户活跃度奖励。由于采取了Double-DQN 的结构，Q现实值的计算变为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/5b6c6f1cc156450f832ba9ebf47820f9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272005914.png" />   
     </p>
 <p>再加上Dueling的考虑，模型的网络结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/ff18ce81341046ada99f9573f5edc3c2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272005997.png" />   
     </p>
 <p>文章中关于DQN的理论部分没有详细介绍，可以参考我之前写过的强化学习系列的文章进行理解。</p>
 <h2 id="34-用户活跃度">3.4 用户活跃度</h2>
 <p>用户活跃度（User Activeness） 是本文提出的新的可以用作推荐结果反馈的指标。用户活跃度可以理解为使用app的频率，好的推荐结果可以增加用户使用该app的频率，因此可以作为一个反馈指标。</p>
 <p>用户活跃度的图示如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/f4f8858733b64c5caf72cfdb581671f6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272005145.png" />   
     </p>
 <p>如果用户在一定时间内没有点击行为，活跃度会下降，但一旦有了点击行为，活跃度会上升。</p>
 <p>在考虑了点击和活跃度之后，之前提到过的立即奖励变为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/5dc6d124ba574a33ab61fa89e236fc06.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272005293.png" />   
     </p>
 <h2 id="35探索">3.5探索</h2>
 <p>本文的探索采取的是Dueling Bandit Gradient Descent 算法，算法的结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/ac659f955b64483cb50687bbd464968f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272005058.png" />   
     </p>
 <p>在DQN网络的基础上又多出来一个exploration network Q ̃ ，这个网络的参数是由当前的Q网络参数基础上加入一定的噪声产生的，具体来说：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a5fc9d59217d405f98c53f2465d6a998.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272005190.webp" />   
     </p>
 <p>当一个用户请求到来时，由两个网络同时产生top-K的新闻列表，然后将二者产生的新闻进行一定程度的混合，然后得到用户的反馈。如果exploration network Q ̃的效果好的话，那么当前Q网络的参数向着exploration network Q ̃的参数方向进行更新，具体公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/df5aae16158c437d85b5d9bffe8e035e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272005761.png" />   
     </p>
 <p>否则的话，当前Q网络的参数不变。</p>
 <p>总的来说，使用深度强化学习来进行推荐，同时考虑了用户活跃度和对多样性推荐的探索，可以说是一个很完备的推荐框架了！</p>
@@ -295,11 +295,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="41-数据集">4.1 数据集</h2>
 <p>使用的数据集是新闻app得到的数据：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/60ffc517be78476c853ae75b6762b312.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272005452.webp" />   
     </p>
 <p>数据中存在明显的长尾特点：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/7604468d6bc94da1942a603207e2af72.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272005303.png" />   
     </p>
 <h2 id="42-评估指标">4.2 评估指标：</h2>
 <p>主要用的评估指标有CTR、top-K准确率，nDCG，三者的计算公式如下：</p>
@@ -433,6 +433,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -466,10 +470,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -848,6 +848,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

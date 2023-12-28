@@ -222,7 +222,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>事实上，如果特征工程做的足够好，即使是简单的模型，也能表现出非常好的效果。而复杂的模型可以在一定程度上减少特征工程的工作量。例如，对于线性模型，我们需要将类别变量进行独热编码等处理，但对于复杂一些的模型如树模型，则可以直接处理类别变量。像推荐系统中常用的 LR 模型，需要手工构造组合特征，而 FM 模型可以解决特征组合的问题，直接输入原始特征。而更复杂的 DNN 模型，可以自动学习特征的表示。</p>
 <p>在微视场景下，视频的播放时长、播放完整度、点赞、转发、分享、评论等多种互动行为都是推荐模型的训练目标，根据模型所要学习的目标和业务逻辑，我们需要考虑数据中有哪些可能相关的信息，从现有数据中挖掘出对模型预测有用的特征。比如在微视排序中，用户的兴趣，在 App 上的播放、互动等行为以及视频的类别、标签、热度等都是强相关的因素。在确定了哪些因素可能与预测目标相关后，我们需要将此信息抽取成特征，下面会对不同特征的处理方式做具体介绍。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d05a4efed21e4392a7bda4e7d66ba719.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272120394.webp" />   
     </p>
 <h3 id="1数值特征">1.数值特征</h3>
 <p>数值类型的数据具有实际统计意义，例如用户对不同类目下视频的兴趣分，或者是计数，例如一个视频被播放了多少次、被点赞、转发以及评论了多少次等。虽然一些机器学习模型可以直接输入数值类型的数据，但是通常情况下，对数值型数据进行适当的变换和处理能带来更优的效果。对于数值特征，我们主要考虑的因素是它的大小和分布。下面介绍几种我们用到的数值特征的处理方法。</p>
@@ -233,7 +233,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>3）缺失值处理。</strong> 实际问题中经常会遇到特征缺失的情形，对于特征缺失，可以选择补一个值，例如使用均值，中位数，众数等进行替代，需要视具体情况进行选择；也可直接忽略，即将缺失作为一种信息进行编码输入模型让其进行学习，比如用户性别缺失，可以直接将未知作为一种类别进行处理；还可以使用模型预测缺失值，当然也有一些模型可以直接处理缺失值特征，比如 XGBoost。</p>
 <p><strong>4） 特征交叉。</strong> 特征交叉可以表示特征之间的相互作用，有助于表示非线性关系，增强对问题的刻画，缺点是维度快速增长，需要更多的训练样本。提升模型表达能力常见的关联方式有内积、笛卡尔积、哈达玛积等。内积是将两个或多个特征相乘，若向量 a=(a1,b1)，向量 b=(a2,b2)，则向量 a·向量 b=a1a2+b1b2；笛卡积是将所有元素两两相乘，例如，A={a,b}，B={0,1,2}，则 A×B={(a, 0), (a, 1), (a, 2), (b, 0), (b, 1), (b, 2)} ；Hadamard 积是将对应位置的元素相乘，例如，A={a,b}，B={0,1}，则 A×B={(a, 0) (b, 1) } 。下图旨在说明笛卡尔积与 Hadamard 积在具体特征构造上的差异。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9027f3b2499e427d9811d6dc59a1aa71.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272120317.webp" />   
     </p>
 <p>特征交叉可以通过一些特征选择方法来选择有效的组合特征，比如卡方检验、特征相关性分析等；也可以根据经验进行组合， 有些 cross 特征，虽然可能没有直观的解释，但也常常会给模型带来很大的效果提升。除了手工构造交叉特征外，有些模型可以自动进行特征的交叉组合，比如常用的 FM 和 FFM 模型等。</p>
 <p><strong>5）标准化与缩放。</strong> 数据的标准化或者归一化是将数据按比例缩放，将其转化为无量纲的纯数值，使得不同单位或量级的特征之间具有可比性，对于利用梯度下降来训练模型参数的算法，有助于提升模型的收敛速度。需要强调的是，不同业务的数据，其数据分布是不同的，缩放的方法一定要符合其特定的数据分布。一般会根据实际数据的情况，对常规做法或者公式进行调整，但大体思路上还是一致的，下面介绍 3 类相对通用的做法。</p>
@@ -241,13 +241,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>0-1 标准化，是对原始数据的线性变换，使结果落到[0,1]区间，其中 max 为样本数据的最大值，min 为样本数据的最小值。这种方法有一个缺陷就是当有新数据加入时，可能会导致 max 值和 min 值的变化，需要重新定义。如果 max 值和 min 值波动较大，容易使得标准化结果不稳定，因此在实际使用中常用经验常量值来替代最大最小值。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7ed1cecf756849d6bf5304165742c043.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272120196.webp" />   
     </p>
 <ul>
 <li>z-score 标准化，经过处理的数据符合标准正态分布，即均值为 0，标准差为 1，其中 μ 为所有样本数据的均值，σ 为所有样本数据的标准差。这种标准化方式要求原始数据的分布可以近似为高斯分布，否则效果会变得很糟糕。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bbae04aa20654367a1a7ecd5a242d38f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272120717.webp" />   
     </p>
 <ul>
 <li>非线性标准化，这种方法一般使用在数值差异较大的场景，通过一些数学函数，比如对数、指数、正切等，将原始值做映射变换。实际使用中，需要根据不同业务的数据分布来选择，比如对数缩放，对数缩放对于处理长尾分布且取值为正数的数值变量非常有效，可以压缩数据范围，将长尾变为短尾，像 log2 和 log10 转换在微视中也都有使用，是一种方差稳定的变换。</li>
@@ -260,7 +260,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>电商领域中经常需要计算或预测一些转化率指标，比如 CTR。这些转化率可以是模型的预测值，也可以作为模型的特征使用。以商品点击率预测为例，CTR 的值等于点击量除以曝光量。理想情况下，例如某个广告点击量是 10000 次，转化量是 100 次，那转化率就是 1%。但有时，例如某个广告点击量是 2 次，转化量是 1 次，这样算来转化率为 50%。但此时这个指标在数学上是无效的。因为大数定律告诉我们，在试验不变的条件下，重复试验多次，随机事件的频率近似于它的概率。后者点击量只有 2 次，不满足“重复试验多次”的条件。如果对于一个新上线的商品，其曝光为 0，点击量也为 0，此时这件商品的 CTR 应该设为 0 还是赋一个初始值？初始值设 0 是可以的，但不太合理。当 CTR 作为特征使用时，表示这个商品完全没有点击，不太符合日常推断，通常是赋一个大于 0 的初始值。</p>
 <p>以上两个问题可以使用平滑技术来解决。贝叶斯平滑的思想是给 CTR 预设一个经验初始值，再通过当前的点击量和曝光量来修正这个初始值。如果某商品的点击量和曝光量都是 0，那么该商品的 CTR 就是这个经验初始值；如果商品 A 和商品 B 的曝光量差别很大，那么可以通过这个经验初始值来修正。贝叶斯平滑就是确定这个经验值的过程。贝叶斯平滑是基于贝叶斯统计推断的，因此经验值计算的过程依赖于数据的分布情况。对于一件商品或一条广告，对于某次曝光，用户要么点击，要么没点击，这符合二项分布。因此对于点击率类的贝叶斯平滑，都可以基于以下假设：对于某件商品或广告，其是否被点击是一个伯努利分布。伯努利分布的共轭分布就是 Beta 分布，也就是说，点击率服从 Beta 分布。而所有的数据有一个自身的点击率分布，这个分布可以用不同的 beta 分布来拟合。beta 分布可以看做是对点击率的一个先验知识，我们可以根据观测来修改我们的先验，所以贝叶斯平滑就是估计 Beta 分布中的参数 α 和 β，其中 C 和 I 是点击次数和曝光量。实际应用时根据历史数据得到的 α 和 β 可以帮助确定平滑参数的大致范围，防止设置参数时偏离过大。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/52013e79c93848308b6e7610bcfc479f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272120288.webp" />   
     </p>
 <ul>
 <li>威尔逊区间平滑</li>
@@ -269,7 +269,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>假设 u 表示正例数（好评），n 表示实例总数（评论总数），那么好评率 p 就等于 u/n。p 越大，表示这个 item 的好评比例越高，越应该排在前面。但是，p 的可信性，取决于有多少人，如果样本太小，p 就不可信。我们已知 p 是二项分布中某个事件的发生概率，因此我们可以计算出 p 的置信区间。置信区间实际就是进行可信度的修正，弥补样本量过小的影响。如果样本多，就说明比较可信，不需要很大的修正，所以置信区间会比较窄，下限值会比较大；如果样本少，就说明不一定可信，必须进行较大的修正，所以置信区间会比较宽，下限值会比较小。威尔逊区间就是一个很好的修正公式，在小样本上也具有很强的鲁棒性。</p>
 <p>在下面的公式中， p 表示样本的好评率，n 表示样本的大小，z 表示对应某个置信水平的 z 统计量，是一个常数。一般情况下，在 95%的置信水平下，z 统计量的值为 1.96。可以看到，当 n 的值足够大时，这个下限值会趋向 p 。如果 n 非常小，这个下限值会远小于 p，起到了降低好评率的作用，使得该 item 的打分变低、排名下降。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fb37a717afeb41d680a5f3e5b50e49ca.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272120924.webp" />   
     </p>
 <p><strong>7）bias 消除。</strong> 微视会用到一些不同时间窗口以及实时的统计特征，比如不同类目或者不同时长区间下的完播率、平均播放时长等，考虑到冷热门类目以及长短视频在统计量上本身存在明显的差异，平滑之后我们会用统计量均值进行消偏，这也相当于有一个对热门视频降权，对长视频提权的作用。</p>
 <p><strong>8）多维度定义。</strong> 有些特征可以结合多个属性或者统计量来定义，比如用户所属用户群特征，用户群可以从画像、操作系统等维度来定义；比如用户的活跃度特征可以从周/月登录次数、日播放时长、日播放个数、平均完播率等维度联合定义。</p>
@@ -289,7 +289,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>视频 embedding 分为基于内容的 embedding 和基于行为的 embedding，前者使用视频的标题、封面、图像，音频等视频自身属性信息，通过 nlp、图像视觉等技术获得 embedding，后者是基于用户与视频的交互行为数据获得，比如我们发现用户在一个 session 中，前后点击的视频存在一定的相似性，通常会表现出对某类型视频的兴趣偏好，可能是同个风格类别，或者是相似的话题人物等。因此我们将一段时间内用户点击的视频 id 序列作为训练数据，使用 skip-gram 模型学习视频的 embedding 特征。由于用户点击行为具有上下文承接关系，因此得到的 embedding 特征有很好的聚类效果，使得在特征空间中，同类目的视频聚集在一起，相似类目的视频在空间中距离相近。在微视推荐系统里，视频 embedding 不仅可以作为排序特征，利用用户最近点击过视频的平均 embedding 进行召回，也是带来了效果提升。</p>
 <p>我们使用 TSNE 对视频 embedding 进行降维，从可视化结果来看，同一个类目下的视频是聚在一起的；相似的类目在特征空间中离得较近，如“猫”和“狗”，“亲子互动”和“亲情”；差异较大的类目离得较远，如“旅行 Vlog”和“猫”。这还是很符合预期的，一个用户的主要兴趣可能就集中在某几类，比如有的用户喜欢“猫”，那这个用户很大可能对“猫”的视频有大量的播放以及互动行为，那我们学习出来关于猫这个类目的视频 embedding 就会很相似，表现出在嵌入空间中聚集在一起的情形。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/68a51f1d421a46ce99b21220ea1c7ad4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272120698.webp" />   
     </p>
 <p>但是如果只是简单的对视频 id 序列学习 embedding 特征，我们是无法获得新视频 embedding 的。针对这个问题，我们使用了 side information 来解决视频冷启动问题，side information 指的是视频的一、二级类目、视频标签、视频时长、清晰度、距离发布的时间等视频属性信息，像距离发布的时间属性对于新闻资讯类视频，提升视频时新性有一定的帮助，尤其我们发现用户比较偏爱新发布的视频。我们将视频 embedding 特征转化为视频属性的 embedding 特征，取一段时间内同属性视频的平均 embedding 作为这个属性的 embedding 特征。这样当有新的视频进入到推荐库时，可以计算出新视频的视频属性 embedding。这样做的好处是在同一个语义空间做运算，排序模型不需要再重新学习 embedding 的空间分布。</p>
 <p>基于 side information 获得的视频 embedding 区分能力还是受到一定限制的，只要视频属性相同，不同视频 embedding 是完全一样的，而且如果增加了新的类目标签或者其他属性分类也是没有办法处理的。针对以上情况，实际使用中我们采用增量式 skip-gram 模型学习视频的 embedding，使用推荐库最新资源线上实时训练，将新入库的视频加入到模型中做增量式学习。Incremental skip-gram 模型与传统 skip-gram 模型的不同之处在于 embedding 空间分布是动态更新的。</p>
@@ -477,6 +477,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -510,10 +514,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -892,6 +892,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

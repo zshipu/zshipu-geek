@@ -204,7 +204,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>2018 年 11 月 20 日</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dcf4616da3eb42a3965aee927922e125.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109277.jpeg" />   
     </p>
 <h4 id="背景介绍">背景介绍</h4>
 <p>对于腾讯庞大的大数据分析业务，几千台的 Hadoop 集群，近百 P 级的存储总量，每日产生万亿的消息数据入库，需要针对几十亿 IMEI 手机设备去重，并关联数千亿的历史全表，进行曝光、点击、PV、UV、日活、新增、留存等统计指标分析，当前所有业务的 ETL 清洗、统计计算、用户画像都全部依赖离线 m/r 和 Hive SQL，给集群造成很大压力，系统负载高任务积压重，计算耗时久业务响应慢（t+1），难以及时反馈市场信息的变化，不仅是技术上的巨大挑战，同时业务的迅速增长变化也在挑战着当前技术团队的工作模式和流程。如何突破现有大数据分析架构瓶颈？</p>
@@ -216,12 +216,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="二典型业务流程和数据流">二、典型业务流程和数据流</h4>
 <p>手机浏览器业务场景典型流程：从手机浏览器的资讯日志数据，统计每板块的 PV，并挖掘用户浏览咨讯的内容提取标签，并计算标签权重，进行推荐，再将推荐结果反馈到日志。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c68dbf0acb664669ac5e05960af4fd31.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109809.jpeg" />   
     </p>
 <h4 id="三贯穿业务场景的数据流">三、贯穿业务场景的数据流</h4>
 <p>多份业务 log 和产品如灯塔 sdk 产生多份数据日志，分别有各自的通道和 hdfs 数据模型，对集群存储和计算有很大重复，也造成各自数据的不完整，目前尚未在“通道采集—基础数据—集市数据——高级画像”数据流链路上形成统一数据模型，这样即能优化节省资源，又能数据建模标准化，所有统计计算和算法挖掘都基于统一数据标准进行，上层可以提供大量工具化用户产品。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/73e50199e1d947229e9aaba49856cba7.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109096.jpeg" />   
     </p>
 <h4 id="四系统架构瓶颈全链路分析">四、系统架构瓶颈全链路分析</h4>
 <p>综上所述，我们通过对集群、采集、通道、统计、存储、数据治理、idc、业务场景的全链路架构分析，归纳出以下瓶颈点：</p>
@@ -258,22 +258,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>（1）、Log 进行重新梳理和合并，减少冗余，制定 log 规则</p>
 <p>（2）、考虑从源头进行 log 梳理和分流，以统计业务维度接收局部消息内容：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3940cac8b0fc4c34a2c3bc1b79615d76.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109301.jpeg" />   
     </p>
 <p>2、通过大量 hdfs 存储表实现数据流处理：以手机浏览器业务，每个 log 表会产生多个清洗结果表，多张清洗结果表汇合清洗统计表，完成统计计算后，还需要汇合多张统计结果表，形成通过大量的 hdfs 中间存储表，来实现统计和集市的数据处理逻辑。如果考虑用实时流取代存储表处理流，可以带来很大的资源节省和效率提升：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5fcaba65e9b4480e8b14ca6eb9dc80ac.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109453.jpeg" />   
     </p>
 <p>3、当前离线处理方式，以灯塔为例，每 10 分钟接收 MQ 通道的日志数据，在 HDFS 建立一个分区，一天共 144 个分区，每个分区建立 3600 个几 K 到 10M 的小文件不等，再提交 144 个离线 JOB 去执行清洗任务，产生 1500 个解析表，再按照小时、天、月建立统计统计任务，反复关联全表热表操作，完成新增用户等典型统计。离线处理方式计算和磁盘耗用严重，解决 1 天内的实时需求难以满足。除灯塔外，其他的业务也按照这种方式源源不断产生大量的离线任务进行统计，除计算外还会产生大量数据存储冗余，现在我们终于明白集群为什么如此繁忙的症结所在了。</p>
 <h5 id="二迁入实时计算进行优化的考虑">（二）迁入实时计算进行优化的考虑：</h5>
 <p>1、经过分析了灯塔、应用宝、手机浏览器和手机管家，业务的相似主线模式如下，更适合实时处理；</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d5e937abdb3b4bc9b95c8b6597dd452a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109715.jpeg" />   
     </p>
 <p>2、清洗部分实时处理 DEMO 验证：相对于离线计算 MAP/REDUCE 的时间消耗换算，耗用机器数从 84 台降低到 15 台 m10，完成了 90% 的数据量进行流式清洗，包括：从 kafka 拉数据 -&gt; 解包 -&gt;byte2string-&gt; 清洗 -&gt;string2byte-&gt;，5 分钟处理 10 亿消息数据，333w/s，接近 mq 纯拉取消费的 360w/s；</p>
 <p>3、清洗转换步骤，采用实时流处理架构如 Storm，通过 spout 从 MQ 获取输入流，自定义多个 bolt 并行处理输入流，再依此组合设计；</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cf87017ce4f44895b66148627839a33a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109007.jpeg" />   
     </p>
 <p>4、业务迁移计划，以灯塔广告监测 CASE 为切入逐步安排计划迁移。</p>
 <h5 id="三实时计算框架选型问题">（三）实时计算框架选型问题：</h5>
@@ -293,13 +293,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="六锋刃大数据架构方案">六、锋刃大数据架构方案</h4>
 <p>到目前为止，我们需要寻找一种新的大数据架构方案，针对海量大数据的实时统计场景进行专门设计，得到更先进的解决办法。我们把业务场景简化一下如下表述，按照因果关系，我们通过手机设备获取到一些 app 维度的 log 数据，经过大数据平台的统计处理，最后得到用户相关的结果和一些 count 类结果（pv,uv, 金额，数量等），现在我们想在内存中按照维度组合来实时计算这些结果，削峰填谷把离线累积的数据统计变成每分钟实时流处理。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/51f2801b1b394d6f92d506a235205358.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109494.jpeg" />   
     </p>
 <h5 id="一bitmap-位存储和位计算">（一）BitMap 位存储和位计算</h5>
 <p>为了解决海量用户的去重问题，我们发现使用 bitmap 有两个非常显著的优势：位存储占用空间低，位计算效率高。</p>
 <p>1、将需要做统计计算的 id 转换成数字序号，每个只占 1 个 bit，对于 20 亿的用户 id，只需要 20 亿 bit 约 238m 大小，压缩后占用空间更小，最少只要 200k；</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4d886de636b5402caf43aa051603d71c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109650.jpeg" />   
     </p>
 <p>2、通过单个 bitmap 可以完成去重操作，通过多个 bitmap 的且、或、异或、反等位操作可以完成日活、月活、小时分钟活跃、重度用户、新增用户、用户流向等绝大部分的统计计算，而且能在单机毫秒级完成，真正做到实时计算出结果，同比 Hadoop/Hive 离线计算执行“select distinct count…from…groupby join…”类似 SQL 的方式统计，往往需要几百台机器，耗用 30 分钟才能完成，对比非常悬殊，而且容易形成大量 SQL 任务调度和大表 join 给集群带来繁重压力。</p>
 <h5 id="二bitmap-聚合计算">（二）BitMap 聚合计算</h5>
@@ -337,11 +337,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8665e117d1fd41b2825041516244f0fd.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109662.jpeg" />   
     </p>
 <p>按照不同维度生成用户 bitmap 后，会得到如下面表格描述的数据结构：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/54edd4219dac43cf93c12284dc0fc2b6.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109726.jpeg" />   
     </p>
 <p>我们可以看到，这个数据结构是个大的 0,1 矩阵，每一行代表某维度取值的用户 bitmap，把 1 累计可以求的此维度取值的用户指标，比如 hw 机型有多少用户在使用。每一列实际上可以获取到该用户的画像，比如 u6 用户用 oppo 机型、经常在北京和深圳等等，维度越多，画像信息越详细。另外，全盘用户的矩阵结构还有更深远的意义，我们在机器学习推荐中，基于特征处理后的 01 矩阵，可以完成大量的算法训练。</p>
 <p>实际上，bitmap 的维度组合还有一些复杂性问题需要权衡，比如维度 A(共 10 个取值) 和维度 B(共 10 个取值)，如果聚合 AB，有两种方式：</p>
@@ -373,29 +373,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h5 id="四流式处理-bitmap-实时计算框架">（四）流式处理 +Bitmap 实时计算框架</h5>
 <p>将离线批量处理改成消息流式实时处理，并按照上面基于 bitmap 做去重和聚合的思路，我们得到下面新的架构：借助 flink 的 SQL 能力做清洗逻辑，并提供基于 SQL 的去重和统计 udf 的封装给到业务分析人员使用，构建一个分布式的 bitmap 集群服务来提供 bitmap 的计算引擎支持，统计结果的数据实时写到数据库里提供报表展示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/430b60a49fc345b0964720eb9a56e312.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109882.jpeg" />   
     </p>
 <p>注意到，上面的架构里增加来一个 ID 查询服务的模块，它用来负责将手机 IMEI 号在线查询转换为数字 ID。</p>
 <p>1、初始化：通过离线任务，按照最后活跃时间初始化用户 ID 的数字序号，很久没来的用户放前面，最近的用户放后面，新增的用户在后面加 1，这样直接从 bitmap 的数字 ID 范围知道是大致什么时间的用户，目前约 50 亿范围的用户 id，除去虚假用户和僵尸用户，还有 20 亿左右正常用户。结果：仅通过数字序号可以区别最近的用户还是很久以前的。</p>
 <p>2、运行时：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0ae89dc3c37c466da669d62a49a121a6.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109273.jpeg" />   
     </p>
 <p>未来：手机设备上，灯塔 sdk 直接携带设备 ID 的数字序号进入通道，逐步减少 id 查询，也就是说，未来对市场上几十亿手机设备，腾讯都能有一个除 imei 外自己的数字编号，这样会极大提升后台的大数据统计分析能力。</p>
 <h5 id="五bitmap-的空间耗用">（五）BitMap 的空间耗用</h5>
 <p>1、大范围数字的空间浪费问题，如果不分区，一个值为 20 亿的数字需要耗用 238m 的空间；</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ee1b2d27aeb341b8b4581066ab6f7a95.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109350.jpeg" />   
     </p>
 <p>2、分区 bitmap 的优势和问题，对于数字最大范围为 20 亿，按照不同的大小分区如下：如果每个分区很大，那么少量分布均匀的数字很容易占满所有分区；如果每个分区很小，分区数（key 的数量）就很多，key 的空间开销也很大。那么如何做到最优的空间消耗呢？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/027987b95827459eafd890d59767744a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109289.jpeg" />   
     </p>
 <p>3、RoaringBitmap 的核心原理和不足：</p>
 <p>RoaringBitmap（ <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2FRoaringBitmap%2FRoaringBitmap">官网地址</a>， <a href="https://zshipu.com/t?url=https%3A%2F%2Farxiv.org%2Fpdf%2F1603.06549.pdf">论文地址</a>）是 Druid、Spark、Hive 等很多大数据框架依赖的 bitmap 核心组件，我们先看看它是怎么做到空间优化的。</p>
 <p>RoaringBitmap 将一个整型数字拆分成高低 2 个短整型，并共用高位做 key，可以知道最大分区为 65535，低位做 value，可以用一个 short[][] 来存储，相同 key 的 value 存储在同一个 short[] 里，进行二分查找去重，当 value 的数量到达 4096 时，空间消耗已经等同于一个长度为 65535 的 bitmap，这时进行 bitmap 转换。 RoaringBitmap 在理论上通过高低分位成两个 short 类型数字，从而有效节省数据量小时的空间开销，并在数据增长到临界点 4096 时转换成 bitmap，数据量大时不再增长空间开销。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dcab3e56fb0a403c96bbbfff916a7cfc.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109373.jpeg" />   
     </p>
 <p>但是 RoaringBitmap 在落地的实现和应用中仍然通常在面临以下问题，不能做到性能和空间最优：</p>
 <ul>
@@ -412,7 +412,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>4、原创实现的高效 ArrayBitmap</p>
 <p>为了克服数据量小而且稀疏时导致的 bitmap 空间浪费问题，经过实践摸索寻找到一种动态增长的分桶数组结合 bitmap 数据结构的新设计方案来解决，经过大量测试证明，相对于 RoaringBitmap 有更好的性能和更优的内存空间消耗。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7ed76b3ffef344e5ad90dae68404a279.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109603.jpeg" />   
     </p>
 <p>性能测试对比：</p>
 <p>经过和 roaring bitmap 不同数据大小的测试对比（20 亿范围随机），情况如下：</p>
@@ -440,7 +440,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>产品官网： <a href="https://zshipu.com/t?url=http%3A%2F%2Fbeacon.qq.com%2F">beacon.qq.com</a></p>
 <p>1、灯塔实时计算经历“实时清洗上线—实时统计开发实施—试运行 1 个月—故障演练”共 3 个月，目前已经全量上线，所有产品可以查看一维 1 分钟和 10 分钟到实时新增、启动用户、启动次数。当前运行状况正常。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f91d1a85b3834cb8b5ae575d613ca7ce.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109564.jpeg" />   
     </p>
 <p>2、确定了实时系统服务保障量化指标，保证实时查看结果，对延迟情况保障：平均延时不超过 5 分钟，异常延时（版本更新重启等）不超过 30 分钟，超过 30 分钟属故障。vip 产品（1 分钟，10 分钟，日）保证和离线统计结果偏差不超过万分之五，长尾产品结果偏差不超过千分之五。</p>
 <p>3、数据核对情况：以 10 分钟为标准，目前实时计算结果和离线统计结果核对一致。1 分钟离线没有统计，日统计离线有策略补充基准不一样，经过和灯塔业务确认，统一了核对结果。</p>
@@ -466,7 +466,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>需求：当前离线 hive 跑 3000 亿全表 join1000 亿日表耗时 7 小时以上，难以满足模型频繁验证。</p>
 <p>方案：3000 亿全表按照 app 维度理论生成 3000 万的 bitmap（其中用于统计的数量在 100 以上有 200 万），1000 亿日表用于统计的数量 100 以上的有 48 万，20 亿用户大盘表生成 1 个 bitmap，通过三类 bitmap 求新增并更新历史全表和大盘用户表。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/65450fe939694a1487e506d9f050a080.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109067.jpeg" />   
     </p>
 <h5 id="四abtest-实时数据分析平台">（四）ABTest 实时数据分析平台</h5>
 <p>1、ABTest 的应用场景可以分为两大类型：</p>
@@ -478,28 +478,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>(2)、模型量化计算综合提升</p>
 <p>如下图，需要通过实时计算将表格内的统计指标完成：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/26d42a8d07b3444b83dabd702f79802c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109399.jpeg" />   
     </p>
 <p>3、Abtest 系统架构方案：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/703f2f54d46d4172ab558357958ae19a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109628.jpeg" />   
     </p>
 <p>4、ABtest 实时数据分析平台上线</p>
 <p>之前几个小时才能看到线上数据，现在只要五分钟！</p>
 <p>实时数据能让我们能更快的看到实验数据，及时发现并下线异常实验。同时也能实时监控实验，及大盘核心指标，发现异常数据。更快发现问题就能更及时解决问题，从而降低异常对线上用户的的影响。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/586b7e8c01d548dbbf8795d2102d22c2.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109051.jpeg" />   
     </p>
 <h5 id="五业务实施推动架构升级">（五）业务实施推动架构升级</h5>
 <p>在实施上线以上实时统计、离线加速的业务场景，业务系统获得了高性能的同时，也暴露了在高可用性和高可靠性的某些不足，为此，也推动着锋刃实施团队进行自身的架构升级。</p>
 <p>1、首先 flink 的清洗和去重改造成基于消息通道的生产消费模式，借助消息 offset 消费位可以更准确的故障恢复消费。</p>
 <p>2、增加配置平台工具化方便业务配置自己的清洗逻辑、统计逻辑、聚合逻辑等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/06b6037c30b344ae8774a27728ce87f9.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272109368.jpeg" />   
     </p>
 <p>3、我们发现，锋刃系统大部分的时间精力耗在上面的虚线框内，实现一个分布式的 bitmap 计算引擎、内存结构、及持久化存储上，以及稳定性保障上。将 bitmap 引擎迁移到部门 kv 存储产品 decache 和 bdb 上，并提供专门的热备、故障恢复、冷热切换、内存管理、分布式扩容等特性。这样锋刃复杂繁重的去重服务模块就简化成一个代理模块，可以更专注在业务需求的满足上。如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2e5e700248734f7692fd0494eb0d822c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272110703.jpeg" />   
     </p>
 <h4 id="八olap-的愿景目标">八、OLAP 的愿景目标</h4>
 <p>我们的大数据统计需求其实可以归纳为两大类型：</p>
@@ -516,7 +516,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们先看看以 Druid 为代表的大数据 OLAP 技术的主要设计原理。</p>
 <h5 id="一druid-的主要原理">（一）Druid 的主要原理</h5>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9a2e7e6ad5c74be4b1882659030e48a0.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272110993.jpeg" />   
     </p>
 <p>简言之，Druid 的设计原理可以通过上述步骤归纳：</p>
 <p>1、提出 rowid、时间戳、维度（多个）、指标（多个）的 OLAP 数据模型，并按列压缩存储，导入明细数据时设置 rollup 为 true 可以实现自动上钻合并，比如点击数累加。</p>
@@ -557,19 +557,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>竖切：查找 d2 维度数据， cube[ ][d2][ ]</p>
 <p>切块：查找 t0-t1 时间，d0=v0 and d0=v1 的数据，cube[&lt;2][d0][&lt;2] （红框内）</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5271944248ba42ecb804b7be803c99d6.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272110395.jpeg" />   
     </p>
 <p>2、锋刃 + Druid 的 OLAP 架构方案</p>
 <p>如果我们不是直接自研实现，而是把锋刃和 Druid 通过如下架构方案集成，也是可以间接满足上面的 cube 的索引模型，虽然看上去有一点小别扭。</p>
 <p>（1）锋刃继续承担消息的接入、实时清洗、和用户去重，这里把用户去重分成上面归纳的两种类型，一类是实时出的关键指标，基于内存结构；一类是可适当延迟出的所有维度指标，基于持久化存储，把这两部分的用户去重结果都导入到 Druid。</p>
 <p>（2）Druid 承担所有维度的自定义查询，由于锋刃完成了用户去重的功能，druid 除了可以快速根据自定义维度过滤，并完成 count 类指标统计外，还可以同时查到用户去重的结果，结果记录是按照 group 展开的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0e4b59b5488e467a9b6e24861f914be5.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272110431.jpeg" />   
     </p>
 <p>我们注意到上面的方案还有一点缺陷，如果查出一个时间范围内的多条用户结果，不能通过 druid 直接合并显示，这时需要返回锋刃系统找到对应的用户 bitmap 再做去重后返回结果。</p>
 <p>（3）我们把用户的自定义查询过程封装成一个统一的输入输出如下，这样看上去就是一个基本实现 OLAP 功能的完整方案了。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/53935412d8f1473fa11077e4822e06d2.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272110803.jpeg" />   
     </p>
 <h4 id="总结">总结</h4>
 <p>本文从集群压力到大数据平台整体架构，再到实时优化的切入，一步步阐述了锋刃大数据系统产生的来龙去脉，重点介绍了流式处理结合 bitmap 技术架构方案的主要原理，相关业务场景实施上线，以及后续的 OLAP 目标规划。关于锋刃大数据系统更多的内容，请参考锋刃团队后续的设计文档、使用指南、以及开源计划。</p>
@@ -704,6 +704,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -737,10 +741,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1119,6 +1119,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

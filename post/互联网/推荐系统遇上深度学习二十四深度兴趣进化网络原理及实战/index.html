@@ -230,25 +230,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们先来对比一下DIN和DIEN的结构。</p>
 <p>DIN的模型结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1f398253e2cd4f8eb95cad613f20b761.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959097.jpeg" />   
     </p>
 <p>DIEN的模型结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/665d60f4148143e58db28bde9df22b4f.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959010.jpeg" />   
     </p>
 <p>可以看到，DIN和DIEN的最底层都是Embedding Layer，User profile， target AD和context feature的处理方式是一致的。不同的是，DIEN将user behavior组织成了序列数据的形式，并把简单的使用外积完成的activation unit变成了一个attention-based GRU网络。</p>
 <h3 id="22-兴趣抽取层interest-extractor-layer">2.2 兴趣抽取层Interest Extractor Layer</h3>
 <p>兴趣抽取层Interest Extractor Layer的主要目标是从embedding数据中提取出interest。但一个用户在某一时间的interest不仅与当前的behavior有关，也与之前的behavior相关，所以作者们使用GRU单元来提取interest。GRU单元的表达式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a0557505397a4c4bb22f9a75ee3814fb.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959852.jpeg" />   
     </p>
 <p>这里我们可以认为ht是提取出的用户兴趣，但是这个地方兴趣是否表示的合理呢？文中别出心裁的增加了一个辅助loss，来提升兴趣表达的准确性：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ae7e84dc449c4806adc88c400d8759c7.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959593.jpeg" />   
     </p>
 <p>这里，作者设计了一个二分类模型来计算兴趣抽取的准确性，我们将用户下一时刻真实的行为e(t+1)作为正例，负采样得到的行为作为负例e(t+1)&rsquo;，分别与抽取出的兴趣h(t)结合输入到设计的辅助网络中，得到预测结果，并通过logloss计算一个辅助的损失：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c28900ad01d8427daa8dd379e635cb91.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959615.jpeg" />   
     </p>
 <h3 id="23-兴趣进化层interest-evolution-layer">2.3 兴趣进化层Interest Evolution Layer</h3>
 <p>兴趣进化层Interest Evolution Layer的主要目标是刻画用户兴趣的进化过程。举个简单的例子：</p>
@@ -261,38 +261,38 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>为了利用这两个时序特征，我们需要再增加一层GRU的变种，并加上attention机制以找到与target AD相关的interest。</p>
 <p>attention的计算方式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/27e599dd51674b71bc9727c96b3aa857.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959628.jpeg" />   
     </p>
 <p>而Attention和GRU结合起来的机制有很多，文中介绍了一下三种：</p>
 <p><strong>GRU with attentional input (AIGRU)</strong></p>
 <p>这种方式将attention直接作用于输入，无需修改GRU的结构：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0a9d73ad873044c08526a9a7a1c4b855.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959407.png" />   
     </p>
 <p><strong>Attention based GRU(AGRU)</strong></p>
 <p>这种方式需要修改GRU的结构，此时hidden state的输出变为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c88a87d77b724b37a8fe78c354b4b1ea.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959986.png" />   
     </p>
 <p><strong>GRU with attentional update gate (AUGRU)</strong></p>
 <p>这种方式需要修改GRU的结构，此时hidden state的输出变为:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e2712f4a94e24e2193d24d6bff5e965f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959491.png" />   
     </p>
 <h3 id="24-模型试验">2.4 模型试验</h3>
 <p>文章在公共数据和自己的数据集上都做了实验，并选取了不同的对比模型：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4097d075dcb34268bb2cd4cc1d046bc9.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959164.jpeg" />   
     </p>
 <p>离线实验的结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ee771822d8034776b59d748259503e22.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959200.jpeg" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b833c666353a43ba930b62fcdce182e1.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959984.jpeg" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f28ff7a8ae714f5799ee14e00ac40e83.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959732.jpeg" />   
     </p>
 <p>DIEN使用了辅助loss和AUGRU结构，而BaseModel + GRU + AUGRU与DIEN的不同之处就是没有增加辅助loss。可以看到，DIEN的实验效果远好于其他模型。</p>
 <h1 id="3dien模型实现">3、DIEN模型实现</h1>
@@ -404,7 +404,7 @@ def auxiliary_net(self,input,stag=&#39;auxiliary_net&#39;):
     tf.summary.histogram(&#39;alpha_outputs&#39;,alphas)
 </code></pre><p>接下来，就是AUGRU的结构，这里我们需要设计一个新的VecAttGRUCell结构，相比于GRUCell，修改的地方如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2404ed79faf74223933cbacfb640cbf8.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959466.jpeg" />   
     </p>
 <p>上图中左侧是GRU的源码，右侧是VecAttGRUCell的代码，我们主要修改了call函数中的代码，在GRU中，hidden state的计算为：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">new_h = u * state + (1 - u) * c
@@ -577,6 +577,10 @@ new_h = u * state + (1 - u) * c
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -610,10 +614,6 @@ new_h = u * state + (1 - u) * c
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -992,6 +992,8 @@ new_h = u * state + (1 - u) * c
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

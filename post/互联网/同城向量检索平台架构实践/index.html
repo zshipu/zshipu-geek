@@ -213,7 +213,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>为了满足业务上对向量检索的需求，降低学习成本，提高开发效率，我们开发并上线了向量检索平台。我们支持了Faiss算法库，实现了几种常用索引的全量索引构建、实时增量索引、实时在线检索，旨在帮助用户更快更好的使用海量高维向量相似性检索功能。</p>
 <h2 id="整体架构"><strong>整体架构</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b73d7ba27779433688f4324359a1b2f3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271658281.webp" />   
     </p>
 <p><strong>WEB接入平台:</strong> 向量检索平台提供统一的web可视化操作界面，可以进行权限管理、任务管理、资源管理、索引管理等。</p>
 <p><strong>SCF接入服务：</strong> 提供给业务方的SCF线上服务服务，包括分布式索引检索、分城市索引检索、线上索引的增量服务，以及更新删除向量接口。SCF( Service Communication Framework)是58自主研发的RPC框架，致力于在分布式环境下提供高性能、高可靠和透明化的RPC远程调用方案。</p>
@@ -221,14 +221,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>存储层：</strong> 提供向量原始文件、索引文件、任务信息、资源配置等数据的存储功能。其中MySQL负责存储任务信息和资源配置，HDFS和WFS负责存储原始数据文件，WOS和WFS负责存储索引文件，Redis负责存储需要增量、更新、删除的向量数据信息。其中WFS是58自研的多用户共享高性能分布式文件系统，WOS是58自研的对象存储系统，提供高性能、高可用的云端存储服务。</p>
 <h2 id="索引构建"><strong>索引构建</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c247bdd52ad54593b02a4d6d0b94651d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271658933.webp" />   
     </p>
 <p>平台基于Facebook的Faiss进行向量索引的构建，目前支持三种比较具有代表性的索引全量构建，分别是IndexFlatL2（基于欧氏距离的暴力索引）、IndexIVFFlat（加聚类的倒排索引，支持欧式距离和向量内积两种距离算法）、IndexIVFPQ（加聚类、加量化的倒排索引），并且支持分布式索引（支持大规模数据的分布式索引构建）。</p>
 <p>使用方在WEB接入平台配置数据文件的路径信息。平台下载对应路径下的数据文件到本地（HDFS路径）或直接读取数据文件（WFS路径），随机从中取出若干样本数据组成样本数据集，进行索引训练。训练成功后，将所有向量数据通过Faiss提供的新增API添加到索引中，最后将索引保存为文件，集中管理。</p>
 <h2 id="增量索引构建"><strong>增量索引构建</strong></h2>
 <p>在实际业务中，在接收到新的实体时，需要将新实体的向量增加到已构建好的全量索引中。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d8c4b1c555f7476784a7042ab9a9b62f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271658635.png" />   
     </p>
 <p>用户通过调用增量接口，实时的添加新增向量。当新增请求到来时，平台会将新增数据的相关信息存入Redis中。平台部署增量节点，增量服务程序加载构建好的全量索引，定时监测并读取Redis中对应任务的新增数据，将数据添加到全量索引中，并定时持久化到WFS和WOS中，供在线检索服务使用。</p>
 <h2 id="分布式索引构建"><strong>分布式索引构建</strong></h2>
@@ -239,12 +239,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>针对以上问题，向量检索平台支持了分布式索引的构建，具体实现如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/438e3b0e019f4599aa657dc2dc238477.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271658519.webp" />   
     </p>
 <p>通过一致性Hash，将原始向量数据分割为多个数据分片，每个分片包含一部分的向量数据且不相交，平台为每个数据分片单独创建一个构建环境，独立的进行索引构建，并且各数据分片分别生成一份索引文件，保存到WFS和WOS系统中。通过将数据量较大的原始数据分割为多个较小的分片，实现了降低单个索引大小，提高构建效率的目的。</p>
 <h2 id="在线检索"><strong>在线检索</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fc11bbc42128462db7f4febeba686bb9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271658218.webp" />   
     </p>
 <p>向量检索平台在线检索模块主要包括向量检索接入SCF服务和向量检索逻辑层两大部分。</p>
 <p>向量检索接入SCF服务主要实现了请求转发和负载均衡两大功能，请求转发主要通过RPC调用，将用户发送的SCF服务请求，重新封装为检索节点的gRPC请求，实现向量检索请求和实时向量添加请求的转发。</p>
@@ -253,7 +253,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>同时为了不影响检索服务的性能，平台通过读写分离实现增量索引的在线检索功能。增量数据通过向量检索接入SCF服务的实时增量添加接口缓存在WRedis中，增量索引构建POD读取WRedis的增量数据并构建到全量索引中并定时持久化保存到WFS中，在线检索POD增量索引更新定时进行索引文件检查，当发现有更新时从WFS上拉取最新索引文件加载到内存，加载完毕切换到线上进行访问，避免了索引更新可能造成的短暂服务失效。</p>
 <h3 id="分布式检索"><strong>分布式检索</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fa43cb5c16f14f76ab37955e66efbe8c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271658928.webp" />   
     </p>
 <p>分布式在线检索采用了分片查询-汇总模式以提升检索效率，并对外提供统一的向量检索接口屏蔽底层部署实现。</p>
 <p>服务部署时，子索引分节点部署，每个子索引分别部署多个副本节点，每个节点对外通过gRPC提供服务。SCF服务进行请求转发时，会从每个子索引的节点集合中挑选一个节点进行请求转发，并将请求结果进行合并、重排、筛选后进行返回。因此我们为每个子索引的节点集合分别部署一个负载均衡，实现子索引多个检索节点的负载均衡。</p>
@@ -265,7 +265,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>针对以上问题，向量检索平台支持了分城市索引检索，具体实现如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/db00e3e0703343f3a1ad95dd2e261170.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271658753.webp" />   
     </p>
 <p>构建分城市索引时，通过数据中的城市ID将数据分别添加到对应ID的城市索引中，在同一个构建节点中创建所有城市的索引，每个城市分别对应一个索引，索引文件名定义包含了对应的城市ID，最后将索引文件打包保存。</p>
 <p>在</p>
@@ -392,6 +392,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -425,10 +429,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -807,6 +807,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

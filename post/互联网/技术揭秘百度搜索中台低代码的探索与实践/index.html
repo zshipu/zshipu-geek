@@ -203,7 +203,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a1a0c85692ff4dfcbe6cde0a228031a4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271934271.webp" />   
     </p>
 <p><strong>导读</strong>：据Gartner调研，应用开发需求的市场增长至少超过IT交付能力的5倍，预计到2025年，70%的新应用开发将使用低代码技术。我们需要在需求迭代越来越高频、创新能力要求越来越高的背景下，探索如何通过技术手段为业务开发降本增效提质做出突破，更高效的实现产品创新。百度搜索中台支撑多元业务场景，有丰富的业务形态，对卓越效能有极致追求。本文从搜索中台业务研发者面临的困难和挑战入手，分析原因，探讨低代码的一些解决思路。</p>
 <h3 id="一关于低代码"><strong>一、关于低代码</strong></h3>
@@ -237,7 +237,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>但是，仅仅有图引擎是不够的，我们需要让算子在业务的使用之下快速沉淀起来：业务愿意去共建通用算子，并且这些算子对业务能够充分共享，即大家可以便捷的查看和使用这些通用算子。而使用图编排工具，可以以平台化的形式对这些算子进行呈现，研发同学可以快速的查看所需功能算子，也可以通过可视化拖拽低成本的配置使用。</p>
 <p>建设图编排工具还有一个很重要的出发点是：我们希望通过可视化的图帮助开发同学快速的了解业务系统。这个图既是系统的实际运行图，也是帮助快速理解系统的执行流程图。我们使用图编排进行可视化之后，图本身就具备自解释性，研发同学可以在图上补充备注信息，图就相当于和代码同步的天然文档。对有一定规模的业务来说，通过“图文档”理解系统要比读源码理解更快，更加自然易懂。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b75a22aa98964e7196f3072554c10d03.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271934258.webp" />   
     </p>
 <h4 id="全流程一站式研发">全流程一站式研发</h4>
 <p>除了代码开发上的改善之外，我们希望有一套统一的工具对研发全流程进行提效：在图编排的基础上打造 All-in-one 的开发平台，将研发流程各个单点能力横向集成与拉通。业务研发者在研发过程中不需要学习对接各种开发工具或平台，所有的研发工作都收拢在一套工具里解决。同时这套流程又是标准化的，过去研发过程中所有的飞线技术栈都能统一起来，使用更加高效便捷的标准化解决方案。业务有能够提升效率的方式、工具也可以往这套工具里进行沉淀，共同打造。</p>
@@ -249,38 +249,38 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在工程效能部同事的支持下，我们建设了可以开箱即用的云端开发环境。业务开发者在代码仓库可以一键申请开发镜像，后台会在云端拉起一个 Docker 容器，容器内运行着 iCoding 的服务端，可以使用浏览器的形式连接开发镜像，也可以使用 iCoding 客户端进行连接。</p>
 <p>镜像内包含代码库、开发过程中的全部工具、服务编译运行所需要的全部依赖包、线上同步的服务配置词典等，业务开发者不需要额外的配置就可以直接开始开发。同时所有用户的开发环境也是完全一致的，不会因为系统、SDK、配置的不同导致的问题影响。当用户长时间未连接开发镜像时，镜像会自动挂起闲置，节省机器成本。镜像也可以分享给其他用户，便于问题排查。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9c80c63f48fc4305a8399c2af422d21e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271934068.webp" />   
     </p>
 <p>在打包镜像的过程中我们发现应用的依赖非常多，如果将这些依赖都放入镜像中会导致镜像体积过大，不仅影响镜像的拉起时间，也对机器的磁盘空间造成很大压力。初期我们将这些依赖都放到 NFS 里，在镜像内通过 fuse 进行挂载，但是会导致业务无法修改这些依赖，在一些场景下使用体验不佳。我们又基于Overlayfs 虚拟了一层联合文件系统，用户看到的只是一个普通的文件系统目录，可以任意修改替换。实际文件系统则包含两层的合并内容，Lower 层指向了公共的 NFS 集群，里面有全部的依赖文件，和线上实时更新，Upper 层指向镜像的工作目录，用户可以修改 Lower 层的文件，修改后会自动移到 Upper 层，Lower 原始数据不受影响。使用 Overlayfs 后我们的镜像拉起速度非常快，绝大部分依赖都放到远程，开发镜像只需要5秒钟就可以拉起。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ad69b02c6c17421faee2135a4ac03832.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271934866.webp" />   
     </p>
 <h4 id="可视化拖拽算子快速组建复杂场景">可视化拖拽算子，快速组建复杂场景</h4>
 <p>开发过程中，使用者可以在 Nimbus 中打开图编排工具来拖拽算子。每个算子都会有详细的描述信息，比如名称、类别、用途、属性等。这些信息通过注解的方式在代码中进行声明，图编排工具会扫描这些算子代码，读取相应的注解信息，并添加到算子仓库中。业务开发同学可以在图编排中对算子仓库中的算子进行浏览或检索，通过拖拽组建适合的业务场景执行图。拖拽后图的连接配置会直接保存到业务的代码库，下次打开可以重新加载。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/82db412f635b4ff6b753b86a7d3512c7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271934064.webp" />   
     </p>
 <p>在图编排工具中，我们也添加了一些交互来提示研发同学在图中添加算子、边的详细备注，帮助其他同学基于图快速了解系统。一些领域的问题可能具有相当的复杂度，用一张图表示并不直观，我们提供了子图的功能，可以将图与图之间关联在一起。开发者在图编排中可以双击跳转，也可以通过Peek 功能快速查看子图的结构。对于复杂的业务场景，研发同学就可以借助子图来层级递进的理解系统。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b9ce6f730da54528ae1a6cbbfaa2ab68.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271934008.webp" />   
     </p>
 <p>Nimbus 是在 IDE 基础上进行的设计，所以图编排可以和代码开发紧密关联在一起。在图中双击算子单元能够直接跳转到具体的代码实现，方便用户实际开发。图编排中也集成了调试分析的功能，用户可以在图中任意算子增加断点查看输入输出，也可以观察整个图的执行状况，各个阶段的耗时，通过图的执行过程快速掌握业务逻辑。</p>
 <p>在实际的使用过程中，我们和业务同学将一些最优实践，高频出现的业务场景抽象成了通用的图模板，这些通用图模板可以直接在 Nimbus 中进行打开，业务可以在这些模板的基础上进行定制，为构建新场景时提供帮助参考。</p>
 <h4 id="免配置的端到端效果调试使用更友好"><strong>免配置的端到端效果调试，使用更友好</strong></h4>
 <p>预览调试过去一直是很繁琐的问题，系统的链路和模块太复杂了，尤其对新人来说是一个很大的挑战。Nimbus 提供了功能强大的预览工具，同时支持直连请求和端到端的效果调试。我们和 QA 同学一起搭建了沙盒环境，完全复刻了线上的在线模块，并和线上模块保持同步更新。在调试端到端的过程中，Nimbus 会将请求转发到沙盒环境，请求开发中的业务模块时，沙盒环境会拦截该请求，转发到实际开发调试的服务。新的效果预览方式中预览环境的大部分模块都使用公共服务，显著节省机器成本，同时省去了环境部署、同步更新的人力成本。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ffaf66a3fa44496aa217c536a6269a55.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271934810.webp" />   
     </p>
 <p>调试过程中，我们也可以通过 Nimbus 进行可观测性分析，如 logging、tracing 等等。Nimbus 中也打通了 IDE 的 live debug 功能，支持用户快速进行代码的断点调试。</p>
 <h4 id="现代化的测试工具集集中在测试本身">现代化的测试工具集，集中在测试本身</h4>
 <p>过去测试流程主要依赖人来驱动，研发同学开发自测完之后，QA 同学需要将服务部署在测试环境，因为依赖较多，部署过程中需要 RD 和 QA 的反复沟通对接才能建立完整的测试环境。Nimbus 连接了一套公共测试集群，研发同学开发完之后可以一键部署仿真实例，仿真实例通过线下的 Paas 平台进行部署，环境和线上基本一致，可用于性能压测、效果验证等。同时 Nimbus 支持自动化回归测试功能，我们定期录制了线上流量，发起自动化回归时，Nimbus 会自动部署基线实例和测试实例，发送录制流量来生成 diff 以及性能报告，用于评估上线风险。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c5c9057800de4fbe9329f28312daa5b6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271934661.webp" />   
     </p>
 <h4 id="智能化的容量管理快速适应服务变化">智能化的容量管理，快速适应服务变化</h4>
 <p>Search-AE 内混布了大量的业务模块，高峰期有百万级 QPS，服务的容量规划一直很难处理。搜索流量本身变化较快，加上业务频繁迭代，线下需要反复压测评估合适的部署方案。同时线上一直在变化，之前合适的部署方案可能因为上下游变更又产生资源不足或浪费。过去线上的容量问题一直需要研发和运维关注，我们希望在 Nimbus 中能够用全局视角统一的管理线上容量，让业务同学只需要关注在实际的代码开发上。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c259801c13bc4634b975024b28049004.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271934415.webp" />   
     </p>
 <p>智能容量管理要解决的问题是在满足稳定性要求的前提下，确定各个服务的部署计划，让 Search-AE 整个集群的资源占用最少。智能容量管理的处理包含触发、分析和决策三个阶段。触发阶段包含三种情况：一种是业务迭代变更时会触发容量分析，第二种是线上持续的轮转服务触发分析，第三种是线上实际资源占用达到某个水位时触发快速分析。分析阶段主要的数据输入包含：</p>
 <ol>
@@ -414,6 +414,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -447,10 +451,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -829,6 +829,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

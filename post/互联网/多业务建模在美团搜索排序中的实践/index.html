@@ -224,7 +224,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="引言">引言</h2>
 <p>美团的使命是“帮大家吃得更好，生活更好”，美团 App 承载的业务包括外卖、到店餐饮、买菜、优选、酒店、旅游、休闲娱乐等各类生活服务。美团首页的搜索是美团 App 上各类生活服务最大的流量分发入口，每天为数千万的用户提供各种服务。美团搜索排序是一个典型的多业务混合排序建模问题，一个典型的多业务搜索场景是当用户搜索地点，如 “望京” 的时候，用户的需求不是很明确，此时搜索的结果页如下图 1 所示，下方的商家列表中会包含望京附近餐饮、电影、休闲娱乐、酒店等多种业务的结果，这就是一个多业务混合排序场景。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/727d844b0c3344a3bd03deeab162954c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800167.webp" />   
      图1 美团搜索结果页面而多业务场景存在如下几点挑战：</p>
 <ol>
 <li>因业务之间存在共性和特性，如何让模型兼顾这两种特性，实现更好的数据学习。比如到店餐饮对距离特征非常敏感，而旅游景点业务对距离特征相对不敏感。</li>
@@ -243,19 +243,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>多层排序架构设计主要是为了平衡排序效果和性能。本文后续提到的多业务建模优化工作主要从多路融合层和精排层进行介绍。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5b7e712b05ee485f822a55d60f9709c3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800200.png" />   
      图2 系统架构图</p>
 <h2 id="多业务建模实践">多业务建模实践</h2>
 <h3 id="多业务配额模型多路融合层">多业务配额模型（多路融合层）</h3>
 <p>随着美团业务的发展，美团搜索接入了到餐、到综、酒店、旅游等业务。对于业务意图模糊的搜索词，比如用户搜索“五道口”，需要根据用户、查询词、场景等多种因素来综合判断用户的业务意图。为了融合不同业务的召回结果，给 L2 精排一个比例合适的候选集，我们设计了一个多业务配额模型来平衡多业务召回的比例。这种基于配额对多路召回结果进行合并的做法在搜索、推荐场景中十分常用，比如淘宝首页搜索、美团推荐等。</p>
 <p>为了多路召回的灵活接入，适配美团搜索业务的发展，我们不断迭代搜索配额模型。下面将详细介绍美团多业务配额模型的迭代过程，文章后续部分会将多业务配额模型（Multi-Business Quota Model）简称为MQM。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9c1daf27bb754ce5b3d98b54cf4e35cc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800244.png" />   
      图3 多路融合过程</p>
 <h4 id="一维目标多业务配额">一维目标多业务配额</h4>
 <p>考虑到大搜结果存在多路不同业务的召回，为了刻画用户搜索 Query 对三路业务召回的意图强弱，我们采用多目标的建模方式，以每一路召回是否被点击、下单为目标进行建模，实现了多业务配额初版模型 MQM-V1。该模型输出各路召回的点击、下单联合概率，作为最终的配额分布。在特征层面，我们使用 Query 维度特征、Context 维度特征、Cross 维度特征、User 维度特征，来刻画用户在不同场景的实时个性化需求。MQM-V1 模型结构如下图 4 所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c8dbb4290a3446c5a9f066e8c19d1b8e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800314.png" />   
      图4 MQM-V1 模型结构图MQM-V1 版本上线后，整体线上点击率 +0.53%，各业务访购率基本持平。</p>
 <h4 id="二维目标多业务配额">二维目标多业务配额</h4>
 <p>随着大搜召回策略的不断迭代，大搜不仅引入了按业务拆分的召回方式，而且引入了向量检索、地理位置近邻检索等跨多业务的异构召回方式，导致大搜召回策略不断增加，多业务配额模型也面临新召回源带来的冷启动问题。同时，为了加强多业务配额模型的个性化，我们参考借鉴了[6]中用户行为序列建模的方法。综上，该版本 MQM-V2 与 MQM-V1 区别如下：</p>
@@ -265,7 +265,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>为了解决新召回源接入的冷启动问题，我们引入了人工经验层，包括业务先验和历史统计，综合模型输出决定每一路召回的配额。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b2d52e8044974b74989e4c1d239b8247.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800495.png" />   
      图5 MQM-V2 模型结构图MQM-V2 版本上线后，各业务指标率均有提升，其中旅游访购率 +2%，到餐访购率 +0.57%，到综、酒店访购率持平。</p>
 <h3 id="多业务排序模型精排层">多业务排序模型（精排层）</h3>
 <p>从美团搜索精排模型升级为 DNN 模型，一直到 2019 年底，美团搜索的精排模型结构是业界主流的 Embedding&amp;MLP 的范式结构，期间我们也尝试过业界提出的模型结构比如PNN[1]、DeepFM[2]、DCN[3]、AutoInt[4]、FiBiNet[5]等等。</p>
@@ -273,7 +273,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="独立子网络拆分">独立子网络拆分</h4>
 <p>考虑到酒店和旅游在美团大搜排序策略的流量里面占比较少，而针对小流量的相关优化在目前统一的 Embedding&amp;MLP 模型结构里面很难体现，我们尝试了如图 6 所示的人工自定义多塔模型 MBN-V1 结构：主网络复用目前的模型结构。具体情况介绍参考[6]中的行为序列建模部分，增加酒店和旅游独立子网络；酒店子网络的输入包括酒店独有特征和主网络的打分输出，旅游子网络的输入包括旅游独有特征、主网络的打分输出、主网络最后一层 FC，酒店和旅游子塔输入不同是因为业务逻辑不同导致数据分布差异大，这是实践出的结果，最终的输出是对三个输出的加权求和。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/44e9df46f9264e8794a06aff2584bb5a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800779.png" />   
      图6 MBN-V1 模型结构图针对加权求和的权重部分，我们采取了两种方式对权重进行设定：</p>
 <ul>
 <li>第一种，采用硬切分的方式，就是说权重向量是一个 One-hot 稀疏向量：对酒店商家进行预测，只选取酒店子网络的输出，其余类推。</li>
@@ -287,12 +287,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>解耦精排模型和配额模型，在精排模型中集成权重生成子网络，该子网络的输入主要是一些 Query 维度，Context 维度的特征。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e4012c90d7d947f2ae1507964543e0cb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800892.png" />   
      图7 MBN-V2 模型结构图线上实验效果：MBN-V2 相比 MBN-V1，整体点击率 +0.1%，业务访购率效果基本持平。</p>
 <h4 id="子网络特征自适应">子网络特征自适应</h4>
 <p>在第二版模型的基础上，我们进一步添加到综业务子塔，随着子网络的变多，目前对于子网络的输入采用人工设计，这种方式需要花费大量的时间进行离线实验。考虑到目前的多业务子塔结构十分类似业界的多任务学习，我们也尝试引入业界的多任务学习结构；同时，我们针对 MBN-V2 中的权重子网络输出进行分析发现其输出的权重对不同业务商户的输出差不多，那么会带来业务的针对性优化不明显。基于上述部分，我们迭代了第三版多业务精排 MBN-V3，结构如下图 8 所示，改进点如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/53cdac12c11e416b9cc49569b99be485.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800912.png" />   
      图8 MBN-V3 模型结构图* 补充到综子网络，采用 MMoE[7]多任务学习结构，来自动学习特征表征输出给上层子网络，从而取代人工设计子网络的输入。</p>
 <ul>
 <li>精排模型的损失函数除了采用用户线上反馈计算的主 LambdaLoss 外，额外添加了业务的分类交叉熵 Loss，达到预测某业务 Item 得分时，对应的业务子塔权重最大的目的。</li>
@@ -302,10 +302,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>虽然 MMoE 多任务学习结构在业界很多场景得到了应用，在我们的多业务建模场景也取得了有效验证，但是我们持续跟进业界前沿，并且结合业务场景进行落地。</p>
 <p>我们尝试了腾讯提出的 PLE[8]结构，迭代出多业务精排 MBN-V4。PLE 可以看成是 MMoE 的改进版，它对于每一个任务有自己特定的专家层，不同任务之间有共享的专家层，相比 MMoE 是所有专家输出的加权求和，PLE 子任务的输入是子任务独有的专家和共享专家输出的加权求和，更容易学出业务的特性；同时基于性能考虑，我们选取了单层 PLE 也即 CGC 结构，结构如下图9所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7166d3b7ac0d4366b39ab2b5dad90705.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800161.png" />   
      图9 MBN-V4 模型结构图线上实验效果：MBN-V4 相比 MBN-V3，整体点击率 +0.1%，美食业务访购率 +0.53%，其余业务访购率波动持平；我们对 MMoE 和 CGC 的专家权重进行可视化如下图 10所示，分析发现：CGC 结构的专家层权重相比 MMoE 在同一业务多条样本之间的专家权重方差更小，更加稳定，说明 CGC 相比 MMoE 在特征表示上更加有优势。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/26e1a1f4096741f2a3acac806ffbb9b8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801204.png" />   
      图10 MMoE、CGC 专家权重分析</p>
 <h2 id="总结和展望">总结和展望</h2>
 <p>2019 年底开始，为了解决实际的多业务召回排序问题，美团搜索进行了大量探索，从工程到算法到产品形态各个层面丰富对多业务的支持。其中排序算法层面主要在多路召回融合层和精排层进行优化。</p>
@@ -453,6 +453,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -486,10 +490,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -868,6 +868,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

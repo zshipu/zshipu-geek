@@ -212,14 +212,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="调用-indexwriter-的构造函数的流程图">调用 IndexWriter 的构造函数的流程图</h1>
 <p>图 1：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/1-354c65dd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272102618.png" />   
     </p>
 <h2 id="生成对象-indexfiledeleter">生成对象 IndexFileDeleter</h2>
 <p>  我们紧接上一篇文章，继续介绍剩余的流程点，下面先给出 IndexFileDeleter 的构造函数流程图：</p>
 <h3 id="indexfiledeleter-的构造函数流程图">IndexFileDeleter 的构造函数流程图</h3>
 <p>图 2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/2-e9a294f9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272102852.png" />   
     </p>
 <h4 id="执行检查点checkpoint工作">执行检查点（checkPoint）工作</h4>
 <p>  在上一篇文章中，我们简单提了一下该流程点，其中 checkPoint 的作用及其逻辑在文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F1203%2F113.html">构造 IndexWriter 对象（八）</a> 已经介绍，不赘述，我们关注问题是为什么在当前流程点还要执行 checkPoint 的工作，这也是上一篇文章遗留的问题。</p>
@@ -229,45 +229,45 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>  我们以一个例子来描述对应的场景，该例子中的 oldIndexWriter 使用的索引删除策略是 NoDeletionPolicy，完整 demo 见： <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2FLuXugang%2FLucene-7.5.0%2Fblob%2Fmaster%2FLuceneDemo%2Fsrc%2Fmain%2Fjava%2Flucene%2Findex%2FPersistentSnapshotDeletionPolicyTest.java">https://github.com/LuXugang/Lucene-7.5.0/blob/master/LuceneDemo/src/main/java/lucene/index/PersistentSnapshotDeletionPolicyTest.java</a> 。</p>
 <p>图 3：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/3-3505c254.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272102827.png" />   
     </p>
 <p>  图 3 中，在执行了第 56 行以及第 62 行的代码的 oldIndexWriter.commit()方法后，索引目录中生成了两个段，如下所示：</p>
 <p>图 4：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/4-44234b8c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272102292.png" />   
     </p>
 <p>  接着在执行了第 63 行的代码后，我们通过索引删除策略 PersistentSnapshotDeletionPolicy 对索引目录中最新的一次提交生成一个快照，该提交即 segments_2，并通过 <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2FLuXugang%2FLucene-7.5.0%2Fblob%2Fmaster%2Fsolr-7.5.0%2Flucene%2Fcore%2Fsrc%2Fjava%2Forg%2Fapache%2Flucene%2Findex%2FPersistentSnapshotDeletionPolicy.java">PersistentSnapshotDeletionPolicy.snapshot()</a> 方法获得一个 IndexCommit 对象，并且在第 75 行我们将这个 IndexCommit 对象作为构造 newIndexWriter 的配置，此时索引目录中的内容如下所示：</p>
 <p>图 5：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/5-5759a1b3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272102224.png" />   
     </p>
 <p>  图 5 中 snapshots_0 即生成的快照。</p>
 <p>  IndexCommit 对象中的索引信息即快照对应的索引信息，即 segments_2 对应的索引信息，对应的索引文件即_0.cfe、_0.cfs、_0.si、_1.cfe、_1.cfs、_1.si，如下图所示：</p>
 <p>图 6：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/image-6fb129f7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272102742.png" />   
     </p>
 <p>  图 6 中，根据 SegmentCommitInfo 的 SegName 字段获得对应的 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2Fsuoyinwenjian%2F2019%2F0605%2F63.html">索引文件。si</a>。</p>
 <p>  我们顺便给出 segments_1 包含的索引信息，在后面的流程中会用到：</p>
 <p>图 7：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/image-b747ddba.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272102326.png" />   
     </p>
 <p>  接着在执行了第 70 行的删除文档操作后，由于文档 0 跟文档 1 都满足该删除条件，即文档 0 跟文档 1 中都包含域名为&quot;author&quot;，域值为&quot;Lucy&quot;的信息，那么在执行了第 71 行的 oldIndexWriter.commit()后，生成的第三个段中就不会包含文档 1 以及文档 2 的信息，即不会包含以_0 为前缀和以_1 为前缀的段的信息，索引目录中的内容如下所示：</p>
 <p>图 8：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/8-4d2869c5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272102533.png" />   
     </p>
 <p>  segments_3 包含的索引信息如下所示：</p>
 <p>图 9：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/image-cb14ef2b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272102521.png" />   
     </p>
 <p>  图 9 中以_2 为前缀的段的索引信息即在图 3 中文档 2 对应的内容。</p>
 <p>  接着执行图 3 中第 77 行代码构造 newIndexWriter，执行完下图中标注的流程后，会根据索引目录中的 segments_N 文件对其对应的索引文件执行计数 +1 的操作：</p>
 <p>图 10：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/10-abe3429a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272102744.png" />   
     </p>
 <p>  根据图 8 的索引目录中的内容，有 segments_1、segments_2、segments_3 共三个 segments_N 文件，他们对应的索引文件的计数如下所示：</p>
 <p>表 1:</p>
@@ -404,6 +404,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -437,10 +441,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -819,6 +819,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

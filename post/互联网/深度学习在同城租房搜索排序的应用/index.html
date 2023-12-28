@@ -243,7 +243,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>本文聚焦租房业务线，围绕数据、模型，对搜索排序应用深度学习提升连接效率的经验做阐释。</p>
 <p>58APP端用户的一个典型使用场景如图1所示。用户通过搜索某一具体小区名或点选某一具体地铁站，发起一次搜索请求，服务端检索到一批相关帖子后，采用某种策略区分帖子的展现位置，最终返回给用户排序后的帖子列表。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/65559c071bfe4149b6d17f36a8c17497.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272152566.webp" />   
     </p>
 <p>图1 用户典型使用场景</p>
 <p>用户指定一个搜索场景后，返回哪些信息给用户，信息如何排序，从根本上说是怎样更好地完成信息与用户需求的匹配，即是否匹配了用户的搜索意图。对于更商业化的现实意义而言，更好的排序不仅能够提升用户的检索效率，提高用户粘性，改善用户获取的信息质量，针对具体业务线还能够提高用户点击或转化的几率，增加平台的收入。</p>
@@ -254,7 +254,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>数据层从前后端日志拿到埋点数据，整合业务侧提供的帖子、用户等数据，得到基础信息日志，通过数据分析，分组提取日志中的特征，部分特征刷入特征中心，供线上使用。离线通过正负采样和特征处理得到模型需要的训练样本。</p>
 <p>策略层包含模型和业务策略两部分，模型部分是运用机器学习或深度学习模型，学习隐含信息，提供初步的排序信息，业务策略针对具体的业务线需求，在模型排序基础上添加分层或调权能力，获得更稳健的排序结果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4c5da673d14b49ac87c12255c3f31c5b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272152599.webp" />   
     </p>
 <p>图2 搜索排序核心架构</p>
 <h2 id="模型迭代路径"><strong>模型迭代路径</strong></h2>
@@ -265,13 +265,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>如图3所示，Wide&amp;Deep可以看做两个模型的组合，左侧部分为LR模型，将输入的特征数据做加权整合，部分特征经过Embedding Layer转为one-hot编码馈入模型。由于特征输入直接反馈输出，保留了大量原始信息，模型挖掘到的用户兴趣，更偏向具体特征或帖子间的关联信息，如果训练数据中，酒仙桥和望京的房源帖共现频率较高，那么用户搜索酒仙桥时，模型会同时赋予望京房源更高的排序权重。这种直接从历史数据挖掘到的特征相关性，是低层特征信息，当用户复现某个历史行为时，模型能够拟合用户兴趣，表现出对特征的良好记忆性（Memorization）。</p>
 <p>右侧部分是典型的DNN模型，负责获取用户兴趣的抽象表征。用于排序的特征数据大多比较稀疏，有些id类特征维度超过百万，因此在输入DNN模型前，通过Embedding Layer来降维特征，将高维稀疏特征转换到低维稠密特征。经过多层信息抽取，模型挖掘到的用户兴趣，会偏向特征组合得到的抽象表征，是高层特征信息，当用户产生历史数据没有出现过的新行为时，模型会平滑排序结果，表现出对特征的良好泛化性（Generalization）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/62926da08ce648cd8070d075d8270691.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272152426.webp" />   
     </p>
 <p>图3 Wide&amp;Deep模型结构</p>
 <h3 id="2-deepfm"><strong>2. DeepFM</strong></h3>
 <p>Wide&amp;Deep模型展现的记忆加泛化性能，在排序上取得了很好的效果，但作为组件之一的LR部分，挖掘到的用户兴趣对交叉信息不够友好。在机器学习模型优化中，使用交叉信息的方式通常是人为构建特征和特征间的组合，形成新特征表示相关关系，然而这部分工作是复杂且繁琐的。DeepFM[2]为了解决这个问题，引入了机器学习的FM模型，替换掉LR部分，形成FM&amp;Deep结构，如图4所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8b0f5630983149378948d1062b830797.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153180.webp" />   
     </p>
 <p>图4 DeepFM模型结构</p>
 <p>FM部分包含了加权求和的一阶信息和向量内积的二阶信息，自动进行特征交叉信息的提取，相比Wide&amp;Deep在低层特征的使用上更合理。且Deep部分和FM部分共享Embedding Layer的输出，在计算复杂度上优化了模型。</p>
@@ -279,18 +279,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>DCN[3]的优化思路与DeepFM大体一致，既然Wide&amp;Deep在低层特征使用时，无法提供更高阶的特征，必须依赖人工来构建交叉信息，那么交叉信息的提取，就从机器学习模型转到深度学习模型。因此相比DeepFM在Wide&amp;Deep的基础上对LR部分的结构改进，DCN更进一步的替换LR部分为类DNN结构。</p>
 <p>具体结构如图5所示，最明显的结构改变是左侧的类DNN模型。区别于右侧DNN的是，每一个隐含层除了接受前一层的输入外，会同步接受原始输入层的特征，从而实现特征信息的高阶交叉。对比DeepFM，DCN在低层特征的信息提取上，能够挖掘特征更高阶的交叉信息，同时由于DNN结构对矩阵计算的友好性，计算效率上较DeepFM更有优势。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cd19ce70e8554c748c8d1c1f973312bb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153936.webp" />   
     </p>
 <p>图5 DCN模型结构</p>
 <h3 id="4din"><strong>4.DIN</strong></h3>
 <p>机器学习模型Xgboost在租房业务现有离线特征上的重要性排序如图6所示，红色透明框标识出的是基于用户历史行为统计得到的个性化特征，可以看出用户历史兴趣是影响租房场景下模型排序效果的重要因素。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6bac9b7f84d84217b42e52149652326a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153776.webp" />   
     </p>
 <p>图6 Xgboost特征重要性排序</p>
 <p>阿里基于相似的业务理解，为更充分的挖掘用户历史兴趣，提出了DIN[4]模型，具体结构如图7所示。先前的模型在使用用户历史兴趣相关特征时，没有考虑候选贴的差异性，对于候选的每个帖子，都提取了相同的历史兴趣信息，DIN通过引入Attention机制，提升了模型对于用户历史兴趣的建模能力，构造了更合理的兴趣表征。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7f338bb12ce44b41875a6cf797a9097e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153674.webp" />   
     </p>
 <p>图7 DIN模型结构</p>
 <p>DIN的核心是Attention Layer，候选贴和用户历史行为中的每个帖子发生交互，抑制无关的历史行为信息，加强和候选贴相似的历史信息，相比先前DNN模型中使用的用户历史统计信息而言，建模的用户兴趣更加准确，做到了千人千面，候选贴间的差异信息得到了更好的挖掘。</p>
@@ -299,7 +299,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="5dien"><strong>5.DIEN</strong></h3>
 <p>在DIN的基础上，阿里迭代了DIEN[5]模型，用来进一步抽取用户历史兴趣信息。DIN使用了用户历史行为序列，但只关注到了序列中和候选贴相关的特征交互信息，忽略了序列中还包含了用户行为的先后信息，这个信息会反映用户兴趣的迁移变化过程。比如用户搜索了丽都壹号的房源，浏览了一段时间后，发现自身预算有限，便转向搜索位置更远的北窑地，同时对于房源施加了一居室、精装修等更严格的要求，这种兴趣转换是DIN无法捕获的，因此DIEN添加了额外结构来解决这个问题，具体结构如图8所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/63b2ec052e184af8bf7ae740777fdbb6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153668.webp" />   
     </p>
 <p>图8 DIEN模型结构</p>
 <p>相对DIN，DIEN在输入特征的处理中，改变了用户历史行为序列的提取逻辑，构建了兴趣提取层（Interest Extract Layer）来捕获用户历史行为中的帖子联系，GRU是NLP中抽取长序列信息的常用结构，DIEN引入GRU以提取用户对历史行为的兴趣。初步提取的兴趣表征，继续通过兴趣发展层（Interest Evolving Layer）加工，兴趣发展层包含了AUGRU和Attention结构，核心在于抽取兴趣的变化。AUGRU是加入了Attention分数的GRU，用来捕获与当前候选贴相关的兴趣变化。当前候选贴的特征只在发展层进行Attention调权，也表明DIEN的核心思想是提取用户历史行为序列中，与当前候选贴相关的兴趣变化，相对DIN更进一步的考虑了用户历史行为中存在的兴趣信息。</p>
@@ -316,14 +316,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们对于DIN、DIEN模型的输入特征需求，新构建了基于Flink+Kafka架构的用户历史行为序列。为保留尽可能丰富的用户序列信息，采用了用户历史点击序列而非转化序列。序列中每一个历史贴，存储了帖子id及帖子的属性值如面积、价格、朝向等信息，这部分信息完全对齐候选贴的属性信息。</p>
 <p>对于时间窗口3、5、7天的用户点击序列，统计了一天数据的序列长度分布，如图9所示。可以看出，序列长度为50时，覆盖超过80%的用户，排除长尾和异常数据，已经足够对用户在一周内的兴趣进行建模，因此我们线上存储的用户序列特征，最大截断长度设置为50，超过50时新序列替换距当前最久的一条序列数据。同时，我们不设置序列的过期时间，对非活跃用户而言，可以保留较长时间的历史行为，对活跃用户而言，基本保留了一周内的实时兴趣。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/252a6a7a680e444b840c212fc3057a3a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153539.webp" />   
     </p>
 <p>图9 用户历史点击序列统计</p>
 <p>用户序列线上实时更新并落入HDFS，同步记录落盘的时间戳，离线构建样本时，依据序列日志的落盘时间戳和样本日志的曝光时间戳来获取实时序列，对同一用户的所有序列日志先按照时间戳排序（由新到旧），在小于曝光时间戳的序列日志中抽取最接近的一条，同时判断用户sessionid是否相同，不相同且时间最接近的认为是线上实时取到的序列日志，这样基本保证线上线下的用户序列特征一致性，缓解线上序列特征的时间穿越问题。</p>
 <h3 id="3样本离线结构"><strong>3.样本离线结构</strong></h3>
 <p>模型的离线样本产出结构如图10所示，分为采样、特征抽取、特征工程、模型训练几个部分。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a0b326eba9a941b2b343f4cc1c245a2e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153343.webp" />   
     </p>
 <p>图10 模型离线样本产出结构</p>
 <p>采样模块用于抽取具体场景数据并预处理，同时控制正负样本的比例，以租房场景而言，离线正负样本比例一般控制在1:4~1:5间效果较好。特征抽取用来获取模型需要的具体特征，对于缺失值和异常值，我们目前统一采用默认值替换方式，默认值依赖线下配置文件的具体指定。特征工程部分主要有归一化、分桶、哈希、类别取值等方式，同时将默认值参与特征工程转换，保证特征输出没有负值（模型输入做embedding不支持负值索引）。模型训练部分构建训练、验证和测试样本，并进行精度评估。我们在评估模型效果时，采用了GAUC[4]评价标准，AUC是对于全体样本排序后计算的一个值，反映了模型对于整体样本的排序能力。然而实际的线上排序，是对于单一用户的曝光，GAUC考虑的是各用户的评价集合，相对AUC更接近线上效果的评估标准。GAUC先计算各个用户自己的AUC，然后加权平均，目前我们的权重采用滤掉单一样本（全为正或负）后的用户样本贴子量占比。</p>
@@ -345,26 +345,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="4多目标"><strong>4.多目标</strong></h2>
 <p>实际做排序优化的过程中，经常面对的问题是，优化目标是转化率的提升，但实际的用户转化行为很少，导致样本空间并不能真正代表线上数据分布，模型很难学习到正确的信息。但是若直接使用点击数据训练的模型，固然会对线上的CTR产生正向效果，对CVR的建模却是有偏的。我们考虑综合利用CTR和CVR的信息，构建了多目标模型，结构如图11所示（以DIN为例）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/296cc00fab3945599f2ff97cd8696744.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153174.webp" />   
     </p>
 <p>图11 多目标模型结构</p>
 <p>输入样本数据生成关于点击和转化各自的标签，模型中为每个任务单独构建DNN部分，共享特征Embedding Layer和Attention Layer的输出。对于CVR任务来说，输入的数据量扩增了数倍，且更逼近真实的样本分布，共享的输入信息也不会增加模型过多的参数量，同时CTR任务训练过程中同步作用在特征输入部分，能够纠正模型的偏差，为模型提供更多维度的信息。线上实际部署模型时，可以用一个多目标模型替代CTR、CVR单独训练的模型，实际的推理性能比单纯部署两个任务模型时更佳。</p>
 <p>多目标训练的损失函数构造如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d6dd2f4526ae47b68aa95bbc6383b044.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153533.webp" />   
     </p>
 <p>采用加权和作为整体loss，权重配比依赖预先在各自任务下训练得到的loss值，基本保持各自任务对loss的贡献相同。</p>
 <p>阿里在ESMM[6]模型提出了CTR任务和CVR任务的级联关系，用户先点击到某个帖子，才会继续发生转化行为，并用连乘来构造总体损失，这个想法比较符合用户实际转化行为发生的场景，后续我们会进行尝试。</p>
 <h2 id="预测优化"><strong>预测优化</strong></h2>
 <p>我们在初步完成模型训练后，针对wpai提供的多个线上环境进行了压测，对相同的单目标DIN模型在batch size 10，单测试节点6核CPU 2G内存情况下，得到如下结论：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f56f50e0406a43d898b64a3d85abf753.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153262.webp" />   
     </p>
 <p>综合性能表现，CPU环境由于数据预处理和模型推断都在同一环境，不必经过CPU到GPU的数据传输，不论是耗时还是QPS均优于其余版本，因此我们选择了使用CPU环境进行模型部署。但上线后，发现测试环境的性能表现不能够完全对齐线上，由于线上环境流量复杂，会有瞬时高峰流量出现，实测的模型耗时相较线下会增长1~3ms左右，且长尾数据导致的模型超时会比较严重，最高达到5%左右，所以我们考虑工程实现上对模型预测过程进行优化。</p>
 <h3 id="1-序列化数据格式转换"><strong>1. 序列化数据格式转换</strong></h3>
 <p>初版预测实现，我们针对模型的不同特征分组组装了预测请求数据，单独特征分组均采用List或List数据形式组装，后续将列表转换为基础数据类型数组，如int[]或float[]，线下压测性能得到了较大幅度的提升，如图12所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cbf90e6d24254b5da6793eb53eb71a4d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153089.webp" />   
     </p>
 <p>图12 序列化数据格式性能对比</p>
 <p>虽然只是很小的工程优化，线下预测性能已经得到了充分的扩展，使用简单的数据传输格式，SCF序列化效率会有比较好的提升。</p>
@@ -373,22 +373,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们对于用户维度的特征数据，如用户id、用户历史行为序列涵盖的帖子特征、mask信息等进行简化，序列化时只保留一个数据的信息，在预测数据预处理时再进行batch数据的填充。</p>
 <p>上述工程实现的优化，使SCF序列化的数据量减小了90%，对应数据组装batch由10提升到20，线上超时率由3-5%降到0.5-0.7%，模型访问平均耗时降低5ms，具体对比如下图13所示。可以看到优化后模型超时量明显下降，能够更准确的评估线上模型迭代效果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/63f178f43e9747fb80cbed38d698ba93.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153319.webp" />   
     </p>
 <p>图13 预测优化前后模型耗时对比</p>
 <h2 id="线上效果"><strong>线上效果</strong></h2>
 <p>基于上述的优化思路，我们持续在线上对模型进行了迭代，主要的优化措施效果如下表所示，baseline为线上的Xgboost模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0d8e947202394bf5bb19e651e6ae57a7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153141.webp" />   
     </p>
 <p>其中最优模型为采取了全部优化措施的多目标DIEN模型，可以看出相对线上基准Xgboost模型，在点击和转化上排序效果都获得了极大的提升。我们后续推全了最优模型，线上的实际表现如图14所示，多目标DIEN模型相对线上Xgboost模型，无论点击率还是转化率的提升都相对稳定。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/22667782d8604160ba58429ba352df14.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153987.webp" />   
     </p>
 <p>图14 10.5~10.13期间多目标DIEN模型线上统计</p>
 <p>模型实际的线上预测表现如图15所示，在访问量有较大波动时，耗时相对稳定，batch为20的平均耗时在12ms以内，且模型超时量最大占比不超过0.2%，预测性能完全满足线上实时并发请求的需要。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/26624f39ae214d1fbc3ba8a5c76f56f9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153205.webp" />   
     </p>
 <p>图15 10.5一天模型线上访问性能表现</p>
 <h2 id="总结与展望"><strong>总结与展望</strong></h2>
@@ -527,6 +527,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -560,10 +564,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -942,6 +942,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

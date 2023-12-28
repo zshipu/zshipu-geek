@@ -210,7 +210,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/41ab29d14dd740e09866d6aca0a7baa9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755677.webp" />   
     </p>
 <blockquote>
 <p>分享嘉宾：周晖栋 bilibili</p>
@@ -220,7 +220,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>导读：</strong> 本文主要介绍Flink实时计算在bilibili的优化，将从以下四个方面展开：① Flink-connector稳定性优化；② Flink sql优化；③ Flink-runtime优化；④ 对未来的展望。</p>
 <h1 id="01-概述"><strong>01 概述</strong></h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1f1d22c972c444fdad173003b85be49f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755281.webp" />   
     </p>
 <p>首先介绍下Flink实时计算在b站的应用场景。</p>
 <p>在b站，Flink on yarn 主要支持3个场景，saber数据计算，lancer数据传输和magneto数据湖。</p>
@@ -231,22 +231,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="02-flink-connector稳定性优化"><strong>02 Flink-connector稳定性优化</strong></h1>
 <h2 id="1-hdfs集群局部热点问题"><strong>1. hdfs集群局部热点问题</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/79066f38ffbc4919938ae3bf3a6fe9a2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755974.webp" />   
     </p>
 <p>背景描述：Flink在写hdfs时遇到写个别hdfs文件慢的问题，也就是hdfs集群局部热点问题。由于b站数据集成是采用管道化的方式，即“一个Flink任务写多条流”的模式。数据集成过程中会出现几百个流存在于同一个kafka topic中的现象，并且由同一个Flink 任务分流写到多个hive表中。这就需要给任务设置很大的并行度，从而会同时打开超大数量的hdfs文件，这使得局部热点问题更加严重。当Flink任务做checkpoint时，hdfsSink会去做flush数据，close文件等操作，经常因为个别文件close慢，而拖累整体的吞吐。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/401f4957757848e495879452c470e00c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755684.webp" />   
     </p>
 <p>优化方案：针对hdfs局部热点问题，我们做了三点优化：</p>
 <p>① 减少文件的close频率。在Snapshot 阶段，不会去close文件，仅将内存数据刷写到hdfs中，并记录写出文件的oﬀset。在从checkpoint做故障恢复时，就需要对文件做Truncate，将文件截断到oﬀset位置，再继续写入，相当于去掉多余的数据。这个方案可以减少文件close的频率，同时大大减少小文件的生成。</p>
 <p>② 文件close的异步化改进，将close超时的文件放到异步队列中，从而保证 close 的动作不会堵塞整个主链路的处理，提升hdfs局部热点情况下的吞吐。异步close 文件操作，需要加入到 state中管理。即使故障恢复时，也能继续对文件进行关闭。</p>
 <p>③ 针对多条流，Snapshot 还做了并行化的处理，多条流并行处理其实就是打开多个 bucket，flink框架原生是通过循环的方式来进行串行的处理，而并行化改造后通过多线程来处理，就可以增加处理速度，减少Checkpoint超时的发生。Snapshot时，文件close在异步队列存储和恢复的具体流程图，如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dd2691d52749424f864cc3fe2fe43b99.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755630.webp" />   
     </p>
 <h2 id="2-分区read判断问题"><strong>2. 分区read判断问题</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7abaf3a8f1da41e283560af3c68b78f9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755277.webp" />   
     </p>
 <p>背景描述：右上角展示的是读取kafka数据写入hive的Flink任务的简单DAG图，由多并行度的hdfs writer算子和单并行度的commit算子组成。在commit算子接收上游所有算子checkpoint都已经完成，并且当前时间超过了watermark +delaytime时，我们就认为该hive分区已经ready了，可以commit hive分区了。然而在checkpoint时不关闭文件以及异步close的场景中，可能出现长时间文件未close的情况，那么超时后就会提前判断认为分区ready，从而提交hive分区，但由于文件未关闭，下游任务运行时就会出现报错。</p>
 <p><strong>优化方案：</strong></p>
@@ -257,7 +257,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>① Flink任务Sink端会连接多样的分布式存储和消息中间件等，通常以多分片的形式分布在多台机器上。因此，会出现因集群侧局部热点问题，某台机器的压力过大，导致flink与该机器上分片的通信RT变长，从而引起任务局部或者整体反压，影响整体吞吐和稳定性。</p>
 <p>② 针对某些吞吐巨大，一致性要求不高的场景，语义上满足At least Once即可，但需要极高的稳定性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/435946032311407d987a174f2651c406.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755978.webp" />   
     </p>
 <p><strong>优化方案：</strong></p>
 <p>① partitioner</p>
@@ -277,7 +277,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>② 业务场景数据量非常大，可达到每秒几十万条的数据规模，在此规模下，原生interval join 效率很差，其通过每来一条数据，就遍历一次全部缓存数据的方式来做join，无法抗住大数据量场景。</p>
 <p><strong>优化方案：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7d492b841bca4f1c8d510d95efe7a2c9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755337.webp" />   
     </p>
 <p>首先来了解一下Flink sql是如何解析并映射到对应的方法类，如上边的图所示：</p>
 <p>① sql通过calcite parser 和validator过程，转换为calcite logical plan。</p>
@@ -289,12 +289,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="2-kafka自定义分流优化"><strong>2. kafka自定义分流优化</strong></h2>
 <p><strong>背景描述：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/226fa7ab0bd94312b62b894f58ef4a6b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755267.webp" />   
     </p>
 <p>在实时数仓分流场景下，想通过sql将一条实时流根据一定的规则，分发到多个不同的kafka topic中。如图所示，通过自定义udf解析数据中project_id字段，将数据分流到a b c 三个topic中。</p>
 <p><strong>优化方案：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cccf01c1eba243d4bf8f097094e349af.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755875.webp" />   
     </p>
 <h1 id="04-flink-runtime优化"><strong>04 Flink runtime优化</strong></h1>
 <h2 id="1-flink-state优化"><strong>1. Flink state优化</strong></h2>
@@ -306,11 +306,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>且同样可以通过kv高效查找数据。同时和checkpoint可以很好的结合，一个checkpoint对应一组rocksdb的sst文件，便于故障恢复的管理。</p>
 <p>所以我们最终选择使用rocksdb最为state的cache。Rocksdb cache在Flink中的架构如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fb0054818d1943d48f06149ee15e2656.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755659.webp" />   
     </p>
 <p>rocksdb最显著的特征就是会compaction，rocksdb的存储是把记录按照key排序后分布到各个文件当中。如下图所示，rocksdb会将L0的小文件进行合并，保证L1开始各层文件中的key都是有序排列的，来提高读取时磁盘的读取效率。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6058e559d40f42e7a535e492b3e9df3c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755307.webp" />   
     </p>
 <p>但是在我们的场景中，当数据量增大，这种高频率的合并会占用大量的CPU资源，最终导致整个任务没法运行。针对这个问题，我们做了如下三个优化方案：</p>
 <p>① FIFO compaction</p>
@@ -322,12 +322,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="2-全局并行度"><strong>2. 全局并行度</strong></h2>
 <p>在sql任务中，可以设置默认并行度，也可以对各个算子单独设置并行度。对用户来说，学习成本大，设置的也不一定合理。具体痛点如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5685c36c06f94d0780f7c1ced522b3b8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755142.webp" />   
     </p>
 <p>按照热点来看，上面这个task是有cpu热点，下面这个task cpu比较空闲。</p>
 <p>**优化方案： **</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/01c8f9e94c6f48c3beaa9887157ef382.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755852.webp" />   
     </p>
 <p>① 仅保留全局并行度概念，屏蔽算子级并行度。</p>
 <p>用户只需要设置一个全局并行度即可，从全局来调整资源，易于理解。将算子均分在所有tm，降低cpu热点的概率。尽可能的让多个算子间并行度一致，利用Flink优化，将算子串联在一起，减少序列化和网络开销。</p>
@@ -341,15 +341,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>随着平台作业的日益增多，作业类型愈加复杂化，对作业的运维管理难度越来越大。</p>
 <p>大部分用户非资深Flink玩家，在遇到任务挂、checkpoint不成功、堆积、数据不准不符合预期等诸多问题时，无法自主分析解决，这大量消耗了平台值班人员以及用户自身的时间。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/32052419995649a79f91f7027de00a19.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755481.webp" />   
     </p>
 <p>所以我们通过warship这个作业智能诊断工具，来辅助线上作业的半自助化运维。warship智能诊断工具，能够自动收集平台（系统层、应用层）上所有的度量标准，并对收集的数据进行分析，并将分析结果以一种简单且易于理解的形式展示出来。同时可以根据历史监控指标采集，分析出资源不够或者资源浪费的任务，给出资源调整建议，未来做到AutoScale任务自动扩缩容。Warship工具的原理如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bf1781a43c0e47228e10f8fb5dfc2205.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755283.webp" />   
     </p>
 <p>如上图，warship从yarn上获取正在运行的app列表，并采集es日志，Flink任务相关指标 ，以及机器级别指标等。这些采集的数据经过启发式算法规则计算、评分、时间归因或者层级归因后，调用告警平台，输出告警，同时进行自动调整并存入数据库。详细的过程如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/78be24f0be584105bfe75a8f965cf3e5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755292.webp" />   
     </p>
 <p><strong>启发式算法介绍：</strong> 以checkpoint为例子。取近10次checkpoint，根据失败次数从100分往下扣分。失败的越多扣得越多。checkpoint耗时评分：ck的耗时/超时时间 越接近超时时间，评分越低。</p>
 <p>将评分低的检测项根据时间排序，时间相同的根据层级排序，找到根因。</p>
@@ -484,6 +484,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -517,10 +521,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -899,6 +899,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

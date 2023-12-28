@@ -202,7 +202,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>今天分享的内容主要是HBase RowKey与索引设计相关的一些技巧、原则和相关案例。将分以下四部分分析，第一部分简单介绍HBase基础知识，第二部分探讨合理的需求调研方法，第三部分是关于RowKey与索引设计的一些技巧、原则，第四部分是关于OpenTSDB/JanusGraph/GeoMesa典型案例的设计分享。</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0baca0af8b274c4fa8b8bb262037ed15.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271428477.webp" />   
     </p>
 <p><strong>一、HBase基础</strong></p>
 <p>第一部分包括基础概念与数据模型介绍、快速浏览读写流程、介绍RowKey在读写流程中发挥的作用。</p>
@@ -214,48 +214,48 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>MemStore：</strong> 用来在内存中缓存一定大小的数据，达到一定大小后批量写入到底层文件系统中。</p>
 <p><strong>HFile：</strong> HBase数据在底层分布式文件系统中的文件组织格式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6532dcaf01ac49e485e4568ed57395ea.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271428145.webp" />   
     </p>
 <p>关于进程角色如下图，主要有ZooKeeper、Master、RegionServer等角色。Meta表的路由信息在ZooKeeper中；Master负责表管理操作，Region到各个RegionServer的分配以及RegionServer Failover的处理等；RegionServer提供数据读写服务。HBase的所有数据文件都存放在HDFS中。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ac43162ffe1b49a5a1c2cf6eb4127935.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271429594.webp" />   
     </p>
 <p>我们先来理解一下KeyValue的概念。在HBase中所存储的数据，是以KeyValue形式存在的。KeyValue拥有特定的组织结构，如下图所示。一个KeyValue可以理解成HBase表中的一个列，当一行存在多个列时，将包含多个KeyValue。同一行的KeyValue有可能存在于不同的文件中，但在读取的时候，将会按需合并在一起返回给客户端。用户写数据时，需要定义用户数据的RowKey，指定每一列所存放的Column Family，并且为其定义相应的Qualifier(列名)，Value部分存放用户数据。HBase中每一行可拥有不同的KeyValues，这就是HBase Schema-Less的特点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f386a926548a4ae794bb9baaa6180b2a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271429442.webp" />   
     </p>
 <p>下面介绍KeyValue多版本。HBase中支持数据的多版本，通过带有不同时间戳的多个KeyValue版本来实现的。HBase所保存的版本数目是可配置的，默认存放3个版本。在普通的读取流程中，旧版本的数据是不可见的，但通过指定版本数或者版本号的读取，可以获取旧版本数据。下图是普通读取流程与多版本读取流程的对比。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1bbbd132ee9a499289e0af75b95eba28.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271429981.webp" />   
     </p>
 <p>用户数据存入到HBase表中时，需要进行Qualifier (KeyValue/Qualifier(KeyValue/列) 设计。一个最简单的设计是保持HBase的列与用户数据一致，如下图1的设计。这种，基本上与关系型数据库的设计是一致，但这种会带来较大冗余 (KeyValue结构化开销)。但HBase 基于KeyValue的接口，决定了这种设计可以是非常灵活的，例如我们也可以考虑为HBase的每一行只设置两个列，其中Name为一个列，其它内容合并到一个列中，如下图2所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0b1f0c576e77453c8e28a39f06af72db.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271429642.webp" />   
     </p>
 <p>尽管我们在使用HBase表存放数据的时候，需要预先做好列设计。但这个设计仅仅由应用层感知，HBase并没有存放任何的Schema信息来描述这个设计。也就是说，应用层需要知道为每一表/每一行设计了什么样的列(KeyValue)，然后在读取的时候做相应的解析。然HBase中并没有Schema信息，那么每一行中的列，也可以是任意添加的。如上图所示，绿色背景的KeyValue为后续增加的。</p>
 <p>关于Column Family，前面提到它是列的集合。每个Column Family里面关联了一个MemStore，关联了多个HFile文件。当我们在选择是否要应用多个Column Family的时候，需要调研所读写应用的业务特点，有些数据可能会一起写入，有时候临时增加数据，此时可以考虑用两个Column Family。如下图所示，假设为表设置了两个列族，而且定义每一个列族中要存放的列：{Name}-&gt;Column Family-A，{City,Phone,Gender}-&gt;Column Family-B 不同列族的数据会被存储在不同的路径中。即设置多个列族时一行数据可能存在于两个路径中。整行读取的时候，需要将两个路径中的数据合并在一起才可以获取到完整的一行记录。但如果仅仅读取Name一列的话，只需要读取Column Family-A即可。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6bc2b130dbf040c893b5ee9058fa7e40.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271429920.webp" />   
     </p>
 <p>下图所示，读写数据的简单路由机制。一开始会先去ZooKeeper中获取Meta表的路由信息，然后在Meta中定位每条数据关联的用户Region路径。下面这部分是基于RowKey从Meta表定位关联Region方法，通过一个反向扫描的方式进行。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2eb326fcad9a4d20b92199d8fdff1ff0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271429609.webp" />   
     </p>
 <p>下面介绍一下写入流程。客户端通过发请求到RegionServer端，写入的时候会先写入WAL日志中，其次会将数据写入memstore内存，当数据达到一定大小后会flush成一个个的HFile文件，当文件达到一定数量后，通过compaction的操作合并成更大文件，这样数据读取会更快。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ce5b5c4408f2442c9cdd3fff432dea01.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271430343.webp" />   
     </p>
 <p>Region Split。有人可能会有疑问，分裂的时候需不需搬迁数据？当一个Region变的过大后，会触发Split操作，将一个Region分裂成两个子Region。Region Split过程并不会真正将父Region中的HFile数据搬到子Region目录中。Split过程仅是在子Region中创建了到父Region的HFile引用文件，子 Region1中的引用文件指向原HFile的上部，而子Region2的引用文件指向原HFile2的下部。数据的真正搬迁工作是在 Compaction过程完成的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0daac83163d349de9b12fa80fab8c95a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271430048.webp" />   
     </p>
 <p>下面是读取流程。当进行读取时，客户端会先发送scan请求到RegionServer，打开scanner，然后调next请求获取一行数据，也可以将一批数据先放入Result的Cache中去,客户端不断迭代获取内容，scan每次获取多少行数据通常需要结合自己业务特点去获取合理的值。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fe8b60e755fb4b74b6f8dd663c355a05.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271430701.webp" />   
     </p>
 <p>关于Scanner的抽象。由于数据一开始会先写入MemStore，当数据达到一定大小以后再Flush成底层文件，那么在读取的时候首先需要解决的问题是什么？因为数据可能存在于多个列族中，然后每个列族里又有内存里面的数据，还有些数据可能存在于多个文件中，那么应该如何读取呢？这里涉及到数据的抽象，这里将Region的读取会封装成ResultScanner对象，每个列族封装成StoreScanner对象，每个StoreScanner里面又有多个HFile、MemStore等。StoreScanner包含一个SegmentScanner和多个StoreFileScanner，这些Scanner会被组织在优先级队列里面，在Scan的时候一定会优先指定一个起始Key的值，Scanner在打开的时候会将指针定位到指定Key的位置，每个Scanner在打开的时候会对KeyValue 进行排序，然后放入一个优先级队列中。然后客户端每次通过Next请求驱动Scan的调用，Scanner Next请求调用如下图所示，用ScannerA-D表示上面提到的各种Scanner，当依次Next请求调用时，会判断哪个Scanner的数据是最小的。比如ScannerA先读，读取KeyValue数据，然后判断Scanner是否读取完毕，是否超出了Scan范围，假如没有读完会被再次丢回队列，重新排序，如此循环获取数据。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/92c781572fb6490d8a75e9b892fcbb61.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271430003.webp" />   
     </p>
 <p>关于HFile的组织结构。HFile中数据按Block组织，一个Data Block的默认大小为64KB，Data Block中直接存储了KeyValue信息，最底层的Block是Leaf Index Block，Data Block的索引信息存储在Leaf Index Block中。而Leaf Index Block的信息存储在 Root Index中(不考虑Intermediate Index Block情形)。从Root Index Block到Leaf Index Block Leaf Index BlockLeaf Index Block Leaf Index Block Leaf Index BlockLeaf Index Block再到 Data Block，以及从 Data Block到用户数据 KeyValue的 数据组织，正是一种典型的B + Tree结构。</p>
 <p>下面我们回顾一下RowKey在读写流程中发挥的作用：</p>
@@ -265,11 +265,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>RowKey查询的局限性。根据下表信息，基于Name+Phone+ID构建RowKey。如果提供的查询条件能够尽可能丰富的描述RowKey的前缀信息，则查询时延越能得到保障。如下面几种组合条件场景：Name+Phone+ID、Name+Phone、Name。如果查询条件不能提供Name信息，则RowKey的前缀条件是无法确定的，此时只能通过全表扫描的方式来查找结果。一种业务模型的用户数据RowKey，只能采用单一结构设计。但事实上，查询场景可能是多维度的。例如在上面的场景基础上，还需要单独基于Phone列进行查询。这是HBase二级索引出现的背景。即二级索引是为了让HBase能够提供更多维度的查询能力。</p>
 <p>注意：HBase原生并不支持二级索引方案，但基于HBase的KeyValue数据模型与API，可以轻易地构建出二级索引数据。Phoneix提供了两种索引方案，而一些大厂家也都提供了自己的二级索引实现。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/49141ddcd3a342f9ab041a5ae9ca4956.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271430631.webp" />   
     </p>
 <p>常见的两种二级索引。方案一全局索引（下右图）、方案二本地索引（下左图）。方案一优点：数据按索引字段全部排序，基于索引字段的小批次查询性能高。能够支持更大的查询并发数。方法的复杂度较低。缺点是：生成索引数据对实时写入的影响较大。方案二优点：每一个用户Region都拥有独立的索引数据，目前最佳的实践是将这部分索引数据存放于一个独立的列族中。方案缺点：按索引字段进行查询时，需要访问所有的索引Region，随着数据量和Region数目的不断增多，查询时延无保障，查询所支持的并发数也会降低。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5be19844667c41a7bd3e6d09d3a0a1ce.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271430172.webp" />   
     </p>
 <p><strong>二、合理的需求调研</strong></p>
 <p>这部分主要介绍一下在设计RowKey之前如何合理地调研，RowKey设计的目标是将数据合理地分配到每一个Region中，从而很好地满足业务的读写需求。索引设计目标是为HBase提供更多维度的查询能力，在实际应用中应该通过构建尽量少的索引，来满足更多的查询场景。</p>
@@ -283,53 +283,53 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>三、RowKey与索引设计</strong></p>
 <p>首先看一下影响查询性能的关键因素是什么？基于某一个索引/RowKey进行查询时，影响查询的关键因素在于是否将扫描的候选结果集限定在一个合理的范围内，如下图所示。知识点备注：直接影响数据扫描范围的查询条件，称之为查询驱动条件。而其它的能够起到过滤作用的查询条件，则称之为查询过滤条件。影响查询的关键因素在于如何合理的设置查询驱动条件。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/90ee4653c070473484f8dfcc298c7e09.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271430932.webp" />   
     </p>
 <p>RowKey字段的选取，遵循的基本原则是唯一性，RowKey必须能够唯一的识别一行数据。无论应用是什么样的负载特点，RowKey字段都应该参考最高频的查询场景。数据库通常都是以如何高效的读取和消费数据为目的，而不是数据存储本身。而后，结合具体的负载特点，再对选取的RowKey字段值进行改造，组合字段场景下需要重点考虑字段的顺序。</p>
 <p>避免数据热点的方法：</p>
 <p><strong>(1) Reversing</strong></p>
 <p>如果经初步设计出的RowKey在数据分布上不均匀，但RowKey尾部的数据却呈现出了良好的随机性，此时，可以考虑将RowKey的信息翻转，或者直接将尾部的bytes提前到RowKey的前部。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/11c4f6554e684db29bd4d2758a668cc1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271430944.webp" />   
     </p>
 <p><strong>(2) Salting</strong></p>
 <p>Salting的原理是在原RowKey的前面添加固定长度的随机bytes，随机bytes能保障数据在所有Regions间的负载均衡。缺点：既然是随机bytes，基于原RowKey查询时无法获知随机bytes信息是什么，也就需要去各个可能的Regions中去查看。可见Salting对于读取是利空的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8f7d6e1675ff490aaae66c8dcdb8584a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271430528.webp" />   
     </p>
 <p><strong>(3) Hashing</strong></p>
 <p>基于RowKey的完整或部分数据进行Hash，而后将Hashing后的值完整替换原RowKey或部分替换RowKey的前缀部分。缺点是与Reversing类似，Hashing也不利于Scan，因为打乱了原RowKey的自然顺序。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/01c0e3a71a3a44dcb5557a4da77b3306.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271431084.webp" />   
     </p>
 <p>接下来介绍一个小的知识点，分布式数据库的常见数据分片方式。两种常见的基础数据分片方式有Hash分片、Range分片。原理与区别见下图，在实际应用中，两者还可以结合应用。HBase采用了基于RowKey分区的方式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ad1510f3811941909214e47ed9798e76.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271431761.webp" />   
     </p>
 <p>二级索引RowKey设计常见方法：</p>
 <p>(1)无Schema模式</p>
 <p>下图是常见设计思路，如果原数据RowKey中已经包含了索引列的信息，该设计容易导致数据冗余。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f8801da7598045de8f4049f1dbf9216a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271431419.webp" />   
     </p>
 <p>(2)有Schema模式</p>
 <p>当原数据RowKey中的列与索引列有重叠时，该设计能避免一个列在索引列中被重复存储。但该设计需要事先支持Schema，也就是需要事先定义原数据的RowKey结构以及索引的结构信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9c616227bc0543b5829f4f40cb8ea583.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271431887.webp" />   
     </p>
 <p>二级索引字段的选取：</p>
 <p>对所有的价值查询场景进行详细分析，基于确实能够缩小查询范围的一部分列来构建二级索引。即我们应该基于离散度较好的一些列来构建索引。如下图所示，字段ID，PHONE的离散度为1，基于这些字段构建索引是最佳的，而字段PROVINCE与GENDER，AGE的离散度较差，不适合用来构建二级索引。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f8becd3e5ae74af89aace5073d1255ae.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271431553.webp" />   
     </p>
 <p>组合索引适用场景/构建原则：</p>
 <p>组合索引的创建，取决于对用户查询场景的详细分析。组合索引的确可极大的优化这些字段组合时的查询场景，但却会带来相对较大的数据膨胀。在不了解用户数据特点以及用户查询场景的情形下，盲目的构建组合索引，是要坚决避免的。举例如下图，假设查询条件为NAME=”Wang” &amp;&amp; Phone=”1388888” 如果基于NAME构建索引，则依然可能需要扫描大量的数据，才可以找到一条目标记录，如下图1所示。如果基于NAME+Phone构建索引，则可以更精确地命中目标记录，如下图2所示。查询性能可大幅度提升。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9abf22f181574e2e8f73d041e7573c1d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271431038.webp" />   
     </p>
 <p>组合索引中字段组合的顺序：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/429c130fd5454167a65b49377cc02ca1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271431487.webp" />   
     </p>
 <p>先导列的选取：</p>
 <p>(1) 被选作先导列的列，一定是经常被用到的列；</p>
@@ -349,12 +349,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>1. OpenTSDB</strong></p>
 <p>OpenTSDB数据模型如下图，一个Time Series可以理解成是一个数据源的一个指标按时间产生的指标数据序列，每一个指标称之为一个Data Point。OpenTSDB使用一个Metric Name以及一组Tags信息来唯一确定一个Time Series。每一条记录成为Data Point。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b775e9f4ba874a7cb8e20c451a084bb1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271431277.webp" />   
     </p>
 <p>典型场景分析：给定Metric Name以及一组Tags信息，查询某时间范围的所有的Data Points；给定Metric Name以及一组Tags信息，查询某时间范围的聚合结果；给定Metric Name,查询所有相关Time Series在某时间范围的统计信息。</p>
 <p>RowKey设计如下图，第一部分有一个SALT决定了数据的分片，第二部分是有关查询都会提供的Metric ID信息，其他包括Timestamp以及tags信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/731988933f184a01bd0ceaf40b974177.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271431904.jpeg" />   
     </p>
 <p><strong>2. JanusGraph</strong></p>
 <p>JanusGraph—数据模型。主要包含两类数据：顶点(Vertex)和边(Edge)。顶点包含属性信息。边拥有EdgeLabel信息，EdgeLabel拥有Multiplicity属性，用来定义任意两个顶点之间具有统一EdgeLabel的边数量信息，以及定义任意一个顶点的出入度信息(入边数量与出边数量)。边也可以包�</p>
@@ -481,6 +481,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -514,10 +518,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -896,6 +896,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

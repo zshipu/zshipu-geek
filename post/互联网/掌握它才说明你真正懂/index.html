@@ -220,7 +220,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Elasticsearch 基于 Lucene，隐藏其复杂性，并提供简单易用的 Restful API接口、Java API 接口。所以理解 ES 的关键在于理解 Lucene 的基本原理。</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2020/2/de3d9e93618a4495980f5f0502aad01e-image.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939047.png" />   
     </p>
 <h1 id="lucene-简介">Lucene 简介</h1>
 <p>Lucene 是一种高性能、可伸缩的信息搜索（IR）库，在 2000 年开源，最初由鼎鼎大名的 Doug Cutting 开发，是基于 Java 实现的高性能的开源项目。</p>
@@ -228,7 +228,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="核心模块"><strong>核心模块</strong></h2>
 <p>Lucene 的写流程和读流程如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ada64bd497a54e3ba3a202d437e1e362.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939357.webp" />   
     </p>
 <p><em>图 1：Lucene 的写流程和读流程</em></p>
 <p>其中，虚线箭头（a、b、c、d）表示写索引的主要过程，实线箭头（1-9）表示查询的主要过程。</p>
@@ -276,7 +276,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>Lucene 的底层存储格式如下图所示，由词典和倒排序两部分组成，其中的词典就是 Term 的集合：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d163bc8f82bd49a0993af171b0008c7a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939214.webp" />   
     </p>
 <p><em>图 2：Lucene 的底层存储格式</em></p>
 <p>词典中的 Term 指向的文档链表的集合，叫做倒排表。词典和倒排表是 Lucene 中很重要的两种数据结构，是实现快速检索的重要基石。</p>
@@ -396,7 +396,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/eb6ad9395a3e478bb75a73cc23aed02c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939857.webp" />   
     </p>
 <p><em>图 3：Elasticsearch 写索引</em></p>
 <p>从上述流程可以看出，数据先被暂时缓存在内存中，在达到一定的条件再被一次性写入硬盘中，这种做法可以大大提升数据写入的速度。</p>
@@ -438,7 +438,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>段分组的步骤如下：</p>
 <p>①根据段生成的时间对段进行排序，然后根据上述标准化公式计算每个段的大小并且存放到段信息中，后面用到的描述段大小的值都是标准化后的值，如图 4 所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/974d3ce8f6ab42d6b9a3c472cae90496.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939486.webp" />   
     </p>
 <p><em>图 4：Lucene 段排序</em></p>
 <p><strong>②</strong> 在数组中找到最大的段，然后生成一个由最大段的标准化值作为上限，减去 LEVEL_LOG_SPAN（默认值为 0.75）后的值作为下限的区间，小于等于上限并且大于下限的段，都被认为是属于同一组的段，可以合并。</p>
@@ -447,7 +447,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>当找到第 1 个满足条件的段时，则停止，并把当前段到 start 之间的段统一分到一个组，无论段的大小是否满足当前分组的条件。</p>
 <p>如图 5 所示，第 2 个段明显小于该分组的下限，但还是被分到了这一组。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/11cc1a6b81234617821f5c0105ce973e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939052.webp" />   
     </p>
 <p><em>图 5：Lucene 段分组</em></p>
 <p>这样做的好处如下：</p>
@@ -466,7 +466,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>然后把 end 指向数组的第 start+MergeFactor 个段，逐个向前查找第 1 个满足条件的段：重复第 3 步和第 4 步。</p>
 <p><strong>⑥</strong> 如果一直没有找到满足合并条件的段，则一直重复第 5 步，直到遍历完整个数组，如图 6 所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/af512558e22b468c8dcea0042f294d30.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939736.webp" />   
     </p>
 <p><em>图 6：Lucene 段分组二</em></p>
 <p><strong>⑦</strong> 在找到满足条件的 mergeFactor 个段时，就需要开始合并了。但是在满足合并条件的段大于 mergeFactor 时，就需要进行多次合并。</p>
@@ -621,7 +621,7 @@ node.data=false
 <p>总之，Elasticsearch 是一个准实时的搜索引擎，而不是一个实时的搜索引擎。</p>
 <p>此时的状态如图 7 所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/961a2c2b1e3f49ef9b562e1da8230257.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939416.webp" />   
     </p>
 <p><em>图 7：Elasticsearch 写数据的过程</em></p>
 <p>然后，当达到默认的时间（1 秒钟）或者内存的数据达到一定量时，会触发一次刷新（Refresh）。</p>
@@ -640,7 +640,7 @@ node.data=false
 </ul>
 <p>此时的状态如图 8 所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f10b527d041c4252abad91d14cb6f6e5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939243.webp" />   
     </p>
 <p><em>图 8：Elasticsearch 写数据的过程</em></p>
 <p>最后，刷新（Flush）。当日志数据的大小超过 512MB 或者时间超过 30 分钟时，需要触发一次刷新。</p>
@@ -664,7 +664,7 @@ node.data=false
 </ul>
 <p>此时的状态如图 9 所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a19a19463c3d4ded9c4fcae0348a9257.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939014.webp" />   
     </p>
 <p><em>图 9：Elasticsearch 写数据的过程</em></p>
 <p>由上面索引创建的过程可知，内存里面的数据并没有直接被刷新（Flush）到硬盘中，而是被刷新（Refresh）到了文件缓存系统中，这主要是因为持久化数据十分耗费资源，频繁地调用会使写入的性能急剧下降。</p>
@@ -672,13 +672,13 @@ node.data=false
 <p>在需要重启时，Elasticsearch 不仅要根据提交点去加载已经持久化过的段，还需要根据 Translog 里的记录，把未持久化的数据重新持久化到磁盘上。</p>
 <p>根据上面对 Elasticsearch，写操作流程的介绍，我们可以整理出一个索引数据所要经历的几个阶段，以及每个阶段的数据的存储方式和作用，如图 10 所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/592389beb11e47b898826aa864fb4b1c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939784.webp" />   
     </p>
 <p><em>图 10：Elasticsearch 写操作流程</em></p>
 <h2 id="在集群中写索引"><strong>在集群中写索引</strong></h2>
 <p>假设我们有如图 11 所示（图片来自官网）的一个集群，该集群由三个节点组成（Node 1、Node 2 和 Node 3），包含一个由两个主分片和每个主分片由两个副本分片组成的索引。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/53eaf1799ab0415d9d30f6bd8f09b100.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939388.webp" />   
     </p>
 <p><em>图 11：写索引</em></p>
 <p>其中，标星号的 Node 1 是 Master 节点，负责管理整个集群的状态；p1 和 p2 是主分片；r0 和 r1 是副本分片。为了达到高可用，Master 节点避免将主分片和副本放在同一个节点。</p>
@@ -697,7 +697,7 @@ node.data=false
 <p>由于在 Elasticsearch 集群中每个节点都知道集群中的文档的存放位置（通过路由公式定位），所以每个节点都有处理读写请求的能力。</p>
 <p>在一个写请求被发送到集群中的一个节点后，此时，该节点被称为协调点（Coordinating Node），协调点会根据路由公式计算出需要写到哪个分片上，再将请求转发到该分片的主分片节点上。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/34504c40274743d6b0b154ac811a4b24.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939905.webp" />   
     </p>
 <p><em>图 12：写索引</em></p>
 <p>写操作的流程如下（参考图 11，图片来自官网）：</p>
@@ -717,7 +717,7 @@ node.data=false
 <h2 id="集群中的查询流程"><strong>集群中的查询流程</strong></h2>
 <p>根据 Routing 字段进行的单个文档的查询，在 Elasticsearch 集群中可以在主分片或者副本分片上进行。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/388bf7f91f534f5abe12ad60d927e24a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939594.webp" />   
     </p>
 <p><em>图 13</em></p>
 <p>查询字段刚好是 Routing 的分片字段如“_id”的查询流程如下（见图 12，图片来自官网）：</p>
@@ -852,6 +852,10 @@ node.data=false
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -885,10 +889,6 @@ node.data=false
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1267,6 +1267,8 @@ node.data=false
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -227,10 +227,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>伴随着产业发展的深入，浅层基础建设基本完成，互联网正加速向房产这个线下场景渗透，并逐步实现「由轻到重」的角色转变。链家作为中国地产中介的龙头企业，基于特有的平台优势以及稳固庞大的经纪人资源，一反行业常规从线下打线上，从低频打高频，开始对互联网端口进行再造，正逐步由一家传统的房地产企业向数据驱动的科技平台型企业转型。2018年4月23日贝壳平台诞生，伴随着平台的发展，越来越多优秀中介品牌的不断加入，经纪人的规模达到了45万之多。因职业年限、个人能力、学历等多方面因素的差异，导致经纪人服务水平参差不齐，如何帮助打平经纪人的方差，成为当前亟待解决的任务。基于此，我们选择当前一个经纪人和用户线上交互比较多的IM对话场景进行改造，学习优秀经纪人的聊天技巧，抽象出一套SOP和模板库，实现了一款基于KBQA的经纪人咨询助手，进而辅助经纪人和用户的对话，提高经纪人服务水平。</p>
 <h3 id="12-系统简介">1.2 系统简介</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f1178b5ca88c4245bfe3b4cd5b5fa332.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841567.webp" />   
     
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/28175457aefc4e3ea0f3df2a7b0fceb6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841603.webp" />   
     </p>
 <p>图1. 咨询助手效果样例如图1咨询助手（前称为智能助手）的样例，展示了在IM场景下经纪人与用户对话的过程(详见图2)。通过咨询助手，可以辅助经纪人回答用户的问题。对经纪人来说，当用户咨询房源信息或者需要经纪人推荐房子时，咨询助手的消费端会主动消费队列中的消息，通过对话中台先调用NLU（Natural Language Understanding的简称，自然语言理解）进行用户意图理解：句法分析+情感/句式识别+意图识别+槽位抽取，然后将理解结果返回给对话中控，对话中控会调用DM（Dialog Management的简称, 对话管理），DM会记录和管理当前和历史的对话状态信息，基于对话策略决策出相应的动作，然后选择相应的动作集合返回给对话中台，对话中台根据动作类型调取Sbot（找房机器人）或者Qbot（房源详情问答机器人）或其他类型动作。如果动作是找房类型，会调用Sbot，Sbot会基于对话过程记录的槽位信息，帮助用户查找合适的房子，同时会根据情况询问用户相关的状态信息；如果动作是详情问答类型，会调用Qbot，Qbot会基于句式和槽位信息，判断问题类型，查询知识图谱、获取意图对应的回答模板信息，然后基于查询到的三元组和模板拼接生成回答返回给经纪人，然后由经纪人点击选择发送用户。总结下我们这款经纪人咨询助手特点，有如下三个方面：</p>
 <ol>
@@ -250,18 +250,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="3-实施技术路线">3 实施技术路线</h2>
 <h3 id="31-整体架构">3.1 整体架构</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a9059b7fa97e4ef1831b20052a95ce3d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841433.webp" />   
     </p>
 <p>图2. 咨询助手整体架构图</p>
 <h3 id="32-技术路线">3.2 技术路线</h3>
 <p>下面着重介绍下基于知识图谱的Qbot部分的实现，也称KBQA部分，功能架构图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d6aa531e54104b0fbb4ec0c3d4768aca.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841391.webp" />   
      图3. Qbot的整体功能架构图下面整体介绍下为了支撑KBQA模块，我们是如何构建知识图谱（知识库）的，主要包含知识建模、知识获取、知识融合、知识存储四个模块，分块解读如下：</p>
 <h4 id="321-知识建模">3.2.1 知识建模</h4>
 <p>知识建模是指建立知识图谱的数据模型，即知识的逻辑体系化过程，构建一个模型对知识进行描述。知识建模的过程是知识图谱构建的基础，高质量的数据模型能避免不必要、重复性的知识获取工作，有效提高知识图谱构建的效率，降低领域数据融合的成本。不同领域的知识具有不同的数据特点，需要分别构建不同的知识模型。知识建模一般有自顶向下和自底向上两种途径:1.自顶向下的方法是指在构建知识图谱时首先定义数据模式即本体，一般通过领域专家人工参与。从最顶层的概念开始定义，然后逐步细化，形成具有领域特色的分类层次结构。2.自底向上的方法则相反，首先对现有实体进行归纳总结，形成底层的概念，再逐步往上抽象形成上层的概念。在贝壳房产知识建模过程中，我们充分结合“自顶向下”和“自底向上”两种方法。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a8800c76097b487abf7e2f6179ad8fc4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841379.webp" />   
     </p>
 <p>图4. 本体建模流程</p>
 <h4 id="322-知识获取">3.2.2 知识获取</h4>
@@ -271,14 +271,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>除了楼盘字典、基于机器学习的信息抽取技术，我们还可以依赖专家的经验，这是构建领域知识图谱的常用手段，事理图谱以及事件图谱通常是由专家的经验形成的。例如，在构建税费事理子图的过程中，需要大量的专家经验去拆解相关的购房税收政策。</p>
 <p>下面给一个基于IM场景的经纪人和用户对话数据，从经纪人的回答中挖掘有价值的房源小区FAQ问答对及三元组信息，补全现有知识图谱知识缺失，挖掘流程如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/995323bef2d6430b80bf0ff2750a6472.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841637.webp" />   
     </p>
 <p>图5. 基于对话日志的FAQ/三元组挖掘抽取流程</p>
 <h4 id="323-知识融合">3.2.3 知识融合</h4>
 <p>知识图谱构建的过程中数据来源广泛、质量参差不齐，导致它们之间存在多样性和异构性。例如，对于相似领域，通常会存在多个不同的概念或实体指称相同的事物。知识融合指对来自多源的不同概念、上下文和不同表达等信息进行融合对齐的过程。</p>
 <p>在构建贝壳房产知识图谱过程中，我们遇到不同来源的房源、小区实体对齐问题以及基于实体的文本信息的实体链接问题，在解决实体对齐和实体链接问题后，我们对实体进行知识融合。抽象出一般的融合流程如图5所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d42b48839a2044b78464136f89eb12a2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281842552.webp" />   
     </p>
 <p>图6. 实体对齐融合流程</p>
 <h4 id="324-知识存储">3.2.4 知识存储</h4>
@@ -287,11 +287,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="4-案例示范意义">4 案例示范意义</h2>
 <h3 id="41-形成一个知识图谱产业应用数据建设闭环">4.1 形成一个知识图谱产业应用数据建设闭环</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8a978c370fe64e679fc2965074c25dcc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281842518.webp" />   
     </p>
 <p>图7. 产业应用+知识图谱
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ad3f9ff9a9754d50a4eb1e60044f0686.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281842487.webp" />   
     </p>
 <p>图8. 房产知识图谱数据建设及应用闭环</p>
 <h3 id="42-垂直领域智能助手的可行方案">4.2 垂直领域智能助手的可行方案</h3>
@@ -301,7 +301,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>③ 领域专家指导：一般领域都会有领域的专家，这样不管是在问题的建模上、还是场景分析上都可以有一定的指导，特别当我们做知识建模时，可以结合专家的经验；同时专家也可以帮助我们对复杂业务知识进行拆解，帮助我们构建事理子图。</p>
 <h2 id="5-展望">5 展望</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e29637ecffbd4666b27e02eba3b22b39.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281842379.webp" />   
      以上是贝壳知识图谱系列文章开篇，后续我们会作关于领域知识建模、信息抽取、知识融合、房产事理知识图谱构建等工作的解读和分享。</p>
 <h3 id="作者介绍">作者介绍</h3>
 <blockquote>
@@ -438,6 +438,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -471,10 +475,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -853,6 +853,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

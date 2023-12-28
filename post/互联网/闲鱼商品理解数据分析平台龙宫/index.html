@@ -220,11 +220,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>我们希望以此实现结构化数据对运营的反哺，构成商品结构化数据生产与应用的闭环。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/07/image-2905a162.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910229.png" />   
     </p>
 <p>总体分层框架如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/07/image-6969b825.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910645.png" />   
     </p>
 <h3 id="数据链路建设"><strong>数据链路建设</strong></h3>
 <p>构建数据分析平台的关键是数据链路的建设，在闲鱼，结构化数据主要分为在线数据（通过发布、编辑入口用户直接填写的数据）和离线数据（通过后置算法模型分析商品的图文获取的数据）。数据链路的建设存在以下关键难点：</p>
@@ -237,7 +237,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>同时我们在线数据存储在mysql的商品表中，通过在java应用中监听表的变更将数据写入数据源表；离线数据通过ODPS+MQ的方式将数据传入算法模块，并通过blink将算法结果写入数据源表。由于在线离线的多来源数据可能存在重复、冲突的问题（同一商品算法A识别为iphone 12而算法B识别为iphone 11），所以在系统设计时我们使用源表来存储所有的原数据，使用终表来存储加工融合之后的数据，加工融合的策略是产品、运营可决策的。</p>
 <p>分析数据我们使用的是分析型数据库ADB，ADB在存储容量、单机查询QPS方面都远不及tableStore，但它在复杂sql的运行、实时索引创建、冷热数据隔离等方面拥有其他数据库不及的性能，是数据分析库的较好选择。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/07/image-b701f0ae.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910877.png" />   
     </p>
 <h3 id="离线异构数据源的接入"><strong>离线异构数据源的接入</strong></h3>
 <p>在闲鱼，结构化数据不仅仅来自于发布时的卖家填写，正如前面所说，闲鱼的C端卖家在填写结构化属性的专业程度和执行力都远远不及淘宝天猫的卖家，所以我们通过图文多模态的算法，在发布的后置链路中为商品补充很多结构化的属性（这部分cpv目前占大盘覆盖率的一半左右，不同类目情况不同）。接入这些离线数据具有以下难点：</p>
@@ -247,22 +247,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>针对这些难点我们设计了一套离线异构数据源统一接入的方案：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0517cca04e6c4013ac1b8673a8796496.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910762.png" />   
     </p>
 <p>各个算法的离线数据存储在ODPS中，各个算法的数据格式不一样，数据的分区也不同，所以先通过一个ODPS的同步任务将各数据源数据统一到一张结构化标准标签表idle_kgraph_std_source中。表结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f4115afc23bc4d32bb597859274c1c65.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910806.png" />   
     </p>
 <p>表中key为主键信息，因为不同场景的数据主键不一样，所以这里设计为开放式的主键，数据为json格式，key为主键列名，value为主键值。结构化标准表idle_kgraph_std_source通过一个Blink任务实时同步到tableStore的各个场景的数据表中。在Blink任务中，根据scene和source字段将数据进行分发，根据data中的key将数据路由到tableStore表中的不同列。同时为了提升效率，减少在Blink任务中写数据库的次数，拿到数据后，先对数据进行合并操作，将同种场景（例如结构化属性数据）的多来源数据合并成一条，再进行写操作。</p>
 <p>通过这套方案，我们成功解决了多数据源接入中数据难以收口，难以统一监控的问题，同时，数据标准表中开放式数据格式的设计使得新数据源能够快速接入，极大地降低了重复开发的成本。</p>
 <h3 id="数据加工融合"><strong>数据加工融合</strong></h3>
 <p>在获取到多来源数据之后，我们需要对数据进行加工融合，融合的策略是由产品和运营共同决定的，在变更策略时，存量的商品数据也需要重新进行加工融合，所以数据加工融合链路必须具备增量处理稳定，全量处理快速的特点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5f3eb4f4dafb4a129793ae773242c015.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910933.png" />   
     </p>
 <p>在进行全量处理数据时，利用分布式任务调度系统，主任务节点通过数据库的分片将全量数据划分成多份，并将数据索引下发给各个子任务节点，由子任务进行数据拉取，使数据拉取与处理不受数据库的物理分区与通道限制，大大提升性能，目前6亿全量数据处理仅需40min。任务的分发策略如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8fb34599a6204c46994303315144a738.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910256.png" />   
     </p>
 <p>总的来说，主要解决以下问题：</p>
 <ul>
@@ -278,7 +278,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>筛选排序条件：这些条件不影响查询的逻辑，只会在查询的结果中进行排序或过滤，针对这种情况我们会优先从缓存获取结果，并在内存中进行排序过滤，以提升分析性能。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/07/image-9a321dfb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910315.png" />   
     </p>
 <p>基于上述的方案，可有效降低数据分析查询的成本，使查询平均效率提升50%以上。</p>
 <h3 id="效果"><strong>效果</strong></h3>
@@ -410,6 +410,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -443,10 +447,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -825,6 +825,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

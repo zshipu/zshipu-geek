@@ -224,7 +224,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="引言">引言</h2>
 <p>在线服务系统的 AB-test 方法有很多种。搭建多个可服务集群，从物理上对流量进行隔离是比较常见的一种方式。这种方式应用于大型复杂的在线服务系统时，存在部署比较慢的问题。这种方式的典型架构如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8d93f565b7134f80a4295d7f8506fe05.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281914153.jpeg" />   
     </p>
 <p>QueryRewrite：改写用户搜索词以期望得到更好的查询结果。</p>
 <p>Matching：根据用户搜索词，召回最符合用户意图的那些推广。</p>
@@ -269,7 +269,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="一-系统整体架构">一. 系统整体架构</h3>
 <p>架构整体可以划分为三个系统，如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e9301db31b3e4156aa583248a7b48574.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281914250.jpeg" />   
     </p>
 <p>接下来对各个子系统进行详细的介绍。</p>
 <p>1. 实验配置管理发布系统</p>
@@ -282,7 +282,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>1. 实验配置管理发布系统</p>
 <p>(1) 实验场景。广告系统中，实验是针对某一批广告位或者特定页面进行的。针对 PID（标记广告的位置信息）或页面来对流量进行分类就成了一个强需求。将这样一批广告位定义为一个实验场景。Web 操作页面上需要提供配置实验场景的 UI 界面，用户可以在这个界面上新建一个场景，指定符合某些 PID 要求或者 URL 要求的请求进入相应的实验场景，UI 界面如下所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/02c9779b36bc433dbc6d08950b52b393.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281914105.jpeg" />   
     </p>
 <p>在此页面上，用户可以方便地添加一个新场景，并指定该场景的入口 PID（入口 PID 可以设定多个）。</p>
 <p>(2) 实验分层和流量切分。进入某个实验场景后，通过分多层来达到流量的复用。每一层的流量均是流入这个场景流量的一个全集。每一层的流量可以按用户指定的切分标记进行分桶切流。</p>
@@ -297,14 +297,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>由于互不影响的实验被分配到了不同的层，从而达到复用流量的目的。相互之间有影响的实验分到同一层，则保证了同一请求不会去作两个互斥的实验。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2e343f2dfaa64c15aaab980ecc1c42c6.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281914992.jpeg" />   
     </p>
 <p>2. 在线服务系统</p>
 <p>Tesla 以 lib 库的方式接入在线服务系统。没有做成一个服务的形式，主要考虑到接入简单，不增加系统复杂性和运维的工作量。</p>
 <p>(1) 分流规则。用户可以在各层指定不同的切分标记进行流量切分。系统会根据用户指定的切分标记值来计算 hash 值。计算出的 hash 值对 100 取模再加 1 可以得到分桶号，每个实验占了指定范围的桶号，这样便可以知道该次请求应当进行哪个实验。这里需要注意的是，选取一个偏差较小的 hash 函数，我们在数 10 种 hash 函数中选取了一个最优的 hash 函数，将偏差控制在实验效果统计可以忽略的范围。</p>
 <p>假如每一层均使用这样的切分规则，不同层做实验的用户选用相同切分规则时，请求始终落入相同的桶。由于不同层的实验之间毫无关系，为了保证实验效果绝对可信，需要做到不同层的流量正交。为了达到这个目的，引入了 layerID 来作为离散因子。由于每一层 layerID 是固定的，也能保证同一请求两次访问能落到同一个实验，从而不会造成同一用户多次访问，返回结果不一致的困惑。示意图如下。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7d9920fbea60436f929444b84be72752.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281915133.jpeg" />   
     </p>
 <p>(2) 实验参数的处理。之前讲述了如何决定一次请求去作哪些实验。这一部分介绍一个具体实验的构成元素，以及系统如何执行实验。一个实验本质上是一堆抽象参数集合。每个请求被分配某个实验之后，系统便会将该实验的抽象参数集合，作为请求的一部分传递至在线服务系统的各个处理模块。</p>
 <p>对于系统而言，可以根据请求携带的参数值来决定作哪个实验。这里需要注意的是，为了保证系统的健壮性，如果一个请求缺少了某个实验参数的数值，系统应该设置一个抄底的值。</p>
@@ -316,12 +316,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="应用实例">应用实例</h2>
 <p>下面以一个简单的广告引擎系统接入上述平台的例子，具体说明上述的方法。该系统共有两个实验点（Query Rewrite 和 Rank），因此可以分为两层实验。下面以一次请求的处理流程来简单说明该引擎系统的工作原理。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d2a95442616a4367ae1917577122abb0.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281915303.jpeg" />   
     </p>
 <p>如上图所示，Tesla 以 lib 库的形式接入引擎中。引擎接收到请求后，调用 Tesla 的 lib 库获取对应的实验参数信息，然后依次将实验信息透传给 Query Rewrite 和 Rank。在 Query Rewrite 和 Rank 模块中各取所需实验参数进行相应的实验，最后将 bucketID 记录到投放日志对应的字段中，用于实验效果统计用。</p>
 <p>下图是整个实验的配置文件的示意图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6df80e58d2ab4d0fa0ddefa6965d9cde.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281915315.jpeg" />   
     </p>
 <p>整个引擎的实验根据需要分为了 PC 和无线两种场景，分别进行策略优化和调整。根据算法实验的需要，在两种场景下均分为了两层（QR 和 Rank 层，QR 是 Query Rewrite）。每一层中均包含了三个实验。每个实验均是一些实验参数的集合，例如，exp 100 包含的参数有 qr_plan=5，qr_weight=3。Exp 103 包含的参数为 rank_level=2，rank_stragety=9。</p>
 <p>使用这个配置文件，一个用户请求发过来之后，如果根据 acookie 分流计算得出此请求恰好落入 PC 场景的 exp 100 和 exp 103 这两个实验，则返回的 bucketID 应当为 100_103，参数集合为 qr_plan=5，qr_weight=3，rank_level=2，rank_stragety=9。BucketID 可以记录在日志中，后续进行日志统计和分析使用。日志统计分析时按下划线把 BucketID 切割开，然后用 Storm 进行实时统计各个实验的情况，也可以用 Hadoop 进行离线的日志分析处理。对于在线引擎，各个实验点根据实验参数的值决定使用哪种策略和模型参数。</p>
@@ -462,6 +462,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -495,10 +499,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -877,6 +877,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

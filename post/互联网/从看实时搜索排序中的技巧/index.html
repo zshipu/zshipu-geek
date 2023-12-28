@@ -203,7 +203,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>废话不多说，我们进入文章的内容。</p>
 <p>Airbnb作为全世界最大的短租网站，提供了一个连接房主（host）挂出的短租房（ <strong>listing</strong>）和主要是以旅游为目的的租客（guest/user）的中介平台。这样一个中介平台的交互方式比较简单，guest输入地点，价位，关键词等等，Airbnb会给出listing的搜索推荐列表：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6aa5b6b39ba548fca5081ba1449ae4ea.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271611303.jpeg" />   
     </p>
 <p>Airbnb的业务场景</p>
 <p>容易想见，接下来guest和host之间的交互方式无非有这样几种：</p>
@@ -213,7 +213,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>host有可能拒绝guest的预定请求 （ <strong>reject</strong>）</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/84bb1a769d6e44a5a143c86ebc74bb39.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271611058.jpeg" />   
     </p>
 <p>Airbnb的交互方式</p>
 <p>基于这样的场景，利用几种交互方式产生的数据，Airbnb的search团队要构建一个real time的ranking model。为了捕捉到用户short term以及long term的兴趣，Airbnb并没有把user history的clicked listing ids或者booked listing ids直接输入ranking model，而是先对user和listing进行了embedding，进而利用embedding的结果构建出诸多feature，作为ranking model的输入。这篇文章的核心内容就是介绍 <strong>如何生成listing和user的embedding</strong>。</p>
@@ -225,43 +225,43 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们先讨论第一个对listing进行embedding的方法：</p>
 <p>Airbnb采用了click session数据对listing进行embedding，其中click session指的是一个用户在一次搜索过程中，点击的listing的序列，这个序列需要满足两个条件，一个是只有停留时间超过30s的listing page才被算作序列中的一个数据点，二是如果用户超过30分钟没有动作，那么这个序列会断掉，不再是一个序列。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8d557f328f94495191568f59bfb6d817.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271611333.jpeg" />   
     </p>
 <p>Click Session的定义和条件</p>
 <p>这么做的目的无可厚非，一是清洗噪声点和负反馈信号，二是避免非相关序列的产生。</p>
 <p>有了由clicked listings组成的sequence，就像我们在之前专栏文章中讲过的item2vec方法一样，我们可以把这个sequence当作一个“句子”样本，开始embedding的过程。Airbnb不出意外的选择了word2vec的skip-gram model作为embedding方法的框架。通过修改word2vec的objective使其靠近Airbnb的业务目标。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2b8c2545e8ac47149dc56a65b51ae981.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271611294.jpeg" />   
     </p>
 <p>Airbnb的类word2vec embedding方法</p>
 <p>我们在之前的专栏文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fzhuanlan.zhihu.com%2Fp%2F53194407">万物皆embedding</a>
 中详细介绍了word2vec的方法，不清楚的同学还是强烈建议先去弄明白word2vec的基本原理，特别是objective的形式再继续下面的阅读。</p>
 <p>我们假设大家已经具备了基本知识，这里直接列出word2vec的skip-gram model的objective如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/45b5ca4168b84deaa9bd04a0ed5f241f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271611928.png" />   
     </p>
 <p>在采用negative sampling的训练方式之后，objective转换成了如下形式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ed7a1ab0a8e04e43876fc312f261fced.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271611361.png" />   
     </p>
 <p>其中σ函数代表的就是我们经常见到的sigmoid函数，D是正样本集合，D&rsquo;是负样本集合。我们再详细看一下上面word2vec这个objective function，其中前面的部分是正样本的形式，后面的部分是负样本的形式（ <strong>仅仅多了一个负号</strong>）。</p>
 <p>为什么原始的objective可以转换成上面的形式，其实并不是显然的，感兴趣的同学可以参考这篇文章， <a href="https://zshipu.com/t?url=http%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttps%253A%2F%2Fgithub.com%2Fwzhe06%2FReco-papers%2Fblob%2Fmaster%2FFamous%252520Machine%252520Learning%252520Papers%2F%25255BW2V%25255DNegative-Sampling%252520Word-Embedding%252520Method.pdf">Negative-Sampling Word-Embedding Method</a>。这里，我们就以word2vec的objective function为起点，开始下面的内容。</p>
 <p>转移到Airbnb这个问题上，正样本很自然的取自click session sliding window里的两个listing，负样本则是在确定central listing后随机从语料库（这里就是listing的集合）中选取一个listing作为负样本。</p>
 <p>因此，Airbnb初始的objective function几乎与word2vec的objective一模一样，形式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/03a5d505431243fc876d7429056244a2.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271611751.jpeg" />   
     </p>
 <p><strong>（给大家出个脑筋急转弯，为啥Airbnb objective的正样本项前面是负号，原始的word2vec objective反而是负样本项前面是负号，是Airbnb搞错了吗？）</strong></p>
 <p>在原始word2vec embedding的基础上，针对其业务特点，Airbnb的工程师希望能够把booking的信息引入embedding。这样直观上可以使Airbnb的搜索列表和similar item列表中更倾向于推荐之前booking成功session中的listing。从这个motivation出发，Airbnb把click session分成两类，最终产生booking行为的叫booked session，没有的称做exploratory session。</p>
 <p>因为每个booked session只有最后一个listing是booked listing，所以为了把这个booking行为引入objective，我们不管这个booked listing在不在word2vec的滑动窗口中，我们都会假设这个booked listing与滑动窗口的中心listing相关，所以相当于引入了一个global context到objective中，因此，objective就变成了下面的样子</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/903c09a173a44c00a7662ff39deb3250.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271611431.png" />   
     </p>
 <p>其中最后一项的lb就是代表着booked listing，因为booking是一个正样本行为，这一项前也是有负号的。</p>
 <p>需要注意的是最后一项前是没有sigma符号的，前面的sigma符号是因为滑动窗口中的中心listing与所有滑动窗口中的其他listing都相关，最后一项没有sigma符号直观理解是因为booked listing只有一个，所以central listing只与这一个listing有关。</p>
 <p><strong>但这里的objective的形式我仍让是有疑问的，因为这个objective写成这种形式应该仅代表了一个滑动窗口中的objective，并不是整体求解的objective。如果是整体的objective，理应是下面的形式：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d33cfe2cc1584a32a93e36811b64f0d3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271611173.png" />   
     </p>
 <p>其中Db代表了所有booked session中所有滑动窗口中central listing和booked listing的pair集合。</p>
 <p>**不知道大家有没有疑问，我们可以</p>
@@ -394,6 +394,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -427,10 +431,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -809,6 +809,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

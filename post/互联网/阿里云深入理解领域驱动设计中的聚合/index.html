@@ -203,7 +203,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/265dc0d4334342b88c9592dce9405f5d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911573.png" />   
     </p>
 <p>作者 | 嵩华 阿里云云栖号</p>
 <p>聚合模式是 DDD 的模式结构中较为难于理解的一个，也是 DDD 学习曲线中的一个关键障碍。合理地设计聚合，能清晰地表述业务一致性，也更容易带来清晰的实现，设计不合理的聚合，甚至在设计中没有聚合的概念，则相反。</p>
@@ -225,7 +225,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>对同一个问题，存在若干种不同的设计思路，例如以数据库为中心的设计、面向对象的设计和“正确的 OO”的 DDD 的设计。</p>
 <p>如果采用以数据库为中心的建模方式，首先会进行数据库设计——我确实看到还有许多团队仍然在采取这种方法，花费大量的时间进行数据库结构的讨论。为了避免图表过大，我们仅仅给出了和采购申请相关的表格。结构如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dba487c886b8436f8b7fb7fbbe84c574.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911269.png" />   
     </p>
 <p>图1 数据库视角下的设计</p>
 <p>如果直接在数据库这么低的设计层次上考虑问题，除了数据库的设计繁琐易错，更重要的是会面临一些比较复杂的业务规则和数据一致性保证的问题。例如：</p>
@@ -237,7 +237,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>确实，每个问题都是有解决方案的，但是，第一，对于模型的讨论过早地进入了实现领域，和业务概念脱开了联系，不便于持续地和业务人员协作；第二，技术细节和业务规则的细节纠缠在一起，很容易顾此失彼。有没有一种方案，可以让我们更多的聚焦于问题领域，而不是深陷到这种技术细节中？</p>
 <p>面向对象技术和 ORM（对象-关系映射）有助于我们提高问题的抽象层级。在面向对象的世界中，我们看到的结构是这样的：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6a0f83096f0241229f52380fbb3c7e4b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911761.png" />   
     </p>
 <p>图2 传统OO视角下的设计</p>
 <p>面向对象的方式提高了抽象层级，忽略了不必要的技术细节，例如已经不需要关心外键、关联表这些技术细节了。我们需要关心的模型元素的数量减少了，复杂性也相应减少了。只是，业务规则如何保证，在传统的面向对象方法中并没有严格的实现约束。例如：</p>
@@ -248,7 +248,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>让我们回到本质思考：采购项如果脱离采购请求，它自身的单独存在有价值吗？——没有价值。如果没有价值：名义上看起来对采购项的修改，本质上是对采购项的修改吗？还是本质上其实是对采购请求的修改？</p>
 <p>如果我们认可“修改采购项也是修改采购请求”这个结论，那么我们就不应该分开来研究采购项和采购请求，而是应该如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5a94033974b2403c97138f9d60f62b2c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911992.png" />   
     </p>
 <p>图3 用聚合封装对象</p>
 <p>我们把“采购请求”和“采购项”组织到一起，看做一个更大的整体，称为“聚合”。这个聚合内部的业务逻辑，例如“采购申请审核通过后，不得对采购申请条目进行更改”，应內建于聚合内部。为了实现这一目标，我们约定：对采购项的一切操作（增加、删除、修改等），都是对采购请求对象的操作。</p>
@@ -268,7 +268,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>生命周期一致性是指聚合边界内的对象，和聚合根之间存在“人身依附”关系。即：如果聚合根消失，聚合内的其他元素都应该同时消失。例如，在前述例子中，如果聚合根（采购请求）不存在了，那么采购项当然也就失去了存在的意义。而商品、作为申请人的用户等对象，和采购请求之间则不存在此关系。</p>
 <p>可以用反证法来证明生命周期一致性：如果一个对象在聚合根消失之后仍然有意义，那么说明在系统中必然需要存在其他方法访问该对象。这和聚合的定义相矛盾。所以聚合根内的其他元素必然在聚合根消失后失效。违反生命周期一致性，也会同时带来实现上的严重问题。让我们一起看一个例子：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/68b31603704f4edebea0d63437f13d90.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911008.png" />   
     </p>
 <p>其中 User 对象的生命周期和采购申请不一致。现在假如有两段程序代码并行执行：</p>
 <p>代码 1（例如采购申请的修改）获得了某个采购申请的对象，对该对象进行了修改，进行保存。注意由于 User 对象嵌入到了 PurchaseRequest 中，User 对象也会被同时保存。</p>
@@ -287,7 +287,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>一个在线论坛，用户可以对论坛上用户的文章发表评论。文章显然应该是一个聚合根。如果文章被删除，那么，用户的评论看起来也要同时消失。那么评论是否可以属于文章这个聚合？</p>
 <p>现在让我们来考虑评论是否还可能有其他的用途。例如，一个图书网站，用户可以对图书发表评论。如果只是因为文章删除和评论删除之间存在逻辑上的关联，就让文章聚合持有评论对象，那么显然就约束了评论的适用范围。一目了然的事实是，评论这一个概念，在本质上和文章这个概念相去甚远。所以，我们得到了一个新的、凌驾于原则 1 之上的原则——不属于同一个问题域的对象，不应该出现在同一个聚合中。对 DDD 熟悉的朋友可能知道，这在 DDD 中对应于限界上下文这一战略模式。限于文章篇幅，我们在此不过多展开。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8a754df50b444c489acf3a839359a905.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911931.png" />   
     </p>
 <p>图4 问题域一致性</p>
 <p>由于聚合根无法保证聚合之外的一致性，所以我们需要依赖”最终一致性“来实现聚合之间的一致性。例如，在文章删除的时候，发送一个文章删除的消息。评论系统接收到文章删除消息之后，删除文章对应的评论。</p>
@@ -296,12 +296,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>场景（scenario）是业务用例的具体化描述，反应了用户使用系统达成业务目标的方式。我们可以观察这些场景中涉及的领域对象操作，如对领域对象的查看、修改等。场景操作频率的一致性是同一聚合内部对象的一个关键表征。经常被同时操作的对象，它们往往属于同一个聚合。而那些极少被同时关注的对象，一般不应该划为一个聚合。</p>
 <p>以下图所示的“产品”、“版本”和“功能”这三个概念为例来说明。产品确实包含了很多功能，这些功能通过一系列的版本发布。但是，在产品层面的操作，例如查看所有的产品列表，却并不需要关心特定功能的详细信息，也不需要了解特定的某个版本信息。我们做版本规划的时候，确实会用到功能列表，但是大多数时候我们并不会去查看功能详情，更加不可能在做版本规划的时候修改功能描述。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b20afcc736b3448999799aab115010bf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911980.png" />   
     </p>
 <p>图5 不合适的聚合</p>
 <p>根据这一原则，我们划分出了如下的三个聚合：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/351e9f8bc6b845578c025c11f646631e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911097.png" />   
     </p>
 <p>图6 更合理的聚合</p>
 <p>基于场景一致性划分聚合，对于实现也有很大好处。不在同一个场景下操作的对象，放入同一个聚合意味着每次操作一个对象，就需要把其他对象的所有信息抓取到，这是非常没有意义的。从实现层次，如果不紧密相关的对象出现在同一个聚合中，会导致它们经常在不同的场景中被并发修改，也增加了这些对象之间冲突的可能性。所以：操作场景不一致的对象，或者说如果一个对象在不同场景下都会被使用，应该考虑把它们分到不同的聚合中。</p>
@@ -309,13 +309,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>聚合出现的本质是解决一致性问题带来的复杂性。因此，那么凡是不破坏以上三个一致性的情况，都没有必要把它们放到同一个聚合中。仅仅由一个业务概念（即领域模型中的类名及属性以及后面马上提到的 Id 对象）构成的聚合在面向对象的世界中是大多数。</p>
 <p>根据上述分析，在采购申请的例子中，采购申请、采购申请的一些属性（如状态、提交时间等）以及采购项属于一个聚合。但是，商品、用户这些不能属于采购申请这个聚合。这些聚合之间如何关联起来呢？我们引入一种新的值对象来解决这个问题，如下图所示。图中也顺便标记了各对象是值对象还是实体对象。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8a8ee38770a649a2a273ad7550998886.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911215.png" />   
     </p>
 <p>图7 精化后的聚合封装</p>
 <p>在采购请求这个聚合中，除了采购请求聚合根是实体对象外，其他对象，包括作为对外引用的 Id 对象都是值对象。</p>
 <p>对应的代码如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ea26cacd39fa4789ab4a7fa09f9285b2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911230.png" />   
     </p>
 <p>Id 值对象的引入是一个值得讨论的问题。</p>
 <p>首先，Id 值对象的引入能断开聚合，能加快查询的速度，但是它不可避免的会导致某些场景下，需要对信息进行第二次查询，而且无法利用 ORM 的 EagerFetch/LazyFetch 加载机制的遍历。这是一种损失吗？简单地回答是：不是损失。不要贪图不属于一个聚合的对象层次嵌套带来的所谓便利——它引起的麻烦要远远多于带来的益处。这类问题应该由外部服务，例如应用层服务来完成。</p>
@@ -329,7 +329,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>尽管聚合的工厂和一般对象的工厂都是以工厂模式同名，但是 DDD 以聚合为基本单位设计的 Factory 对于简化系统的复杂性具有更重要的意义。从设计约束上，在聚合以外，只应该有一个工厂对外可见，那就是聚合的工厂。（领域事件的 Factory 也是有意义的，领域事件离本文的话题稍远，暂且不做讨论）。</p>
 <p>资源库模式也绝非只是意味着持久化，更不是数据库访问层，所以不要误解。资源库更重要的意义是：资源库是聚合的仓储机制，外部世界通过资源库，而且只能通过资源库来完成对聚合的访问。资源库以聚合的整体管理对象。因此，从设计约束上，一个聚合只能有一个资源库对象，那就是以聚合根命名的资源库。除此之外的其他对象，都不应该提供资源库对象。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/460c19444a674190b11d322168d6f7df.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281912088.png" />   
     </p>
 <p>图8 聚合和资源库</p>
 <h4 id="2-代码结构与聚合保持一致"><strong>2 代码结构与聚合保持一致</strong></h4>
@@ -339,7 +339,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="4-聚合改进了系统性能和可伸缩性"><strong>4 聚合改进了系统性能和可伸缩性</strong></h4>
 <p>很多人会为 ORM 机制中低效的查询所困扰。为什么会这样？看一下前面的例子就明白了。我们为前述的不正确的聚合的例子加上 Spring JPA 的 Annotation：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4be1f2e7116b44d58b10eb54ca422cc9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281912524.png" />   
     </p>
 <p>由于缺乏聚合的概念，或者不正确的做了一个超大的聚合，那么每次对 PurchaseRequest 的查询，都需要从系统抓取大量的对象，耗费了大量的计算资源——也许 User 自己也是一个超大的对象呢？“拔出萝卜带出泥”，性能自然不可能好。</p>
 <p>也许有读者会说，我不用 Eager Fetch，我可以用 Lazy Fetch 啊。是的，这确实对性能上更好一些，但是不幸的是，数据访问的上下文将不得不一直保留，系统出错的概率大大增加，也给分布式设计带来了不便。</p>
@@ -482,6 +482,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -515,10 +519,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -897,6 +897,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

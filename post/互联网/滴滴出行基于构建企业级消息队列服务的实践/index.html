@@ -226,7 +226,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><em>2018-11-20</em></p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/271b9f56eaf7482aaa4204559963e42d.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281605057.jpeg" />   
     </p>
 <blockquote>
 <p>本文整理自滴滴出行消息队列负责人 江海挺 在 Apache RocketMQ 开发者沙龙北京站的分享。</p>
@@ -235,7 +235,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="历史">历史</h3>
 <p>初期，公司内部没有专门的团队维护消息队列服务，所以消息队列使用方式较多，主要以 Kafka 为主，有业务直连的，也有通过独立的服务转发消息的。另外有一些团队也会用 RocketMQ、Redis 的 list，甚至会用比较非主流的 beanstalkkd。导致的结果就是，比较混乱，无法维护，资源使用也很浪费。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://static001.infoq.cn/resource/image/1b/08/1befdb06458a70492d108efa221be708.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281605715.png" />   
     </p>
 <h3 id="为什么弃用-kafka">为什么弃用 Kafka</h3>
 <p>一个核心业务在使用 Kafka 的时候，出现了集群数据写入抖动非常严重的情况，经常会有数据写失败。</p>
@@ -250,13 +250,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>所以我们决定做自己的消息队列服务。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d8326529c7724a818e695c64019b1440.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281605922.png" />   
     </p>
 <p>首先需要解决业务方消息生产失败的问题。因为这个 Kafka 用的是发布 / 订阅模式，一个 topic 的订阅方会有很多，涉及到的下游业务也就非常多，没办法一口气直接替换 Kafka，迁移到新的一个消息队列服务上。所以我们当时的方案是加了一层代理，然后利用 codis 作为缓存，解决了 Kafka 不定期写入失败的问题，如上图。当后面的 Kafka 出现不可写入的时候，我们就会先把数据写入到 codis 中，然后延时进行重试，直到写成功为止。</p>
 <h3 id="为什么选择-rocketmq">为什么选择 RocketMQ</h3>
 <p>经过一系列的调研和测试之后，我们决定采用 RocketMQ，具体原因在后面会介绍。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/37c4e9b9ea7f475d9e9df47f3dc14e98.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281605980.png" />   
     </p>
 <p>为了支持多语言环境、解决一些迁移和某些业务的特殊需求，我们又在消费侧加上了一个代理服务。然后形成了这么一个核心框架。业务端只跟代理层交互。中间的消息引擎，负责消息的核心存储。在之前的基本框架之后，我们后面就主要围绕三个方向做。</p>
 <ul>
@@ -272,7 +272,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h3 id="演进中的架构">演进中的架构</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/33a4a3e03b1c4bc3b2ba5f4369e6bb8f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272226567.png" />   
     </p>
 <p>这张图是我们消息队列服务的一个比较新的现状。先纵向看，上面是生产的客户端，包括了 7 种语言。然后是我们的生产代理服务。在中间的是我们的消息存储层。目前主要的消息存储引擎是 RocketMQ。然后还有一些在迁移过程中的 Kafka。另一个是 Chronos，它是我们延迟消息的一个存储引擎。</p>
 <p>再下面就是消费代理。消费代理同样提供了多种语言的客户端，还支持多种协议的消息主动推送功能，包括 HTTP 协议 RESTful 方式。结合我们的 groovy 脚本功能，还能实现将消息直接转存到 Redis、Hbase 和 HDFS 上。此外，我们还在陆续接入更多的下游存储。</p>
@@ -284,7 +284,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>测试环境：Kafka 0.8.2，RocketMQ 3.4.6，1.0 Gbps Network，16 threads</p>
 <p>测试结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b7b5c9e7ffad46388594cdb87e3989ed.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281605199.png" />   
     </p>
 <p>这张图是 Kafka 和 RocketMQ 在不同 topic 数量下的吞吐测试。横坐标是每秒消息数，纵坐标是测试 case。同时覆盖了有无消费，和不同消息体的场景。一共 8 组测试数据，每组数据分别在 Topic 个数为 16、32、64、128、256 时获得的，每个 topic 包括 8 个 Partition。下面四组数据是发送消息大小为 128 字节的情况，上面四种是发送 2k 消息大小的情况。on 表示消息发送的时候，同时进行消息消费，off 表示仅进行消息发送。</p>
 <p>先看最上面一组数据，用的是 Kafka，开启消费，每条消息大小为 2048 字节可以看到，随着 Topic 数量增加，到 256 Topic 之后，吞吐极具下降。第二组是是 RocketMQ。可以看到，Topic 增大之后，影响非常小。第三组和第四组，是上面两组关闭了消费的情况。结论基本类似，整体吞吐量会高那么一点点。</p>
@@ -296,7 +296,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>测试环境：Kafka 0.8.2.2，topic=1/8/32，Ack=1/all，replica=3</p>
 <p>测试结果：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5a5275b9c0c5485fab055168f2c8bdc6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272227238.png" />   
     </p>
 <p>横坐标对应吞吐，纵坐标对应延迟时间</p>
 <p>上面的一组的 3 条线对应 Ack=3，需要 3 个备份都确认后才完成数据的写入。下面的一组的 3 条线对应 Ack=1，有 1 个备份收到数据后就可以完成写入。可以看到下面一组只需要主备份确认的写入，延迟明显较低。每组的三条线之间主要是 Topic 数量的区别，Topic 数量增加，延迟也增大了。</p>
@@ -308,13 +308,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>flushDiskType=SYNC_FLUSH/ASYNC_FLUSH</p>
 <p>测试结果：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/015934507c1d415385c6344841a77981.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272227702.png" />   
     </p>
 <p>上面两条是同步刷盘的情况，延迟相对比较高。下面的是异步刷盘。橙色的线是同步主从，蓝色的线是异步主从。然后可以看到在副本同步复制的情况下，即橙色的线，4w 的 TPS 之内都不超过 1ms。用这条橙色的线和上面 Kafka 的图中的上面三条线横向比较来看，Kafka 超过 1w TPS 就超过 1ms 了。Kafka 的延迟明显更高。</p>
 <h2 id="如何构建自己的消息队列">如何构建自己的消息队列</h2>
 <h3 id="问题与挑战">问题与挑战</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/23f104508bd44ad4b714b830a027cf50.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272227216.png" />   
     </p>
 <p>面临的挑战（顺时针看）:</p>
 <ul>
@@ -345,7 +345,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>针对以上两个问题的解决办法，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/abc77195565446c18a0fa734b825f931.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281605316.png" />   
     </p>
 <ul>
 <li>
@@ -359,7 +359,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="迁移方案">迁移方案</h3>
 <p>架构确定后，接下来是我们的一个迁移过程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bf1f829923074ba1ab885080b91bfcd1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272227837.png" />   
     </p>
 <p>迁移这个事情，在 pub-sub 的消息模型下，会比较复杂。因为下游的数据消费方可能很多，上游的数据没法做到一刀切流量，这就会导致整个迁移的周期特别长。然后我们为了尽可能地减少业务迁移的负担，加快迁移的效率，我们在 Proxy 层提供了双写和双读的功能。</p>
 <ul>
@@ -378,14 +378,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>客户端双写，如下图：</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/32b44b2ce7eb42b7a7dc2e178c91f4d5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272227880.png" />   
     </p>
 <p>业务那边不停原来的 kafka 客户端。只是加上我们的客户端，往 RocketMQ 里追加写。这种方案在整个迁移完成之后，业务还需要把老的写入停掉。相当于两次上线。</p>
 <ul>
 <li>Producer Proxy 双写，如下图：</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e9b856bbe95441278e6f6346559cdd9e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228048.png" />   
     </p>
 <p>业务方直接切换生产的客户端，只往我们的 proxy 上写数据。然后我们的 proxy 负责把数据复制，同时写到两个存储引擎中。这样在迁移完成之后，我们只需要在 Proxy 上关掉双写功能就可以了。对生产的业务方来说是无感知的，生产方全程只需要改造一次，上一下线就可以了。</p>
 <p>所以表面看起来，应该还是第二种方案更加简单。但是，从整体可靠性的角度来看，一般还是认为第一种相对高一点。因为客户端到 Kafka 这一条链路，业务之前都已经跑稳定了。一般不会出问题。但是写我们 Proxy 就不一定了，在接入过程中，是有可能出现一些使用上的问题，导致数据写入失败，这就对业务方测试质量的要求会高一点。然后消费的迁移过程，其实风险是相对比较低的。出问题的时候，可以立即回滚。因为它在老的 Kafka 上消费进度，是一直保留的，而且在迁移过程中，可以认为是全量双消费。</p>
@@ -393,7 +393,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="双读">双读</h4>
 <p>特点：保证不会重复消费。对于 P2P 或者消费下游不太多，或者对重复消费数据比较敏感的场景比较适用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/978e5803b1764dc58ff3f3f6d0492c05.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228266.png" />   
     </p>
 <p>这个方案的过程是这样的，消费先切换。全部迁移到到我们的 Proxy 上消费，Proxy 从 Kafka 上获取。这个时候 RocketMQ 上没有流量。但是我们的消费 Proxy 保证了双消费，一旦 RocketMQ 有流量了，客户端同样也能收到。然后生产方改造客户端，直接切流到 RocketMQ 中，这样就完成了整个流量迁移过程。运行一段时间，比如 Kafka 里的数据都过期之后，就可以把消费 Proxy 上的双消费关了，下掉 Kafka 集群。</p>
 <p>整个过程中，生产直接切流，所以数据不会重复存储。然后在消费迁移的过程中，我们消费 Proxy 上的 group 和业务原有的 group 可以用一个名字，这样就能实现迁移过程中自动 rebalance，这样就能实现没有大量重复数据的效果。所以这个方案对重复消费比较敏感的业务会比较适合的。这个方案的整个过程中，消费方和生产方都只需要改造一遍客户端，上一次线就可以完成。</p>
@@ -540,6 +540,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -573,10 +577,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -955,6 +955,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

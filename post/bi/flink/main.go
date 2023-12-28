@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/fs"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -33,16 +32,16 @@ func ReplaceImageURLs(filePath string) error {
 		}
 		newURL, err := PicGoUpload(oldURL)
 		if err != nil {
-			log.Printf("Error uploading image: %s\n", err)
-
 			// 再试一次
 			newURL, err = PicGoUpload(oldURL)
 			if err != nil {
+				fmt.Println("second download error :" + oldURL)
 				continue
 			}
 
 		}
 
+		fmt.Println("oldURL:" + oldURL + " \t" + "newURL:" + newURL)
 		// 替换URL
 		content = []byte(strings.Replace(string(content), oldURL, newURL, 1))
 	}
@@ -75,17 +74,24 @@ func ReplaceImageURLsMd(filePath string) error {
 		if strings.Contains(oldURL, "jsdelivr") {
 			continue
 		}
+		if !strings.HasPrefix(oldURL, "https:") && !strings.HasPrefix(oldURL, "http:") {
+			// 读取文件
+			fmt.Println("filePath:" + oldURL)
+			continue
+		}
+
 		newURL, err := PicGoUpload(oldURL) // 上传图片并获取新的URL
 		if err != nil {
-			log.Printf("Error uploading image: %s\n", err)
 
 			// 重试一次
 			newURL, err = PicGoUpload(oldURL) // 上传图片并获取新的URL
 			if err != nil {
+				fmt.Println("second download error :" + oldURL)
 				continue
 			}
 
 		}
+		fmt.Println("oldURL:" + oldURL + " \t" + "newURL:" + newURL)
 
 		// 替换URL
 		contentStr = strings.Replace(contentStr, oldURL, newURL, 1)

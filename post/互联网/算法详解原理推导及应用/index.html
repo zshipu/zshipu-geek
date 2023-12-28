@@ -200,37 +200,37 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="adaboost算法简介">AdaBoost算法简介</h1>
 <p>AdaBoost算法的全称是自适应Boosting（Adaptive Boosting），是一种二分类器，它用弱分类器的线性组合构造强分类器。弱分类器的性能不用太好，只需要比随机猜测强，依靠它们可以构造出一个非常准确的强分类器。强分类器的计算公式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a317c2016e3c411f8424e54fe38294de.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281635409.webp" />   
     </p>
 <p>其中x是输入向量，F(x)是强分类器，ft(x)是弱分类器，αt是弱分类器的权重值，是一个正数，T为弱分类器的数量。弱分类器的输出值为+1或-1，分别对应于正样本和负样本。分类时的判定规则为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0d76e774822c4833908999c29336170c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281635055.webp" />   
     </p>
 <p>其中sgn是符号函数。强分类器的输出值也为+1或-1，同样对应于正样本和负样本。弱分类器和它们的权重值通过训练算法得到。之所以叫弱分类器是因为它们的精度不用太高。</p>
 <h1 id="训练算法">训练算法</h1>
 <p>训练时，依次训练每一个弱分类器，并得到它们的权重值。训练样本同样带有权重，初始时所有样本的权重相等，被前面的弱分类器错分的样本会加大权重，反之会减小权重，因此接下来的弱分类器会更加关注这些难分的样本。弱分类器的权重值根据它的准确率构造，精度越高的弱分类器权重越大。给定l个训练样本(xi,yi)，其中xi是特征向量，yi为类别标签，其值为+1或-1。训练算法的流程如下：</p>
 <p>初始化样本权重值，所有样本的初始权重相等：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7cb751d576a94e908bb7427ce016f0fc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281635793.webp" />   
     </p>
 <p>循环，对t=1,…,T依次训练每个弱分类器：</p>
 <p>训练一个弱分类器ft(x)，并计算它对训练样本集的错误率et</p>
 <p>计算弱分类器的权重：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/595b8518e768406ba135182ffa8e2252.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281635503.webp" />   
     </p>
 <p>更新所有样本的权重：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/12404bd2ed894dc4a5df369941c68e80.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636213.webp" />   
     </p>
 <p>其中Zt为归一化因子，它是所有样本的权重之和：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d6dc0fc0cd204726a9acbb69b7f90700.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636849.webp" />   
     </p>
 <p>结束循环</p>
 <p>最后得到强分类器：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e5e735f67c5c44c1b755ab22795d20d7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636631.webp" />   
     </p>
 <p>根据弱分类器权重的计算公式，错误率低的弱分类器权重大，它是准确率的增函数。在SIGAI之前的公众号文章“大话AdaBoost算法”中，我们给出了一个形象的例子。每个弱分类器类似于一个水平不太高的医生，如果在之前的考核中一个医生的技术更好，对病人情况的判断更准确，那么可以加大他在会诊时说话的分量即权重。而强分类器就是这些医生的结合。</p>
 <p>给训练样本加权重是有必要的，如果样本没有权重，每个弱分类器的训练样本是相同的，训练出来的弱分类器也是一样的，这样训练多个弱分类器没有意义。AdaBoost算法的原则是：</p>
@@ -240,82 +240,82 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>AdaBoost看上去是一个脑洞大开想出来的算法，你可能会问：为什么弱分类器的权重计算公式是这样的？为什么样本权重的更新公式是这样的？事实上，它们是有来历的。我们可以用广义加法模型+指数损失函数来推导出AdaBoost的训练算法。</p>
 <p>广义加法模型拟合的目标函数是多个基函数的线性组合：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/40827b6086224659a946e504eaa3de34.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636397.webp" />   
     </p>
 <p>其中
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0faab58a04924550bb869f8a4ecf28c5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636574.webp" />   
      为基函数的参数，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8aceeaedbf1b422da1705a0722ba181b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636252.webp" />   
      为基函数的权重系数。训练时这个模型要确定的是基函数的参数和权重值。训练的目标是最小化对所有样本的损失函数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1402f187a04f4483ae8699c6e8c4c100.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636037.webp" />   
     </p>
 <p>训练算法依次确定每个基函数的参数和它们的权重。接下来将从广义加法模型推导出AdaBoost的训练算法。首先定义强分类器对单个训练样本的损失函数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/23dac0f6bc7a412a8a9f65bfba1600f2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636750.webp" />   
     </p>
 <p>这是指数损失函数。如果标签值与强分类器的预测值越接近，损失函数的值越小，反之越大。使用指数损失函数而不用均方误差损失函数的原因是均方误差损失函数对分类问题的效果不好。将广义加法模型的拟合函数代入指数损失函数中，得到算法训练弱分类器时要优化的目标函数为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f042e9a6d8fb43c3a5170ec07a4911c3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636485.webp" />   
     </p>
 <p>这里将指数函数拆成了两部分，已有的强分类器，以及当前弱分类器对训练样本的损失函数，前者在之前的迭代中已经求出，可以看成常数。目标函数可以简化为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fee217189d524001ac21c10f38145585.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636242.webp" />   
     </p>
 <p>其中：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c4983901ae524fc391ebe89588744b6c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636863.webp" />   
     </p>
 <p>它只和前面的迭代得到的强分类器有关，与当前的弱分类器、弱分类器权重无关，这就是样本权重。这个最优化问题可以分两步求解，首先将
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0347adf2bba0457c91a03c4b71330bab.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636575.webp" />   
      看成常数，由于yi和f(xi)的取值只能为+1或-1，要让上面的目标函数最小化，必须让二者相等。因此损失函数对f(x)的最优解为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8de7a25e4b714e569eb9413859a81e41.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636279.webp" />   
     </p>
 <p>其中I是指标函数，根据括号里的条件是否成立其取值为0或1。上式的最优解是使得对样本的加权误差率最小的分类器。得到弱分类器之后，优化目标可以表示成
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/05580cfa9cea4465869f9b8fea8d2e51.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636917.webp" />   
      的函数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b924d84a5d364a2984231a959dc76e6c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636708.webp" />   
     </p>
 <p>上式前半部分是被正确分类的样本，后半部分是被错误分类的样本。这可以写成：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fdff6e659133465e9910efc89b726c63.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636514.webp" />   
     </p>
 <p>具体推导过程为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/38acbd55a50143338105b1acd1a351cc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636235.webp" />   
     </p>
 <p>函数在极值点的导数为0，即：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/099f699312244f93a468ee15f4508878.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636021.webp" />   
     </p>
 <p>由此得到关于
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/135a93457d65426c9edb0c56c520b132.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636786.webp" />   
      的方程：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f98d2fa81ca24b23b2c2d9627a333b0a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636624.webp" />   
     </p>
 <p>最优解为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/94f71f7c03b1405c9d61edadb79e59ae.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636240.webp" />   
     </p>
 <p>其中errj为弱分类器对训练样本集的加权错误率：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/057343561e954f3e9fa296c340b9c011.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636984.webp" />   
     </p>
 <p>对逼近函数做如下更新：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3c319239edbb4eb6bb98135402b7290c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636675.webp" />   
     </p>
 <p>导致下次迭代时样本的权重为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/071ad247486a48bd96d4307585765bfc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636363.webp" />   
     </p>
 <p>这就是样本权重的更新公式。AdaBoost训练算法就是求解上述最优化问题的过程。</p>
 <h1 id="实际应用">实际应用</h1>
@@ -325,21 +325,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>这种思想的精髓在于用简单的强分类器先排除掉大量的非人脸窗口，使得最终能通过所有级强分类器的样本数很少。这样做的依据是在待检测图像中，绝大部分都不是人脸而是背景，即人脸是一个稀疏事件，如果能快速的把非人脸样本排除掉，则能大大提高目标检测的效率。</p>
 <p>出于性能的考虑，弱分类器使用了简单的Haar特征。这种特征源自于小波分析中的Haar小波变换，Haar小波是最简单的小波函数，用于对信号进行均值、细节分解。这里的Haar特征定义为图像中相邻矩形区域像素之和的差值。下图是基本Haar特征的示意图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2d38ada17f924f74be01593999c327d4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636034.webp" />   
     </p>
 <p>Haar特征是白色矩形框内的像素值之和，减去黑色区域内的像素值之和。以图像中第一个特征为例，它的计算方法如下：首先计算左边白色矩形区域里所有像素值的和，接下来计算右边黑色矩形区域内所有像素的和，最后得到的Haar特征值为左边的和减右边的和。</p>
 <p>这种特征捕捉图像的边缘、变化信息，各种特征描述在各个方向上的图像变化信息。人脸的五官等区域有各自的亮度信息，很符合Haar特征的特点。</p>
 <p>为了实现快速计算，使用了一种称为积分图的机制。通过它可以快速计算出图像中任何一个矩形区域的像素之和，从而计算出各种类型的Haar特征。假设有一张图像，其第i行第j列处的像素值为xij，积分图定义为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f7ce88b53c844f419543c3d1c203463c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636736.webp" />   
     </p>
 <p>即图像在任何一点处的左上方元素之和。在构造出积分图之后，借助于它可以快速计算出任何一个矩形区域内的像素之和。以下图中的黑色矩形框为例：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fe0b5523721c43f4b429b0200f383b54.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636692.webp" />   
     </p>
 <p>在上图中，要计算黑色矩形框内的像素值之和，计算公式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/311a4a0c6d744dc58a0b877131ef383c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281636316.webp" />   
     </p>
 <p>所以这样，是因为黑色区域内的像素值之和等于这4个矩形框内的像素值之和，减去上面两个矩形框的像素值之和，再减去左边两个矩形框的像素值之和，这样做的话，左上角的矩形</p>
 
@@ -469,6 +469,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -502,10 +506,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -884,6 +884,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

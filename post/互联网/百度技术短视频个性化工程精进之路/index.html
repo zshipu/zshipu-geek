@@ -226,7 +226,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Push系统服务于好看视频，直播，度小视，好看大字版等业务。系统会实时订阅更新视频物料信息和用户属性信息，保障构建Push消息体时信息的准确性，会在凌晨请求推荐服务进行个性化物料的召回，然后根据运营Push和个性化Push的时间点创建Push任务，任务创建完成后会提前半个小时进行任务的预处理操作(保障Push能按时间尽快的发送)，用户互动消息和直播开播提醒等实时Push是通过api调用实时把要推送的内容发送给Push预处理服务。预处理完成将结果写进redis队列中，发送服务根据任务的优先级发送信息给云Push中台，云Push中台调用厂商代理or自己的长链接服务将Push信息发送到用户手机上。</p>
 <p><strong>总体架构如下图所示：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d68b6a9eba6847748572b310cf438c1d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272314877.webp" />   
     </p>
 <h2 id="push核心架构各模块简介">Push核心架构各模块简介</h2>
 <ul>
@@ -242,13 +242,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p><strong>Push核心架构各模块依赖图如下：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9370323b7f404150b9832596eeae3191.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272314414.webp" />   
     </p>
 <h2 id="系统数据流">系统数据流</h2>
 <p><strong>系统整体数据流</strong></p>
 <p>客户端上报用户信息及一些用户行为的打点日志到数据中心，数据中心根据客户端打点产出相应的数据表，策略根据数据中心产出的数据表产出视频物料、Push发送用户集和代理配额用户集，架构侧根据策略模型进行Push物料的召回并进行任务创建和发送将信息发送给Push中台，Push中台发送给各厂商代理或长链接并产出Push相关数据表，厂商感知Push到达后发送回执消息给内部服务，架构根据到达回执记录日志并上报数据中心完成相关报表的产出。如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9866affd92e64615a5a798ff1a054cb1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272314566.webp" />   
     </p>
 <p><strong>客户端：</strong> 通过Push sdk完成Push_token的绑定，上报用户基本信息及用户行为打点日志。</p>
 <p><strong>数据中心：</strong> 根据业务打点产出活跃用户表、用户行为表和相关业务报表。</p>
@@ -260,7 +260,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Push到达回执分三种，各安卓代理厂商回执，Ios回执和长链接回执，都由Push中台服务接收然后写进消息队列，架构侧的Push-arrive服务消费消息队列，1.实时统计计算并将数据写入Redis供实时统计报表使用，1.记录本地Log，采集后做实时监控和报警，并上传到数据中心产出相关统计报表、Push物料候选集，此外还会产出Push的点展样本用作Push模型的训练。</p>
 <p><strong>如下图所示：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/68fbd0458061445fb30ba0cd1e5b59ce.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272314146.webp" />   
     </p>
 <h1 id="02-系统迭代及优化之路">02 系统迭代及优化之路</h1>
 <h2 id="定时预估个性化push首末条发送时间">定时预估个性化Push首末条发送时间</h2>
@@ -270,7 +270,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>服务设计</strong></p>
 <p>通过用户的使用习惯预估不同用户每日的首末条发送时间，达到用户在想看手机的时候准时给他Push他感兴趣的内容。显而易见服务的难点在于怎么预估用户什么时间比较空闲会看手机，大致逻辑如下，首条发送时间预估，统计7天内用户在[5:30, 6:00]时段内的首次活跃天数，若大于1，则此用户的首条个性化发送时间由6：30调整为5:30；非上述区间，则统计7天内该用户在[5:30, 6:30]时段内的首次活跃天数，若大于1，则此用户的首条个性化发送时间由6：30调整为6:00；剩下的用户发送时间仍为6:30；末条发送时间预估，统计7天内用户在[22:15, 22:45]时段内的首次活跃天数，若大于1，则此用户的首条个性化发送时间由21:45调整为22：15；非上述区间，则统计7天内该用户在[22:15 23:59]时段内的首次活跃天数，若大于1，则此用户的首条个性化发送时间由21:45调整为22:45；剩下的用户发送时间仍为21:45；如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7022b68eff40400398d9d63b62c27758.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272314325.webp" />   
     </p>
 <h2 id="push系统用户分群服务优化">Push系统用户分群服务优化</h2>
 <p><strong>背景</strong></p>
@@ -286,13 +286,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>原架构</strong></li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/40ff8430bf014fe08795530f5bc5a34c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272314386.webp" />   
     </p>
 <ul>
 <li><strong>新架构</strong></li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7e42f66648b344df986d98ef18f22b52.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272314510.webp" />   
     </p>
 <p>1）为区别当前架构中基于物理机ftp、afs集群的用户包，使用用户群来表示符合某个单一维度特征的用户集合。</p>
 <p>2）用户群的注册和管理通过 amis 平台统一配置，每个用户群拥有一个唯一标识。</p>
@@ -301,7 +301,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>5）发送过程中首先通过用户群标签的逻辑表达式查询用户群服务，获取一个最终要发送用户的bitmap；再通过 bitmap 从用户群服务中批量获取 用户标识，流式处理并发送。</p>
 <h2 id="用户群管理设计">用户群管理设计</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0e16bc26cf504c018ccdfe9d46bea909.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272314637.webp" />   
     </p>
 <p><strong>用户群配置：</strong></p>
 <p>1）配置层通过 amis 平台进行用户群的统一管理，以任务形式存于mysql中，支持用户群标签、用户包产出地址、更新频率、重试次数等配置；</p>
@@ -312,7 +312,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>3、计算当前用户群的 bitmap（RaoringBitmap算法），并将结果存储在 redis 中（k：用户群标签，v：用户群bitmap）。</p>
 <p><strong>在线服务交互设计</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f9084bd9a5824253be0d8ca8f51d0ec8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272314707.webp" />   
     </p>
 <p><strong>在线服务交互流程：</strong></p>
 <p>1）Push 任务通过用户群标签来指定发送用户集合（amis/定时任务写入 mysql），多个标签使用逻辑表达式表示；</p>
@@ -337,7 +337,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <h2 id="服务设计-1">服务设计</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7eb80269a39f4b3b974606a977c867ae.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272314453.webp" />   
     </p>
 <p><strong>动态扩容，一致性hash算法</strong></p>
 <ol>
@@ -346,22 +346,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>然后从数据映射到的位置开始顺时针查找，将数据保存到找到的第一个服务器上。如果超过2^32^ 仍然找不到服务器，就会保存到第一台服务器上。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a966a6555caa45158387d512cfcadbfc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272314313.webp" />   
     </p>
 <p><strong>资源压缩，使用protobuf协议进行数据压缩</strong></p>
 <p>Google Protocol Buffer( 简称 Protobuf) 是 Google 公司内部的混合语言数据标准，目前已经正在使用的有超过 48,162 种报文格式定义和超过 12,183 个 .proto 文件。他们用于 RPC 系统和持续数据存储系统。Protocol Buffers 是一种轻便高效的结构化数据存储格式，可以用于结构化数据串行化，或者说序列化。它很适合做数据存储或 RPC 数据交换格式。可用于通讯协议、数据存储等领域的语言无关、平台无关、可扩展的序列化结构数据格式。Protobuf 由如 JSON 和 XML，不过它更小、更快、也更简单。你可以定义自己的数据结构，然后使用代码生成器生成的代码来读写这个数据结构。你甚至可以在无需重新部署程序的情况下更新数据结构。只需使用 Protobuf 对数据结构进行一次描述，即可利用各种不同语言或从各种不同数据流中对你的结构化数据轻松读写。</p>
 <p>**一句话描述：**protobuf是二进制协议, 通过给json设计了schema来提供更快的解析速度，主要是把比如{，&quot;，key 等值舍弃，采用tag|value存值，传输效率极高，传输体积很小，在tcp/rpc里的使用很普及。</p>
 <p><strong>序列化耗时对比：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0550277e52734f3cbe16eded368269dc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272314096.webp" />   
     </p>
 <p><strong>bytes字节数对比：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9b48cd3f7cab4f578a779ec9d65ef230.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272314748.webp" />   
     </p>
 <p><strong>Push业务个协议对比：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3e16ccb67e64443da7fc998164266908.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272314452.webp" />   
     </p>
 <p><strong>结论：</strong> proto的Marshal 比 json的Marshal快2倍，压缩后数据大小proto是json的 1/4，且数据越大优势越明显。最终频控数据压缩后节省75%的redis资源。</p>
 <h1 id="03-总结">03 总结</h1>
@@ -494,6 +494,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -527,10 +531,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -909,6 +909,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

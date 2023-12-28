@@ -220,7 +220,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>（1）RocketMQ中RPC通信的Reactor多线程设计与流程</strong></p>
 <p>RocketMQ的RPC通信采用Netty组件作为底层通信库，同样也遵循了Reactor多线程模型，同时又在这之上做了一些扩展和优化。下面先给出一张RocketMQ的RPC通信层的Netty多线程模型框架图，让大家对RocketMQ的RPC通信中的多线程分离设计有一个大致的了解。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/7/a2ee9dc73f054dd6ad2bb478e9b3784a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272128533.png" />   
     </p>
 <p>RocketMQ的RPC通信层—1+N+M1+M2模型.png</p>
 <p>从上面的框图中可以大致了解RocketMQ中NettyRemotingServer的Reactor 多线程模型。一个 <strong>Reactor 主线程（eventLoopGroupBoss，即为上面的1）负责监听 TCP网络连接请求，建立好连接后丢给Reactor 线程池（eventLoopGroupSelector，即为上面的“N”，源码中默认设置为3）</strong>，它负责将建立好连接的socket 注册到 selector上去（RocketMQ的源码中会自动根据OS的类型选择NIO和Epoll，也可以通过参数配置），然后监听真正的网络数据。拿到网络数据后，再丢给 <strong>Worker线程池（defaultEventExecutorGroup，即为上面的“M1”，源码中默认设置为8）</strong>。</p>
@@ -359,7 +359,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
 </code></pre><p>从上面的描述中可以概括得出RocketMQ的RPC通信部分的Reactor线程池模型框图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/7/fe35c65463f84ab38bba354213ed8411.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272128792.png" />   
     </p>
 <p>RocketMQ的RPC通信层—Reactor线程池.png</p>
 <p>整体可以看出RocketMQ的RPC通信借助Netty的多线程模型，其服务端监听线程和IO线程分离，同时将RPC通信层的业务逻辑与处理具体业务的线程进一步相分离。时间可控的简单业务都直接放在RPC通信部分来完成，复杂和时间不可控的业务提交至后端业务线程池中处理，这样提高了通信效率和MQ整体的性能。（ps：其中抽象出NioEventLoop来表示一个不断循环执行处理任务的线程，每个NioEventLoop有一个selector，用于监听绑定在其上的socket链路。）</p>
@@ -491,6 +491,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -524,10 +528,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -906,6 +906,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

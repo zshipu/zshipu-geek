@@ -229,13 +229,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>推荐系统排序模型在推荐系统中占据绝对核心的地位</strong>，很多公司也都在提出并尝试一些前沿的算法和推荐模型。而机器学习和深度学习模型正在变得越来越复杂，将这种复杂模型推上线，模型响应速度就可能变得很慢，因此对推荐系统的数据流和工程实现产生新的挑战。</p>
 <p>**如何做到海量数据的实时处理、特征的实时提取、线上模型服务过程的数据实时获取以及工程能力与技术方案的平衡等，成为模型上线的重要挑战。**本文主要探讨OTA酒店推荐方面常用的在线部署模型以及技术架构，并从核心之外的角度审视推荐系统的不同技术模块及优化思路。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-76b5c66b85414c39af4c9d79e5bf3486.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272021143.webp" />   
     </p>
 <p>图1 推荐系统逻辑框架</p>
 <h2 id="一酒店推荐系统的技术架构"><strong>一、酒店推荐系统的技术架构</strong></h2>
 <p>实际推荐系统中主要解决的问题可以分为两类， <strong>数据部分以及算法模型部分</strong>。其中数据部分融合了数据离线批处理、实时流处理的数据流框架。算法模型部分则是集训练 (training)、评估 (evaluation)、部署 (deployment)、线上推断 (online inference) 为一体的模型框架。目前通用的推荐系统技术架构如图2所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0b3d629aa65d47ce81375c39d7d313f7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272021007.webp" />   
     </p>
 <p>图2 推荐系统的技术架构示意图</p>
 <h3 id="11-数据部分"><strong>1.1 数据部分</strong></h3>
@@ -245,7 +245,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>酒店推荐系统中的实时特征部分主要来源于用户的实时点击行为数据和一些上下文信息（如GPS获得的地点信息等），通过Storm或Flink进行准实时流处理，将用户实时行为数据解析入特征数据库Redis。</p>
 <p>离线特征部分主要包含用户和酒店两部分的特征。其中用户离线特征主要由用户画像（CRM）提供，包含数据库中用户的订单和浏览历史信息等，并且严格遵守欧盟通用数据保护条例（GDPR）。酒店离线特征主要包含酒店的基础信息，如星级、评分等。由于特征维度及样本量较大，离线特征数据的清洗与预处理通常在Spark平台上进行，后将处理好的特征数据落入HDFS的Hive表并同步至Redis缓存中。离线特征与实时特征合并供线上模型使用。下面代码展示Hive表数据同步Redis的方法：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-00cde9f4e7c44336bb06b01dafbe9a2f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272021982.png" />   
     </p>
 <h3 id="12-模型部分"><strong>1.2 模型部分</strong></h3>
 <p>模型部分是推荐系统的主体，一般由召回层、排序层、补充策略与算法层组成。召回层一般利用高效的召回规则、算法或者简单的模型，快速从海量的候选集中召回用户可能感兴趣的物品。排序层利用排序模型对筛选的候选集进行精排序。排序层是推荐系统产生效果的重点，后面部分将重点介绍一些主流推荐模型和酒店推荐上的应用。</p>
@@ -256,22 +256,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="21-利用pmml转换并部署模型"><strong>2.1 利用PMML转换并部署模型</strong></h3>
 <p>酒店推荐场景中由于实时数据量较大，通常采用SOA框架实现分布式服务，完成模型服务过程。但绝大部分SOA框架都是Java或C++语言编写，而预测模型大多是基于Python语言。因此常用预测模型标记语言（Predictive ModelMarkup Language，以下简称PMML）重新实现算法模型，然后将模型封装成类，通过JAVA调用这个类来进行预测。由python封装的模型可以通过sklearn中的sklearn2pmml函数实现PMML文件转换。XGBoost模型需要JPMML-XGBoost命令行转换工具，转换命令为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-62e9abdd50ea4de6810bb930af3ad7a9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272021613.png" />   
     </p>
 <p>XGBoost模型需要生成.model模型文件和 .fmap特征映射文件。.model文件可以通过save_model函数生成。</p>
 <h3 id="22-tensorflow-serving">2.2 Tensorflow Serving</h3>
 <p>上面的方法也适用于Tensorflow生成的模型，但由于Tensorflow模型文件往往较大，且PMML文件无法优化，使用起来比较麻烦。本质上讲，Tensorflow Serving的工作流程和PMML类工具的流程是一致的。不同之处在于，Tensorflow定义了自己的模型序列化标准。</p>
 <p>利用Tensorflow自带的模型序列化函数可将训练好的模型参数和结构保存至某文件路径。路径下包括variables文件夹和saved_model.pbtxt文件。variable文件夹下包含各个变量的状态（断点），有*.data和*.index两类文件。 <em>.data记录变量的内容。</em>.index文件用于将变量名映射到*.data中的变量数据。.pbtxt文件是包含SavedModel、MetaGraphs、Graphs、签名等的二进制protobuf。模型文件通常由自身的Python API生成，然后由Tensorflow的客户端库（如JAVA或C++库）来加载模型并进行在线预测。以下代码展示了使用SavedModelBuilder 构建 SavedModel 的典型方法：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-982b75098a1e4f01a7583abaf4b02d41.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272021735.png" />   
     </p>
 <p>添加Tensorflow相关依赖后Java导入已保存的模型方法为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-d424edc96ccb44db9c20cb62f85c5916.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272021981.png" />   
     </p>
 <p>具体的酒店实时推荐工程架构如图3所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ef33216a49514bcfa11a063cfdb9dc6c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272021973.png" />   
     </p>
 <p>图3 酒店实时推荐工程架构</p>
 <h2 id="三embedding技术在酒店推荐中的应用"><strong>三、Embedding技术在酒店推荐中的应用</strong></h2>
@@ -283,34 +283,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>酒店嵌入矩阵（Embeddingmatrix）的行数为酒店的总个数，列数为嵌入维度。酒店相似度使用余弦相似度。将相似度得分从高到低排序，选取TopN酒店做候选酒店。酒店向量生成使用的是Word2vec模型中的Skip-Gram模型。Skip-Gram神经网络模型训练一个带有单个隐含层的简单神经网络来执行某个预测任务，训练好的模型并不用于实际预测，其真正目的是获取输入层-隐含层的权重矩阵，将这些权重值视为词向量。</p>
 <p>图4展示了当skip_window = 2时（即仅选输入词前后各两个词和输入词进行组合），训练样本是如何产生的（蓝色代表输入词，方框内代表位于窗口内的单词）。通过输入文本中成对的单词来训练神经网络，其输出概率代表着到词典中每个词有多大可能性跟输入单词同时出现。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-1f55a6a8bf234bd7b2e95dff65fab864.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272021969.png" />   
     </p>
 <p>图4 训练样本生成</p>
 <p>每个词wt都决定了wt+j，基于极大似然估计方法，希望所有样本的条件概率p(wt+j|wt)之积最大，这里使用对数概率。因此Word2vec的目标函数如公式(1)所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-7055c08d04a04b3bbd0efd6f753b1c5a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272021908.webp" />   
       (1)</p>
 <p>基于训练数据需要构建词汇表并对单词做one-hot编码。神经网络结构如图5所示。假设从训练数据中抽取出10000个唯一不重复的单词组成词汇表，则模型的输入为10000维的向量，输出也是10000维的向量。每一维输出都是一个概率，代表当前词是输入样本时输出词的概率大小。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-38a704e7845b4fa6a620fdf19d27fcc2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272021738.png" />   
     </p>
 <p>图5 Skip-Gram神经网络</p>
 <p>隐含层不使用激活函数，输出层使用softmax计算输出概率。由于权重矩阵规模非常大，通过梯度下降更新权重是相当慢的，并且需要大量的训练数据避免过拟合。因此通常对优化目标采用负采样方法，即每个训练样本的训练只会更新一小部分的模型权重，从而降低计算负担。Skip-Gram模型的Tensorflow核心代码如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-01ae5f6ab89f4fd1b7cd456a4ac99ba2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272021642.png" />   
     </p>
 <p>Word2vec和由其衍生出的Item2vec是Embedding技术的基础性方法，但都是建立在序列样本的基础上。在互联网场景下，数据对象之间更多呈现的是图结构。典型的场景是由用户行为数据生成的物品关系图，如图6(a)(b) 所示，以及由属性和实体组成的知识图谱,如图6(c)所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-3394faa2deef48eda16398fd00f265ad.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272021846.webp" />   
     </p>
 <p>图6 物品关系图与知识图谱</p>
 <p>由于用户浏览酒店的模式不一定呈现序列结构，而是一种关系图结构，我们后期尝试Graph Embedding中的DeepWalk方法对图结构中的节点酒店进行Embedding。即在由酒店组成的图结构上进行随机游走（如图7所示），产生大量酒店序列，然后将这些物品序列作为训练样本输入Word2vec进行训练，得到酒店的Embedding。在DeepWalk算法中，需要定义随机游走的跳转概率，即到达节点vi后，下一步遍历vi的邻接点vj的概率。见公式(2)。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0a0dd89e327146278b856419f9516065.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272021674.png" />   
     </p>
 <p>图7 随机游走</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-19dea0b06e0e4162a8f96f2eec18e014.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272021486.webp" />   
       (2)</p>
 <p>其中ε是物品关系图中所有边的集合。如果物品关系图是有向有权图，则N+(vi)是节点vi所有的出边集合，Mij是节点vi到节点vj边的权重。如果物品关系图是无向无权图，则权重Mij将为常数1，且N+(vi)是节点vi所有边的集合。酒店推荐场景采用无权无向图结构进行训练。</p>
 <h2 id="四酒店推荐系统中的模型应用"><strong>四、酒店推荐系统中的模型应用</strong></h2>
@@ -328,115 +328,115 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="41-factorization-machines因式分解机">4.1 Factorization Machines（因式分解机）</h3>
 <p>对于一个给定的特征向量
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-3bdac28805f543469e9eb019a7133a33.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272021226.webp" />   
      ，线性回归建模时采用的函数是</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-17a3f4570b5f4017ab5598d2540c3de4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272021849.webp" />   
      （3）</p>
 <p>其中， W0和
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-827f8f6786b041e7a762b6e81ca90421.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272021431.webp" />   
      为模型参数。方程中各特征分量xi和xj (i≠j)之间相互独立，即
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-be732ff1b3964e1bb8aaab2eeb7878eb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272021962.webp" />   
      中仅考虑单个的特征分量，而没有考虑特征分量之间的相互关系。因此将
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-654786675c6a4fc99210f8d720ca21be.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272021636.webp" />   
      改写为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-d4293f86ab95466c98e67a67b4dc4729.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272021294.webp" />   
      （4）</p>
 <p>公式中增加了任意两个不同特征之间的关系。但是在稀疏数据中，这样的建模方式存在一个缺陷，对于训练数据中未出现交互的特征分量，不能对相应的参数进行估计。而在类似推荐这种高度稀疏数据场景中，样本中出现未交互的特征分量是很普遍的。</p>
 <p>为了克服上面的缺陷，针对每个维度的特征分量xi引入辅助向量</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-072ef9da3c934359b1c5d013c6784b22.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272021959.webp" />   
     </p>
 <p>其中
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0774dff279a54b6cb46ca9bef13c7c93.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272022554.webp" />   
      为超参数， wij改写为</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-3c0bf5b0239846828d480a97fdb9c56c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272022160.webp" />   
     </p>
 <p>则
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-654786675c6a4fc99210f8d720ca21be.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272022694.webp" />   
      模型方程可以改写为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-853517280ce94cc7a5b7e58ebf0a1f69.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272022622.webp" />   
     </p>
 <p>由于
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-7e4c683de6a142349d5e2aadbfb817d6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272022140.webp" />   
      对应一种矩阵分解技术，因此模型方程的方法称为Factorization Machines。该模型方程可以证明在线性时间0(kn) 内计算，并且方程可以进一步推导为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-96ce97a75f654ec1aaf0fb0464519ee0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281604006.webp" />   
       (6)</p>
 <p>FactorizationMachines的Tensorflow核心实现代码如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-687d4e857f2e41b79d712c1fb05534d9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281604839.png" />   
     </p>
 <h3 id="42-wide--deep-learning">4.2 Wide &amp; Deep Learning</h3>
 <p>深度学习存在过度泛化的问题，当用户与物品交互较少即特征向量稀疏时推荐一些与用户不相关的项目（例如用户有特定的偏好或者一些小众项目），这种情况下大多数项目不应该被推荐，但是Dense Embedding会给出非0的预测，因此不相关的项目也会被推荐。而进行特征交叉乘积变换的线性模型能够记忆这些特殊情况或例外规则，并且使用更少的参数。Google在2016年提出了Wide&amp; Deep模型，很好的结合了线性模型的记忆能力和深度神经网络的泛化能力，在训练过程中同时优化2个模型的参数，从而达到整体模型的预测能力最优。模型结构如图9所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-e10876dfbf8545f38d6280e3e69bbced.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281604168.png" />   
     </p>
 <p>图9 Wide &amp; Deep模型结构</p>
 <p>Wide部分就是LR，输入特征包含了原始特征和交叉特征。Deep部分是MLP网络，隐含层的激活函数使用ReLUs=max(0,a)，输入特征包含了连续的特征和embedding特征。对于一个逻辑回归任务Wide &amp; Deep模型预测方程为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ec4f71dd94484e57995db01b5df5846b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281604208.webp" />   
      （7）</p>
 <p>其中Y是二分类标签，σ(.)是sigmoid函数，∅(x)是原始特征的交叉乘积转换。Wwide是所有线性模型的权重向量，Wdeep是应用于最后激活层输出
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-bf6ba4d47d4d4f699f626aedf2b10353.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272024001.webp" />   
      的权重。</p>
 <p>Wide&amp; Deep建模可以使用Tensorflow高级API，建模步骤如下：</p>
 <p>（1）选择Wide部分的特征（wide_columns）：稀疏基础特征和交叉特征。</p>
 <p>（2）选择Deep部分的特征（deep_columns）：连续型特征、类别特征（编码）。</p>
 <p>（3）将Wide &amp; Deep特征合并输入模型（DNNLinearCombinedClassifier）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-d24f0270b3924234ba536022f79970ab.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272024607.png" />   
     </p>
 <h3 id="43-ftrl-算法">4.3 FTRL 算法</h3>
 <p>Wide&amp; Deep模型训练方面常使用结合 L1 正则的Follow-the-regularized-leader (FTRL) 算法进行Wide部分训练，而Deep部分使用AdaGrad算法进行训练。</p>
 <p>其中FTRL算法可以实施于在线学习，对模型参数进行实时更新，在处理诸如逻辑回归之类的带非光滑正则化项的凸优化问题上性能非常出色。像Batch Gradient Descent 等优化算法，是对一批样本进行一次求解，得到一个全局最优解。而实际CTR预测需要更快速地更新模型，模型的参数需要针对每一个新来样本进行一次迭代。因此可以通过工程上实现FTRL算法，从而快速更新模型的参数。FTRL算法的特征权重更新公式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5809292c178242f8930181bcc0832520.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272024358.webp" />   
      （8）</p>
 <p>其中
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-50260f598c5e416ea337f2a54d0a8666.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272024986.webp" />   
      是针对每个特征维度的学习率。如果特征 A 比特征 B变化快，那么在维度 A 上面的学习率应该比维度 B 上面的学习率下降得更快。维度i的学习率定义为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-8da1c4995476448bacd0d36404668bf5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281604877.webp" />   
      （9）</p>
 <p>在Logistic Regression中，假设σ(a)=1/(1+exp(-a))是sigmoid函数，yt∈{0,1}，需要预测Pt=σ(Wt)，损失函数使用LogLoss函数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-34529e4528044e7c9d41436163eb4dbb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281604506.webp" />   
       （10）</p>
 <p>梯度
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-140006104b7541cc82fa2567df037dc2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272025988.webp" />   
      .Logistic Regression的FTRL算法为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0ad058646ed345039704f8a48aa01a16.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272025745.png" />   
     </p>
 <h3 id="44-deepfm">4.4 DeepFM</h3>
 <p>Wide &amp; Deep 模型中需要宽度部分和深度部分两类不同的输入，而宽度部分仍然需要依赖大量的特征工程工作。2018年提出的DeepFM 模型结合了分解向量机（FM）和深度神经网络（DNN），既能学习复杂的低阶与高阶特征交互又不需要原始特征以外的特征工程，并且允许端到端的学习方式。模型结构如图10所示。嵌入层（Dense Embedding）将原始输入向量压缩到低维稠密向量，作为FM和深度部分的输入。因此不同于Wide &amp; Deep 模型，DeepFM的FM部分和深度部分共享相同的输入向量，从而可以进行端到端的训练。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5dd938da2e284ae8a2305e03c178426d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272025572.png" />   
     </p>
 <p>图10 DeepFM 模型结构</p>
 <p>尽管不同Field的输入长度不同，但是Embedding之后的Dense vector的长度均为k。Dense vector其实就是输入层到Embedding层该神经元相连的k条线的权重，即
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ea36578b36a546619ec833a4cbd6663f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272025478.webp" />   
      。这k个值组合起来就是我们在FM中所提到的辅助向量vi，即FM和深度神经网络的共享输入向量。其中深度部分可以使用不同的神经网络结构。如图所示DeepFM模型是一种并行结构，预测结果可以表示为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-e6d1a10594dd4b05b84d4ad5d59bd07a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272025140.webp" />   
      （11）</p>
 <p>DeepFM 模型的Tensorflow核心实现代码如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5a1cead77f2c4f38b9bbd99b77255d6d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281604393.png" />   
     </p>
 <h2 id="五酒店推荐系统评估"><strong>五、酒店推荐系统评估</strong></h2>
 <p>推荐系统一般分为离线评估和在线评估两部分。离线评估的指标主要是机器学习模型常用的一些评估指标，包括准确率、精确率与召回率、F1-Score、AUC值等。在线评估的主要方式是A/B测试，主要评估指标有点击率、转化率、点击排名等。</p>
@@ -451,16 +451,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>另外也可以通过主动学习、迁移学习和探索利用机制。最经典的启发式探索利用方法为几个Bandit算法，如Thompson Sampling算法和UCB（Upper Confidence Bound）算法，二者都是利用了分布的不确定性作为探索强弱的依据。UCB算法流程如下：</p>
 <p>（1）假设有K个老虎机，对每个老虎机进行随机摇臂m次，获得老虎机受益的初始化经验期望
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-db58de9ce8c145198254b16a98a4a5cc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272026046.webp" />   
      。</p>
 <p>（2）用t表示至今摇臂的总次数，用nj表示第j个老虎机至今被摇臂的次数，计算每个老虎机的UCB值：
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-c980eef73efa46069d693173cccccb5b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272026481.webp" />   
     </p>
 <p>（3）选择UCB值最大的老虎机i摇臂，并观察其收益Xi,t。</p>
 <p>（4）根据Xi,t更新老虎机i的收益期望值
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-9ef684e71c714c76a37e91a83384a070.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272026372.webp" />   
      。</p>
 <p>（5）重复第2步。</p>
 <p>ThompsonSampling算法和UCB算法都是工程中常用的探索与利用方法，不但可以解决冷启动问题，还可以发掘用户新兴趣，增加推荐结果的多样性，减少大量同质化内容同时出现时用户的厌倦情绪。可以说探索与利用的思想是所有推荐系统不可或缺的补充。</p>
@@ -595,6 +595,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -628,10 +632,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1010,6 +1010,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

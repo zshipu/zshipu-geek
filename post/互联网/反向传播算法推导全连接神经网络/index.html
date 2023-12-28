@@ -205,487 +205,487 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>这是深度学习的开山之作。Hinton同志几十年如一日孜孜不倦的探索着神经网络，在最低谷的时候也毅然坚持，在这里我们先向他致敬！</p>
 <p>下面是这篇论文的原貌（截图自原文）：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/986a84e4e50d40f4bc6ebeda6479a073.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271650352.webp" />   
     </p>
 <p>单纯从数学的角度看，反向传播算法并没有什么创新，函数求导的链式法则是微积分的发明人莱布尼兹时代出现的成果。但用于多层神经网络却让这种机器学习算法真正具有了实用价值。</p>
 <p>链式法则</p>
 <p>在正式介绍神经网络的原理之前，先回顾一下多元函数求导的链式法则。对于如下的多元复合函数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f2f55030d15c4cd488af157fe443166b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271650150.webp" />   
     </p>
 <p>在这里，x和y是自变量。其中u，v，w是x的函数，u，v是y的函数，而f又是u，v，w的函数。根据链式法则，函数f对x和y的偏导数分别为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/458968ddeedf495f8fc5b264fec2b56c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271650525.webp" />   
     </p>
 <p>总结起来，函数自变量x的偏导数等于函数对它上一层的复合节点的偏导数（在这里是u，v，w）与这些节点对x的偏导数乘积之和。因此，我们要计算某一个自变量的偏导数，最直接的路径是找到它上一层的复合节点，根据这些节点的偏导数来计算。</p>
 <p>神经网络原理简介</p>
 <p>在推导算法之前，我们首先简单介绍一下人工神经网络的原理。大脑的神经元通过突触与其他神经元相连接，接收其他神经元送来的信号，经过汇总处理之后产生输出。在人工神经网络中，神经元的作用和这类似。下图是一个神经元的示意图，左侧为输入数据，右侧为输出数据：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e8fa5c88dc8b467191d0421697c34755.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271650315.webp" />   
     </p>
 <p>这个神经元接受的输入信号为向量(x1,x2,x3,x4,x5)，向量(w1,w2,w3,w4,w5)为输入向量的组合权重，b为偏置项，是标量。神经元对输入向量进行加权求和，并加上偏置项，最后经过激活函数变换产生输出：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5520416a7ec94accae0f2b9006f84b1d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271650899.webp" />   
     </p>
 <p>为表述简洁，我们把公式写成向量和矩阵形式。对每个神经元，它接受的来自前一层神经元的输入为向量x，本节点的权重向量为w，偏置项为b，该神经元的输出值为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/97b9814426eb4044869a03e8bfdcc771.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271650475.webp" />   
     </p>
 <p>先计算输入向量与权重向量的内积，加上偏置项，再送入一个函数进行变换，得到输出。这个函数称为激活函数，典型的是sigmoid函数。为什么需要激活函数以及什么样的函数可以充当激活函数，在 <a href="https://zshipu.com/t?url=http%3A%2F%2Fmp.weixin.qq.com%2Fs%3F__biz%3DMzU4MjQ3MDkwNA%3D%3D%26mid%3D2247485306%26idx%3D2%26sn%3Dcde2177542c9162a4d5731110b1c59d8%26chksm%3Dfdb69aedcac113fbc5e09e9dcc81269996a5fb87853fe595eeb065a98ae63394486c86290758%26scene%3D21%23wechat_redirect">SIGAI</a> 之前的公众号文章“ <a href="https://zshipu.com/t?url=https%3A%2F%2Fmp.weixin.qq.com%2Fs%3F__biz%3DMzU4MjQ3MDkwNA%3D%3D%26mid%3D2247483977%26idx%3D1%26sn%3D401b211bf72bc70f733d6ac90f7352cc%26chksm%3Dfdb69fdecac116c81aad9e5adae42142d67f50258106f501af07dc651d2c1473c52fad8678c3%26scene%3D21%23wechat_redirect">理解神经网络的激活函数</a>”中已经进行了介绍。</p>
 <p>神经网络一般有多个层。第一层为输入层，对应输入向量，神经元的数量等于特征向量的维数，这个层不对数据进行处理，只是将输入向量送入下一层中进行计算。中间为隐含层，可能有多个。最后是输出层，神经元的数量等于要分类的类别数，输出层的输出值被用来做分类预测。</p>
 <p>下面我们来看一个简单神经网络的例子，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1988cc8992e64becbcb8158ef9a39e5d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271650001.webp" />   
     </p>
 <p>这个网络有3层。第一层是输入层，对应的输入向量为x，有3个神经元，写成分量形式为（x1,x2,x3）它不对数据做任何处理，直接原样送入下一层。中间层有4个神经元，接受的输入数据为向量x，输出向量为y，写成分量形式为(y1,y2,y3,y4,y5)。第三个层为输出层，接受的输入数据为向量y，输出向量为z，写成分量形式为(z1,z2)。第一层到第二层的权重矩阵为W(1)，第二层到第三层的权重矩阵为W(2)。权重矩阵的每一行为一个权重向量，是上一层所有神经元到本层某一个神经元的连接权重，这里的上标表示层数。</p>
 <p>如果激活函数选用sigmoid函数，则第二层神经元的输出值为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1bacf205988b487d9bf9f84a7f208176.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271650422.webp" />   
     </p>
 <p>第三层神经元的输出值为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2a0d14cbcbf6497b8166f30f18f58b10.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271650047.webp" />   
     </p>
 <p>如果把yi代入上面二式中，可以将输出向量z表示成输出向量x的函数。通过调整权重矩阵和偏置项可以实现不同的函数映射，因此神经网络就是一个复合函数。</p>
 <p>需要解决的一个核心问题是一旦神经网络的结构（即神经元层数，每层神经元数量）确定之后，怎样得到权重矩阵和偏置项。这些参数是通过训练得到的，这是本文推导的核心任务。</p>
 <p>一个简单的例子</p>
 <p>首先以前面的3层神经网络为例，推导损失函数对神经网络所有参数梯度的计算方法。假设训练样本集中有m个样本(xi,zi)。其中x为输入向量，z为标签向量。现在要确定神经网络的映射函数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/80ad78300dfe4e6f9584943abc64315d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271650652.webp" />   
     </p>
 <p>什么样的函数能很好的解释这批训练样本？答案是神经网络的预测输出要尽可能的接近样本的标签值，即在训练集上最小化预测误差。如果使用均方误差，则优化的目标为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ce50181edfe2463aab18ab4c021db0d1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651004.webp" />   
     </p>
 <p>其中h(x)和zi都是向量，求和项内部是向量的2范数平方，即各个分量的平方和。上面的误差也称为欧氏距离损失函数，除此之外还可以使用其他损失函数，如交叉熵、对比损失等。</p>
 <p>优化目标函数的自变量是各层的权重矩阵和梯度向量，一般情况下无法保证目标函数是凸函数，因此这不是一个凸优化问题，有陷入局部极小值和鞍点的风险（对于这些概念和问题， <a href="https://zshipu.com/t?url=http%3A%2F%2Fmp.weixin.qq.com%2Fs%3F__biz%3DMzU4MjQ3MDkwNA%3D%3D%26mid%3D2247485306%26idx%3D2%26sn%3Dcde2177542c9162a4d5731110b1c59d8%26chksm%3Dfdb69aedcac113fbc5e09e9dcc81269996a5fb87853fe595eeb065a98ae63394486c86290758%26scene%3D21%23wechat_redirect">SIGAI</a> 之前的公众号文章“ <a href="https://zshipu.com/t?url=https%3A%2F%2Fmp.weixin.qq.com%2Fs%3F__biz%3DMzU4MjQ3MDkwNA%3D%3D%26mid%3D2247484111%26idx%3D1%26sn%3D4ed4480e849298a0aff828611e18f1a8%26chksm%3Dfdb69f58cac1164e844726bd429862eb7b38d22509eb4d1826eb851036460cb7ca5a8de7b9bb%26scene%3D21%23wechat_redirect">理解梯度下降法</a>”，“ <a href="https://zshipu.com/t?url=https%3A%2F%2Fmp.weixin.qq.com%2Fs%3F__biz%3DMzU4MjQ3MDkwNA%3D%3D%26mid%3D2247484439%26idx%3D1%26sn%3D4fa8c71ae9cb777d6e97ebd0dd8672e7%26chksm%3Dfdb69980cac110960e08c63061e0719a8dc7945606eeef460404dc2eb21b4f5bdb434fb56f92%26scene%3D21%23wechat_redirect">理解凸优化</a>”中已经做了详细介绍），这是神经网络之前一直被诟病的一个问题。可以使用梯度下降法进行求解，使用梯度下降法需要计算出损失函数对所有权重矩阵、偏置向量的梯度值，接下来的关键是这些梯度值的计算。在这里我们先将问题简化，只考虑对单个样本的损失函数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e6f0a5419bd54132904ea94f70e41c4a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651449.webp" />   
     </p>
 <p>后面如果不加说明，都使用这种单样本的损失函数。如果计算出了对单个样本损失函数的梯度值，对这些梯度值计算均值即可得到整个目标函数的梯度值。</p>
 <p>W(1)和b(1)要被代入到网络的后一层中，是复合函数的内层变量，我们先考虑外层的W(2)和b(2)。权重矩阵W(2)是一个2x4的矩阵，它的两个行分别为向量
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/44cf0a27bc8043fca630debf76fe0148.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651827.webp" />   
      ，b(2)是一个2维的列向量，它的两个元素为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/97b0b0292ae343618341004347a0a6be.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651238.webp" />   
      。网络的输入是向量x，第一层映射之后的输出是向量y。</p>
 <p>首先计算损失函数对权重矩阵每个元素的偏导数，将欧氏距离损失函数展开，有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f8d7501c624041b599287e4135d54d5c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651914.webp" />   
     </p>
 <p>如果i = 1，即对权重矩阵第一行的元素求导，上式分子中的后半部分对wij来说是常数。根据链式法则有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d4613b64d9cc4ebea88728827b515dcc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651394.webp" />   
     </p>
 <p>如果i = 2，即对矩阵第二行的元素求导，类似的有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/22c2513712af4af3a161ced6d20e1c28.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651018.webp" />   
     </p>
 <p>可以统一写成：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fad63c8853b74a2e94000bc7dd11708b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651482.webp" />   
     </p>
 <p>可以发现，第一个下标i决定了权重矩阵的第i行和偏置向量的第i个分量，第二个下标j决定了向量y的第j个分量。这可以看成是一个列向量与一个行向量相乘的结果，写成矩阵形式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/67ad4361242c4d33b4341a2280525b34.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651956.webp" />   
     </p>
 <p>上式中乘法
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/73b5d691fa7140f4a0bb452293e24fc5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651470.webp" />   
      为向量对应元素相乘，第二个乘法是矩阵乘法。
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6cd011a358684b408d54a2341d88c856.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651095.webp" />   
      是一个2维列向量，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/58008c490a3f48899dce6364e08c2a71.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651685.webp" />   
      也是一个2维列向量，两个向量执行
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a487c261d8df471c8d4ad9a079acc134.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651151.webp" />   
      运算的结果还是一个2维列向量。y是一个4元素的列向量，其转置为4维行向量，前面这个二维列向量与yT的乘积为2x4的矩阵，这正好与矩阵W(2)的尺寸相等。在上面的公式中，权重的偏导数在求和项中由3部分组成，分别是网络输出值与真实标签值的误差
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8ffa3bd594d24fb494b6b3437e5b6023.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651520.webp" />   
      ，激活函数的导数
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4978b7df800544d782541ae18f8bbab2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651988.webp" />   
      ，本层的输入值y。神经网络的输出值、激活函数的导数值、本层的输入值都可以在正向传播时得到，因此可以高效的计算出来。对所有训练样本的偏导数计算均值，可以得到总的偏导数。</p>
 <p>对偏置项的偏导数为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d13d98b2752c4def8515cce31a67b95d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651447.webp" />   
     </p>
 <p>如果i = 1，上式分子中的后半部分对b1来说是常数，有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2595c0cffb73403cb4f4ba89e1ba4406.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651050.webp" />   
     </p>
 <p>如果i = 2，类似的有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/82606e48261248a88e44e2c5a156314c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651939.webp" />   
     </p>
 <p>这可以统一写成：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a4a44e5893824f1fb14b43e7a59754c2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651473.webp" />   
     </p>
 <p>写成矩阵形式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1196ba63029146a3b949b66aec5a4da5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651030.webp" />   
     </p>
 <p>偏置项的导数由两部分组成，分别是神经网络预测值与真实值之间的误差，激活函数的导数值，与权重矩阵的偏导数相比唯一的区别是少了yT。接下来计算对W(1)和b(1)的偏导数，由于是复合函数的内层，情况更为复杂。W(1)是一个4x3的矩阵，它的4个行向量为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/43d4a475e9294f928a4aea7e49194ef3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651426.webp" />   
      。偏置项b(1)是4维向量，4个分量分别是
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3341322c0148479e8f3e0182e53b6fa2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651918.webp" />   
      。首先计算损失函数对W(1)的元素的偏导数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7560887f880a4b70af8b7ad00e0c7cc2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651397.webp" />   
     </p>
 <p>而：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f57a1f0884ce433d9e5faf1f24e381ea.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651829.webp" />   
     </p>
 <p>上式分子中的两部分都有y，因此都与W(1)有关。为了表述简洁，我们令：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3026c7ae20164c2ab1f2fdd445c3e42d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651288.webp" />   
     </p>
 <p>根据链式法则有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/696e3ce197c9470389e28ef263e2fdf4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651910.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/078e22cec1ad456f9e9c7409b6c073a1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651372.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dbb17c6703bb4d438672969ce9a09bc2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651958.webp" />   
     </p>
 <p>这里的
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/683eb56bf693459499da2c7d020fe7b6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651413.webp" />   
      是一个向量，表示y的每个分量分别对
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c099cefe8d744a4d9171d018ad224897.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651999.webp" />   
      求导。当i = 1时有：
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f239b9be35304f88b6303e1808999c32.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651448.webp" />   
     </p>
 <p>后面3个分量相对于求导变量
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7b3b670a98b644108aac488b39fcfcb4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651074.webp" />   
      都是常数。类似的当i = 2时有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/842207b367244a77bf4540ca8ddf6a3b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651411.webp" />   
     </p>
 <p>i = 3和i = 4时的结果以此类推。综合起来有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5175001dc4f14d4cb12af66dbdeddb0d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651008.webp" />   
     </p>
 <p>同理有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b6a37ec72df94b8db43b9d6f5fb2e495.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651369.webp" />   
     </p>
 <p>如果令：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7665a5d13fa8437b80c82032b794fea9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651736.webp" />   
     </p>
 <p>合并得到：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2e5ce3797eac486cb91a003ae6cb820d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651138.webp" />   
     </p>
 <p>写成矩阵形式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b61fdd840de34854934656793a56bb6d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651762.webp" />   
     </p>
 <p>最后计算偏置项的偏导数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8f4e756e6eec4fa6947258dfabc5fb72.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651200.webp" />   
     </p>
 <p>类似的我们得到：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3b235c646e4b476eae38ed7aed753416.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271651596.webp" />   
     </p>
 <p>合并后得到：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/81cc97e9c2cb482bb555d3c844e60be4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652051.webp" />   
     </p>
 <p>写成矩阵形式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0f855cee17e04bc6856a52b61bed3d7e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652682.webp" />   
     </p>
 <p>至此，我得到了这个简单网络对所有参数的偏导数，接下来我们将这种做法推广到更一般的情况。从上面的结果可以看出一个规律，输出层的权重矩阵和偏置向量梯度计算公式中共用了
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0d5a2b3498284c4a87cf66a48eaf879c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652063.webp" />   
      。对于隐含层也有类似的结果。</p>
 <p>完整的算法</p>
 <p>现在考虑一般的情况。假设有m个训练样本(xi,yi)，其中xi为输入向量，yi为标签向量。训练的目标是最小化样本标签值与神经网络预测值之间的误差，如果使用均方误差，则优化的目标为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9a786c64f5084315bb6ebc3234048aca.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652467.webp" />   
     </p>
 <p>其中W为神经网络所有参数的集合，包括各层的权重和偏置。这个最优化问题是一个不带约束条件的问题，可以用梯度下降法求解。</p>
 <p>上面的误差函数定义在整个训练样本集上，梯度下降法每一次迭代利用了所有训练样本，称为批量梯度下降法。如果样本数量很大，每次迭代都用所有样本进计算成本太高。为了解决这个问题，可以采用单样本梯度下降法，我们将上面的损失函数写成对单个样本的损失函数之和：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6ba45f92908647c4a9c1b34c657929e5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652180.webp" />   
     </p>
 <p>定义对单个样本(xi,yi)的损失函数为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3cf50f2d8b3240fcb0bc8a29cd52e8e6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652592.webp" />   
     </p>
 <p>如果采用单个样本进行迭代，梯度下降法第t + 1次迭代时参数的更新公式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9db1c8313adc4f1dae86fb2f5a95701d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652028.webp" />   
     </p>
 <p>如果要用所有样本进行迭代，根据单个样本的损失函数梯度计算总损失梯度即可，即所有样本梯度的均值。</p>
 <p>用梯度下降法求解需要初始化优化变量的值。一般初始化为一个随机数，如用正态分布
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f0d33e2ca8fa4f549d5d05b6b49b4bcf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652504.webp" />   
      产生这些随机数，其中
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/102f848911a749099d1a7e95b32e7abb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652278.webp" />   
      是一个很小的正数。</p>
 <p>到目前为止还有一个关键问题没有解决：目标函数是一个多层的复合函数，因为神经网络中每一层都有权重矩阵和偏置向量，且每一层的输出将会作为下一层的输入。因此，直接计算损失函数对所有权重和偏置的梯度很复杂，需要使用复合函数的求导公式进行递推计算。</p>
 <p>几个重要的结论</p>
 <p>在进行推导之前，我们首先来看下面几种复合函数的求导。又如下线性映射函数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/77f0502df8a245aa9431229a456fa003.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652588.webp" />   
     </p>
 <p>其中x是n维向量，W是mxn的矩阵，y是m维向量。</p>
 <p>问题1：假设有函数f(y)，如果把x看成常数，y看成W的函数，如何根据函数对y的梯度值
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ec1c30a2fee74448894fb504bf61463e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652919.webp" />   
      计算函数对W的梯度值
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b1371948e45c4292941f5db56ef18a76.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652341.webp" />   
      ？根据链式法则，由于wij只和yj有关，和其他的yk，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c0211e8165cf4d8eb32b1f2621e62d44.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652709.webp" />   
      无关，因此有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4ba9846848194c69b008a7335728beb2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652084.webp" />   
     </p>
 <p>对于W的所有元素有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c163fdd1306f4d3cac9c3c8ce6b8373c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652558.webp" />   
     </p>
 <p>写成矩阵形式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7c1b556303434d18b3eb5a0ead851426.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652035.webp" />   
     </p>
 <p>问题2：如果将W看成常数，y将看成x的函数，如何根据
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/61a45448ee1d413abf84043d684f0451.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652458.webp" />   
      计算
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/50e5097d47eb4bb0a8390f88f51f5f5f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652886.webp" />   
      ？由于任意的xi和所有的yi都有关系，根据链式法则有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/30f76cb248ec412b88b653909563c854.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652327.webp" />   
     </p>
 <p>写成矩阵形式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a878c2abd1b04dd095fb81e3af7419dc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652765.webp" />   
     </p>
 <p>这是一个对称的结果，在计算函数映射时用矩阵W乘以向量x得到y，在求梯度时用矩阵W的转置乘以y的梯度得到x的梯度。</p>
 <p>问题3：如果有向量到向量的映射：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1bb018d73dbb4517bb5e9ac06780225c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652095.webp" />   
     </p>
 <p>写成分量形式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/39e967d0714d496fa80a710b75f95de6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652418.webp" />   
     </p>
 <p>在这里每个yi只和对应的xi有关，和其他所有
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6b27a4068da34cf8a57dcd9e7cef24e2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652806.webp" />   
      无关，且每个分量采用了相同的映射函数g。对于函数f(y)，如何根据
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5abd27f2400a47578c74d5708f40bdac.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652137.webp" />   
      计算
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/48f1c9d684af4e2b9783dc039db721d7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652622.webp" />   
      ？根据链式法则，由于每个yi只和对应的xi有关，有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2c4383824e1f415dac1049e2c3856ab6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652986.webp" />   
     </p>
 <p>写成矩阵形式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bb20376b15474f69bcfbe4a85dd697b7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652435.webp" />   
     </p>
 <p>即两个向量对应元素相乘，这种乘法在上一节已经介绍。</p>
 <p>问题4：接下来我们考虑更复杂的情况，如果有下面的复合函数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/feafdd122c7c4bbc896888941e30e554.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652899.webp" />   
     </p>
 <p>其中g是向量对应元素一对一映射，即：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d853dcf35240413480f03aea0701d736.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652371.webp" />   
     </p>
 <p>如果有函数f(y)，如何根据
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/246599167ae54e80b549e24f9925f553.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652995.webp" />   
      计算
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f369f361996e4354a34e8b4d207e0716.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652489.webp" />   
      ？在这里有两层复合，首先是从x到u，然后是从u到y。根据问题2和问题3的结论，有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4ecc0e8fc0d34a03825fe77b1c94271e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652921.webp" />   
     </p>
 <p>问题5：x是n维向量，y是m维向量，有映射y=g(x)，即：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5190dfd16492467dbddcfb8644979063.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652378.webp" />   
     </p>
 <p>这里的映射方式和上面介绍的不同。对于向量y的每个分量yi，映射函数gi不同，而且yi和向量x的每个分量xj有关。对于函数f(y)，如何根据
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/eda106c7c23041798f15c061aebc99d8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652857.webp" />   
      计算
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5230665a681d403fbdbab43531476347.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652294.webp" />   
      ？根据链式法则，由于任何的yi和任何的xj都有关系，因此有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8b3aada0fcc34f86bdd71ca0a3235824.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652671.webp" />   
     </p>
 <p>对于所有元素有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6cc299524cce445eaf93b6d911d6d6e8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652030.webp" />   
     </p>
 <p>写成矩阵形式有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c760052830ac44ca908f8d32414fe1c0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652510.webp" />   
     </p>
 <p>其中
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7f787e319b204e48ad366d8f3a2af783.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652932.webp" />   
      为雅可比矩阵。对于如下向量到向量的映射函数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b535fe47f28a455b8b75ffd763bfc457.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271652326.png" />   
     </p>
 <p>其中向量
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9a91fb960098471192f27487fe7ff773.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653757.webp" />   
      ，向量
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2d588cf429b343c497cb163f9d2bd12a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653080.webp" />   
      这个映射写成分量形式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b34f48896b4148a1be98809f02cdc912.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653417.webp" />   
     </p>
 <p>即输出向量的每个分量是输入向量的函数。雅克比矩阵定义为输出向量的每个分量对输入向量的每个分量的偏导数构成的矩阵：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3b3f486866d44ef9a7f9f22cb00d23f4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653933.webp" />   
     </p>
 <p>这是一个m行n列的矩阵，每一行为一个多元函数的梯度。对于如下向量映射函数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c4e9203bec5f438792adf79f7b5932aa.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653495.webp" />   
     </p>
 <p>它的雅克比矩阵为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ce0c7e8825aa497087b936da4f255049.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653907.webp" />   
     </p>
 <p>前面介绍的几个问题都是这个映射的特例。</p>
 <p>完整的算法</p>
 <p>根据上面的结论可以方便的推导出神经网络的求导公式。假设神经网络有nl层，第l层神经元个数为Sl。第1层从第l-1层接收的输入向量为x(l-1)，本层的权重矩阵为W(l)，偏置向量为b(l)，输出向量为x(l)。该层的输出可以写成如下矩阵形式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cbcf6fd0d1ed497fbedb7acd1fcd2428.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653342.webp" />   
     </p>
 <p>其中W(l)是slxsl-1的矩阵，u(l)和b(l)是sl维的向量。神经网络一个层实现的变换如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0aa6b55f9a5d4e5b818239f471f26222.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653747.webp" />   
     </p>
 <p>如果将神经网络按照各个层展开，最后得到一个深层的复合函数，将其代入欧氏距离损失函数，依然是一个关于各个层的权重矩阵和偏置向量的复合函数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7c2b59cde6b24a388d40ad9ca6010e7d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653378.webp" />   
     </p>
 <p>要计算某一层的权重矩阵和偏置向量的梯度，只能依赖于它紧贴着的外面那一层变量的梯度值，通过一次复合函数求导得到。</p>
 <p>根据定义，w(l)和b(l)是目标函数的自变量，u(l)和x(l)可以看成是它们的函数。根据前面的结论，损失函数对权重矩阵的梯度为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ea0775a29eea47a5870b43a46a0c262e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653824.webp" />   
     </p>
 <p>对偏置向量的梯度为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/34d2ff86bf9841d6a66e0bbf9ce93612.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653177.webp" />   
     </p>
 <p>现在的问题是，梯度
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a0c4dab6a3494fd4adb3d01df5d68a71.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653538.webp" />   
      怎么计算？我们分两种情况讨论，如果第l层是输出层，在这里只考虑对单个样本的损失函数，根据上一节推导的结论，这个梯度为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ba50d40f24234cb08bc8a9cec50d3233.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653995.webp" />   
     </p>
 <p>这就是输出层的神经元输出值与期望值之间的误差。这样我们得到输出层权重的梯度为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/78a23bf35b3d499fbd7e70aa6faccb6b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653450.webp" />   
     </p>
 <p>等号右边第一个乘法是向量对应元素乘；第二个乘法是矩阵乘，在这里是列向量与行向量的乘积，结果是一个矩阵，尺寸刚好和权重矩阵相同。损失函数对偏置项的梯度为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5b0b1b983ba842dc8d4be075a31ff7cc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653781.webp" />   
     </p>
 <p>下面考虑第二种情况。如果第l层是隐含层，则有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/67f7fb287e4148799e716540b0e3cd91.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653405.webp" />   
     </p>
 <p>假设梯度
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ef9b038630194ad9852d7e86d0e90364.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653802.webp" />   
      已经求出，根据前面的结论，有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b482f6e300eb4df6b6ee9bd20fe503c7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653188.webp" />   
     </p>
 <p>这是一个递推的关系，通过
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9268514c9c164e188fcd403cd8787981.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653678.webp" />   
      可以计算出
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/48bf092fa9804d8d88cd0f003309d843.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653119.webp" />   
      ，递推的终点是输出层，而输出层的梯度值我们之前已经算出。由于根据
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/84a10b56bfc34b6496400cb4cda005b6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653581.webp" />   
      可以计算出
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5d1db59ef0904da480d05ab733ade59a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653988.webp" />   
      和
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/43bebb1643a44c0b8f5cf8dc0d6f7026.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653444.webp" />   
      ，因此可以计算出任意层权重与偏置的梯度值。</p>
 <p>为此我们定义误差项为损失函数对临时变量u的梯度：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8d82c69f561f45d99b7f4c6b994bb606.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653875.webp" />   
     </p>
 <p>向量
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ad1fbf9acafd4015a76f184c022fed1b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653340.webp" />   
      的尺寸和本层神经元的个数相同。这是一个递推的定义，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/396766b8d3da4e5fb3ec9d84b6c98004.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653941.webp" />   
      依赖于
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/db1c59aa30994a41ba5d19d9202e369f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653471.webp" />   
      ，递推的终点是输出层，它的误差项可以直接求出。</p>
 <p>根据误差项可以方便的计算出对权重和偏置的偏导数。首先计算输出层的误差项，根据他得到权重和偏置项的梯度，这是起点；根据上面的递推公式，逐层向前，利用后一层的误差项计算出本层的误差项，从而得到本层权重和偏置项的梯度。</p>
 <p>单个样本的反向传播算法在每次迭代时的流程为：</p>
 <p>1.正向传播，利用当前权重和偏置值，计算每一层对输入样本的输出值</p>
 <p>2.反向传播，对输出层的每一个节点计算其误差：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2a8f25b04345455382394cf2c677e7cd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653772.webp" />   
     </p>
 <p>3.对于
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/144f72a858f34f299fcc7db56a0c97a3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653255.webp" />   
      的各层，计算第l层每个节点的误差：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4d463c99dcda40319d4f1bcb548c5bb9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653673.webp" />   
     </p>
 <p>4.根据误差计算损失函数对权重的梯度值：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2ab52093c5204963b89828fba5cd247f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653283.webp" />   
     </p>
 <p>对偏置的梯度为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c4dcbefc001f4ce88a5931b9be9c617b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653774.webp" />   
     </p>
 <p>5.用梯度下降法更新权重和偏置：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3572a4c7593b43dbb987f14db79f3098.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653194.webp" />   
     </p>
 <p>实现时需要在正向传播时记住每一层的输入向量x(l-1)，本层的激活函数导数值
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a74a25540e444b96ae7660e7dc6610b1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271653612.webp" />   
      。</p>
 <p>神经网络的训练算法可以总结为：</p>
 <p>复合函数求导+梯度下降法</p>
@@ -818,6 +818,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -851,10 +855,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1233,6 +1233,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

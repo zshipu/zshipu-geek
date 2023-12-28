@@ -210,13 +210,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>(1) 爱奇艺APP <strong>底Tab的随刻视频</strong> 以及 <strong>顶导航的热点模块</strong></p>
 <p>(2) 爱奇艺 <strong>随刻APP 首页</strong> 短视频流推荐页面</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/29561790cf114a5aa90c46053c560f99.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801978.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/405677f018b3448ea2df8dee29c2402e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801704.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8160a6e094d145ceb7ecd3e6e8d16989.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801398.webp" />   
     </p>
 <p>图1:短视频推荐页面</p>
 <p>用户在 <strong>feed流页面的行为</strong> 分为：</p>
@@ -230,16 +230,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>该策略会造成 <strong>长视频的权重较高</strong>，**模型偏向推出长视频。**综合来看，无论将播放时长还是完播率作为样本权重，都会导致模型对长短视频有所偏重。</p>
 <p>因此，权重设计方案应 <strong>确定合理的假设</strong>： <strong>视频推出质量与视频长度无关，且在视频时长的各区间下应近似均匀分布。</strong> 即在任何区间下，样本权重的均值大概相同。则有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/840a7d234cae4ff48144ae0faf22a8f2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801223.webp" />   
     </p>
 <p>采用 <strong>等频分桶</strong> 的方式，对一定时间窗口内的播放样本按照 <strong>duration（视频时长）</strong> 排序分散到100个桶，确保同一桶中视频观看数相同。进一步地对每个duration桶按照playtime（播放时长）排序再次等频分散到100个桶， <strong>并将权重归一化到[0,99]的区间整数。因此对所有样本，均可按照（duration，playtime）确定固定的分桶坐标</strong> 和 <strong>权值</strong>。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/db2c3d7d3baa444c86ec3a0689ce20f1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801641.webp" />   
     </p>
 <p>图2:对视频时长和播放时长进行分桶</p>
 <p>在确定整体的权重计算框架后，进一步对playtime较高的样本权重进行整体提升。预期**优化消费时长的指标，同时控制长视频的偏向。**具体的boosting方案：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5b7c6b0eb4d7459ba9b4c69d6ef131ea.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801219.webp" />   
     </p>
 <p>其中， <strong>Am是上界值，shift是下界值，offset是时长偏移量，slope是斜率。</strong></p>
 <p>为了完善视频生态，保证新老视频的权重具有一定的区分度。我们融合了 <strong>视频年龄</strong>（用户行为时间-视频发布时间）对样本降权**（年龄越大，权重越低） <strong>。同时，为了能够使权重配置及时拟合整体用户最近的消费习惯，在保证任务产出效率的基础上，分别对不同平台用户生成</strong> 特定权重配置**，实现了 <strong>周期性更新</strong>。</p>
@@ -249,7 +249,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>缺点：将时长转为样本权重影响训练loss</strong>， <strong>本质并非对多目标建模</strong>，而是将不同目标的信息转移到统一的目标上优化。而且时长信息利用不够充分， <strong>收益有限。</strong></p>
 <h3 id="2多模型融合"><strong>2.多模型融合</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/de937f647b9b471c93455ba0867e6f52.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801764.webp" />   
     </p>
 <p>图3：多模型融合</p>
 <p><strong>多模型融合是指分别对每个目标训练一个模型，各预估得分根据目标重要性、业务指标需求等策略相加/相乘后进行融合排序</strong>**。**</p>
@@ -265,7 +265,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>（2）优化底层共享表示。</strong></p>
 <h4 id="31任务序列依赖关系建模"><strong>3.1任务序列依赖关系建模</strong></h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/32e8aaa63fde4eba9f0783ff8581168f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801486.png" />   
     </p>
 <p>图4：基于ESMM的方案</p>
 <p>推荐场景中，用户的行为通常具有 <strong>序列依赖关系</strong>，在阿里ESMM的文章[1]中，用户的 <strong>转化行为是发生在用户点击之后</strong>，因此基于序列依赖进行建模。如图4所示，对比feed流场景，点击是时长或者互动的前提，可以把 <strong>点击&amp;时长，或者点击&amp;互动作为ESMM迭代的方向。</strong> 实现上， <strong>互动作为主任务，点击作为辅助任务，时长作为二者的正例权重，离线训练时两者loss直接相加。</strong> 我们曾经尝试过对两个目标预估值进行变化以及时长更多的Label制定方式，但线上效果均持平微正。</p>
@@ -273,12 +273,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="32-mmoe帕累托优化"><strong>3.2 MMOE+帕累托优化</strong></h4>
 <p>我们分别对 <strong>观看时长</strong> 和评论数 <strong>Top 100</strong> 的视频进行对比分析，发现 <strong>重合度较低、排序差异很大，强制底层共享存在冲突。因此，我们采用了谷歌MMOE</strong> [2][3]的方案，但是考虑到联合Loss需要进行 <strong>大量超参调节</strong>，可能出现 <strong>目标一涨一跌</strong> 的现象，因此使用帕累托优化保证原有目标效果不降低的情况下，提升互动效果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d2b158eb2dd44fc4a4f148d13921478b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801413.png" />   
     </p>
 <p>图5 MMOE模型结构</p>
 <p>MMOE模型底层通过采用 <strong>Soft parameter sharing</strong> 方式，能够有效解决 <strong>两个任务相关性较差情况下的多任务学习。</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6b027db29f204d98b49e2cd749cfc0ef.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801293.png" />   
     </p>
 <p>图6 基于MMOE+帕累托优化的方案</p>
 <p><strong>帕累托优化</strong> 主要参考阿里2019年发表于RecSys上的一篇文章[4]，对比手动调节联合Loss，该论文使用 <strong>kkt条件来负责各目标权重的生成</strong>。大体步骤（如图中Training虚线框内所示）：</p>
@@ -291,7 +291,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="41-乘法融合升级"><strong>4.1 乘法融合升级</strong></h4>
 <p><strong>在线推理</strong> 时，使用可适配多种融合方案的 <strong>超参配置</strong>。在多目标融合初期，我们采用了加权和的方式。由于最终的排序得分对 <strong>各子目标的得分值域</strong> 很敏感，因此我们增加α和β两个超参，来联合调节各子目标得分的 <strong>灵敏度与提升比例。</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/476cf446a29f415daecb165e3bf59a1e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801170.png" />   
     </p>
 <p>其中，αi： <strong>超参，灵敏度</strong>；scorei: <strong>模型i的输出</strong>；βi： <strong>超参，提升比例，非线性处理</strong>；factor： <strong>超参，组合权重</strong>；n： <strong>模型数量</strong>。</p>
 <p>在业务的目标较少时，通过 <strong>加法方式</strong> 融合新增目标可以短期内 <strong>快速获得收益</strong>。但随着 <strong>目标逐渐增多时，加法的融合排序能力会逐渐受限</strong>。主要包括：</p>
@@ -299,7 +299,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>（2）随着目标逐渐增多， <strong>加法融合会逐步弱化各子目标的重要性影响。</strong></p>
 <p>因此我们对多目标的融合方式升级为乘法：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1b71529dd1b24580a26e2e9e9287f2e5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271802195.png" />   
     </p>
 <p><strong>线上收益：CTR提升1.5%，人均播放时长提升1%。</strong></p>
 <p><strong>4.2任务序列依赖关系建模</strong></p>
@@ -440,6 +440,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -473,10 +477,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -855,6 +855,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

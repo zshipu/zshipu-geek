@@ -213,14 +213,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <hr>
 <h2 id="工业推荐系统整体架构是怎样的"><strong>工业推荐系统整体架构是怎样的</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4c49d4481e2f457cba0a815087ab0007.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944619.jpeg" />   
     </p>
 <p>一个典型的工业级推荐系统整体架构可以参考上图，一般分为在线部分，近线部分和离线部分。</p>
 <p>对于在线部分来说，一般要经历几个阶段。首先通过召回环节，将给用户推荐的物品降到千以下规模；如果召回阶段返回的物品还是太多，可以加入粗排阶段，这个阶段是可选的，粗排可以通过一些简单排序模型进一步减少往后续环节传递的物品；再往后是精排阶段，这里可以使用复杂的模型来对少量物品精准排序。对某个用户来说，即使精排推荐结果出来了，一般并不会直接展示给用户，可能还要上一些业务策略，比如去已读，推荐多样化，加入广告等各种业务策略。之后形成最终推荐结果，将结果展示给用户。</p>
 <p>对于近线部分来说，主要目的是实时收集用户行为反馈，并选择训练实例，实时抽取拼接特征，并近乎实时地更新在线推荐模型。这样做的好处是用户的最新兴趣能够近乎实时地体现到推荐结果里。</p>
 <p>对于离线部分而言，通过对线上用户点击日志的存储和清理，整理离线训练数据，并周期性地更新推荐模型。对于超大规模数据和机器学习模型来说，往往需要高效地分布式机器学习平台来对离线训练进行支持。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9c9899cbccdd453a9ddcc8fe439d4e5e.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944403.jpeg" />   
     </p>
 <p>因为粗排是可选的，对于大多数推荐系统来说，通常在线部分的主体分为两个阶段就够，第一个阶段是召回，第二个阶段是排序。因为个性化推荐需要给每个用户展现不同的信息流或者物品流，而对于每个用户来说，可供推荐的物品，在具备一定规模的公司里，是百万到千万级别，甚至上亿。所以对于每一个用户，如果对于千万级别物品都使用先进的模型挨个进行排序打分，明显速度上是算不过来的，资源投入考虑这么做也不划算。从这里可以看出，召回阶段的主要职责是：从千万量级的候选物品里，采取简单模型将推荐物品候选集合快速筛减到千级别甚至百级别，这样将候选集合数量降下来，之后在排序阶段就可以上一些复杂模型，细致地对候选集进行个性化排序。</p>
 <p>从上面在线推荐两阶段任务的划分，我们可以看出，召回阶段因为需要计算的候选集合太大，所以要想速度快，就只能上简单模型，使用少量特征，保证泛化能力，尽量让用户感兴趣的物品在这个阶段能够找回来；而排序阶段核心目标是要精准，因为它处理的物品数据量小，所以可以采用尽可能多的特征，使用比较复杂的模型，一切以精准为目标。</p>
@@ -228,7 +228,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="多路召回怎么做"><strong>多路召回怎么做</strong></h2>
 <p>目前工业界推荐系统的召回阶段一般是怎么做的呢？可以用一句江湖气很重的话来总结，请您系好安全带坐稳，怕吓到您，这句话就是：“一只穿云箭，千军万马来相见”。听起来霸气十足是吧？我估计看过古惑仔电影的都熟悉这句话，黑帮集结打群架的时候喜欢引用这句名言，以增加气势，自己给自己打气。如果和推荐系统对应起来理解，这里的“穿云箭”就是召回系统，而千军万马就是各路花式召回策略。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/729cb05ee82b4e76937ccc22c072d7fa.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944313.jpeg" />   
     </p>
 <p>目前工业界的推荐系统，在召回阶段，一般都采取多路召回策略。上图展示了一个简化版本的例子，以微博信息流排序为例，不同业务召回路数不太一样，但是常用的召回策略，基本都会包含，比如兴趣标签，兴趣Topic，兴趣实体，协同过滤，热门，相同地域等，多者几十路召回，少者也有7／8路召回。</p>
 <p>对于每一路召回，会拉回K条相关物料，这个K值是个超参，需要通过线上AB测试来确定合理的取值范围。如果你对算法敏感的话，会发现这里有个潜在的问题，如果召回路数太多，对应的超参就多，这些超参组合空间很大，如何设定合理的各路召回数量是个问题。另外，如果是多路召回，这个超参往往不太可能是用户个性化的，而是对于所有用户，每一路拉回的数量都是固定的，这里明显有优化空间。按理说，不同用户也许对于每一路内容感兴趣程度是不一样的，更感兴趣的那一路就应该多召回一些，所以如果能把这些超参改为个性化配置是很好的，但是多路召回策略下，虽然也不是不能做，但是即使做，看起来还是很Trick的。有什么好办法能解决这个问题吗？有，本文后面会讲。</p>
@@ -244,59 +244,59 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>从LR到SVM再到FM模型</strong></li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7b8a8fed0b8b48878a42ad75cda42b50.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944148.jpeg" />   
     </p>
 <p>LR模型是CTR预估领域早期最成功的模型，大多工业推荐排序系统采取LR这种“线性模型+人工特征组合引入非线性”的模式。因为LR模型具有简单方便易解释容易上规模等诸多好处，所以目前仍然有不少实际系统仍然采取这种模式。但是，LR模型最大的缺陷就是人工特征工程，耗时费力费人力资源，那么能否将特征组合的能力体现在模型层面呢？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3f106ef60f7541128e27c3263a670245.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944851.jpeg" />   
     </p>
 <p>其实想达到这一点并不难，如上图在计算公式里加入二阶特征组合即可，任意两个特征进行组合，可以将这个组合出的特征看作一个新特征，融入线性模型中。而组合特征的权重可以用来表示，和一阶特征权重一样，这个组合特征权重在训练阶段学习获得。其实这种二阶特征组合的使用方式，和多项式核SVM是等价的。虽然这个模型看上去貌似解决了二阶特征组合问题了，但是它有个潜在的问题：它对组合特征建模，泛化能力比较弱，尤其是在大规模稀疏特征存在的场景下，这个毛病尤其突出，比如CTR预估和推荐排序，这些场景的最大特点就是特征的大规模稀疏。所以上述模型并未在工业界广泛采用。那么，有什么办法能够解决这个问题吗？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f0deb6074d6f4284baa0c5b11452656b.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944723.jpeg" />   
     </p>
 <p>于是，FM模型此刻可以闪亮登场了。如上图所示，FM模型也直接引入任意两个特征的二阶特征组合，和SVM模型最大的不同，在于特征组合权重的计算方法。FM对于每个特征，学习一个大小为k的一维向量，于是，两个特征 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c777672958a94a9e9ff58516eccae51d.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944478.svg&#43;xml" />   
     
 和 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f835cdb9dc764f249c1b1b088ae10c7f.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944188.svg&#43;xml" />   
     
 的特征组合的权重值，通过特征对应的向量 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b8287aa442084b50b10f140d9b68559d.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944735.svg&#43;xml" />   
     
 和 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c92695b08c5141c3a251c85b21bed060.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944360.svg&#43;xml" />   
     
 的内积 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/17db7e44fb4e411cad57c64c9056d748.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944935.svg&#43;xml" />   
     
 来表示。这本质上是在对特征进行embedding化表征，和目前非常常见的各种实体embedding本质思想是一脉相承的，但是很明显在FM这么做的年代（2010年），还没有现在能看到的各种眼花缭乱的embedding的形式与概念。所以FM作为特征embedding，可以看作当前深度学习里各种embedding方法的老前辈。当然，FM这种模式有它的前辈模型吗？有，等会会谈。其实，和目前的各种深度DNN排序模型比，它仅仅是少了2层或者3层MLP隐层，用来直接对多阶特征非线性组合建模而已，其它方面基本相同。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/91dc654ad30343458120ac2e4473c03c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944522.jpeg" />   
     </p>
 <p>那么为什么说FM的这种特征embedding模式，在大规模稀疏特征应用环境下比较好用？为什么说它的泛化能力强呢？参考上图说明。即使在训练数据里两个特征并未同时在训练实例里见到过，意味着 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6ecc8c6b45cd4d66a2ce052aa5b15a1d.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944295.svg&#43;xml" />   
     
 一起出现的次数为0，如果换做SVM的模式，是无法学会这个特征组合的权重的。但是因为FM是学习单个特征的embedding，并不依赖某个特定的特征组合是否出现过，所以只要特征 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/84886e02e4f24158ba5dad9fc324df6a.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944997.svg&#43;xml" />   
     
 和其它任意特征组合出现过，那么就可以学习自己对应的embedding向量。于是，尽管 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7d3c1301f8a64121b4a4e0aeccca2559.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944546.svg&#43;xml" />   
     
 这个特征组合没有看到过，但是在预测的时候，如果看到这个新的特征组合，因为 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b4ef9319888a40408140bf0e82e2f79a.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944113.svg&#43;xml" />   
     
 和 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/378375aaf4874d6590ded646571eaa53.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944846.svg&#43;xml" />   
     
 都能学会自己对应的embedding，所以可以通过内积算出这个新特征组合的权重。这是为何说FM模型泛化能力强的根本原因。</p>
 <p>其实本质上，这也是目前很多花样的embedding的最核心特点，就是从0/1这种二值硬核匹配，切换为向量软匹配，使得原先匹配不上的，现在能在一定程度上算密切程度了，具备很好的泛化性能。</p>
@@ -306,29 +306,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>FM我们大致应该知道是怎么个意思了，这里又突然冒出个MF，长得跟FM貌似还有点像，那么MF又是什么呢？它跟FM又有什么关系？</p>
 <p>请跟我念：“打东边来了个FM，手里提着一斤挞嘛；打西边来了个MF，腰里别着一个喇叭；提着一斤挞嘛的FM想要别着喇叭的MF腰里的喇叭……..”你要是能不打磕绊一遍念下来的话………你以为你就理解它们的错综复杂的关系了是吗？不，你就可以去学说相声了……</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e1b37b6ac50c4313b443e7c751a1586e.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944306.jpeg" />   
     </p>
 <p>MF（Matrix Factorization，矩阵分解）模型是个在推荐系统领域里资格很深的老前辈协同过滤模型了。核心思想是通过两个低维小矩阵（一个代表用户embedding矩阵，一个代表物品embedding矩阵）的乘积计算，来模拟真实用户点击或评分产生的大的协同信息稀疏矩阵，本质上是编码了用户和物品协同信息的降维模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9d56a191a0874074b03871ea161b53bc.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944145.jpeg" />   
     </p>
 <p>当训练完成，每个用户和物品得到对应的低维embedding表达后，如果要预测某个 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5e663228d0824905af950740742848e9.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944737.svg&#43;xml" />   
     
 对 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/adbc1988b6f04408ad5cd0827130f0f6.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944285.svg&#43;xml" />   
     
 的评分的时候，只要它们做个内积计算 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fbcc6acbbf624922a819352dc48e50e6.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944880.svg&#43;xml" />   
     
 ，这个得分就是预测得分。看到这里，让你想起了什么吗？</p>
 <p>身为推荐算法工程师，我假设你对它还是比较熟悉的，更多的就不展开说了，相关资料很多，我们重点说MF和FM的关系问题。</p>
 <p>MF和FM不仅在名字简称上看着有点像，其实他们本质思想上也有很多相同点。那么，MF和FM究竟是怎样的关系呢？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ada66f37de5747f89f80c1238cc391f5.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944427.jpeg" />   
     </p>
 <p>本质上，MF模型是FM模型的特例，MF可以被认为是只有User ID 和Item ID这两个特征Fields的FM模型，MF将这两类特征通过矩阵分解，来达到将这两类特征embedding化表达的目的。而FM则可以看作是MF模型的进一步拓展，除了User ID和Item ID这两类特征外，很多其它类型的特征，都可以进一步融入FM模型里，它将所有这些特征转化为embedding低维向量表达，并计算任意两个特征embedding的内积，就是特征组合的权重，如果FM只使用User ID 和Item ID，你套到FM公式里，看看它的预测过程和MF的预测过程一样吗？</p>
 <p>从谁更早使用特征embedding表达这个角度来看的话，很明显，和FM比起来，MF才是真正的前辈，无非是特征类型比较少而已。而FM继承了MF的特征embedding化表达这个优点，同时引入了更多Side information作为特征，将更多特征及Side information embedding化融入FM模型中。所以很明显FM模型更灵活，能适应更多场合的应用范围。</p>
@@ -352,58 +352,58 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>如何优化FM的计算效率</strong></li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/68f20efc53814fb589fbf56fd87b6416.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944502.jpeg" />   
     </p>
 <p>再说回来，FM如今被广泛采用并成功替代LR模型的一个关键所在是：它可以通过数学公式改写，把表面貌似是 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/90d3088d5cc2486788957d2d872a83bb.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944241.svg&#43;xml" />   
     
 的复杂度降低到 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fa8cb1e9e72346d5b429591331624cd2.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944762.svg&#43;xml" />   
     
 ，其中n是特征数量，k是特征的embedding size，这样就将FM模型改成了和LR类似和特征数量n成线性规模的时间复杂度了，这点非常好。</p>
 <p>那么，如何改写原始的FM数学公式，让其复杂度降下来呢？因为原始论文在推导的时候没有给出详细说明，我相信不少人看完估计有点懵，所以这里简单解释下推导过程，数学公式帕金森病患者可以直接跳过下面内容往后看，这并不影响你理解本文的主旨。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dde88cf886c04f0484ccd789439fa11f.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944413.jpeg" />   
     </p>
 <p>上图展示了整个推导过程，我相信如果数学基础不太扎实的同学看着会有点头疼，转换包括四个步骤，下面分步骤解释下。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2de8b0ea3d6340a782c029f837726aef.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944331.jpeg" />   
     </p>
 <p>第一个改写步骤及为何这么改写参考上图，比较直观，不解释了；</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/775d406435de4131a09753dccd054bc9.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944255.jpeg" />   
     </p>
 <p>第二步转换更简单，更不用解释了。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/025771ddb136413c9b993441a530923a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944977.jpeg" />   
     </p>
 <p>第三步转换不是太直观，可能需要简单推导一下，很多人可能会卡在这一步，所以这里解释解释。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c474a2e6998b4956aaae4521cfe105e9.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271944670.jpeg" />   
     </p>
 <p>其实吧，如果把k维特征向量内积求和公式抽到最外边后，公式就转成了上图这个公式了（不考虑最外边k维求和过程的情况下）。它有两层循环，内循环其实就是指定某个特征的第f位（这个f是由最外层那个k指定的）后，和其它任意特征对应向量的第f位值相乘求和；而外循环则是遍历每个的第f位做循环求和。这样就完成了指定某个特征位f后的特征组合计算过程。最外层的k维循环则依此轮循第f位，于是就算完了步骤三的特征组合。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3d27d5deefd34187870100f41d98e0dd.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271945507.jpeg" />   
     </p>
 <p>对上一页公式图片展示过程用公式方式，再一次改写（参考上图），其实就是两次提取公共因子而已，这下应该明白了吧？要是还不明白，那您的诊断结果是数学公式帕金森晚期，跟我一个毛病，咱俩病友同病相怜，我也没辙了。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d75953f00f994aa799f1e254c57f0de1.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271945444.jpeg" />   
     </p>
 <p>第四步公式变换，意思参考上图，这步也很直白，不解释。</p>
 <p>于是，通过上述四步的公式改写，可以看出在实现FM模型时，时间复杂度就降低到了 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2c15c3397e1745c69113d2e57e677e2b.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271945449.svg&#43;xml" />   
     
 了，而虽说看上去n还有点大，但是其实真实的推荐数据的特征值是极为稀疏的，就是说大量xi其实取值是0，意味着真正需要计算的特征数n是远远小于总特征数目n的，无疑这会进一步极大加快FM的运算效率。</p>
 <p>这里需要强调下改写之后的FM公式的第一个平方项，怎么理解这个平方项的含义呢？这里其实蕴含了后面要讲的使用FM模型统一多路召回的基本思想，所以这里特殊提示一下。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b85ce66a2a58457cb6978613849c18ae.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271945447.jpeg" />   
     </p>
 <p>参考上图，你体会下这个计算过程。它其实等价于什么？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c7f6438799924d9ebbdeae92dfddabe1.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271945241.jpeg" />   
     </p>
 <p>这个平方项，它等价于将FM的所有特征项的embedding向量累加，之后求内积。我再问下之前问过的问题：“我们怎样利用FM模型做统一的召回？”这个平方项的含义对你有启发吗？你可以仔细想想它们之间的关联。</p>
 <hr>
@@ -425,11 +425,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>不论是简化版本FM召回模型，还是复杂版本，首先都需要做如下两件事情：</p>
 <p>第一，离线训练。这个过程跟在排序阶段采用FM模型的离线训练过程是一样的，比如可以使用线上收集到的用户点击数据来作为训练数据，线下训练一个完整的FM模型。在召回阶段，我们想要的其实是：每个特征和这个特征对应的训练好的embedding向量。这个可以存好待用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e0c09c93f15a457d90e59f4032abd3d3.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271945032.jpeg" />   
     </p>
 <p>第二，如果将推荐系统做个很高层级的抽象的话，可以表达成学习如下形式的映射函数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cec3ed848a474699a43f1559be63334e.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271945882.svg&#43;xml" />   
     </p>
 <p>意思是，我们利用用户（User）相关的特征，物品(Item)相关的特征，以及上下文特征（Context,比如何时何地用的什么牌子手机登陆等等）学习一个映射函数F。学好这个函数后，当以后新碰到一个Item，我们把用户特征，物品特征以及用户碰到这个物品时的上下文特征输入F函数，F函数会告诉我们用户是否对这个物品感兴趣。如果他感兴趣，就可以把这个Item作为推荐结果推送给用户。</p>
 <p>说了这么多，第二个我们需要做的事情是：把特征划分为三个子集合，用户相关特征集合，物品相关特征集合以及上下文相关的特征集合。而用户历史行为类特征，比如用户过去点击物品的特征，可以当作描述用户兴趣的特征，放入用户相关特征集合内。至于为何要这么划分，后面会讲。</p>
@@ -439,13 +439,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>我们先来构建一个极简的FM召回模型，首先，我们先不考虑上下文特征，晚点再说。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/230ba678ecc64675bf34d6b7a3b3412d.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271945522.jpeg" />   
     </p>
 <p>第一步，对于某个用户，我们可以把属于这个用户子集合的特征，查询离线训练好的FM模型对应的特征embedding向量，然后将n个用户子集合的特征embedding向量累加，形成用户兴趣向量U，这个向量维度和每个特征的维度是相同的。</p>
 <p>类似的，我们也可以把每个物品，其对应的物品子集合的特征，查询离线训练好的FM模型对应的特征embedding向量，然后将m个物品子集合的特征embedding向量累加，形成物品向量I，这个向量维度和每个特征的维度也是是相同的。</p>
 <p>对于极简版FM召回模型来说，用户兴趣向量U可以离线算好，然后更新线上的对应内容；物品兴趣向量I可以类似离线计算或者近在线计算，问题都不大。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b0f4821f3de24fdaa07c767748ebbba9.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271945278.jpeg" />   
     </p>
 <p>第二步，对于每个用户以及每个物品，我们可以利用步骤一中的方法，将每个用户的兴趣向量离线算好，存入在线数据库中比如Redis（用户ID及其对应的embedding），把物品的向量逐一离线算好，存入Faiss(Facebook开源的embedding高效匹配库)数据库中。</p>
 <p>当用户登陆或者刷新页面时，可以根据用户ID取出其对应的兴趣向量embedding，然后和Faiss中存储的物料embedding做内积计算，按照得分由高到低返回得分Top K的物料作为召回结果。提交给第二阶段的排序模型进行进一步的排序。这里Faiss的查询速度至关重要，至于这点，后面我们会单独说明。</p>
@@ -453,11 +453,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>问题一：首先我们需要问自己，这种累加用户embedding特征向量以及累加物品embedding特征向量，之后做向量内积。这种算法符合FM模型的原则吗？和常规的FM模型是否等价？</p>
 <p>我们来分析一下。这种做法其实是在做用户特征集合U和物品特征集合I之间两两特征组合，是符合FM的特征组合原则的，考虑下列公式是否等价就可以明白了：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fbbdd9c3efbc4895ae47f6bf588e1d08.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271945960.svg&#43;xml" />   
     
 (公式1)</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/324543be65e047ae947312659fc1f5d5.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271945506.svg&#43;xml" />   
     
 （公式2）</p>
 <p>其实两者是等价的，建议您可以推导一下（这其实不就是上面在介绍FM公式改写的第三步转换吗？当然，跟完全版本的FM比，我们没有考虑U和I特征集合内部任意两个特征的组合，等会会说这个问题）。</p>
@@ -473,15 +473,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>问题二：我们需要考虑上下文特征C和用户特征U之间的特征组合，也需要考虑C和物品特征I之间的特征组合。上下文特征有时是非常强的特征。那么，如何做能够将这两对特征组合考虑进来呢？</p>
 <p>我们可以这么做：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4d3d0e2e85084232b9a857411c573541.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271945149.jpeg" />   
     </p>
 <p>首先，由于上下文特征的动态性，所以给定用户UID后，可以在线查询某个上下文特征对应的embedding向量，然后所有上下文向量求和得到综合的上下文向量C。这个过程其实和U及I的累加过程是一样的，区别无非是上下文特征需要在线实时计算。而一般而言，场景上下文特征数都不多，所以在线计算，速度方面应可接受。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/882b45cb1b7346758a61fe83d8d53746.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271945923.jpeg" />   
     </p>
 <p>然后，将在线算好的上下文向量C和这个用户的事先算好存起来的用户兴趣向量U进行内积计算Score=。这个数值代表用户特征和上下文特征的二阶特征组合得分，算好备用。至于为何这个得分能够代表FM中的两者（U和C）的特征组合，其实道理和上面讲的U和I做特征组合道理是一样的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fb9d6a15485942fca50196b07cfaf300.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271945765.jpeg" />   
     </p>
 <p>再然后，将U和C向量累加求和，利用（U+C）去Faiss通过内积方式取出Top K物品，这个过程和极简版是一样的，无非查询向量由U换成了（U+C）。通过这种方式取出的物品同时考虑到了用户和物品的特征组合，以及上下文和物品的特征组合。道理和之前讲的内容是类似的。</p>
 <p>假设返回的Top K物品都带有内积的得分Score1，再考虑上一步的得分Score，将两者相加对物品重排序（因为跟物品无关，所以其实不影响物品排序，但是会影响最终得分，FM最外边的Sigmoid输出可能会因为加入这个得分而发生变化），就得到了最终结果，而这个最终结果考虑了U/I/C两两之间的特征组合。</p>
@@ -490,7 +490,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>上文所述是如何利用FM模型来做召回，下面我们讨论下如何将多路召回统一到FM召回模型里来。</p>
 <p>我们以目前不同类型推荐系统中共性的一些召回策略来说明这个问题，以信息流推荐为例子，传统的多路召回阶段通常包含以下策略：协同过滤，兴趣分类，兴趣标签，兴趣Topic，兴趣实体，热门物品，相同地域等。这些不同角度的召回策略都是较为常见的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cd1453fe65d941848c81a1e4ce6c870a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271945590.jpeg" />   
     </p>
 <p>我们再将上述不同的召回路分为两大类，可以把协同过滤作为一类，其它的作为一类，协同过滤相对复杂，我们先说下其它类别。</p>
 <p>对于比如兴趣分类，兴趣标签，热门，地域等召回策略，要把这些召回渠道统一到FM模型相对直观，只需要在训练FM模型的时候，针对每一路的特性，在用户特征端和物品特征端新增对应特征即可。比如对于地域策略，我们可以把物品所属地域（比如微博所提到的地域）和用户的感兴趣地域都作为特征加入FM模型即可。兴趣标签，Topic，兴趣实体等都是类似的。所以大多数情况下，在多路召回模式下你加入新的一路召回，在FM统一召回策略下，对应地转化成了新增特征的方式。</p>
@@ -643,6 +643,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -676,10 +680,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1058,6 +1058,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

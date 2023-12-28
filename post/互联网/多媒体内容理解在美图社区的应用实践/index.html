@@ -234,7 +234,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>美图社区和多数社区一样，包含图片、文字、音频、视频等多种形态的数据。社区内容五花八门、质量层次不齐、数据分布极度不均匀，这给内容理解带来了很大的挑战。</p>
 <p>总体来说，多媒体内容理解的应用分为四个方向：内容审核、内容质量、内容标签和特征工程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/df2397c77a5240febf7ee6572b39be59.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801233.webp" />   
     </p>
 <h3 id="1-内容审核"><strong>1. 内容审核</strong></h3>
 <p>内容审核包括过滤竞品水印、广告、证件、性感视频等违规特征。但是违规过滤的特征与安全审核中涉黄涉政和反恐反暴的特征不一样，这里的关注重点是不适合曝光的内容。</p>
@@ -249,49 +249,49 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="1-短视频分类在美图社区的应用场景"><strong>1. 短视频分类在美图社区的应用场景</strong></h3>
 <p>**
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1196856d884a451f81d196519687f12d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801904.webp" />   
      **</p>
 <p>短视频分类被应用在美图旗下多款社区产品的不同场景中。比如美图秀秀的推荐信息流中使用了基于用户兴趣标签的召回、基于用户所在地域的召回；相关推荐中使用了基于视觉相似的召回等；搜索用户画像、运营后台的人工审核等也都有应用短视频分类。同时内容特征会作为排序模型的一个重要的输入特征，在实际使用过程中也起到了不错的正向效果。</p>
 <h3 id="2-短视频的特点"><strong>2. 短视频的特点</strong></h3>
 <p>**
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/74aac8bd8cc741f9b79bcd698ea3fa07.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801856.webp" />   
      **</p>
 <p>短视频是用户在生活中用手机随意拍摄得到的，内容千变万化，类别分布不均匀，拍摄角度单一。即使在相同的结构场景下，表达的内容可能也不相同。而且拍摄者希望自己的作品与众不同，也希望自己的作品可以第一时间分享给其他用户。此外视频本身是由图片、文字、音频等多种形式组成，随着时间的推移，拍摄的风格也会随之变化。</p>
 <h3 id="3-短视频分类模型的选择"><strong>3. 短视频分类模型的选择</strong></h3>
 <p>在模型的选择上，在保证效率的同时，一方面希望利用文本、音频、视频等更多的特征来提升模型的性能；另一方面希望利用简单高效的方法，用尽可能少的帧数输出相对不错的效果。</p>
 <p>① 多模态模型</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2f19187ee3314e578f8aecee155b6ec1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801491.webp" />   
     </p>
 <p>在这样的初衷下，排除LSTM、3D CNN和双流网络模型。我们首先尝试的是NextVlad——第二届YouTube 8M短视频分类大赛第三名的论文。原有的模型基于音频和视频特征实现分类，进行标签预测。我们在此基础上做了三点不同的处理：一是添加文本特征：通过在社区下预训练的Bert模型提取128维固定长度的文本向量；二是用更好、速度更快的EfficientNet B3模型替代原有的特征提取模型Inception V3；三是结合视频loss、标题loss和音频的loss，进行多任务的学习。性能比原有模型高出3%左右。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f70cbfe0462649e88eec09a714a2fbed.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801188.webp" />   
     </p>
 <p>统计NextVlad模型运行一天的数据。在使用GPU的情况下，处理一个视频平均需要8.6秒。其中300帧视频的特征提取需要8.1秒，占整体时间的93%。</p>
 <p>在舞蹈类别上对NextVlad（多模态模型）、TSM和GSM三个模型进行性能和效率的对比。舞蹈类别的数据包括14类：爵士舞、韩舞、街舞、手势舞、古典舞、肚皮舞、拉丁舞、民族舞、少儿舞、钢管舞、芭蕾舞、鬼步舞、广场舞和宅舞。</p>
 <p>总体来看，多模态模型的性能提升不高，与TSM相比仅提升3%左右，这说明音频信息对舞蹈分类有一定的辅助作用。而TSM、GSM没有特征提取这一步，精度也接近90%。所以综合来看，多模态的整体流程比较复杂且依赖过多，而且NextVlad和GSM模型精度相差不大，性价比不高。</p>
 <p>② 单模态模型</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/98d8e9e80614480e884fb9f48b5b2259.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801956.webp" />   
     </p>
 <p>C3D在缺乏足够大数据集的情况下进行大规模训练，性能一般不佳。而且模型训练过程涉及大量的参数和计算量，所以在这里我们暂不考虑。TSN则是对每帧图像进行分类，对分类结果求均值。该模型没有任何的时间编码能力，最后的预测结果也与帧的时序无关。GST则是在分离的通道上，通过2D和3D卷积并行模拟空间和时间的相互作用。TSM则是通过时间卷积限定在一个硬编码的时移上，这种时移可以使某些通道在时间上向前或向后移动。这种学习方法具有硬连线的连接和跨网络传输模式的结构化内核。</p>
 <p>上述网络的中任意一点都没有数据依赖的决策，即通过不同的分支来选择路由特征。分组和随机的模式都是在设计之初设定的，而学习如何随机具有一定的组合复杂性。所以在美图社区中使用的是GSM。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/584c62d901bf4ffba47d26d88c32d3c9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801915.webp" />   
     </p>
 <p>GSM首先把输入的2D卷积分成两组，然后分别通过3D时空卷积和tanh激活函数，再然后经过门控单元，一组固定前移、一组固定后移，最后将输出与门控的另一个输出进行相加。GSM通过3D时空卷积将2D卷积转化为高效的时空特征提取器。这样2D卷积就可以自适应地学习时间路由特性，并将它们结合起来，而且过程中几乎没有额外的参数和计算开销。GSM模块的本质是一个x为输入的残差结构。这种残差结构具有一定的特征选择能力和数据路由能力。GSM模型学习到的时空特征如果用于分类，可以提升模型性能。GSM与其他模型的关系可以概括为：当门控输出全为零时，GSM退化成TSN；当其中一组门控为零、一组不为零时，GSM收敛到TSM。在实际应用中，GSM被放在卷积数比较少的分支上。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c0aa6bf317a8488ea6548eb469ee6030.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801823.webp" />   
     </p>
 <p>我们在原有GSM模型的基础上做了两点优化：一是在获取每一帧的特征之后和类别的FC层之前，也就是在2048×8和42×8之间添加一个128维的全连接层。添加全连接层，相当于在原有特征的基础上再进行一次特征聚合，进一步提取特征。同时增加了网络深度。这一优化在美图社区场景下，可提升2%左右的精度。二是优化采样。美图社区的数据类别分布不均匀，样本最多的类别下有数万个样本，最少的仅有100多个样本。通过提高少数类样本的采样率使每个类别有相同数量的样本，性能基本上没有提升。GSM的训练仅需要8帧的图像信息。以64帧视频为例，有56帧的信息是浪费的。所以在这里我们做了一些优化：64帧的视频则均匀取8帧，间隔8帧。从第一帧开始，在第一帧和第八帧之间随机取一帧。从第二帧开始的话，则从当前帧到当前帧之后的第八帧之间再随机取。这里我们是从第四帧到第八帧间取第二次采样开始的帧数，避免相邻帧过度相似。</p>
 <p>通过这种方式对少数类样本进行采样，基本上每次都可得到一个新的视频。对于数量比较少的类别，这一优化最高可提升20%的精度。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/daacecd6280345d7bf35fb0c810c7994.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801716.webp" />   
     </p>
 <p>在美图社区下42个类别、150万的短视频数据上进行训练，对多个模型的性能和效率进行对比。其中GSM的backbone是Inception V3，TSM的backbone是ResNet 50。实验结果显示，在性能上，GSM比TSN的精度高出32%；比TSM的准确率提升8%以上，召回率提升27%。在效率上，GSM和TSM在GPU上的推理速度相差不大，大约都是30毫秒。经过推理优化之后，GSM在四核CPU上的推理速度可达到200毫秒左右。下图的右侧是使用TSM和GSM输出的128维向量在42个类别上的聚类图，从图中也可以看出GSM的聚类效果好于TSM。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d53e71e5bde649f78350108951ae86e6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801657.webp" />   
     </p>
 <p>为进一步提升召回率，使标签覆盖率尽可能接近100%，这里使用GSM模型添加的128维的FC层提取128维向量对未打标的数据进行二次打标。</p>
 <p>这一过程包括两部分：在线（online）和离线（offline）。离线部分的主要作用是对全量数据建立索引库，在线部分的主要作用是预测新视频的标签。在离线部分中，首先对全量的视频进行策略筛选，然后使用GSM提取128 特征向量，建立索引。在线部分，首先确定打标过程中由于置信度较低而没有标签的数据，然后对这一类数据进行特征提取，在索引库中检索相似视频，并取出top50的结果，最后对标签进行预测，得到一、二级的标签。实验结果显示，在保证一、二级标签准确率不变的前提下，整体的召回率可以提升11%。</p>
@@ -301,25 +301,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="2-视频指纹的pipeline"><strong>2. 视频指纹的pipeline</strong></h3>
 <p>**
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/03309624e38e499ba1664e778eefa0ad.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801503.webp" />   
      **</p>
 <p>视频指纹的pipeline主要分为两个部分：第一部分是粗召回，主要针对视频整体特征，第二部分是二次校准，主要是对视频中帧与帧之间的相似度对比。</p>
 <p>粗召回，query经过下载抽帧，获取每帧的特征，通过每帧的特征获得视频级的特征，在视频指纹库中查询，取出top1，在于query视频进行逐帧对比，对比成功打上重复指纹，对比不成功，分配新的指纹。逐帧比对时，使用Smith Waterman算法。</p>
 <p>① 对比视频的特征提取</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/722d839946ae4b1bbe1ba7fc4ff60351.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801301.webp" />   
     </p>
 <p>常用的视频特征提取方法有三种：第一种是直接用ImageNet预训练模型提取特征，并将其用作视频的整体特征；第二种是在ImageNet预训练模型上添加一些特殊的数据增强方法，然后在自己的数据集上进行反推理。这种做法有一定的性能提升，但是特征分布还是基于类别的特征分布。第三种做法，也就是我们的做法，使用Moco作为前置任务，然后通过添加剪裁、文字、logo等数据增加方法，在自己的数据集上进行训练，得到视频的特征向量。最后使用这一特征向量作为视频帧和视频整体的特征向量。</p>
 <p>此外，在视频指纹的场景中，添加黑边、白边后视频的主体内容其实都是中心部分。中心的像素权重应该大于黑边和白边的像素权重，所以在每帧的特征上设置了中心加权。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/07b7ca88214e43b68ca5aa38ff5dbd6c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801132.webp" />   
     </p>
 <p>下面介绍一下中心加权是如何设置的。目前图像检索一般使用CNN提取特征，使用卷积特征一般会优于使用全连接层的特征。在中心加权中也是使用CNN中间层的特征。首先提取图片中间层的特征，然后添加高斯核函数，使用特征聚类算法Rmac进行中心加权。</p>
 <p>Rmac采用窗口滑动的方式，使用max pooling提取不同区域大小的feature map。Rmac还使用了scale的方法，最大区域为1时用于提取整张图片的特征；对于较小的区域，在取值时设置40%的重叠域。</p>
 <p>由于Rmac平等地对待每一块特征聚合的图像区域，而实际上每一块区域的特征权重并不一致，所以这里使用了区域注意力机制。根据图像显著性检测原理生成不同的区域权重，然后使用Rmac和区域注意力权重进行加权聚合，获得最终的图像特征。</p>
 <p>② 视频逐帧对比方法</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/257d7fc8b2b34c85a97c4948b718f36b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801993.webp" />   
     </p>
 <p>在获取每张图像的特征后，如何高效、准确地对比两个视频的帧序列？是用向量计算cosine相似度？还是借助Face计算欧式距离？或者是用哈希方法计算海明距离？或者还有什么其他的好办法？</p>
 <p>在这里我们使用的是生物信息工程中的DNA对比算法——Smith Waterman算法。它是一种局部序列对比的算法，作用是找出两个视频序列之间的相似区域。</p>
@@ -329,11 +329,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>② 计算得分。得分来自三个方向（见上图），最后的得分取三个方向上的得分和0之间的最大值。以DNA序列为例（见上图3），该图展示了前三个元素的打分过程。黄色区域表示当前正在考虑的两个碱基，红色代表这个位置的一个得分来源。以图三为例，对应元素的左上角为零分，但是对应的横方向和纵方向都是G，是匹配的，所以斜方向得分为0+3分；对应元素的左方和上方是不匹配的，所以左方和上方的得分均为0-2分。所以最后这个位置的三个方向上的得分为3、-2、-2。取这三个值和0中的最大值，也即3，作为当前元素的得分。其他元素的得分以此类推。最终得到一个划分矩阵，划分矩阵就如下图所示。</p>
 <p>③ 回溯蓝色区域。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/399c95323d134bc094e94298154ecc2d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801246.webp" />   
      蓝色区域代表最高得分的元素位置。从最高分的元素开始回溯，直至回溯到0。局部最相似的序列是从最高分回溯到0的过程中自右向左产生的序列。需要注意的是在回溯过程中，某些位置可能有不止一种方向，这样可能会产生多个分支。如果多个得分方向上有相同的最高分，则应当考虑每一个最高分的回溯。此外在回溯的过程中还有可能出现一种情况：相同格会有多个最大值的得分方向。这时优先级按照左上角、上边、左边的顺序进行回溯。</p>
 <p>最终仅需计算局部相似序列中相似的特征个数。如果小于某个值，则认为两个视频不匹配，反之则认为它是匹配的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e83fec9672a8437e890117aab8dc987f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801158.webp" />   
     </p>
 <p>上图是视频指纹的效果示例。对于改变视频本身内容的，如剪裁、添加黑边，可以看到效果不错。对于添加文案的，同样会有不错的效果。该方法与哈希的方法相比，准确率提升3.1%，召回率提升24.4%。</p>
 <h2 id="04-ocr"><strong>04 OCR</strong></h2>
@@ -344,26 +344,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="3-ocr解决方案"><strong>3. OCR解决方案</strong></h3>
 <p>**
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/da7d523a9c534331a9ae87d287c81f31.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801991.webp" />   
      **</p>
 <p>美图则是使用数据合成的方式，用社区的图片和语料训练适合美图社区的文字检测模型和文字识别模型。</p>
 <p>在文字检测框送入识别模型之前，对文字检测框进行角度预测和矫正，用于提高识别的准确率。文字检测时可以识别不同角度横排、竖排的文字以及带有弯曲角度的文字。经过文字检测后，文字检测框是多种多样的。对文字检测框进行最大外接矩阵和仿射变换后，将其输入角度预测模型，会得到0°、90°、180°和270°四个分类结果；然后根据预测的结果进行旋转，将文字检测框归并为水平文字和横排文字；最后再输入水平和竖排文字的识别模型，得到识别结果。</p>
 <p>① 文字检测</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1067ce6b84fa4795a6dbb38803efd757.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801673.webp" />   
     </p>
 <p>在社区环境下，不仅有自然场景下的文字，还有广告字体和一些复杂背景的文字符号。Ctpn这种利用bounding-box回归方法对弯曲的文字检测不准确，无法检测竖排文字，还会经常把一些符号误识别成文字，无法检测靠近文字。所以我们使用PSENet。</p>
 <p>PSENet具有两大优势：首先它是一种基于分割的方法，能够对任意形状的文字进行定位；其次它是一种渐进的尺度扩展算法，该算法能够解决相邻文本定位不准确的问题。</p>
 <p>PSENet受FPN启发，采用U型的网络架构，将网络提取出的特征进行融合；然后利用分割的方式将提取出的特征进行像素分类；最后利用像素分类结果，通过一些后处理的方式得到文本检测结果。该方法可以解决现有bounding-box回归方法对弯曲文字检测不准确的问题，也能相对减少对符号的错误识别。</p>
 <p>② 文字识别</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b8bb92fa308b4421936944b1c477e032.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801411.webp" />   
     </p>
 <p>文字识别模型一般需要上下文信息特征。如Inception、ResNet这类CNN网络，如果需要有上下文信息的CRNN，就需要添加LSTM。通常的文字识别模型由CRNN、LSTM和CTC组成。LSTM训练的时候较难收敛，推理速度较慢。出于对易于训练和加速推理速度的考虑，我们使用的是ResNet。该模型可在不需要LSTM学习上下文的同时提升推理速度。在解码方面上使用添加FC层的CTC：利用FC层输出的特征，通过决策层进行解码，然后输出一个正确的文本识别结果。另外我们计算并实验了感受野大于或等于3个字符的情况，识别效果是最好的。</p>
 <h3 id="4-ocr线上效果"><strong>4. OCR线上效果</strong></h3>
 <p>**
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e18426c093e44cdd98633e0de185adda.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271801229.webp" />   
      **</p>
 <p>上图是OCR模型的线上效果示例。对于长文本的广告，基本上能做到100%的识别，且没有丢字或者重复字的情况。竖排文字、变形文、变形字体以及各种角度的文字识别都有着不错的效果。</p>
 <p>整体上文字检测的精度比CDPN提高32.54%，速度提升12.73%。文字识别的精度比CRNN提高10%，速度提升8%。由于做了网络的瘦身，整体速度优化推理速度也提升10%。</p>
@@ -499,6 +499,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -532,10 +536,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -914,6 +914,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -202,7 +202,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>1.1基本概念</strong></p>
 <p>强化学习是人工智能的一大重要分支，模拟的是人类通用的解决序列决策问题的思维，它的总体目标是通过和环境的不断交互，选择一系列的行为让整体获得收益的最大化（虽然有可能在某个单步执行的时候收益并不是最大）。如图1-1所示，强化学习主要包括Agent、Action、Environment、State、Reward 5个主体。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-86d75569d5074653bb1ccdb2397d8deb.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271903902.jpeg" />   
     </p>
 <p>图1-1. 强化学习整体框图</p>
 <p>Agent通过从Environment观测到的State和Reward，会执行一个Action（这个Action通过策略π获得）。Environment则会产生新的State和Reward，而Agent通过新的反馈执行下一步的行为，如此往复，这就是强化学习的工作过程。强化学习的最终目标是最大化Value Function(v_\pi(s))或者Action-Value Function (q_\pi(s,a))从而学到一组最优的策略。</p>
@@ -219,14 +219,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>特别强调的一点是值函估计中Q-learning近似的方法是对每个State-Action对预测Q值，然后选择使得Q值最大的Action，限定了Action为离散低维，如果Action高维或者连续，搜索出是Q最大的Action会非常困难。</p>
 <p>策略梯度这一类基于策略的方法则为直接对策略建模，模型的输出即为执行各Action的概率（stochastic policies），或者输出单个确定的Action (deterministic policies)。它的优势是更好的收敛特性和对于Action是高维或连续空间更有效（Q-learning其实做不了）。相应的略势为容易收敛到局部最小值（这个问题在深度学习中更常见）及策略评估的高方差。图1-2展示了强化学习方法的简单汇总。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-1d6a64a27392469b96b3d0831a253c83.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271903585.webp" />   
     </p>
 <p>图1-2. 强化学习方法纵览</p>
 <p><strong>2.新闻推荐建模</strong></p>
 <p><strong>2.1 新闻推荐主体定义</strong></p>
 <p>如图2-1所示，一次完整的推荐过程包含以下几个过程：一个用户点击app底部刷新或者下拉，后台获取到用户请求，并根据用户的标签召回候选新闻，推荐引擎则对候选新闻进行排序，最终给用户推出10条新闻，如此往复，直到用户关闭app，停止浏览新闻。如果将用户持续浏览新闻的推荐过程看成一个序列决策过程，就可以通过强化学习学习每一次推荐的最佳策略，从而使得用户从开始打开app开始到关闭app这段时间内的点击量最高</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-3c2a9554f53c42f6b2f9c1de51701729.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271903304.webp" />   
     </p>
 <p>图2-1.搜狐资讯版一次推荐</p>
 <p>整体过程中各部分主体定义如下：</p>
@@ -244,23 +244,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>方法概述:</strong></p>
 <p>随机策略是在一个状态下以概率的形式执行可能行为，确定性策略是模型的输出即为一个选中的Action。各自定义如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b3feedf0a94640b3b859e5aea0239c91.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271903909.webp" />   
     </p>
 <p>其中θ表示网络的参数，s，a分别为状态和行为。</p>
 <p>参考原论文中的表示方法，策略梯度的损失函数或者目标函数定义成：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-289e8ad184f84973ba5bfb16679130ae.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271903600.webp" />   
     </p>
 <p>其中s服从ρ分布，a由\pi_\theta决定，公式以积分的形式表示目标函数（默认了连续空间）。</p>
 <p>根据Q-learning的定义，策略提升的时候应该选择使得Q值最大的Action，在Action为连续值的时候，这一步的操作会比较困难，所以只能在使得Q增大的梯度方向走一小步，迭代更新。</p>
 <p>参数更新公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-190b0394294b4d90b952b02f364e6ca0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271903080.webp" />   
     </p>
 <p>根据链式法则，梯度方向由Q对a的导数和a对θ的导数相乘而得(如红框标注)。Action是Actor和Critic之间的结合部分，梯度从Critic通过Action传给Actor，也就决定了Action是连续的值，可以高维。</p>
 <p><strong>框架图</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b7ef16d3cd0943c2b268dbedde8adec5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271903630.webp" />   
     </p>
 <p>图3-1. DDPG新闻推荐框图</p>
 <p>如图3-1所示，整个框架分为Actor和Critic两个部分，Actor负责输出Action，再传入到Critic中进行Q值的预测。</p>
@@ -275,24 +275,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>方法概述:</strong></p>
 <p>著名的DQN算法是一种值函数近似的算法。在强化学习中，利用神经网络对值函数进行近似会造成学习过程的不稳定甚至不收敛，于是在DQN中采用了很多技巧，才使得Q-learning在实际问题中真正有效。所谓的值函数进行就是用模型来估计V或者Q：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0b636f43aacf409b89688c38b0183cc2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271903729.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-1befbcfbfe4c4d8a8935184b4ab3a60d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271903292.webp" />   
     </p>
 <p>其中w为近似模型的参数，例如神经网络的参数。再使用和MC 或者 TD learning类似的思想进行参数的更新算法中关键的亮点，一是Replay Buffer对样本（transition）进行混合，减少连续时间上的相关性；二是采用Target Network，它的结构和训练的网络完全一致，但保存了训练网络中参数的缓存，目的是为了是学习更加稳定，这样不至于让网络参数陷入局部最优。</p>
 <p>Double DQN（DDQN）则主要改进DQN中对Q高估的问题。通常Q-leaning中更新公式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-624020510f5a401d9f6b98de56a5d4dd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271903897.png" />   
     </p>
 <p>其中max操作会引起值函数的高估，这个问题被称为：maximization bias，overestimate action values。</p>
 <p>在上述更新公式中，有一个很明显的问题在于，Action的选择和Q值的估计都是一个模型，解决的办法就是把两者分开，选择Action和Q值的估计使用不同的模型。倘若用DQN中的Target Network来估计Q值，用DQN中Online Network选择Action，就变成了DDQN。更新公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-4e5189a72c714d3e86aac81ae014bd8b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271903774.webp" />   
     </p>
 <p><strong>框架图:</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-22b462a4fd854256a886342b70295602.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271903301.webp" />   
     </p>
 <p>图3-2. 新闻推荐DQN框图</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">和DDPG相比，DQN去掉了Critic，简化了很多。中间每一步step的最�
@@ -425,6 +425,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -458,10 +462,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -840,6 +840,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

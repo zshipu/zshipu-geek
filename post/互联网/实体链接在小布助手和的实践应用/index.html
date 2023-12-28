@@ -213,59 +213,59 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="1-问题背景"><strong>1 问题背景</strong></h1>
 <p>精准直达的知识问答能力对营造小布“懂知识、更懂你”的形象非常重要。在语音助手场景，经常会出现一词多义或者口语化表达等问题。例如:李白出装，李白的诗，播放李白。第一李白是指游戏角色，第二个是指诗人李白，第三个是指歌曲李白。如何精确识别用户所指、给出正确的答案是小布助手面临的挑战。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/253f56c339d8427cbcbc01777cd6deaa.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271820785.webp" />   
     </p>
 <p>知识图谱是让机器理解客观世界的基石,拥有极强的表达能力和建模灵活性。目前OPPO自建知识图谱OGraph已经积累了数亿实体和数十亿关系。接下来让我们看看小布和Ograph将如何碰撞，通过实体链接技术解决实体歧义问题，帮助小布做能听、会说、更懂你的智能助手。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/098d2b3cb2dd4abda129a746c32bd318.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271820542.webp" />   
     </p>
 <p>图：小布助手KBQA流程</p>
 <h1 id="2-任务介绍"><strong>2 任务介绍</strong></h1>
 <p>实体链接是NLP、知识图谱领域的基础任务，即对于给定的一个中文文本，将其中的实体描述（mention）与给定知识库中对应的实体进行关联的任务。</p>
 <p>2009年在TAC会议上第一次提出实体链接任务，2014年深度学习流行之前都是通过统计特征和基于图的方法进行实体链接。2017年提出了Deep Joint方案，使用Attention结构进行语义匹配来实体消歧。后面该团队通过模型结构创新，实现了同一个模型同时实体识别和消歧，消歧依旧使用Attention。2018年提出了Deep Type方案，将消歧问题转化为实体分类，得到实体类别后，通过Link Count确定要链接到的实体。2020年预训练语言模型开始流行，Entity Knowledge方案借助大量的语料和强大的预训练模型，用序列标注的方式进行实体链接。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/27236d2d137042ff91117843670e89d1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271820239.webp" />   
     </p>
 <p>图：实体链接发展历程</p>
 <h1 id="3-技术方案"><strong>3 技术方案</strong></h1>
 <p>实体链接通常会被拆分为三个子任务：实体识别、候选实体召回、实体消歧。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e5ef6275928941d4afd9cca1b81aec5a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271820017.webp" />   
     </p>
 <p>图：实体链接流程示意</p>
 <h2 id="31实体识别"><strong>3.1实体识别</strong></h2>
 <p>实体识别的作用是识别出query中的实体描述（即mention），例如李白所在朝代皇帝是谁中的李白即为要识别的mention。在进行通用领域实体识别时，实体量级大、类型多、说法多样，因此方案要兼顾效率和泛化。</p>
 <p>小布助手开发了基于词典的实体识别使用自研匹配工具Word Parser，该工具无论是在性能还是功能都较开源工具有优势。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a4792e9c1ef24bb38a207b7d8e9a7853.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271820039.webp" />   
     </p>
 <p>实体链接中并不关心实体类型，因此实体识别可以使用 B/I 标签或者指针标注的模式，同时为了提升输入信息的丰富程度，引入词汇信息作为特征补充，试验了 Lattice LSTM 和 FLAT 等结构，实体识别效果提升约 1%。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a188474bec904cd195fadc71f371cf53.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271820440.webp" />   
     </p>
 <p>图：FLAT示意</p>
 <h2 id="32候选实体召回"><strong>3.2候选实体召回</strong></h2>
 <p>候选实体召回的目标是用mention召回所有可能的候选实体，但是线上存在大量昵称、同音字、口语化表达，例如：卷福、抖森这类昵称别名，而且还会出现表述错误，例如丰满奥特曼、拖拉机奥特曼、倩雅集，如果缺乏别名到正确实体的映射，就无法完成召回。在语音场景没有用户直接反馈，无法像搜索一样通过用户点击进行挖掘，因此实体别名的挖掘相当有挑战。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/271198c7578748698064e402cb94bc6c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271820150.webp" />   
     </p>
 <p>图：实体别名示意</p>
 <p>根据问题的特点，我们构建了两套方案，通用别名挖掘采用信息抽取为主模式生成为辅的挖掘流程，充分利用OGraph中的描述信息、别名信息和关系信息，从中挖掘别名。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c0c711a1a8eb49cdaafcc5337c6dbb42.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271820615.webp" />   
     </p>
 <p>图：通用别名挖掘流程</p>
 <p>针对用户输入错误、同音字、近音字这类别名挖掘，小布助手开创性的构建了基于特征聚类的别名发现流程。挖掘步骤如下：</p>
 <p>1）Query筛选：采用领域关键词过滤、搜索点击日志筛选的方式，从用户搜索query和小布助手线上query中筛选出可能包含待挖掘别名的query。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/038d05ab445943c398fc99753c2dc1ef.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271820375.webp" />   
     </p>
 <p>图：错误别名示意</p>
 <p>2）实体识别：使用实体识别技术，从待挖掘query中识别实体。实体识别模型采用通用实体识别模型+垂域finetune的方式得到。</p>
 <p>3）领域特征构建：由于实体识别直接得到的实体别名准确率不高，而且没有和实体标准名关联起来，需要构建领域特征，将挖掘的实体别名与实体标准名关联。根据场景特点，我们选取了部首偏旁特征和拼音特征。</p>
 <p>4）特征聚类：使用聚类的方式来关联挖掘的实体别名与实体标准名。通过使用这套挖掘方案，得到数十万实体别名，准确率95%+，解决了线上高频的别名问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8f6cf51cece54dd3a79ca2dab414d0fe.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271820140.webp" />   
     </p>
 <p>图：基于特征聚类的别名发现流程</p>
 <h2 id="33实体消歧"><strong>3.3实体消歧</strong></h2>
@@ -273,7 +273,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>1）在语音助手场景下多为短文本，因此上下文特征缺失，需要额外构造特征帮助消歧。</p>
 <p>2）消歧时不能仅仅通过语义特征来消歧，还要充分考虑全局消歧特征，例如“刘德华给学员讲课，把炸弹比喻成姑娘的手”中的刘德华，从语义上来讲清华大学教授刘德华更符合，实际上是演员刘德华和《拆弹专家》的文章标题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2b856a0a9f4d4906acdca6b02382bf91.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271820857.webp" />   
     </p>
 <p>3）图谱中存在未对齐实体，导致模型消歧困难，同时容易出现语料标注错误。例如中国和中华人民共和国在有些开源图谱中是两个实体，导致训练集里有些正确标签中国这个实体，有的正确标签为中华人民共和国这个实体。</p>
 <p>针对上面提到的问题，我们从数据准备、模型选型、模型优化等方面着手，通过针对性的优化解决这些问题。</p>
@@ -281,66 +281,66 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>构造消歧样本时，我们提供尽可能多的信息给模型，样本由三部分构成：query样本、实体样本和统计特征。</p>
 <p>query样本构造：query样本输入时关键时将mention的位置信息传入模型，让模型能判断mention在query中的具体位置。因此引入标识符#将，在mention两边加入统一的标识符“#”，样本如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7803635197134b8e903c37c7c6e2cf41.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271820450.webp" />   
     </p>
 <p>图：query样本示意</p>
 <p>实体描述样本构造：实体样本中需要包含待消歧实体的特征，我们在第一版实体样本中设计了mention和标准名的拼接表示标准名和mention是否相同这一特征；构造了“类型：实体类型”这种描述，提供实体类型信息；同时加入了实体描述和图谱的三元组信息。在第二版中，我们将标准名和mention是否相同的特征直接转化成文本描述“名称相同/不同”,同时加入了“非/是主义项”这一特征，通过优化特征表达方式，模型表现提升约2%。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0c60d511d0b74876b6fcd805f88f3ba2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271820973.webp" />   
     </p>
 <p>图：实体样本示意</p>
 <p>统计特征样本构造：为了避免消歧模型只关注语义特征，我们统计了query和实体样本共现特征、流行度、丰富度、mention共现特征等统计特征，作为模型输入，辅助进行全局消歧。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c9b71c5fd1ae46be9730d80e5683a184.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271820507.webp" />   
     </p>
 <p>图：统计特征示意</p>
 <h3 id="332模型选型"><strong>3.3.2模型选型</strong></h3>
 <p>排序学习中，有三种常见模式pointwise，pairwise和listwise，对于实体消歧这种只需要TOP1的排序任务，并不需要考虑候选实体之间的顺关系，只考虑全局相关性，因此我们选取了pointwise方法。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b6c957a1b2a54d03a01195d41b6954cf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271821178.webp" />   
     </p>
 <p>图：排序学习模型示意</p>
 <p>总结前人的消歧模型，Deep Joint从排序出发，Deep Type从分类出发,都取得了较好的效果，说明分类和排序任务都对消歧有帮助，因此我们根据任务特点，设计了多任务模型框架，同时进行排序和分类，两个任务共享模型参数，一起训练，损失函数一起优化，通过共享排序任务和分类任务的信息，模型可以有更好的表现，多任务损失函数如下。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e93b37be61aa4d98976336b05d560366.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271821871.webp" />   
     </p>
 <p>为了更好的融入统计特征，我们直接将统计特征embedding拼接到特征向量后面进行排序。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2fc8a1b19a8b451ead910c75182a9f36.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271821350.webp" />   
     </p>
 <p>图：实体消歧模型示意</p>
 <p>最终我们模型结构如下，将query样本和实体样本拼接，输入预训练语言模型，将CLS位置的向量和统计特征embedding拼接后作为特征向量。排序任务将特征向量输入全连接层，然后经过tanh最终输出[-1,1]区间的分数，分数越高代表越有可能是目标实体。分类任务将特征向量输入全链接层，经过softmax层输出各个分类的得分。</p>
 <p>通过试验基于多任务的实体链接模型效果整体上优于单任务模型，具体F1见下表。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d92d1962e3604ea9aa72d289391dd461.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271821929.webp" />   
     </p>
 <h3 id="333模型优化"><strong>3.3.3模型优化</strong></h3>
 <p>为了了解模型到底关注哪些输入特征，使用互信息的可视化方法对模型进行可视化，对各个词的重要程度进行了可视化，颜色越深重要程度越高。通过可视化发现，模型倾向于关注实体的类型和用来区分实体的片段，例如示例1吃得慢、食物、吃法、火腿肠，示例2中的珊迪、海绵宝宝、开关电源品牌。示例3种的人物、种族、梦三国等，可以看到多任务模型关注的特征都是对消歧有帮助的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3fd502e61f0149088c676d3ed2660b14.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271821465.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dc1236a03b7e48a0a54093d21c911921.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271821251.webp" />   
     </p>
 <p>图：模型可视化</p>
 <p>置信学习（Confident Learning ，CL）是一种识别标签错误、表征标签噪声的算法框架。针对标注错误的问题根据置信学习的思想，在原始数据上用n-flod方式训练了5个模型，用这些模型预测原始训练集的标签，然后融合5个模型输出的标签作为真实标签，再从原始训练集中清理真实标签与原标签不一致的样本，我们清理的样本占比3%，其中标签错误的80%+。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3cfe21f515c94b47ae96c4cf0e920647.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271821207.webp" />   
     </p>
 <p>图：对抗训练流程示意</p>
 <p>对抗训练是指在模型的训练过程中构建对抗样本，参与模型训练的方法。正常训练过程中，如果梯度方向陡峭，那么很小的扰动都会产生很大的影响。为了防止这种扰动，对抗训练在模型训练的过程中使用带扰动的对抗样本进行攻击，从而提升模型的鲁棒性。可以看到FGM和PGD两种生成对抗样本的方式效果提升都比较明显。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0b9630b5f0994e4f9d08d6fcaaa8ebde.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271821885.webp" />   
     </p>
 <h1 id="4技术应用"><strong>4.技术应用</strong></h1>
 <h2 id="41小布助手中的应用"><strong>4.1小布助手中的应用</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e400beb19d79461fadcee2537b85a7f7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271821416.webp" />   
     </p>
 <p>图：小布助手KBQA流程示意</p>
 <p>在小布助手场景中，用户对语音助手的智能程度抱有很大的期望，会问各类有趣的问题，比如多跳问题、六度关系查询等。借助实体链接技术小布助手可以精确识别用户所指，配合子图匹配技术可以处理实体问答、结构化问答、多跳问答、六度关系查询等，覆盖大部分结构化问题，</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bcc6fb3875ef4e328e4e0a62e11f21dd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271821262.webp" />   
     </p>
 <p>图：小布助手各类结构化�</p>
 
@@ -470,6 +470,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -503,10 +507,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -885,6 +885,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

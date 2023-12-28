@@ -250,10 +250,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>总体来说，美团需要一种组件来管理千亿级别的图数据，解决图数据存储以及多跳查询问题。海量图数据的高效存储和查询是图数据库研究的核心课题，如何在大规模分布式场景中进行工程落地是我们面临的痛点问题。传统的关系型数据库、NoSQL 数据库可以用来存储图数据，但是不能很好处理图上多跳查询这一高频的操作。</p>
 <p>Neo4j 公司在社交场景（见图1）里做了传统关系型数据库 MySQL 跟图数据库 Neo4j 的查询性能对比 [1]，在一个包含 100 万人、每人约有 50 个朋友的社交网络里找最大深度为 5 的朋友的朋友，实验结果表明多跳查询中图数据库优势明显（见图 2）。然而选取或者自主研发一款高吞吐、低查询延时、能存储海量数据且易用的图数据库非常困难。下面将介绍美团在图数据库选型及平台建设方面的一些工作。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/480e13ffbd474fd3891ab92786ed9f1e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281658662.png" />   
      图 1
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ebfa69604eb94ca7a7196acea8f98f70.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281658661.png" />   
     </p>
 <p>图 2</p>
 <h2 id="2-图数据库选型">2 图数据库选型</h2>
@@ -268,7 +268,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>NebulaGraph 是由前 Facebook 员工叶小萌离职创业后，在 2019年 推出的图数据库产品，底层数据模型是属性图，基于 C++ 语言编写，存储引擎基于 RocksDB[14] 改造，也使用 RAFT 保证数据读写的强一致性。</p>
 <p>这两个项目的创始人都在互联网公司图数据库领域深耕多年，对图数据库的落地痛点有深刻认识，整体的架构设计也有较多相似之处。在图数据库最终的选型上，我们基于 LDBC-SNB 数据集[15]对 NebulaGraph、DGraph、HugeGraph 进行了深度性能测评，测试详情见文章： <a href="https://zshipu.com/t?url=https%3A%2F%2Fmp.weixin.qq.com%2Fs%3F__biz%3DMzI1ODQyMDg3Mg%3D%3D%26mid%3D2247485209%26idx%3D1%26sn%3D064a931cb34486363a326444f666a37f%26scene%3D21%23wechat_redirect">主流开源分布式图数据库 Benchmark</a>，从测试结果看 NebulaGraph 在数据导入、实时写入及多跳查询方面性能均优于竞品。此外，NebulaGraph 社区活跃，问题响应速度快，所以我们团队最终选择基于 NebulaGraph 来搭建图数据库平台。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b8ec063777324e0da756911690e6035a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281658893.png" />   
      图 3一个完整的 NebulaGraph 集群包含三类服务，即 Query Service、Storage Service 和 Meta Service。每类服务都有各自的可执行二进制文件，既可以部署在同一节点上，也可以部署在不同的节点上。下面是NebulaGraph 架构设计（见图 3）的几个核心点[16][17]。</p>
 <ul>
 <li><strong>Meta Service：</strong> 架构图中右侧为 Meta Service 集群，它采用 Leader/Follower 架构。Leader 由集群中所有的 Meta Service 节点选出，然后对外提供服务；Followers 处于待命状态，并从 Leader 复制更新的数据。一旦 Leader 节点 Down 掉，会再选举其中一个 Follower 成为新的 Leader。Meta Service 不仅负责存储和提供图数据的 Meta 信息，如 Schema、数据分片信息等，同时还提供 Job Manager 机制管理长耗时任务，负责指挥数据迁移、Leader 变更、数据 compaction、索引重建等运维操作。</li>
@@ -287,7 +287,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h2 id="4-图数据库平台建设">4 图数据库平台建设</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/50b196a8779b4e038eb7c78c67150c0e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281658091.png" />   
      图 4为了统一管理图数据，减少工程同学在图数据库集群上的运维压力，我们基于开源分布式图数据库 NebulaGraph，搭建了一套一站式图数据库自助管理平台（见图 4），该平台包含以下 4 层：</p>
 <ul>
 <li>
@@ -310,12 +310,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>与业界方案相比，团队主导设计的图数据库平台除了支持存储千亿顶点、万亿边，具备毫秒级别查询能力外，还提供了如下四项能力：应用可用性 SLA 达 99.99%；支持每小时百亿量级数据导入；实时写入数据时保证多集群数据最终一致性；易用的图谱可视化能力。下面将介绍具体的设计思路。</p>
 <h3 id="41-高可用模块设计">4.1 高可用模块设计</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d4a22b9de54f4c548f86486450717edb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281658552.png" />   
      图 5首先介绍单应用多集群高可用模块的设计（AP 方案）。为什么有 AP 方案的设计呢？因为接入图数据库平台的业务方比较在意的指标是集群可用性。在线服务对集群的可用性要求非常高，最基础的要求是集群可用性能达到 4 个 9，即一年里集群的不可用时间要小于一个小时。对于在线服务来说，服务或者集群的可用性是整个业务的生命线，如果这点保证不了，即使集群提供的能力再多再丰富，那么业务方也不会考虑使用，可用性是业务选型的基础。</p>
 <p>另外，公司要求中间件要有跨区域容灾能力，即要具备在多个地域部署多集群的能力。我们分析了平台接入方的业务需求，大约 80% 的场景是 T+1 全量导入数据、线上只读。在这种场景下，对图数据的读写强一致性要求并不高，因此我们设计了单应用多集群这种部署方案。</p>
 <p>AP 方案部署方式可以参考图 5，一个业务方在图数据库平台上创建了 1 个应用并部署了 4 个集群，其中北京 2 个、上海 2 个，平时这 4 个集群同时对外提供服务。假如现在北京集群 1 挂了，那么北京集群 2 可以提供服务。如果说真那么不巧，北京集群都挂了，或者北京侧对外的网络不可用，那么上海的集群也可以提供服务。在这种部署方式下，平台会尽可能地通过一些方式来保证整个应用的可用性。然后每个集群内部尽量部署同机房的机器，因为图数据库集群内部 RPC 非常多，如果有跨机房或者跨区域的频繁调用，整个集群对外的性能会比较低。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2f5b26121d7a412db03f33b7253c9dce.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281658034.png" />   
      图 6高可用模块主要包含下面 4 个部分，如上图 6 所示：</p>
 <p>第一部分是右侧的图数据库 Agent，它是部署在图数据库集群的一个进程，用来收集机器和图数据库三个核心模块的信息，并上报到图数据库平台。Agent 能够接收图数据库平台的命令并对图数据库进行操作。</p>
 <p>第二部分是图数据库平台，它主要是对集群进行管理，并同步图数据库集群的状态到配置中心。</p>
@@ -323,14 +323,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>第四部分是配置中心，类似 ZooKeeper，存储集群的当前状态。</p>
 <h3 id="42-每小时百亿量级数据导入模块设计">4.2 每小时百亿量级数据导入模块设计</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/74562def08c74d12a155a9c5dc16b984.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281658083.png" />   
      图 7第二个模块是每小时百亿量级数据导入模块，平台在 2019 年底- 2020 年初全量导入数据的方式是调用 NebulaGraph 对外提供的批量数据导入接口，这种方式的数据写入速率大概是每小时 10 亿级别，导入百亿数据大概要耗费 10 个小时，耗时较长。此外，在以几十万每秒的速度导数据的过程中，会长期占用机器的 CPU、IO 资源，一方面会对机器造成损耗，另一方面数据导入过程中集群对外提供的读性能会变弱。</p>
 <p>为了解决上面两个问题，平台进行了如下优化：在 Spark 集群中直接生成图数据库底层文件 SST File，再借助 RocksDB 的 Bulkload 功能直接 ingest 文件到图数据库。</p>
 <p>数据导入的核心流程可以参考图 7，当用户执行导数据操作后，图数据库平台会向公司的 Spark 集群提交一个 Spark 任务，在 Spark 任务中会生成图数据库里相关的点、边以及点索引、边索引相关的 SST 文件，并上传到美团的 S3 云存储上。文件生成后，图数据库平台会通知应用中多个集群去下载这些存储文件，之后完成 ingest 跟 compact 操作，最后完成数据版本的切换。</p>
 <p>为兼顾各个业务方的不同需求，平台统一了应用导入、集群导入、离线导入、在线导入，以及全量导入、增量导入这些场景，然后细分成下面九个阶段，从流程上保证在导数据过程中应用整体的可用性：SST File 生成 、SST File 下载 、ingest、compact、数据校验、增量回溯、数据版本切换、集群重启、数据预热。</p>
 <h3 id="43-实时写入多集群数据同步模块设计">4.3 实时写入多集群数据同步模块设计</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f5a884d9618b4fefb20e87a403e9b077.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281658468.png" />   
      图 8第三个模块是实时写入多集群数据同步模块，平台约有 15% 的需求场景是在实时读取数据时，还要把新产生的业务数据实时写入集群，并且对数据的读写强一致性要求不高。就是说，业务方写到图数据库里的数据，不需要立马能读到。针对上述场景，业务方在使用单应用多集群这种部署方案时，多集群里的数据需要保证最终一致性。针对这一需求，我们做了以下设计。</p>
 <p>第一部分是引入 Kafka 组件，业务方在服务中通过 SDK 对图数据库进行写操作时，SDK 并不直接写图数据库，而是把写操作写到 Kafka 队列里，之后由该应用下的多个集群异步消费这个 Kafka 队列。</p>
 <p>第二部分是集群在应用级别可配置消费并发度，来控制数据写入集群的速度。具体流程如下：</p>
@@ -340,11 +340,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>并发扩展：通过改变 Kafka 分片数、Agent 中消费 Kafka 线程数来调整 Kafka 中操作的消费速度。如果未来图数据库支持事务的话，上面的配置需要调整成单分片单线程消费，有必要对设计方案再做优化调整。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3357da69648545a98dd4f1a7e7b00854.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281658830.png" />   
      图 9第三部分是在实时写入数据过程中，平台可以同步生成一个全量数据版本，并做平滑切换（见图 9），确保数据的不重、不漏、不延迟。</p>
 <h3 id="44-图可视化模块设计">4.4 图可视化模块设计</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8536d5d4d278498b8bf113fc063e130d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281658457.png" />   
      图 10第四个模块是图可视化模块（见图10），主要是用于解决子图探索问题。当用户在图数据库平台通过可视化组件查看图数据时，能尽量通过恰当的交互设计来避免因为节点过多而引发爆屏。主要包括以下几个功能：</p>
 <ul>
 <li>通过 ID 或者索引查找顶点。</li>
@@ -355,21 +355,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="5-业务实践">5 业务实践</h2>
 <h3 id="51-智能助理">5.1 智能助理</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ee42ee4afeb14dea889fa497de669260.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281658864.png" />   
      该项目数据是基于美团商户数据、用户评论构建的餐饮娱乐知识图谱，覆盖美食、酒店、旅游等领域，包含 13 类实体和 22 类关系。目前，点边数量大概在百亿级别，数据 T+1 全量更新，主要用于解决搜索或者智能助理里 KBQA（全称：Knowledge Based Question Answer）类问题。核心处理流程是通过 NLP 算法识别关系和实体后构造出 NebulaGraph SQL 语句，再到图数据库获取数据。</p>
 <p>典型的应用场景包括商场找店，比如，某个用户想知道望京新荟城这个商场有没有海底捞，系统可以快速查出结果告诉用户；另一个场景是标签找店，用户想知道望京 SOHO 附近有没有适合情侣约会的餐厅，或者可以多加几个场景标签，系统都可以帮忙查找出来。</p>
 <h3 id="52-搜索召回">5.2 搜索召回</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/916827cd3b4a448da71718ce83d44eea.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281658082.png" />   
      该项目数据是基于医美商家信息构建的医美知识图谱，包含 9 类实体和 13 类关系，点边数量在百万级别，同样也是 T+1 全量更新，主要用于大搜底层实时召回，返回与 Query 相关的商户、产品或医生信息，解决医美类搜索词少结果、无结果问题。比如，某个用户搜“啤酒肚”这种症状、或者“润百颜”这类品牌，系统可以召回相关的医美门店。</p>
 <h3 id="53-图谱推荐理由">5.3 图谱推荐理由</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1db4cb79d497439591e24d024dc03ca1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281658385.png" />   
      该项目数据来自用户的画像信息、商户的特征信息、用户半年内收藏/购买行为，数据量级是 10 亿级别，T+1 全量更新。现在美团 App 和点评 App 上默认的商户推荐列表是由深度学习模型生成的，但模型并不会给出生成这个列表的理由，缺少可解释性。</p>
 <p>而在图谱里用户跟商户之间天然存在多条连通路径，项目考虑选出一条合适路径来生成推荐理由，在 App 界面上展示给用户推荐某家店的原因。该项目基于用户的协同过滤算法来生成推荐理由，在家乡、消费水平、偏好类目、偏好菜系等多个组合维度中找出多条路径，然后给这些路径打分，选出一条分值较高的路径，之后按照特定 Pattern 产出推荐理由。通过上述方式，就可以获得“在北京喜欢北京菜的山东老乡都说这家店很赞”，或者“广州老乡都中意他家的正宗北京炸酱面”这类理由。</p>
 <h3 id="54-代码依赖分析">5.4 代码依赖分析</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8ba6808947ba4e6c8b998b12a982e524.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659172.png" />   
      该项目把代码库中代码依赖关系写入到图数据库。代码库中存在很多服务代码，这些服务会包括对外提供的接口，这些接口的实现依赖于该服务中某些类的成员函数，这些类的成员函数又依赖了本类的成员变量、成员函数或者其它类的成员函数，那么它们之间的依赖关系就形成了一张图，可以把这个图写到图数据库里做代码依赖分析。</p>
 <p>典型应用场景是精准测试：当开发同学完成需求并向公司的代码仓库提交了 PR 后，可以把更改实时地写到图数据库中。这样的话，开发同学就能查到他所写的代码影响了哪些外部接口，并且借助图可视化组件查看调用路径。如果开发同学本来是要改接口 A 的行为，改了很多代码，但是他可能并不知道他改的代码也会影响到对外接口 B、C、D，这时候就可以用代码依赖分析来做个 Check，增加测试的完备性。</p>
 <h2 id="6-总结与展望">6 总结与展望</h2>
@@ -497,6 +497,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -530,10 +534,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -912,6 +912,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

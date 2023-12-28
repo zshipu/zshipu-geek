@@ -229,7 +229,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>如下图所示，新的实时流重度依赖 kafka，实现了平台各个处理阶段的异步化。</p>
 <p>另外，整个服务的构建是基于 SpringCloud，借助 Spring config 实现了业务接入的可配置化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/3/4fd928cd568c4dc7874ab265e52073cc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281843474.png" />   
     </p>
 <h3 id="11-事件平台">1.1 事件平台</h3>
 <p>事件平台作为一个独立的服务存在，对阿里开源的 canal 进行了定制化开发，实现对数据库变更的监听，并把变更格式化后写入 kafka；格式化后的事件示例如下：</p>
@@ -327,7 +327,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="21-并发-vs-数据一致性">2.1 并发 vs 数据一致性</h3>
 <p>为了提高数据同步的速度（主要针对全量更新或者刷数据的情况），整个实时流架构下各个服务都支持并发处理，这个功能由 kafka topic 的多 partition 来支持(partition 概念可以参考 <a href="https://zshipu.com/t?url=http%3A%2F%2Fkafka.apache.org%2Fdocumentation%2F%23intro_topics">http://kafka.apache.org/documentation/#intro_topics</a>)。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f64aed66567c40aab555d751623c7d02.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281843310.webp" />   
     </p>
 <p>如上图所示，topic 配置有 0，1，2 三个 partition，对于同一个业务单元（如房源 123456）的多次变更，默认情况下会被写入到任何一个 partition，这时，由于消费进度不一致，后变更可能会被先处理，这样就有数据不一致的风险。问题就来了，我们如何能保证同一个业务单元的变更能写入到同一个 partiton 呢？</p>
 <p>Kafka 生产者 client 文档中的描述如下：</p>
@@ -338,17 +338,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="22-异步化-vs-全链路追踪">2.2 异步化 vs 全链路追踪</h3>
 <p>考虑到整个架构是基于 SpringCloud，最初选用的了 SpringCloud 生态下的 sleuth(对 zipkin 进行了封装)以实现全链路追踪，方便排查问题，分析处理过程中耗时情况。zipkin 官网效果图如下。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/3/c073125d61de4e74b24c5e514776e766.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281843179.png" />   
     </p>
 <p>由上图可以很直观看到，所示的链路信息是同步请求的，也就是在结果返回前请求端会一直阻塞。由前文描述，我们可以知道，我们采用使用 kafka 使系统各个部署实现了异步化，这样就给全链路追踪带来的问题。虽然 zipkin 本身已经对 kafka 的传输有了支持（参考：Existing instrumentations），但是由于 kafka 消息的读/写都是批量的，并不能支持单条数据粒度的链路追踪（参考：Brave Kafka instrumentation）</p>
 <p>通过对 sleuth Java 客户端的源码进行分析发现，全链路追踪的数据是由 traceId 来串起来的，默认情况下，traceId 是自动生成的。基于源码的分析，我们对 zipkin 客户端数据收集模块进行了重写，由业务代码来控制 traceId 的生成，并且，把 traceId 做为业务数据的一部分，在整个处理流程中一直传下去；显式控制追踪数据的上传，从而可灵活指定埋点，以及具体的埋点信息。</p>
 <p>整体效果可见下图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/3/5930dffe085842278528ae91f0849728.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281843883.png" />   
     </p>
 <p>自定义埋点信息效果见下图。其中_sid 和_id 对应于具体的业务方以及具体的数据，可以做为 zipkin 页面上的检索条件。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/3/83e9056c40874201b35f666df92a2daa.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281843463.png" />   
     </p>
 <h3 id="23-可扩展-vs-业务隔离">2.3 可扩展 vs 业务隔离</h3>
 <p>原则上，在以上描述的架构中，我们是可以接入的业务数目是没有限制的，各个结点都是可以根据需求来扩展的。但是，在具体的使用中，我们还是遇到了一些问题，某个业务出现异常，导致整个系统不可用的情况。</p>
@@ -385,7 +385,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="241-方案-1单索引--多消费者分组">2.4.1 方案 1：单索引 + 多消费者分组</h3>
 <p>该方案下，无全量时，只存在一个 es 索引，做全量时会新建一个索引；在做全量过程，旧的索引只写入增量，新的索引会写入增量和全量数据；全量结束时，别名指向新的索引。示意图如下，需要注意的是，每次全量索引 B 不是同一个索引。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/3/eed8cc3172f441ffacaab8e68ad9e011.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281843973.png" />   
     </p>
 <ol>
 <li>数据先后顺序两种方案解决方式是一致的，可以参考 2.1 的描述。以同一个房源为例，变更事件本身是不区分顺序的，最终写到索引的数据都是来自于数据构造系统。对于同一个索引，同一个房源变更都只会被同</li>
@@ -515,6 +515,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -548,10 +552,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -930,6 +930,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

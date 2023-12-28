@@ -218,12 +218,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="1-数据服务平台简介"><strong>1 数据服务平台简介</strong></h2>
 <p>如前所述，数据服务旨在提供全面的数据服务及数据共享能力，能够作为数据仓库的统一出口，处于数据中台的最上层，对外提供统一数据服务，其位置如图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/28cc792083604fce9c43d18bdf5a0c09.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281649734.webp" />   
     </p>
 <p>从图可以看出，日志、业务数据等通过DataStream、ndc等平台同步、再经过实时离线等计算平台进行处理后落地成数据仓库的各层数据模型，同时借助于数据地图、元数据中心、数据质量中心等等数据中台套件对数据进行管理和校验等、使之成为资产。数据仓库的数据借助于数据传输，可以将数据从hive离线数仓同步到hbase、redis、ddb等在线存储中，数据服务即将数据从在线存储中读取的API服务，上层的数据产品、数据报表甚至于线上业务等都可以读取这些方便快捷地读取这些接口。</p>
 <p>数据服务开发平台是一个集成了服务API开发、测试、部署、调用等一站型服务平台，能够非常便捷地基于在线存储快速生成数据服务API的平台。目前已集成到网易有数大数据开发套件中，平台如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/362bb47d8c8c40c9b43c3c4ececff09a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281649651.webp" />   
     </p>
 <p>平台用户分为服务调用者和服务创建者两个角色。</p>
 <p>调用者即要通过服务接口消费数据的人，在音乐可能为各业务方的服务端、前端、算法等技术同学，平台支持调用者通过API集市找到需要调用的API，同时可以根据API的详情来查看API的调用方式、输入输出并申请调用权限。</p>
@@ -232,46 +232,46 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="2-阶段一内部场景使用平台功能性丰富"><strong>2 阶段一：内部场景使用、平台功能性丰富</strong></h2>
 <p>我们是从20年Q4开始与网易有数大数据平台团队开始确定共建项目及规划到云音乐的落地使用，此时平台已经有了V1版本，以开源kong网关的方式提供API的创建、测试、发布功能，这些功能后端都由管理服务来承载，管理服务功能如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8c1abbb5cd914de4a0484353822c1dc2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281649532.webp" />   
     </p>
 <p>v1版本管理服务提供了数据源管理、API管理、应用授权管理等基本核心功能，同时服务治理、监控统计报警等依赖于kong网关。</p>
 <p>在平台上创建好的API调用者即可以通过kong网关对应的域名进行http调用，API发布后和调用时跟平台已无关系，已经注册到了kong网关上，服务调用的数据流如图</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/273359b7385c48f2a59eb12453a8c7a4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281649418.webp" />   
     </p>
 <p>v1版本查询调用时所有API走同一个kong网关，由kong网关来分发到后端的查询服务。由于kong网关是开源的，团队目前只是限于使用，对于线上运维等并无较好经验且云音乐后端线上都使用的是自研的batch网关，由此Q4我们将kong网关作为了数据报表、数据产品、运营系统数据使用等内部使用场景的网关，且这些内部场景API混布于一个资源组中，来较好地利用资源，主要落地数据报表、产品等低调用量的内部系统来前期落地。</p>
 <p>这一阶段在使用时发现平台的v1版本功能无法满足一些使用场景，因此Q4我们主要围绕平台的功能性做了几个大的迭代，大大提升了平台的易用性，主要有以下几点：</p>
 <h3 id="21-api集市"><strong>2.1 API集市</strong></h3>
 <p>数据服务平台除了管理员之外，用户应该有两个角色，一个是主要由数据开发担任的服务创建者，在平台上进行API的创建并发布，另一个角色是服务调用者，能够在平台上浏览检索有哪些API，能够看到API的调用方式、入参出参，申请调用权限等。API集市即为API的地图，能够提供给服务调用者去检索和查看已发布的所有API，并申请调用权限。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e53102a4072d432c89b1dc3d8687886a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281649153.webp" />   
     </p>
 <h3 id="22-支持clickhousedruidkylines等更多数据源"><strong>2.2 支持clickhouse、druid、kylin、es等更多数据源</strong></h3>
 <p>平台提供了数据源管理功能，并以jdbc的方式支持了clickhouse、druid、kylin、es等诸多olap数据源，能够支持一些olap场景的API调用；</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/05d70c177e3f46579f150c4afec8b0c6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281649752.webp" />   
     </p>
 <p>这些数据源跟元数据中心打通，能够跟数据传输模块共用一套元数据，同时数据源绑定了已发布的API时，不允许再对其进行修改。由于我们将数据源进行了充分的抽象，添加jdbc类型的新数据源在代码中只需要配置即可得到，非jdbc类型的实现接口的相关方法即可。</p>
 <h3 id="23-支持入参转换返回可选等功能"><strong>2.3 支持入参转换、返回可选等功能</strong></h3>
 <p>平台支持了自定义入参转换和返回结果转换等功能。</p>
 <p>平台将API输入参数分为普通入参和函数入参，普通入参即基本数值、字符串、布尔类型的参数，由调用者自己传入，函数入参对普通入参进行了处理和转换，API创建者能够通过自定义java代码的方式对普通入参进行转换来生成函数入参，从而能够进行复杂的和自定义的参数转换，函数入参对调用者不可见，由创建者自己来封装和转换底层取数逻辑，屏蔽了底层细节。如图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bfc61f0603634c319cff13c8986d1c16.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281649448.webp" />   
     </p>
 <p>此函数入参能够将id转成对应底层存储hbase表的rowkey，调用者只需要传入id即可，无需自己拼接rowkey，屏蔽了存储细节，调用者无需感知底层存储是用的hbase还是其他，函数入参只有创建者才可见。</p>
 <p>实现上来讲，函数入参通过codegen+动态编译+反射的技术生成反射的实体对象放置于内存中，在实际调用的时候普通入参实际调用的值作为invoke方法的args传入来获取真实函数入参的结果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/49cc80df0bec4783bd9687527c88bafa.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281649323.webp" />   
     </p>
 <p>平台对所有类型数据源生成的API统一了返回格式，但有些场景下需要将API转成自己需要的格式，平台提供了udf的功能，通过实现相关接口并打包上传注册的方式来达到这样的目的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/71ebb3fc39ec47b79804e9fcf1af4846.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281649544.webp" />   
     </p>
 <p>实现上来讲也是通过jar包管理，然后异步执行下载jar包、加载类、反射生成udf实现类。调用的时候直接获取即可。</p>
 <h3 id="24-支持mybatis条件动态sql"><strong>2.4 支持mybatis条件动态SQL</strong></h3>
 <p>平台还支持了条件sql，通过引入mybatis相关的包，能够支持类似mybatis动态sql方式根据入参刻画条件sql，从而大大提升了通过SQL生成API的能力。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/621c902631194cc6a98597a4388574f1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281649329.webp" />   
     </p>
 <p>一阶段结果：通过以上一阶段的平台迭代，随着功能的提升较好地支撑了数据服务在云音乐内部数据场景的建设，支撑了丰收项目、muse、歌曲profile、日志查询服务等一些数据产品、系统的使用，共建设30+接口、10余个调用者。这些API混合部署于一套资源组中并对接kong网关。</p>
 <h2 id="3-阶段二线上数据服务平台稳定性建设"><strong>3 阶段二：线上数据服务、平台稳定性建设</strong></h2>
@@ -279,14 +279,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="31-支持云音乐batch-httprpc框架等"><strong>3.1 支持云音乐batch http、RPC框架等</strong></h3>
 <p>之前查询服务还是单网关架构，使用的都是开源kong网关，为了支持多种类型的http网关以及RPC等，剥离了核心facade层充当门面，上层ingress层可直接对接各类http网关的controller以及RPC协议，架构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0af35d3c1bd34f39a7599d76f8969672.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281649155.webp" />   
     </p>
 <p>上层的ingress层可支持各类网关、RPC，跟核心服务层解耦。如要支持dubbo也只需要新开发一个ingress即可。服务facade层支持springboot cache作为缓存，能够对单个API进行缓存配置。</p>
 <p>下层QueryService层插件化，支持各类数据源的查询。对数据源类型分为支持向导模式(如redis、hbase等kv类型）及SQL模式(如mysql、clickhouse、kylin)等通过jdbc的方式去调用。</p>
 <h3 id="32-强弱依赖梳理"><strong>3.2 强弱依赖梳理</strong></h3>
 <p>一个API请求进来的时候，查询服务依赖管理服务去获取API的元数据信息以及API对应的数据源元数据信息，这些都在管理服务统一封装并提供服务，查询服务只要依赖管理服务即可，而无需去关心API、数据源的元数据具体的存储细节。目前管理服务不只服务于云音乐，并且内部API元数据等存储于rds、依赖于元数据服务，在线上服务高并发场景下若查询服务每次请求都去访问管理服务则一方面rt会有显著增加、另一方面管理服务也非高可用。考虑到API的信息一旦发布后基本是不可变的，只会增加API与调用方的绑定关系等，基于此，通过异步线程定时去管理服务获取API及数据源信息 并作compareAndSet操作，在内存中维护API的元数据信息即可。其整个架构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/66aeebacf5534ee090741fb5392f98d1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281649101.webp" />   
     </p>
 <p>这样查询服务对管理服务是弱依赖，即使管理服务挂掉，对线上运行中的API亦没有影响，只会影响新API的发布。</p>
 <h3 id="33-资源隔离独立部署"><strong>3.3 资源隔离、独立部署</strong></h3>
@@ -418,6 +418,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -451,10 +455,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -833,6 +833,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

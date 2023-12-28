@@ -218,20 +218,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>随着各种大数据技术蓬勃发展，爱奇艺视频生产的数据业务经历了两个阶段。</p>
 <p><strong>早期阶段一</strong>：团队基于公司内部 BabelX 离线数据同步工具，引入 Hive 技术，来做报表开发。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e296f74835d14a7896406791b1139888.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272028371.png" />   
     </p>
 <p>在阶段一中，缺点是每天跑全量数据，成本高，实时性低，修改纬度字段时，整条链路都要修改；ETL 完全依赖 Hive 内置函数，可复用性低，运维成本高。</p>
 <p><strong>早期阶段二</strong>：随着生产数据增多，Mysql 提供的可视化查询性能遇到瓶颈，且实效性要求提高，数据报表进入了第二阶段，引进 ClickHouse 进行实时报表开发。</p>
 <p>在引进clickHouse的过程中，我们也研究了业界如druid、kudu等其他方案，结论是：Druid、kudu在用户视频数少，时间跨度大的情况下，性能表现还不错；当用户视频数超过1千万后，Druid会受聚合影响，速度大幅度降低，甚至会出现超时的情况。最终我们选择了clickHouse，通过它的引擎的选择，我们还支持了频繁的数据更新。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3a3bd241e23d4ed6b644ebe8e166bf88.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272028166.png" />   
     </p>
 <p>这个阶段其缺点是：不支持连表操作，业务库仅支持 JDBC/ODBC 类型，Merge引擎不支持更新，Mysql导入 ClickHouse再Truncate，期间数据存在丢失。</p>
 <p>在此基础上，我们完善系统，最终形成了如下的新的架构体系。</p>
 <h2 id="02-sparkclickhouse实时数仓"><strong>02 Spark+ClickHouse实时数仓</strong></h2>
 <p>话不多说，先上架构图</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bbfa3efcf26841f1aa8b301a609367f4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272028266.png" />   
     </p>
 <p>整体结构</p>
 <p>ClickHouse 是面向列的数据库管理系统（DBMS），用于对查询进行联机分析处理（OLAP）。由俄罗斯IT公司 Yandex 为 Yandex.Metrica 网络分析服务开发的。允许分析实时更新的数据，该系统以高性能为目标，且储存明细数据。</p>
@@ -244,14 +244,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="实时数据加工"><strong>实时数据加工</strong></h3>
 <p>历史存量数据的处理是通过 Spark 计算引擎，将 Mongo 数据写入 ClickHouse（只执行一次，可以直接从业务库导。因为例行导入 Hive 表本身就是我们在做）。实时数据的处理就是Spark技术引擎直接处理 Kafka 消息写入 ClickHouse 了。如果不需要历史存量数据，只需要消费 Kafka，实时计算导入 ClickHouse 就可以了。具体实时架构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e25d8fe0ea2942f19a0b09afc8b89396.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272028349.png" />   
     </p>
 <p>实时方案流程图</p>
 <p>这里离线数据和实时数据连接点需要注意一下：ReplacingMergeTree 引擎由于幂等性质，可将 Kafka offset 向前多重置一些，保证最少一次。其他引擎存在误差数据。除非 Kafka 能够重放 Mongo 中历史所有数据。</p>
 <h3 id="join需求"><strong>Join需求</strong></h3>
 <p>存在 Join 需求时，由于两个表目前都是百G的存储，使用Redis、CB内存太浪费，我们最终选择了使用HBase。以 HBase 作为纬度表，在 Spark 计算引擎中，进行合并处理，并写入事实表。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/09c800cb289c4c7ca3f49f5979e2a25d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272028327.png" />   
     </p>
 <p>大表Join方案流程图</p>
 <p>除了以上工作，这里有一些注意事项：</p>
@@ -398,6 +398,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -431,10 +435,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -813,6 +813,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

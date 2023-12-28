@@ -201,36 +201,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>门畅 徐哲 刘春阳 滴滴技术</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e2aff4ce1e304190be5fd2649073cb2b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228677.webp" />   
     </p>
 <blockquote>
 <p>桔妹导读：如何解决供需不平衡问题呢？一个自然的想法就是调度空闲的在线司机到需求较多的区域。滴滴网约车团队近期发表在万维网大会WWW 2020 Research Track的Oral长文《When Recommender Systems Meet Fleet Management: Practical Study in Online Driver Repositioning System》提出了在线司机调度系统的一种有效的解决方案。本文是对该论文的详细解读。</p>
 </blockquote>
 <p>随着移动互联网的兴起，网约车逐渐成为了大众常用的一个出行选择。但在网约车平台上经常出现这种情况：有时候乘客抱怨打不到车，与此同时其他地方的司机却没有订单接，长时间空驶。这就是典型的供需不平衡问题，即乘客和司机的自然分布出现了错配。这一方面让很多乘客的出行需求得不到满足，另一方面也让很多司机空驶等待，运力资源没有充分利用。如何解决供需不平衡问题呢？一个自然的想法就是调度空闲的在线司机到需求较多的区域。以下与大家分享对于本篇论文的详细解读。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5632257b14e14566a3ff70d44e06dea2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228731.webp" />   
     </p>
 <p><strong>论文地址：</strong></p>
 <p><em><a href="https://zshipu.com/t?url=https%3A%2F%2Fdl.acm.org%2Fdoi%2Fabs%2F10.1145%2F3366423.3380287">https://dl.acm.org/doi/abs/10.1145/3366423.3380287</a></em>\<em>\</em>\**</p>
 <h2 id="背景"><strong>背景</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/25c4c1beb85e4b8cb72f75dad5fd6cbb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228491.webp" />   
     </p>
 <p>出租车为人们提供了方便灵活的出行服务，在公共交通中扮演了重要角色。出租车在道路上空载行驶寻找乘客的过程，称为空车巡游过程。这一过程可能会占到出租车司机工作时间的50%以上，降低了出租车的运营效率。</p>
 <p>在网约车平台上，司机和乘客向平台上报他们的实时位置，平台通过集中决策机制来完成司机和乘客间的匹配。在这种情况下，司机可以在实际见到乘客前就接到该乘客的订单，因而空车巡游的目的不再是寻找乘客，而是寻找一个接到订单概率更高的地理区域或者路线。</p>
 <p>本质上来说，空车巡游是由供给和需求间的不平衡导致的。例如图1中，在早高峰司机将一位乘客从家送到办公室后，由于此刻办公区域乘客需求很少，司机必须再次回到住宅区才能有比较大的机会接到下一单。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2ad5851a324541ec825ff7430b75fa44.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228207.png" />   
     </p>
 <p>图1. 司机调度问题背景</p>
 <p>在本文中，我们研究司机调度问题。所谓“司机调度”，是指平台会通过一定的交互过程打断司机自发的空车巡游过程，将他们引向一个更可能接到单的目的地。受益于供需两侧丰富的实时信息，平台可以通过调度改善司机个人的体验，同时提高平台整体的效率。</p>
 <h2 id="什么是调度任务"><strong>什么是“调度任务”</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/813797ca5c4743a38f4b83ab201626e7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228056.webp" />   
      实际场景中，空闲司机往往依赖个人经验来决定空车巡游的目的地，主观性强。经验不准确时可能会前往接单概率较低的区域，既影响司机的个人收入和接单体验，也会影响乘客需求的满足率。因此，本文中我们利用司机和平台之间的实时信息通道来为司机发送即时的调度任务，帮助空闲司机找到最佳的空车巡游目的地。</p>
 <p>在本文中，当司机停留在空闲状态时会触发调度任务,如图2所示。调度任务会以卡片消息的形式在司机的APP上弹出。如果司机点击导航按钮，会直接进入以调度终点为目的地的导航页面。为帮助司机尽快接到下一个订单，在司机前往调度终点的途中，始终可以被分配订单。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9bc016b41d8b403fa0b4e5fc1f1511ab.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228767.webp" />   
     </p>
 <p>图2. 调度任务的产品交互形式</p>
 <p><strong>一次调度任务包括三个步骤：</strong></p>
@@ -239,7 +239,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>(3) 在调度任务失败时为司机提供补偿。</p>
 <p>在这里，需要对调度任务的判定标准进行更具体的说明。一个调度任务有四种可能的结束状态，如图3所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a82647eb95d3444c9804edcb836c454e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228738.png" />   
     </p>
 <p>图3. 调度任务的结束状态</p>
 <ul>
@@ -251,11 +251,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>如果一次调度任务以状态2和状态3结束，那么被视作一次成功的调度；如果以状态4结束，则会被视作一次失败的调度。由于接受调度任务会给司机带来额外的空驶成本，因此，在调度任务失败的情况下，应当为司机提供一定的补偿。这是在司机和平台之间建立信任的关键措施。</p>
 <h2 id="方法"><strong>方法</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1a43a4de2df547838788a6911c54e4fd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228672.webp" />   
     </p>
 <p>本文提出的解决框架分为三阶段，如图4所示。受到推荐系统的启发，前两个阶段的作用是产生候选调度任务集并为每一个候选调度任务打分；受到车队管理方法的启发，第三阶段应用规划算法来实现多司机间的协作，产生最终向司机下发的调度任务。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9dd6c5480abd45dbb7ff2926d4dc5dd3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228384.png" />   
     </p>
 <p>图4. 框架示意图</p>
 <p><strong>▍第一阶段：产生候选调度任务</strong></p>
@@ -267,15 +267,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>任务评分阶段度量了每一个候选调度任务可能为平衡供需分布、提高平台效率所带来的收益。</p>
 <p>对于一个时空状态，用分段线性函数拟合应答率（被应答订单数与全部呼叫订单数之比）与供需比（空闲司机数与呼叫订单数之比）的函数关系：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7d771bcbde174dd99e89b6e01e762bbd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272229607.webp" />   
     </p>
 <p>依据这一函数，可以计算出向调度终点时空增加一个空闲司机可能会带来的边际增益，以此作为每一个候选调度任务的评分结果，即</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ef1668fdfdf84a9f8ae85f8a984f6441.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272229473.webp" />   
     </p>
 <p>依据拟合结果，我们可以推导出另外一个有应用价值的结果：每个时空状态的司机缺口数量。通过设定一个目标应答率，我们可以计算出达到这一目标所需增加的司机数量，也即运力缺口数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4d4868c2212b48f6998045208f63cc84.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272229326.webp" />   
     </p>
 <p><strong>▍第三阶段：规划</strong></p>
 <p>在第一阶段产生的候选调度任务集，并且在第二阶�</p>
@@ -406,6 +406,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -439,10 +443,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -821,6 +821,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

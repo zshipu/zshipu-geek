@@ -207,7 +207,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p><strong>导读</strong>： 工业界的推荐系统通常包括召回、粗排、精排以及重排四个阶段，如图一所示，每个阶段都像是一个漏斗，从海量的物品集合中过滤出用户最有可能感兴趣的物品。其中粗排模型发挥的主要作用是统一计算和过滤召回结果，在尽量保证推荐准确性的前提下减轻精排模型的计算压力。本文主要介绍爱奇艺随刻基础推荐团队在短视频推荐业务的粗排模型优化上落地的一系列实践方案。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4be8d28836c84f7c9e54c3f247c76cb4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240993.png" />   
     </p>
 <p>图一：推荐整体流程架构图</p>
 <h2 id="背景"><strong>背景</strong></h2>
@@ -237,7 +237,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>2. up主ID</strong></p>
 <p><strong>3. 视频标签</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2b9ad53f64654e8fb2e827e855bc3bd5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240066.webp" />   
     </p>
 <p>图二：粗排双塔DNN模型结构图</p>
 <p>从GBDT到双塔DNN，模型的复杂度和参数量级还是有 <strong>爆炸性增长</strong> 的，为了不损失粗排模型的精度同时满足上线的性能指标要求，我们从下面几个方面做了很多优化工作：</p>
@@ -246,19 +246,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>知识蒸馏是一种模型压缩常见方法，在 <strong>teacher-student框架</strong> 中，将复杂、学习能力强的网络学到的特征表示“知识蒸馏”出来，传递给 <strong>参数量小、学习能力弱</strong> 的网络。从而我们会得到一个 <strong>速度快，能力强</strong> 的网络。</p>
 <p>将粗排模型和精排模型放到知识蒸馏的 <strong>teacher-student框架</strong> 中，以蒸馏训练的方式来训练粗排模型，以精排模型为teacher来指导粗排模型的训练，从而得到一个 <strong>结构简单，参数量小，但表达力不弱</strong> 的粗排模型，蒸馏训练示意图如图三所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3a451e4b898f4368a3953424a4905eca.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240104.png" />   
     </p>
 <p>图三：粗排模型蒸馏训练示意图</p>
 <p>在蒸馏训练的过程中，为了使粗排模型输出的logits和精排模型输出的logits分布尽量对齐，训练优化的目标从原来单一的粗排模型的logloss调整为如公式一所示的三部分loss的加和，包括 <strong>student loss</strong>（粗排模型loss）、 <strong>teacher loss</strong>（精排模型loss）和 <strong>蒸馏loss</strong> 三部分组成。</p>
 <p>其中蒸馏loss我们线上采用的是粗排模型输出和精排模型输出的最小平方误差，为了调节蒸馏loss的影响，我们在该项loss前又加了一维 <strong>超参lamda</strong>，我们设置超参lamda随着训练步数迭代逐渐增大，增强蒸馏loss的影响，在训练后期使得粗排模型预估值尽 <strong>量向精排模型对齐</strong>，lamda随着训练step的变化趋势如图四所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2dd91c02f5d24bd399a7ae620464ab9c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240439.png" />   
     </p>
 <p>图四：Distillation loss超参lamda设定</p>
 <h3 id="2-embedding参数优化"><strong>2. Embedding参数优化</strong></h3>
 <p>为了进一步减少参数量级，压缩模型大小，提高模型传输速度，同时减少加载模型时的内存消耗，我们在训练粗排模型时，将模型 <strong>embedding</strong> 参数的优化器替换为稀疏解优化神器FTRL，其他层的参数依然还用AdaGrad。这一步调整不仅离线Auc有小幅提升，训练得到的粗排模型的embedding参数全为0的比率也 <strong>高达49.7%之多。我们在做模型导出时，裁剪掉了全为0的embedding参数，粗排模型大小减小了46.8%</strong>，使得模型的传输速度也有近一倍的提升，同时线上加载模型的内存消耗也 <strong>降低了100%</strong>。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ba44fcbd379341cba513097dddad53e4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240524.png" />   
     </p>
 <h3 id="3线上inference优化"><strong>3.线上Inference优化</strong></h3>
 <p>除了离线训练时的一系列优化，我们对双塔粗排模型的线上inference计算也做了很多 <strong>计算去重和优化</strong>。首先在计算user侧embedding时进行了合并计算，对同一个用户+千级别候选视频pair，在计算user侧embedding时，将user侧的特征独立拆分， <strong>只过一次user侧NN的inference。这个优化使得粗排模型打分计算服务p99的计算耗时减少了19ms</strong> 左右。</p>
@@ -392,6 +392,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -425,10 +429,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -807,6 +807,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

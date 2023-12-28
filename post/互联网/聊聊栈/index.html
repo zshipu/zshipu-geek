@@ -229,13 +229,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>言归正传，我们的讨论从存储器的层次结构开始。</p>
 <h3 id="存储器的金字塔结构">存储器的金字塔结构</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/fd07c89eda094994b2fbdc3ae9594ec4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281718034.png" />   
     </p>
 <p>受限于存储介质的存取速率和成本，现代计算机的存储结构呈现为金字塔型[1]。越往塔顶，存取效率越高、但成本也越高，所以容量也就越小。得益于程序访问的局部性原理[2]，这种节省成本的做法也能取得不俗的运行效率。从存储器的层次结构以及计算机对数据的处理方式来看，上层一般作为下层的Cache层来使用（广义上的Cache）。比如寄存器缓存CPU Cache的数据，CPU Cache L1~L3层视具体实现彼此缓存或直接缓存内存的数据，而内存往往缓存来自本地磁盘的数据。</p>
 <p>本文主要讨论磁盘IO操作，故只聚焦于Local Disk的访问特性和其与DRAM之间的数据交互。</p>
 <h3 id="无处不在的缓存">无处不在的缓存</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/3b1e9fa0accb43dba462f13e841bf7e3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281718473.png" />   
     </p>
 <p>如图，当程序调用各类文件操作函数后，用户数据（User Data）到达磁盘（Disk）的流程如图所示[3]。图中描述了Linux下文件操作函数的层级关系和内存缓存层的存在位置。中间的黑色实线是用户态和内核态的分界线。</p>
 <p>从上往下分析这张图，首先是C语言 <code>stdio</code> 库定义的相关文件操作函数，这些都是用户态实现的跨平台封装函数。 <code>stdio</code> 中实现的文件操作函数有自己的 <code>stdio buffer</code>，这是在用户态实现的缓存。此处使用缓存的原因很简单——系统调用总是昂贵的。如果用户代码以较小的size不断的读或写文件的话， <code>stdio</code> 库将多次的读或者写操作通过buffer进行聚合是可以提高程序运行效率的。 <code>stdio</code> 库同时也支持 <code>fflush(3)</code> 函数来主动的刷新buffer，主动的调用底层的系统调用立即更新buffer里的数据。特别地， <code>setbuf(3)</code> 函数可以对 <code>stdio</code> 库的用户态buffer进行设置，甚至取消buffer的使用。</p>
@@ -244,7 +244,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="linux内核中的io栈">Linux内核中的IO栈</h3>
 <p>这一小节来看Linux内核的IO栈的结构。先上一张全貌图[4]：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/562e6e553a7d427faa15952b428e70f6-Linuxstoragestackdiagramv4.10.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281718310.png" />   
     </p>
 <p>由图可见，从系统调用的接口再往下，Linux下的IO栈致大致有三个层次：</p>
 <ol>
@@ -254,7 +254,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>结合这个图，想想Linux系统编程里用到的 <code>Buffered IO</code>、 <code>mmap(2)</code>、 <code>Direct IO</code>，这些机制怎么和Linux IO栈联系起来呢？上面的图有点复杂，我画一幅简图，把这些机制所在的位置添加进去：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/efd8079c6a384362a8889efd422a5365.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281718294.png" />   
     </p>
 <p>这下一目了然了吧？传统的 <code>Buffered IO</code> 使用 <code>read(2)</code> 读取文件的过程什么样的？假设要去读一个冷文件（Cache中不存在）， <code>open(2)</code> 打开文件内核后建立了一系列的数据结构，接下来调用 <code>read(2)</code>，到达文件系统这一层，发现 <code>Page Cache</code> 中不存在该位置的磁盘映射，然后创建相应的 <code>Page Cache</code> 并和相关的扇区关联。然后请求继续到达块设备层，在IO队列里排队，接受一系列的调度后到达设备驱动层，此时一般使用DMA方式读取相应的磁盘扇区到Cache中，然后 <code>read(2)</code> 拷贝数据到用户提供的用户态buffer中去（ <code>read(2)</code> 的参数指出的）。</p>
 <p>整个过程有几次拷贝？从磁盘到 <code>Page Cache</code> 算第一次的话，从 <code>Page Cache</code> 到用户态buffer就是第二次了。而 <code>mmap(2)</code> 做了什么？ <code>mmap(2)</code> 直接把 <code>Page Cache</code> 映射到了用户态的地址空间里了，所以 <code>mmap(2)</code> 的方式读文件是没有第二次拷贝过程的。那 <code>Direct IO</code> 做了什么？这个机制更狠，直接让用户态和块IO层对接，直接放弃 <code>Page Cache</code>，从磁盘直接和用户态拷贝数据。好处是什么？写操作直接映射进程的buffer到磁盘扇区，以DMA的方式传输数据，减少了原本需要到 <code>Page Cache</code> 层的一次拷贝，提升了写的效率。对于读而言，第一次肯定也是快于传统的方式的，但是之后的读就不如传统方式了（当然也可以在用户态自己做Cache，有些商用数据库就是这么做的）。</p>
@@ -413,6 +413,10 @@ vm.dirty_background_ratio = 10
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -446,10 +450,6 @@ vm.dirty_background_ratio = 10
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -828,6 +828,8 @@ vm.dirty_background_ratio = 10
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

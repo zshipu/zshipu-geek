@@ -199,7 +199,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/477b0821ddbb449fa4fbbf7c2e0cf7a7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271531623.png" />   
     </p>
 <p>今天为大家分享下京东电商推荐系统实践方面的经验，主要包括：</p>
 <ul>
@@ -221,12 +221,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h2 id="简介">▌简介</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8bd15fe78d774014a20d74ddddef636b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271531667.webp" />   
     </p>
 <p>说到推荐系统，最经典的就是协同过滤，上图是一个协同过滤的例子。协同过滤主要分为俩种：user-based 基于用户的协同过滤和 item-based 基于商品的协调过滤。</p>
 <p>但是，现在绝大多数推荐系统都不会直接使用协同过滤来做推荐。目前主要用的是 learning to rank 框架。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/51fd1a0690294eb1a83abf50364c1c77.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271531273.webp" />   
     </p>
 <p>这里，是推荐系统的框架，整个推荐系统可以分为两部分，在线部分和离线部分。</p>
 <ul>
@@ -241,7 +241,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>和新闻、视频这类的内容推荐相比，电商推荐系统又有一些特殊的地方，比如：</p>
 <p>优化方向（点击、销售额、时长、用户留存等）。另外，电商中推荐的内容也会有很多种，尤其像是活动类的内容，很多推荐都是算法和人工运营共同完成的。这就是电商推荐和新闻推荐等的区别之处。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1205e7d3a8fd4f86bd1827e13437b383.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271531665.jpeg" />   
     </p>
 <p>我们展开看下在线推荐系统：</p>
 <p>除了刚才说的召回和排序以及最终的调整之外，还有实践过程中的一些细节。</p>
@@ -263,25 +263,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="排序模块">▌排序模块</h2>
 <p><strong>1. 模型结构</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/da8bfa00e6024813a147a1698c0a8adb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271531268.webp" />   
     </p>
 <p>深度学习 ranking 模型结构我们不作为重点讨论，这里列举了一种最经典的模型，它们都用到了很多 id 的 Embedding，然后这些 Embedding 规模都很大，这样训练和上线都比较耗时。因此，我们做了一些优化，比如做分布式的训练，并且会有一套 Pipeline 来完成模型的上线。另外，虽然模型很复杂，并且能带来很好的效果，但是特征工程还是必不可少的，很多指标的提升还是依赖于特征工程，当然也包括一些模型调整的工作。</p>
 <p><strong>2. 实践</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/23aa3eacb31f44d6bdc7dedbe6d85e87.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271531889.webp" />   
     </p>
 <p>那么如何把这些模型落地呢？我们看下整个模型的上线过程：</p>
 <p>首先最重要的部分是模型训练平台和排序服务，因为很多深度模型计算量要求很高，为了能达到比较快的效果，需要部署单独的排序服务。目前比较流行的是 TensorFlow serving，可以很快速的来上线一个深度模型，并充分利用对分片、单机并行，达到很高的计算效率。</p>
 <p>模型线上线下一致性问题对于模型效果非常重要，我们使用特征日志来实时记录特征，保证特征的一致性。这样离线处理的时候会把实时的用户反馈，和特征日志做一个结合生成训练样本，然后更新到模型训练平台上，平台更新之后在推送到线上，这样整个排序形成了一个闭环。</p>
 <p><strong>3. 实时更新</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/95c3bd3645cf45638a46a45fa65d5cdc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271531474.webp" />   
     </p>
 <p>我们的特征和模型都需要做实时的更新。因为我们经常需要很快的 catch 一些实时的信号，比如需要实时的用户画像来抓住实时的用户兴趣的变化，还比如需要抓住实时的商品画像，因为经常会有一些活动或者爆品，我们需要快速的捕捉这些信号，并应用到推荐中。另外还有一些实时的召回和特征，比如一些交叉的特征，实时的点击率，实时订单等特征。</p>
 <p>除了特征外，模型也需要实时更新，对于电商场景来说这是有一定困难的，因为订单是有延时的，延时可能是十几分钟到十几小时不等，这样实时模型更新上就会采取一些保守的策略，比如用点击率对模型做些微调，然后订单数据再通过离线来获得，这属于业务场景的限制。</p>
 <h2 id="思考">▌思考</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/715c0aa8c8eb4ab9ad15d0565ec23779.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271531932.webp" />   
     </p>
 <p>排序可以算是推荐系统中比较重要的一个环节，但是只有排序肯定是不够的，事实上，有一些问题是目前的排序框架无法解决的：</p>
 <ul>
@@ -297,7 +297,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p><strong>1. 多样性</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5e16ddd76b29415fb2175f17815d52f2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271532383.webp" />   
     </p>
 <p>使用模型输出的结果一般都会非常相似，如果直接给用户看体验会很差，因此在模型之后我们需要加入多样性的逻辑。</p>
 <p>比较通用的解决办法是多样性的 ranking，这是一个贪心算法，从第一个商品开始选，当选第二个商品的时候，会重新计算下候选集中每个商品的 score，然后选择一个 score 最高的。我们的方法是看 novelty score 候选商品的产品词分布和之前 N 个商品的产品词分布的 KL 距离。这样做的思路，就是选一个和已有商品最不像的商品，来更好的保证商品推荐结果的多样性。</p>
@@ -305,45 +305,45 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>最后，我们思考一个问题，有没有更好的方法实现多样性的逻辑呢？当然有，比如是否可以考虑使用 list wise ranking。这里只是为大家分享一个比较容易的，并且效果比较好的方法。</p>
 <p><strong>2. 多目标</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c8aba8af2e94467b93a6f9b259ced1f1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271532026.webp" />   
     </p>
 <p>我们的优化目标有很多，比如点击、转化、时长等，问题会变得比较复杂，单一的模型训练很难覆盖到所有指标。另外，经常我们需要在各个指标之间进行权衡，因此可调试性也非常重要。</p>
 <p>一种很有用的方式是多模型 ranking，然后用某种方式把所有模型的结果 combine。</p>
 <p>这也体现了一个思想，在算法的实际应用中，其实需要在算法的先进性和系统可维护性、可调试性之间做一个平衡。往往 paper 里很有创意的算法落地的时候是有些困难的。</p>
 <p><strong>3. 多轮排序</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/2bc96fc420ed4592b4b2146ba58cfdb0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271532344.png" />   
     </p>
 <p>下面我们讨论一下多轮排序的问题。多轮排序是 learning to rank 实践中很重要的一个思想。使用多轮排序主要是因为计算资源的限制，无法使用复杂的模型进行大规模的候选集排序。右图描述了一个多轮排序的框架。这像是一个漏斗模型，从上往下模型的复杂度是递增的，同时候选集是逐渐减少的，就是越到后面用越复杂的模型来保证效果更好，越到前面可能只需要简单的模型来保证能拿到一些商品就可以了。</p>
 <p>这样会存在一个问题，由于训练样本可能有偏，导致只有被用户看到的样本才有 label，但是一般不会有太大的影响。</p>
 <h2 id="基于索引的首轮排序">▌基于索引的首轮排序</h2>
 <p><strong>1. 索引召回</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/21adc1c4edcb4fbc9d999863b94906bf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271532356.webp" />   
     </p>
 <p>下面我们重点介绍一下第一轮排序。倒排索引很常见，是信息检索里常用的工具。它通过把 doc 的内容索引到 doc id 的方式，快速通过内容来查找 doc。我们很多召回都是通过索引实现的。这里我列举了一些基于索引的召回方式，如 item cf 的 key、产品词、热门类目、促销产品词等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1c769e1a22594fc0b30ae265c5d40b27.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271532028.webp" />   
     </p>
 <p>虽然索引能够很大程度上的缩小候选集的范围，但是经常情况下，第一轮排序的 doc 数量仍然可能会很大。为了保证性能，截断逻辑是必不可少的。通过情况下可以通过 quality score 截断，保留质量好的 doc。经过线性的 LR 或者 GBDT 模型就可以有结果了。另外截断之后需要有些多样性的逻辑，因为只有在召回的时候保持多样性，最终结果才会有多样性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c8ffc84094f84177a8b9b2d17130304f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271532902.webp" />   
     </p>
 <p>基于 quality score 截断是一种 naive 的算法，这里我们讨论另一种业界也较常用的算法，wand。wand 其实是 weak and，它的重点是 wand 操作符。wand 操作符是一个布尔操作符，当 Xi wi 比 θ 大时，它的值是1，否则是0。之所以叫做 weak-and，是因为当 w 都取1， θ 取 K 时，wand 操作符就变成了 and，当 w 取1，θ 取1时，wand 操作符就变成了 or。可以看出 wand 是介于 and 和 or 之间的操作。对 Xi wi 求和的操作其实和我们线性模型很相似。通过 wand 操作符，我们可以定义一些上界，因为是倒排索引，可以给每个索引链赋予一个估计值，这样就可以拿到权重上界 UBt，这样通过和 wand 操作符对比，就可以快速的判断 UBt 是否满足条件，如果满足条件就可以快速的把一些 doc 扔掉，这样就可以快速的使用线性模型对全户做 ranking。可以看到，基于线性模型的分数做截断，比完全基于 quality score 截断的策略要稍微好一点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/156a939ece2548919a5869c99a174a75.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271532126.webp" />   
     </p>
 <p>这里我列了 paper 中 wand 算法的伪代码。出于时间关系，我们不会过算法逻辑的细节。我认为它的主要的思路是通过快速使用 upper bound 做截断和跳转，可以略过很多明显不符合的候选 doc，从而减少计算 score 的次数。当然这种方法对于线性模型来说，有一个缺点，当我们需要多样性的时候，没办法很好的实现在模型中增加多样性的。</p>
 <p>wand 算法目前已经应用非常广泛了，在很多开源的索引如 lucene 中，也会用到这种方法快速计算文本相关分。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9f1fe5a70cc74e738013f76751b16321.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271532696.webp" />   
     </p>
 <p>刚刚我们介绍了使用倒排索引做第一轮排序，以及一个常见的排序加速算法，回过来我们思考一下倒排索引本身，它适用于什么场景，不适用于什么场景。</p>
 <p>首先它适用于 kv 查找这种场景，并且 kv 查找也属于实际应用很多的情况。但是对于更复杂的方式，类似 graph 的召回方式不友好，比如找用户看过的商品中相似商品的相关商品，这时实现起来会比较麻烦，这是它的一些限制。再一个，我们需要有较好的截断策略，例如底层使用 relevence score 截断，排序使用 GBDT。</p>
 <p>当然，索引还会受到机器本身的内存限制，限于机器的大小，很多时候我们需要多机分片部署索引，这样会带来一定的复杂性。虽然有些限制，但是索引是目前应用很广泛、有效的方式，包括在推荐、搜索等领域都会使用到。</p>
 <p><strong>2. KNN 召回</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/223ef635c9964d759b161b3baa0d8bb8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271532414.webp" />   
     </p>
 <p>除了索引召回，KNN 也是现在较常用的一种召回方式。首先，我们把所有的候选集转换成 embedding，我们把用户兴趣也可以转换成 embedding，通过定义 embedding 之间距离计算公式，我们可以定义 KNN 召回问题，也就�</p>
 
@@ -473,6 +473,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -506,10 +510,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -888,6 +888,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

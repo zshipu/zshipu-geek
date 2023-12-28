@@ -207,7 +207,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>作为【推荐系统】系列文章的第七篇，将以CIKM2020中的一篇论文“Search-based User Interest Modeling with Lifelong Sequential Behavior Data for Click-Through Rate Prediction”作为今天的主角，主要介绍针对Lifelong用户行为序列建模的方案，用户行为长度可以达到上万，而且可以像DIN那样，对于不同的候选商品从用户行为里查找有效的信息建模用户的特殊兴趣。</p>
 <h2 id="背景"><strong>背景</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-c87cb7f6cb9b4f82b13ff45ca16cce28.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272149572.webp" />   
     </p>
 <p>从上图中可以发现，当用户行为序列长度增加到1000时，AUC会有1.5%的提升，用户历史行为数据对ctr的预估是有很大帮助的，而且越丰富用户行为数据对ctr模型的帮助越大。</p>
 <h2 id="本文的主要工作"><strong>本文的主要工作：</strong></h2>
@@ -218,23 +218,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p><strong>目前，对于用户行为数据的利用分为两方面:</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ed3cad06d97b44fb9a06a705fc9c7993.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272149427.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0def4805056144378efe299950a68977.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272149341.webp" />   
     </p>
 <ol>
 <li>一种是考虑效果DIN和DIEN，优点：考虑候选广告和用户行为的关系（Attention等），使用与候选item相关的行为建模出用户对于当前候选的兴趣，即可以建模出用户对不同候选item的兴趣；缺点：用户行为不能太长，serving的性能和线上存储。</li>
 <li>另一种是考虑性能MIMN，优点：将用户兴趣建模和ctr预估解耦，在用户兴趣建模方面，借鉴memory network的思路，使用两个矩阵M和S分别存储用户兴趣的信息和用户兴趣演化的信息，线上进行ctr预估时，只需要读取两个固定大小矩阵。因为兴趣矩阵可以提前计算好，所以不会对线上耗时造成较大的影响。缺点：固定大小的memory 矩阵表达信息是有限的，如果想建模更长的用户行为序列，memory-based的方法会面临表达能力有限，难以过滤噪声，建模随时间信息遗忘的问题。UIC&amp;MIMN解耦了兴趣建模和在线CTR预估的计算，建模用户兴趣时模型无法获取和使用待预估的候选item的信息。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5a10478d81ec4796bccaf520071d2588.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272149193.webp" />   
     </p>
 <p>这说明如果想更准确地建模超长的用户行为，对候选item的利用是很有必要的。</p>
 <h2 id="模型结构"><strong>模型结构</strong></h2>
 <p>本文借鉴了DIN的思想，也就是用与候选item相关的用户行为建模用户对当前预估目标item相关的兴趣。同时又考虑到线上根据候选item直接对全序列进行搜索性能肯定是扛不住的，所以就把整个搜索过程分成了两个阶段，即General Search Unit和Exact Search Unit。General Search Unit是将长度上千的用户行为数据缩减至几百，其中的大部分计算可以离线完成，Exact Search Unit是将缩减后的用户行为进一步进行信息提取，建模出用户对于候选item的兴趣。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-553905cd724144eda0893501db6d5b1b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272149280.webp" />   
     </p>
 <p><strong>General Search Unit的两种实现思路：</strong></p>
 <ol>
@@ -242,37 +242,37 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>Soft Search，用参数化的方式，对用户行为和候选item进行向量化，然后用向量检索的方式检索出Top_K个相关的行为（实现方法有Maximum Inner Product Search (MIPS）的方法ALSH）。文中提到因为长期用户行为的分布和短期用户行为的分布不一致，直接使用ctr模型中，短期行为学习到的embedding矩阵，会造成一定的误导，所以对于Soft Search中需要用到的embedding矩阵要单独搭建模型，进行训练。训练数据为超长的用户行为序列，作为ctr的一个辅助任务联合训练，如果行为过长，需要随机采样。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-8223b805f39d4fca88b4f3d2c4f8a525.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272149235.webp" />   
     </p>
 <p>给定用户行为集合B=[b_1; b_2; ,,, ; b_T] ，其中b_i是第i个用户行为， T是用户行为的长度。GSU为每个行为b_i计算关于候选商品的相关性分数 r_i，然后根据r_i选择Top-K相关的行为得到行为序列 B^*。hard-search和soft-search不同点是r_i的计算公式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5d54fb7d8a99472987ee3c60259ff7df.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272149254.webp" />   
     </p>
 <p><strong>hard-search</strong> 是无参数的，只有和候选广告类目相同的用户行为数据才会被选出送到下一级进行建模。其他C_a代表了候选广告类目，C_i代表了第i个用户行为的类目。虽然hard-search是一种基于数据特征的一种比较直观的方案。但是它非常容易部署到实际工业界在线预估系统中。</p>
 <p>在 <strong>soft-search</strong> 中，我们将用户行为序列B映射成为embedding表达E=[e_1; e_2; &hellip;&hellip;; e_T]。W_b和W_a都是模型参数，其中e_a代表了候选广告的embedding，e_i代表了第i个用户行为embedding。为了加速上万个用户行为的Top-K检索，采用基于内积的近似最近邻检索出Top_K个相关的行为，比如Maximum Inner Product Search (MIPS)。</p>
 <p>在工业数据上，Hard Search可以覆盖Soft Search中75%的行为，线上考虑性能使用了Hard Search。</p>
 <p>**Exact Search unit **直接使用multi-head Attention的结构对GSU中提取出的topK的用户行为进行建模，得到用户的长期兴趣的表示。因为长期行为中的时间跨度较大，文中也将历史行为与候选行为之间的时间间隔建模进来。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-56d01cc5384c4965aa6f4df7ad84bc3f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272149890.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-7fbb0c7f2aa344d89ed97cf426a04c84.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272149631.webp" />   
     </p>
 <p><strong>Multi-head attention</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-14fab93cc88e458ea07dae799eede076.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272149802.webp" />   
     </p>
 <p>最后，其中第一阶段和第二阶段是采用交叉熵 loss 联合学习。Loss 函数如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-aaa25d2b4dd64b3e99bc7cc2ee3668b7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272149477.webp" />   
     </p>
 <h2 id="online-serving"><strong>Online Serving</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-cc1c8ae95c6a4a3fab583460f8a09863.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272149282.webp" />   
     </p>
 <p>工业推荐系统和广告系统需要在1秒内处理巨量流量请求，需要CTR模型实时响应。serving耗时应该少于30ms。上图简要说明了CTR任务的Real Time Prediction (RTP) system。考虑lifelong用户行为，长期用户兴趣模型的serving在实时系统中更加困难。存储和耗时是长期用户兴趣模型的瓶颈。流量会随着用户行为序列长度线性增长。并且，在流量高峰每秒会有100万的用户请求。部署长期兴趣模型到线上挑战巨大。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-db33a83e83e44d5cb6f27573728de15e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272150026.webp" />   
     </p>
 <p>对于GSU里的两种search-model：soft-search model和hard-search model，用阿里的数据集做了大量离线实验。可以观察到soft-search model和hard-search model得到的Top-K行为极度相似，也就是soft-search得到的大多数top-K行为和目标商品的类目是一样的。这是我们场景里数据的一个典型特征。鉴于此，尽管soft-search model在离线实验中比hard-search model稍微好些，权衡收益和资源消耗，最终选择在我们系统中用hard-search model部署SIM。</p>
 <p>General Search的选择：Hard Search选出的用户行为可以覆盖soft Search选</p>
@@ -403,6 +403,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -436,10 +440,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -818,6 +818,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

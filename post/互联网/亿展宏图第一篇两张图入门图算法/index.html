@@ -207,7 +207,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c69e11d80ee64c28b72c56c7335b8ac4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271546720.png" />   
     </p>
 <blockquote>
 <p>供稿|eBay支付风控团队</p>
@@ -218,7 +218,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>——罗卡定律。</strong></p>
 <p><strong>引子</strong>: 在老牌TVB剧《法证先锋》中，法证部的高sir（欧阳震华饰）经常说的一句话：“ <strong>凡两个物体接触，必会产生转移现象</strong>”。这就是 <strong>罗卡定律</strong>，指的是：在犯罪现场调查中，行为人（犯罪嫌疑人）必然会带走一些东西，亦会留下一些东西。即现场必会留下微量迹证。而在eBay支付风控部门，我们也时时刻刻扮演着侦探的角色，与“不法分子”进行斗智斗勇。图算法(Graph Algorithm)作为侦探的好帮手，可以帮我们通过图深度学习的算法快速定位人与人以及人与物之间的微妙联系，用于抓住企图利用平台而做的不良行为。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5fbd1c7d6eb74543acdf6f7f55f704be.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271546611.webp" />   
     </p>
 <h2 id="导读"><strong>导读</strong></h2>
 <p>“亿展宏图”（“亿”是亿贝eBay的亿，“图”指的是图算法）是由eBay支付风控团队（主要负责保护在eBay交易的买家和卖家，降低交易支付风险）推出的系列文章，希望将eBay支付风控团队工作中图算法方面的一些理解和研究跟大家一起分享和探讨。同时，我们会把过去的几年里在KDD，AAAI等会议中发表的4~5篇文章的思路，用相对易于理解和形象的表述，轻松的融入到这些技术博客中，希望对大家有些启发。出于公司数据的安全性考虑，文中所用的数据是脱敏数据或者会有意换成假数据，请大家谅解。</p>
@@ -235,15 +235,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>根据维基百科的官方定义：图(Graph)用于表示物件与物件之间的关系，是图论的基本研究对象[1]。图是由一些小圆点（称为定点或者节点）和连接这些圆点的直线或者曲线（称为边）组成。从定义中可以看出，图就是点和边的集合，研究图就是对点和边的研究。为了便于大家理解，我们以下面三张图为例：</p>
 <p>1、社交图：人为节点，社交关系/方式为边；</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0eaa8674d567486f95b8f343459b1824.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271546143.png" />   
     </p>
 <p>2、知识图谱：知识为节点，知识点间的关系/联系为边；</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a769f2964f3b4861a34714593dc56f0e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271546095.png" />   
     </p>
 <p>3、化学里面的分子图：原子为节点，键为边。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5a88f123d78a473fb3257cb42b4fcd2c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271546858.png" />   
     </p>
 <h2 id="二图算法的应用"><strong>二、图算法的应用</strong></h2>
 <p>上大学期间，有些人可能会开始“堕落”、不学无术，对所学专业缺乏兴趣。其中一个很重要的原因就是他们内心没有找到这些课程对他以后工作或者生活的用处。我一直认为，只有知道了这个“物”能为我们“所用”之后，我们才会更有耐心和兴趣去一步一步学习研究。这也是我为什么前两篇要优先介绍图算法应用而不是纯算法公式的原因。图算法在业界的应用有搜索推荐、分类、聚类、异常检测、传染病传播分析等等，我们逐一介绍一下。</p>
@@ -252,18 +252,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>比如在Pinterest网站的搜索排序中，他们就引入了基于图的算法，因为用户会自己会建立自己的收藏商品集合，比如所有的洋娃娃在一个收藏夹里面，这样无形中就建立了点和边的信息，每个点就是物品，如果两个物品在一个收藏夹里面，他们之间就会有连边，更大概率是同一类物品。引入这种结构在某些场景下会大幅度提升算法效果。</p>
 <p>普通的搜索会根据图片信息，错误地返回一些纹理颜色类似但并不是同类型的物品，如下图的第一行所示，比如灯具等等。而基于图的算法结果（如下图第二行所示）在某些场景下会明显较好。不少大公司目前在搜索中也都慢慢地开始逐步引入图算法得到的一些特征，进而提升搜索准确性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2e45e19150f0445789b30a2fa28a6872.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271546495.png" />   
     </p>
 <p>（此图摘自斯坦福大学图算法课程[2])</p>
 <h3 id="2-分类"><strong>2. 分类</strong></h3>
 <p>如维基百科需要识别文章是否是假的/谎报文章(hoax article)，这就需要分类模型算法。通常解决这类问题的思路是用各种自然语言处理(NLP)的模型，通过文字上的不同进行分类。但是如果仔细看维基百科里文章结构性的分析，你会发现文章的联系图结构其实就是最核心的分类特征。根据维基百科分析师的研究发现，真实的文章会更互相耦合，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9396b3d6856d472f859bec7b42c91427.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271546114.png" />   
     </p>
 <p>（此图摘自斯坦福大学图算法课程[2])</p>
 <p>根据结构的不同，就可以建立图模型进行分类预测。效果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3c85e6cc93774a4584954f5aeaa148c5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271546013.png" />   
     </p>
 <p>（此图摘自斯坦福大学图算法课程[2])</p>
 <p>根据以上数据显示：随机标记(Random)的准确率在50%，非专业人工标记(Human)的准确率在66%，而图算法(Network)的准确性可以达到86%！可见图算法在某些特定的分类应用中的优越性。</p>
@@ -271,46 +271,46 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>业界有各种各样的图聚类算法，这里就先不赘述了。其中需要注意的是：图聚类算法和普通的K-means、层次聚类算法、密度聚类算法等各类传统算法的不同点。纯图聚类算法更多考虑的是图的结构，即边的结构，而不是传统聚类算法里面点和点之间的相似性。</p>
 <h3 id="4-异常检测"><strong>4. 异常检测</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6d8678a905fa434ba1cc5bb98ae08641.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271547029.png" />   
     </p>
 <p>（此图摘自斯坦福大学图算法课程[2])</p>
 <p>比如你有一个大的物理计算机集群，你可以通过图算法找到集群中各个机器，也就是各个节点之间的联系，并构造边，这样你就构造出来一张大图。当某些节点发生问题的时候，通过应用图算法便可以检测并定位到集群相关的节点问题。</p>
 <h3 id="5-传染病传播分析"><strong>5. 传染病传播分析</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7e91a8528b244c93be04d661a85c48e4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271547221.png" />   
     </p>
 <p>（此图摘自斯坦福大学图算法课程[2])</p>
 <p>新冠来临之后，每个人的停留轨迹和与他人的联系就天然的形成了图，可以应用各种图的算法。比如上图就是用户(Usr)和停留的地方(Place)之间的连边图，我们可以轻松找到与潜在危险用户有联系的人。另外，还有一类学术专家在研究传染病的传染速率模型，经典的是SIR(Susceptible, Infectious, Recovered)模型，会通过统计模型来模拟易感染人群，感染人群和治愈人群之间的关系和相关系数。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/29a8d4f8443047deb0aec16b56d2cb89.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271547696.webp" />   
     </p>
 <h2 id="三图算法的演化"><strong>三、图算法的演化</strong></h2>
 <p>在真正学习某一方向的算法时，不仅仅需要了解当前最流行和高级的的算法细节，更需要的是总结这个领域整个算法体系的历史演化并了解各个主要分支。假如你想到了一个优化创新的方向，但这其实是前人早就研究过并认为已经是行不通的方向，那么这个方向的研究其实是低效研究。理清体系的演化过程就可以很好地避免这种“无用功”。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e5e38656dca940ec933d6a64eed7b327.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271547540.png" />   
     </p>
 <p>只有了解了图算法的形成，发展和演化的整个过程，对于图的应用才会有更好的掌控能力。下面是笔者根据个人理解总结的两张图，以便梳理整个图算法的演进过程，如有理解不到位的地方，也希望大家指正，共同加深理解。</p>
 <p>首先，第一张图如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e43cb0530b8c4e28bcd62c1e25a2f93b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271547739.png" />   
     </p>
 <p>让我们先换位思考一下，假如说先辈们从来没有研究过任何图算法，你就是第一个开始研究图算法这个领域的人，你会一上来就研究各种图模型吗？不！你会先加深对于图算法这个领域的理解，做一些统计量，使自己对于这一门学科有更好的掌控力。</p>
 <p>这就是第一部分： <strong>测量(Measure)</strong>。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/21f561addc2e43c4a450001faae20e9c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271547502.webp" />   
     </p>
 <p>学术专家们定义了很多指标来描述一个图结果，比如说图的度分布，即每个点有几个边。比如一个点连有3条边，这个点的度就是3。对于每个点我们可以进行度的分布统计，就形成了度分布的统计量，用来衡量一个图的边的稠密程度等。</p>
 <p>有了一些统计量之后，人们开始试图建立一些统计模型，这个时候假设条件就是我们的好帮手，当加入一些假设条件后，问题就会变得简单很多，并可以从理论上抽象出模型来，这就到了第二个阶段： <strong>网络结构模型(Model Network Structure)</strong>。人们研究了各种宏观统计模型，比如经典的random graph模型和小世界模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2cc07706dd214beaa7a21ade6c1df6a2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271547060.png" />   
     </p>
 <p>再之后，宏观的模型研究一番后，人们发现不太容易应用这些模型，因为这些模型有了过多的假设，使得它很难解决实际的业界问题，所以大家又回到微观领域，也就到了第三阶段 <strong>探索一个图中的子图或者某种模式(Subgraph / pattern Detection)</strong>。如下图所示的ESU算法等这类算法就很好地帮助我们ebay风控团队在海量交易里面找到某种特定的洗钱或者盗号模式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3b10ec075b5d40159b62ec2071a47454.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271547756.png" />   
     </p>
 <p>在宏观微观都研究的差不多后，此时大家对于图已经有了相对深刻的了解，这个时候就更想研究用图算法来解决更常见的问题，比如对于图里面的人进行归类，并找到其中的共性来界定点和点之间的关系。这就是第四阶段： <strong>探寻共性(Detect Community)</strong>。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/51b00b00c4f34e3792ea183a7deed32a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271548367.png" />   
     </p>
 <p>这一类的算法主要分成没有节点重合的基于模块化进行优化的louvain图聚类算法，以及允许有节点重合的AGM算法等等。这一块有很多学术研究者都在研究。有兴趣的读者可以查阅相关算法细节，因为篇幅问题，我这里不再赘述了。</p>
 <p>以上四个阶段就构成了我所做的第一张图。</p>
@@ -444,6 +444,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -477,10 +481,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -859,6 +859,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

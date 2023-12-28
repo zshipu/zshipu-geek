@@ -216,29 +216,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b79afe0c824e4d2d8bf829d897e94952.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228420.png" />   
     </p>
 <p><strong>桔妹导读：</strong> 滴滴ElasticSearch平台承接了公司内部所有使用ElasticSearch的业务，包括核心搜索、RDS从库、日志检索、安全数据分析、指标数据分析等等。平台规模达到了3000+节点，5PB 的数据存储，超过万亿条数据。平台写入的峰值写入TPS达到了2000w/s，每天近 10 亿次检索查询。为了承接这么大的体量和丰富的使用场景，滴滴ElasticSearch需要解决稳定性、易用性、性能、成本等诸多问题。我们在4年多的时间里，做了大量优化，积攒了非常丰富的经验。通过建设滴滴搜索平台，打造滴滴ES引擎，全方位提升用户使用ElasticSearch体验。这次给大家分享的是滴滴在写入性能优化的实践，优化后，我们将ES索引的写入性能翻倍，结合数据冷热分离场景，支持大规格存储的物理机，给公司每年节省千万左右的服务器成本。</p>
 <h2 id="1背景"><strong>1、背景</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fd3994b718df41569f51adc076b00a4c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228575.webp" />   
     </p>
 <p>前段时间，为了降低用户使用ElasticSearch的存储成本，我们做了数据的冷热分离。为了保持集群磁盘利用率不变，我们减少了热节点数量。ElasticSearch集群开始出现写入瓶颈，节点产生大量的写入rejected，大量从kafka同步的数据出现写入延迟。我们深入分析写入瓶颈，找到了突破点，最终将Elasticsearch的写入性能提升一倍以上，解决了ElasticSearch瓶颈导致的写入延迟。这篇文章介绍了我们是如何发现写入瓶颈，并对瓶颈进行深入分析，最终进行了创新性优化，极大的提升了写入性能。</p>
 <h2 id="2写入瓶颈分析">2、写入瓶颈分析</h2>
 <h3 id="21-发现瓶颈">▍2.1 发现瓶颈</h3>
 <p>我们去分析这些延迟问题的时候，发现了一些不太好解释的现象。之前做性能测试时，ES节点cpu利用率能超过80%，而生产环境延迟索引所在的节点cpu资源只使用了不到50%，集群平均cpu利用率不到40%，这时候IO和网络带宽也没有压力。通过提升写入资源，写入速度基本没增加。于是我们开始一探究竟，我们选取了一个索引进行验证，该索引使用10个ES节点。从下图看到，写入速度不到20w/s，10个ES节点的cpu，峰值在40-50%之间。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ee15de6fb3734598a5bb610d9c5a314a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228297.png" />   
     </p>
 <p>为了确认客户端资源是足够的，在客户端不做任何调整的情况下，将索引从10个节点，扩容到16个节点，从下图看到，写入速度来到了30w/s左右。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e672b9b018b8409e82e56eb53a42da19.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228664.webp" />   
     </p>
 <p>这证明了瓶颈出在服务端，ES节点扩容后，性能提升，说明10个节点写入已经达到瓶颈。但是上图可以看到，CPU最多只到了50%，而且此时IO也没达到瓶颈。</p>
 <h3 id="22-es写入模型说明">▍2.2 ES写入模型说明</h3>
 <p>这里要先对ES写入模型进行说明，下面分析原因会跟写入模型有关。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2790e5241d0646abb75ab709e564f8ec.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228533.webp" />   
     </p>
 <p>客户端一般是准备好一批数据写入ES，这样能极大减少写入请求的网络交互，使用的是ES的BULK接口，请求名为BulkRequest。这样一批数据写入ES的ClientNode。ClientNode对这一批数据按数据中的routing值进行分发，组装成一批BulkShardRequest请求，发送给每个shard所在的DataNode。发送BulkShardRequest请求是异步的，但是BulkRequest请求需要等待全部BulkShardRequest响应后，再返回客户端。</p>
 <h3 id="23-寻找原因"><strong>2.3 寻找原因</strong></h3>
@@ -255,36 +255,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 bulkDetail||requestId=null||size=210506||items=137||totalMills=2655||max=2655||avg=218
 </code></pre><p>从示例中可以看到，2条记录的avg相比max都小了很多。一个BulkRequest请求的耗时，取决于最后一个BulkShardRequest请求的返回。这就很容易联想到分布式系统的长尾效应。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cbe932b970d94d349f857d24c91a7e33.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228725.png" />   
     </p>
 <p>接下来再看一个现象，我们分析了某个节点的write线程的状态，发现节点有时候write线程全是runnable状态，有时候又有大量在waiting。此时写入是有瓶颈的，runnable状态可以理解，但却经常出现waiting状态。所以这也能印证了CPU利用率不高。同时也论证长尾效应的存在，因为长尾节点繁忙，ClientNode在等待繁忙节点返回BulkShardRequest请求，其他节点可能出现相对空闲的状态。下面是一个节点2个时刻的线程状态：</p>
 <p>时刻一：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5fb627892f8c40b69a8f16c87d72a441.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228831.png" />   
     </p>
 <p>时刻二：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9a0e561c2ead4a018f66f39f4088fdb9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228204.png" />   
     </p>
 <h3 id="-24-瓶颈分析">▍ <strong>2.4 瓶颈分析</strong></h3>
 <p>谷歌大神Jeffrey Dean《The Tail At Scale》介绍了长尾效应，以及导致长尾效应的原因。总结下来，就是正常请求都很快，但是偶尔单次请求会特别慢。这样在分布式操作时会导致长尾效应。我们从ES原理和实现中分析，造成ES单次请求特别慢的原因。发现了下面几个因素会造成长尾问题：</p>
 <p><strong>2.4.1 lucene refresh</strong></p>
 <p>我们打开lucene引擎内部的一些日志，可以看到：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6c13c00888634e7ba489d777441c942b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228578.png" />   
     </p>
 <p>write线程是用来处理BulkShardRequest请求的，但是从截图的日志可以看到，write线程也会会进行refresh操作。这里面的实现比较复杂，简单说，就是ES定期会将写入buffer的数据refresh成segment，ES为了防止refresh不过来，会在BulkShardRequest请求的时候，判断当前shard是否有正在refresh的任务，有的话，就会帮忙一起分摊refresh压力，这个是在write线程中进行的。这样的问题就是造成单次BulkShardRequest请求写入很慢。还导致长时间占用了write线程。在write queue的原因会具体介绍这种危害。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/674c031152484e99a7413f54a54765f2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228758.png" />   
     </p>
 <p><strong>2.4.2 translog ReadWriteLock</strong></p>
 <p>ES的translog类似LSM-Tree的WAL log。ES实时写入的数据都在lucene内存buffer中，所以需要依赖写入translog保证数据的可靠性。ES translog具体实现中，在写translog的时候会上ReadLock。在translog过期、翻滚的时候会上WriteLock。这会出现，在WriteLock期间，实时写入会等待ReadLock，造成了BulkShardRequest请求写入变慢。我们配置的tranlog写入模式是async，正常开销是非常小的，但是从图中可以看到，写translog偶尔可能超过100ms。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/03eb56b480ce49aeac247a86c9b4f6a4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228811.webp" />   
     </p>
 <p><strong>2.4.3 write queue</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b878752665fa494dbc6ed4beb9c05c1b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228023.webp" />   
     </p>
 <p>ES DataNode的写入是用标准的线程池模型是，提供一批active线程，我们一般配置为跟cpu个数相同。然后会有一个write queue，我们配置为1000。DataNode接收BulkShardRequest请求，先将请求放入write queue，然后active线程有空隙的，就会从queue中获取BulkShardRequest请求。这种模型下，当写入active线程繁忙的时候，queue中会堆积大量的请求。这些请求在等待执行，而从ClientNode角度看，就是BulkShardRequest请求的耗时变长了。下面日志记录了action的slowlog，其中waitTime就是请求等待执行的时间，可以看到等待时间超过了200ms。</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">[xxx][INFO ][o.e.m.r.RequestTracker   ] [log6-datanode-sf-4f136-100] actionStats||action=indices:data/write/bulk[s][p]||requestId=546174589||taskId=6798617657||waitTime=231||totalTime=538
@@ -295,13 +295,13 @@ bulkDetail||requestId=null||size=210506||items=137||totalMills=2655||max=2655||a
 <p>长尾问题主要来自于BulkRequest的一批请求会分散写入多个shard，其中有的shard的请求会因为上述的一些原因导致响应变慢，造成了长尾。如果每次BulkRequest只写入一个shard，那么就不存在写入等待的情况，这个shard返回后，ClientNode就能将结果返回给客户端，那么就不存在长尾问题了。</p>
 <p>我们做了一个验证，修改客户端SDK，在每批BulkRequest写入的时候，都传入相同的routing值，然后写入相同的索引，这样就保证了BulkRequest的一批数据，都写入一个shard中。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bedec4370d9e401582c4eca1340fd4ae.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228747.png" />   
     </p>
 <p>优化后，第一个平稳曲线是，每个bulkRequest为10M的情况，写入速度在56w/s左右。之后将bulkRequest改为1M（10M差不多有4000条记录，之前写150个shard，所以bulkSize比较大）后，性能还有进一步提升，达到了65w/s。</p>
 <p>从验证结果可以看到，每个bulkRequest只写一个shard的话，性能有很大的提升，同时cpu也能充分利用起来，这符合之前单节点压测的cpu利用率预期。</p>
 <h2 id="3性能优化">3、性能优化</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ceea6da7032e4653bde257c15c2b7af1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228025.webp" />   
     </p>
 <p>从上面的写入瓶颈分析，我们发现了ES无法将资源用满的原因来自于分布式的长尾问题。于是我们着重思考如何消除分布式的长尾问题。然后也在探寻其他的优化点。整体性能优化，我们分成了三个方向：</p>
 <ul>
@@ -316,7 +316,7 @@ bulkDetail||requestId=null||size=210506||items=137||totalMills=2655||max=2655||a
 <p><strong>3.1.1 不带routing场景</strong></p>
 <p>由于用户对routing分布没有依赖，ClientNode在处理BulkRequest请求中，给BulkRequest的一批请求带上了相同的随机routing值，而我们生成环境的场景中，一批数据是写入一个索引中，所以这一批数据就会写入一个物理shard中。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d3487d52f45e46e880df79e5660b97e8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228116.webp" />   
     </p>
 <p><strong>3.1.2 带routing场景</strong></p>
 <p>下面着重介绍下我们在带routing场景下的实现方案。这个方案，我们需要在ES Server层和ES SDK都进行优化，然后将两者综合使用，来达到一个BulkRequest上的一批数据写入一个物理shard的效果。优化思路ES SDK做一次数据分发，在ES Server层做一次随机写入来让一批数据写入同一个shard。</p>
@@ -324,7 +324,7 @@ bulkDetail||requestId=null||size=210506||items=137||totalMills=2655||max=2655||a
 <p>物理shard必须是逻辑shard的整数倍，这样一个逻辑shard可以映射到多个物理shard。一组逻辑shard，我们命名为slot，slot总数为 <code>number_of_shards / number_of_routing_size</code>。</p>
 <p>数据在写入ClientNode的时候，ClientNode会给BulkRequest的一批请求生成一个相同的随机值，目的是为了让写入的一批数据，都能写入相同的slot中。数据流转如图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/01c924f6425e40128a6a48285fa8a4b2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228053.png" />   
     </p>
 <p>最终计算一条数据所在shard的公式如下：</p>
 <pre tabindex="0"><code class="language-slot" data-lang="slot">
@@ -333,7 +333,7 @@ slot = hash(random(value)) % (number_of_shards/number_of_routing_size)
 shard_num = hash(_routing) % number_of_routing_size + number_of_routing_size * slot
 </code></pre><p>然后我们在ES SDK层进一步优化，在BulkProcessor写入的时候增加逻辑shard参数，在add数据的时候，可以按逻辑shard进行hash，生成多个BulkRequest。这样发送到Server的一个BulkRequest请求，只有一个逻辑shard的数据。最终，写入模型变为如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1c00ed223fa340ed97999e93125edb5c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228000.png" />   
     </p>
 <p>经过SDK和Server的两层作用，一个BulkRequest中的一批请求，写入了相同的物理shard。</p>
 <p>这个方案对写入是非常友好的，但是对查询会有些影响。由于routing值是对应的是逻辑shard，一个逻辑shard要对应多个物理shard，所以用户带routing的查询时，会去一个逻辑shard对应的多个物理shard中查询。</p>
@@ -361,13 +361,13 @@ shard_num = hash(_routing) % number_of_routing_size + number_of_routing_size * s
 <p>不清洗大的冗余字段，我们验证下来，能有20%左右的性能提升，该优化同时还带来了10%左右存储空间节约。</p>
 <h2 id="4生产环境性能提升结果">4、生产环境性能提升结果</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ab9886dacf364276823260f8e14628bb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228894.webp" />   
     </p>
 <h3 id="41-写入模型优化">▍4.1 写入模型优化</h3>
 <p>我们重点看下写入模型优化的效果，下面的优化，都是在客户端、服务端资源没做任何调整的情况下的生产数据。</p>
 <p>下图所示索引开启写入模型优化后，写入tps直接从50w/s，提升到120w/s。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7b101031fa134cb381abccc14369b3cf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272228592.webp" />   
     </p>
 <p>生产环境索引写入性能的提升比例跟索引混部情况、索引所在资源大小（长尾问�</p>
 
@@ -493,6 +493,10 @@ shard_num = hash(_routing) % number_of_routing_size + number_of_routing_size * s
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -526,10 +530,6 @@ shard_num = hash(_routing) % number_of_routing_size + number_of_routing_size * s
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -908,6 +908,8 @@ shard_num = hash(_routing) % number_of_routing_size + number_of_routing_size * s
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -201,7 +201,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9c065ba07bbd4eed820acb1098f2b0ae.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272156016.jpeg" />   
     </p>
 <blockquote>
 <p>文章作者：省钱快报算法团队</p>
@@ -213,11 +213,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="业务背景">业务背景</h2>
 <p>省钱快报推荐业务主要涉及首页 feeds 推荐、详情页相似商品推荐、收藏、个人中心等其他入口的推荐，业务指标着重关注 ctr/cvr/gmv 等，产品形态上和淘宝、京东等大致一样，不同之处在于下单的动作发生在第三方 app 上。简单来说用户在快报上的成交链路为浏览-&gt; 点击-&gt; 领券-&gt; 跳转至第三方平台详情页并下单。因此不同于一般电商业务，快报的交易场景下转化漏斗较多，漏斗各层都需要关注。点击率、领券率、下单率每个环节都需要最优化，而各个指标又相互牵制相互影响，优化过程困难重重。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-c426e604eed2417bb11c21489a29d70f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272156668.webp" />   
     </p>
 <h2 id="系统架构">系统架构</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-37ecb801090a4735b289d32f0047dd5d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272156649.webp" />   
     </p>
 <p>▷▷ <strong>数据流</strong></p>
 <p>数据流分为离线部分和实时部分，离线部分主要包含了 app 曝光日志、线上服务特征日志的收集、拼接、清洗等，大体上是一个 label match 的过程，这一过程的准确性决定了后续阶段模型能够给业务带来的收益，如果 label match 出错了，那训练出来的模型也必然是不可用的，一定不会带来好的应用效果。数据拼接的任务一定要尽可能的保证曝光、点击、订单的量和比例都能和 BI 报表的统计数据对的上，这是训练出可靠模型的前提。快报团队非常重视数据的准确性，我们从多个方面检验和保证最终数据的准确无误。这中间最重要的是需要设计一个跟踪用户请求、曝光、点击、订单整个转化链路的唯一 ID，我们称之为 traceID，主要通过这个 ID 来完成 label match 的过程。</p>
@@ -247,11 +247,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>▷▷ base 模型 ( FM )</strong></p>
 <p>一般的模型演进过程都是从 LR 或者 GBDT 开始，我们直接跳过了 LR 的阶段，直接过渡到了 FM 作为第一个模型。究其原因，FM 早在 13 年左右就已经开始被大范围使用，而我们在 18 年中才开始应用模型进行排序工作，FM 模型的效果已经得到各大厂的广泛验证，因此我们也比较有信心将 FM 作为 base model。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/91a04e58b213459fa18a5c3747631207.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272156441.webp" />   
     </p>
 <p>相比于历史更悠久 LR 模型，FM 模型可以自动做二阶的特征组合，相比于需要人工进行特征组合的 LR 来说 FM 在这方面完爆之。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3fc51bf84ae64354b18d096935380618.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272156337.webp" />   
     </p>
 <p>看公式，FM 只是比 LR 多了后面交叉项的因式分解部分，实际上这也算是如今大行其道的 embedding 的雏形了。公式上看直接计算 FM 复杂度是 O(KN^2)，但是上述公式在简化后可以在 O(KN)复杂度内计算，而在稀疏情况下往往大量 x 为 0，因此计算通常远远小于 O(KN)的复杂度，同时稀疏模型的模型文件也可以大幅压缩，在实际应用中我们去除了 w 和 v 全为 0 的参数，模型文件压缩了 80% 左右，同步模型所需的带宽和 predictor 服务所需的内存也大幅减少。</p>
 <p>我们上线的第一版模型是 FM+FTRL 的组合，经过多次迭代 auc 大致在 0.68～0.69 左右，线上累计 ctr 提升 30%+。</p>
@@ -259,7 +259,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>经过小半年的迭代，FM 逐渐有点力不从心，在特征上挖掘和利用的差不多的时候我们逐渐开始把方向转向深度模型，希望深度模型能进一步带来效果提升。</p>
 <p>深度模型在 15、16 年之后慢慢变成主流，在 Google 开源 tensorflow，发表 wide&amp;deep 模型，推出 alpha go 之后，深度模型便彻底火了起来。但是在推荐/搜索领域深度模型真正应用的好的也就是头部几个大厂，小公司印象里有成功应用的并不多见。我们在 18 年底押注深度学习，经过调研后第一个模型便确定为 DeepFM，因为 FM 模型我们已经做的相当成熟练，因此从 FM 升级到 DeepFM 是理所当然。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cac9b2f03c314c2081e5b4fa4ec96ab4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272156975.webp" />   
     </p>
 <p>DeepFM 本身并不复杂，从本质上讲只是在 FM 的基础上增加了若干层神经网络而已，embedding 层都是共享的，因此可以端到端的训练。相对于 FM 模型，DeepFM 的 NN 部分可以增加高阶的特征交互，弥补 FM 在高阶特征组合上的补足 ( 原理上 FM 可以任意阶组合，但是受限于计算复杂度，一般应用中只有二阶 )。相较于 FNN 这种把 FM 的输出当作 NN 输入的模型，DeepFM 可以端到端的训练，而且能同时保留二阶和高阶的特征组合。</p>
 <p>在 FM 迁移到 DeepFM 后，并没有取得预期的效果，auc 和 FM 持平，经过多次调优依然不能超越 FM。究其原因，我们推测有如下两点：</p>
@@ -273,21 +273,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>1. DIN/DIEN</strong></p>
 <p>DIN/DIEN 是阿里妈妈团队的 ctr 模型，主要用在广告 ctr 预估上业务上，当然推荐排序场景也可以应用。上图中和 Base 模型相比 DIN 的主要思想是引入 attention，一般网络中对序列特征等多值/变长的特征处理方法通常是 embedding 之后做 sum/average/pooling 等操作，将其变为定长。序列有长有短，这类操作往往导致信息损失和误差。我们认为序列中每个元素都代表用户的兴趣点，引入 attention 之后便可以通过网络来学习整个序列，每个点都可以学到一个归一化的权重，整个序列可以通过加权和来表示，则兴趣的表示更加合理，理论上效果要好的多。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cd4753983d3242cca73be2aaa2ee3cf7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272156182.webp" />   
     </p>
 <p>而 DIEN 更进一步引入 RNN 来提取兴趣，序列按时间先后顺序先通过 RNN 再对 RNN 的输出做 attention，可以兼顾长短期兴趣及兴趣的演进，因此比 DIN 更加合理。</p>
 <p>我们在实验中使用了过去 30 天点击过的物品序列，物品所属类别序列，物品品牌序列等，序列长度为 50，其他特征方面和 DeepFM 差不多，经过多次迭代和调整，线下 auc 相比 DeepFM 没有提升，最终没有上线。DIN/DIEN 对数据要求比较高，我们最长商品点击序列定为 50，实际上大部分样本序列都非常短，序列的延续性不高，这些因素都影响了模型能力的发挥。</p>
 <p><strong>2. DCN、xDeepFM</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5c45dc2be63c4572ac6fd8fbca66795f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272156875.webp" />   
     </p>
 <p>DCN 和 DeepFM 相比主要区别是左边 FM 部分替换为一个 cross network 的网络，其中第 L+1 层表示为 X_{l+1}=X_0X^T_lw_l+b_l+X_l，可以简单理解为前一层和第 0 层 ( 即输入层 ) 的特征组合。虽然 cross net 可以非常方便的控制任意高阶的特征组合，相比 FM 的二阶组合更具优势，但是从公式可以看出每一层都与输入层有太强的关联，因此高阶的特征交叉和一阶特征有很大相关性。</p>
 <p>微软出的 xDeepFM 则更进一步将 DeepFM 左边 FM 部分替换为 CIN ( Compressed Interaction Network )，xDeepFM 及 CIN 的结构如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5893d9ca77d54888b942cf962d4a80c1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272156930.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4869f7980e8b4a0ab2b967e81d993100.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272156824.webp" />   
     </p>
 <p>X^k即为 K 阶的特征组合，相比于 DCN 中的 cross network，CIN 表达能力更强。在 CIN 中第 K 层表示为X^k_{h,*} - \sum_{i=1}^{H_{k-1}}\sum_{j=1}^mW^{k,h}_{ij}(X^{k-1}_{i,*}*X^0_{j,*})，通过堆叠点乘和 1 维卷积操作，CIN 能更充分的进行高阶特征融合，在加上右边的 RNN，使得模型可以兼具更强的记忆和泛化能力。在我们的实验中，使用的特征和 base model 保持一致，仅仅改变网络结构，实验结果是 DCN 和 DeepFM 持平，xDeepFM 在 auc 上仅有非常微弱的优势，但其计算量太大，线上预估时长较长，最终没有上线。</p>
 <p><strong>3. ESMM</strong></p>
@@ -295,11 +295,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>4. 自定义网络模型</strong></p>
 <p>经过 DIN/DIEN/DCN/xDeepFM 等一系列模型的研究之后，我们开始反思为什么这些大名鼎鼎的模型在我们的业务中没有达到预期？一方面业务不同、数据不同，没有一个万能的模型。另一方面我们在照搬这些模型的时候也许有一些细节没做好，这块后续还会进一步研究。之后我们从业务出发，逐渐开发和调整自己现有的网络结构和参数，最终我们的自定义网络经过多次迭代和优化，累计 auc 提升了接近 2 个点，下面是最终的网络结构。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/137af147548f4c3f974f6bed7d1edf55.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272156810.webp" />   
     </p>
 <p><strong>模型效果对比</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/765fe53db34a4799a93f4c9b11738194.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272156715.webp" />   
     </p>
 <p><strong>5. pairwise model</strong></p>
 <p>我们在 pairwise model 方面也做了好一些尝试，模型上改动不大，主要是 loss 部分改为 BPR ( Bayesian Personalized Ranking ) loss，训练数据由 pointwise 调整为 pairwise。</p>
@@ -351,7 +351,7 @@ S:-1 -Hash-&gt; 325344354 -embeding_lookup-&gt; [.3,.5,.6,.7...] -Mask-&gt; [.0,
 <p>我们也尝试过在线上通过一个简单 lr 模型来更好的拟合 ctr 和 cvr，但是最终效果不太理想，从总的思路来讲我们需要让整个转化漏斗的每个环节的敞口最大化。</p>
 <p><strong>▷▷ ESMM</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c8785000475c4df4af2987ef9b80dfdb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157697.webp" />   
     </p>
 <p>在 ctr 和 cvr 分别建模的情况下 cvr 模型由于下单样本相对于曝光/点击样本来说非常少，导致 cvr 模型难以充分训练。另外只用点击到下单的样本则丢失了曝光样本当中的大量信息，模型的预估也存在偏差。受到阿里 ESSM 模型的启发我们也尝试将 ctr、cvr 融合在一个模型进行建模。底层的输入一致，ctr 任务和 cvr 任务共享 embedding 层，对于 cvr 来说可以在整个曝光的大空间内学习 embedding 向量。</p>
 <p>因为有两个网络因此模型训练时长大致也增长一倍，从模型服务的角度讲好处是请求模型时只需要请求一个模型就可以。在具体应用时我们可以得到三个预估数值：pctr、pcvr、pctcvr，在线下评估的时候分别评估了 pctr 对应的点击 auc，pcvr 对应的下单 auc，二者组合对应的点击/下单 auc，从最终线下评估结果看 ESMM 要差于两个模型分开训练，最终线上的效果也低于基线。</p>
@@ -370,7 +370,7 @@ S:-1 -Hash-&gt; 325344354 -embeding_lookup-&gt; [.3,.5,.6,.7...] -Mask-&gt; [.0,
 <p>输入的数据全部是哈希之后 embedding 的所以有一个哈希空间和 embedding 向量维度的取舍，向量维度越高越准确，哈希空间也是。所以要根据机器内存综合考虑哈希冲突率和向量维度的影响。</p>
 <p>下表为在其他参数不变的情况下，调整不同参数带来的 AUC 变化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c61139d409504dd7b6eff71590bc778e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157030.webp" />   
     </p>
 <p><strong>▷▷ 激活函数</strong></p>
 <p>激活函数方面，选择了常用的 Relu。尝试过 prelu 和 dice ( DIN 中提出的激活函数 )，有略微的正收益，其中 Dice&gt;Prelu。</p>
@@ -531,6 +531,10 @@ S:-1 -Hash-&gt; 325344354 -embeding_lookup-&gt; [.3,.5,.6,.7...] -Mask-&gt; [.0,
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -564,10 +568,6 @@ S:-1 -Hash-&gt; 325344354 -embeding_lookup-&gt; [.3,.5,.6,.7...] -Mask-&gt; [.0,
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -946,6 +946,8 @@ S:-1 -Hash-&gt; 325344354 -embeding_lookup-&gt; [.3,.5,.6,.7...] -Mask-&gt; [.0,
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

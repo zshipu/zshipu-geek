@@ -206,11 +206,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>语音是58同城用户之间的重要沟通媒介，58同城C端用户和B端商家之间可以通过网络音视频通话、电话建立连接。58同城数千名销售和客服人员会通过呼叫中心与客户进行电话沟通，这些场景下会产生大量的语音数据，这些语音数据可以通过语音识别技术转换为文本，并做进一步挖掘，以提取有价值的数据。流式语音识别，可以实现“边说话边出转写结果”的功能，应用在与B端商家或者C端用户的语音交互的场景中。语音交互中的服务系统可以“实时”的获取对端用户的转写结果，更快速的进行下一轮的预测、判别，为交互的时效性、流畅度提供重要支持。</p>
 <p>举例来说，在与B端商家或者C端用户进行语音沟通时，除了人工销售、客服人员，也使用语音机器人(参见: <a href="https://zshipu.com/t?url=http%3A%2F%2Fmp.weixin.qq.com%2Fs%3F__biz%3DMzA5OTQ1MDQ4Mw%3D%3D%26mid%3D2456198277%26idx%3D1%26sn%3Da718adb26f02633b417ca635c2097a39%26chksm%3D87101799b0679e8f78d34802b4970ad0aee055218cf4f341b11864ba44a3983596f5e532d414%26scene%3D21%23wechat_redirect">人机语音对话技术在58同城的应用实践</a>)进行电话语音沟通。在电话语音沟通的过程中，使用流式识别将对端的语音数据实时转写为文本，以进行意图识别、问题匹配等，然后根据不同意图选择不同的回复内容。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2ba07ac8221b450bb725b8cc439fa1d8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271936696.webp" />   
     </p>
 <h2 id="总体架构"><strong>总体架构</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2cd0ac3492804708bca405d1287c59a7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271936526.webp" />   
     </p>
 <p>流式语音识别引擎的整体架构如下:</p>
 <p>(1) 接入层：包含了IOS/Android/Java SDK作为接入调用接口。接入层和语音识别服务建立全双工长连接通信，完成协议交互。</p>
@@ -223,13 +223,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>识别进行中阶段，客户端开始发送语音数据流，语音接入服务调用VAD人声检测服务，检测到人声的开始，开始调用实时语音解码服务进行解码。语音识别状态为识别进行中。语音解码服务将语音数据流解码为文本，实时返回给语音接入服务，再返回给客户端。语音识别状态为识别进行中。</p>
 <p>识别结束阶段，客户端一句话的语音数据流发送完毕，语音接入服务结束实时解码服务的调用，实时解码服务将一句话的完整结果返回给语音接入服务。语音接入服务返回给客户端。语音识别状态为句子识别结束。客户端结束语音识别的调用，语音接入服务收到信令后，结束和实时解码服务的连接，释放资源。语音识别状态为识别结束。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9da81f3900d749bea51cd36d83f49d99.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271936455.webp" />   
     </p>
 <p>流式语音识别服务，经过SDK和语音接入服务的交互，通过实时语音解码服务获取转写的结果，最后对转写的句子进行后处理加标点，再返回给调用方。</p>
 <h2 id="接入层sdk"><strong>接入层SDK</strong></h2>
 <p>接入层SDK，主要是鉴权加密、建立连接，处理服务端返回的事件，以及完成事件对应的回调。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4f1b2dd234244d0bae195d31bc6f5ce1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271936261.webp" />   
     </p>
 <p>事件，即服务协商好的关于识别的状态，回调就是对于不同识别状态的处理。比如识别开始，即注册一系列的回调函数，在接收到服务端确认消息后，回调函数通知调用方。</p>
 <h2 id="流式识别引擎核心功能"><strong>流式识别引擎核心功能</strong></h2>
@@ -237,7 +237,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>**语音接入(交互)服务 **</p>
 <p>语音接入服务的功能，是实现和客户端SDK建立连接，完成和客户端SDK的协议交互；与实时解码服务建立连接和交互，获取到转写的中间结果，和最终识别结果。中间转写结果，指的是整句话结束前的转写结果。最终识别结果，指的是整句话结束后的完整的识别结果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8c2039bceaa74d7cbd3020662feeea08.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271936904.webp" />   
     </p>
 <p>语音接入服务完成的主要功能有五种：</p>
 <p>（1） <strong>鉴权：</strong> 对每个接入的请求，通过秘钥生成的签名进行鉴权对比，只接受合法的请求。</p>
@@ -249,7 +249,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>**实时语音解码服务 **</p>
 <p>实时解码服务，是整个流式识别引擎的核心功能，完成将语音流实时“翻译”为文字的功能。实时解码服务，依赖于两个方面:模型和解码器。模型，即语音识别的声学模型、语言模型。解码器，即可以将音频特征转为文本的对象。对于流式识别引擎来说，要求解码器的转写能有较低耗时，需要毫秒级的响应，实时率越低越好。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d7d481c29abe4f8abdf4d6655735efc7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271936715.webp" />   
     </p>
 <p>我们是基于开源的Kaldi语音识别框架，结合业务标注数据，由算法同学离线训练出了准确率高于第三方语音识别引擎的模型，即上文说的声学模型和语言模型。声学模型，可以简单的认为是音频帧和音素的一种映射；语言模型，可以简单的认为是音素和字的一种映射。基于两个模型，即可以完成由音频帧到文字的预测。解码，是音频特征在解码网络中搜索出最优路径的过程，解码器就是完成的这个过程。解码的网络，就是声学模型和语言模型构造的网络。</p>
 <p>实时语音解码服务的整体流程：</p>
@@ -267,7 +267,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>在介绍语音接入服务时，我们提到了并发限制，说明整个流式语音识别引擎对于并发是敏感的。我们在最开始的系统测试时，发现在系统的资源使用率不高的情况下，解码耗时随着并发路数的增加而逐步增大。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9599b4b93b0a48ccac40e902dda3928c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271936711.webp" />   
     </p>
 <p>通过优化解码器参数，降低beam和lattice-beam以降低网络搜索规模、优化内存操作的分配和释放方式以减少内存碎片，降低内存操作耗时、优化解码路径选取以降低在网络中操作和搜索的耗时等，使得并发解码路数和耗时之间的关系解耦，将服务支持的最大并发路数提高了一倍。在相同测试集下的最终转写结果解码耗时，优化前平均耗时567ms，优化后平均耗时97ms。在优化解码器参数的过程中，尽可能的保证了识别的准确率，优化后相比优化前的识别准确率基本持平。</p>
 <ul>
@@ -275,7 +275,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>流式语音识别，是不断的输入语音流，不断产生中间结果，达到边说边出转写效果的识别系统。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3f9f7c514c304955840e8e0a43c0ae5f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271936443.webp" />   
     </p>
 <p>在原始的解码器版本中，获取中间结果的耗时较高，并且和发送的语音时长相关，之前每次获取中间的转写结果时，都需要从头从整个lattice中搜索最优路径，耗时比较高，这里优化为从已经走过的最优路径中回溯出一条最优的路径，使得获取中间结果时不受耗时、以及发送时长的影响(发送时长越短耗时越高)。在相同测试集下获取结果时的耗时，每次发送100ms音频流，优化前平均耗时104ms左右，优化后平均耗时18ms左右，且不受发送时长的影响。</p>
 <p>(3) 对于保证解码结果准确率的要求，经过在标准测试集上评测，实时解码结果的准确率和离线模型结果的准确率几乎相近。</p>
@@ -405,6 +405,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -438,10 +442,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -820,6 +820,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

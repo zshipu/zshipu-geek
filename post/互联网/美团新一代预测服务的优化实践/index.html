@@ -237,7 +237,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>第一，TensorFlow的算子粒度划分较细，导致一个模型通常由几千个算子构成，这些算子在GPU上的执行转变为对应的GPU kernel的执行。kernel是GPU上并行执行的函数。</p>
 <p>GPU kernel大体上可以划分为传输数据、kernel启动、kernel计算等几个阶段，其中每个kernel的启动需要约10𝞵𝘀左右。大量的小算子导致每个kernel的执行时间很短，kernel启动的耗时占了大部分。相邻的kernel之间需要通过读写显存进行数据的传输，产生大量的访存开销。而GPU的访存吞吐远远低于计算吞吐，导致性能低下，GPU利用率并不高。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6b176ddbb6134bdeb0e3292b61fa2dd8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706263.webp" />   
     </p>
 <p>第二，GPU卡上包含多个计算单元，理论上，不同计算单元是可以跑不同kernel的，但实际上为了编程简单，CUDA默认假设在同一时刻一个Stream里跑同一个kernel。虽然可以通过多Stream的方式跑，但是多Steam之间又缺少细粒度的协同机制。</p>
 <p>在经过充分调研与讨论后，我们决定第一期重点关注TensorFlow框架下如何解决常见CTR模型结构在英伟达GPU上执行效率不高的问题，我们先将问题收敛为以下两个子问题：</p>
@@ -251,7 +251,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="31-算子融合">3.1 算子融合</h3>
 <p>通过将多个小算子融合为一个语义等价的大算子，可以有效减少GPU上的kernel数量。一方面，kernel数量减少直接降低了kernel发射的开销；另一方面，融合后的大kernel执行的计算量增加，避免了多个kernel间数据传输导致的频繁访存，提高了计算的访存比。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5151c2d5e99e4306928984cda94eff1e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706051.webp" />   
     </p>
 <p>可以看到，上图中的左右等价结构，左侧的21个算子执行的运算，可以在1个等价算子中完成。反映到GPU的活动上，左侧至少有21个GPU kernel以及21次显存的读写，而右侧只需要执行1个kernel以及1次显存读写。对于每个融合后的算子，需要有对应的kernel实现。然而，模型的算子组合是无穷的，对每种融合后算子手工实现kernel是不现实的。TVM通过编译手段，可以自动进行算子的融合以及设备代码生成，避免了逐一手写kernel的负担。</p>
 <h4 id="311-tf-tvm自动切图优化">3.1.1 TF-TVM自动切图优化</h4>
@@ -263,51 +263,51 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在最终方案实现上，我们参考了TF-TRT的设计。这个设计对比XLA的优势在于XLA切图方案与TensorFlow源码紧耦合，直接将XLA的三个Pass嵌入到了启动Session的主流程中。而切图策略，优化策略后续会有非常频繁的迭代，我们不希望与TensorFlow的源码太过耦合。我们扩展了TF-TVM的方案，在实际使用中我们把这个切图过程为一个独立流程。在模型部署或更新时，自动触发。</p>
 <p>在推理阶段，优化过的子图使用TVM执行，其余的计算图使用TensorFlow原生实现执行，将两者结合共同完成模型的推理。由于TVM和TensorFlow的Runtime各自使用独立的内存管理，数据在不同框架间传输会导致额外的性能开销。为了降低这部分开销，我们打通了两个框架的底层数据结构，尽可能避免额外的数据拷贝。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9471c0eca2af43fe97e5ac31fe51f198.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706923.webp" />   
     </p>
 <h4 id="312-计算图等价替换">3.1.2 计算图等价替换</h4>
 <p>TensorFlow模型中过多的不被TVM支持的算子会导致TF-TVM切图零碎，影响最终的优化效果。为了让TF-TVM切图尽量大且完整，以及让TVM优化过程中的融合力度更大，我们对模型中的一些复杂结构进行检测，替换为执行更高效或更易于融合的等价结构。</p>
 <p>例如，TensorFlow原生EmbeddingLookup结构，为了支持分布式训练，会对Embedding表进行切分，产生DynamicPartition和ParallelDynamicStitch等动态算子。这些动态算子不被TVM支持，导致TF-TVM图切分过于细碎。为了让TF-TVM切图更完整，我们通过图替换，对这种结构进行修改，通过将Embedding分表提前合并，得到简化的EmbeddingLookup结构。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0bf84d1143294fb08f88c31d29b2ed3f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706836.webp" />   
     </p>
 <h3 id="32-cpu-gpu数据传输优化">3.2 CPU-GPU数据传输优化</h3>
 <p>TVM优化后的子图被替换为一个节点，该节点在GPU上执行，通常有几十甚至几百个输入，该节点的前置输入（如Placeholder）通常是在CPU上执行，会涉及多次的CPU-GPU传输。频繁的小数据量传输，无法充分利用带宽。为了解决这个问题，我们对模型结构进行修改，在计算图中添加合并与拆分节点，控制切图的位置，减少数据传输的次数。</p>
 <p>一种可能的合并方式是，对这些输入按相同的Shape和Dtype进行合并，后续进行拆分，将拆分节点切入TVM的子图一起优化。这种方式会导致一些问题，如部分子图的算子融合效果不佳；另一方面，GPU kernel函数的参数传递内存限制在4KB，对于TVM节点输入非常多的情况（如超过512个），会遇到生成代码不合法的情况。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6fb5a6c4a2b948079e60d9381045d18d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706754.webp" />   
     </p>
 <h3 id="33-高频子图手工优化">3.3 高频子图手工优化</h3>
 <p>对于TVM无法支持的子图，我们对业务中高频使用的结构进行抽象，采用手写自定义算子的方式，进行了高效GPU实现。</p>
 <p>例如，模型中有部分时序特征使用String类型输入，将输入的字符串转为补齐的数字Tensor，将int类型的Tensor作为下标进行Embedding操作。这部分子图的语义如图，以下简称SE结构（StringEmbedding）：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8e2ba855025b4686bfd7cb0967b37bd4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706889.webp" />   
     </p>
 <p>这一部分结构，TensorFlow的原生实现只有基于CPU的版本，在数据量较大且并行度较高的情景下，性能下降严重，成为整个模型的瓶颈。为了优化这部分结构的性能，我们在GPU上实现了高效的等价操作。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5809d73ad510478295ab00039ce3d07c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706850.webp" />   
     </p>
 <p>如图所示，PadString算子在CPU端将多个字符串按最大长度进行补齐，拼接成一个内存连续的uint8类型Tensor，以便一次性传输到GPU。StringEmbedding接收到补齐后的字符串后，利用GPU并行计算的特性，协同大量线程完成字符串的切分与查表操作。在涉及规约求和、求前缀和等关键过程中，使用了GPU上的Reduce/Scan算法，编码过程使用 <code>&lt;span&gt;warp_shuffle&lt;/span&gt;</code> 指令，不同线程通过寄存器交换数据，避免了频繁访存的开销，获得了很好的性能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6b0ee77a428d42f69720f1c0b5643b95.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706860.webp" />   
     </p>
 <p>GPU Scan算法示意，一个8个元素的前缀和操作，只需要3个迭代周期。在一个有几十路类似操作的模型中，手工优化前后的GPU timeline对比如下图，可以看到H2D + StringEmbedding这部分结构的耗时有很大的缩减，从42毫秒缩减到1.83毫秒。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/90658ee84f5e40abb6f35ad12b83f422.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706834.webp" />   
     </p>
 <p>除了StringEmbedding结构，我们对StringSplit + ToNumber + SparseSegmentSqrt、多路并行StringEmbedding等结构都进行了高效融合实现，在优化流程中通过结构匹配进行相应的替换。</p>
 <h3 id="34-cpu-gpu分流">3.4 CPU-GPU分流</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7d94915e0a5e4ab9b1c0caa0a08a0b3b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706011.webp" />   
     </p>
 <p>实际线上的RPC请求，每个请求内的样本数（下文称Batch）是在[1,MaxValue]范围内变化的，MaxValue受上游业务系统，其他基础系统能力等多方面因素制约，相对固定。如上图所示，以某个搜索服务为例，我们统计了线上的Batch数值分布，Batch=MaxValue的请求占比约45%，Batch=45占比7.4%，Batch=1占比2.3%。其余的Batch占比从0.5%到1%不等。对于GPU来说，提高单个请求的Batch能更好地利用硬件资源，发挥GPU的并行计算能力，表现出相对CPU更优的延迟和吞吐；当Batch较小时，GPU相对CPU的优势就不明显了（下图是我们测试同样的模型在固定压力下，CPU/GPU上延迟的变化）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d8f4b3a3f4214d549bdb8f1a4888a61a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706071.webp" />   
     </p>
 <p>大部分请求都由GPU在做了，CPU资源有较多空余，我们将一些小Batch的碎请求放在CPU运行，这样可以让整个Worker的资源利用更加均衡，提高系统整体的性能。我们根据测试设定了一个Batch阈值，以及计算图在异构硬件上区别执行的判断逻辑：对于小Batch的情况，直接在CPU上执行计算图，只有Batch超过阈值的请求才会在GPU上推理。从线上的统计数据来看，整体流量的77%跑在GPU上，23%跑在CPU上。</p>
 <p>在GPU的一系列优化策略和动作中，Batch大小是很重要的信息，不同Batch下优化出的kernel实现可能是不同的，以达到对应workload下最优的计算性能；由于线上的流量特点，发送到GPU的请求Batch分布比较细碎，如果我们针对每个Batch都优化一个模型的kernel实现显然是不够经济和通用的。因此，我们设计了一个Batch分桶策略，生成N个固定Batch的优化模型，在实际请求到来时找到Batch距离最近的一个Bucket，将请求向上Padding到对应的Batch计算，从而提高了GPU的利用效率。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4d95ef1d3a7749a4818b62ca36ae2b59.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706710.webp" />   
     </p>
 <h2 id="4-压测性能分析">4 压测性能分析</h2>
 <p>我们选取一个模型进行线上性能压测分析。</p>
@@ -316,7 +316,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>GPU模型测试环境为8核Intel(R) Xeon(R) Gold 5218 CPU @ 2.30GHz，Tesla T4 GPU，16G内存。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0b7a652eaa434c92b25949c1284e7b90.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706503.webp" />   
     </p>
 <p>上图对比了在不同的QPS下（x轴），GPU模型在各BatchSize下的推理时延（y轴）。GPU模型在BatchSize=128以下，推理耗时差异不明显，较大的BatchSize更有利于吞吐；对比BatchSize=256的GPU模型与BatchSize为25的CPU模型，在QPS低于64的情况下，二者推理耗时基本持平；QPS超过64的情况下，GPU的推理时延低于CPU。GPU的吞吐相比CPU提升了10倍。</p>
 <p>同时，我们可以看到不同曲线的陡峭程度，CPU在QPS高出64后，时延会迅速上升，GPU则依然保持平稳，直到QPS超过128才会有明显上升，但仍旧比CPU更平稳。</p>
@@ -447,6 +447,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -480,10 +484,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -862,6 +862,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

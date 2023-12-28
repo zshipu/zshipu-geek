@@ -210,19 +210,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>该项目为一个企业舆情监测系统，通过监测企业的各类公开信息和新闻来帮助用户快速了解企业动态，掌握企业舆情走向。而用户所操作的最多的一个核心功能就是搜索，囊括了新闻搜索、事件搜索、公司搜索。其中新闻搜索由于更新频率快、时效性强，因此数据量最大，也是最容易被用户感知到“速度慢”、“卡”、“转不动”的一个模块。</p>
 <p>因此，本次优化的核心背景就是舆情系统的新闻搜索速度慢，QPS过低，具体可以参考下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a6abe4b9eb0f4d89bc30aad79a89aa55.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272017382.png" />   
     </p>
 <p>本次测试是在单机情况下进行的，采用的测试工具是k6，测试方法是通过发起10个线程模拟10个用户的并发请求，观察10分钟内的处理请求数。</p>
 <p>通过测试显示，新闻搜索的单机服务器QPS为8.9/s。由于是单机测试，正式上线后会采用集群，因此正式环境中的QPS肯定会远远大于这个数字。并且由于搜索业务调用比较频繁，QPS小于10会让客户感到明显的卡顿，因此该问题亟需优化。另外公司大量的业务依赖于ES，因此研究如何提升新闻搜索也可以对优化其他类似的业务有启发，例如实体链接、知识图谱包括基础架构部的日志收集ELK等等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e80e44ad03a84165bd783fe24c7916d6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272017464.webp" />   
     </p>
 <h2 id="es优化过程"><strong>ES优化过程</strong></h2>
 <h3 id="1段合并"><strong>1.段合并</strong></h3>
 <p>也就是对ES内部的新闻索引进行 <strong>force segment</strong>，这是一种非常常见的加速ES查询速度的手段。</p>
 <h5 id="1原理"><strong>（1）原理</strong></h5>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ab1baaadf9fc4b80a1dec1835dbcb12b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272017144.png" />   
     </p>
 <p>一个index的所有数据在一个集群中是分布在不同的nodes上的，而一个node又是由若干shards来组成的，一个shard就是一个Lucene实例，是一个基本的搜索单元，发送给ES的查询请求，最终会打到所有的Lucene实例中去进行搜索（1个ES的索引有1个或者多个分片 ，分片对应实际存储数据的Lucene的索引），并进行聚合。而对于一个Lucene实例来说，索引文件又是由大量的segments来组成的，每次查询，Lucene实例都会打开所有的segments分段来进行搜索，而打开segments又需要维持响应数量的文件句柄、上下文环境等，所以底层的segments的数量会影响到搜索效率，大量的小segment会严重拖慢搜索速度。</p>
 <p>这里留一个坑有空来填，就是段合并的原理，为什么每次flush后触发的段合并仍然会有大量的小分段？合并分段会给线上索引带来怎样的影响？其中采用的怎样的算法我会在后面描述。</p>
@@ -238,7 +238,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">POST &lt;host&gt;/&lt;index&gt;/_forcemerge?max_num_segments=
 </code></pre><h5 id="3效果"><strong>（3）效果</strong></h5>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1a7a13ffb62f4704b75de6d988e1f325.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272018170.webp" />   
     </p>
 <p>通过段合并，分段数量从269 到10 ，QPS数值提升了大约3倍。</p>
 <h4 id="2使用highlight取代全文"><strong>2.使用highlight取代全文</strong></h4>
@@ -248,7 +248,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="3优化精排"><strong>3.优化精排</strong></h4>
 <p>通过如下的PPROF图，我们可以发现，在NewSentence这个函数里面strings.Split 和strings.ToLower占据了很大的比重：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2b4bce6072634ec4b59780d268c62b45.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272018041.png" />   
     </p>
 <p>下面分析一下这一步的代码究竟在执行什么：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">
@@ -303,7 +303,7 @@ func ToLower(s string) string {
 }
 </code></pre><p>简单来说，golang为了满足全世界字母的大小写转换，所以当它判定字符串中有非ascii码的时候，就会走Map函数去进行其他语言的大小写转换，比如德语的ä会被转写为Ä，全世界这么多语言有非常多的大小写映射，所以要在内存里面装一个大table 来表示各种语言的大小写映射，而查找字符，则是用的二分法来查找。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3132d310b1e14da58b5a2da141cfc9b9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272018284.png" />   
     </p>
 <p>而我们恰恰是中文字符，所以每次都会走这个Map，但中文没有大小写区分，所以做了很多无用功。为了规避这一点，就需要自己写Lowercase方法。</p>
 <p>对于第二个问题而言，我们只需要把这些操作放在一个方法里面走一次遍历完成Tolower, split, replace操作即可。</p>
@@ -338,7 +338,7 @@ func PreprocessText(s string) []string{
 }
 </code></pre><p>最终的优化效果就是，从CPU耗时上，精排比以前缩减了大约50%。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e9890702b4c449139428d4b4ba33f81d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272018030.png" />   
     </p>
 <p>实际QPS的提升却并不明显，主要原因是引发性能瓶颈的桎梏并不在精排上。但是优化还是有意义的，当需要用golang处理大量文本来实现一些底层函数时可以得到加速，用go bench 来评估一下速度:</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">
@@ -350,16 +350,16 @@ BenchmarkOfNewMethod-8          1000000000           0.000098 ns/op
 <p><strong>第一，采用多个date filter来召回数据，并维护一个set保证召回的数据不重复。</strong></p>
 <p>具体来说，每个filter都是一个时间段，例如”近3天” ”近7天&quot; “近30天” 这三个filter, 在每个时间段里去取TOP100的数据，最终召回300条数据送到精排。问题在于：即便采用go routine进行并发请求,但根据木桶效应，其速度依然取决于最慢的那个query,如下图显示，其实际处理时间是1.67s,另外还很容易对ES集群造成很大的压力。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1060749819dd48baa25c336a63df705c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272018185.png" />   
     </p>
 <p><strong>第二，采用gaussian decay function。</strong></p>
 <p>它其实是在ES打分时，加入了一个function score，考虑其时间因素来进行召回， 但是因为它本质上是个function score，而function score又是个性能杀手，所以当时我们没考虑使用这个。</p>
 <p>最终，我们决定通过测试来决定最终采取哪种方式来实现近期数据的召回，我们采用vue为10，并发请求1min来进行测试，下图分别为多date filter qps和Gaussian decay function的测试结果：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8f2a47fa44ce47a283a7332b91c93ba3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272018032.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a9612c95e48c4d4b84f9e5fc00d0e1ec.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272018490.png" />   
     </p>
 <p>最终测试显示，相比于多date filter qps的方式，Gaussian decay function的QPS要明显高出很多，因此选择Gaussian decay function的方式。</p>
 <h4 id="5自建es-cluster-扩大nodes数量"><strong>5.自建ES Cluster, 扩大Nodes数量</strong></h4>
@@ -368,7 +368,7 @@ BenchmarkOfNewMethod-8          1000000000           0.000098 ns/op
 <p>因此想要更深入地控制ES集群，就必须采取自建ES集群的方式。本来这里是有一个指向公司内网wiki的外链的，由于涉及公司保密问题，因此自建的详细步骤就不在这里说了。</p>
 <p>简单来说，在费用降低的情况下提高了机器的配置以及data node 的数量。并且采用了高版本的ES以及Kibana，在成本降低30%的情况下，将QPS 提升到 96/s。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3e8f65ba5f364a15b1f7dc909a3e443d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272018904.png" />   
     </p>
 <h4 id="6优化-shards-数量"><strong>6.优化 shards 数量</strong></h4>
 <p>关于这个主题，我也是在公司wiki单独有个栏目介绍，所以这里就不放链接了，简而言之，我做了一个对比试验，一个index有10个shards，�</p>
@@ -495,6 +495,10 @@ BenchmarkOfNewMethod-8          1000000000           0.000098 ns/op
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -528,10 +532,6 @@ BenchmarkOfNewMethod-8          1000000000           0.000098 ns/op
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -910,6 +910,8 @@ BenchmarkOfNewMethod-8          1000000000           0.000098 ns/op
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

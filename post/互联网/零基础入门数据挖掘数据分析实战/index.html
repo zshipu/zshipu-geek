@@ -230,7 +230,7 @@ Train_data = pd.read_csv(path+&#39;used_car_train_20200313.csv&#39;, sep=&#39; &
 Test_data = pd.read_csv(path+&#39;used_car_testA_20200313.csv&#39;, sep=&#39; &#39;)
 </code></pre><p>所有特征集均脱敏处理，脱敏处理后均为 label encoding 形式，即数字形式</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c177f1a0e36348458a4f1716f09d0376.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281949871.png" />   
     </p>
 <p><strong>总览数据</strong></p>
 <p><strong>简略观察数据 head()+shape</strong></p>
@@ -242,25 +242,25 @@ Test_data.shape
 <p>describe()中包含每列的统计量，个数(count)、平均值(mean)、方差(std)、最小值(min)、中位数(25% 50% 75%)、最大值(max)等。通过观察以上指标，可以瞬间掌握数据的大概范围和每个值的异常值的判断 ，例如有时候会发现 999 9999、 -1 等值这些其实都是 nan 的另外一种表达方式。</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">Train_data.describe()
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/27baf230f41d45b68e9ec8efad5e94b6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281949100.png" />   
     </p>
 <p><strong>info()熟悉数据类型</strong></p>
 <p>通过 info()来了解数据每列的 type，有助于了解是否存在除了 nan 以外的特殊符号异常。</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">Train_data.info()
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8c5c2e1de39f4f66afb1301d19eab93f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281949572.png" />   
     </p>
 <h2 id="缺失值和异常值">缺失值和异常值</h2>
 <p><strong>缺失值</strong></p>
 <p><strong>查看每列的存在 nan 情况</strong>**</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">Train_data.isnull().sum()Test_data.isnull().sum()
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8fe93809f7b5477fa650ce6e20638b9d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281949624.png" />   
     </p>
 <p><strong>排序函数 sort_values()</strong></p>
 <p>可以将数据集依照某个字段中的数据进行排序，该函数即可根据指定列数据也可根据指定行的</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/865dc871eff34e92bf8c6de3f4d5f1f8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281949668.png" />   
     </p>
 <p>通过以下两句可以很直观的了解哪些列存在 “nan”, 并可以把 nan 的个数打印。主要的目的在于 nan 存在的个数是否真的很大，如果很小一般选择填充，如果使用 lgb 等树模型可以直接空缺，让树自己去优化，但如果 nan 存在的过多、可以考虑删掉。</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">
@@ -270,7 +270,7 @@ missing = missing[missing &gt; 0]
 missing.sort_values(inplace=True)
 missing.plot.bar()
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/43846308c2f743209345dbad5da1fec9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281949962.png" />   
     </p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">
 # 可视化缺省值
@@ -279,29 +279,29 @@ msno.bar(Train_data.sample(1000))
 msno.matrix(Test_data.sample(250))
 msno.bar(Test_data.sample(1000))
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dc602bbf68724525ad639353866a9c3f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281949170.png" />   
     </p>
 <p>从上文 Train_data.info()的统计信息可以发现，除了 notRepairedDamage 为 object 类型其他都为数字。接下来将 notRepairedDamage 中几个不同的值都进行显示如下：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">Train_data[&#39;notRepairedDamage&#39;].value_counts()
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c68ea826ff5a4b71b8cf84919ea5ecb6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281949585.png" />   
     </p>
 <p>可以看出‘ - ’也为空缺值，因为很多模型对 nan 有直接的处理，这里我们先不做处理，先替换成 nan。</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">Train_data[&#39;notRepairedDamage&#39;].replace(&#39;-&#39;, np.nan, inplace=True)
 Train_data[&#39;notRepairedDamage&#39;].value_counts()
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d4928b6e1f9b412883a73b557c1646a2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281949494.png" />   
     </p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">Train_data.isnull().sum()
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ecf3352633a6485c9a589860371040b8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281949310.png" />   
     </p>
 <p><strong>异常值</strong></p>
 <p>以下两个类别特征：seller 和 offerType 严重倾斜，一般不会对预测有什么帮助，故这边先删掉，当然你也可以继续挖掘，但是一般意义不大</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">Train_data[&#34;seller&#34;].value_counts()
 Train_data[&#34;offerType&#34;].value_counts()
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8102e8028f12454b8659c4468d89194e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281949285.png" />   
     </p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">del Train_data[&#34;seller&#34;]
 del Train_data[&#34;offerType&#34;]
@@ -328,14 +328,14 @@ sns.distplot(y, kde=False, fit=st.norm)
 plt.figure(3); plt.title(&#39;Log Normal&#39;)
 sns.distplot(y, kde=False, fit=st.lognorm)
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/11152bdc6ca7430f89fcb49829a9700f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281949222.png" />   
     </p>
 <p><strong>偏度和峰度</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d71e4be821fc4c908ae6f84b6e50acab.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950128.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6fcfba093c594c408d941c2e436802a8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950489.png" />   
     </p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">sns.distplot(Train_data[&#39;price&#39;]);
 print(&#34;Skewness: %f&#34; % Train_data[&#39;price&#39;].skew())
@@ -351,7 +351,7 @@ plt.show()
 plt.hist(np.log(Train_data[&#39;price&#39;]), orientation = &#39;vertical&#39;,histtype = &#39;bar&#39;, color =&#39;red&#39;)
 plt.show()
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/48f21b98bdf447109977e0930a11d2ae.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950061.png" />   
     </p>
 <h2 id="特征分析">特征分析</h2>
 <p><strong>数字特征</strong></p>
@@ -368,7 +368,7 @@ categorical_features = [&#39;name&#39;, &#39;model&#39;, &#39;brand&#39;, &#39;b
 </code></pre><p><strong>总览</strong></p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">numeric_features.append(&#39;price&#39;)print(numeric_features)
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/eacb8b59f08d44c881fb210e6c10ec51.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950260.png" />   
     </p>
 <p><strong>相关性分析</strong></p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">price_numeric = Train_data[numeric_features]
@@ -379,7 +379,7 @@ plt.title(&#39;Correlation of Numeric Features with Price&#39;,y=1,size=16)
 sns.heatmap(correlation,square = True,  vmax=0.8)
 del price_numeric[&#39;price&#39;]
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8e02881200de4d1a982dd5f52bbbb23c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950564.png" />   
     </p>
 <p><strong>特征偏度和峰值</strong></p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">
@@ -390,7 +390,7 @@ for col in numeric_features:
           &#39;Kurtosis: {:06.2f}&#39;.format(Train_data[col].kurt())
          )
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d44accc53f93446dabe75da1918d078a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950676.png" />   
     </p>
 <p><strong>每个数字特征的分布可视化</strong></p>
 <p>pd.melt()：处理数据，透视表格，可将宽数据转化为长数据，以便于后续分析。形成的数据即为，键：各特征名称，值：特征对应的值</p>
@@ -411,7 +411,7 @@ columns = [&#39;price&#39;, &#39;v_12&#39;, &#39;v_8&#39; , &#39;v_0&#39;, &#39;
 sns.pairplot(Train_data[columns],size = 2 ,kind =&#39;scatter&#39;,diag_kind=&#39;kde&#39;)
 plt.show()
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/53686c04bf9c4e28b1d8164a9f0d0c6f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950020.png" />   
     </p>
 <p><strong>多变量与 price 的回归关系</strong></p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">fig, ((ax1, ax2), (ax3, ax4), (ax5, ax6), (ax7, ax8), (ax9, ax10)) = plt.subplots(nrows=5, ncols=2, figsize=(24, 20))
@@ -446,7 +446,7 @@ sns.regplot(x=&#39;v_14&#39;,y = &#39;price&#39;,data = v_14_scatter_plot,scatte
 v_13_scatter_plot = pd.concat([Y_train,Train_data[&#39;v_13&#39;]],axis = 1)
 sns.regplot(x=&#39;v_13&#39;,y = &#39;price&#39;,data = v_13_scatter_plot,scatter= True, fit_reg=True, ax=ax10)
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bd316a744e224075acf46dcb9f75dbbe.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950892.png" />   
     </p>
 <p><strong>类别特征</strong></p>
 <p><strong>查看 nunique 分布</strong></p>
@@ -475,7 +475,7 @@ f = pd.melt(Train_data, id_vars=[&#39;price&#39;], value_vars=categorical_featur
 g = sns.FacetGrid(f, col=&#34;variable&#34;,  col_wrap=2, sharex=False, sharey=False, size=5)
 g = g.map(boxplot, &#34;value&#34;, &#34;price&#34;)
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f98f9e31988a49e88ac28b08bc119851.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950465.png" />   
     </p>
 <p><strong>查看小提琴图</strong></p>
 <ul>
@@ -483,7 +483,7 @@ g = g.map(boxplot, &#34;value&#34;, &#34;price&#34;)
 <li>这种图表结合了箱形图和密度图的特征，主要用来显示数据的分布形状</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8598eef153a34b2f980fed6023792cc9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950330.png" />   
     </p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">
 catg_list = categorical_features
@@ -500,7 +500,7 @@ f = pd.melt(Train_data, id_vars=[&#39;price&#39;], value_vars=categorical_featur
 g = sns.FacetGrid(f, col=&#34;variable&#34;,  col_wrap=2, sharex=False, sharey=False, size=5)
 g = g.map(bar_plot, &#34;value&#34;, &#34;price&#34;)
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ceeda0e6cc6642228d2df2ee42790342.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950304.png" />   
     </p>
 <p><strong>类别频数可视化</strong></p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">
@@ -643,6 +643,10 @@ g = g.map(count_plot, &#34;value&#34;)
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -676,10 +680,6 @@ g = g.map(count_plot, &#34;value&#34;)
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1058,6 +1058,8 @@ g = g.map(count_plot, &#34;value&#34;)
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -202,7 +202,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6b6847e4d04a4c159c03ac95a254a848.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553787.png" />   
     </p>
 <blockquote>
 <p>分享嘉宾：傅轶 网易数帆</p>
@@ -219,109 +219,109 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="01-云原最初的探索"><strong>01 云原⽣最初的探索</strong></h1>
 <p><em>Operator化的⽇志采集</em></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6b27f358addc4d8cb28c329008f05ccf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553205.png" />   
     </p>
 <p>早期公司内部业务跑在物理机上时，各业务使用的日志采集工具、日志中转和存储、配置下发都比较混乱，选型种类多。公司内基于轻舟平台推进了各服务容器化和云原生化，随着服务不断地迁移到K8s上，我们关于采集K8s容器日志和日志平台方面积累很多实践经验。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/32374cc9065445ad889385d416d4ea9e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553923.png" />   
     </p>
 <p>云原生日志是什么样的，容器日志采集和主机上服务的日志采集有什么差异？首先Pod在K8s中会频繁地发生迁移，手动去节点上变更配置日志采集配置不太切实际。 同时，云原生环境中日志存储的形式多样，有容器标准输出和HostPath，EmptyDir，PV等。另外，采集日志后，一般会根据云原生环境的Namespace、Pod、Container、Node甚至容器环境变量、Label等维度进行检索和过滤，这些元信息需要在日志采集时被注入。</p>
 <p>常见的云原生环境日志采集有以下三种思路：</p>
 <h2 id="1-只采集标准输出"><strong>1. 只采集标准输出</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ebd36b676a4945169498cea8e1f231d6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553005.png" />   
     </p>
 <p>日志打印到标准输出的操作虽然符合云原生十二要素，但是很多业务还是习惯输出到日志文件中，而且只采集标准输出日志难以满足一些复杂业务的需求。常规的采集标准输出日志的方式是挂载/var/lib/docker，/var/log/pods下的目录。同时需要注意选型的日志Agent是否支持注入k8s元信息。</p>
 <h2 id="2-agent志路径全局挂载"><strong>2. Agent⽇志路径全局挂载</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/db6d6fb98eac4f30b8794b9f944bfa94.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553273.png" />   
     </p>
 <p>日志可以放在EmptyDir，HostPath或PV存储中，通过DaemonSet方式把日志采集Agent部署到每一台k8s节点上。EmptyDir等存储映射到节点的目录可以通过通配的方式配置到Agent进行采集，由Agent读取配置路径下的日志文件。</p>
 <p>但这种通用匹配的方式无法根据服务级别进行单独配置。如果需要配置只采集某些服务的日志、或是某一个应用和其他应用的格式不同，例如某个应用的日志是多行的日志，此时需要单独修改配置，管理成本比较高。</p>
 <h2 id="3-sidecar式"><strong>3. Sidecar⽅式</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0421cb71120144e1b817facbfb3e1b1d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553734.png" />   
     </p>
 <p>每个业务Pod在部署时都增加一个日志采集的Agent SideCar，可以通过容器平台或k8s webhook的方式把日志采集Agent注入到Pod内。Agent可以通过挂载相同的HostPath或EmptyDir的方式采集到业务容器的日志。</p>
 <p>这种方式的弊端是对Pod侵入性强，Pod数量多时资源消耗较大。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/76a100fbc6a7461e82019cf2c914496c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553910.png" />   
     </p>
 <p>对比DaemonSet和SideCar两种部署方式，DaemonSet在稳定性、侵入性、资源占用方面有优势，但隔离性、性能方面SideCar方式更好。我们实践中会优先使用DaemonSet方式采集日志。如果某个服务日志量较大、吞吐量较高，可以考虑为该服务的Pod配置Sidecar方式采集日志。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d6b73e962e9c46559ea775293249ff89.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553333.png" />   
     </p>
 <p>针对日志采集方面的痛点，我们提出的第一个初步方案是：自研的Ripple Operator配合开源的日志采集客户端Filebeat进行业务日志采集。</p>
 <p>部署方面，FileBeat、Ripple通过SideCar方式部署在一起，Ripple监听k8s。在使用方面，用户通过CRD，一个CRD可以表示一个服务的日志采集配置，Ripple可以和k8s交互感知到Pod生命周期。Ripple可以下发配置到Agent，自动添加Pod相关元信息并注入到日志中。存储方面HostPath、EmptyDir、PV、Docker Rootfs都可以支持。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/58de95d6ee0841aea0c113eb4c7cfc5b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553761.png" />   
     </p>
 <p>图中日志采集的架构先在网易严选进行了应用， 后面逐渐地被公司内绝大多数部门参考落地，具体架构会根据实际环境有所区别。首先日志平台下发配置，Ripple监听到K8s的CRD配置变动后，把配置下发给Filebeat。Filebeat把采集到的日志发送到中转机，中转机发送给Kafka，Flink消费Kafka数据进行处理后转发给后端日志存储。</p>
 <h1 id="02-进深区"><strong>02 进⼊深⽔区</strong></h1>
 <p><em>⼤规模场景下的困境与挑战</em></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/798b4f9ab36f40059180e4eccc325b40.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553826.png" />   
     </p>
 <p>随着接入的业务越来越多，1.0版本的日志架构逐渐暴露了一些问题：超大规模下系统的稳定性问题、日志平台性能问题、排障困难和排障需求不断增多、维护人力成本直线升高等。</p>
 <p>在前面介绍的架构中，Filebeat会把每个服务的日志发送给中转机。但是Filebeat是一个单一的队列架构，在中转机的阻塞会影响整个节点的Filebeat日志上报。</p>
 <p>我们尝试把Filebeat改造成多队列的模式增强隔离性，但是由于Filebeat本身的设计架构局限，重构的效果和运行状态都不理想，同时与开源版本的维护和升级存在很大困难。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/43e80692cbe1465fa7895b653c255caf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553030.png" />   
     </p>
 <p>Filebeat只支持单个Output，当用户需要把日志发送到多个Kafka集群时，只能在同一个节点上部署多个Filebeat。导致运维成本高、计算资源消耗大、水平扩展困难。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3f89297fa08f46b6b8cf3197858ce318.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553383.png" />   
     </p>
 <p>Filebeat设计之初是为了解决Logstash的问题，作为轻量级的日志采集端运行，不适合作为中转。Logstash在日志切分、解析等方面表现出色，但是问题在于性能较弱。虽然Flink性能和表现出色，但我们的很多场景只需要简单的日志切分，Flink一般依赖流式处理基础平台的支持，同时在交付过程中用户要额外付出Flink的机器和运维成本，所以我们需要一个更轻量、成本更低的方案。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c2645539042c4836b6eba06ce62c40ff.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553751.png" />   
     </p>
 <p>此外，日志采集过程的可观测性和稳定性也很重要。在用户使用过程中经常会遇到日志没有按预期采集、日志采集延迟、日志丢失、日志量增长速度过快磁盘爆满等问题，Filebeat没有提供这些完善等监控指标，同时还需要额外部署prometheus exporter。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e1a8654c23734b848f11d23fa9499369.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553961.png" />   
     </p>
 <p>我们以一个线上问题为例。线上某集群经常遇到磁盘使用量短时间内暴增到90%以上并触发报警的情况。实际登录节点排查问题后，发现报警的原因在于下游Kafka吞吐量不够，一些日志文件没有完全采集完毕，Filebeat进程默认保留文件句柄直到文件采集完毕，由于文件句柄没有释放，底层的文件无法被真正删除。但在这种情况下，Filebeat缺乏输入延迟、发送延迟和堆积情况等指标，影响稳定性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ea51be8209b64574b6dd5046519797bd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553077.png" />   
     </p>
 <p>在一个大流量的节点，我们发现Filebeat发送数据到下游Kafka时整体数据处理速度不理想，于是进行了很多优化的尝试，比如换SSD的Kafka集群、改Kafka配置、优化Filebeat配置等调优。我们发现在Filebeat不打开数据压缩的情况下，最大数据发送速度达到80MB/s后很难再有提升，打开数据压缩后Filebeat的CPU的消耗又暴增。调整Kafka或Filebeat参数、机器等配置的优化效果不明显。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/13a561dcefed4ea691f48e30fb6f2daa.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553389.png" />   
     </p>
 <p>那么除了Filebeat外，其他的日志采集工具能不能满足需求？当前主流的日志采集Agent对容器化场景下的日志采集支持不太理想，大部分开源日志采集工具仅支持到容器标准输出的采集，对云原生下日志采集也没有整体解决方案。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c229f8ab3da948c0aedbf0051b8ca43c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553446.png" />   
     </p>
 <h1 id="03-新的征程"><strong>03 新的征程</strong></h1>
 <p><em>开源Loggie的现在和未来</em></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/84cd2450cdfb4f768a3976fb31271e8e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553694.png" />   
     </p>
 <p>基于Filebeat和现有主流数据采集工具的情况，我们决定自研日志采集Agent——Loggie。它是基于Golang的轻量级、⾼性能、云原⽣⽇志采集、聚合Agent，⽀持多Pipeline和组件热插拔，整体架构如图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ef77c7a54b3349a58b9b8d850527dc74.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553926.png" />   
     </p>
 <p>我们加强了Agent的监控和稳定性，可以利用Monitor EventBus上报Agent运行情况，同时暴露了可调用的Restful API和Prometheus拉取监控数据的接口。配置管理方面，目前使用K8S进行配置下发和管理，后续会接入更多配置中心供用户管理配置。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/34a31e8b26ac4fe282ce36a020286333.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553029.png" />   
     </p>
 <p>Loggie提供了一栈式日志解决方案，新Agent不再分开维护Agent和中转机。作为一个可插拔组件，Agent既可以作为日志采集端使用，也可以作为中转机使用，同时支持日志中转、过滤、解析、切分、⽇志报警。Loggie同时提供了云原生日志采集完整解决方案，比如通过CRD的形式利用K8s的能力下发配置、部署等。基于我们长期的大规模运维日志收集服务的经验，Loggie沉淀了全⽅位的可观测性、快速排障、异常预警、⾃动化运维能⼒的功能。Loggie基于Golang开发，性能非常好，它资源占⽤小、吞吐性能优异、开发效率高维护成本低。</p>
 <h2 id="1-栈式志解决案"><strong>1. ⼀栈式⽇志解决⽅案</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b3ec867f94594319a0ab82af653cbcb8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553078.png" />   
     </p>
 <p>Agent既可以作为日志采集客户端，也可以作为中转机使用。在日志中转方面，我们通过实现Interceptor模块逻辑实现日志的分流、聚合、转存、解析、切分等。通过K8s的CRD可以下发日志采集Agent配置。新的日志采集架构整体维护成本更低。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e297c1b8831241fd89f9998980bf6357.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281554332.png" />   
     </p>
 <p>在采用Loggie之前我们有两种报警方案：第一种是基于ElastAlert轮询Elasticsearch进行日志报警，该方案存在配置下发需要手动配置、告警接入不能自动化和高可用不完善等问题；第二种是基于Flink解析关键字或是对日志进行正则匹配进行报警，在前面我们已经介绍过，对于整体日志采集服务而言Flink是比较重量级的。</p>
 <p>在采用Loggie后，我们可以使用logAlert Interceptor，在日志采集过程中就可以通过关键字匹配识别info或error进行报警。也可以通过单独部署Elasticsearch Source的Loggie Aggregator对Elasticsearch进行轮询，把信息发送到Prometheus进行报警。新版日志报警架构更轻量，维护起来也更简单。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bc07f5613e484108aad1cf9aecca9148.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281554424.png" />   
     </p>
 <p>在项目开发方面，我们秉承微内核、插件化、组件化的原则，把所有组件抽象为component。开发者通过实现生命周期接口，可以快速开发数据发送端逻辑、数据源读取逻辑、处理逻辑和服务注册逻辑。这样的设计让需求能更快更灵活地实现，大大了日志采集侧的开发效率。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9f0dfe7898f34da2afb8ef6c7fe0f671.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281554789.png" />   
     </p>
 <p>基于灵活高效的Agent数据源设计，我们可以配置kubeEvent source采集K8S Event数据作为监控报警的补充。相比重新实现一个采集K8S Event项目，只需要在Loggie上实现对应的source，其他如队列缓存、解�</p>
 
@@ -449,6 +449,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -482,10 +486,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -864,6 +864,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

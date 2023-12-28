@@ -220,7 +220,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/da81982c0f0541b384d082f2ef12fbaf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281729941.webp" />   
     </p>
 <blockquote>
 <p>分享嘉宾：苏舒 腾讯 高级工程师</p>
@@ -238,7 +238,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="01-背景及痛点"><strong>01 背景及痛点</strong></h2>
 <p>如图 1 所示，这是当前已经助力的一些内部应用的用户，其中小程序和视频号这两款应用每天或者每个月产生的数据量都在 PB 级或者 EB 级以上。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/33c5029533c04a5fbba3dcfe34c68bdf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281729893.png" />   
     </p>
 <p>图1</p>
 <p>这些应用的用户在构建他们自己的数据分析平台过程中，他们往往会采用图 2 这样的一个架构，相信大家对这个架构也非常的熟悉了。</p>
@@ -246,7 +246,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>业务方比如腾讯看点或者视频号的用户，他们通常会采集应用前端的业务打点数据以及应用服务日志之类的数据，这些数据会通过消息中间件（Kafka/RocketMQ）或者数据同步服务 (flume/nifi/dataX) 接入数仓或者实时计算引擎。</p>
 <p>在数仓体系中会有各种各样的大数据组件，譬如 Hive/HBase/HDFS/S3，计算引擎如 MapReduce、Spark、Flink，根据不同的需求，用户会构建大数据存储和处理平台，数据在平台经过处理和分析，结果数据会保存到 MySQL、Elasticsearch 等支持快速查询的关系型、非关系型数据库中，接下来应用层就可以基于这些数据进行 BI 报表开发、用户画像，或基于 Presto 这种 OLAP 工具进行交互式查询等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/96b50ae1240d42da99edd47c883c337e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281729203.png" />   
     </p>
 <p>图2</p>
 <h3 id="2-lambda-架构的痛点"><strong>2. Lambda 架构的痛点</strong></h3>
@@ -254,7 +254,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>整体上，数仓架构中有非常多的组件，大大增加了整个架构的复杂性和运维的成本。</p>
 <p>如下图，这是很多公司之前或者现在正在采用的 Lambda 架构，Lambda 架构将数仓分为离线层和实时层，相应的就有批处理和流处理两个相互独立的数据处理流程，同一份数据会被处理两次以上，同一套业务逻辑代码需要适配性的开发两次。Lambda 架构大家应该已经非常熟悉了，下面我就着重介绍一下我们采用 Lambda 架构在数仓建设过程中遇到的一些痛点问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/db8b38ab95a34717abba302fb3e04e91.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281729490.png" />   
     </p>
 <p>图3</p>
 <p>例如在实时计算一些用户相关指标的实时场景下，我们想看到当前 pv、uv 时，我们会将这些数据放到实时层去做一些计算，这些指标的值就会实时呈现出来，但同时想了解用户的一个增长趋势，需要把过去一天的数据计算出来。这样就需要通过批处理的调度任务来实现，比如凌晨两三点的时候在调度系统上起一个 Spark 调度任务把当天所有的数据重新跑一遍。</p>
@@ -269,7 +269,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>那么有没有这样一个架构，既能够满足实时性的需求，又能够满足离线计算的要求，而且还能够减轻运维开发的成本，解决通过消息队列构建 Kappa 架构过程中遇到的一些痛点？答案是肯定的，后面的篇幅会详细论述。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/373f7f2ba4a242a8a228bebb66f3c6f2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281729669.png" />   
     </p>
 <p>图4</p>
 <h3 id="4-痛点总结"><strong>4. 痛点总结</strong></h3>
@@ -294,14 +294,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>全链路依赖消息队列的实时计算可能因为数据的时序性导致结果不正确</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/407b723c5c004cd5a7e92def87806a03.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281729010.png" />   
     </p>
 <p>图5</p>
 <h3 id="5-实时数仓建设需求"><strong>5. 实时数仓建设需求</strong></h3>
 <p>是否存在一种存储技术，既能够支持数据高效的回溯能力，支持数据的更新，又能够实现数据的批流读写，并且还能够实现分钟级到秒级的数据接入？</p>
 <p>这也是实时数仓建设的迫切需求（图 6）。实际上是可以通过对 Kappa 架构进行升级，以解决 Kappa 架构中遇到的一些问题，接下来主要分享当前比较火的数据湖技术&ndash;Iceberg。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/923c1174ee274eeda7c685646e4a6da6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281729291.webp" />   
     </p>
 <p>图 6</p>
 <h2 id="02-数据湖-apache-iceberg-的介绍"><strong>02 数据湖 Apache Iceberg 的介绍</strong></h2>
@@ -310,7 +310,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Apache Iceberg is an open table format for huge analytic datasets. Iceberg adds tables to Presto and Spark that use a high-performance format that works just like a SQL table.</p>
 <p>Iceberg 的官方定义是一种表格式，可以简单理解为是基于计算层（Flink , Spark）和存储层（ORC，Parqurt，Avro）的一个中间层，用 Flink 或者 Spark 将数据写入 Iceberg，然后再通过其他方式来读取这个表，比如 Spark，Flink，Presto 等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8aaa7b9046f04ba6b1858f1bc3f54fb0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281729302.png" />   
     </p>
 <p>图7</p>
 <h3 id="2-iceberg-的-table-format-介绍"><strong>2. Iceberg 的 table format 介绍</strong></h3>
@@ -320,7 +320,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="3-iceberg-的能力总结"><strong>3. Iceberg 的能力总结</strong></h3>
 <p>Iceberg 目前支持三种文件格式 parquet，Avro，ORC，如图 7，无论是 HDFS 或者 S3 上的文件，可以看到有行存也有列存，后面会详细的去介绍其作用。Iceberg 本身具备的能力总结如下（如图 8），这些能力对于后面我们利用 Iceberg 来构建实时数仓是非常重要的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/12e6666ac68c4116b9547710dd288dd8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281729665.png" />   
     </p>
 <p>图8</p>
 <ul>
@@ -339,7 +339,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>从图上看到，snapshot-1 包含了 snapshop-0 的数据，而 snapshot-1 这个时刻写入的数据只有 manifest2，这个能力其实就为我们后面去做增量读取提供了一个很好的支持。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ce64a095891942e0aa089623768503bf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281729184.png" />   
     </p>
 <p>图 9</p>
 <h3 id="5-iceberg-读写过程介绍"><strong>5. Iceberg 读写过程介绍</strong></h3>
@@ -347,7 +347,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>首先，如果有一个 write 操作，在写 snapsho-1 的时候，snapshot-1 是虚线框，也就是说此时还没有发生 commit 操作。这时候对 snapshot-1 的读其实是不可读的，因为用户的读只能读到已经 commit 之后的 snapshot。发生 commit 之后才可以读。同理，会有 snapshot-2，snapshot-3。</p>
 <p>Iceberg 提供的一个重要能力，就是读写分离能力。在对 snapshot-4 进行写的时候，其实是完全不影响对 snapshot-2 和 snapshot-3 的读。Iceberg 的这个能力对于构建实时数仓是非常重要的能力之一。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4bb8169c14f64fe5b103c8ff9dcda08a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281729386.png" />   
     </p>
 <p>图 10</p>
 <p>同理，读也是可以并发的，可以同时读 s1、s2、s3 的快照数据，这就提供了回溯读到 snapshot-2 或者 snapshot-3 数据的能力。Snapshot-4 写完成之后，会发生一次 commit 操作，这个时候 snapshot-4 变成了实心，此时就可以读了。另外，可以看到 current Snapshot 的指针移到 s4，也就是说默认情况下，用户对一张表的读操作，都是读 current Snapshot 指针所指向的 Snapshot，但不会影响前面的 snapshot 的读操作。</p>
@@ -355,7 +355,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>接下来讲一下 Iceberg 的增量读。首先我们知道 Iceberg 的读操作只能基于已经提交完成的 snapshot-1，此时会有一个 snapshot-2，可以看到每个 snapshot 都包含前面 snapshot 的所有数据，如果每次都读全量的数据，整个链路上对计算引擎来说，读取的代价非常高。</p>
 <p>如果只希望读到当前时刻新增的数据，这个时候其实就可以根据 Iceberg 的 snapshot 的回溯机制，仅读取 snapshot1 到 snapshot2 的增量数据，也就是紫色这块的数据可以读的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a98eaeb4d1544456ab891c3b23c68c41.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281729562.png" />   
     </p>
 <p>图 11</p>
 <p>同理 s3 也是可以只读黄色的这块区域的数据，同时也可以读 s3 到 s1 这块的增量数据，基于 Flink source 的 streaming reader 功能在内部我们已经实现这种增量读取的功能，并且已经在线上运行了。刚才讲到了一个非常重要的问题，既然 Iceberg 已经有了读写分离，并发读，增量读的功能，Iceberg 要跟 Flink 实现对接，那么就必须实现 Iceberg 的 sink。</p>
@@ -363,7 +363,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>社区现在已经重构了 Flink 里面的 FlinkIcebergSink，提供了 global committee 的功能，我们的架构其实跟社区的架构是保持一致的，曲线框中的这块内容是 FlinkIcebergSink。</p>
 <p>在有多个 IcebergStreamWriter 和一个 IcebergFileCommitter 的情况下，上游的数据写到 IcebergStreamWriter 的时候，每个 writer 里面做的事情都是去写 datafiles 文件。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/811b6a12df324feba53eb8ebce7371f3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281729696.png" />   
     </p>
 <p>图 12</p>
 <p>当每个 writer 写完自己当前这一批 datafiles 小文件的时候，就会发送消息给 IcebergFileCommitter，告诉它可以提交了。而 IcebergFileCommitter 收到信息的时，就一次性将 datafiles 的文件提交，进行一次 commit 操作。</p>
@@ -372,7 +372,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Flink 实时作业一般会长期在集群中运行，为了要保证数据的时效性，一般会把 Iceberg commit 操作的时间周期设成 30 秒或者是一分钟。当 Flink 作业跑一天时，如果是一分钟一次 commit，一天需要 1440 个 commit，如果 Flink 作业跑一个月commit 操作会更多。甚至 snapshot commit 的时间间隔越短，生成的 snapshot 的数量会越多。当流式作业运行后，就会生成大量的小文件。</p>
 <p>这个问题如果不解决的话，Iceberg 在 Flink 处理引擎上的 sink 操作就不可用了。我们在内部实现了一个叫做 data compaction operator 的功能，这个 operator 是跟着 Flink sink 一起走的。当 Iceberg 的 FlinkIcebergSink 每完成一次 commit 操作的时候，它都会向下游 FileScanTaskGen 发送消息，告诉 FileScanTaskGen 已经完成了一次 commit。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/63aea51d5d804f00ad5cde1dcf50952b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281730520.png" />   
     </p>
 <p>图 13</p>
 <p>FileScanTaskGen 里面会有相关的逻辑，能够根据用户的配置或者当前磁盘的特性来进行文件合并任务的生成操作。FileScanTaskGen 发送到 DataFileRewitre 的内容其实就是在 FileScanTaskGen 里面生成的需要合并的文件的列表。同理，因为合并文件是需要一定的耗时操作，所以需要将其进行异步的操作分发到不同的 task rewrite operator 中。</p>
@@ -383,7 +383,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>前面介绍了 Iceberg 既支持读写分离，又支持并发读、增量读、小文件合并，还可以支持秒级到分钟级的延迟，基于这些优势我们尝试采用 Iceberg 这些功能来构建基于 Flink 的实时全链路批流一体化的实时数仓架构。</p>
 <p>如下图所示，Iceberg 每次的 commit 操作，都是对数据的可见性的改变，比如说让数据从不可见变成可见，在这个过程中，就可以实现近实时的数据记录。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4e725fe10d5e415997ba74fbaaba534a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281730794.png" />   
     </p>
 <p>图 14</p>
 <h3 id="2-实时数仓---数据湖分析系统"><strong>2. 实时数仓 - 数据湖分析系统</strong></h3>
@@ -391,7 +391,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>基于以上功能，我们再来回顾一下前面讨论的 Kappa 架构，Kappa 架构的痛点上面已经描述过，Iceberg 既然能够作为一个优秀的表格式，既支持 Streaming reader，又可以支持 Streaming sink，是否可以考虑将 Kafka 替换成 Iceberg？</p>
 <p>Iceberg 底层依赖的存储是像 HDFS 或 S3 这样的廉价存储，而且 Iceberg 是支持 parquet、orc、Avro 这样的列式存储。有列式存储的支持，就可以对 OLAP 分析进行基本的优化，在中间层直接进行计算。例如谓词下推最基本的 OLAP 优化策略，基于 Iceberg snapshot 的 Streaming reader 功能，可以把离线任务天级别到小时级别的延迟大大的降低，改造成一个近实时的数据湖分析系统。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3b4b2b57ef96480381aae02efe226963.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281730086.png" />   
     </p>
 <p>图 15</p>
 <p>在中间处理层，可以用 presto 进行一些简单的查询，因为 Iceberg 支持 Streaming read，所以在系统的中间层也可以直接接入 Flink，直接在中间层用 Flink 做一些批处理或者流式计算的任务，把中间结果做进一步计算后输出到下游。</p>
@@ -409,20 +409,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>对接其他数据系统需要额外开发工作</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/683f8ef0a27742d6b0c127e6b216089e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281730422.webp" />   
     </p>
 <p>图 16</p>
 <p><strong>秒级分析 - 数据湖加速：</strong></p>
 <p>由于 Iceberg 本身是将数据文件全部存储在 HDFS 上的，HDFS 读写这块对于秒级分析的场景，还是不能够完全满足我们的需求，所以接下去我们会在 Iceberg 底层支持 Alluxio 这样一个缓存，借助于缓存的能力可以实现数据湖的加速。这块的架构也在我们未来的一个规划和建设中。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f3fc02d2e8da4f8892dcab7bd24b7a19.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281730688.png" />   
     </p>
 <p>图 17</p>
 <h3 id="3-最佳实践"><strong>3. 最佳实践</strong></h3>
 <p><strong>实时小文件合并：</strong></p>
 <p>如图 18 所示，腾讯内部已经实现了 Iceberg 的完全 SQL 化，其实我们在 table properties 里面可以设置一些小文件合并的参数，例如 snapshot 达到多少进行一次合并，一共有多少个 snapshot 时进行合并等，这样底层就可以直接通过一条 insert 语句启动 Flink 入湖任务，整个任务就可以持续运行，后台数据的 datafiles 文件也会在后台自动完成合并的操作。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/da3442060ed342e4ac9d5ebc1d69ad61.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281730375.png" />   
     </p>
 <p>图 18</p>
 <p>下面这张图就是 Iceberg 中数据文件和数据文件对应的 meta 文件的信息，因为现在社区开源的 IceberFlinkSink 还没有文件合并的功能，可以尝试打开一个比较小的流处理任务，然后在自�</p>
@@ -549,6 +549,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -582,10 +586,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -964,6 +964,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -208,34 +208,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>压缩交互网络</strong></p>
 <p>为了实现自动学习显式的高阶特征交互，同时使得交互发生在向量级上，我们首先提出了一种新的名为 <strong>压缩交互网络（Compressed Interaction Network， 简称CIN）的神经模型</strong>。在CIN中，隐向量是一个单元对象，因此我们将输入的原特征和神经网络中的隐层都分别组织成一个矩阵，记为X^0 和X^k。CIN中每一层的神经元都是根据前一层的隐层以及原特征向量推算而来，其计算公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/84452eaae19541bba04a13322953b12e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271946495.webp" />   
     </p>
 <p>其中，第k层隐层含有H_k条神经元向量。隐层的计算可以分成两个步骤：（1）根据前一层隐层的状态X^k和原特征矩阵X^0，计算出一个中间结果Z^k+1，它是一个三维的张量，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/687bcd6135144c62a66e8b3cb59f6951.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271946040.webp" />   
     </p>
 <p>图1 CIN的隐层计算步骤一：根据前一层隐层状态和原始输入数据，计算中介结果</p>
 <p>在这个中间结果上，我们用H^k+1个尺寸为m*H^k的卷积核生成下一层隐层的状态，该过程如图2所示。这一操作与计算机视觉中最流行的卷积神经网络大体是一致的，唯一的区别在于卷积核的设计。CIN中一个神经元相关的接受域是垂直于特征维度D的整个平面，而CNN中的接受域是当前神经元周围的局部小范围区域，因此CIN中经过卷积操作得到的特征图（Feature Map）是一个向量，而不是一个矩阵。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d394a51f62864e03aa19c8ef0af80ced.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271946643.webp" />   
     </p>
 <p>图2 CIN的隐层计算步骤二：根据中介结果，计算下一层隐层的状态</p>
 <p>CIN的宏观框架可以总结为图3。它的特点是，最终学习出的特征交互的阶数是由网络的层数决定的，每一层隐层都通过一个池化操作连接到输出层，从而保证了输出单元可以见到不同阶数的特征交互模式。同时不难看出，CIN的结构与循环神经网络RNN是很类似的，即每一层的状态是由前一层隐层的值与一个额外的输入数据计算所得。不同的是，CIN中不同层的参数是不一样的，而在RNN中是相同的；RNN中每次额外的输入数据是不一样的，而CIN中额外的输入数据是固定的，始终是X^0。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4633bcae60a341a6b8a91cb23e5107fe.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271947363.webp" />   
     </p>
 <p>图3 CIN的宏观结构概览</p>
 <p><strong>极深因子分解机</strong></p>
 <p>参考Wide&amp;Deep和DeepFM等模型的设计，我们发现同时包含多种不同结构的成分可以提升模型的表达能力。因此我们 <strong>将CIN与线性回归单元、全连接神经网络单元组合在一起，得到最终的模型并命名为极深因子分解机xDeepFM</strong>，其结构如图4所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a7aec6afae92443c9788a7a6a49b04f1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271947861.webp" />   
     </p>
 <p>图4 极深因子分解机xDeepFM</p>
 <p><strong>集成的CIN和DNN两个模块能够帮助模型同时以显式和隐式的方式学习高阶的特征交互，而集成的线性模块和深度神经模块也让模型兼具记忆与泛化的学习能力</strong>。值得一提的是，为了提高模型的通用性，xDeepFM中不同的模块共享相同的输入数据。而在具体的应用场景下，不同的模块也可以接入各自不同的输入数据，例如，线性模块中依旧可以接入很多根据先验知识提取的交叉特征来提高记忆能力，而在CIN或者DNN中，为了减少模型的计算复杂度，可以只导入一部分稀疏的特征子集。</p>
 <p><strong>实验结果</strong></p>
 <p>我们在Criteo、大众点评和必应新闻等三个数据集上对上述模型进行评测，这三个数据集分别对应广告推荐、餐馆推荐和新闻推荐等不同的应用场景。所采用的评测指标为AUC和LogLoss。我们将xDeepFM与多种当前主流的深度推荐模型进行对比，结果如表1所示。在三个数据集上，xDeepFM模型在AUC和LogLoss上均超过了其它基准模型。这说明， <strong>结合显式和隐式的特征交互能够有效提高推荐系统的准确性</strong>。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cfb4d44a97ce4e328334d5d7f573f373.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271947564.webp" />   
     </p>
 <p>表1 三个数据集上的评测结果</p>
 <p>同时，我们还 <strong>关注不同的基本单元模型的学习能力</strong>。我们对比了FM、DNN、CrossNet和CIN在三个数据集上单独学习的结果，它们分别对应只有二阶特征交互、隐式特征交互、特殊的显式特征交</p>
@@ -366,6 +366,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -399,10 +403,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -781,6 +781,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

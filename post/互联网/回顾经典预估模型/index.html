@@ -210,7 +210,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>计算广告方向的同学应该都对GBDT+LR这个模型有所了解，这一点也无益是这篇文章最大的贡献。虽然文章其他部分的价值丝毫不逊于该模型，但再次回顾该模型，清楚知道其技术细节还是必要的。</p>
 <p>简而言之，文章提出了一种利用GBDT自动进行特征筛选和组合，进而生成新的feature vector，再把该feature vector当作logistic regression的模型输入，预测CTR的模型结构。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5ae8dd94b12a40b5997f0165a028ae8a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271727297.jpeg" />   
     </p>
 <p>GBDT+LR模型结构</p>
 <p>这里需要强调的是，用GBDT构建特征工程，和利用LR预测CTR两步是独立训练的。所以自然不存在如何将LR的梯度回传到GBDT这类复杂的问题，而利用LR预测CTR的过程是显然的，在此不再赘述，我们着重讲一讲如何利用GBDT构建新的特征向量。</p>
@@ -219,12 +219,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>举例来说，比如GBDT由三颗子树构成，每个子树有4个叶子节点，一个训练样本进来后，先后落到了“子树1”的第3个叶节点中，那么特征向量就是[0,0,1,0]，“子树2”的第1个叶节点，特征向量为[1,0,0,0]，“子树3”的第4个叶节点，特征向量为[0,0,0,1]，最后concatenate所有特征向量，形成的最终的特征向量为[0,0,1,0,1,0,0,0,0,0,0,1]，我们再把该向量作为LR的输入，预测CTR。</p>
 <p>引入了GBDT+LR的模型后，相比单纯的LR和GBDT，提升效果是非常显著的。从下表中可以看到，混合模型比单纯的LR或Trees模型在loss上减少了3%。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/977d9c107f514f55a7fa995770dea699.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271727908.jpeg" />   
     </p>
 <p>LR+Trees模型的Loss对比</p>
 <p>为了确定最优的GBDT子树规模，facebook绘出了子树规模和loss的关系曲线如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/72e09ada5bfd4e119a40340fc34da248.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271727597.jpeg" />   
     </p>
 <p>GBDT子树数量与loss的关系</p>
 <p>可以看到，在规模超过500棵子树后，增加子树规模对于loss下降的贡献就微乎其微了。特别是最后1000棵子树仅贡献了0.1%的loss下降，最终facebook选择了600作为其子树规模。</p>
@@ -232,7 +232,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="模型的实效性问题和更新策略"><strong>模型的实效性问题和更新策略</strong></h2>
 <p>虽然我们的直觉是模型的训练时间和serving时间之间的间隔越短，模型的效果越好，但为了证明这一点，facebook的工程师还是做了一组实效性的实验，在结束模型的训练之后，观察了其后6天的模型loss（这里采用normalized entropy作为loss）</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/aadc6119b3e94432978cf1cb3c8bbd5d.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271727258.jpeg" />   
     </p>
 <p>模型更新延迟与loss的关系</p>
 <p>可以看出，模型的loss在第0天之后有所上升，特别是第2天过后显著上升。因此daily update的模型相比weekly update的模型效果肯定是有大幅提升的。</p>
@@ -244,7 +244,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="facebook的实时数据流架构"><strong>facebook的实时数据流架构</strong></h2>
 <p>为了实现模型的准实时训练，facebook专门介绍了其基于Scribe的数据流架构，文中称其为 <strong>online data joiner。</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/38f173d5da3c46ae8afee2c89eb2e398.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271727987.jpeg" />   
     </p>
 <p>该模块最重要的作用是准实时的把来自不同数据流的数据整合起来形成sample features，并最终与click数据进行join，形成完整的labeled sample。在整个过程中，我认为最应该注意的有三点：</p>
 <ol>
@@ -256,17 +256,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>对于巨型互联网公司来说，为了控制数据规模，降低训练开销，降采样几乎是通用的手段，facebook实践了两种降采样的方法，uniform subsampling和 negative down sampling</p>
 <p><strong>uniform subsampling</strong> 是对所有样本进行无差别的随机抽样，为选取最优的采样频率，facebook试验了0.001，0.01， 0.1， 0.5 和1五个采样频率，loss的比较如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c404ab4f9fc149099c4ba510549d7a5d.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271727684.jpeg" />   
     </p>
 <p>可以看到当采样率是10%时，相比全量数据训练的模型，仅损失了不到1%的效果。</p>
 <p>另一种方法 <strong>negative down sampling</strong> 保留全量正样本，对负样本进行降采样。除了提高训练效率外，负采样还直接解决了正负样本不均衡的问题，facebook经验性的选择了从0.0001到0.1的一组负采样频率，试验效果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/31deb9cf7af742aa8246d2f28db3d696.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271727555.jpeg" />   
     </p>
 <p>大家可以看到，当负采样频率在0.025时，loss不仅优于更低的采样频率训练出来的模型，居然也优于负采样频率在0.1时训练出的模型，虽然原文没有作出进一步的解释，但推测最可能的原因是解决了数据不均衡问题带来的效果提升。</p>
 <p>负采样带来的问题是CTR预估值的漂移，比如真实CTR是0.1%，进行0.01的负采样之后，CTR将会攀升到10%左右。而为了进行准确的竞价以及ROI预估等，CTR预估模型是要提供准确的有物理意义的CTR值的，因此在进行负采样后需要进行CTR的校正，使CTR模型的预估值的期望回到0.1%。校正的公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d83cbf0bfd014cbca1632be623f88340.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271727252.jpeg" />   
     </p>
 <p>其中q是校正后的CTR，p是模型的预估CTR，w是负采样频率。大家可以利用简单的转换关系就可以得出上述公式，有兴趣的同学可以手动推导一下。</p>
 <p>至此，我们介绍完了facebook这篇经典的CTR预估论文，可以看到虽然五年过去了，我们仍能从中汲取不少模型改造和工程实现的经验，就我个人来言，最值得学习的有下面三点：</p>
@@ -414,6 +414,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -447,10 +451,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -829,6 +829,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

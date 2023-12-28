@@ -231,7 +231,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="1-图灵平台介绍">1. 图灵平台介绍</h2>
 <p>图灵平台是一站式算法平台，总体架构如下图1所示，底层依托于Kubernetes和Docker，实现了对CPU/GPU等资源的统一调度和管理，集成了Spark ML、XGBoost、TensorFlow等机器学习/深度学习框架，包含特征生产、模型训练、模型部署、在线推理、AB实验等一站式平台功能，支撑了美团配送及闪购、骑行、买菜、地图等事业部的调度、时间预估、配送范围、搜索、推荐等各类AI应用。图灵平台主要包括机器学习平台、特征平台、图灵在线服务（Online Serving）、AB实验平台四大功能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a466ae6b7e894a9eb2d72c7dc8369ad0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715211.png" />   
     </p>
 <p>图1 图灵平台总体架构</p>
 <ul>
@@ -251,7 +251,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>“烟囱模式”在业务发展早期做出了不可磨灭的贡献，但随着业务体量的增长，这种方式的边际收益逐渐降低到了不可忍受的程度，亟需一个统一的在线服务框架来进行改变。</p>
 <p>目前，市面上大部分主流开源的机器学习在线服务框架仅提供了模型预测功能，不包含预处理和后处理模块，如下图2所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5f989eff8d9f47b6a61d070009233890.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716621.png" />   
     </p>
 <p>图2 机器学习在线服务示意图</p>
 <p>比如谷歌TensorFlow Serving是一个用于机器学习模型Serving的高性能开源在线服务框架，提供gRPC/HTTP接口供外部调用，支持模型热更新与自动模型版本管理，同时解决了资源调度、服务发现等痛点，对外提供稳定可靠的服务。但是TensorFlow Serving不包含预处理和后处理模块，需要将业务工程方将输入预处理成张量传递给TensorFlow Serving进行模型计算，然后再对模型计算结果进行后处理。预处理和后处理的逻辑对于算法策略非常重要，迭代也比较频繁，这部分跟模型结合比较密切，更适合由算法同学负责，如果由工程方实现，则工程同学只是单纯的实现算法同学设计的逻辑，耦合过于严重，迭代效率低，而且还容易导致设计和具体实现不一致，引发线上事故。</p>
@@ -263,7 +263,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>通过图灵OS 1.0，我们解决了各业务方独自开发、独自迭代以及重复造轮子的问题，大大简化了算法工程师和工程研发人员的开发工作，而且工程是通过图灵在线服务框架间接调用算法预处理和模型计算，不直接跟算法进行交互，一定程度上也减轻了工程和算法的耦合问题。</p>
 <p>如图3所示，该阶段的图灵在线服务框架集成了以下功能：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/caa2bc1b9c254b37a769a5016e24281f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716801.png" />   
     </p>
 <p>图3 图灵OS 1.0</p>
 <h4 id="311-特征获取">3.1.1 特征获取</h4>
@@ -291,7 +291,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>随着图灵平台提供的功能越来越丰富，图灵在线服务SDK变得越来越臃肿，业务工程必须升级图灵在线服务SDK才能使用图灵平台新功能，但是业务工程升级SDK风险较高，而且会拖慢业务工程部署的速度。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/614f0fba0b344064b3beba49a86913fb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716121.png" />   
     </p>
 <p>图4 三方高耦合示意图</p>
 <p>基于上述几点可知，算法、工程和图灵平台三方高耦合，导致各自都存在很多痛点，如图4所示。这些问题严重影响了算法迭代效率，算法迭代上线测试工期长，效率低：</p>
@@ -305,7 +305,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>针对图灵OS 1.0框架中算法、工程和图灵平台三方高耦合的痛点，我们研发了图灵OS 2.0框架，目标是解决算法、工程、图灵平台三者耦合的问题，让算法迭代无需依赖工程发版，图灵平台新功能上线无需业务工程升级SDK，进一步提升算法迭代效率和工程开发效率。</p>
 <p>围绕解耦算法、工程和图灵平台的目标，在图灵OS 2.0框架中，我们设计研发了算法包插件化热部署框架、算法数据通道和算法编排框架等功能，支持算法自助迭代上线。同时设计研发了以沙箱引流、实时回放、性能压测和Debug测试等功能为一体的算法验证平台，保证了算法策略的高性能、正确性及稳定性。图灵OS 2.0框架解耦了算法、工程和图灵平台，实现了算法与工程迭代的各自闭环。大部分算法迭代的整个流程无需工程研发人员、测试工程师的参与，算法工程师在小时级即可完成算法策略的迭代上线；通过图灵OS 2.0的赋能，算法的研发迭代效率得到了大幅提升。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/47ed5cc788194d67bbfe5da7ff17a592.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716459.png" />   
     </p>
 <p>图5 图灵OS框架V2.0</p>
 <p>图灵OS 2.0具体功能特性如下：</p>
@@ -319,7 +319,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>性能压测</strong>：图灵OS通过整合美团全链路压测系统Quake的能力，复用统一回放平台采集的流量数据来构造请求，对部署了新版本算法包的沙箱进行压力测试，保证算法策略迭代的性能及稳定性。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3e75a335de7547ea967b548268413e6a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716722.png" />   
      图6 图灵OS 2.0总体架构以下将对上述几个功能特性进行展开介绍，看看图灵OS 2.0是如何解决算法、工程和图灵平台三方耦合痛点的。</p>
 <h3 id="41-标准化轻量级sdk">4.1 标准化轻量级SDK</h3>
 <p>为了解决业务工程和图灵平台的耦合痛点，即图灵在线服务SDK部署在业务工程中，SDK版本收敛难度大的问题，我们主要从SDK轻量化、简单易接入、稳定可扩展、安全可靠等几个方面考虑对图灵在线服务SDK进行了拆分和改造：</p>
@@ -338,7 +338,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>图灵OS容器化</strong>：图灵OS充当一个插件容器，装载算法包不同的算法版本，执行算法版本路由以及算法策略计算，图灵OS经过容器化改造之后的流程：1）如果算法版本不需要新增参数，则工程端和图灵OS都不需要发版；2）业务工程主要工作是传递参数给算法，逻辑简单，如输入参数无变化则不需要发版，算法包发版节奏自己掌控。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fcfe87d399344e63ad715b30fd6f2a51.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716930.png" />   
     </p>
 <p>图7 图灵OS容器化-算法插件化示意图</p>
 <h3 id="43-数据通道">4.3 数据通道</h3>
@@ -361,7 +361,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>从算法工程师的视角来看，图灵OS以搭积木的方式提供服务，通过组合一个个独立的子功能及算子，以标准的方式串并联，从而形成满足各式各样需求的在线系统。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/761f3f635e9947eaad9e2ede8651f93f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716388.png" />   
     </p>
 <p>图8 基于算子编排的算法在线服务架构</p>
 <p>在该架构下，算法的工作主要有如下三部分：1）算法工程师进行业务流程的抽象与建模；2）算法工程师进行独立的算子开发与测试；3）算法工程师基于业务流程抽象进行算子的编排与组合。算子编排为业务功能上线和算法迭代进一步赋能，业务算法迭代效率进一步提升。</p>
@@ -378,7 +378,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>在算法包插件部署时，以内嵌模式集成的业务工程将作为容器装载相应的算法包，路由到本地进行算法计算，如下图9所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7c1931d06de545958e4ece2ca86c9630.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716724.png" />   
      图9 图灵OS集成模式Embed/RPC示意图Standalone和Embedded模式各有利弊，谁都没有绝对的优势，使用时需要根据具体的业务场景进行选择。两种模式的对比如下：</p>
 <p>部署模式优点缺点适用场景<strong>Standalone</strong>耦合度更低，业务方只依赖图灵轻量级SDK需要搭建图灵OS集群，占用机器资源；有RPC调用开销适合大批量调用，需要分布式多机异步并行计算的业务场景<strong>Embedded</strong>复用业务方机器，资源利用率高；少了RPC调用，性能高无法充分发挥多机异步分布式并行，只能单机并行适合小批量调用，对单次调用RT性能要求较高的业务场景</p>
 <h2 id="46-图灵沙箱">4.6 图灵沙箱</h2>
@@ -391,7 +391,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>当时的可选方案是算法策略先部署上线，灰度切小流量，然后再分析统一埋点日志评测算法效果。该方案的缺陷是无法在上线前对算法效果进行评测，问题发现时间过晚。如果灰度的功能有问题，会对线上的业务造成影响，产生Bad Case。针对上述上线前校验环节的各个问题，我们研发了图灵沙箱，在不干扰线上业务稳定的前提下，实现了算法的全链路仿真实验。</p>
 <p><strong>图灵沙箱</strong> 是一个与图灵OS服务物理隔离但运行环境完全一致的服务，流量经过沙箱不会对线上业务造成任何影响。如下图10所示，线上流量引流到线上环境沙箱，图灵OS和图灵沙箱的各环境配置及数据都一致（版本、参数、特征、模型等）。算法新版本（如下图10中算法包1的版本V3）先部署沙箱，引流验证算法正确性，同时还可以在沙箱内引流进行算法性能压测。图灵沙箱作为算法验证流程的自动化工具，提升了算法测试效率，进一步提升了算法版本的迭代效率。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b68542c996784202b05425579d496a8c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716044.png" />   
      图10 图灵沙箱引流验证示意图## 4.7 统一回放平台</p>
 <p>为了方便分析算法效果及异常时排查问题，我们需要把算法计算过程中的输入、输出、所用的特征以及模型等数据都记录下来，以便还原现场。但是算法计算过程中会产生大量的数据，对存储和记录带来了挑战：</p>
 <ol>
@@ -406,14 +406,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>考虑到对这些数据查询的时效性要求不高，使用消息队列将发送和存储进行解耦，达到对流量削峰填谷的效果，图灵OS平台中的各算法通过回放Client自动接入回放。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9b85b8a132ab43cebea6a8b56ced54cd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716221.png" />   
     </p>
 <p>图11 图灵回放平台示意图</p>
 <h2 id="48-性能压测及调优">4.8 性能压测及调优</h2>
 <p>通过图灵沙箱和统一回放，图灵OS具备了快速验证算法数据正确性的能力，但是在算法计算性能分析方面缺少自动化工具。图灵OS通过整合公司全链路压测系统Quake（Quake介绍详见《 <a href="https://zshipu.com/t?url=https%3A%2F%2Ftech.meituan.com%2F2018%2F09%2F27%2Fquake-introduction.html">全链路压测平台（Quake）在美团中的实践</a>》）的能力，复用统一回放平台采集的流量数据来构造请求，对部署了新版算法包的图灵OS或图灵沙箱进行压力测试。</p>
 <p>压测过程中记录算法在不同QPS场景下的性能表现，主要包括CPU和内存等应用指标，TP时延和超时率等响应耗时数据，并与线上真实性能、历史压测数据和服务承诺的SLA进行对比分析给出压测报告及优化指南，存在明显性能问题时将阻断算法包的上线流程。图灵OS也接入了美团内部性能诊断优化平台Scalpel，可以生成压测过程中线程堆栈和性能热点的分析报告，辅助用户快速定位性能瓶颈点，为具体优化方向提供参考。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/af4dd5ce44074f7e90a06ea04aa9bb7f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716420.png" />   
     </p>
 <p>图12 图灵全链路压测及性能诊断示意图</p>
 <h2 id="5-图灵os-20建设成果">5. 图灵OS 2.0建设成果</h2>
@@ -553,6 +553,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -586,10 +590,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -968,6 +968,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -256,14 +256,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="21-指标采集">2.1 指标采集</h2>
 <p>Flink框架本身提供了丰富的监控指标，任务运行指标反映了实际运行的情况，指标的采集与存储是后续监控、报警、资源调优、智能分析的基础。早期是通过官方提供的influxdb metrics reporter将指标采集到influxdb，随着任务数的增长，指标的上报、存储、查询遇到瓶颈，原因是开源的influxdb只支持单点部署，大规模的聚合查询性能存在瓶颈。后续平台实现了指标采集与存储方案的升级，整体架构如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7131dd85c0b347e8a14c32a794c278f4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281844506.webp" />   
     </p>
 <p>公司内部存在多个底层依赖Flink的平台，如日志平台、实时计算平台、实时数仓等等。采用统一的指标采集存储方案。将指标采集过滤规则统一存储在redis，过滤规则修改不需再重启任务，通过自定义的Kafka reporter，过滤后将指标信息统一发送到kafka。</p>
 <h2 id="22-指标存储">2.2 指标存储</h2>
 <p>指标采集到Kafka后，将全量指标实时写入influxdb，influxdb的写入和查询比较灵活，读写性能优秀，对于各种指标的格式没有强制限制，且底层存储为明细数据，因此适合用来提供大而全的整体监控大盘。同时将核心指标写入druid，如CPU load、内存指标、gc指标、稳定性相关指标、checkpoint等，druid预聚合能力可以降低存储数据量并且基于hdfs存储历史数据，便于存储长期的指标数据用来做资源的资源分析和智能诊断，另外druid的实时数据可用来作为报警检测。</p>
 <p>由于单机的Influxdb存在性能瓶颈，集群模式为收费产品。因此我们对Influxdb存储进行了扩展，搭建Influxdb分布式集群来应对未来更大的数据存储压力，整体架构如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b7587e7ebf6c45fdaea91c732e967a87.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281844445.webp" />   
     </p>
 <p>我们通过OpenResty做集群节点的代理，通过Lua脚本来做读写的分发。通过统一的域名提供服务，根据taskid将对应指标的读写转发到不同的InfluxDB节点，并且集群支持灵活的扩容，提升整体的写入和读取性能，解决单台机器的瓶颈问题。InfluxDB集群目前包括4个节点，可以满足3k+任务的7天的详细指标存储，并且写入和查询都在毫秒级。</p>
 <p>数据是分析的基石，有了前期的数据准备，后续的分析挖掘才更加有力。</p>
@@ -271,7 +271,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="31-可视化监控">3.1 可视化监控</h2>
 <p>基于influxdb的全量指标，我们为所有Flink任务提供了大而全的监控大盘，包括数十个任务指标看板，方便用户了解任务运行现状的全貌。同时，为了让用户更直观的看到自己Flink任务的健康状况，降低监控的使用门槛，我们进行了任务健康分的建设，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c5671820e8d84b55b7c6325aedb6c15c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281844376.webp" />   
     </p>
 <p>一个Flink任务运行过程中的健康状况，可以通过以下几个维度来评价：</p>
 <p><strong>整体稳定性</strong> 。任务整体运行的情况，根据任务正常运行时长占比和任务自动重启次数来衡量。若运行时长占比过低或者频繁重启说明任务可能存在问题。</p>
@@ -283,7 +283,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="32-报警检测">3.2 报警检测</h2>
 <p>指标报警旨在提供统一的指标查询、分布式报警检测、报警回调、规则管理、任务信息注册等服务。整体架构图如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/436e0b439b7d4a149b6bd05d66a78d35.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281844580.webp" />   
     </p>
 <p>Flink指标根据指标重要程度分为核心指标与非核心指标。核心指标存储为druid，全量指标存入InfluxDB，因此指标报警根据指标类型进行区分，查询不同的数据源。</p>
 <p>Flink任务指标报警根据报警等级分为：</p>
@@ -294,7 +294,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>3.3 日志分析</p>
 <p>我们对Flink任务的错误日志进行统一收集、存储和分析，提高任务的运维效率。通过Log4j的Kafka appender将错误日志以Json的形式写入Kafka中，然后进行实时的ETL。主要分成两条流处理，其中一条流将错误日志的明细信息，收敛后接入日志平台，落入ES；另一条流对错误日志类型进行统计，并提取日志的关键维度，写入Druid中，为后续聚合分析与报警做数据准备。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e03e7e164b9b42cc9af6a86da3f85ad5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281844555.webp" />   
     </p>
 <h1 id="4-资源预估">4 资源预估</h1>
 <h2 id="41-资源使用现状">4.1 资源使用现状</h2>
@@ -309,7 +309,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>算子效率过低</strong> ：算子内部逻辑存在问题，也难以通过调整资源来解决问题，比如复杂的正则解析，阻塞IO等。我们通过设定单条消息处理耗时阈值来排除这些效率过低的算子。</p>
 <h3 id="423-计算任务并发"><strong>4.2.3 计算任务并发</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8038671564dd42aabc94cda045f5a6ff.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281844481.webp" />   
     </p>
 <p>首先获取Flink任务数据源的生产速率，基于该生产速率的90分位值来预估任务的实际吞吐。目前大部分流任务数据源都是Kafka，我们通过Kafka集群的监控信息获取Kafka生产速率和消费延迟情况。</p>
 <p>然后Kafka元数据中的消费延迟情况和Flink自身指标分析任务是否存在延迟等问题，并将任务划分为延迟任务和非延迟任务。针对延迟任务，根据数据源生产速率和单条处理耗时计算得到每个算子需要的并发，并以算子中最大并发作为任务需要扩容的并发值。针对非延迟任务，定期计算该任务所需的最小并发，若当前配置并发远大于任务真实所需并发，则进行缩容；若计算所得真实所需并发与配置并发值相差不大，则暂不调整，因为流任务每次重启都需要一定成本。</p>
@@ -318,23 +318,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="431-内存预估"><strong>4.3.1 内存预估</strong></h3>
 <p>首先由Flink内存模型可以得出Flink内存主要包括堆内内存和堆外内存，其中堆内主要包括FrameWork Heap Memory、Task Heap Memory,堆外内存主要包括Managed Memory、Framework Off-heap Memory、Network。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/58e66a52a5d849bb9dbda6295b9475a8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281844482.webp" />   
     </p>
 <p>FrameWork为Flink框架本身所用内存，通常比较固定，network默认从总内存的固定比例计算得出，通常不是任务瓶颈。从指标观察和历史经验来说内存的瓶颈主要出现在Task Memory，其中off-heap默认流任务不使用，因此瓶颈主要出现在Task Heap Memory，这也是与真正的数据处理逻辑相关的内存，那么针对内存的资源调优主要由Task Heap Memory推算得出。</p>
 <p>内存预估可以由《Java Performance》建议进行预估计算，核心点是获得Full GC之后年老代内存空间大小来预估整个heap所需要的内存，推荐的计算公式如下所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dec86fe9e49a4feca68471d20cdf3bab.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281844512.webp" />   
     </p>
 <p>Full GC之后年老代内存空间大小可由Flink指标获得，通过观察下图的堆内内存与Full GC监控图可以得出，对于绝大多数的正常运行的Flink任务，其内存使用符合如下规律：随着新数据（如kafka原始数据）的不断摄入，新生代内存使用随着时间推移不断增高，当新生代内存不足时便会进行young gc释放内存。而长期存活的数据（如部分规则数据、缓存数据）则会进入老年代，young gc时不会释放。因为可以根据每次gc后的内存使用低谷作为年老代内存空间的大小。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/30a0f10924c74ed8881fa172108cf8cb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281844566.webp" />   
     </p>
 <p>若任务数据量超大，新生代内存不足，会导致数据进入老年代，导致任务频繁full gc，如下图所示。这种非正常运行的场景，可以根据单位时间full gc次数和当前内存大小预估所需的内存。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/02d7efa88e5a45bcafac5d8c77c44cbf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281844417.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d6106fcc135a4d3fb662235e65a8ace7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281844503.webp" />   
     </p>
 <p>因此可以简单汇总规则：1、内存资源过大存在浪费时，可以根据年老代内存空间大小预估内存。2、内存资源不足时根据Full GC次数和当前内存大小设置内存。</p>
 <h3 id="432-cpu预估"><strong>4.3.2 CPU预估</strong></h3>
@@ -359,7 +359,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>方案1：Standalone Cluster on K8S</strong></p>
 <p>Standalone Cluster on K8S在Flink的早期版本中就已经支持，基本原理是在K8S集群中部署standalone集群然后提交任务。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4bea22d8923a4aedbb8d88a9d650e800.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281844350.webp" />   
     </p>
 <p>流程：</p>
 <p>1、通过yaml文件预先定义Flink Master deployment、taskmanager deployment、configmap等。</p>
@@ -371,7 +371,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>方案2：Native Flink on K8S</strong></p>
 <p>为了降低Flink on K8S的使用门槛，同时解决Flink on K8S资源无法自动调整的问题，Flink官方推出了Native Flink on K8S。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5cd76535777740918a51a1bc40ca900d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281844339.webp" />   
     </p>
 <p>流程：</p>
 <p>1、Flink client通过内置的K8S client与K8S API Server直接进行通信，之后部署master deployment、jobmanager service、configmap等。</p>
@@ -387,7 +387,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>Operator通过将CRD和Controller相结合实现了声明式API，声明式API是K8S容器编排的核心，通过API对象来声明期望的状态，并且支持多client以 PATCH 的方式对 API 对象进行修改，K8S可以方便地对API对象进行管理，完成对“实际状态”和“期望状态”的调谐(Reconcile)过程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b4250dcb0de44751bc59a92ff27e62f7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281844768.webp" />   
     </p>
 <p>流程：</p>
 <p>1、在K8S集群中部署Flink Operator，包括FlinkCluster CRD和controller。</p>
@@ -404,7 +404,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p><strong>方案对比</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d97c4600af78499a980c463eab56b3dd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281844823.webp" />   
     </p>
 <p>通过上述几种Flink on K8S方案进行概览和对比后，我们了解了其基础原理和优缺点。可以了解到Flink相对于普通后端服务来说较为复杂，包含很多需要考虑的技术细节。同时考虑到大规模Flink任务生命周期管理成本、后续的运维成本、相关方案成熟度、平台方的兼容改造成本等。综上所述，目前贝壳选择了Flink K8S Operator方案。</p>
 <h2 id="53-存储与计算分离">5.3 存储与计算分离</h2>
@@ -422,7 +422,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>K8S存储的管理通过 PVC/PV 机制将存储如何供应的细节从其如何被使用中抽象出来，使得存储的使用比较清晰易配置，同时降低存储系统变更带来的影响。Flink作为存储需求方只需要通过PVC描述pod期望的持久化存储的属性，比如存储的大小、读写权限等，对于运行日志可以声明较大的HDD存储，对于部分checkpoint较大的任务可以声明少量的SSD存储，为不同的存储需求声明不同的PVC，便于后续的运维管理。PV和StorageClass由则K8S运维方统一管理，PV描述一个具体的Volume的属性，比如Volume的类型、挂载目录、相关的权限信息、远程存储服务器地址等，StorageClass完成PV/PVC绑定。</p>
 <p>从上述需求回顾中可以得出结论，Flink on K8S的计算存储分离需要能够支撑较大存储量、能够支持K8S容器环境使用的分布式文件系统。通过调研并与存储团队沟通后我们选择ChubaoFS（储宝文件系统）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/03eb2fb5e1234ac38fdd12960dd6dd8a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281844802.webp" />   
     </p>
 <p>ChubaoFS是为云原生应用提供稳定的，高性能，高可用，可扩展的分布式文件系统和对象存储服务，可为容器平台提供持久化存储解决方案，实现计算与存储分离。ChubaoFS的以下特性能够满足Flink存储与计算分离的需求：</p>
 <p><strong>可扩展元数据管理</strong> 。ChubaoFS中使用了分布式元数据子系统，以便提供高可扩展性，其元数据子系统可以认为是内存元数据存储。能够应对Flink存储需求文件数多的问题。</p>
@@ -432,11 +432,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Flink根据业务分为多个namespace，每个namespace使用三个ChubaoFS卷，分别用于存储checkpoint、日志、依赖文件。任务内部checkpoint路径改为容器本地file（如：file:///checkpoint/12345），其中/checkpoint目录对应chubao mountPath。</p>
 <p>Flink任务内部的运行日志量比较大但价值密度较低，若通过K8S常用的日志采集的方式写入外部存储系统（如ES）则会增大存储成本。因此，将日志存储系统默认输出路径也挂在上ChubaoFS卷，则可以将运行日志实时写入ChubaoFS。另外，对Operator进行改造，支持将启动日志自定义输出到ChubaoFS Subpath上，启动日志也可以在ChubaoFS查看。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dcfa193a3e2f4ecb9491cce197c1b37e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281844716.webp" />   
     </p>
 <p>通过taskid和versionid划分chubao subpath，可以minio gateway代理可以在不同路径下看到历史日志详情，如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/289c0702b9d84ccfa039da224b713993.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281844728.webp" />   
     </p>
 <h2 id="54-网络">5.4 网络</h2>
 <h3 id="541-性能优化"><strong>5.4.1 性能优化</strong></h3>
@@ -448,7 +448,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="551-生命周期管理优化"><strong>5.5.1 生命周期管理优化</strong></h3>
 <p>在平台进行任务生命周期管理的时候，通常需要查询任务状态，比如任务启停或任务监控。Flink上云我们采取了Flink K8S Operator，其中使用到了CRD，CRD在ETCD里面是以JSON格式来存储的，而K8S的API对象是以protobuf格式存储，在资源对象数量多的时候JSON的序列化和反序列化性能会成为瓶颈。另外，随着运行在K8S上的任务增多，CR也随着增多，任务的生命周期管理需要频繁获取任务状态，目前运行在K8S上的任务上千个，频繁的查询K8S API Server会遇到性能瓶颈。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/eabf47587f764a11918aa77485cb026a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281844689.webp" />   
     </p>
 <p>如何解决上述问题，我们采用的办法是双“Operator”模式，除了Flink K8S Operator，我们使用kubernetes-client/java新起了一个Operator，用另一个Operator的Informer去监听同一类型CRD，基于使用通过Etcd的Watch机制获取任务最新状态之后并缓存到MySQL并提供查询API，平台侧查询任务状态时的性能得到了大幅提升，也降低了K8S API Server的压力。</p>
 <h3 id="552-任务启动慢优化"><strong>5.5.2 任务启动慢优化</strong></h3>
@@ -456,7 +456,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>首先从Operator层面进行优化，Operator 默认设置的readiness的检查周期较长，默认为60s，pod启动成功后到任务pod就绪可能会有时间间隔，因此将检测周期减小，减小了几十秒的启动时间。</p>
 <p>之后，从容器内部进行优化，通过查看pod监控可以看到Flink任务启动过程中CPU利用率几乎到达了100%，需要CPU资源较多，而我们的资源预估和K8S的资源细粒度控制能力将一些长期数据量很小的任务CPU限制到了0.1核。0.1核对于一些任务启动成功后处理数据来说是足够的，但是会导致启动时间变长，那么为了能够精细化使用资源同时降低启动耗时，我们深入分析了Flink启动流程，查看为什么启动过程会耗费大量CPU资源。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bfa037ff6c4f4f1fa64843f5dd28c9bb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281844764.webp" />   
     </p>
 <p>通过查看进程的CPU使用占比发现，任务启动过程中耗费了很多时间在实行启动脚�</p>
 
@@ -586,6 +586,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -619,10 +623,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1001,6 +1001,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

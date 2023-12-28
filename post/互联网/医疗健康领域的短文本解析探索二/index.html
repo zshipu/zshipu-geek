@@ -214,23 +214,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="开胃菜">开胃菜</h3>
 <p>10 月份第五届中国健康信息处理会议(CHIP2019)发布了一个测评任务[1]，临床术语标准化任务，和我们最后提到的标准化任务差不多，给定一手术原词，要求给出其对应的手术标准词。如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-4831f6847c634abc9b7594e9a21d50be.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271642971.webp" />   
     </p>
 <p>这和我们目前做的内容契合度很高，所以就拿这个数据来练练手。对于信息检索相关的任务，一般思路都会分为 <strong>召回</strong> 和 <strong>精排（或重排 Rerank）</strong> 两个阶段，这里我们仅使用过往方法验证一下召回阶段。首先分析一下数据，数据中会存在三种关系， <code>一对一，一对多，多对一，多对多</code> 主要先解决一对一这个问题，简单回顾一下 MADAE[2]模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-326262bf4f974bb18b5583360bfec584.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271642662.webp" />   
     </p>
 <p>首先使用简单的 Noise Function 进行数据增强，三层的 Multi-view Encoders，分别为音，字，词三种方式的 embedding 层进行输入。因为严重缺少上下文，就没办法将上下文信息做特征，所以直接用 Denoising Text Embedding 生成向量后的 Top-1 的结果只有 73%。于是我们做了两个改进，首先将 Noise Function 替换为 EDA[3]构建数据集，并且将 Multi-view Encoder 层加入 bert 的，发现效果好了很多，结果如下表所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-49e811cd34e648eab8d090e7e25c0a7c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271642323.png" />   
     </p>
 <p>后来发现一对多和多对一的问题在测试集上出现挺多的，我对于一对多的处理方式是将 origin 词中带有&rsquo;+&lsquo;号的进行分割了，导致了最终正确率下降很多。ps:就这个 <code>单侧甲状腺切除伴他叶部分切除术</code> 在测试集上就有 80 个，一定要认真的看数据集合。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-71348c4364cf4f1f8c4ad75e7edce990.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271642616.webp" />   
     </p>
 <p>简单的说一下后续优化的思路，首先来看一下计算相似度后的结果，key 是原始词，target 是验证集给出的结果，topK 是 <strong>BERT+DAE</strong> 相似度计算给出的排序结果，我们可以根据 Top-3 的结果构建正负样本，将图中&rsquo;✓&rsquo;做为正样本，图中的&rsquo; <strong>x</strong>&lsquo;作为负样本，再构建一个分类器模型，可以用 origin 和 ^target(预测结果)的一些相似度度量的结果作为特征，比方说 jaccard，Edit Distance，word2vec 等等。之后分类的结果对 topK 进行 rerank，一切有趣的玩法请自行开发。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-69cd3e7612cf41c383024360926271da.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271642570.webp" />   
     </p>
 <p>后续看了前三名的 ppt，排名第一的方法是用 LCS 最长公共子序列做粗筛，最后精排直接用 bert 构建分类器。精排过程对于最终信息检索的效果有非常重要的作用，经过精排后，前几名参赛队伍对于数据集的 top1 准确率可以提高到 90%+。如果有兴趣可以[1]邮件联系要数据。</p>
 <h3 id="有趣的主菜">有趣的主菜</h3>
@@ -242,34 +242,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在保证质量同时又源源不断的获取新的词汇，最简单的方式是找到这个垂直领域的专家，持续不断的对一些非结构化文本进行标注。但是这种方式的成本比较高，而且周期比较长。使用远监督的方式，根据一份质量较高的词典对非结构化文本进行&quot;伪标注&quot;,但是在垂直领域由于泛化能力有限，我们没办法保证其命名实体识别的有效性，举个例子，苹果可以是食物，也可以是公司，那么我们在进行远监督对文本做标注时，无法有效的进行区分。</p>
 <p>生物医学领域为解决泛化性低这一问题，提出了基于规则和统计的混合分类器模型[9]。使用前缀匹配，拼写规则，N-gram，词性标注和一些上下文相关文法作为特征，使用贝叶斯网络，决策树和朴素贝叶斯等分类器模型进行融合。准确率在该数据集上提升了 1.6 个点，其结果如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-18a1af03ea7e401fad5b783db678a91a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271642225.webp" />   
     </p>
 <p>近日看了使用远监督进行命名实体识别一些论文，其中一篇《Distantly Supervised Named Entity Recognition using Positive-Unlabeled Learning》[10-11]，作者主要用未标记数据和领域辞典进行 NER 方法，作者将任务表示为对正未标记（PU, Positive-Unlabeled）学习问题，因为词典不能包含句子中的所有实体单词，所以没有采用传统的 BIO,BIESO 标注模式，而是转化为二分类问题，将实体单词映作为正样本，非实体单词作为负样本。在 AdaSampling[12]不断扩充词典数据的同时也在不断的优化 PU 分类器。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-e81dcf4db7c641c897dd7195fe723e55.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271642879.webp" />   
     </p>
 <p>这种半监督方式虽然和监督学习比有一些差距，但是也达到了相对较好的结果。印象深刻的是这篇《HAMNER: Headword Amplified Multi-span Distantly Supervised Method for Domain Specific Named Entity Recognition》这篇文章应用了之前文章中提到的文本结构化方法和名词短语挖掘等技术，来为命名实体识别提供 pseudo annotation。</p>
 <p>作者提出了一个 <strong>HAMNER</strong>:Headword Amplified Multi-span Named Entity Recognition 远监督的方式进行标注。这篇文章旨在减小传统的监督学习方法和远监督之间的差距，文中表明，远监督方法有两个限制条件，第一个就是 oov 问题，挖掘到的新的名词短语，没有一个准确对应的类别，就比方说，ROSAH syndrome，像这个词如果未存在词典中时，我们可以根据它的 headword syndrome 来判断它实际上是一个疾病类型。另一个限制就是远监督方法很可能带来很多不确定的边界问题，举个例子， <em>我想买一个苹果手机</em>，苹果是 Food 也可以是 Company，苹果手机是 Mobile Phone，因此先确定 mention 的类型再去判断 mention type，并根据其置信度给出更为准确的实体边界。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-1dd48510c0a4478da4775bfc085a658d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271642781.webp" />   
     </p>
 <p>从流程图中看出，我们远监督所用到词典数据来源有两个，高质量带类别的词典和抽取的 phrase(本文中为 span)，对训练数据生成 <code>伪标注</code> 数据。那么 <strong>问题</strong> 就有了， <strong>如何获得词典之外的 Noun phrase，如何解决同义词和拼写错误问题</strong>，文中提到了两个方法，其中一个用的是 Auto Phrase，也就是之前的文章中我们谈过的关于名词短语挖掘的方法[4-7]。抽取到的 phrase 没有类别时，并使用 headword 和 word embedding 计算相似度的方式确定抽取 Noun Phrase 。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-85c2315a0bd142e1bc36d555cacce3b3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271642661.webp" />   
     </p>
 <p>输入词典 D，高质量的 phrase，headword 频率的阈值和 headword 相似度阈值，根据 phrase 匹配到的相似度最大值的类别进行记录，phrase 很有可能存在多个类别标签，T 为 phrase 的类别标签集合。在构建伪标签的训练数据时，根据正向最大匹配原则，不允许存在嵌套或重叠。但是允许同一个实体有多个类别。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-6a9b7cdab2704f0b99a257845dfc481f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271642618.webp" />   
     </p>
 <p>不仅每一个实体可以有多个类别标签，在构建数据时还要对词实体的每个类别给定一个权重 w，这个权重是根据 <strong>Algorithm 1</strong> 中最大相似度值进行计算。像图中给出的例子一样，将包含 <em>granuloa cell tumors（phrase）</em> 的句子作为输入层，ELMo, Character Representation 和 Word Embedding 做为 embedding 层，隐藏层为 Bidirectional LSTM，将其最终结果作为 Word Representation 并根据 phrase 的 span 将句子划分为三个部分，每一部分计算一个隐藏的表示，最后将三个结果进行拼接后将最终 EntityType 作为这 phrase 的类别。并且我们可以获得 phrase 在这个类别下的权重 w。</p>
 <p>最后一步，根据神经网络模型提供的 phrase 和其所有类型的概率估计，对句子进行划分，因为 phrase 之间位置互相不重叠且不存在嵌套，并且在句子中应该是保留一个固定类别信息，因此对于句子中存在多个 phrase 时，我们根据其最小的联合概率，作为最优解，其中用了动态规划做优化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-13b8b686ba70411f9a0c2e7300c6b44a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271642343.webp" />   
     </p>
 <h3 id="一点也不甜的甜点">一点也不甜的甜点</h3>
 <p>其实整个方法不难理解，但是内容相对来说还是挺丰富的，首先我们需要有一个在垂直领域一定规模的自定义词典，根据 auto phrase 等名词短语挖掘方法，挖掘一批高质量的名词短语，并且简单的做一些标注后，根据上下文信息构建分类器模型，确定其在每个类别下的条件概率值，概率最大的作为该句子下 phrase 的类别，再计算最小的联合概率结果，使用动态规划，找到最优解，作为最终的伪标注训练数据。这样做的好处是，减少人工标注成本，而且在某些领域下效果近乎于专家标注结果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-fed097486ee74d47b5be27712f9e2f3b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271642071.webp" />   
     </p>
 <p>这篇文章也是最近刚看到的，其中一些方法我们也在用，并正在尝试着做一些改进，原文在为抽到 phrase 给定类别的时候，使用 headword 和词向量计算相似度。但是词典中会存在 oov 问题，很可能没有 phrase 所对应的 headword 时，可以考虑用一些规则，或者是根据[5]中提到的对症状数据进行标准化的方法，标注一批数据，构建语义树等方式来辅助我们给定 phrase 最终类别。</p>
 <h3 id="总结">总结</h3>
@@ -409,6 +409,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -442,10 +446,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -824,6 +824,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

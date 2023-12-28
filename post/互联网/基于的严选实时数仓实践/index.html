@@ -192,7 +192,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3acd9e559ea34a90aa6b41ed6963372b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754872.webp" />   
     </p>
 <blockquote>
 <p>分享嘉宾： <strong>杨雄 网易严选 资深研发工程师</strong></p>
@@ -204,12 +204,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>出品社区： <strong>DataFun</strong></p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/96d960aec9cd4b5398924b0b85083afb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754450.webp" />   
     </p>
 <p>今天分享的内容主要分为四个部分，首先会介绍下严选实时数仓的背景、产生的一些问题。然后是针对这些背景和问题对实时数仓的整体设计和具体的实施方案，接着会介绍下在实时数仓的数据质量方面的工作，最后讲一下实时数仓在严选中的应用场景。</p>
 <p><strong>1、背景</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/593a70020d6e4873837cb8567e3027af.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754065.webp" />   
     </p>
 <p>严选实时数仓项目是从17年下半年开始做的，背景总结为三个方面：</p>
 <p>第一个是长链路且快速变化的业务，严选作为一个ODM电商，整个业务链度从商品采购、生产、仓库、到销售这个阶段可以在主站APP上购买或者分厂购买，然后通过商户配送到达消费者。链度是非常长的，这也决定数据的数据域非常广；严选作为一个成长的电商，会有很多新的业务出现。</p>
@@ -218,34 +218,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>针对这样的项目背景提出了三个设计目标，第一个是 <strong>灵活可扩展</strong>，第二个是 <strong>开发效率高</strong>，第三个是 <strong>数据质量要求高</strong>。</p>
 <p><strong>2、整体设计和实现</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/25a6f9a6aac64ba39544424df42154b7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754709.webp" />   
     </p>
 <p>基于这样的设计目标，介绍一下整体的设计和实现方案：</p>
 <p>实时数仓整体框架依据数据的流向分为不同的层次，接入层会依据各种数据接入工具收集各个业务系统的数据，如买点的业务数据或者业务后台的并购放到消息队列里面。消息队列的数据既是离线数仓的原始数据，也是实时计算的原始数据，这样可以保证实时和离线的原始数据是统一的。有了源数据，在计算层经过FLink+实时计算引擎做一些加工处理，然后落地到存储层中不同存储介质当中。不同的存储介质是依据不同的应用场景来选择。框架中还有FLink和Kafka的交互，在数据上进行一个分层设计，计算引擎从Kafka中捞取数据做一些加工然后放回Kafka。在存储层加工好的数据会通过服务层的两个服务：统一查询、指标管理，统一查询是通过业务方调取数据接口的一个服务，指标管理是对数据指标的定义和管理工作。通过服务层应用到不同的数据应用，数据应用可能是我们的正式产品或者直接的业务系统。后面会从数据的分层设计和具体的实现两个方面介绍。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4e032193ac914b6da336b2613cd995e1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754302.webp" />   
     </p>
 <p>上面是对数据的整体设计，主要参考了离线数仓的设计方案，也参考了业界同行的一些做法。将数据分为四个层次：</p>
 <p>首先是ODS层，即操作数据层，通过数据采集工具收集各个业务源数据；DWD层，明细数据层是按主题域来划分，通过维度建模方式来组织各个业务过程的明细数据。中间会有一个DIM层，维度数据层主要做一些查询和关联的操作。最上层是DM层，通过DWD层数据做一些指标加工，主要面向一些分析和应用汇总的指标或者是做多维分析的明细数据。</p>
 <p>举例说明一下数据设计流向过程，假如要对严选主类目上当天销售和流量的统计，统计每个类目的销售量和流量从ODS层来源两部分，一部分来自访问，这是来源于埋点数据，这种数据通常比较规范，通过一些简单加工，在DWD层形成一张商品访问明细表；交易数据来自交易明细表，在ODS层来源于订单表和订单购物车表。将两个表汇聚在DWD层形成一个交易域的交易明细表，因为统计需要统计到类目维度，所以从DWD层向DM加工需要从商品维度表做一个关联，这样就可以在DM层做一些汇总统计，就可以形成DM所需要的指标数据。这里的数据分为两类，一种是实时的，一种是准实时；如果维度比较复杂，如准实时弹幕做一些配置来做到同步，如果有一些关联关系比较简单的就做成实时维表。这样的好处是能实时统计，能比较直观观察。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cc7db0a3e83742e6b35504ae1f01f69b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754965.webp" />   
     </p>
 <p>实时数仓设计分为5个主题域，分别是 <strong>商品、流量、交易、营销、仓配</strong>。在这五个主题域下沉淀了25个模型，整个实时数仓在线任务数达到135。基于这样的设计方案能整体实现设计目标。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/af2c05e60e7a4f94a1f271678581d95d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754571.webp" />   
     </p>
 <p>首先通过主体域的模型复用能够提高开发效率，最常用的就是交易域的实时数据。交易域的交易明细模型能够产生多个集市层模型，交易明细的字段清洗比较规范，一般两天就能开发一个模型，如果模型简单一天就能搞定。第二个就是比较灵活，在DWD层封装一些业务逻辑，快速应对一些业务调整。举例说明下，严选上线一个众筹业务，先前对交易定义都是以支付来算，但是众筹交易和支付相隔时间较长，对于离线只需要活动结束再进行统计，但是实时只关注于当天数据，这个时候统计就没有意义。因此需要将众筹数据剔除，实现时只需要在交易明细里面进行过滤，这样集市层所有指标数据都统一更改掉。第三个就是统一，数据都是按照业务域划分，管理和维护都比较方便，对于开发资源分配也比较便利。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a419e2c3b3f4439a997727796d9b700d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754196.webp" />   
     </p>
 <p>然后介绍下技术实现方面的考量，主要分为 <strong>计算</strong> 和 <strong>存储</strong>。对于计算方面，有很多实时计算引擎，有Flink、Storm、Spark Streaming，Flink相对于Storm的优势就是支持SQL，相对于Spark Streaming又有一个相对好的性能表现。同时Flink在支持好的应用和性能方面还有比较好的语义支持和比较好的容错机制，因此构建实时数仓Flink是一个比较好的实时计算引擎选择。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b87921947c804de18a51ceff0357d55f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754903.webp" />   
     </p>
 <p>对于存储层会依据不同的数据层的特点选择不同的存储介质，ODS层和DWD层都是存储的一些实时数据，选择的是Kafka进行存储，在DWD层会关联一些历史明细数据，会将其放到Redis里面。在DIM层主要做一些高并发维度的查询关联，一般将其存放在HBase里面，对于DIM层比价复杂，需要综合考虑对于数据落地的要求以及具体的查询引擎来选择不同的存储方式。对于常见的指标汇总模型直接放在MySQL里面，维度比较多的、写入更新比较大的模型会放在HBase里面，还有明细数据需要做一些多维分析或者关联会将其存储在Greenplum里面，还有一种是维度比较多、需要做排序、查询要求比较高的，如活动期间用户的销售列表等大列表直接存储在Redis里面。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a5986ba13c864b0db0326b687ad6dba4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755567.webp" />   
     </p>
 <p>性能优化方面，在计算中采用很多维度关联，如果每一次维度关联都从HBase中调用性能受限，因此将维度数据在本地task进行一次缓存。聚合去重用一些精度去重算法，如Hyperloglog，既能保证在一个可接受的数据统计误差，又能比较好的优化存储。存储方面主要针对MySQL和Greenplum两种场景，在大数据场景下MySQL写入压力比较高，在写入之前做一个窗口预聚合，实现延迟和负载均衡，较少MySQL的写入压力。对于明细数据写入Greenplum，明细数据不适合高并发写入，因此会对要写入的表依据主键做哈希，定位要录入的segment，直接到Slave节点，批量写入数据，这样也能有效提高写入的存储量。</p>
 <p><strong>3、数据质量</strong></p>
@@ -256,25 +256,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>第三，数据接入与源数据统一；</p>
 <p>最后，数据产出方面，指标定义和接口都是统一输出。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ed5f3b3a4d32437f980f1de7a7681e1d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755134.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0df78d55989a45b4b14c61c867036d19.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755879.webp" />   
     </p>
 <p>DWD层做到主题域与模型同步，按照业务过程来设计模型，这种方法对于实时和离线都是统一的。以交易域为例，在实时和离线都有订单、订单明细、组合装的交易明细，还有加购数据模型，由于开发成本原因实时模型大都是离线模型的子集。在DM层会统一定义指标和模型定义的方法，规范对于实时和离线都是适用的，定义模型会指定相应的指标和维度，指标通常是派生指标，通过原子指标+时间维度+修饰词完成派生指标的定义，再经过定义维度形成模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/164300d817a74da09439535f3982e4ea.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755289.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a73e7965247e41f99935dc1118e3ea89.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755006.webp" />   
     </p>
 <p>有了模型定义规范具体落地，如果要定义当日主站PC端销售，首先定义原子指标流水，时间维度今天，端是PC，然后定义派生指标，有了派生指标接着定义模型，定义为每天商品销售实时情况，做一个实时与离线的标记，选择其存储，维度选择一个是时间维度、一个是商品维度，然后加入先前的派生指标，最后生成模型。不同模型知识实时和离线标记，调用都是基于同一套接口来调用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7a072e3c132047d794233b6c6c53c218.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755582.webp" />   
     </p>
 <p>数据监控涉及两个方面，一个是数据平台监控。主要是对任务失败情况监控、异常日志监控、任务失败是RPS异常监控。还有任务本身运行正常，但是数据已经处理不过来，由于Flink机制，数据挤压到消费管理，通过对Kafka数据延迟监控能够及时发现问题。将问题通过监控发现，利用值班流程规范将问题及时发现和处理，及时通报和定期进行修复，来提高整个数据质量。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a0b45d42e1ac4d9c95febbfb8f345227.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755066.webp" />   
     </p>
 <p>为了配合数据监控，正在做实时数据血缘。主要是梳理实时数仓中数据依赖关系，以及实时任务的依赖关系，从底层ODS到DIM再到DM，以及DM层被哪些模型用到，将整个链度串联起来。这样的好处是：</p>
 <p>（1）数据/任务主动调整可以周知关联的下游；</p>
@@ -282,14 +282,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>（3）指标异常时借助血缘定位问题。</p>
 <p><strong>4、应用场景</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c1fe80058f77481cbb87dc5972459d66.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755800.webp" />   
     </p>
 <p>实时数仓应用场景分为三类： <strong>数据产品、线上运营活动、业务后台</strong>。在线模型数有84个，历史总模型数为110+，大部分数据延迟都在10s以内，对于数据大屏这种对延迟要求比较高数据延迟在毫秒级。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/61a65909a2474f36b49b9e8e4d9055b5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755404.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b0980ad3303f4aed9534c82186a06d8d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755961.webp" />   
     </p>
 <p>数据大屏是最常用的实时数据应用场景，有针对客服业务大屏，如大麦-商品数据运营平台、神相-流量分析平台、刑天-推广渠道管理系统。第二个是线上</p>
 
@@ -421,6 +421,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -454,10 +458,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -836,6 +836,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

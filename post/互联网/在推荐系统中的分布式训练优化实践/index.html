@@ -242,28 +242,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="221-问题分析工具链">2.2.1 问题分析工具链</h4>
 <p>TensorFlow是一个非常庞大的开源项目，代码有几百万行之多，原生系统的监控指标太粗，且不支持全局的监控，如果要定位一些复杂的性能瓶颈点，就比较困难。我们基于美团已经开源的监控系统CAT[2]，构建了TensorFlow的细粒度监控链路（如下图1所示），可以精准定位到性能的瓶颈问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8c7741d413f64322a7e249c45811ea7e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271739858.webp" />   
     </p>
 <p>图1 TensorFlow PS架构全链路监控</p>
 <p>同时，在性能优化的过程中，会涉及到大量的性能测试和结果分析，这也是一个非常耗费人力的工作。我们抽象了一套自动化的实验框架（如下图2所示），可以自动化、多轮次地进行实验，并自动采集各类监控指标，然后生成报告。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ddcf8c2a0d11498da15b22df6f42a36f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271739535.webp" />   
     </p>
 <p>图2 自动化实验框架</p>
 <h4 id="222-业务视角的负载分析">2.2.2 业务视角的负载分析</h4>
 <p>在推荐系统场景中，我们使用了TensorFlow Parameter Server[3]（简称PS）异步训练模式来支持业务分布式训练需求。对于这套架构，上述的业务变化会带来什么样的负载变化？如下图3所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b5512aa4acdb440eac9d70efde39a666.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271739308.webp" />   
     </p>
 <p>图3 TensorFlow PS架构大规模训练负载分析</p>
 <p>总结来看，主要包括通信压力、PS并发压力、Worker计算压力。对于分布式系统来说，通常是通过横向扩展来解决负载问题。虽然看来起可以解决问题，但从实验结果来看，当PS扩展到一定数量后，单步训练时间反而会增加，如下图4所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/993c1684c78444a98541947bee72625f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740042.webp" />   
     </p>
 <p>图4 扩展PS提升训练性能实验</p>
 <p>导致这种结果的核心原因是：Worker单步训练需要和所有的PS通信同步完成，每增加1个PS要增加N条通信链路，这大大增加了链路延迟（如下图5所示）。而一次训练要执行上百万、上千万步训练。最终导致 <strong>链路延迟超过了加PS算力并发的收益</strong> 。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/166d64e1a49d443e80bbd42bffb3894d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740478.webp" />   
     </p>
 <p>图5 增加PS带来的链路开销</p>
 <p>而对于这个系统，优化的核心难点在于： <strong>如何在有限的PS实例下，进行分布式计算的优化</strong> 。</p>
@@ -284,7 +284,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>简化版的基于PS架构的实现示意如下图6所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e9b8f8275a79415d8b286af4358684c2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740093.webp" />   
     </p>
 <p>图6 支撑大规模稀疏参数的HashTable方案</p>
 <p>核心流程大致可以分为以下几步：</p>
@@ -298,7 +298,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>对于推荐模型来说，我们的主要优化策略是，把所有稀疏参数和大的稠密参数自动、均匀的切分到每个PS上，可以解决大多数这类问题。而在实践过程中，我们也发现一个比较难排查的问题：原生Adam优化器，实现导致PS负载不均衡。下面会详细介绍一下。</p>
 <p>在Adam优化器中，它的参数优化过程需要两个β参与计算，在原生TensorFlow的实现中，这两个β是所有需要此优化器进行优化的Variabl（或HashTable）所共享的，并且会与第一个Variable（名字字典序）落在同一个PS上面，这会带来一个问题：每个优化器只拥有一个和一个，且仅位于某个PS上。因此，在参数优化的过程中，该PS会承受远高于其他PS的请求，从而导致该PS成为性能瓶颈。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9133009b5dc945bbbe5c91a7672218d0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740943.webp" />   
     </p>
 <p>图7 Adam优化算法</p>
 <p>但是通过观察Adam的优化算法，我们可以看到\beta_1和\beta_2都是常量，且蓝色高亮的部分都是相对独立的计算过程，各个PS之间可以独立完成。基于这样的发现，优化的方法也就非常直观了，我们为每一个PS上的Adam优化器冗余创建了β参数，并在本地计算t和alpha值，去除了因此负载不均导致的PS热点问题。</p>
@@ -310,12 +310,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="331-memory-registration优化">3.3.1 Memory Registration优化</h4>
 <p>RDMA有三种数据传输的方式SEND/RECV、WRITE、READ，其中WRITE、READ类似于数据发送方直接在远程Memory进行读写，Receiver无法感知，WRITE和READ适用于批量数据传输。在TensorFlow内部，基于RDMA的数据传输方式使用的是WRITE单边通信模式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/749efa553b8048c590f3428417615831.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740561.webp" />   
     </p>
 <p>图8 RDMA传输方式</p>
 <p>在RDMA传输数据时，需要提前开辟内存空间并将其注册到网卡设备上（Memory Registration过程，下称MR），使得这片空间可以被网卡直接操作。开辟新的内存并注册到设备上，整个过程是比较耗时的。下图9展示了不同大小的内存绑定到网卡设备上的耗时，可以看到随着注册内存的增大，绑定MR的耗时迅速增加。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9e72e58801024ece9c2cd55afec978e3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740164.webp" />   
     </p>
 <p>图9 MR过程开销</p>
 <p>社区版Tensorflow RDMA实现，Tensor创建依旧沿用了统一的BFC Allocator，并将所有创建的Tensor都注册到MR上。正如上面所提到的，MR的注册绑定具有性能开销，高频、大空间的MR注册会带来显著的性能下降。而训练过程中的Tensor，只有那些涉及到跨节点通信的Tensor有必要进行MR，其余Tensor并不需要注册到MR。因此，优化的方法也就比较直接了，我们识别并管理那些通信Tensor，仅对这些跨节点通信的Tensor进行MR注册就好了。</p>
@@ -327,7 +327,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>针对上面的问题，我们引入了MR静态分配器的策略。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a73763b0881e49db8bc9e98283db9f36.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740817.webp" />   
     </p>
 <p>图10 MR静态分配器</p>
 <p>这里核心的设计思路为：</p>
@@ -337,7 +337,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>我们引入了一种简单的交换协议，将传输Tensor的Shape，Data打包到一起，写到Client端。Client端根据协议，解析出Tensor大小，并最终读取Data，避免了原生实现中因Tensor的Shape变化而产生的多次协商过程。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3ab9edb0ddcd4224b4d860e1dced6259.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740470.webp" />   
     </p>
 <p>图11 MR静态分配器构造流程</p>
 <p>具体到实现中，我们引入了Allocation Analysis模块，在训练开始的一段时间，我们会对分配的历史数据进行分析，以得到一个实际预开辟MR大小以及各个Tensor的预留空间大小。然后我们会暂停训练的进程，启动Allocator的构造过程，包括MR的创建以及通信双端的信息同步。利用相关信息构造MR Info Map，这个Map的Key是传输Tensor的唯一标记（ParsedKey，计算图切图时确定），Info结构体中包含了本地地址指针、offset大小、ibv_send_wr相关信息等。然后恢复训练，后续Tensor的传输就可以使用静态开辟好的MR进行收发，也免去了因Shape变化而产生的多次协商过程。</p>
@@ -351,7 +351,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="334-send-driven--rendezvous-bypass">3.3.4 Send-Driven &amp; Rendezvous-Bypass</h4>
 <p>对于Tensorflow PS架构熟悉的同学会了解，一整张计算图被切割为Worker端和PS端后，为了使两张计算图能够彼此交换数据，建立了基于Rendezvous（汇合点）机制的异步数据交换模式。如下图12所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fde796cf87f346d99f91fb2a2b6686da.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740053.webp" />   
     </p>
 <p>图12 TensoFlow切图之Send-Recv对添加</p>
 <p>基于上图的切图逻辑，Recv算子代表着这一侧计算图有Tensor的需求，而Tensor的生产者则位于与之配对的另一设备上的Send算子背后。</p>
@@ -363,7 +363,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>针对上面提到的问题，我们在RDMA上实现了另外一种数据交换的模式，叫做Send-Driven模式。与Recv-Driven模式相对，顾名思义就是有Send算子直接将数据写到Recv端，Recv端接收数据并注册到本地Rendezvous中，Recv算子直接从本地的Rendezvous中获取数据。具体流程如下图13所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4c52e55726ea4157900bfd90304c73ff.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740926.webp" />   
     </p>
 <p>图13 原生的Recv-Driven与补充的Send-Driven机制</p>
 <p>从图中可以看到，相较于Recv-Driven模式，Send-Driven模式的通信流程得到了比较大的简化，另外在数据ready后立即发送的特性，跳过了一侧的Rendezvous，并且对于生产者先于消费者的情况，可以加快消费端数据获取的速度。</p>
@@ -374,7 +374,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>以Adam优化器为例，需要创建两个slot，以保存优化中的动量信息，它的Shape与Embedding相同。在原生优化器中，这两个Variable是单独创建的，并在反向梯度更新的时候会去读写。同理，使用HashTable方案时，我们需要同时创建两张单独的HashTable用来训练m、v参数。那么在前向，反向中需要分别对Embedding、 m、v进行一次Lookup和一次Insert，总共需要三次Lookup和三次Insert。</p>
 <p>这里一个优化点就是将Embedding、 m、v，以及低频过滤的计数器（见下图14的Counting HashTable）聚合到一起，作为HashTable的Value，这样对稀疏参数的相关操作就可以聚合执行，大大减少了稀疏参数操作频次，降低了PS的压力。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ea1fe935929f4c768df94d61dfea2888.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740461.webp" />   
     </p>
 <p>图14 基于HashTable的参数融合策略</p>
 <p>该特性属于一个普适型优化，开启聚合功能后，训练速度有了显著的提高，性能提升幅度随着模型和Worker规模的变化，效果总是正向的。在美团内部真实业务模型上，聚合之后性能相比非聚合方式能提升了45%左右。</p>
@@ -390,12 +390,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>那我们是否可以提前执行稀疏参数的Embedding，来做到通信和计算的Overlap，隐藏掉这部分时间呢？从系统实现上肯定是可行的，但从算法上讲，这样做会引入参数Staleness的问题，可能会导致模型精度受到影响。但在实际的生产场景中，大规模异步训练时本身就会带来几十到几百个步的滞后性问题。经过我们测试，提前获取一两步的稀疏参数，模型精度并未受到影响。</p>
 <p>在具体实现上，我们把整个计算图拆分为Embedding Graph（EG）和Main Graph（MG）两张子图，两者异步独立执行，做到拆分流程的Overlap（整个拆分过程，可以做到对用户透明）。EG主要覆盖从样本中抽取Embedding Key，查询组装Embedding向量，Embedding向量更新等环节。MG主要包含稠密部分子网络计算、梯度计算、稠密参数部分更新等环节。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ce91756b61184c5fb11896b5ab00e0ce.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740118.webp" />   
     </p>
 <p>图15 Embedding流水线模块交互关系</p>
 <p>两张子图的交互关系为：EG向MG传递Embeding向量（从MG的视角看，是从一个稠密Variable读取数值）；MG向EG传递Embedding参数对应的梯度。上述两个过程的表达都是TensorFlow的计算图，我们利用两个线程，两个Session并发的执行两张计算图，使得两个阶段Overlap起来，以此到达了更大的训练吞吐。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c62353c0784e4d9aa54520e16b2491d2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740721.webp" />   
     </p>
 <p>图16 Embedding流水线架构流程图</p>
 <p>上图是Embedding流水线的架构流程图。直观来看分为左侧的样本分发模块，顶部的跨Session数据交换模块，以及自动图切分得到的Embedding Graph和Main Graph，蓝色的圆圈代表新增算子，橙色箭头代表EG重点流程，蓝色箭头代表MG重点流程，红色箭头代表样本数据重点流程。</p>
@@ -420,7 +420,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>对于大规模稀疏模型训练来说，Embedding HashTable会面对大量的并发操作，通过Profiling我们发现，频繁动态的内存申请会带来了较大性能开销（即使TensorFlow的Tensor有专门的内存分配器）。我们基于内存池化的思路优化了HashTable的内存管理。</p>
 <p>我们在HashTable初始化时，会先为Key和Value分别创造两个BucketPool，每个池子都会先Malloc较大一块内存备用，考虑到可能会有对HashTable进行中的Key和Value进行Remove的场景（如Online Learning训练时），需要对从HashTable中删除的Key和Value所使用的内存进行回收，因此每个BucketPool还有一个ReuseQueue来负责维护回收的内存。每次向内部的哈希表数据结构中Insert Key和Value的时候，Key和Value内存和释放分配都进行池化管理。用这种方式降低了大规模稀疏训练中遇到稀疏内存分配开销，整体端到端训练性能提升了5%左右。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cf6e838fdf274078a02469aa50e1f06a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740746.webp" />   
     </p>
 <p>图17 HashTable内存优化</p>
 <h3 id="36-单位算力吞吐优化">3.6 单位算力吞吐优化</h3>
@@ -436,7 +436,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>Unique和Dynamic Partition算子存在冗余数据遍历，这些操作其实可以在一次数据遍历中全部做完，节省掉算子切换、冗余数据遍历的耗时。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5604f8c7d4cd4168b392268fab657e3a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740357.webp" />   
     </p>
 <p>图18 Unique算子内部出现DRAM Bound问题</p>
 <p>总结来说，HashTable开辟过大会导致大量的minor_page_fault，导致访存的时间增加，HashTable过小又可能会导致扩容。我们采用了基于启发式算法的内存自适应Unique算子实现，通过对训练历史重复率的统计，我们可以得到一个相对合理的HashTable大小，来提高访存的性能；另外Unique算子内HashTable的具体选择上，经过我们的多种测试，选择了Robin HashTable替换了原生TF中的实现。</p>
@@ -581,6 +581,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -614,10 +618,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -996,6 +996,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

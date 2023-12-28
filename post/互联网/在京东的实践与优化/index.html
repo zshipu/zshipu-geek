@@ -225,17 +225,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>到了 2020 年，基于 Flink 和 K8s 打造的全新实时计算平台已经比较完善了，我们进行了计算引擎的统一，同时支持智能诊断，来降低用户开发和运维应用的成本和难度。在过去，流处理是我们关注的一个重点。同年，我们也开始支持批处理，于是整个实时计算平台开始朝着批流一体的方向演进。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8217f678db164ddca44bec9b21902888.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271737522.webp" />   
     </p>
 <h3 id="业务场景"><strong>业务场景</strong></h3>
 <p>京东 Flink 服务于京东内部非常多的业务线，主要应用场景包括实时数仓、实时大屏、实时推荐、实时报表、实时风控和实时监控，当然还有其他一些应用场景。总之，实时计算的业务需求，一般都会用 Flink 进行开发。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/116433db446e47a4bdd59cd52d711914.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271737263.webp" />   
     </p>
 <h3 id="业务规模"><strong>业务规模</strong></h3>
 <p>目前我们的 K8s 集群由 5000 多台机器组成，服务了京东内部 20 多个一级部门。目前在线的流计算任务数有 3000 多，流计算的处理峰值达到 5亿条每秒。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/88257ebf2fdc4c57a8f32d2a645a1306.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271737782.webp" />   
     </p>
 <h1 id="二容器化实践"><strong>二、容器化实践</strong></h1>
 <p>在 2017 年，京东内部的大多数任务还是 storm 任务，它们都是跑在物理机上的，同时还有一小部分的 Spark streaming 跑在 Yarn 上。不同的运行环境导致部署和运维的成本特别高，并且在资源利用上有一定的浪费，所以我们迫切需要一个统一集群资源管理和调度系统，来解决这个问题。</p>
@@ -243,7 +243,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在 2018 年的 6.18，我们只有 20% 的任务跑在 K8s 上；到了 2019 年 2 月份，已经实现了实时计算的所有任务都跑在 K8s 上。容器化后的实时计算平台经历了 6.18，双 11 多次大促，扛住了洪峰压力，运行的非常稳定。</p>
 <p>但是，我们过去的 Flink 容器化方案是基于资源预先分配的静态方式，不能满足很多业务场景，于是我们在 2020 年也进行了一个容器化方案的升级，后面会详细介绍。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a4781866aab54f38b354b69111573f68.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271737364.webp" />   
     </p>
 <p>容器化带来非常多的收益，这里主要强调三点：</p>
 <ul>
@@ -259,7 +259,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>第二，极端场景下 Pod 不能正常拉起， 影响任务恢复 。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8c248c5a66df4ed28399fc405b94f0a5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271737106.webp" />   
     </p>
 <p>于是我们进行了一个容器化方案的升级，实现了基于 K8s 的动态的资源分配方式。在集群创建的时候，首先我们会根据用户指定的 job manager 的数量创建 jobmanager 的 deployment；用户在提交任务的时候，我们会根据任务所需要的资源数，动态的向平台申请资源，创建 taskmanager。</p>
 <p>在运行过程中，如果发现这个任务需要扩容，job manager 会和平台交互，进行动态扩容；而在发现资源浪费时，会进行缩容。通过这样一个方式可以很好的解决静态预分配带来的问题，并提高了资源利用率。</p>
@@ -272,7 +272,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>另外，为了兼容原有 Slot 分配策略 (按 slot 分散)，在提交任务时会预估出任务所需资源并一次性申请，同时按照一定的策略进行等待。等到有足够的资源，能满足任务运行的需求时，再进行 slot 的分配。这样很大程度上可以兼容原有的 slot 分散分配策略。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d87f44ad35684529b17468d6c04a3402.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271737886.webp" />   
     </p>
 <h1 id="三flink-优化改进"><strong>三、Flink 优化改进</strong></h1>
 <h3 id="预览拓扑"><strong>预览拓扑</strong></h3>
@@ -290,12 +290,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>第三，网络 Buffer 预估。这样可以最大限度的方便用户在平台进行业务的调整和调优。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fb9cb0e491af4ecd80a8e11dc45db6e9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271737521.webp" />   
     </p>
 <p>用户在平台提交 SQL 作业或 Jar 作业，这个作业提交之后，会生成一个算子的配置信息，再反馈到我们平台。我们平台会把整个拓扑图预览出来，然后用户就可以在线进行算子配置信息的调整。调整完之后，把调整完的配置信息重新提交到我们平台。并且，这个过程可以是连续调整的，用户调整完觉得 ok 了就可以提交任务。提交任务之后，整个在线调整的参数就生效了。</p>
 <p>这里任务可以多次提交，如何保证前后两次提交生成算子稳定的对应关系呢？我们采用这样一个策略：如果你指定了 uidHash 或者 uid，我们就可以拿 uidHash 和 uid 作为这样一个对应关系的 Key。如果没有，我们会遍历整个拓扑图，按照广度优先的顺序，根据算子在拓扑图中的位置生成确定的唯一的 ID。拿到唯一的 ID 之后，就可以得到一个确定的关系了。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/87c3f971440a4fe28befddee2d1ca564.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271737523.webp" />   
     </p>
 <h3 id="背压量化"><strong>背压量化</strong></h3>
 <p>下面介绍一下我们的第二个改进，背压量化。目前 <strong>观测背压</strong> 有两种方式：</p>
@@ -325,11 +325,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c8297ccdddc14da1b0609b55e37e29f0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271737323.webp" />   
     </p>
 <p>针对这个问题，我们的解决方案是采集背压发生的位置、时间和次数指标，然后上报上去。将量化的背压监控指标与运行时拓扑结合起来，就可以很直观的看到背压产生的影响 (影响任务的位置、时长和次数)。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/567ea537b54f4fc793f617fe36782eb5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271737050.webp" />   
     </p>
 <h3 id="文件系统支持多配置"><strong>文件系统支持多配置</strong></h3>
 <p>目前在 Flink 中使用文件系统时，会使用 FileSystem.get 传入 URI，FileSystem 会将 shceme+authority 作为 key 去查找缓存的文件系统，如果不存在，根据 scheme 查找到 FileSystemFactory 调用 create 创建文件系统，返回之后就可以对文件进行操作了。不过，在平台实践过程中，经常会遇到这样的问题：</p>
@@ -340,7 +340,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>第二， 如何将数据从一个 OSS 存储读出、处理后写到另外一个 OSS 存储？</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1725ca7c644a48f3b4e1fff16588b0ac.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271737746.webp" />   
     </p>
 <p>这两个问题都涉及到如何让 Flink 的同一个文件系统支持多套配置。我们的解决方案是通过使用不同的scheme指定和隔离不同的配置。以 HDFS 支持多配置为例，如下图所示：</p>
 <ul>
@@ -349,7 +349,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>第三步，在读写 HDFS 时，使用 HadoopFileSystemWrapper 将用户自定义 scheme 的路径 (aaHDFS://) 转换为真实的 hadoop 路径 (HDFS://)。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a19867034a2a4805a3aaf3d24b6db4dc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271737480.webp" />   
     </p>
 <p>我们也做了许多其它的优化和扩展，主要分为三大块。</p>
 <ul>
@@ -481,6 +481,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -514,10 +518,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -896,6 +896,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

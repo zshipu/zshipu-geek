@@ -215,7 +215,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>话题：AI深度学习</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2df489cdadca4ffdbb763e40ca9cb6e2.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155404.jpeg" />   
     </p>
 <p>搜索排名是机器学习中的一个重要应用。在 Airbnb 公司，最初它们是使用梯度提升的决策树模型来做的。随着时间的推移，传统的梯度提升树模型遇到了瓶颈，于是 Airbnb 开始探索利用深度学习来解决搜索排名问题。本文是 AI 前线第 57 篇论文导读，下面我们来深入了解 Airbnb 实践背后的细节和应用深度学习过程中踩过的一些坑。</p>
 <h2 id="背景介绍">背景介绍</h2>
@@ -225,14 +225,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>下面讨论的搜索排名只是 Airbnb 模型生态中的一部分，所有的模型最后的目标都是给客户呈现一个最优的房屋预定列表。生态中的模型有一些是预测房东接受客人预定的概率，一些是预测客人在体验上给五星的概率等。本论文只讨论搜索排名的模型，这个模型负责根据客户预定房屋的可能性给房屋检索列表做一个最优的排序。</p>
 <p>下图 1 是一个典型的客户搜索会话路径。客户通常有多个搜索，并伴随着点击搜索列表查看详细页。一个成功的搜索会话是以客户开始搜索为开始，以客户预定房屋成功为结束。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3b58df96182f4ed99215048827bf6545.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155745.png" />   
     </p>
 <p>客户的搜索会话行为是通过日志来记录，这些日志会被用来做模型训练。新模型训练的时候，对训练样本进行预处理时，将已经被客户预定的房屋尽可能的指定到排名靠前的位置，来学习打分函数。然后，对训练好的新模型进行 A/B 实验测试，在统计学上观察是否相对现有模型有显著的提升。</p>
 <p>下面我们通过几个大的版块来展开讨论：1、总结过去一段时间模型架构是如何演变的；2、特征工程和系统工程的思考；3、介绍一些内部工具和超参数方面的探索；4、总结回顾。</p>
 <h2 id="模型演变">模型演变</h2>
 <p>从传统机器学习模型向深度学习模型的转变，不是一种潮流，是一次次优化改进后累积的结果。下图 2 展示了各个阶段离线和在线模型 NDCG 的效果演变过程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1388d72a3ecb4cfa98bd6672aa616af7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155954.png" />   
     </p>
 <h4 id="简单的神经网络simple-nn">简单的神经网络（Simple NN）</h4>
 <p>Andrej Karpathy （特斯拉人工智能和自动驾驶视觉总监）在神经网络模型架构设计方面有个建议：不要做英雄主义者。受英雄主义的影响，你就会自己设计非常复杂的模型架构，然后耗费大量的时间和精力来优化模型，最后效果不好不了了之。</p>
@@ -241,17 +241,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="lambdarank-nn">Lambdarank NN</h4>
 <p>简单的神经网络给了我们一个新的尝试，但还远不够。下面我们做的另外一个尝试是将 Lambdarank 和神经网络结合，其中 NDCG 作为离线搜索排名的主要衡量指标，Lambdarank 提供了一种可以直接优化神经网络 NDCG 的方法。在简单神经网络的回归公式中，这里涉及到两个关键的改进：1、使用｛booked listing, not-booked listing｝作为训练样本，训练过程中，最小化预定列表和非预定列表得分之间的交叉熵损失。2、 调整两个列表的位置，生成新的 pair 对，在 pairwise loss 上赋予不同的权重。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/46c6faef1e1c49f1b105644372e0415a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155884.png" />   
     </p>
 <h4 id="decision-treefactorization-machine-nn-决策树--因式分解机-nn">Decision Tree/Factorization Machine NN 决策树 / 因式分解机 NN</h4>
 <p>此时，尽管线上使用的是神经网络模型，但是我们同时也在研究其他模型。其中一个比较显著的模型是将 FM 和 GBDT 的输出结果作为神经网络的特征输入的架构模型。如图 3 展示新的模型架构，其中 FM 将预测的结果输入神经网络作为一部分特征，GBDT 模型激活的树节点的索引做为类别特征的 Embedding 结果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e6a2d36daece41e1854e1da220fbfc9c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155115.png" />   
     </p>
 <h4 id="deep-nn">Deep NN</h4>
 <p>一个典型的神经网络配置是 195 个类别特征 embedding 后，输入到第一个含 127 个全连接 ReLU 的隐层，然后输入第二个含 83 个全连接 ReLU 的隐层。输入神经网络的特征是一些简单的属性特征，比如：价格、历史预定数量等特征。图 4，展示了对比了 NDCG 在训练集和测试集的学习曲线。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7b6dff5d87aa4bb096ae72edd8fe93c8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155097.png" />   
     </p>
 <h2 id="特征工程">特征工程</h2>
 <p>在特征工程中，常见的处理技巧有计算比率、在滑动窗口上计算平均等，这些都是多年积累的经验。但是，尚不清楚这些特征对于模型是不是最好的，也不能根据最新的信息做出及时的调整。使用神经网络建模的一个最大好处是它可以根据原始数据，在隐含层自己组合特征。为了发挥神经网络的优势，我们发现给神经网络输入原始的数据还远不够，需要在特征工程方面做些基础的转换。传统的机器学习特征工程主要是做计算方面的处理，而神经网络这部分工作在隐含层可以自己完成。在神经网络特征工程中，我们更多的精力是确保输入的特征遵循某些特性。</p>
@@ -263,21 +263,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>定位异常 ( Spotting bugs）: 在处理数亿特征样本时，如何检查其中一部分样本是否有异常是非常困难的。有误差的分布和典型分布是有差异的，找到一个光滑平稳的分布对我们定位异常很有帮助。比如：在某地区的价格记录中，发现跟市价明显不一致的错误。这些错误表现在具体的分布图中是一个尖峰。</p>
 <p>提升泛化（Facilitating generalization）：解释为什么神经网络有较好的泛化能力，是一个复杂的前沿研究课题。然而基于我们实际项目观察的经验，输出层的分布会逐渐变得越来越平滑。下图 8 展示了最后一层输出的分布，图 9、图 10 展示了第一层和第二层的分布。其中，在绘制分布图时，做了特殊处理，删除零值，应用 log(1+relu_output) 做转换。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2c000699623a452d91939c6a9a09f675.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155894.png" />   
     </p>
 <p>对于地理信息的特征，一般都是使用经纬度来表示。图 11（a）和（b）是原始的经纬度分布信息，为了使地理特征分布更平滑，通过计算与中心点的偏移量来表征地理特征信息。图 11（c）展示了经纬度偏移量比值的原始特征分布，图 11（d）展示了 log 处理经纬度偏移量比值后的特征分布，图 11（e）和（f）是对经纬度偏移量分别经过 log 处理后的特征分布。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/88690e67dcc64235a7b456336610120a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155974.png" />   
     </p>
 <p>检查特征完整性（Checking feature completeness）某些特征的分布不平滑，会导致模型学习信息缺失。如下图 12（a）展示的是原始房屋占用分布，（b）展示的是（房屋占用 / 居住时长）归一化后的分布，分布不太符合正常理解，调查发现列表中有一些房屋有最低的住宿要求，可能延长到几个月。然而，开始我们没有添加最低的居住时长特征。所以，我们考虑添加最低居住时长作为模型的一个特征。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c656679bfbe54a789df2c79d65825d6a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155407.png" />   
     </p>
 <h4 id="高数量类别特征high-cardinality-categorical-features-">高数量类别特征（High cardinality categorical features ）</h4>
 <p>对于某个类别 l 特征，不同值的数量非常多，比如邮编、地理位置等特征，我们称为高数量类别特征。对于低数量类别特征使用 one-hot 编码就可以，高类别需要特殊编码。对于 GBDT 模型，它不需要做编码操作，可以自己捕获类别的层次结构。</p>
 <p>在神经网络中，对于高数量类别特征处理相对简单。在房屋预定查询中，城市高数量特征的处理只需要将搜索查询中的城市和列表中城市房屋的位置相结合，利用一个哈希函数映射成一个数字即可。这些类别特征映射成 embedding，输入神经网络模型中。模型训练过程中，通过反向传播来学习这些位置偏好信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/aba93d7e69b443ac92b5e3b73c80cf79.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155244.png" />   
     </p>
 <h2 id="系统工程">系统工程</h2>
 <p>我们目前的 pipeline 是：一个访客的搜索查询通过 Java（TM）服务端返回检索结果和分数。Thrift（TM）序列化来存储查询日志，Spark（TM）来处理训练数据，TensorFlow（TM）训练模型，各个工具都是使用 Scala 和 Java（TM）来编写，训练好的模型上传到 Java（TM）服务端给访客提供搜索服务。</p>
@@ -426,6 +426,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -459,10 +463,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -841,6 +841,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

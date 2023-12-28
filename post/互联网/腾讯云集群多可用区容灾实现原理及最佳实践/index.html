@@ -201,12 +201,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="一数据节点"><strong>一、数据节点</strong></h1>
 <p>当客户选择了跨多可用区的集群架构部署时，集群的数据节点必须是多可用区的倍数，如客户选择的是三可用区部署，则数据节点个数应为 3，6，9，12 等，以此类推。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f977a6d5ae1a499388f8453aa5c295e6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281720179.png" />   
     </p>
 <p><em>图1 腾讯云ES控制台购买三可用区集群</em></p>
 <p>如上图 1 所示，我们在上海地域选择了三可用区集群的部署，数据节点数量选择 6 个。ES 会自动将 6 个数据节点均衡得分布在三个可用区中，并对每个节点标记上可用区属性，从而可以通过可用区感知功能将索引的分片自动分布在多可用区中，集群中节点的具体分布情况如图 2 所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f89f53c9bdd64772b6ef8df095e3b807.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281720720.png" />   
     </p>
 <p><em>图2 三可用区集群架构</em></p>
 <p>从图 2 中我们可以看到，腾讯云 ES 提供了 VPC 内的负载均衡功能，客户可以直接通过 VIP 连接集群，由于 VIP 下绑定了集群内部的所有数据节点，因此客户所有的读写请求会均衡的分布到各个数据节点上。</p>
@@ -218,7 +218,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>当选择双可用区部署时，为了避免出现一个可用区上分布两个专用主节点且出现“该可用区不可用”导致选不出 Master 节点的情况，腾讯云 ES 会选择一个隐藏可用区用来专门部署专用主节点，如下图 3 所示。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/21e674f9a745454f88e99144805a1e9c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281720951.png" />   
     </p>
 <p><em>图3 双可用区集群专用主节点分布原理</em></p>
 <h1 id="三索引副本分片"><strong>三、索引副本分片</strong></h1>
@@ -235,7 +235,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="五单可用区平滑升级多可用区"><strong>五、单可用区平滑升级多可用区</strong></h1>
 <p>前文图 1 演示了在腾讯云 ES 控制台购买多可用区集群的操作步骤。对于存量的单可用区集群，腾讯云 ES 同样支持平滑升级到多可用区的部署架构。具体操作如下图 4 所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d04ec6f4dfb24f76aeac1eaf37815468.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281720182.webp" />   
     </p>
 <p><em>图4 腾讯云ES控制台升级多可用区</em></p>
 <p><strong>这里需要注意以下几点：</strong></p>
@@ -247,17 +247,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>单可用区升级到多可用区的变配流程最大的难点和挑战在于专用主节点的协调上。下面重点介绍腾讯云 ES 在处理可用区升级方案中专用主节点的实现机制：</p>
 <p>为了下图说明方便，我们先对各类型节点使用不同颜色进行标记：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7d227a08876d416aa24beaacb2c33717.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281720147.png" />   
     </p>
 <p><em>普通节点</em></p>
 <p>普通节点：包含 master、data、ingest 等所有属性，节点上存储索引数据，使用蓝色标记。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/158dc87e1aef4730ac26b47a110c9149.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281720949.webp" />   
     </p>
 <p><em>专用主节点</em></p>
 <p>专用主节点：只包含 master 属性，在集群中属于专用主节点，不存储索引数据，只负责管理集群和存储集群的元数据信息，使用粉红色标记。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ef34f013e05f437abfdbe8bb66ee62e7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281720686.webp" />   
     </p>
 <p><em>数据节点</em></p>
 <p>数据节点：只包含 data、ingest 属性，一般用于具有专用主节点的场景，该节点上存储索引数据，通常也被称为专有数据节点，使用绿色标记。</p>
@@ -265,7 +265,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="1原单可用区集群没有专用主节点"><strong>（1）原单可用区集群没有专用主节点：</strong></h2>
 <p>如果原单可用区集群没有设置专用主节点，这种情况下无论是升级到双可用区还是三可用区都是比较简单的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c18fad74a88d4950b6297468fd5a8e2d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281720493.webp" />   
     </p>
 <p><em>图5 原单可⽤区⽆专⽤主节点升级到多可⽤区流程示意图</em></p>
 <p>升级变配流程如上图 5 所示：</p>
@@ -396,6 +396,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -429,10 +433,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -811,6 +811,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

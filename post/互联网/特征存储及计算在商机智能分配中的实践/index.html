@@ -204,23 +204,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>CRM系统是服务于我们58销售团队的一个重要系统。面对庞大的历史商机库，我们AI Lab开展了商机智能分配项目。该项目旨在将机器学习和推荐技术应用于CRM，为每个销售人员分配适合其跟进的商机，优化成单转化，以提高销售团队业绩，进而提升业务线收入。</p>
 <p>58黄页(本地生活)直销业务线采用的是密歇根营销模式。具体是将销售团队分为商机组和销售组，商机组的职能是商机意向初筛，过滤出有成单意向的商机后转出到销售组的转出商机库，销售组的职能是从转出商机库中进行跟进最终成单。两个团队的销售跟进单位都是商机，即对58潜在会员抽象出来的实体。项目详细介绍请参考公众号文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fmp.weixin.qq.com%2Fs%3F__biz%3DMzI1NDc5MzIxMw%3D%3D%26mid%3D2247491164%26idx%3D2%26sn%3D0feee0d4afc490678b2636b63c3d72d9%26scene%3D21%23wechat_redirect">《AI+CRM提高企业的绩与效》</a>。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d3211c3a8ab5479c9a00a9cf991cbc8a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272242959.png" />   
     </p>
 <p>我们从相应的商机库中挖掘出不同维度的特征，进行计算及转换后输出到模型中进行训练和预测。本文介绍的就是服务于CRM系统中的个性化推荐/搜索排序等相关模型的特征数据推送部分。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/965e3d3748754fed81c0515e19f07678.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272242098.png" />   
     </p>
 <p>上图是我们AI接入CRM系统的架构图。应用层中的一键申领和商销匹配是密歇根模式引入CRM系统的两个场景，通过引入不同的场景，可以切分成单链路，让销售的目标更加明确，同时我们可以接入更多的AI模型去提升销售的工作效率。一键申领场景即销售主动从商机库中拉取商机，商销匹配场景即系统主动给销售分配到最适合该销售的商机。搜索服务层就是我们场景相关的模型，这里后续会有其他文章进行介绍。数据计算层中的特征计算及处理，和基础数据层中的业务核心数据建设即特征仓库，是我们今天分享的重点。场景的多元化与模型的丰富性加大了我们特征推送的难度，下面介绍一下特征推送自动化流程的具体实践。</p>
 <h2 id="数据流程"><strong>数据流程</strong></h2>
 <p><strong>需求分析：</strong> 为了能满足下游模型迭代的特征需求，并且快速推送出相应特征数据。基于此，我们梳理了数据流程，大体可划分为以下几个模块。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bdc19779f51c4804b7135ccc95459760.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272242137.png" />   
     </p>
 <p>正负样本标识会根据业务线和场景的变化而变化，即和目标提升业务指标高度相关，这里很难做到抽象出公用框架。而对于特征仓库、特征计算和特征聚合，可以做出通用流程，节省人力和效率。最后的预测集和训练集可以基于前两步的数据升级进行通用化。所以这里核心是特征存储和特征计算及其处理。下文将从特征仓库、特征计算、特征聚合三方面叙述自动化特征数据推送的业务点和技术点。</p>
 <h2 id="特征仓库"><strong>特征仓库</strong></h2>
 <p>特征仓库可以类比于数据仓库，区别是数仓是为了建设各项数据指标服务，而特征仓库是为了建设基础特征服务。经过探索和积累，我们主要基于HBase的特征仓库业务架构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/25eba084a9564e629447d12b5f3d2d4c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272242085.png" />   
     </p>
 <p>上述架构中的部分表来源于数仓，基于底层数据可以开展各类基础数据计算统计。整体也参考了经典的数仓分层架构，实用性优点这里不予介绍。值得一提的是，由于hive不满足我们的特征仓库的建设，所以hbase的选型在我们的场景里至关重要。</p>
 <p><strong>需求分析：</strong></p>
@@ -233,7 +233,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>解决方案：</strong></p>
 <p>上述分析具体可以概括为三个特性：存储性、扩展性及更新融合性。相应解决办法如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9693c30464f84b31812041f870274014.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272242364.png" />   
     </p>
 <p>作为一种可以高并发和随机读写的K-V数据库，Qualifier-Value可以很好的存储结构化的特征。这里特征仓库ETL的过程应用了很多HBase的特性。</p>
 <p>比如对于DWD层的话务表存放的一条数据的例子是：RowKey为电话散列后的电话ID，其中的一对K-V明细数据为：call_01_20210508101358_108：json_feature。相应含义是该电话在01业务线下于2021-05-08 10:13:58秒时接通了108秒，json_value可以存放具体的明细字段。这样当离线数据以同样的逻辑写入(二者时间戳设置相同，可以为拨打时间等)，可以直接覆盖该条明细数据，达到实时和离线的融合。然后下游读取时设置TimeStamp为日期，就可以过滤出天维度的特征，然后解析相应json得到的特征经过加工就可以导入到MID层中天维度的HBase特征表中，方便后续进行天粒度的特征计算。同时，结合HBase TTL和Cell多版本特性可以达到特征的自动化管理。</p>
@@ -242,13 +242,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>本场景的特征计算是在内存中进行大量的离线计算，主要指上述特征仓库中的MID层-&gt;APP层的计算，即从维度大宽表中的海量数据及基础特征中，过滤出指定的样本集和特征集来缩减计算量，再采用 <strong>特征字典+特征矩阵</strong>(下文会具体介绍)完成高效计算，输出为深度学习可以直接使用的特征，或者输出后进行特征聚合再输出到机器学习使用的特征。具体内容及实现如下：</p>
 <p><strong>计算逻辑：</strong> 基于商机、电话、用户和销售四个粒度，对其进行基础特征+产品线+计算函数+时间窗进行组合衍生计算，最后输出特征。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a50165a600214483a3770173f8dab3f7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272242682.png" />   
     </p>
 <p>上图中输出特征的含义为某用户在01业务线下7天内登录总次数为15次。</p>
 <p>其中，login_01是基础特征，01就是业务线，这里把业务线也作为一个维度，是因为取了不同业务线的特征；然后，SUM是指该特征的计算函数是求和，我们特征衍生计算的计算函数包含了十多种类型，分别是：COUNT(),SUM(),MAX(),MIN(),MAXPARTITION(),MEAN(),MEDIAN(),STD(),RANGE(),MODE()等，这里具体函数含义即为其中文含义，当然对于每一种基础指标，我们会采取其适合的统计方式；最后，时间窗可以自由定义且 <strong>窗口不交叉</strong>，比如时间窗可以是3,7,15,30,90,180。</p>
 <p><strong>业务痛点：</strong> 由于承接的业务线多，每条业务线又有不同的场景，这里的目标是：打造一套剥离出业务逻辑又适用于各种场景的高效特征计算架构。具体梳理来看，主要需要考虑到以下六个问题：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ee6e7c21784f4cb5b3a384cf3cbba6bf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272242865.png" />   
     </p>
 <p>可以抽象出三类问题：</p>
 <ul>
@@ -259,22 +259,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>对于上述三类问题，解决方案分别是： <strong>特征字典，特征矩阵，聚合存储</strong>。其中，聚合存储为数据升级后的结果，放在下部分介绍。先介绍这里的架构设计及其他两项。</p>
 <p><strong>架构设计：</strong> 基于特征仓库设计的特征计算的架构如下，设计为 <strong>HBase+Spark</strong> 技术实现，其中也用到了许多HBase的生态组件。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/137b4b10d87a41288b91f66108fb67bf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272242125.png" />   
     </p>
 <p>基础特征和衍生特征分别对应的特征仓库的MID层，APP层，中间层引入 <strong>特征字典+特征矩阵</strong> 的概念实现高效的计算方式。具体流程大致为：每日凌晨数据运行时，每个维度起一个计算任务进行并行计算。</p>
 <p>首先，每个任务内先过滤出相应产品线的不同维度的全量ID，通过对HBase的一个列族打上目标计算群体的标签，然后根据标签用Filter Api过滤出样本集；然后，根据TimeStamp读取初所需要计算的时间跨度内的特征，并读取特征字典表来告诉程序需要计算的具体特征；最后，在内存中每个用户都转化为一个特征矩阵(只存储有效特征)，根据计算类型并发计算各个ID的特征，写入衍生特征层。</p>
 <p><strong>特征字典：</strong> 特征字典可类比维度字典表，存放的是特征仓库MID层各个宽表中的基础特征。为了解决以上特征管理的问题，这里我们设计了具体字段，部分字段展示如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d3fa34c143b74e87ace7b43d56fe0b91.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272242311.png" />   
     </p>
 <p>dim存放的是基础特征的维度，id是基础特征对应的特征编码，name是特征名称，explain是对应的中文含义，cal_sort是具体的计算类型，times是衍生逻辑里的时间窗，data_src是基础特征对应的数据源HBase表。</p>
 <p><strong>特征矩阵：</strong> 在计算内存中，每个ID都会转化为一个特征矩阵，之后的计算函数会全部基于这个特征矩阵进行计算。其中，矩阵的行定义为用户维度的特征个数，列定义为时间窗跨度。当计算时，通过查询特征字典表告诉程序所需要计算的特征及类型，然后在特征矩阵中找到相应特征具体的坐标：X(特征ID)和Y(时间窗)的非0有效特征值。最后传入有效值的坐标进行计算。这样可以极大程度上 <strong>减少存储、简化计算</strong>，提高计算效率。具体计算效果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/06f9aad9a99d4d0d9eb9fcc467f6567c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272242700.png" />   
     </p>
 <p>表格中阴影部分就是特征矩阵，因为用户的特征都是稀疏的，所以利用稀疏矩阵的存储方式，只存储有效数据。假设A用户是一个100*365的稀疏矩阵，则对应转换示意图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8e9ed0977571440294a908aa9f40b917.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272242972.png" />   
     </p>
 <p>每个用户在内存中转换为二维数�</p>
 
@@ -400,6 +400,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -433,10 +437,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -815,6 +815,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

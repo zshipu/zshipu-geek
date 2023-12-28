@@ -208,7 +208,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>为了满足不同的业务需求，Java 的 GC 算法也在不停迭代，对于特定的应用，选择其最适合的 GC 算法，才能更高效的帮助业务实现其业务目标。很多低延迟高可用Java服务的系统可用性经常受GC停顿的困扰。GC停顿指垃圾回收期间STW（Stop The World），当STW时，所有应用线程停止活动，等待GC停顿结束。比如HBase方面，如果regionserver进程的GC停顿时间过长，会导致大量请求延迟，对客户端影响较大。对于这类延迟敏感的应用来说，GC 停顿已经成为阻碍 Java 广泛应用的一大顽疾，需要更适合的 GC 算法以满足这些业务的需求。</p>
 <p>目前我们线上HBase集群应用的都是CMS作为java服务进程的垃圾回收器，在不同的应用场景下经过了多次调优之后，基本满足于一般业务场景下对延迟等方面性能的要求。但是随着业务的发展，会有某些高敏感的场景，请求延迟要求较高一些，此时集群性能就会捉襟见肘。通过线上集群监控系统查看某一台RS节点的GET请求延迟P99，发现毛刺比较多，分析对应时间内（大约24个小时）的GC信息， <strong>发现GC平均暂停时间为57.4ms</strong>（这些GC Pause中99%以上都是Allocation Failure原因产生的YongGC导致的， <strong>这里结合具体的场景，为了避免业务高并发请求的时间节点GC频率过高，配置了新生代大小为8G，大约占整个堆26.7%）</strong>，GC频率整体上看比较正常（平均63.35s会发生一次GC Pause）。但是发现某些时间点gc频率会高一些,比如会达到平均4.5s发生一次GC Pause，结合平均暂停时间看对延迟敏感的业务影响较大。之前也考虑过使用G1，但是经过各种原因没有进行应用，比如G1本身存在一些问题。为了降低GC停顿对系统可用性的影响，我们考虑调研、测试和应用ZGC。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/de54720e69ec428da94b78a8d456eab9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271703858.webp" />   
     </p>
 <h2 id="常见gc回收器介绍"><strong>常见GC回收器介绍</strong></h2>
 <p>在介绍ZGC之前，先简单说下CMS和G1等。CMS是基于标记-清除算法实现的（新生代为复制算法），G1从整体来看是基于“标记-整理”算法实现的，从局部（两个Region）上来看是基于“复制”算法实现的。像复制、标记-清除、标记-整理算法，也可以称为Tracing GC。所有的Tracing GC均需要以下三个步骤：</p>
@@ -234,11 +234,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>由设计目标可知，ZGC 主要是为现在及未来大堆的管理问题服务，致力于以最小的性能损失换取最大的停顿优势。从 Oracle 发布的测试数据来看，SPECjbb2015基准测试，使用128G堆，暂停时间ZGC远低于Parallel GC 和 G1GC，如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/55a92ca6483a4106931bcfab2eef11a2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271703452.webp" />   
     </p>
 <p>与CMS中的ParNew和G1类似，ZGC也采用标记-复制算法，不过ZGC对该算法做了重大改进：ZGC在标记、转移和重定位阶段几乎都是并发的，这是ZGC实现停顿时间小于10ms目标的最关键原因。所以，ZGC 几乎在所有地方并发执行的，停顿时间几乎就耗费在初始标记上，这部分的时间是非常少的。ZGC的执行过程可以细分为6个阶段，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c506f36d8b8445c48f15216b1660793a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271703021.webp" />   
     </p>
 <ul>
 <li>第一个阶段是初始标记，标记gc roots直接引用的对象。</li>
@@ -273,7 +273,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>着色指针是一种将信息存储在指针中的技术。</p>
 <p>在64位系统中，ZGC利用了对象引用中4bit进行着色标记（低42位：对象的实际地址），结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0054f1eafd9846be814864d7d3e16202.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271703560.webp" />   
     </p>
 <p>Colored Pointers（着色指针）用以下几个bits表示：</p>
 <ul>
@@ -371,11 +371,11 @@ int age = person.age; // No barrier, not an object reference
 <p>服务性能对比</p>
 <p>读写平均延时对比</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cdaba962447a439c824195e58483f8aa.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271703140.webp" />   
     </p>
 <p><strong>读写吞吐量对比</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bfef2c70bf9b4453a72b5741adcecf5b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271703755.webp" />   
     </p>
 <p><strong>写入压测（100%WRITE）: 粗略计算ZGC比CMS提升6.15%的性能。</strong></p>
 <p><strong>workloada（50%WRITE，50%READ）:粗略计算整体读写ZGC比CMS提升5.21%的性能， 粗略计算READ性能提升11%。</strong></p>
@@ -396,20 +396,20 @@ int age = person.age; // No barrier, not an object reference
 </ol>
 <p>升级前：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d7018817e20b4259bb47b938e6125977.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271703303.webp" />   
     </p>
 <p>升级后，</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/01be8193289b46d084485a815f868d44.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271703958.webp" />   
     </p>
 <ol>
 <li>个别分组下的节点应用ZGC后批量写入延迟方面效果较明显，批量写入延迟P99稳定了很多，且整体降低了很多，如下两个截图所示（图中红框标记的是升级后的监控数据）：</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/44f9b0ca4933432ab56c39f01036dfcf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271703596.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ade34b96b4a64ac6911903ffb218d550.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271703393.webp" />   
     </p>
 <p><strong>遇见的问题&amp;解决办法</strong></p>
 <p>个别分组在应用ZGC后，出现了请求延迟的问题，下面列出一个分组应用ZGC后出现的问题以及解决方式</p>
@@ -566,6 +566,10 @@ int age = person.age; // No barrier, not an object reference
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -599,10 +603,6 @@ int age = person.age; // No barrier, not an object reference
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -981,6 +981,8 @@ int age = person.age; // No barrier, not an object reference
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

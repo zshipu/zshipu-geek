@@ -215,30 +215,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>另外一种是有交互的匹配模型，如基于矩阵匹配的层次化匹配模型MatchPyramid[1]、基于交互注意力机制的ESIM模型[2]等，在这些模型的架构中，可以从文本对之间的词汇级别、句子级别等不同层面建模和学习相关性信息，但这种模型主要建模句对关系，并行处理能力差。虽然神经网络架构的变种很多，但大多数以全连接、CNN、LSTM等网络为编码器。</p>
 <p>自2018年开始，注意力机制被广泛应用到自然语言处理的多项任务中，注意力机制可以充分的学习文本的上下文语义信息，并对这些信息的相关程度进行加权，从而区分文本中每个字词在语义理解过程中的重要程度。如图1所示，Self Attention机制通过对自身实现注意力加权学习句子中各个词汇的语义相关性。以Self Attention为基础的Transformer架构[3]实现了以Attention运算代替传统神经网络的变革。而随着Transformer架构的提出，以其为单元模块的预训练模型在众多NLP任务上均取得了SOAT的效果。预训练语言模型通过在大规模的无标注文本数据上进行自监督训练，学习到丰富的通用知识，随后在特定的下游任务上利用少量标注数据进行微调训练，即可获得的不错的效果，如BERT、GPT、XLNET等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9ca17812bb29498ebd8c7a611cdad3e8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272019414.webp" />   
     </p>
 <p>图1 Self Attention注意力加权计算过程</p>
 <p>2018年10月份开源的BERT模型[4]是最经典的预训练语言模型。基本结构如图2所示，BERT模型以Transformer为基础，由多层的Transformer-Encoder组成了双向注意力编码的语言模型。BERT模型在GLUE的各项任务上长期占据榜首位置，其中包括推断句对关系的语义匹配任务。此外，多语言预训练模型的研究改变了依赖机器翻译的自然语言理解，对于跨语种的知识迁移具有很大的帮助。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/34cb57665eb74a599303fdfdee164c1b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272019786.webp" />   
     </p>
 <p>图2 BERT及Transformer网络结构图</p>
 <h1 id="三语义匹配技术应用"><strong>三、语义匹配技术应用</strong></h1>
 <p>语义匹配问题有两种框架：分类和排序。如图3所示，分类的方法是对用户输入做softmax多分类，将其归属到特定的类别。而排序问题是将用户输入与候选SQ（业务维护的FAQ知识库）进行对比学习，衡量之间的相关度。按照训练方式的不同，分为point-wise、pair-wise和list-wise三种类型。其中point-wise和pair-wise应用最广泛。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3117732b18094629bd0c2b6557be442e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272019253.webp" />   
     </p>
 <p>图3 语义匹配模型框架图</p>
 <h1 id="四多阶段语义匹配"><strong>四、多阶段语义匹配</strong></h1>
 <p>在智能客服机器人的服务过程中，我们以单轮交互的QA模型为基础，用户的输入（UQ）会经过匹配召回和点击精排的多个阶段，反馈给用户最可能想问的问题及答案，整体的计算流程如图4所示，其中匹配召回和点击精排阶段是本文介绍的重点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5c735c59892843f386164dd06a7353d4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272020110.webp" />   
     </p>
 <p>图4 多阶段语义匹配计算流程图</p>
 <h2 id="41-匹配召回"><strong>4.1 匹配召回</strong></h2>
 <p>在匹配召回阶段，我们将语义匹配问题转化为对标准SQ的排序问题，通过pairwise的训练方式，学习两两之间的排序关系，训练的目标是最大化正例样本对 (UQ ,SQ+) 和负例样本对 (UQ ,SQ-) 之间的距离，如公式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d91ae2082af7466198a9a09b9e2db0f9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272020158.webp" />   
     </p>
 <p>其中，sim(∙) 是一种距离度量方法，一般采用的是余弦相似度。</p>
 <p>这种基于排序的模型结构如图所示，其中Encoder表示提取句义特征的编码器，可以从原始的文本输入映射到低维的稠密向量表示。一般的Encoder采用的是CNN或者RNN的网络模型。</p>
@@ -247,7 +247,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>匹配召回能够对知识库中的全量候选标准SQ给出一个排序结果，如果直接将这个排序结果反馈给用户，对于知识库中存在语义很接近但存在细微差别的SQ难以给出一个最优的排序结果。如何利用好线上日志的用户反馈，对于难区分的样本给出正确的判断，是非常重要的。</p>
 <p>因此，我们引入了点击重排序的精排范式，采用线上用户真实的点击反馈数据，训练一个强的排序模型，对语义相近的样本进行对比区分。在这一阶段，我们更加关注用户问题和候选标准问题之间的细粒度相关性，因此采用ESIM模型这种基于注意力机制进行细粒度语义交互的语义匹配模型。如图5所示，ESIM有两个LSTM编码层和一个注意力层组成。注意力层对两个输入文本的各个token进行相关性计算，并经过softmax后得到相似度权重。这种交互可以从更细的粒度学习到样本对之间的共性和差异。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6d07187920d1444fb0e0772ddfc9694e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272020068.webp" />   
     </p>
 <p>图5 ESIM模型架构图</p>
 <p>从全量候选知识库中召回Top-K个标准SQ之后，通过构造K个句对样本，由点击重排序模型统一给出精排分数，之后作为线上预测的最终依据。</p>
@@ -264,14 +264,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>意图实际上可以看作是用户问题的抽象，其本质上是和之前提到的标准SQ是等价的。在调研分析中发现，售前用户有很多会进入客服页面咨询酒店的相关信息，如酒店的位置、周边商场、景点美食、交通出行等。如用户输入“酒店到外滩景点有多远？”，这个问题属于用户咨询“酒店到某POI的距离”这个标准意图类别，利用现有业务线数据训练的召回模型仅能定位到知识库中配置的“酒店附近交通”这个标准SQ，难以继续精确到更细粒度的意图子类。</p>
 <p>考虑到以继续新增标准SQ的形式并不能枚举用户所有的信息咨询问题，但可以在现有“酒店附近交通”下面再拆分成更细粒度的意图子类。如果采用分类模型去预测用户的意图，很多时候会因为业务的变化导致数据和模型的频繁变更。因此，我们继续采用语义匹配的排序方式实现意图识别，在保证业务意图匹配准确率的同时，支持业务意图的动态变更。此外，扩展新意图的同时，并不能提供大量标注样本用于训练，所以适应于小样本学习的匹配模型更适合我们的KBQA场景。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/adc2953f5cdd4b21b0da7f00b3862409.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272020632.webp" />   
     </p>
 <p>图6 意图识别匹配模型框架</p>
 <p>如图6所示，意图识别模型采用的是学术界比较新颖的Induction Network模型[5]，这是在经典Match Network基础上演变而来的匹配架构。在训练过程中，每个意图类别i，仅需要N条（20条-200条）的标注样本，选取K条样本经过Encoder模块编码得到句向量表示，之后由动态路由模块归纳得到该类别的向量表示。用户query经过句向量编码后得到，会和每个计算相似度，最后计算分类的交叉熵损失函数。在线上推理过程中，各个意图类别的向量可以预先计算和动态更新，仅需对用户query做实时编码和意图类别的相似度计算。</p>
 <h2 id="62-槽位提取"><strong>6.2 槽位提取</strong></h2>
 <p>意图识别能够让机器人理解用户问题的主干，而细节理解则由槽位抽取模块完成。用户问题中的“外滩”是一个经典POI，只有确定了该POI的坐标，我们才能计算推理酒店到该POI的距离，并给用户推荐出行方式。发现用户query中的实体词汇并能够链接到知识库信息，是槽位抽取模块的主要工作。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/98e1a61d79a04f75892de1ae972b6a19.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272020612.webp" />   
     </p>
 <p>图7 NER模型框架</p>
 <p>对于用户问题中描述准确的词汇以及常见的别名表述，都可以通过词典和规则的方法识别出正确的结果。但对于复杂实体的识别则需要NER模型来完成。我们将ALBERT+BiLSTM+CRF的模型应用到词槽抽取任务中，NER模型的整体框架如图7所示，用户query会先经过ALBERT和BiLSTM的特征编码层，获得每个token的向量表示，softmax层将映射到标注类别标签上，得到初步标注结果，CRF层以作为输入，通过维特比算法为每个token都重新被打上一个标注类别（B、I、O）。CRF层需要根据场景定制标注类别，但Albert的编码能力具有通用性。既保留了语言模型在少样本或零样本情况下强大的迁移学习能力，又能够在线上有一个更快的推理速度。</p>
@@ -411,6 +411,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -444,10 +448,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -826,6 +826,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

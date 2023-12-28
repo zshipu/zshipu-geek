@@ -225,7 +225,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>音频置信度的计算可以从两个标准来考虑，第一个标准是能否只从解码器的原始模型中直接提取相关信息进行计算，比如语言模型中出现 back-off 平滑处理的次数；也可以出于计算置信度目的而构建一个新模型，比如我们会收集大量特征，包括归一化的声学得分和启发式特征，然后对其进行组合，使用广义线性模型或人工神经网络对这些特征与单词正确概率间的关联性进行建模。第二个标准则是置信度度量是否具有概率性。</p>
 <p>本文将会从原始模型中提取相关概率信息用于置信度的计算。给定输入观测序列 x^T_1=x_1,x_2,&hellip;,x_T 语音识别系统中都会用到贝叶斯决策准则来求得单词序列 w^M_1=w_1,w_2,&hellip;w_M 的后验概率 p(w^M_1|x^T_1)，只要最大化该后验概率，即最小化识别出的句子出现错误的概率，就会得到最优单词序列 \{w^M_1\}_{opt}:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-f6ede659535147bb81cadd2756e6376c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281842888.png" />   
     </p>
 <p>其中，p(x^T_1) 是输入观测序列的先验概率，p(x^T_1|w^M_1) 是声学模型得分 p(w^M_1) 是语言模型得分，因为先验概率是服从均匀分布的，用于决策时可忽略不计。</p>
 <p>如果已知这些后验概率，则可以将所有包含单词 w_m 的句子 w^M_1 对应的后验概率值进行相加，估计出该特定单词 w_m 的后验概率 p(w_m | x^T_1)，这个后验概率值可以近似作为该单词的置信度分数。上文说到，由于观测序列的先验概率不会影响最佳单词序列的选择，可以忽略不计，因此，解码阶段所做的决策其实是基于未归一化的分数，这些分数可用于比较音频的竞争词序列，但不能直接作为已识别单词是否正确的概率值，换句话说，对输入观测先验概率的估计，是计算置信度时要考虑的问题。</p>
@@ -233,41 +233,41 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>置信度计算的所有操作是在词图上进行的，词图是有向、无环、加权的图，它是由许多节点和边组成，节点代表离散的时间点 t \in \{1,&hellip;,T\}，令 \tau 和 t 分别为 w 的开始时间和结束时间，边上有从节点 \tau 到节点 t 关于词 w 的假设 [w;\tau,t] 及其对应的权重得分，从音频的第一时间帧相对应的节点开始到最后时间帧相对应的节点结束的任何单词序列，都是音频的假设词序列。</p>
 <p>一个由 M 个词组成的假设词序列可以被抽象为 [w;\tau,t]^M_1=[w_1; \tau_1, t_1 ],&hellip;,[w_M;\tau_M,t_M]，\tau 和 t 对应时间信息，其中 \tau_1=1,t_M=T，当 n=2,&hellip;,M 时，t_{n-1}=\tau_n-1。给定输入观测序列 x^T_1、声学模型得分 p(x^T_1|[w;\tau,t]^M_1)、语言模型得分 p(w^M_1) 后，p([w;\tau,t]^M_1|x^T_1) 则是某条词序列的后验概率值，如上所述，最优词序列可通过下式得到：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-19dc66bca77e4b058886089a174c74db.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281842088.png" />   
     </p>
 <p>可根据语言模型的阶次修改语言得分 p(w_m|w^{m-1}_1) 中的 w^{m-1}_1 序列，在这里保留输入观测序列的先验概率，保证后验概率值的归一化操作。那么对于序列中某个词 [w;\tau,t] 的后验概率 p(w;\tau,t)|x^T_1，可以通过将包含该词 [w;\tau,t]（时间信息也一致）的所有词序列对应的后验概率相加来得到：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ff38dfad29c84099b365816840df373f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281842596.png" />   
     </p>
 <p>在这里应当指出，在特定时间段内词图上所有可能单词的后验概率总和为 1，即</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-daf967bd9d4f470bbd26b9939ee359d8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281842774.png" />   
     </p>
 <p>就像下图所示，在任何时间点，后验概率总和计为 1。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-4dad8fd140b04e128eb6c6691409f4f3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281842754.webp" />   
     </p>
 <p>对于单词的后验概率值，可以先计算单词假设的前向概率和后向概率，并利用前向后向算法将这两个概率组合为该单词假设的后验概率。与隐马尔可夫模型状态水平上的前向后向算法相比，此前向后向算法是基于单词级别的。假设已经给出词图，并且使用的是 m-gram 语言模型，现在有一个单词假设 [w;\tau,t]，可以令 h^{m-1}_2=h_2,&hellip;,h_{m-1} 作为单词 w 的 m-2 个前置词，令 f^{m-2}_1=f_1,&hellip;,f_{m-2} 作为单词 w 的 m-2 个前置词，前向概率计算时会遍及词图中所有以单词假设 [w;\tau,t] 结尾并且将 h^{m-1}_2 作为其 m-2 个前置词的所有单词序列，我们可以设前向概率值为 \phi(h^{m-1}_2; [w;\tau,t])，而后向概率计算时会遍及词图中所有从单词假设 [w;\tau,t] 开始并且将 f^{m-2}_1 作为其 m-2 个后置词的所有单词序列，设后向概率值为 \delta([w;\tau,t];f^{m-2}_1)， 根据前向、后向概率值可求得 [w;\tau,t] 的后验概率为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-bf73317af88e4f809195432c89c58a7d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281842662.png" />   
     </p>
 <p>由于前向、后向概率计算时都会包含声学概率 p(x^t_\tau|W) ，所以上面的结果必须除以一次声学概率 p(x^t_\tau|W) ；求和操作考虑了单词 w 对应不同前置词、后置词的不同组合情况。</p>
 <h3 id="23-置信度的计算">2.3 置信度的计算</h3>
 <p>由上文可知，每个单词假设的置信度分数可以被近似为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-89cca9cb675845519b69ed89894854c9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281842708.png" />   
     </p>
 <p>单词假设的固定开始时间和固定结束时间确定了在计算前向、后向概率时要考虑词图中的哪些路径，对于分布在多个单词序列中的相同单词假设，其对应的开始和结束时间在大多数情况下都会有时间差，如果按照上述方法规定开始时间和结束时间都必须严格一致，那满足要求的单词序列会很少，会使最终的置信度结果偏小，而且也不贴合实际情况。下面将描述几种改进方法，首先是第一种改进，对于假设路径中对应单词的开始和结束时间间隔，只要其与最佳路径中定义的时间间隔的交集不为空，在求取置信度时，就可以将该假设路径的后验概率考虑进来，这种置信度计算方法称为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-264888c808a04bc0a173f0ff35be2274.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281842383.png" />   
     </p>
 <p>不幸的是，在本次实验验证后发现，当使用 C_{sec([w;\tau,t])} 计算最佳路径中某单词的置信度值时，置信度值会有超过 1 的情况发生，使得最终分配在整个置信度区间[0,1]的音频数量有缺失。而且如果参照上式中的度量规则，在一个特定的时间范围内，所有可能单词的后验概率之和将出现不再合乎定义的情况，和可能会超过 1。例如，在最佳路径中，时间段 [t_1,t_3] 对应的单词为“中国”，而某些假设路径中相同时间段 [t_1,t_3] 所对应单词为“中国”（处于时间段 [t_1,t_2]））和“经济”（处于时间段 [t_2,t_3])这两个词，显而易见，这些假设路径中“中国”所处时间段 [t_1,t_2] 和最佳路径中“中国”所处时间段 [t_1,t_3] 是有交集的，在计算时间段 [t_1,t_3] 所有可能单词的后验概率之和时，对于假设路径中时间段 [t_1,t_2] 对应的单词“中国”，会出现其后验概率值重复相加的现象，如果符合上述这种情况的假设路径条数比较多，会使得最终后验概率之和超过 1，影响置信度计算的稳定性。但如果后验概率累加的时间范围限制在包含该单词的所有假设路径共有的时间段，则会避免上述问题，因此有了第二种改进，当假设路径中包含某单词，而且该单词的时刻信息与最佳路径中该单词对应的中点时刻相交时，才会对这条假设路径的后验概率进行累加，这样置信度的计算变为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-dc6a4b212cf34b51bf7611ee857081e4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281842400.png" />   
     </p>
 <p>本文不仅针对中点时刻对单词假设的后验概率进行了累加，还面向该单词假设的所有时刻去进行后验概率的累加，并选择了这些累加值中的最大值作为最终置信度结果，如下式所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-9351d4f94812455a92d735ab77f4ff89.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281842275.png" />   
     </p>
 <p>如果要求取整个单词序列的置信度，只需将这条序列上所有词的置信度值相加，然后除以总词数即可，这也就得到了该条语音的置信度值。</p>
 <h2 id="3-实验">3 实验</h2>
@@ -277,19 +277,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>上文说到，将后验概率近似为置信度时，要进行一定的改进，三种改进方法分别为 C_{sec}([w;\tau,t])、C_{med}([w;\tau,t])、C_{max}([w;\tau,t])，下面给出三种改进方法下的结果对比。</p>
 <p>CFER（Confidence Error Rate）可以简单定义为未正确分类的单词数除以识别出来的单词总数，所谓的分类指的是，设定一个置信度阈值，当置信度值高于该阈值，可以认定识别的单词为 true；当置信度值低于该阈值，则认定识别的单词为 false。CFER 的大小取决于阈值的选择，不同的任务选择的置信度阈值是不同的，因此为了综合考虑不同语音任务下三种改进方法的优劣对比，本文采用多个置信度阈值进行测试，分别为 0.6、0.7、0.8、0.9。如果在单词级别设置阈值去估计 CFER，我们就需要确定当前识别单词存在于真实标注文本中的哪句语音、对应于该语音中的哪个单词位置，然后才能进行误差的计算，这种操作比较繁琐且不易实现，因此可以由单词级别扩展到句子级别，在通过单词置信度值得到句子置信度值后，根据设定的阈值，对于那些高于阈值的句子，去求这些句子中错误单词的个数，单词错误主要包括插入、替换、删除错误，因为求句子置信度的时候考虑的是所有识别出的单词，而删除错误的面向对象是未识别出的单词，所以在这里不考虑删除错误词数 num_{del|above}，只考虑替换错误词数 num_{sub|above} 和插入错误词数 num_{ins|above}；对于那些低于阈值的句子，我们需要求这些句子中正确单词的个数 num_{cor|below}，这些正确的单词其实是置信度决策错误的表现。设测试集中识别出的单词总数为 num_{rec|all}，该值同理也是不包括删除错误词数的，设真实标注文本中的总词数为 num_{all}，总删除错误词数为 num_{del|all}, num_{rec|all}=num_{all}-num_{del|all}，那么置信度所做决策的错误率，即 CFER，可由下式得到：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-3494a0d2c2834886b5eee132d91f6d5b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281842314.png" />   
     </p>
 <p>下表是三种改进方法在不同置信度阈值下的 CFER 对比：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-e0a8928802244dd592711995b77c32e6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281842527.png" />   
     </p>
 <p>结合语音识别的实际应用，我们设置置信度阈值主要是为了能将高于此阈值的音频提取出来，便于后续分析与优化，或者把低于此阈值的音频提取出来，便于后续过滤与校正，而对于高于阈值的那部分音频，一般希望它有比较小的错误率，因此在本实验中还需要对高于阈值的音频进行词错误率 WER（Word Error Rate）和字错误率 CER（Character Error Rate）的求取，WER 就是识别错误的词数与总词数的比值，是语音识别中最为常用的指标之一，该值越小越好，CER 和 WER 类似，只不过由词单元变成了字单元。下表将给出三种方法下置信度值超过指定阈值的那部分音频对应的 WER 和 CER 结果对比。首先是 WER 对比：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-cba58f28b7aa4a9c90f2c07caf25f4cc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281842614.png" />   
     </p>
 <p>接下来是 CER 对比：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-f13fddd59e47430293d8717ab35fb8fa.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281842668.png" />   
     </p>
 <p>在这里定义一个新指标 ER，我们设 ER=0.5*CFER+0.25*WER+0.25*CER，该指标会综合考虑 CFER 及阈值以上音频对应的 WER 和 CER，可以根据该指标选择最优的置信度计算方法。ER 结果对比如下表所示。</p>
 <p>
@@ -426,6 +426,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -459,10 +463,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -841,6 +841,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

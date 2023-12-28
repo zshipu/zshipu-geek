@@ -219,7 +219,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/87c95d5171a24e53b20e55e4aeadfab1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271756926.webp" />   
     </p>
 <blockquote>
 <p>分享嘉宾：魏天闻 小米人工智能部</p>
@@ -237,18 +237,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="01-asr纠错问题的介绍"><strong>01 ASR纠错问题的介绍</strong></h2>
 <h3 id="1-语音交互流程"><strong>1. 语音交互流程</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7528b04d1c104c8382ed777a2374c172.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271756574.webp" />   
     </p>
 <p>在分享语音纠错的相关问题之前，先简单介绍一下小爱同学语音使用流程：首先我们需要唤醒小爱同学，比如，手机按键或者语音唤醒，唤醒之后进入录音模块，启动录音前开启Voice Activity Detection ( VAD ) 状态，检测当前有没说话声音，如果没有则忽略，如果有，会把语音记录下来传递到下一个模块，就是最受关注的Automatic Speech Recognition ( ASR )，该模块负责把语音转译成文字。</p>
 <p>我们负责的是ASR接下来的一个模块，文本理解模块Natural Language Understanding ( NLU )，主要目的是试图理解ASR转换出的文本，准确识别用户的意图，然后给出相应技能执行的方案，最后一步就是技能执行了。</p>
 <p>在这个语音交互流程中，前三步都涉及到语音相关的工作，很容易出现记录噪音或者识别错误等情况，例如误操作唤醒录入了噪音；或者语音记录过程中，把某种声音误以为是人的声音而记录下来，在识别时转译成了错误的文本。另外，即便是纯净的人说话的语音，ASR模型转换过程仍然会出现一定的错误。</p>
 <h3 id="2-asr错误的例子"><strong>2. ASR错误的例子</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ded555147c34482fafd562a4041bde7b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271757047.webp" />   
     </p>
 <p>表格中展示的是ASR识别过程中常见错误例子。用户问&quot;给我播放一首生僻字&quot;，识别的文本结果为&quot;给我播放一首升壁纸&quot;，还有中文中夹带英文的情况，如：&ldquo;eraser什么意思&rdquo;，识别的文本结果为&quot;意味着什么意思&quot;。通过分析这些错误的case发现，语音识别过程对于发音因素类似的词，识别准确的难度比较大。而我们的工作目标是把ASR识别后的错误query找出来，替换成正确的query。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/eaf558bfa0e046c1b1a5abe713f17443.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271757778.webp" />   
     </p>
 <p>此时我们需要思考，对于ASR识别纠错是否为良定义问题 ( well-posed )[1]，良定义问题是说在当前给定信息的条件下能解决的问题，或者说使用贝叶斯分类器分类得到的准确率非常高。对于ASR的纠错问题，从case中可以看出，要纠正这些query，有些根据句子的结构就可以纠正，比如，&ldquo;你讲话好像被句子&rdquo;，可以通过语法结构的分析知道&quot;被&quot;在此处是不合适的，应该是背诵的&quot;背&quot;；而有些是需要知道一些背景知识，才能进行纠错，比如&quot;生僻字&quot;是一首歌，&ldquo;右眼血斑&quot;是常识，&ldquo;布朗熊&quot;是小爱同学业务的技能 ( 布朗熊跳个舞 )，甚至有些语法上没有错误，需要根据原始的音频才能纠正错误，如&quot;播放第二个&quot;与识别的文本结果&quot;拨打第二个&rdquo;，或者&quot;eraser&quot;识别为&quot;意味着&rdquo;；有些可能听音频也没有用，对于中文有很多的发音声调都相同的词，需要结合当时环境的上下文情景才能确定是哪一个词。所以纠错需要结合很多的信息，如果全部考虑知识、音频、上下文环境，基本相当于重新做一个ASR识别系统。但ASR本身处理语音过程受限于一些内存、吞吐流量等物理条件，声学模型和语言模型很难有很大的处理量，综合考虑ASR的语言模型还是基于传统的n-gram模型。但是使用NLP技术具有一些先天的优势，能够利用目前强大的预训练模型，并且不需要音频来进行纠错。</p>
 <p>ASR纠错与普通错别字纠错也是有区别的，普通错别字纠错是根据字形相似来纠错，如&quot;阀&quot;和&quot;阈&quot;。而ASR纠错是音似，发音相似导致难以识别正确的内容，所以ASR纠错和普通错别字纠错面临的问题和数据分布是不同的。另外普通错别字纠错覆盖的范围也比ASR纠错更广一点，但这并不意味着普通错别字纠错可以用来ASR纠错。&ldquo;天下没有免费的午餐&rdquo;，也就是说没有一个模型能够很好的应用在不同的数据分布上。比如文本&quot;的&quot;、&ldquo;地&rdquo;、&ldquo;得&quot;纠错，假如句子中其他词都是正确的，只有&quot;的&quot;需要纠正为&quot;得&rdquo;，但是使用一个没有结合先验信息的普通模型来纠错，很显然容易把句中其他位置原本正确的词纠正为错误的，从而影响模型的准确率。正确的做法是根据先验条件做出一个能适应当前数据分布的纠错模型。对于ASR纠错模型也一样，发音相似是ASR纠错的一个限制条件，我们需要把普通错别字模型结合这个限制条件，来设计针对ASR识别后的文本数据纠错模型。</p>
@@ -265,11 +265,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="02纠错相关工作"><strong>02纠错相关工作</strong></h2>
 <h3 id="1-bert模型简介"><strong>1. BERT模型简介</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a555eb6ecc8e47f2a5ea21523380909f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271757489.webp" />   
     </p>
 <p>BERT[2]是目前效果最好的预训练语言表示模型，引入了双向的Transformer-encoder结构，已训练好的模型网络有12层BERT-small和24层的BERT-large。BERT包含两种训练任务，一种是Masked Language Model ( MLM )，另一种是Next Sentence Prediction ( NSP )。BERT模型主要作为预训练模型使用，提取特征获得具有语义的词向量表示，提升下游任务的表现。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b34e189dacfe48058b367582f0c0ff9d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271757145.webp" />   
     </p>
 <p>BERT模型中与ASR纠错任务相关的是MLM部分， MLM训练阶段有 15% 的token被随机替换为 [MASK] ( 占位符 )，模型需要学会根据 [MASK] 上下文预测这些被替换的token。例如对于输入句子&quot;明天武汉的 [MASK] 气怎么样&quot;，模型需要预测出 [MASK] 位置原来的token是&quot;天&quot;。</p>
 <p>如果只利用MASK机制训练存在一些迁移的问题，因为在其他任务中没有MASK的情况，这样就很难作为其他任务的预训练任务，所以作者通过MASK的方式进行了优化。</p>
@@ -281,7 +281,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>MLM实际上包含了纠错任务，所以原生的BERT就具备了纠错能力。但是BERT的MASK位置是随机选择的15%的token，所以并不擅长侦测句子中出现错误的位置；并且BERT纠错未考虑约束条件，导致准确率低，比如：&ldquo;小爱同学今 [明] 天天气怎么样&rdquo;，MASK的位置是&quot;今&rdquo;， 那么纠错任务需要给出的结果是&quot;今&quot;。但是由于训练预料中大多数人的query都是&quot;明天天气怎么样&quot;，这样在没有约束的条件下，大概率给出的纠正结果是&quot;明&quot;，虽然句子结构是合理的，但结果显然是不正确的。</p>
 <h3 id="2-electra模型"><strong>2. ELECTRA模型</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/044a7636539d41dcabaf46b1f9e8afe7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271757776.webp" />   
     </p>
 <p>ELECTRA[3]模型由Standford 大学团队提出，其模型结构由一个生成器和一个判别器组成，看起来与GAN结构类似但不属于GAN模型。</p>
 <ul>
@@ -292,7 +292,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>ELECTRA的一个变体ELECTRA-MLM模型，不再输出0和1，而是预测每个MASK位置正确token的概率。如果词表大小是10000个，那么每个位置的输出就是对应的一个10000维的向量分布，概率最大的是正确token的结果，这样就从原生ELECTRA检测错误变成具有纠错功能的模型。</p>
 <h3 id="3-soft-masked-bert纠错模型"><strong>3. Soft-Masked BERT纠错模型</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9ba24b026ce847fc9a9e69034f048548.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271757517.webp" />   
     </p>
 <p>最近发表的一个纠错模型是Soft-Masked BERT[4]，该模型通过对搜集到的语料，进行同音字替换等简单规则随机生成错误样本，然后得到错误-正确的样本对作为训练数据。该网络模型串联了一个检测模型 ( BiGRU ) 和一个纠错模型 ( BERT )，双向的GRU模型输出每个token位置是错误词的概率，当错误概率为1时，退化为原生BERT模型纠错。</p>
 <p>该模型的创新点在于BERT输入的词向量不是原始输入的token，而是token的embbeding和 [MASK] 的embbeding的加权平均值，权重是BiGRU输出序列中每个位置的错误概率，从而在MASK时起到soft-mask 的作用。举个例子，假如GRU认为某个位置的词输出错误概率是1，则输入到BERT的词向量就是 [MASK] 的词向量；而如果是检测模型认为某个位置的词是正确的，即错误概率是0，这时输入到BERT模型的词向量就是token的向量；但是如果检测模型的某个位置输出错误概率是0.5，此时输入到BERT模型的词向量为二者加权后的结果 ( (1-0.5)* token_embedding + 0.5*[MASK]_embedding )。不同于之前检测器输出0/1，只有被MASK和未被MASK的Hard-Mask方式，因此该模型称为Soft-Mask BERT，文章指出这种方式纠错比原生的BERT纠错效果高出3%左右。</p>
@@ -300,33 +300,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="03我们的工作"><strong>03我们的工作</strong></h2>
 <h3 id="1-模型结构"><strong>1. 模型结构</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3d36d1e21611442db4bc5516a0673113.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271757356.webp" />   
     </p>
 <p>我们的纠错模型结构也类似生成器和判别器的模式，如上图所示。</p>
 <p>语料库包括维基百科中文、知乎中文、爬取的一些新闻语料，以及小爱同学运行的用户日志，总共将近有1亿条的数据，从语料库中抽样出原始样本，类似&quot;请播放歌曲芒种&quot;、&ldquo;布朗熊跳个舞&rdquo;、&ldquo;打开和平精英&quot;等等。我们开发了专门模拟ASR生成错误数据的模糊音生成器，基于模糊拼音来对原始样本处理生成错误样本，生成结果如&quot;请播放歌曲曼钟&rdquo;、&ldquo;波兰熊跳个舞&rdquo;、&ldquo;打开和平静音&quot;等等。构造好正确样本和错误样本的样本对输入到判别器模型，判别器进行端到端的纠错，即给模型输入错误样本，模型输出为正确的样本。</p>
 <h3 id="2-模糊音生成器"><strong>2. 模糊音生成器</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c9fc8900687e4e39aca472edf69e9e9f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271757995.webp" />   
     </p>
 <p>通过分析ASR错误样本的规律，在模糊音生成器中定义了模糊等级和模糊候选集，如上图所示。</p>
 <p>根据模糊音的相似性划分为5个等级，等级越高，发音越不相似，比如level1是发音完全相同 ( &ldquo;爱&quot;和&quot;艾&rdquo; )，level2的发音相同，声调不同 ( &ldquo;几&quot;和&quot;季&rdquo; )，level3是常见的平卷舌和前后鼻音模糊 ( &ldquo;shi&quot;和&quot;si&rdquo;，&ldquo;l&quot;和&quot;n&rdquo; )，level4的拼音编辑距离为1，level5拼音的编辑距离大于1，基本上发音已经不一样了。</p>
 <p>拼音的编辑距离计算采用的非标准拼音方案，如虽 ( &ldquo;sui&quot;使用&quot;suei&rdquo;，&ldquo;sui&quot;是缩写形式 )，&ldquo;四&quot;的发音&quot;si&quot;使用&quot;sI&rdquo;，由于&quot;i&quot;在&quot;si&quot;中和在&quot;di&quot;中发音是不同的，因此使用&quot;I&quot;来代替&quot;i&quot;在&quot;si&quot;中的发音。再比如&quot;有&rdquo; ( &ldquo;you&quot;使用&quot;iou&quot;代替 ) 是因为&quot;y&quot;并不是真正的声母，当&quot;i&quot;作为声母时用&quot;y&quot;替换&quot;i&rdquo;，这里相当于还原了这种实际发声拼音规则，还有&quot;挖&rdquo; ( &ldquo;wa&quot;使用&quot;ua&rdquo; )，&ldquo;w&quot;作为声母时真正的发音实际上是&quot;u&rdquo;。</p>
 <p>标准的拼音方案不能很好的体现汉字的发音相似问题，比如&quot;挖&quot;和&quot;华&quot;读音很相似，如果使用标准拼音方案时，拼音的编辑距离为2 ( &ldquo;wa&rdquo;，&ldquo;hua&rdquo; )，而采用我们定义的非标注方案时，编辑距离为1 ( &ldquo;ua&rdquo;，&ldquo;hua )，所以采用非标准拼音方案更能准确地描述ASR语音出现错误的规律，找到合适的编辑距离计算方案。****</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e57f5b1a0a99493a9f3632a8df18eaaf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271757932.webp" />   
     </p>
 <p>模糊音生成器的工作流程如上图所示，输入文本为&quot;小爱同学请播放音乐&rdquo;，假设MASK位置随机到&quot;爱&quot;，模糊等级level=1时，发音与&quot;爱&quot;相同的候选集为{&ldquo;哎&rdquo;，&ldquo;艾&rdquo;，&ldquo;碍&rdquo;，&ldquo;暧&rdquo;，&hellip;}，然后基于n-gram语言模型在模糊候选集中选择最可能的替代词，如果计算的词序列概率最大的是&quot;艾&quot;，那么&quot;爱&quot;被替换成了&quot;艾&quot;，最后的输出为&quot;小艾同学请播放音乐&quot;。</p>
 <p>我们通过人工标记了一些ASR错误样本的数据，研究了声母和韵母的特征，例如平卷舌，前后鼻音等出现的识别错误。人工标注的数量毕竟有限，所以根据掌握的规律，通过调整模糊音生成器的超参数 ( MASK的数量，fuzzy的比例等 )，使生成的错误样本分布尽可能接近真实ASR系统中错误样本的数据分布，以便纠错模型可以更容易地用于ASR识别的纠错任务中。</p>
 <h3 id="3-纠错判别器"><strong>3. 纠错判别器</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/612de37ff8684aecb97585ba7f7faf74.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271757683.webp" />   
     </p>
 <p>纠错判别器结构如上图所示，输入数据为汉字和拼音的特征，其中汉字经过BERT预训练模型得到汉字的词向量，而拼音数据则是通过BERT模型重新训练一个关于拼音数据的词向量，二者拼接后经过Softmax层，计算交叉熵损失。</p>
 <p>为什么使用拼音的数据呢？这是因为正确的字发音一般比较相似，那么可以通过拼音来缩小搜索正确词的范围，所以拼音是一个重要的特征。并且通过尝试后，拼音和汉字单独训练再拼接提取的特征优于其他组合方式，这种方式类似于Ensemble模型。先用汉字语料训练一个端到端的纠错模型BERT，再训练一个拼音到汉字的解码模型，两个模型拼接后通过输出层softmax训练每个位置的交叉熵损失，这点不同于原生的BERT模型只计算MASK位置的损失，而是类似于ELECTRA模型的损失函数。</p>
 <p>关于拼音特征的处理过程，比较合理的做法是将拼音拆分成声母、韵母、声调，根据发音特征来得到相似发音的embedding表示向量，并且有相似发音的embedding向量要尽可能接近。汉字的拼音表示只有有限个，所有声母韵母组成的网格也只有几百个，并且拼音的写法变化也不多，所以拆分成声母、韵母、声调之后做embedding是合理的。如果直接对拼音做embedding的训练，得到的拼音表示向量无法表示出相似的发音。</p>
 <h3 id="4-评测集的表现"><strong>4. 评测集的表现</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6c39dcc8b2d94192b81395652fd2e1e6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271757324.webp" />   
     </p>
 <p>模型中使用到了两个trick：</p>
 <ul>
@@ -340,13 +340,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>从结果中发现，原生BERT微调之后直接纠错，模型评测指标为9.3%，加入词表过滤和递归预测后，f1提升到21.6%，加入纠错训练后f1大幅提升到65%，加入trick后，又提升到73.4%，再加入拼音特征数据，效果提升明显，f1提升到77.6%。</p>
 <h3 id="5-纠错的表现"><strong>5. 纠错的表现</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/216fb8395f0240eda89f1984dbb3e396.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271757074.webp" />   
     </p>
 <p>从表中纠错的例子中可以看出，之前分析的ASR识别错误类型的query，基本上能实现纠错了，比如&quot;播放洛天依唱的忙种&quot;能够纠正为&quot;播放洛天依唱的芒种&quot;，&ldquo;你能帮我玩和平基因吗&quot;纠正为&quot;你能帮我玩和平精英吗&rdquo;，&ldquo;清理一下听懂灰尘&quot;纠正为&quot;清理一下听筒灰尘&quot;等</p>
 <p>虽然没有引入知识库，但是对于语料数据分布的头部知识仍然是可以纠正的，比如&quot;芒种&rdquo;、&ldquo;和平精英&rdquo;、&ldquo;新冠肺炎&quot;等，在语料中的占比比较高，但是对于尾部的知识，该模型纠错效果并不理想。</p>
 <h2 id="04未来的方向"><strong>04未来的方向</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dc8c83d327744c3dacfb6bed5109445e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271757774.webp" />   
     </p>
 <ul>
 <li>尽管遵循目前关于NLP纠错模型的设定条件，但是该模型在纠错方面仍然存在一定的局限性。后续可以考虑BERT-Decoder结构的模型如 GPT系列模型，BERT-Decoder是seq2seq模型，不会局限于一对一的纠错方式。</li>
@@ -482,6 +482,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -515,10 +519,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -897,6 +897,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

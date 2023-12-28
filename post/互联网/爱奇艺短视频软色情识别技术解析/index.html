@@ -232,21 +232,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>· CNN</strong> 能学习文本中有软色情倾向的重要片段，不受切词影响，如：“如愿 / 娶 / 小娇妻 / 甜蜜 / 滚 / 床单“；</p>
 <p><strong>· LSTM</strong> 依赖整个句子的语义进行判别，能识别出不含明显色情词的 case，如：“男子 / 开 / 兰博基尼 / 邀 / 美女 / 上车 / 聊天 / 聊着聊着 / 就 / 上手”；</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/182231af8ec94df5b4161ffa4a025294.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240499.png" />   
     </p>
 <p>图 1 文本软色情分类模型 -Convolutional Bi-LSTM 模型结构</p>
 <h3 id="2-封面图软色情识别"><strong>2. 封面图软色情识别</strong></h3>
 <p>目前常见的图像分类的基本思路是直接基于 ImageNet 预训练分类模型 (e.g. ResNet【4】, Xception【5】, SENet【6】等) 进行 fine-tuning；然后基于微调后的模型提取图像 feature，作为 task-specific 分类模型的输入进行图像分类。</p>
 <p>综合考虑模型的准确率和复杂度 (推理速度)，决定选择 Xception 进行 fine-tuning, 抽取图像 feature，其框架结构如图 2 所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5f9890846b564c25a56ef0c98c265418.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240364.png" />   
     </p>
 <p>图 2 Xception 模型结构</p>
 <p>但通过这种方式抽取的图像表示通常为 global average pooling 的输出，丢失了空间信息和 channel 信息；为充分利用 channel 和空间信息，封面图模型 (如图 3 所示) 在 Xception block-14 和 global average pooling 之间引入 CBAM(Convolutional Block Attention Module)【7】模块，建模 channel 和 spatial 的重要程度，再对 Xception-CBAM 进行 finetuning, 以学习更好的图像表示，其中 CBAM 由 channel attention 和 spatial attention 两个子模块构成：</p>
 <p>· Channel attention 模块：强调应该更关注什么, i.e. “what is meaningful given an input image”。</p>
 <p>· Spatial attention 模块：强调应该更关注哪里, i.e. “where is an informative part”; 和 channel-attention module 相辅相成。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/32a6930fb42d45668743107ce6dc18f1.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240291.jpeg" />   
     </p>
 <p>图 3 封面图软色情分类模型：Xception-CBAM 模型结构</p>
 <h3 id="3-视频内容软色情识别"><strong>3. 视频内容软色情识别</strong></h3>
@@ -256,29 +256,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>基于 Bi-LSTM 的模型通过将视频的每一帧用预训练的深度卷积网络抽取 feature，然后将每一帧作为一个时间点，依次输入到 LSTM 中学习视频的语义表示。但由于 RNN 网络结构的串行本质，推理效率较低；此外，判定一个视频是否为软色情，并不需要考虑帧之间的顺序关系，只需要某一帧为软色情即可。</p>
 <p>NetVLAD 是目前将 frame-level feature 融合为 video-level feature 的另一种较流行的方案，强调建模 distribution of features in the video，其主要思想是基于视频帧集合的 frame-level feature 学习视频帧集合的聚类，聚类中心向量作为 video-level 表示，如图 4 所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4560548b4c224126a26cf253d0d8e096.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240551.png" />   
     </p>
 <p>图 4 基于 NetVLAD layer 的图像特征融合</p>
 <p>NetVLAD 将 RGB 帧视为整体进行建模，但一个 RGB 帧往往包含多个物体，为了刻画更加细粒度的图像表示，NeXtVLAD（Youtube’18 视频分类比赛第三名解决方案）在 NetVLAD layer 的基础上将 RGB 帧划分成多个 group 分别进行建模，并引入视觉 attention 机制对不同的 group 赋予不同权重, 其和 NetVLAD 的主要区别如图 5 所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9f2356a9cfc842daba5569fe12cf5388.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240280.png" />   
     </p>
 <p>图 5 NetVLAD 和 NeXtVLAD 的区别</p>
 <p>最后，我们基于 NeXtVLAD 构建最终的视频内容软色情分类模型。如图 6 所示，首先对视频的每个关键帧利用 fine-tuned 的 Xception-CBAM 抽取 RGB 特征 (frame-level) 作为模型输入，经过 NeXtVLAD 学习 video-level 语义表示, 然后送入分类网络。其中，SE context gating 主要尝试在 channel 维度上引入 attention 机制以学习更好的 feature 表示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4a4c3cd03851496cb0419ac101961d31.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240380.png" />   
     </p>
 <p>图 6 基于 NeXtVLAD layer 的视频内容软色情分类模型</p>
 <p><strong>4. 整合模型</strong></p>
 <p>审核 video 软色情模型尝试了两种方式将文本模型、封面图模型和视频内容模型三者融合为一个整体：pipeline 模型和端到端的多任务学习模型。</p>
 <p>其中，pipeline 模型如图 7 所示，其主要流程是: 文本软色情识别 =&gt; 封面图软色情识别 =&gt; 视频内容软色情识别。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ed17c7bbfe474cc497254d098d441947.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240228.jpeg" />   
     </p>
 <p>图 7 视频软色情分类整合模型 -Pipeline 模型结构</p>
 <p>端到端的多任务学习模型结构图 8 所示，该模型是一个包含文本软色情二分类，封面图软色情二分类，视频内容软色情二分类，feed 软色情二分类 4 个任务的端到端的多任务学习模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f2693397c69645be9f45a9d2d7b3ddff.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240331.jpeg" />   
     </p>
 <p>图 8 视频软色情分类整合模型 - 端到端的多任务学习模型结构</p>
 <p>两种整合方式各有利弊 (如下表所示)，主要体现在以下四个方面：</p>
@@ -426,6 +426,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -459,10 +463,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -841,6 +841,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

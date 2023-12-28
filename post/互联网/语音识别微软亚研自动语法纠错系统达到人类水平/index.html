@@ -196,60 +196,60 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>用于语法纠错（GEC）的序列到序列（seq2seq）模型（Cho et al., 2014; Sutskever et al., 2014）近年来吸引了越来越多的注意力（Yuan &amp; Briscoe, 2016; Xie et al., 2016; Ji et al., 2017; Schmaltz et al., 2017; Sakaguchi et al., 2017; Chollampatt &amp; Ng, 2018）。但是，大部分用于 GEC 的 seq2seq 模型存在两个缺陷。第一，seq2seq 模型的训练过程中使用的纠错句对有限，如图 1（a）所示。受训练数据的限制，具备数百万参数的模型也可能无法实现良好的泛化。因此，如果一个句子和训练实例有些微的不同，则此类模型通常无法完美地修改句子，如图 1（b）所示。第二，seq2seq 模型通常无法通过单轮 seq2seq 推断完美地修改有很多语法错误的句子，如图 1（b）和图 1（c）所示，因为句子中的一些错误可能使语境变得奇怪，会误导模型修改其他错误。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6d97ee948deb41ab9ec892ff544bd59d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281827901.webp" />   
     </p>
 <p><em>图 1：（a）纠错句对；（b）如果句子与训练数据有些微的不同，则模型无法完美地修改句子；（c）单轮 seq2seq 推断无法完美地修改句子，但多轮推断可以。</em></p>
 <p>为了解决上述限制，微软研究者提出一种新型流畅度提升学习和推断机制，参见图 2。</p>
 <p>对于流畅度提升学习，seq2seq 不仅使用原始纠错句对来训练，还生成流畅度较差的句子（如来自 n-best 输出的句子），将它们与训练数据中的正确句子配对，从而构建新的纠错句对，前提是该句子的流畅度低于正确句子，如图 2（a）所示。研究者将生成的纠错句对称为流畅度提升句对（fluency boost sentence pair），因为目标端句子的流畅度总是会比源句子的流畅度高。训练过程中生成的流畅度提升句对将在后续的训练 epoch 中作为额外的训练实例，使得纠错模型可以在训练过程中看到具有更多语法错误的句子，并据此提升泛化能力。</p>
 <p>对于模型推断，流畅度提升推断机制允许模型以多轮推断的方式渐进地修改句子，只要每一次提议的编辑能够提升语句的流畅度，如图 2(b) 所示。对于有多个语法错误的语句，一些错误将优先得到修正。而经修正的部分能让上下文更加清晰，这对模型接下来修改其它错误非常有帮助。此外，由于这种任务的特殊性，我们可以重复编辑输出的预测。微软进一步提出了一种使用两个 seq2seq 模型的往返纠错方法，其解码顺序是从左到右和从右到左的 seq2seq 模型。又因为从左到右和从右到左的解码器使用不同的上下文信息解码序列，所以它们对于特定的错误类型有独特的优势。往返纠错可以充分利用它们的优势并互补，这可以显著提升召回率。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6cf902c23b224daf9ccad8f1c4201748.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281827090.webp" />   
     </p>
 <p><em>图 2：流畅度提升学习和推断机制：（a）给出一个训练实例（即纠错句对），流畅度提升学习机制在训练过程中从 seq2seq 的 n-best 输出中构建多个流畅度提升句对。流畅度提升句对将在后续的训练 epoch 中用作训练实例，帮助扩展训练集，帮助模型学习；（b）流畅度提升推断机制允许纠错模型通过多轮 seq2seq 推断渐进式地修改句子，只要句子的流畅度一直能够提升。</em></p>
 <p>结合流畅度提升学习和推断与卷积 seq2seq 模型，微软亚洲研究院取得了当前最佳的结果，这使其成为首个在两个基准上都达到人类水平的 GEC 系统。</p>
 <p><strong>论文：REACHING HUMAN-LEVEL PERFORMANCE IN AUTOMATIC GRAMMATICAL ERROR CORRECTION: AN EMPIRICAL STUDY</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b7909a9967084237be0ee30f99eb402d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281827190.webp" />   
     </p>
 <p>论文地址： <a href="https://zshipu.com/t?url=https%3A%2F%2Farxiv.org%2Fpdf%2F1807.01270.pdf">https://arxiv.org/pdf/1807.01270.pdf</a></p>
 <p>摘要：神经序列到序列（seq2seq）方法被证明在语法纠错（GEC）中有很成功的表现。基于 seq2seq 框架，我们提出了一种新的流畅度提升学习和推断机制。流畅度提升学习可以在训练期间生成多个纠错句对，允许纠错模型学习利用更多的实例提升句子的流畅度，同时流畅度提升推断允许模型通过多个推断步骤渐进地修改句子。结合流畅度提升学习和推断与卷积 seq2seq 模型，我们的方法取得了当前最佳的结果：分别在 CoNLL-2014 标注数据集上得到 75.02 的 F0.5 分数，在 JFLEG 测试集上得到 62.42 的 GLEU 分数，这使其成为首个在两个基准数据集上都达到人类水平（CoNLL72.58，JFLEG62.37）的 GEC 系统。</p>
 <p><strong>2 背景：神经语法纠错</strong></p>
 <p>典型的神经 GEC 方法使用带有注意力的编码器-解码器框架将原始句子编辑成语法正确的句子，如图 1（a）所示。给出一个原始句子
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6550fcfaf6c249a6b525b0bf72e79093.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281827247.webp" />   
      及其纠错后的句子
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/90b45b6c8b9842a2911cb73654144a36.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281827039.webp" />   
      ，其中
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d352224ad24444bd9bbef7988318e691.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281827086.webp" />   
      和
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8dc52e1576a5419db0b1343f6c945c79.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281827867.webp" />   
      分别是句子 x^r 和 x^c 的第 M 和第 N 个单词，则纠错 seq2seq 模型通过最大似然估计（MLE）从纠错句对中学习概率映射 P(x^c |x^r )，进而学习模型参数 Θ_crt 以最大化以下公式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/aba73373e72049839a027d47d68e84af.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281827622.webp" />   
     </p>
 <p>其中 S* 表示纠错句对集。</p>
 <p>对于模型推断，通过束搜索输出句子选择
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/60d809a592a1496a873ed943e170fe52.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281827396.webp" />   
      ，这一过程需要最大化下列公式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0f07fdaa679a485cbe571f3e7d6dd95c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281827158.webp" />   
     </p>
 <p><strong>3 流畅度提升学习</strong></p>
 <p>用于 GEC 的传统 seq2seq 模型仅通过原始纠错句对学习模型参数。然而，这样的纠错句对的可获得性仍然不足。因此，很多神经 GEC 模型的泛化性能不够好。</p>
 <p>幸运的是，神经 GEC 和神经机器翻译（NMT）不同。神经 GEC 的目标是在不改变原始语义的前提下提升句子的流畅度；因此，任何满足这个条件（流畅度提升条件）的句子对都可以作为训练实例。</p>
 <p>在这项研究中，研究者将 f(x) 定义为句子 x 的流畅度分数。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0513a7a0193a40fc873cffd0570f1045.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281827965.webp" />   
     </p>
 <p>其中，P（x_i | x_</p>
 <p>流畅度提升学习的核心思想是生成流畅度提升的句对，其在训练期间满足流畅度提升条件，如图 2（a）所示，因此这些句子对可以进一步帮助模型学习。</p>
 <p>在这一部分中，研究者展示了三种流畅度提升策略：反向提升（back-boost）、自提升（self-boost）和双向提升（dual-boost），它们以不同的方式生成流畅度提升句子对，如图 3 所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ec6eb8ae4cb549cb9c4a9aae70dcce7e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281827813.webp" />   
      <em>图 3：三种流畅度提升学习策略：（a）反向提升，（b）自提升，（c）双向提升。它们都能生成流畅度提升句对（虚线框中的句对），帮助训练过程中的的模型学习。图中的数字是对应句子的流畅度分数。</em></p>
 <p><strong>4 流畅度提升推断</strong></p>
 <p><strong>4.1 多轮纠错</strong></p>
@@ -383,6 +383,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -416,10 +420,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -798,6 +798,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

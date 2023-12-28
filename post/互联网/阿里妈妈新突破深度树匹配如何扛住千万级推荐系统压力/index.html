@@ -218,27 +218,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>为了提升推荐系统的精准度，最大程度解决推荐系统存在的问题，来自阿里妈妈的高级技术专家李晗和团队提出了一种新型的推荐算法名曰：深度树匹配。在 2018 年 AICon 全球人工智能与机器学习技术大会上，李晗公开分享了这一算法，AI 前线也对此内容进行了独家整理。</p>
 <p>本文系 AI 前线“推荐系统”专题系列文章之一。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7c4979332f9a4c9da30c0c3e7b13ad96.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281918254.png" />   
     </p>
 <p>大家好，我叫李晗。来自阿里妈妈，今天非常有幸能够在 AICon 的现场给大家分享一下我们团队做的工作，我演讲的主题是：深度树匹配，下一代推荐技术的探索和实践。</p>
 <p>首先介绍一下我个人。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7a85173c15a54b98b463be9bd0f42d41.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281918929.png" />   
     </p>
 <p>我是 2013 年加入阿里从事广告算法工作，现在在阿里妈妈。阿里妈妈是阿里巴巴里面主要负责广告营收的业务部门，承载了阿里 50% 以上的收入，我们工作主要的职责也是负责广告投放的算法。</p>
 <p>我目前在阿里妈妈主要负责三块工作：第一块工作主要是整体信息流广告的算法策略；第二块工作是整体展示广告的匹配召回技术体系的建设；第三块工作是负责云营销业务的数据算法。</p>
 <p>今天的演讲我主要分四个方面来讲述：首先我会重点介绍一下推荐问题的技术概要；之后我会从问题出发，讲述一下我们提出的深度树匹配方案；接着，我会讲一下从深度树匹配来看我们认为的下一代推荐技术面临的核心挑战；最后回归到问题本身，来看一下深度树匹配在下一代推荐技术探索过程中的再思考。</p>
 <h2 id="推荐问题和技术概要">推荐问题和技术概要</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/62f689df998f4398974f3e0b785278e9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281918509.png" />   
     </p>
 <p>首先来讲第一部分，推荐问题和技术概要。其实前面已经讲过了，推荐这样一个典型应用贯穿于我们的生活中，无论是新闻、音乐、商品还是视频，各种各样的推荐应用层出不穷。大家其实平时日常上网，经常能够使用到这些推荐产品。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6fe72782aaf443f782fb7c7bfe024862.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281918950.png" />   
     </p>
 <p>那么这些推荐业务背后的核心技术是什么样的？简单以淘宝的商品为例，做一个简单的技术拆解。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ea1d02aba90a4231bccfbe10df0df923.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919394.png" />   
     </p>
 <p>它核心就是根据用户的请求从海量的商品库挑选合适商品最终展示给用户，考虑到系统和算力的限制，大体分为两个环节：第一个我们叫做 <strong>召回环节</strong>，又叫 <strong>匹配环节</strong>。从海量的商品库里面得到一个侯选的商品集合，然后再把这个侯选的商品集合通过更精细的预估模型最终在第二个排序环节展示给用户。</p>
 <p>我今天讲的主要内容会围绕着匹配召回阶段来讲述我们的方法。</p>
@@ -252,7 +252,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cd87deba9f3648a5a18311d879c8552c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919939.png" />   
     </p>
 <p>所以说，围绕高效检索和相关整个推荐技术面临的问题，至少在召回技术层面的话经历了两代技术的发展。</p>
 <p>第一代的技术发展是我们大家都很熟悉的，以启发式规则为代表的推荐技术，这里面的典型代表是什么呢？协同滤波，基于商品的协同过滤，它的流程拆分如下：</p>
@@ -264,23 +264,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>这代技术也是目前推荐召回核心发展的一代技术，我相信有不少公司应该都在上面做了很多的研究，但是现在，我们发现这一代方法存在一些局限性，因为它最终的模式是将用户描述成一个向量，再把商品做一个向量，用它们的内积表达用户对商品的兴趣。做过预估模型的同学都知道，特征组合对模型效果是相当关键的，但在这种方法下，其实不太方便去做用户和商品之间的特征组合关系，使整个模型能力受限。</p>
 <p>我们认为这是现在这一代技术的核心问题，它对模型结构做了很大的限制，必须要求是用户向量和商品向量的 embedding 在顶层做内积的模型结构。在深度学习领域其实模型结构层出不穷，百花齐放，但是这样一个特定的结构实际上对模型能力造成了很大的限制。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6ee85fd1a50a4b0aadc1c42e4eaee870.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919623.png" />   
     </p>
 <p>所以对于这样的问题，我们进行了持续的思考：下一代推荐技术应该怎么去发展？</p>
 <p>如果说内积检索相对于启发式规则，它打开的是整个全库检索的天花板，要进一步提高推荐效果，我们就需要打开模型能力的天花板。所以我们在想：能否设计一套全新的推荐算法框架，它允许容纳任意先进的模型而非限定内积形式，并且能够对全量候选集进行更好的推荐。我们今天所讲的方案 <strong>深度树匹配</strong>，就是从这个视角出发做的技术探索。</p>
 <h2 id="深度树匹配下一代推荐技术的探索">深度树匹配：下一代推荐技术的探索</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b2ca3d2872ec45bebf7704a1567f072f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919805.png" />   
     </p>
 <p>先来思考一下怎么做到全库检索和先进模型。</p>
 <p>我们知道整个召回阶段，系统性能是最大的制约，因为一方面要计算用户对商品的兴趣，需要考虑单点的计算消耗 T，同时要考虑对海量商品库来做检索的过程，这里还有个计算次数 N 的问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/64ce705562e544eba72f497a92a6f1d1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919309.png" />   
     </p>
 <p>如果我们引入了先进模型，就使得在单点上的消耗不可避免的增大；如果说要把这个先进模型用到全库遍历去计算，对于淘宝这样一个亿级的商品库，要计算一亿次，这个 N 又非常大，使得整体的性能不可行。这就造成我们很难将一些排序预估环节的先进模型用到召回阶段，这样的问题好像不是特别容易解决。那怎么来更深入的去剖析这个问题给出一个解法呢？</p>
 <p>我们做了这样一个推演来重新认识这个问题，如果先进模型要在匹配召回阶段应用，核心的单点计算消耗是降不下来的，要使得整个系统可行的话，必须要降低 N，也就是计算次数。那么面向全量的检索，需不需要对全库做遍历计算呢？这个答案其实是不一定的，如果说我们能够设计一个高效的检索结构，使得系统可以对整个商品库里面只做有限次的计算，就近似等价于对全量做了遍历计算，那就可以使先进模型能够在这运用。所以说我们整体的方案围绕的是怎么构建一套高效的索引结构，来承载先进的模型能力。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c327e62b5b914b88954fc816fab917de.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919576.png" />   
     </p>
 <p>有了这样一个想法之后，我们下一步来看看应该采用什么样的方法。</p>
 <p>面对复杂的问题，我们知道人脑常用的思考模式是什么：是确定大方向之后再细化。我们也尝试从这个角度思考，能否有一个从粗到细的检索模式，它能够逐步判断和细化，最终给出最优推荐。</p>
@@ -302,7 +302,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="beamsearch">BeamSearch</h3>
 <p>首先讲怎么做高效地检索。我们假定整个树结构的叶子层是具体要推荐的商品，然后从上到下，把兴趣从粗到细构建了一个平衡二叉树。那么要高效的完成 topK 检索，关键点在于自顶向下的过程中能够快速剪枝。因此我们采用 beamsearch，根据用户对每层节点的兴趣挑选 topK，将每层 topK 节点的子节点作为下一层挑选的候选集合逐层展开，直到最终的叶子层。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e53338d6fbbe4ab8b419bff278cf1646.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919207.png" />   
     </p>
 <p>这个方案大家应该很熟悉，每一层节点中挑选 Top K 节点，比如说第一层要挑选的 Top2 是 LN1 和 LN2，展开的子节点是 SN1 到 SN4，在这个侯选集里挑选 SN2 和 SN3 是它的 Top2，沿着 SN2 和 SN3 它的整个子节点集合是 ITEM3 到 ITEM6，在这样一个子结合里去挑 Top2，最后把 ITEM4 和 ITEM6 挑出来。</p>
 <p>通过这样的方式，我们在每一层能够对非 topK 兴趣的节点分支快速剪枝停止搜索。这样 topK 召回总体的计算次数是 2_logN_K ，N 是整个叶子个数，这个数量是一个可控的计算量，使得先进模型能够使用。</p>
@@ -312,7 +312,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>这里我们提出了兴趣最大堆结构。直观上这么来理解：用户对树上的每个节点的兴趣是正比于对这个节点子节点兴趣的最大值。这是一个假设，我们希望能够建立一个模型，满足这样的最大的兴趣。</p>
 <p>基于这样的性质，我们来看一下它有什么样的好处？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/14e7f95f7f8e4606a654affd59d1e50e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919748.png" />   
     </p>
 <p>如果用户对叶子层这么多节点中的 ITEM8 是最感兴趣的，我们就知道，该用户应该对 SN4 的兴趣也是最大的。因为根据最大堆的性质，父节点的兴趣等于子节点兴趣的最大值。同样，我们也可以推导出用户对 LN2 的兴趣应该是最大的。那么在自顶向下检索的时候，我们就可以每层只挑 Top1 节点，沿着 Top1 子节点展开继续检索，保证这样的检索方式能够最终挑选到 Top1 叶子节点。我们在这里提出兴趣最大堆这样建模结构，本质上是来承载高效的检索策略。</p>
 <p>接下来就谈到另外一个核心问题：有了这样的兴趣建模方案，模型该怎么进行学习？</p>
@@ -320,11 +320,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>具体实践中，我们将每一层兴趣的序关系估计还原成兴趣点估计，然后构建符合满足最大堆概率性质的样本，牵引模型去拟合样本，进而逼近最大堆性质。注意这里我们并没有使用一些结构化正则去约束每一层概率满足最大堆性质，因为我们发现这样的方法求解起来非常困难，所以用样本牵引模型的方式更轻巧的来解决。</p>
 <p>那么具体怎么做呢？假设用户对叶子层 ITEM6 这样一个节点是感兴趣的，那么可以认为它的兴趣是 1，同层其他的节点兴趣为 0，从而也就可以认为 ITEM6 的这个节点上述的路径的父节点兴趣都为 1，那么这一层就是 SN3 的兴趣为 1，其他的为 0，这层就是 LN2 的兴趣为 1，其他为 0。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cffd93b1bc5a413799834d8b5e19b0c2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919191.png" />   
     </p>
 <p>通过这样的样本分布，就可以满足兴趣最大堆的性质，接下来只需要让模型去拟合样本分布就 OK 了。在这里我们总结一下采样方案：从叶子层确定正样本节点，那么就可以沿着正样本上溯确定每一层的正样本，其他的同层采一些负样本，构建用于每一层偏序学习模型的样本。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5794d8239d1348ba9a69c7544144e712.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919900.png" />   
     </p>
 <p>基于这样的性质，我们来看一下最开始提出的问题：怎么承载先进模型。</p>
 <p>因为我们通过整个树的结构和最大堆性质，构建了模型的样本，而真正对于每个模型要学习的时候，它只关心它的模型是否足够拟合样本就可以了。我们在这里就并没有要求模型一定要把用户特征和 item 特征转换为顶层向量内积的形式，而是给模型很大的自由度，只要去拟合好足够的样本，那么任意的模型都是 OK 的。我们的做法使得整个模型结构和检索结构解绑了，进而使得任何模型都可以用在这样一个召回的问题上来，同时结合高效的检索策略，实现召回阶段模型能力的提升。</p>
@@ -334,39 +334,39 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们从顶向下的检索策略，利用的是我们对每一层节点兴趣建模进行快速剪枝，要保证最终的检索效果，就需要我们每一层的兴趣判别模型能力足够强。由于树结构负责我们中间层的样本生成，所以我们的思路是通过优化树结构影响样本生成进而提升模型能力。具体来说，通过树结构优化降低中间层的样本混淆度，让中间层样本尽可能可分。</p>
 <p>所以，整个树结构的生成创建和优化的过程，实际上是围绕着怎么来生成更好的样本、帮助模型学习的视角进行的，而不是只是考虑相似、聚类这样的模式。那么这里的核心方案是什么呢？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/11ec930254c246849c852adbd3103768.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919483.png" />   
     </p>
 <p>考虑到我们的叶子层样本来自于用户行为序列，对于同一个用户，其行为序列中相近的 target item 构成的不同样本。设计树结构让中间层样本样本尽可能可分，具体来说，就是相近的 X 所对应的 Y 的标签也尽可能的相近。在具体的实现上面，相近的 X（即用户行为序列中间的一些抽取的片断）对应的真实的标签 item pair，我们希望它在树上的距离尽可能足够的近，通过这样一种规则来建立树结构，能够使得检索的效果有大幅度的提升。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b2255fdc1efb47ac862e1393db64f2c1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919068.png" />   
     </p>
 <p>到这里，我们来对深度树做一个算法总结。</p>
 <p>首先我们提出了 BeamSearch 方案来实现对树上面的高效检索；然后提出了兴趣最大堆的兴趣建模的方案，通过生成样本，用样本迁牵引型拟合，去满足这个最大堆性质来做兴趣建模；最后我们通过让树生成尽可能可分的样本去建立树结构，这就是我们整个方案的内核。</p>
 <p>讲述到此，听众可能会有这样两个问题：这个方案并不简单，是否给效果带来足够大的提升？同时这么一套复杂的方案，意味着要把排序阶段那么复杂的模型引入到召回阶段，工程能力是否足够的去支持真正在线应用？</p>
 <p>为了回答这些问题，我们先分享一下结果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ebb55dea28054133b0b62038c723e046.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919447.png" />   
     </p>
 <p>首先，我们认为这样的技术实际要通过离线和在线的验证。通过离线端我们构造了一个基于淘宝数据的大规模数据集名为：User behaviour，我们在这个数据集上面验证了三代方法的对比，可以看到我们的方法获得了显著的离线效果提升。去年 KDD2018 也收录了我们的论文，大家感兴趣的话，可以看一下相关的论文。</p>
 <p>另外，从在线效果来说，我们用这样一套方案，已经承载了整个阿里信息流广告流量 80% 召回工作，同时能够支持对千万量级 AD 的全量检索，核心的业务场景取得了显著效果提升，所以从算法效果是足够有信心的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b6442a0ddf4148a6a0ef9f279a4f435e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919128.png" />   
     </p>
 <p>从工程实践来说，整个工程架构离不开我们的工程团队强大的支持。在线端：我们对整体的架构做了抽象化的设计，把它拆分成了三个环节：</p>
 <p>首先是用户定向服务，叫做 user targeting service，它能够负责对用户行为序列、用户特征的基础组织；其次，我们还构建了 deep searching service，它用来做整个树的索引构建和检索的过程；此外，考虑到在这个过程中要进行复杂的模型计算，我们构建了 model serving 这样的服务来专门支持高效的 GPU 计算。通过这三个环节，我们形成了高效的在线方案。通过跳层检索，多路并行等方案，我们在真实广告业务中，从千万量级广告库召回 top2K，整体链路 rt 增长不超过 5%。离线端依托于阿里即将开源的 X-Deep Learning 框架，我们能够支持千亿级样本 &amp; 十亿级特征的离线训练。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0b5fddc70a25484aa18e5ef59a531d8e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919552.png" />   
     </p>
 <p>到这里，我对整个深度树匹配方案进行总结和思考。</p>
 <p>我们从一个本质性的问题出发：怎么从全量的商品库里面高效检索 TopK 的相关商品；为了解决这个问题，我们提出一套全新的推荐算法框架，它能够支持全库检索和先进模型。在此过程中，我们提出了兴趣最大堆的结构，通过兴趣最大堆这样一个结构，决定了我们的检索策略可以采用 BeamSearch 这样的方案，同时兴趣最大堆结构又阐明了样本是怎么生成的，进而指导了树结构是怎么优化的。此外兴趣最大堆又给出了兴趣建模，同时推导出用样本牵引模型学习的方案。回顾整个流程我们知道兴趣最大堆链接了推荐技术的三个核心环节，索引构建，兴趣模型和检索策略，形成了统一框架。</p>
 <p>而我们又跳开这个层面深入思考一个新问题：兴趣最大堆性质本身源于数据中学习得到，因此我们思考下一代推荐技术不止于全库检索 + 先进模型，而是数据驱动下三者（索引，模型，检索）的联合优化学习。</p>
 <h2 id="下一代推荐技术的核心挑战">下一代推荐技术的核心挑战</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1dd0b496800f44569fd00816feb333fa.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919117.png" />   
     </p>
 <p>沿着这样一个思路，我们来看一下深度树匹配在这样一个全新的视角上，面临的挑战是什么。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2898fb1a4b7b4bf9b811b4582a4a29fe.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919400.png" />   
     </p>
 <p>如果说下一代推荐技术应该围绕的是索引结构、模型能力和检索策略的联合端到端学习，那么在这样一个大的目标下面，深度树匹配要成为下一代推荐核心技术，我们认为仍然存在 3 个方面的问题：</p>
 <ul>
@@ -384,14 +384,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="端到端的模块优化">端到端的模块优化</h3>
 <p>首先是端到端的模块优化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b2cfe47fe8dd4e728e6d5b20879ddc81.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919637.png" />   
     </p>
 <p>这里重点讲一下树结构和模型是怎么联合优化的。因为树结构会影响中间层的样本生成，那么从模型视角来看，模型效果不好的话，一般就是把样本错分了。但是样本错分这样一个具体事实，背后又可能有两个原因：第一个原因就是模型确实训练的不好；第二个原因是可能样本标签本身打错了，比如说树结构本身生成的样本标签打错了。</p>
 <p>所以我们提出了一套方案：优化模型和优化样本标签交替进行，来实现树结构和模型的联合优化方案。最开始先生成一个初始的树，根据这个初始的树去训练模型，有了模型之后，再对数据进行判别，找出哪些样本标签打错了，从而进行一些标签的调整，相当于做一些树结构的调整。完成一轮新的树的结构的调整之后，我们再来做新的模型学习，实现整个交替的优化。</p>
 <h3 id="端到端的流程优化">端到端的流程优化</h3>
 <p>第二部分是怎么在业务赋能下面来做到端到端的流程优化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/39459f15feea4fac870e0d383bb27f69.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919065.png" />   
     </p>
 <p>举个具体的例子：广告召回的时候，不是考虑兴趣最大化召回，而是考虑收入最大化召回，我们叫做 ECPM。从公式上讲，它包括 PCTR×BID，PCTR 是预估点击率，BID 是广告主的出价。</p>
 <p>由于这个 ECPM 是通过公式得到的，它是两个因子的乘积，因此很难根据用户直接对一个商品是否有兴趣这样一个隐式的反馈学习得到。那么对于业务目标的最大化召回，怎么来改善整个深度树匹配的方案，使得它能够适应业务目标，就是我们探究的一个问题。</p>
@@ -400,7 +400,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="平台能力输出">平台能力输出</h3>
 <p>第三个挑战就是整个平台能力的输出。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/30590d6f5f7e40589264aa4f11c12f0f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919530.png" />   
     </p>
 <p>这里我们计划搭建一套通用框架，其中核心能力包括三个部分：</p>
 <ul>
@@ -417,18 +417,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>那么对于推荐召回问题，可能很多人会关心树结构是怎么更新的，比如新闻推荐，如果现在就有新的新闻，要怎么被这个树的结构捕捉到。实际上我们已经给出了一个方案：对于实时更新的新鲜事，可以根据一些 sideinfo，找到和当前的新闻相似的新闻，挂载到它们的最相近的父亲节点上，保证初始的召回。有了初始的召回之后，就可以积累数据，有了数据之后，就可以通过实时更新，增量学习的方式，实现整个树型索引和层排序模型的学习，来达成整个树结构的更新。</p>
 <h2 id="下一代推荐技术探索的再思考">下一代推荐技术探索的再思考</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/805a01de46f44b58aac18ace2ed79404.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919042.png" />   
     </p>
 <p>最后再讲一些内容，是对深度树匹配再进一步的思考。</p>
 <p>要完成从全量商品库里面高效检索 TopK 商品这样一个推荐问题，实际上最核心关注的是三个大的模块：检索、模型和索引。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/243076c839f648deb6e8537705209990.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919310.png" />   
     </p>
 <p>索引决定了整个数据的组织结构，它承载的是模型能力和检索策略，实现检索的快速准确。检索实际上是面向目标，它需要和索引结构相适配。模型支撑的是整个检索效果的优化。</p>
 <p>我们认为，在数据驱动下的三者联合学习，才能实现整个推荐效果的最优化。之前的两代发展，可能索引、模型和检索的策略往往是分离的优化，那么接下来要进一步去优化它，我们考虑的是怎么让它进行联合优化学习。所以说深度树匹配这样一个方案，还会沿着联合优化学习的方案持续的去探索创新。</p>
 <p>第二，我们尝试把深度树匹配方案跳出推荐业务，再来看一下，它有哪些横向和纵向业务的发展空间。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3bceba59d5f84b609688363cc728c659.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281919613.png" />   
     </p>
 <p>从算法链路视角看，用户得到最终的结果经历了召回、CTR 预估 Rank 和最后的策略，TDM 更多承担的是召回的工作。我们现在是独立在优化召回结果，从孤立的优化，到协同 Rank 联合一起联动的优化，可能是 TDM 接下来的一个发展的方向。</p>
 <p>同时我们从技术和业务的视角来考虑扩展，因�</p>
@@ -561,6 +561,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -594,10 +598,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -976,6 +976,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

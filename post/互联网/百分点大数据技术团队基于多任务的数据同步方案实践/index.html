@@ -237,7 +237,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>用过ClickHouse的同学们都清楚，CK分两种表，一种是分布式和一种是本地表，分布式表是做查询用的，本地表是做存储用的。一张本地表等同于一份数据的分片，通常一张表会分成多个本地表分布存储，从而达到海量存储和负责均衡的集群效应。写入ClickHouse的时候会按照一定的均衡方式，均匀地落在不同本地表中，假如100万数据需要写入CK，假如CK集群有三个主节点，则每个主节点的本地表会存33w左右，假如CK集群有四个节点，则每个节点存25w左右，以此类推。</p>
 <p>为方便大家更好的思考和理解，后边会以三主三备的ClickHouse集群为案例进行讲解，首先先了解一下ck分布式表查询的过程图解：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b54c4be889f5449d865022ef7c6e2b87.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272308766.webp" />   
     </p>
 <p>图一：ClickHouse分布式表查询过程</p>
 <p>如上图所示，在每个节点执行的语句都一样，操作也一样，只是查询的数据不同。同理存储过程也非常类似，其实写入数据时也可以写入分布式表，让其均匀落到不同节点上，但是这样的写入方式会存在诸多问题，如：数据的一致性问题、合并速度与写入速度不匹配问题，zk压力问题等，因此一般是禁止写入分布式表的，所以选择写入本地表是一种不错的方案。</p>
@@ -250,7 +250,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>以三主三备的ClickHouse集群为例，以用的最多的MergeTree+Distributed的分布式架构方案为例，逐步进行方案的分解和分析。</p>
 <p>业务需求：经过数据仓库建设和数据加工最终产出数据集市DM层中的一张1亿条*400字段体量的客户信息标签大宽表（全中国14亿人中就有1个人在里面）,该表数据需要同步到ClickHouse中，以满足BI展示、WEB页面数据查询、第三方系统数据检索和数据输出（数据输出多为MySQL等）的需求，同时也满足旁临系统的使用。如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/981ad8e303324534b817df4d32731d26.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272308598.webp" />   
     </p>
 <p>本次主要分析图中橙色字体部分，总结为如下3个步骤：</p>
 <ul>
@@ -265,12 +265,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在我们需要确保reduce的数量与表中的bucket数量一致，需要设置几个参数：</p>
 <p>（1）让Hive强制分桶，自动按照分桶表的bucket进行分桶。 <strong>（推荐 ）</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/99a752003fb1450ea4e52d50d280ad49.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272308412.webp" />   
     </p>
 <p>（2）手动指定reduce数量。</p>
 <p>我们的桶数量为3，所以这里的值也为3。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/82484260071749bc99ba838c6f98e51f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272308229.webp" />   
     </p>
 <p>（3）采用insert overwrite重新组装新表数据，完成Hive数据的准备任务。</p>
 <h2 id="2-hive数据写入clickhouse"><strong>2. Hive数据写入ClickHouse</strong></h2>
@@ -285,12 +285,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>注：2和3在同一个线程中前后顺序执行。</p>
 <p><strong>请看如下示意图（3条线&ndash;3个管道）：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1417067bbdf0445f897f87c8fd19cc88.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272308058.webp" />   
     </p>
 <h3 id="第一步-建立ck多节点连接"><strong>第一步：</strong> <strong>建立CK多节点连接</strong></h3>
 <p>首先需要知道ClickHouse的所有连接，可以通过CK的元数据得到，即使CK集群发生了变化我们在使用前获取最新的集群信息，以保障数据一致。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c4a4e6424c9b48fa848bfa26111e16c1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272308907.webp" />   
     </p>
 <p>如上图所示，我们可以看到所有集群对应的hostname列表，通过图内容我们可以看到该ClickHouse拥有3个数据集群，集群名字为write、read、meta_sync，分别部署在6个节点，其中read和write为3主3备模式，meta_sync为6主模式没有备份，一般元数据信息的建表语句或者更新语句都采用meta_sync，表创建肯定都会在每个节点上都创建，一般数据表采用write或者read，三个备节点会定时同步主节点数据，即使一台节点挂掉了也不影响整个集群使用，所以本次数据写入我们使用read集群，三主三备，所以我们写入的主机名为db3、db5、db7，db4、db6、db8会自动同步主节点数据完成数据备份。</p>
 <h3 id="第二步hive数据读取"><strong>第二步：Hive数据读取</strong></h3>
@@ -306,7 +306,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>通过上一章节的管道建立，数据已经写入到CK之中，CK的数据可以对外提供访问和检索。上一章节的建立的是数据引入管道，那本章节建立就是第二道管道&ndash;数据流出管道，即从CK到MySQL。</p>
 <p>那从ClickHouse数据同步到MySQL这条管道如何实现呢？如何更高效的实现呢？Spark技术又如何利用？带着问题且听下面讲解，正如图中蓝色部分所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/38993da2154e474382a5f91e3c3203be.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272308840.webp" />   
     </p>
 <p>从ClickHouse到MySQL的步骤与之前从Hive到ClickHouse的过程恰恰相反，Hive到ClickHouse是流入管道，这次是流出管道（相当于从CK抽水的动作），这种场景也很常见，例如数据交换、数据同步、第三方需求等，不要求太高的更新频率，只需要数据输出即可。众多数据库中，MySQL用的是最多的，所以本次以MySQL作为案例场景进行分解；虽然与Hive到CK数据流程相反，但建立管道的方案和技术都触类旁通，此次架构设计也是基于ClickHouse的存储特性而出发的，整合Spark框架技术，充分利用大数据集群资源而作出的数据输出架构设计和案例分析。</p>
 <p><strong>从ClickHouse输出到MySQL，前后共尝试四种方案进行逐阶段尝试，分析利弊。</strong></p>
@@ -450,6 +450,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -483,10 +487,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -865,6 +865,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

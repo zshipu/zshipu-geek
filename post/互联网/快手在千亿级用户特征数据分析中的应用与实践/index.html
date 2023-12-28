@@ -206,7 +206,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/7/8ae472df02984561a4be6ea578df87e4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271916364.png" />   
     </p>
 <blockquote>
 <p>分享嘉宾：陈杨 快手</p>
@@ -233,7 +233,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="业务需求及挑战"><strong>▌业务需求及挑战</strong></h1>
 <h2 id="1业务需求">1. 业务需求</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/110b69b5399749cba96964e7dd42847e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271916734.webp" />   
     </p>
 <p>用一句话来概括业务需求：在千亿级日志中，选择任意维度，秒级计算7-90日留存。</p>
 <p>如上图所示。左边是原始数据，可能跨90天，每一天的数据可以看作是一张 Hive 宽表，在逻辑上可以认为每行数据的 rowkey 是 userId（这里不严谨，userId 可能是重复的），需要通过90天的原始数据计算得到右边的表，它的横轴和纵轴都是日期，每个格子表示纵轴日期相对于横轴日期的留存率。</p>
@@ -251,7 +251,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h2 id="2技术选型">2. 技术选型</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8af105e876f14ab791068a96fd271e1b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271916396.webp" />   
     </p>
 <p>面对这些问题，我们当时的技术选型：</p>
 <p>①  Hive，因为大部分数据可能是存在 Hive 里，可以直接写 SQL 计算，该方案不用做数据迁移和转换，但是时延可能是分钟到小时级别，因此否定了这个方案。</p>
@@ -261,12 +261,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="bitbase-解决方案"><strong>▌BitBase 解决方案</strong></h1>
 <h2 id="1数据模型">1. 数据模型</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/adb4f7845f754c47b8ddc0594e467119.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271916953.webp" />   
     </p>
 <p>如上图所示，首先将原始数据的一列的某个值抽象成 bitmap（比特数组），举例：city=bj，city 是维度，bj (北京) 是维度值，抽象成 bitmap 值就是10100，表示第0个用户在 bj，第1个用户不在北京，依次类推。然后将多维度之间的组合转换为 bitmap 计算：bitmap 之间做与、或、非、异或，举例：比如在北京的用户，且兴趣是篮球，这样的用户有多少个，就转换为图中所示的两个 bitmap 做与运算，得到橙色的 bitmap，最后，再对 bitmap 做 count 运算。count 表示统计“1”的个数，list 是列举“1”所在的数组 index，业务上表示 userId。</p>
 <h2 id="2bitbase-架构">2. BitBase 架构</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b8755126eecd46799e215a5a58209480.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271916568.webp" />   
     </p>
 <p>整个 BitBase 架构包括五部分：</p>
 <ul>
@@ -288,7 +288,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h2 id="3存储模块">3. 存储模块</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/83f2601e581a4aa5bbb1812a3ed7a324.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271916325.webp" />   
     </p>
 <p>用数据存储设计的核心目的是让计算更快。</p>
 <p>如上图，左边为一天的原始数据，包括多个 table，通过 mrjob 或者 rpc 的方式转换成中间的 bitmap。</p>
@@ -315,7 +315,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h2 id="4计算模块">4. 计算模块</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/19985c99de5d41298681fec9bb7a14cd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271916950.webp" />   
     </p>
 <p>一个完整的计算流程涉及到三个组件：BitBase Client、BitBase Server 和 HBase regionServer。</p>
 <p>①  BitBase Client 首先把业务的需求封装成计算表达式，然后把计算表达式发给 BitBase Server；</p>
@@ -334,7 +334,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h2 id="5deviceid问题">5. DeviceId 问题</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/797b62d8dd704440926464185a2183c4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271916701.webp" />   
     </p>
 <p>在引入 Bitmap 数据模型之后，我们隐含的也引入了一个非常大的问题：无法支持 deviceId。要支持 deviceId，首先需要将 deviceId 转化为数字类型，并且转换之后的 DeviceIdIndex 必须要满足四个条件：</p>
 <p>①  连续：deviceIdIndex 如果存在空洞，会降低压缩效率，同时 Block 数量会增加，计算复杂度相应增加，最终计算变慢；</p>
@@ -344,7 +344,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="6deviceid-方案">6. DeviceId 方案</h2>
 <p>连续、一致、支持反解：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/58a0b43116484758984ad8c1424cb36e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271916381.webp" />   
     </p>
 <p>如何保证连续、一致、支持反解？解决方案非常简单，利用 HBase 实现两阶段提交协议。如上图中间实线部分所示，定义 deviceId 到 deviceIdIndex 的映射为字典。第一张表存储字典的 meta 信息；第二张表存储 index 到 de</p>
 
@@ -472,6 +472,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -505,10 +509,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -887,6 +887,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

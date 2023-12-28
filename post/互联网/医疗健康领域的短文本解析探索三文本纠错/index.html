@@ -223,18 +223,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h5 id="an-improved-graph-model-for-chinese-spell-checking-a-hybrid-model-for-chinese-spelling-check">《An Improved Graph Model for Chinese Spell Checking 》&amp;&amp;《A Hybrid Model for Chinese Spelling Check》</h5>
 <p>14 年的一篇文章，实验用到的数据集是 SIGHAN-2013[2]，借鉴分词时构建 DAG(Directed Acyclic Graph )的方法，因为错误句子可能会造成错误的分词结果，会导致多种分词情况，对所有切分结果的相似拼音的字/词加入到分词的 DAG 中，构成一个由相似词语组成的新的 DAG 模型。就像下面这个例子，misspelled: &ldquo;假书抵万金&rdquo;。其中有一个替换原则，定义一个相似词典，所有的替换按照字典相似的词进行替换。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b238948087f44281ba52f42cf6840d3b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641739.png" />   
     </p>
 <p>根据新的有向无环图，去找最短路径 Single Source Shortest Path（SSSP），用替换词之后最合理的分词结果，就是 CSC 正确的结果。但是这种方式存在两个小问题，如果说分词的时候如果是单个字，那么进行替换会变的没有意义，或者说，如果是分词之后，分出去的词也是分词词典中已有的词，就不好进行纠错，比方说“我/对/心[里 &mdash; 理]/研究/有兴趣”，也就是说如果出错的来源是一个置信度比较高的词语时不好进行纠错，区分“他”和“她”的不同就会相对困难。</p>
 <p>因此为解决这一问题，本文加入 crf model 进行预测，再加一些 rule model。虽然这篇文章比较久远，但是这种 Hybrid Model 的方式确实值得借鉴。</p>
 <h5 id="hanspeller-a-unified-framework-for-chinese-spelling-correction-">《HANSpeller++: A Unified Framework for Chinese Spelling Correction 》</h5>
 <p>本文提出了一个 HANSpeller 框架进行检测和纠错，这个框架有两个主要的工作，首先对输入的句子生成可能的候选集，再对候选集进行排序，选择最好的结果作为新的句子。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-1f92bc7356bc44af9b66f8c812e5b63d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641883.webp" />   
     </p>
 <p>在 data processing 阶段，将长句子根据标点切分为短句并且去掉非汉字内容，根据 SIGHAN-2013,SIGHAN-2014 作为外部数据构建 confusion pair，用于生成候选方案之一。下一步 candidates generating 时根据句子中的字生成有限候选集，根据同音字，近音字，形近字，和一开始生成的 confusion pair 进行替换，因为候选集有限，只保留权重较高的替换词。替换 priority weight 计算公式如下（其中 P(c)为其在 c 这个字符可能出错的概率，edit_dist 编辑距离，二者加权）：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-9172f782a305400a93cf7163deef71b2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641584.webp" />   
     </p>
 <p>在候选结果 rerank 阶段，分为两次筛选和排序，初筛时用到的特征比较简单，n-gram probability，词典统计特征，编辑距离，和分词特征做逻辑回归分类预测。第二次筛选的时候用外部依赖数据，bing 的搜索结果，英文翻译的结果，并且使用 mi crosoft Web n-gram 服务计算翻译的 n-gram 概率。两次筛选后，保留最有可能的 top5 候选结果。其中一些通用的错误需要加入一些规则进行重新打分。之后用一些规则获取最终结果，比方说 n-gram 的概率做过滤器，不同的相似类型的候选集权重不同，confusion pair 是根据大量标注数据抽取的因此权重高于同音同形等类别，之后再对长句所需要替换的个数进行约束。</p>
 <p>这个纠错的方案特征相对比较丰富并且使用 n-gram 保留部分的语义信息做筛选。其相当于枚举出了所有种可能的替换方案，并且根据经过分类器进行初筛，二次筛选和规则排序选择最有可能正确的结果。</p>
@@ -244,31 +244,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>FASPell 通过上下文的 confidence score 和字音的 similarity score 联合打分进行过滤，过滤条件：0.8 × confidence + 0.2 × similarity &lt; 0.8 。</p>
 <p>某些特定效果场景效果不错 GitHub 上有源码有兴趣的同学可以去试试，我们简单的构建了一批数据，做了一些尝试，效果如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-a2422399f2b4402487cb5cf8ae14d6e1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641204.webp" />   
     </p>
 <p>但是存在一个问题，如果连续的词出现出错，或者说同样是置信度很高的词语，纠错效果不好，就类似于第一篇文章说的“心里&mdash;-心理”其 confidence score 同样很高。所以需要在构建数据集的时候需要下一些功夫。</p>
 <h5 id="spelling-error-correction-with-soft-masked-bert-">《Spelling Error Correction with Soft-Masked BERT 》</h5>
 <p>2020 年 ACL 的一篇文章，可以说是改进了原有 BERT 直接获取每个字的候选集的方法，将纠错任务拆分为两部分解决，Detection Network 和 Correction Network,其中 Detection Network 是基于 Bi-GRU 构建的一个二分类模型，用于预测文本出错的概率。Correction Network 则是利用 bert 生成候选集合并打分。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-f2f9cb88105944b798b0ae3447a90c49.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641094.webp" />   
     </p>
 <p>Dectection Network 在后续处理时有一个小细节，二分类获得的概率之后，根据概率对 bert 的 char embedding 和 mask embedding 加权求和传递给 Correction Network。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-db4297c596bf49aeaf48eefe15f601bb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641708.webp" />   
     </p>
 <p>Correction Network 则是一个基于 BERT 的多分类模型，其 input 是检测层向量加权的结果结果。其目标函数由两部分组成，其中λ 是(0,1)之间的超参。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5041056f9e0b419fa25ca399d12ef7bb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641153.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-9b8d0cf4d6fe4fddb6cd222e36979fa7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641623.webp" />   
     </p>
 <h3 id="打造垂直领域纠错">打造垂直领域纠错</h3>
 <p>在 dxy 垂直搜索中，用户输入 short query 经常会出现一些错误文本，导致可能无法搜索到正确的内容，也可能拿到与用户无关内容，最最常见的错误都是由于输入法带来的拼音错误、形近字，用户习惯带来的谐音错误，内容缺失和内容中有多余字符的错误。那么按照上面论文的方法，我们可以解决形近字和谐音这种同等长度的问题，但是像拼音和内容补全删除问题就不太好办了。而且还有一个问题，纠错文本的标注成本较高，而且做垂直领域纠错最好用该领域文本的标注数据效果最好。</p>
 <p>好在我们是做医学垂直领域，那么我们就要利用好我们构建的医学知识图谱，用已有的领域实体帮我们解决这一问题，甚至还可以有效的解决一些用户对常识知识不熟悉带来的一些错误。</p>
 <p>流程如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-dcca74e3049a4e74808e488ac72a55f1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641052.webp" />   
     </p>
 <p>ps. 因为是搜索引擎纠错而非对话系统的纠错，所以我们暂时不用纠结依存句法错误。所以我们将句法问题可以暂时交给搜索中的 Query 扩展技术和搜索引擎。</p>
 <h6 id="data-processing">data processing</h6>
@@ -278,11 +278,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h6 id="spell-correction">spell correction</h6>
 <p>纠错将会从两方面考虑，一方面领域词纠错，另一方面是常用词中字粒度错误。在医疗垂直领域，依赖领域内知识，根据之前构建的知识图谱中的实体构建前缀字典树，并根据搜索日志构建常见的 confusion set，并且基于 DAE 对需纠错词进行向量表示，其中用到了字型，拼音，上下文语义等特征作为输入层，中间隐藏层作为向量表示，根据 embedding simility 生成候选集合，再根据 embedding cosine distance 和 edit distance 进行联合打分进行排序过滤。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0806a7b3212242f59e5ce29016bb103e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641914.webp" />   
     </p>
 <p>前缀树召回候选集</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-18f17106daff43c397db3436c6497830.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271642064.webp" />   
     </p>
 <p>DAE 召回候选集</p>
 <p>常用词字粒度的纠错借鉴了上述很多方法进行融合，基于 BERT fine-tune MLM 生成候选，再根据 common dict 构建 n-gram 模型根据字的 confusion set 生成候选。最后将生成的候选集与原句子中的 mention 进行替换，与原句子的 language model 的 preplexity 再一次的比较。</p>
@@ -419,6 +419,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -452,10 +456,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -834,6 +834,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -208,42 +208,42 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="背景"><strong>背景</strong></h2>
 <p>智能回复流程由QABot机器人和Taskbot机器人两部分构成，如图所示，第一部分QABot机器人用于解答用户问题，第二部分Taskbot机器人用于引导用户留下更多信息以及商机，当前智能回复已接入黄页多个二级类目，本文我们主要讲述QABot机器人相关实践探索。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/83537f71c2e743d3a7ab95f2c178affc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271703730.png" />   
     </p>
 <h2 id="智能问答在黄页业务中的难点"><strong>智能问答在黄页业务中的难点</strong></h2>
 <p>黄页场景业务线数量相对较多，不同业务线之间消息分布差别较大，用户消息相比智能客服简短，存在大量陈述句。这些陈述消息难以归为某一类问题咨询，因此相对智能客服场景有结果率较低。为此我们首先采用了分类模型进行线上迭代，之后实验了分类模型+检索的方法。</p>
 <h2 id="分类模型整体架构"><strong>分类模型整体架构</strong></h2>
 <p>QABot问答机器人目前由分类模型实现，分类模型冷启动和线上迭代过程构成。冷启动期间，我们拉取线上各业务线的微聊数据日志，抽取C端用户消息通过BERT[1]或者word2Vec[2]的方式生成用户消息句向量。采用Bi-KMeans方法进行聚类，将相似语义的用户消息聚集到一起。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/873a9bf456a94a70a012d2d1a9bf0cf3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271703578.png" />   
     </p>
 <p>对聚类结果标注，相似语义消息归为一类（例：“价格是多少”、“多少钱”、“钱怎么算”是一类问题，均是对商品价格的询问），分类模型预测频次出现较高的类别，能够覆盖用户的高频问题。为方便编辑同学进行标注，我们对每类问题抽象出一条标准问题来概括该类，而该类下的具体用户消息称为扩展问题，是标准问题的具体表现形式。获取数据后，通过不断模型的迭代和线上评测，最终达到对用户消息有效分类。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/03/image-1977c8c4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271703377.png" />   
     </p>
 <h2 id="分类模型选择"><strong>分类模型选择</strong></h2>
 <p>在分类模型的选择上，我们考虑了多种工业界常用的算法：</p>
 <p><strong>(1)FastText</strong></p>
 <p>FastText[3]是由FaceBook于2016年发布的文本分类模型，具有结构简单，训练及推理速度较快的特点。FastText与生成词向量的CBOW方法结构很像，并且采用了N-gram的方法，在预测过程中使用了分层SoftMax来加速训练。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/495fff7d45404a368d1bc98e4a91af97.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271703114.png" />   
     </p>
 <p>FastText能够在文本分类任务中迅速达成baseline，达到相对较好的效果，并且推理耗时较少，适用于项目启动时期的快速上线。</p>
 <p><strong>(2)LSTM+DSSM</strong></p>
 <p>DSSM[4]即Deep Structured Semantic Model，模型出自微软研究院，主要方法是将query和doc通过深度网络映射到相同维度的空间中，通过最大化其余弦相似度来进行训练。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e4a33819f277482490fcccf4feab29f8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271703889.png" />   
     </p>
 <p>LSTM-DSSM是对DSSM的优化，原生DSSM的基础上，引入LSTM作为句子表征，提取更多的语义级别的信息。</p>
 <p><strong>(3)BERT</strong></p>
 <p>BERT是由谷歌发布的预训练模型，采用了12层transformer和多头注意力机制，使用大量数据进行预训练，得到了通用模型，在大量数据集上创造了最佳成绩。实际应用的过程中仅需要将原有模型在当前任务上进行Fintiune即可。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c0695dee7d344e8292622fad128fd738.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271703813.png" />   
     </p>
 <p><strong>(4)SPTM</strong></p>
 <p>SPTM是58自研框架，该框架与BERT采用相同的预训练数据方法，第一版SPTM删除了NSP训练任务，使用字粒度的数据，随机掩码15%的字。并将Bert中的TransFormer替换为残差Bi-LSTM进行预训练，完成预训练之后保留模型参数。在微调时替换最后的全连接层，采用不同场景的标注数据对预训练模型进行微调，整体结构如图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2d753f99da034c5aabc4bf13ca99b92d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271703980.png" />   
     </p>
 <p>在分类模型的选择中，我们参考了其他业务线的实验结果，采用了自研的SPTM框架。SPTM在离线实验中能够保持较高的分类精度，满足问答匹配过程中对准确率召回率的总体要求。同时在耗时方面仍旧能够有相对较快的推理速度。以FastText为baseline，LSTM+DSSM能够在baseline的基础上提高6.07%的F1值，而BERT和SPTM能够分别提升21.37%和20.79%的F1，效果明显较好。在推理耗时方面，CPU场景下SPTM耗时11.74ms，相比BERT的81ms能大大减少预测耗时，达到线上预测要求。</p>
 <h2 id="检索模型探索"><strong>检索模型探索</strong></h2>
@@ -254,7 +254,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>（2）采用ALBert tiny[5]作为用户消息表征模型，将用户消息表征为312维的向量并横向拼接，构建&lt;多轮表征，回复&gt;的格式。</p>
 <p>（3）多轮消息表征训练Faiss任务，用于线上检索最近邻消息，回复写入Redis用于线上回答。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2f7b6acf341648508cf5ebc11f0897f7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271703711.png" />   
     </p>
 <p>线上预测流程如图所示：</p>
 <p>（1）用户消息通过ALBert tiny输出第四层Encoder的312维的表征向量，拼接后获取多轮表征</p>
@@ -262,12 +262,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>（3）阈值过滤，距离精排选取top1相似表征</p>
 <p>（4）以相似表征对应ID为Key获取对应的人工客服回复</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ed1eb4be57b64552a5ba4c1edce8b25c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271703633.png" />   
     </p>
 <h2 id="模型融合"><strong>模型融合</strong></h2>
 <p>检索模型模型和分类模型在回复消息的分布上存在差异，为此我们融合了检索模型和分类模型。以检索模型优先，分类模型作为兜底，当检索模型无结果时由分类模型来回复。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/10092fa51c2048a7bd77d59e38556f12.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271703445.webp" />   
     </p>
 <p>融合模型提高了对于用户的有结果率，相比分类模型，仅使用检索模型能够提高7.68%的有结果率，而融合检索模型和分类模型之后能够提高26.21%的有结果率，同时在结果的准确率方面并没有下降。</p>
 <p>在模型融合方面，当前的融合方法逻辑相对简单，仅仅当检索结果不满足要求的时候再调用分类模型。但实际线上的检索回答结果并不一定优于分类模型回答，这里可以构建一个精排模型，将分类模型答案与检索答案一起精排来决定最终选择。但检索模型仍旧存在一些问题，历史数据并不一定恰当，需要进行大量的人工审核。并且由于人工客服回复中也存在商机引导内容，检索结果与智能回复中的taskbot存在冲突。</p>
@@ -402,6 +402,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -435,10 +439,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -817,6 +817,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

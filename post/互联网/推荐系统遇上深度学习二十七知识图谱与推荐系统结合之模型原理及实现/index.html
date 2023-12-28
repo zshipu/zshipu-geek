@@ -214,7 +214,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>知识图谱特征学习在推荐系统中的应用步骤大致有以下三种方式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ee2765ee43134419a898c933d2e72040.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957006.jpeg" />   
     </p>
 <p>依次训练的方法主要有：Deep Knowledge-aware Network(DKN)</p>
 <p>联合训练的方法主要有：Ripple Network</p>
@@ -226,67 +226,67 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在上一篇中我们介绍了Deep Knowledge-aware Network(DKN)，在DKN中，我们需要首先学习到entity的向量和relation的向量，但是学习到的向量，其目的是为了还原知识图谱中的三元组关系，而并非是为了我们的推荐任务而学习的。因此今天我们来介绍一下知识图谱和推荐系统进行联合训练的一种网络结构：RippleNet。</p>
 <p>Ripple是波纹的意思，RippleNet就是模拟用户兴趣在知识图谱上的一个传播过程，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fbf9d6a6f5ab468e8d4e26e352b2efab.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957026.jpeg" />   
     </p>
 <p>如上图，用户的兴趣以其历史记录为中心，在知识图谱上逐层向外扩散，而在扩散过程中不断的衰减，类似于水中的波纹，因此称为RippleNet。</p>
 <h2 id="12-ripplenet网络结构">1.2 RippleNet网络结构</h2>
 <p>我们先来介绍两个相关的定义：</p>
 <p>Relevant Entity：在给定知识图谱的情况下，用户u的k-hop相关实体定义如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6597d1f23962499c85754900c4afe15d.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957035.jpeg" />   
     </p>
 <p>特别地，用户u的0-hop相关实体即用户的历史记录。</p>
 <p>Ripple Set：用户u的k-hop ripple set被定义为以k-1 Relevant Entity 为head的相关三元组：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ece8008c8b044f0c9b968d2c1b61146b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957005.png" />   
     </p>
 <p>这里，为避免Ripple Set过大，一般都会设定一个最大的长度，进行截断。另一方面，构建的知识图谱都是有向图，只考虑点的出度。</p>
 <p>接下来，我们来看看RippleNet的网络结构：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/917bdbed8ce143b8b910a886dd9c68f6.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957896.jpeg" />   
     </p>
 <p>可以看到，最终的预测值是通过item embedding和user embedding得到的，item embedding通过embedding 层可以直接得到，关键是user embedding的获取。user embedding是通过图中的绿色矩形表示的向量相加得到的，接下来，我们以第一个绿色矩形表示的向量为例，来看一下具体是如何计算的。</p>
 <p>第一个绿色矩形表示的向量，需要使用的是1-hop的ripple set，对于set中的每一个(h,r,t)，会计算一个与item-embedding的相关性，相关性计算公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a96d206a25fe413da2cbed0b8da69c21.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957931.png" />   
     </p>
 <p>最后通过加权所有t对应的embedding，就得到了第一个绿色矩形表示的向量，表示用户兴趣经第一轮扩散后的结果：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3d801fbbbd304fd98a9fa2760f05d7a2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957721.png" />   
     </p>
 <p>接下来，我们重复上面的过程，假设一共H次，那么最终user embedding的结果为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d5b45ce2356e4862844f37dc08281592.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957345.png" />   
     </p>
 <p>而最终的预测值计算如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0f9adbf914bd438ea1ccc251ac3629a3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957983.png" />   
     </p>
 <h2 id="13-ripplenet损失函数">1.3 RippleNet损失函数</h2>
 <p>在给定知识图谱G，用户的隐式反馈(即用户的历史记录)Y时，我们希望最大化后验概率：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cfba906d03504949b6ba49ff33a58ad2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957559.png" />   
     </p>
 <p>后验概率展开如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a2e978e1cfe940fa95989a57fe1f541b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957092.png" />   
     </p>
 <p>其中，我们认为参数的先验概率服从0均值的正态分布：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e6cfe5718a724936b4d7b4af458bee17.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957728.png" />   
     </p>
 <p>第二项的似然函数形式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b07b0ba21dd04f24a7d34317bebd0c6d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957391.png" />   
     </p>
 <p>上面的式子搞得我有点懵，后面应该是一个具体的概率值而不是一个正态分布，G在θ条件下的分布也是一个0均值的正态分布，后面应该是取得Ih,r,t-hTRt的一个概率，由于我们希望我们得到的指数图谱特征表示能够更好的还原三元组关系，因此希望Ih,r,t-hTRt越接近0越好。</p>
 <p>第三项没什么问题，即我们常用的二分类似然函数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/99a5a848ae394a7d866e7c0864599d16.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957199.png" />   
     </p>
 <p>因此，我们可以得到RippleNet的损失函数形式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3b8b9d689be7484dbb8c88df3581216e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957788.png" />   
     </p>
 <h1 id="2ripplenet的tensorflow实现">2、RippleNet的Tensorflow实现</h1>
 <p>本文的代码地址如下： <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2Fprincewen%2Ftensorflow_practice%2Ftree%2Fmaster%2Frecommendation%2FBasic-RippleNet-Demo">https://github.com/princewen/tensorflow_practice/tree/master/recommendation/Basic-RippleNet-Demo</a></p>
@@ -295,11 +295,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在对数据进行预处理后，我们得到了两个文件：kg_final.txt和rating_final.txt</p>
 <p>rating_final.txt数据形式如下，三列分别是user-id，item-id以及label（0是通过负采样得到的，正负样本比例为1:1）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7633888d2a8848cebc9cc05b33096ff8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957635.png" />   
     </p>
 <p>kg_final.txt格式如下，三类分别代表h，r，t(这里entity和item用的是同一套id)：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/65f4399a13174d2aadd5770c14f71496.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957416.png" />   
     </p>
 <p>好了，接下来我们重点介绍一下我们的RippleNet网络的构建。</p>
 <h3 id="网络输入">网络输入</h3>
@@ -543,6 +543,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -576,10 +580,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -958,6 +958,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

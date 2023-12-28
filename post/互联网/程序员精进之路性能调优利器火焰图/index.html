@@ -212,7 +212,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="初识火焰图"><strong>初识火焰图</strong></h3>
 <p>火焰图（Flame Graph）是由 Linux 性能优化大师 Brendan Gregg 发明的，和所有其他的 profiling 方法不同的是，火焰图以一个全局的视野来看待时间分布，它从底部往顶部，列出所有可能导致性能瓶颈的调用栈。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-02cf635015b64f70af4ddb35841187bc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281620002.webp" />   
     </p>
 <p>火焰图整个图形看起来就像一个跳动的火焰，这就是它名字的由来。</p>
 <p>火焰图有以下特征（这里以 on-cpu 火焰图为例）：</p>
@@ -229,7 +229,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>常见的火焰图类型有 On-CPU，Off-CPU，还有 Memory，Hot/Cold，Differential 等等。他们分别适合处理什么样的问题呢？</p>
 <p>这里笔者主要使用到的是 On-CPU、Off-CPU 以及 Memory 火焰图，所以这里仅仅对这三种火焰图作比较，也欢迎大家补充和斧正。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/07ff23067a6e444b9650086021554fdf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281620082.png" />   
     </p>
 <h4 id="火焰图分析技巧"><strong>火焰图分析技巧</strong></h4>
 <ol>
@@ -268,7 +268,7 @@ kernel-debuginfo-3.10.107-1-tlinux2-0046.x86_64
 <p>故需要先修改 off-cpu 脚本，让其先生成内核模块；之后对该内核模块作签名；最后使用 systemtap 命令手工运行该脚本，统计监控数据</p>
 <p>Systemtap 执行流程如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ceb2083664e341c9921e214231b3130d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281620449.png" />   
     </p>
 <ul>
 <li>parse：分析脚本语法</li>
@@ -311,7 +311,7 @@ staprun -x {进程号} {内核模块名} &gt; demo.bt
 ./flamegraph.pl demo.folded &gt; demo.svg
 </code></pre><p>这样便获得了 off-cpu 火焰图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-d87a36b09af6413d9c18867b28533986.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281620379.png" />   
     </p>
 <h3 id="看图说话"><strong>看图说话</strong></h3>
 <p>趁热打铁，通过几张火焰图熟悉下如何使用火焰图</p>
@@ -319,16 +319,16 @@ staprun -x {进程号} {内核模块名} &gt; demo.bt
 <h4 id="on-cpu-火焰图"><strong>on-cpu 火焰图</strong></h4>
 <h5 id="apache-apisix-qps-急剧下降问题"><strong>Apache APISIX QPS 急剧下降问题</strong></h5>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-54320d2523744befb42871d020038cea.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281620587.png" />   
      Apache APISIX 是一个开源国产的高性能 API 网关，之前在进行选型压测时，发现当 Route 匹配不中场景下， QPS 急剧下降，在其 CPU （四十八核）占用率几乎达到 100% 的情况下只有几千 QPS，通过绘制火焰图发现，其主要耗时在一个 table 插入阶段( <code>lj_cf_table_insert</code>)，分析代码发现是该 table 一直没有释放，每次匹配不中路由会插入数据，导致表越来越大，后续插入耗时过长导致 QPS 下降。</p>
 <h4 id="off-cpu-火焰图"><strong>off-cpu 火焰图</strong></h4>
 <h5 id="nginx-互斥锁问题"><strong>nginx 互斥锁问题</strong></h5>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-56ff7f9600e748f5ab21055fc26300a4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281620450.png" />   
      这是一张 nginx 的 off-cpu 火焰图，我们可以很快锁定到 <code>ngx_common_set_cache_fs_size -&gt; ngx_shmtx_lock -&gt; sem_wait</code> 这段逻辑使用到了互斥锁，它让 nginx 进程绝大部分阻塞等待时间花费在获取该锁。</p>
 <h5 id="agent-监控上报断点问题"><strong>agent 监控上报断点问题</strong></h5>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ce0ae7b952194b9eabb6e425a009f089.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281620750.png" />   
     </p>
 <p>这是一张 agent 的 off-cpu 火焰图，它是一个多线程异步事件模型，主线程处理各个消息，多个线程分别负责配置下发或者监控上报的职责。当前问题出现在监控上报性能差，无法在周期（一分钟）内完成监控数据上报，导致监控断点，通过 off-cpu 火焰图我们可以分析出，该上报线程花费了大量的时间使用 curl_easy_perform 接口收发 http 监控数据消息中。</p>
 <p>依据火焰图将发送 http 消息的逻辑改为异步非阻塞后，该问题解决。</p>
@@ -466,6 +466,10 @@ staprun -x {进程号} {内核模块名} &gt; demo.bt
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -499,10 +503,6 @@ staprun -x {进程号} {内核模块名} &gt; demo.bt
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -881,6 +881,8 @@ staprun -x {进程号} {内核模块名} &gt; demo.bt
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

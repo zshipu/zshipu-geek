@@ -218,7 +218,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7ff3de34e6654cbf81bba4575739520b.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281851156.jpeg" />   
     </p>
 <blockquote>
 <p>本文节选自《 <strong>从零开始构建企业级推荐系统</strong>》一书</p>
@@ -246,7 +246,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>依照此原则，图11-1展示了推荐系统的主要外部依赖。</p>
 <p>﻿</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e628ff716eeb4e5983a8fd9124b6ff12.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281851036.png" />   
     </p>
 <p>﻿</p>
 <p>图11-1　推荐系统的主要外部依赖</p>
@@ -260,7 +260,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>架构设计有很多不同的切入方式，最简单也是最常用的一种方式就是先决定某个模块或逻辑是运行在离线层、在线层还是近线层。这三层的对比如表11-1所示。</p>
 <p>﻿
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6efc156a0a9d4fc2974ccad2758dc666.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281851000.png" />   
     </p>
 <p>﻿任何使用非实时数据、提供非实时服务的逻辑模块，都可以被定义为离线模块。其典型代表是离线的协同过滤算法，以及一些离线的标签挖掘类算法。离线层通常用来进行大数据量的计算，由于计算是离线进行的，因此用到的数据也都是非实时数据，最终会产出一份非实时的离线数据，供下游进一步处理使用。与离线层相对的是在线层，也常被称为服务层，这一层的核心功能是对外提供服务，实时处理调用方的请求。这一层的典型代表是推荐系统的对外服务接口，接受实时调用并返回结果。在线层提供的服务是实时的，但用到的数据却不一定局限于实时数据，也可以使用离线计算好的各种数据，例如相关性数据或标签数据等，但前提是这些数据已经以对实时友好的形态被存储起来。</p>
 <p>﻿近线层则处于离线层和在线层的中间位置，是一个比较奇妙的层。这一层的典型特点就是：使用实时数据（也会使用非实时数据），但不提供实时服务，而是提供一种近实时的服务。所谓近实时指的是越快越好，但并不强求像在线层一样在几十毫秒内给出结果，因为通常在近线层计算的结果会写入缓存系统，供在线层读取，做了一层隔离，因此对时效性无强要求。其典型代表是我们前面讲过的实时协同过滤算法，该算法通过用户的实时行为计算最新的相关性结果，但这些计算结果并不是实时提供给用户的，而是要等到用户发起请求时才会把最新的结果提供给他使用。</p>
@@ -270,7 +270,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>﻿在具体实践中，经常放在离线层执行的任务主要包括：协同过滤等行为类相关性算法计算、用户标签挖掘、物品标签挖掘、用户长期兴趣挖掘、机器学习模型排序等。仔细分析这些任务，会发现它们都符合上面提到的特点。这些任务的具体流程各不相同，但大体上都遵循一个共同的逻辑流程，如图11-2所示。</p>
 <p>﻿</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d88224726ba74b47af76f8cd02f2c84c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281851976.png" />   
     </p>
 <p>图11-2　离线层逻辑架构图</p>
 <p>﻿在这个逻辑架构图中，离线算法的数据来源主要有两大类：一类是HDFS/Hive这样的分布式文件系统，通常用来存储收集到的用户行为日志以及其他服务器日志；另一类是RDBMS这样的关系数据库，通常用来存储商品等物品信息。离线算法会从输入数据源获取原始数据并进行预处理，例如，协同过滤算法会先把数据处理成两个倒排表，LDA算法会先对物品文本做分词处理，等等，我们将预处理后的数据统一称为训练数据（虽然有些离线算法并不是机器学习算法）。预处理这一步值得单独拿出来讲，这是因为很多算法用到的预处理是高度类似的，例如，文本标签类算法需要先对原始文本进行分词或词性标注，行为类相关性算法需要先将行为数据按用户聚合，点击率模型需要先将数据按照点击/展示进行聚合整理，等等。所以在设计离线挖掘的整体架构时，有必要有针对性地将数据预处理流程单独提炼出来，以方便后面的流程使用，做到更好的可扩展性和可复用性。下一步是各种推荐算法或机器学习模型基于各自的训练数据进行挖掘计算，得到挖掘结果。离线计算用到的工具通常包括Hadoop、Spark等，结果可能是一份协同过滤相关性数据，可能是物品的文本主题特征，也可能是结果排序模型。接下来，为了让挖掘结果能够被后面的流程所使用，需要将挖掘结果同步到不同的存储系统中。一般来说，如果挖掘结果要被用作下游离线流程的输入，是一份中间结果，那么通常它会被再次同步到Hive或HDFS这样的分布式文件系统中；如果挖掘结果要被最终的推荐服务在线实时使用，那么它就需要被同步到Redis或RDBMS这样对实时访问更为友好的存储系统中。至此，一个完整的离线挖掘流程就完成了。</p>
@@ -286,7 +286,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>图11-3展示了典型的近线层计算架构图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3237813e2fda4fafaa4acb048f3654fb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281851025.png" />   
     </p>
 <p>图11-3　典型的近线层计算架构图</p>
 <p>从数据源接入的角度来看，近线层主要使用实时数据进行计算，这就引出了近线层和离线层的一个主要区别：近线层的计算通常是事件触发的，而离线层的计算通常是时间触发的。事件触发意味着对计算拥有更多的主动权和选择权，但时间触发则无法主动做出选择。事件触发意味着每个事件发生之后都会得到通知，但是否要计算以及计算什么是可以自己选择的。例如，可以选择只捕捉满足某种条件的事件，或者等事件累积到一定程度时再计算，等等。所以，当某个任务的触发条件是某个事件发生之后进行计算，那么这个任务就很适合放在近线层来执行。例如推荐结果的去重，需要在用户浏览过该物品之后将其加入一个去重集合中，这就是一个典型的事件触发的计算任务。此外，近线层的计算是可以使用离线数据的，但前提是需要提前将这些数据同步到对实时计算友好的存储系统中。</p>
@@ -321,7 +321,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在这套流程中，本书前面介绍过的相关性算法的结果、用户画像的结果、用户兴趣模型的结果等都会被串联起来。</p>
 <p>这套流程对应的在线层服务架构图如图11-4所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/da4ae766163d4327af099c017f4aaa40.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281851115.png" />   
     </p>
 <p>图11-4　在线层服务架构图</p>
 <p>﻿</p>
@@ -330,7 +330,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="架构层级对比">架构层级对比</h2>
 <p>在介绍完离线层、近线层和在线层的架构之后，我们通过表11-2对它们进行更全面的对比。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/47405495aa9f438ab2db67f6272d7ced.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281851206.png" />   
     </p>
 <p>在表11-2中基本上列出了推荐系统的所有主要模块在架构中的位置，建议读者从架构的视角对其算法进行回顾，以加深对它们的理解。</p>
 <h2 id="系统和架构演进原则">系统和架构演进原则</h2>
@@ -376,7 +376,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>与传统的代码编写方式相比，基于DSL的开发方式增加了两个部分，一个是逻辑描述部分，一个是逻辑翻译部分。逻辑描述部分，也就是DSL外在的表现形式，用来描述想要实现的逻辑，例如可以指定使用哪些召回源、使用哪个排序模型、使用哪些过滤规则等；逻辑翻译部分，负责将逻辑描述的DSL代码翻译成通用的计算机语言，进而执行。与SQL相比，DSL的逻辑描述部分就像工程师写的SQL语句，用来描述想要选择哪些列、条件是什么等，而逻辑翻译部分就像SQL的编译器，将SQL语句翻译成更底层的执行逻辑，最终执行的是翻译后的结果。</p>
 <p>﻿DSL执行流程图如图11-5所示。首先用DSL来描述要执行的推荐逻辑，例如使用哪些召回源、使用哪个排序模型等。编写好逻辑描述代码之后，在服务启动时调用逻辑翻译代码，将逻辑描述代码中描述的逻辑翻译为最终可执行的逻辑执行代码。其中逻辑描述代码可以是自定义的DSL代码，有自己的语法；逻辑翻译代码和逻辑执行代码是平台的原生代码，例如Java、Go或C++代码等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/82364ba1d8684fcc954ab1bad04fffba.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281852328.png" />   
     </p>
 <p>图11-5　DSL执行流程图</p>
 <p>﻿下面看一个简单的例子。这是一段自定义的DSL代码，用来描述一个简单的推荐模块。</p>
@@ -505,6 +505,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -538,10 +542,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -920,6 +920,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

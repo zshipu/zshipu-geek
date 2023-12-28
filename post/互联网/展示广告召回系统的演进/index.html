@@ -192,7 +192,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/10/45b1739270984323bf37ad635bbbb96e-image.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831620.png" />   
     </p>
 <blockquote>
 <p>文章作者：王华呈 360 资深算法工程师</p>
@@ -204,29 +204,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>▌1. 展示广告介绍</strong></p>
 <p><strong>1.1 展示广告业务介绍</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e4fd842645b4431f84d00000fd39f088.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831615.webp" />   
     </p>
 <p>展示广告主要是在RTB程序化购买框架下运行的，首先有媒体方，比如新浪、搜狐等市面上的各大媒体，我们都已经接入。媒体在一次曝光产生之前会把这次曝光发送给Ad Exchange（ADX）模块进行拍卖，360的ADX平台叫360 Max。ADX平台将该曝光发送给多个竞价平台DSP，DSP来决定是否对该次曝光进行竞价，360的DSP平台叫360点睛DSP。广告主们会针对自己的需求设置广告投放策略，DSP平台会从广告主设置的广告投放库中根据该次曝光的特征匹配出合适的创意（广告）候选集返回给ADX。一般要求DSP的响应时间为100ms左右，除去网络传输耗时，留给DSP模型的时间只有几十毫秒，其中间各个模块的时间就更少。ADX从接收到的所有候选集中选择出价最高的广告进行曝光。</p>
 <p><strong>1.2 常见展示广告</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0835a97171114887aea74e2517431259.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831309.webp" />   
     </p>
 <p>目前在360场景下主要有这几种广告类型，第一种类型是广告侧边栏，包含具体投放广告的详情页。第二种类型是整体的开屏广告，主要是品牌广告。第三种类型是在信息流场景下，将广告嵌入新闻上下文中且与文章内容形式保持一致。</p>
 <p><strong>▌2. 展示广告整体架构介绍</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4979f4e29f0c46508b9f323542c71801.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831003.webp" />   
     </p>
 <p>整体架构流程：</p>
 <p>流量从ADX发送给DSP端，DSP拿到流量之后交给检索召回模块，我们叫Ad Search模块，Ad Search模块分为两个部分，一个是Ad Search Root模块，对流量进行识别，判断其为哪种类型的流量，比如keyword流量、信息流流量、banner流量，然后交给不同级别的Ad Search Leaf模块对广告进行召回，选出相匹配的广告初步候选集，该模块就是我们今天的主题。然后将选出的广告初步候选集交给Ad Selector模块进行精排，即对广告的CTR或者CVR预估，进行打分，选出top K个广告返回给DSP Server。同时DSP Server会将点击、曝光、后续的日志写入kafka，并进行日志落地，日志落地后会进入后续的ETL离线流程，用于后续粗排、点击率等模型生成训练样本使用，另一部实时数据日志数据流会经过反作弊模块后过一遍ctr预估的online learning和实时曝光反馈的online feedback。</p>
 <p><strong>▌3. 召回模块的演进脉络</strong></p>
 <p><strong>3.1 检索召回模块</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/06ae8b15a6d7469993eadd26ee157e2e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831569.webp" />   
     </p>
 <p>Ad Search Leaf召回模块展开来主要分三个阶段，召回、过滤和粗排。召回模块接收到DSP给流量请求中包含了用户信息和上下文信息。广告主设置的广告投放存在Ad Meta db中，然后建成相关的广告索引（Ad index），投放更新后才会实时更新这个索引。RTDB主要存储用户标签数据，标签数据一部分是通过请求中带的用户信息和上下文信息进行用户标签的实时更新，另一部分是通过线下离线全量更新。召回模块就是结合这两端选出初步的广告候选集，然后进入过滤模块（正排模块），过滤方法主要包括基于规则、黑白名单、广告主预算pacing过滤。最后进入粗排模块，对初选的广告候选集按评价函数模型进行打分，但没有精排模块那么复杂，相对比较简单，比如最开始基于核心特征的LR模型，后续升级过基于特征交叉的FFM模型。</p>
 <p><strong>3.2 召回通路</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7deed6e4499748ecb9cac3b8d64f9ac2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831149.webp" />   
     </p>
 <p>接下来讲一下在我们检索召回中一些通路，我们是进行多路召回的，其中有三种类型，第一种是上下文、第二种是用户行为、第三种是当前正在做的深度召回。</p>
 <p>上下文召回有这几种类型，第一种是基于图片的，在内容页场景下，一个明星穿了哪件衣服，根据这件衣服投放哪件商品，做法是将图片向量化，计算广告商品与图片向量的相似度进行召回。第二种是基于标题的，主要是基于文本NLP相关模型进行召回。第三种是基于lbs的，广告主自身设定某个标签区域进行投放，在该区域内进行标签匹配召回，属于布尔召回。</p>
@@ -234,69 +234,69 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>最后一种召回通路是深度召回，主要是把user profile、媒体特性、上下文特性等特征结合起来进入深度模型中进行召回，接下来会具体介绍下这个是如何做的。</p>
 <p><strong>3.3 基于文本的召回</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/21f0d2b708214704ba91ab4d02babeac.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831629.webp" />   
     </p>
 <p>上面讲的标题和query召回主要是文本召回，包括几种，第一种是精准匹配，有完全匹配和基于ngram的TF-IDF提取核心词匹配，属于比较简单的方式。第二种是模糊匹配，有word2vec和DSSM语义化模型，将文本语义向量化，然后按向量化检索召回。第三种是广泛匹配，是把语义化向量聚类成多个标签，然后按标签召回。</p>
 <p><strong>3.4 召回模块演进</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7f5ac01f64e2406bb5c941be687663fe.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831347.webp" />   
     </p>
 <p>我们的召回模块演进主要是分成三个阶段，第一种是布尔召回，刚才介绍的信息标签类型和lbs都是基于这种。第二种是向量检索召回，利用深度学习模型将广告、用户等信息都映射为向量，然后进行向量检索召回。第三种是我们现在在做的基于深度树的匹配。三个阶段是由浅入深的过程，接下来我们依次介绍这三个阶段。</p>
 <p><strong>3.5 布尔召回</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/65e37d455dc84902a82d8a4c2a466b94.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831837.webp" />   
     </p>
 <p>布尔召回在早期检索中都会用到的，我们的方式是基于树+维度bitMap分组+哈希表。广告主设置定向组合，比如访问某些网站的人群、有特定兴趣的人群等其他各种定向组合。而请求中会带有用户标签，问题就变成了怎么找到与用户标签匹配的定向组合广告？布尔召回本质就是基于倒排索引的布尔运算，所以关键在于倒排索引怎么构建？构建的方式有两个层级，第一层索引是将广告主的投放配置进行分解分组，每一个组为一个conjunction，一个广告投放会对应多个conjunction，这样就可以建立conjunction到广告投放的倒排索引。第二层索引在于根据用户标签找到对应的conjunction，我们的标签是一个int64类型的整数，高八位的某些bit位会做一些标识，来区分这个标签属于哪种类型，拿到用户的标签做位运算，找到bitMap分组的conjunction list。然后到基于每个conjunction到第一层取出对应的广告主集合，最后计算每个集合的交并，得到最终召回的广告候选集。</p>
 <p>在实际使用中布尔召回有一些问题，比如倒排表有部分conjunction对应的广告集合很长（&gt;1w），检索性能很差，我们的实际解决方案是在布尔表达式中做一个转换，比如将先并后交的布尔运算改为先交后并的布尔运算，能极大优化检索的性能。</p>
 <p><strong>3.6 向量化召回</strong></p>
 <p>我们在实际向量化召回中有两种类型，第一种是类似于早期YouTube DNN，把用户变成一个向量，把item也变成一个向量，最后做一个向量相似度检索。第二种是用户相关历史内容变成一个向量，再进行向量相似度检索。两种类型都是基于两个向量的相似度进行检索，得到item候选集。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8678061d0d3d4af7b46497995683f5e7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831477.webp" />   
     </p>
 <p>实际中我们选择的是微软提出的基于深度语义检索模型（DSSM），该模型的输入是一组相关的Query和Document，以及两个与Query不相关的Documents，然后分别dense为embedding向量，再经过NN网络，再做softmax打分，得到三个分数，训练目标就是是相关的Document分数尽可能高，不相关的Documents尽可能低。中间的NN层可以有多个选择，可以为多层FC，也可以类似textcnn那样为CNN+FC，或者为RNN。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b4e2ddf3493b407896b24175c6be06fc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831944.webp" />   
     </p>
 <p>在通过模型向量化之后就涉及到向量索引该怎么选择？下面介绍下常见的几种。第一种为LSH（局部敏感哈希）索引，方法就是基于多个哈希函数进行分桶，比较耗内存。第二种为faiss提出的IVF Flat，方法是构建由聚类中心向量构成的倒排表，针对输入向量，先找到聚类中心向量，再基于KNN方式进行检索，这种类型是保留精度的，效果跟直接暴力检索非常接近，但性能有很大的提升。第三种为IVF PQ，也是基于倒排，与IVF Flat区别在于在向量上做了有损压缩或PC降维，好处在于省内存，但是带来了实际检索精度的丢失。这三种可以根据实际业务场景进行选择。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e79b170a62f34863a76efff93b4bddb8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831634.webp" />   
     </p>
 <p><strong>3.7 深度树召回</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/aadad27ed7f24ac0aaf924ce916c4c4b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831362.webp" />   
     </p>
 <p>上面讲的布尔召回和向量化召回都有一定的缺点，比如布尔召回的有些conjunction的候选列表非常长，容易遇到性能瓶颈。向量检索会局限于模型的向量表达是否准确，而且向量空间有限。这里参考了阿里妈妈提出的深度树匹配（TDM）模型，深度树匹配能解决全量检索的性能问题和模型精度问题。如何构建一个深度检索树呢？在广告场景下选取的是基于ecpm（千次曝光预期收益）最大堆方式，最大堆树下当前层最优Top K孩子节点的父亲必然属于上层父节点的最优Top K，这样就可以从根节点逐层递归向下挑选Top K直至叶子层，同时极大提高检索速度。为了简便起见，我们构建树的形式是二叉树，则检索Top K的时间复杂度是2KlogN，N为item个数，且随着N的增长，相比暴力全量检索的性能提升更为明显。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/587f95abe98649dda134d8b3debbdcab.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831049.webp" />   
     </p>
 <p>深度树模型的大致结构如上图所示，分为两部分，左边是流量端，包括用户profile特征（如标签、cookie历史行为、频次等）和上下文特征（如媒体广告位属性、黑白名单、时间特性等）。首先把这两种特征dense化变成embedding，再做特征交叉组合，在我们场景下特征交叉采用的是IPNN方式，然后再经过FC+BN的多层NN网络，最终转化为Search端的embedding，线上处理时，左边这个流程每次请求都会计算。右边是候选集端，是一颗检索树，叶节点就包含了广告投放信息，包括尺寸、类目、行业等广告主设置的定向信息，叶节点和父节点本质都是同一维度的embedding，都会进入FC+BN层，形成与Search端embedding相同维度的Tree Leaf和Parent embedding。左右两端的embedding做交叉+concat操作进入FC+BN层，最终得到一个分数，与样本label按交叉熵损失进行训练。整体的模型架构就是这样。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/336aef3015da473c877832f87c0b9c3e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831769.webp" />   
     </p>
 <p>那我们要怎么准备这颗树模型的样本呢？有两部分，分别为leaf样本和parent样本，对于leaf节点，选取精排模型输出的虚拟曝光Top3作为正例。负例包括两部分，第一部分是在正例叶子节点同层，随机选取其他叶子节点作为负例，第二部分是选择粗排阶段的一些负分item标识为负例。对于父节点，基于ecpm最大堆原理，将正例向上回溯的所有父节点都标记为正例，同层随机标记为负例。整体的样本规模是用了7天的采样曝光样本，大概在5000千万左右。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5bcee387fdb84a6d84d1669bf8541f2b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831386.webp" />   
     </p>
 <p>接下来我们该如何生成这颗树呢？我们这里有两种方式，第一种方式就是随机生成，将item随机放到叶结点上，当然也可以根据标签体系手动把相近的item放在同一个父节点下，基于随机深度树训练一轮，将叶子结点的embedding导出来，然后聚类，这样就可以根据聚类的结果重新生成一颗树，然后再去训练，一直迭代到指标变化不大。第二种方式就是自下而上合成树，先当这颗树不存在，只训练每个叶子结点的embedding，然后根据叶子结点的embedding向上聚类回溯成一颗树（kmeans或者根据曝光频次来聚类），接着就可以与第一种方式一样一直迭代直到指标变化不大。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/974acf509d3c4c698d0c007923961cad.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831098.webp" />   
     </p>
 <p>我们最后选择方式是第二种方式，第一步就是先训练叶子，把叶子embedding导出来，然后聚类生成一颗树，基于这颗树结构重新训练叶子结点和父节点的embedding，得到最终上线的模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0635379d618c4862b873fee9d1171fd7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831760.webp" />   
     </p>
 <p>接着我们来讲一下这个模型的loss，我们的目标是去拟合曝光，所以loss由两部分组成，第一部分是交叉熵损失，去拟合对应的样本是否曝光。第二部分是triplet loss，含义是叶子节点中正样本之间距离尽可能相近，而与负样本之间的距离尽可能远，来约束叶子距离。第一部分loss考虑的是拟合曝光，并没有考虑点击，所以可以把实际用户点击的样本进行加权，把即曝光又点击的样本着重考虑，体现重要性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4f8897ad4b274c21ab68d30746baa5c5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831383.webp" />   
     </p>
 <p>线上如何检索呢？因为我们是基于最大堆的，所以采用的基于beam search的方式，就是逐层往下的检索，每一层都保留K个节点并往下扩展。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/01d56199f4d74e859eef2ecac3d57b12.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831297.webp" />   
     </p>
 <p>实际线上投放是有变化的，广告主会新增一些投放，对于这种新增投放怎么添加到这颗树中呢？比如新增一个item，我们会根据训练好的模型把item对应特征转换为embedding，然后把之前训练的叶子节点的embedding set拿出来，然后做一个相似度检索，得到item embedding最接近的叶子节点37，将该新item加入这个叶子节点37的list中去（线上训练时，叶子节点实际是一个cluster，一个列表，并不是一个单一的节点）。</p>
 <p><strong>▌4. 性能优化</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/183013d273a445c6832ce9bc44ea2464.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831982.webp" />   
     </p>
 <p>最后提一下我们在实际中做的一些性能优化工作，主要介绍两方面：</p>
 <p>第一方面是在检索阶段，针对树的最上几层，会根据Top K的大小，进行跳层（父节点个数</p>
@@ -432,6 +432,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -465,10 +469,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -847,6 +847,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

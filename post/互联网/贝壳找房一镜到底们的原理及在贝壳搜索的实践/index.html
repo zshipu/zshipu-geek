@@ -219,44 +219,44 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>当数据量到达千万条以上时，将特征进行交叉组合是一个十分耗时和消耗资源的过程。并且模型在学习时会产生大量的参数，如果把 m 维的特征和 n 维的特征进行交叉将产生 mxn 个参数，加大了模型过拟合的风险。更为重要的是在特征十分稀疏的情况下，LR 和 XGB 等模型也很难学习特征之间的交叉信息，这也是因子分解机最主要的目的。</p>
 <p>简单介绍下因子分解机的原理。我们首先考虑一个多项式模型，并对模型进行二元交叉可以得到下面的式子</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2c4b8f27274d4e95b44ffea7edef9550.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281832271.webp" />   
     </p>
 <p>其中 x 表示特征，n 代表特征维度，w 表示系数。很容易得出参数 w_{ij}的个数为 n(n-1)/2，当特征维度 n 很大时参数矩阵{ w_{ij}}几乎不可计算。思考下原因，在多项式模型中 wij 代表的是两个特征之间的系数，在特征十分稀疏（大部分 x 的值为 0）的情况下直接学习参数效率低下。FM 提出用 k 维隐向量作为来表示特征，这 k 个值都是表示特征的因子，因此被称为因子分解机，其公式如下所示</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/174b4474f8394036b7c2e4e18a869b23.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281832976.webp" />   
     </p>
 <p>其中 v 就代表 k 维的因子。这样就将 W={ w_{ij}} 分解为W=V^TV的形式，这里V=(v_1,v_2,&hellip;,v_n)就是一个k \times n的矩阵。然后我们惊奇的发现，需要训练的参数个数从 n(n-1)/2 降到 kn 。变换之后，将求解 <em><strong>W={ _</strong></em><strong>w</strong>_ ij**<em>}**</em> 的问题变成了求解(v_i \cdot v_j)。FM 算法中还有一个小技巧，利用变换对参数求解的过程进一步优化，具体的过程如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/7/4226ccc90ab7450cba5caea7f9fa5206.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281832779.png" />   
     </p>
 <p>可能变换的第一步不好理解，首先我们知道 <em><strong>V</strong></em> 是一个对角阵，假设
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/519e28a58b1549d2aa9405954467dce2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281832115.webp" />   
      代表的就是上三角阵元素之和（这里 <em><strong>A</strong></em> 不包括对角线元素），
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cee03b6d26af4b14be51fbdcd950f5ee.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281832956.webp" />   
      来表示对角线元素之和，同时整个矩阵之和可表示为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9dde19f2a0db425fa6c9705b13c027e2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281832626.webp" />   
      。根据对角阵的性质我们可以得到 C = (2A + B)，那么 A 就可以表示为 A=C/2 - B/2。</p>
 <p>在训练 FM 时，也可以和 LR 算法一样可以利用 SGD（随机梯度下降）来求解参数，各个参数的梯度如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fd499ed8230442fa8a98b5bdd2666899.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281832554.webp" />   
     </p>
 <p>在模型中，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e5ade98f82e84238ad5fe59ec7e9fe4a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281832274.webp" />   
      只和 _f _有关，因此在每次迭代中，只需要计算一次就可以得到所有的梯度。原本 FM 的复杂度为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a9060fbda96449d6b4d497116e6b175e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281832097.webp" />   
      ，通过上面等式的变换将其二次项化简为 <em><strong>v{i, f}</strong></em> 有关的等式，模型的复杂度降为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cbef99532fe64fecafb20ba2c8c0e8b4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281832855.webp" />   
      。从梯度计算的公式也可以看出，当特征值为 0 时时梯度也为 0，值为 0 的特征放到模型中训练没有意义，因此可以忽略 0 值， 这样一来 FM 就可以很快学习极其稀疏的特征。</p>
 <h2 id="22-ffm">2.2 FFM</h2>
 <p>FFM 是 FM 的一个变种，可以说是加强版，基本的框架和 FM 一致，再其基础之上引入了域的概念。首先强推美团技术团队的《深入 FFM 原理与实践》和作者的 Slides ，看完这些就可以了解 FFM 的基本原理。FFM 的全称是 Field-aware Factorization Machine，是在因子分解机的基础之上引入了域（filed）的概念。FM 有一个很明显的缺点，它不加区分的对待每一个特征，忽略了某一类特征之间的共性。FFM 认为，由同一个 ID 类特征通过 onehot 编码产生的特征，或者其他特征变换获得的特征，应该同属于一个特殊的集合域，不同的特征和同一个域关联时需要使用不同的隐向量。假如我们一个有 d 个特征和 f 个域，那么每个特征需要用 f 个隐变量表示，也就是一共有 d x f 个隐向量。从 FFM 的公式也可以看出，</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/7/7a5300714e26444bb96d14af7b650c88.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281832869.png" />   
     </p>
 <p>同样是上面用户点击房子的例子，在 FFM 中特征可以表示为</p>
 <p>Field nameField indexFeature nameFeature index用户1A1B2C3小区2x4y5z6价格3price7面积area8</p>
@@ -264,7 +264,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>label field1: feature1: value1 field2:feature2:value2</p>
 <p>经过简单的归一化和零值处理之后，上面的例子可以表示为</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/7/aab95f426c49481a8fd36f6edb718995.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281832749.png" />   
     </p>
 <p>进一步的原理不再介绍，和 FM 大同小异，相对于 FM 而言，FFM 的设计更为复杂与合理。简单的来说，FM 是两个特征之间的直接交叉，FFM 更近一步特征是和域进行交叉。当只有一个域的时候，FFM 等价于 FM，也就是说其实 FM 是 FFM 把特征都归为一个域的特例。FFM 的基本原理就不在赘述，有兴趣的可以好好看看上面推荐的两个链接。</p>
 <p>下面分享下使用 FFM 的一些注意事项：</p>
@@ -280,7 +280,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>工具包语言GitHub特性libfmC++<a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2Fsrendle%2Flibfm">https://github.com/srendle/libfm</a>最早的 FM 工具包，由算法的提出者编写libffmC++<a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2Fycjuan%2Flibffm">https://github.com/ycjuan/libffm</a>FFM 提出者编写的工具包xLearnC++<a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2Faksnzhy%2Fxlearn">https://github.com/aksnzhy/xlearn</a>性能强，易扩展tffmPython<a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2Fgeffy%2Ftffm">https://github.com/geffy/tffm</a>基于 Tensorflow 实现</p>
 <p>xLearn 是一个十分有用的机器学习工具包，由北京大学信息科学技术学院开源。目前 xLearn 已经集成了三种经典的算法，包括 LR，FM 和 FFM，适用于广告点击率预测、推荐系统等多种场景。相比与其他工具包，它的优势在于性能好和简单易用。作者在单台 MacBook 上测试，xLearn 性能远远超过其他工具包，同时提供 out-of-core 计算，利用外存计算可以在单机处理 1TB 数据，并且支持分布式训练。另外一个令人欣喜的是，xLearn 提供了 python 接口，调用起来十分的方便。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/7/11e1f308a9a4478686943fc17bff68d1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281832885.png" />   
     </p>
 <p>接下来将用我司（贝壳找房）真实小批量原始数据集上进行实验，其中 field 数量为 34，特征维度为 1407926。以下试验均省略掉构建 FM 和 FFM 特定的训练文件的过程，只对比训练的时间和效果。xLearn 的代码比较简单，同时也支持 CSV、libsvm、libffm 等多种格式。由于 FFM 算法只支持 libffm 格式，实验代码中均用 libffm 的格式来表示，代码如下：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">1. `import xlearn as xl #载入工具包`
@@ -423,22 +423,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="33-xdeepfm">3.3 xDeepFM</h2>
 <p>在 KDD 2018 上提出一个新的模型——极深因子分解机（xDeepFM），主要是针对 DeepFM 和 DCN 进行改进。首先，xDeepFM 的算法框架仍然沿用 Wide and Deep 的框架，在 Wide 部分加入了作者称之为压缩交互网络（Compressed Interaction Network， 简称 CIN）的神经模型结构。先上整体的框架图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/7/04b7eb1911444090849c0a668d323246.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281833618.png" />   
     </p>
 <p>xDeepFM 仍然沿用了 DeepFM 中 Embedding 共享的思路，文中没有列出的 DCN 也是如此。DCN 的改动是将 DeepFM 中的 FM Layer 替换成 Cross Network 为了学习二阶以上的交叉特征，有兴趣的可以看看原论文。受到 DCN 的启发，总结 DCN 存在的缺点，xDeepFM 的作者提出了更有效的解决办法。先介绍一下，CIN 和 其他模型不同的是特征交叉为显式的向量级（Vector-wise），而不是隐式的元素级（bit-wise）。举个例子，两个特征向量分别为 (a 1, b 1, c 1) 和 (a 2, b 2, c 2) ，f 是交叉函数，如果交叉的形式如 f(w 1 * a 1 * a 2, w 2 * b 1 * b 2, w 3 * c 1 * c 2) 为元素级的，若为 f(w*(a 1 * a 2, b 1 * b 2, c 1 * c 2)) 则称之为向量级。该作者认为，向量级的交叉特征更符合因子分解机的初衷，特征交互发生在向量级，更兼具记忆与泛化的学习能力。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/7/1150481787c1405f8f8da8910b6f000f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281833084.png" />   
     </p>
 <p>下面简单介绍下 CIN，在 CIN 中每一层的神经元都是根据前一层的隐层以及原特征向量推算而来，其计算公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/7/b501efdfcf4c4f5d8370ddb706b343de.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281833666.png" />   
     </p>
 <p>CIN 的计算主要有两个步骤：(1) 根据前一层隐层状态
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3196ca5b25de43439fb56b90f6521567.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281833724.webp" />   
       和原始输入数据
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/df8c711931564090b05339e971d694b0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281833555.webp" />   
      ，计算中间结果 Z；(2) 根据中间结果，计算下一层隐层的状态。从上面的图可以看出，其实步骤(1)操作类似于 RNN 网络，而步骤(2)相当于 CNN 中池化的操作，这样看来 CIN 其实是结合了 RNN 和 CNN 的一种网络结构。</p>
 <p>第一步实现的是特征维度的相互交叉，通过对原始数据的 tensor 和隐藏状态点乘操作计算出中间结果。两个 2 维从图 a 中可以看出，
         <img class="mx-auto" alt="" src="https://img.hacpai.com/e/c4d4acd24232469ca1873ae0f54db396.webp" />   
@@ -574,6 +574,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -607,10 +611,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -989,6 +989,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

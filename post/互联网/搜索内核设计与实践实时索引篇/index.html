@@ -213,7 +213,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>本文将介绍 ESearch 的整体架构，并重点说明其中实时索引的设计和实现细节。</p>
 <p><strong>一、整体架构</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cbad2fc55ca94e099f8a6befa2f98038.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272016806.webp" />   
     </p>
 <p>上图是 58 搜索系统的整体架构，分为应用层和内核层两大部分，应用层包括 Proxy 和 Builder 两个模块，负责与业务相关的逻辑，内核层就是本文重点介绍的 ESearch，包括 Merger 和 Searcher 两个模块，负责通用的检索功能。各个模块的具体功能如下：</p>
 <ul>
@@ -244,7 +244,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>ESearch 也采用了读写分离设计，为了克服合并时间过长的问题，对合并机制做了改进设计：对每个检索节点的索引数据按生命周期分为多段，每段是一份完整的小索引，包含独立的倒排和正排索引等数据。新增的文档数据只和最小的索引段合并，确保了索引的更新速度。</p>
 <p>在实际的应用层面，根据自身数据量和业务特点，我们采取了以下方案：每个节点上索引按生命周期分为 3秒、15分钟、6小时、1天、1个月、1个月以前等6级。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c0793cfd18c749939d65a0e1bba0a878.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272016599.webp" />   
     </p>
 <p>实时索引每3秒接收一批新文档数据，然后建成一个生命周期为3秒的小段，此时这批文档立即生效，能被查询线程召回。3秒后，该段到达生命周期终点，由一个专门负责索引段合并的线程将其与15分钟生命周期的段合并。由于15分钟索引段最多只包含了15分钟内的新增文档，数据量较少，所以合并速度非常快，可以达到毫秒级。同理，15分钟、6小时等其他周期的段，到达各自的生命周期终点后，都会向上一级索引段合并。</p>
 <p>生命周期在1天以上的段，数据量较多，合并时间较长，但其合并频率较低，每天最多一次，可以指定其在每天凌晨进行，这是一天中访问量和数据更新最少的时间段，因此对系统性能影响不大。若1个月周期的数据量太大，可以在线下定期将其与1个月以前的索引合并，合并好后推送到检索节点，避免影响系统性能。</p>
@@ -262,7 +262,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>58的关键词查询通常需要在多个文本域中查询，比如“title:租房 OR content:租房”，需要召回title或者content这两个域中包含租房的文档。为了优化这类常见查询的性能，同时也让文本相关性计算更方便，ESearch支持倒排域打包功能（或称联合域），即自动把同一个term在多个文本域中的文档集合并到同一个倒排链（Posting List）中，此功能只需在schema中稍作配置即可启用。如此，相当于在索引中对每个term预计算了多个域的并集。另外，由于不同文本域的权重不同，进行文本相关性打分时需要识别出一个term命中了哪些文本域，因此联合域倒排链中的每个doc id 还必须附带一个微型 bitmap 来标记其所命中的域。</p>
 <p>下图为把Title域和Content域合并为Fulltext域的例子：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2154901a9e8045a5bec34435a226ec76.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272016241.webp" />   
     </p>
 <p><strong>3.4、正排索引</strong></p>
 <p>正排索引是从doc id到文档属性值的映射。在58的搜索系统中，正排索引除了存储必要的文档属性以外，也存储用于打分的文档特征。在检索过程中，也有可能读取某些正排域来进行文档过滤。</p>
@@ -271,7 +271,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>这意味着有些域的值分布是稀疏的，例如在所有信息中，包含“手机品牌”这个字段的信息的占比可能远低于50%，而有些域的值分布是紧密的，例如几乎100%的信息都包含“类目ID”这个字段。</p>
 <p>针对紧密型的正排域，我们使用数组作为存储形式，而针对稀疏型正排域，使用哈希表作为存储形式，这样能够避免浪费空间，也都保证了O(1)的平均查找时间复杂度。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3e90dfd91fc647659270ec217e23ec57.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272016872.webp" />   
     </p>
 <p>此外，对于布尔型的正排域，我们直接采用Bitmap 作为存储形式。</p>
 <p>列存储的一个缺陷是缺乏空间局部性，可能影响CPU缓存命中率。例如在给一个文档打分时，通常会从正排索引读取多个特征值进行计算，因此需要进行多次查找和多处内存访问。针对此问题，可以考虑使用联合正排域，将经常需要同时访问的多个字段合并建到一个正排域中。</p>
@@ -284,7 +284,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>为了便于打分排序，我们会把一些文档特征值存储在索引中。这些特征值不会作为召回条件，因此只建在正排索引中。对这类文档属性的更新可以不走前文所述的生成新段-段合并的更新流程，而是直接在正排索引中原地刷新，因此特征值刷新的性能远高于正常文档更新，从而允许我们实时调整排序结果。</p>
 <p>为了使特征值的改变能够实时影响排序结果，我们在从缓存中取出检索结果后，对检索结果会做第二次打分排序。由于缓存中的结果一般只包含Top几百的文档，因此第二次排序耗时有限，不影响整体性能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b8eb15df3edf4fe08734070aa8db5a0a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272016422.webp" />   
     </p>
 <p>除了保证实时性以外，这种两阶段排序也便于我们在58主站大规模应用复杂的机器学习排序模型。</p>
 <p>复杂的排序策略通常比较耗时，因此业界在处理海量数据的排序时，通常用“粗排-精排”两阶段排序的方式，在效果和性能之间做一个合理折中，即先对海量数据进行低代价的粗排，然后对粗排的TopN结果进行代价较大的精排，最终整个处理过程耗时不会太大。</p>
@@ -414,6 +414,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -447,10 +451,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -829,6 +829,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

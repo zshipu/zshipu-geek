@@ -228,17 +228,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="数据格式">数据格式</h3>
 <p>Dgraph 的输入数据可以是三元组格式或者 JSON 格式。在 Dgraph 内部，JSON 格式的数据会被转化为等价的三元组格式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-a8cb604ea230444bbd404f6a041d8cd0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281835855.png" />   
     </p>
 <h3 id="数据存储">数据存储</h3>
 <p>在 Dgraph 中，数据的最小单位是一个三元组。三元组既可以表示一个属性(subject-predicate-value)，也可以表示一条边(subject-predicate-object)。Dgraph 为每个对象分配一个全局唯一的 id，称为 uid。Uid 是一个 64 位无符号整数，从 1 开始单调递增。</p>
 <p>Dgraph 基于 predicate 进行数据分片，即所有相同 predicate 的三元组形成一个分片。在分片内部，根据 subject-predicate 将三元组进一步分组，每一组数据压缩成一个 key-value 对。其中 key 是 &lt;subject, predicate&gt;，value 是一个称为 posting list 的数据结构。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-9f33e86868df4875b187474269f6c787.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281835729.png" />   
     </p>
 <p>Posting list 是一个有序列表。对于指向值的 predicate(如 name)，posting list 是一个值列表；对于指向对象的 predicate，posting list 是一个 uid 列表，Dgraph 对其做了整数压缩优化。每 256 个 uids 组成一个 block，block 拥有一个基数(base)。Block 不存储 uid 本身，而是存储当前 uid 和上一个 uid 的差值。这个方法产生的压缩比是 10。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b346a317066941e8a4d05779959e5bb9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281836780.png" />   
     </p>
 <p>Dgraph 的存储方式非常有利于连接和遍历，一个边遍历只需要一个 KV 查询。例如，找到 X 的所有粉丝，只需要用 &lt;follower，X&gt; 当做 key 进行查询，就能获得一个 posting list，包含了所有粉丝的 uid；寻找 X 和 Y 的公共粉丝，只需要查询 &lt;follower, X&gt; 和 &lt;follower, Y&gt; 的 posting lists，然后求两者的交集。</p>
 <p>如果有太多的三元组共享相同的 &lt;subject，predicate&gt;，posting list 就变得过大。Dgraph 的解决方法是，每当 posting list 的大小超过一个阈值，就把它分成两份，这样一个分割的 posting list 就会对应多个 keys。这些存储细节都是对用户透明的。(注：当前版本未支持 predicate 分割)</p>
@@ -253,7 +253,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>索引跟数据一样，以 key-value 的形式存储，区别是 key 有所不同。数据的 key 是 &lt;predicate, uid&gt;，而索引的 key 是 &lt;predicate, token&gt;。Token 是索引的分词器从 value 中获取的，例如 hash 索引生成的 token 就是 hash 函数所计算的 hash 值。</p>
 <p>在定义 schema 的时候，可以给 predicate 创建一个或多个索引。对该 predicate 的每次更新会调用一个或多个分词器来产生 tokens。更新的时候，首先从旧值的 tokens 的 posting lists 中删除相应的 uid，然后把 uid 添加到新产生的 tokens 的 posting lists 里。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b16b0556c52e46f683e93a4e5bb4af4d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281836947.png" />   
     </p>
 <p>以上图为例，说明索引构建过程。Schema 定义了三个 predicates 和它们的数据类型、索引类型。Mutation 以 JSON 格式写入一个对象。由于 key1 建立了 fulltext 索引，所以会调用 fulltext 分词器由 key1 的值&quot;running fast&quot;得到 run 和 fast 两个 tokens。它们分别和 key1 组成两个 badger key，然后把 uid 0x0a 添加到各自的 posting lists 里。这样，一个值的索引就转化为后端存储的 KVs。</p>
 <h2 id="三查询处理">三、查询处理</h2>
@@ -324,7 +324,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>以查询 [ <em>people lives in SF who eat sushi</em>] 为例，people 伴随它的 lives-in 和 eat 边，随机分布在集群的服务器上。</p>
 <p>最简单的想法是，第 1 步广播一个子查询 [ <em>people in SF</em>] ；对第 1 步的每个结果，产生一个子查询，找出其饮食习惯，挑出吃寿司的人。显然，如果第 1 步有上百万的结果(洛杉矶的人数)，第 2 步就产生上百万个子查询。解决方法是，聚集第 1 步的查询结果，根据数据分片函数打包，然后再广播子查询。改进后的查询过程如图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-a942158c07f74e71af03a34a09f5199b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281836424.png" />   
     </p>
 <p>观察上述过程，可以发现两个问题：</p>
 <p>第一，查询需要不断地聚集和发送中间结果集，增加了网络开销。</p>
@@ -332,11 +332,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="低延迟深度连接">低延迟深度连接</h3>
 <p>为了优化分布式连接，Dgraph 采用基于 predicate 的数据分片策略，使得每个连接都可以完全由一台机器执行。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-639d8f604f8f46c3a36a4ac2ab738969.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281836439.png" />   
     </p>
 <p>以查询 [ <em>people lives in SF who eat sushi</em>] 为例，数据有两个分片 lives-in 和 eat，在最坏的情况下，这两个分片存储在不同的服务器上。查询过程是，第 1 步通过一个网络调用找到所有居住在洛杉矶的人；第 2 步通过一个网络调用，发送第 1 步的结果集并与所有吃寿司的人求交集。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-8f207abb110e4eefab8f6864a4cb6bfd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281836555.png" />   
     </p>
 <p>通过独特的分片机制，Dgraph 可以通过两次网络调用完成了上述查询，并且每增加一度连接仅增加一次网络调用。</p>
 <h3 id="一个复杂的例子">一个复杂的例子</h3>
@@ -494,6 +494,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -527,10 +531,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -909,6 +909,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

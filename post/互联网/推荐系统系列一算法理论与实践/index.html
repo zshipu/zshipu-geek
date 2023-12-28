@@ -210,7 +210,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ol>
 <li>模型并未考虑到特征之间的关系
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-e2c6a083496c400892596cb6a959ede0.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948516.svg&#43;xml" />   
       。在实践经验中，对特征进行交叉组合往往能够更好地提升模型效果。</li>
 <li>对于多取值的 categorical 特征进行 one-hot 编码，具有高度稀疏性，带来维度灾难问题。</li>
 </ol>
@@ -219,90 +219,90 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="1-fm-定义"><strong>1. FM 定义</strong></h2>
 <p>FM 以特征组合进行切入点，在公式定义中引入特征交叉项，弥补了一般线性模型未考虑特征间关系的缺憾。公式如下（FM 模型可拓展到高阶，但为简化且不失一般性，这里只讨论二阶交叉）[1]：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-59accecc34ce4921b861118c46ab5eea.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948948.svg&#43;xml" />   
     </p>
 <p>与一般线性模型相比，公式（1）仅多了一个二阶交叉项，模型参数多了
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-987175f4336d4d9a96f8976c1b667a17.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948571.svg&#43;xml" />   
       个。虽然这种显式交叉的方式能够刻画特征间关系，但是对公式求解带来困难。</p>
 <p>因为大量特征进行 one-hot 表示之后具有高度稀疏性的问题，所以公式（1）中的
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-f6383ee71ed1430cb5b9ae7f1b551fed.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948075.svg&#43;xml" />   
       同样会产生大量的 0 值。参数学习不充分，直接导致
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-f3c5c74bc6bd47a5a43e1c36c796d8e7.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948591.svg&#43;xml" />   
       无法通过训练得到。（解释：令
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-586fb76e594a4842b2d053cec51c933b.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948226.svg&#43;xml" />   
       ，则
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-f84af2f66850409ab19400d5f13664a6.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948816.svg&#43;xml" />   
       ，又因
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b7ef6cf443914e6eacfb18703a080d32.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948450.svg&#43;xml" />   
       ，所以
 
         <img class="mx-auto" alt="" src="https://img.6aiq.com/image-1425ed519992465d99191a7ee8675f79.svg%5E%7Bnew%7D%3Dw_%7Bij%7D%5E%7Bold%7D%2B%7B%5Calpha%7DX%3Dw_%7Bij%7D%5E%7Bold%7D" />   
      ，梯度为 0 参数无法更新。）</p>
 <p>导致这种情况出现的根源在于：特征过于稀疏。我们期望的是找到一种方法，使得
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-36145c32ef7847eebed85b8ccd1c992f.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948628.svg&#43;xml" />   
       的求解不受特征稀疏性的影响。</p>
 <h2 id="2-公式改写"><strong>2. 公式改写</strong></h2>
 <p>为了克服上述困难，需要对 FM 公式进行改写，使得求解更加顺利。受 <strong>矩阵分解</strong> 的启发，对于每一个特征
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0c12b9a7b0ed4557a0f56b26a0d2960d.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948178.svg&#43;xml" />   
       引入辅助向量（隐向量）
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-09fa8515bb4a4bb8a2f6b627aa071c8e.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948835.svg&#43;xml" />   
       ，然后利用
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ea1f3b49e0504145ab46faa32fa1a38f.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948425.svg&#43;xml" />   
       对
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-e04669c3331047c2a48ed1de94cb82ef.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948059.svg&#43;xml" />   
       进行求解。即，做如下假设：
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-1105560f67e9420f995f0282747fcb8e.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948644.svg&#43;xml" />   
       。</p>
 <p>引入隐向量的好处是：</p>
 <ol>
 <li>二阶项的参数量由原来的
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-53af73795a384aeca11857bf14c78a45.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948292.svg&#43;xml" />   
       降为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5397043d9c8c48ea8b087503c4a6094a.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948799.svg&#43;xml" />   
       。</li>
 <li>原先参数之间并无关联关系，但是现在通过隐向量可以建立关系。如，之前
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=w_%7Bij%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948658.svg&#43;xml" />   
      与
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-bd9c1cda7dce4c8cb8cb560977844b19.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948264.svg&#43;xml" />   
       无关，但是现在
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-c1ddabd56c874ffbbda330781431b0b3.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948755.svg&#43;xml" />   
       两者有共同的
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-02f5da7d5bb545968868c7bba2c71d60.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948407.svg&#43;xml" />   
       ，也就是说，所有包含
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-05a964401b734aeaae9ee0d250d24cd9.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948944.svg&#43;xml" />   
       的非零组合特征（存在某个
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-7f843fde7e964da9943ff686d3019b73.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948588.svg&#43;xml" />   
       ，使得
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-052b4f4aa7ac430782ad39afc833fb04.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948124.svg&#43;xml" />   
       ）的样本都可以用来学习隐向量
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-76da552be58e4f6a81bf4f5592b4450c.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948667.svg&#43;xml" />   
       ，这很大程度上避免了数据稀疏性造成的影响。[2]</li>
 </ol>
 <p>现在可以将公式（1）进行改写：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-6817b4a56ac7471e9943d886fb152f9a.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948222.svg&#43;xml" />   
     </p>
 <p>重心转移到如何求解公式（2）后面的二阶项。</p>
 <p>预备知识：</p>
@@ -311,135 +311,135 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <img class="mx-auto" alt="" src="https://img.6aiq.com/image-4b28bfb8066d4a1b90d30b5a15e9ff6f.svghttps://img.6aiq.com/image-ccede7edadab4c2399fca51d721567d1.svg" />   
       ：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b2a0de74ef9149a7b513b06715970ebf.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948741.svg&#43;xml" />   
     </p>
 <p>其中，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-8368c1a79ea44965b0c8ac62fc132db4.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948568.svg&#43;xml" />   
       。</p>
 <p>令上三角元素和为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-f3bf5ecfb31e47a38252806bfb7c0da0.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948049.svg&#43;xml" />   
       ，即
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-7a9eb67589864203858c1e2aad845b4d.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948637.svg&#43;xml" />   
       。那么，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-52768c1a69d04a389f690505afed9c9e.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948262.svg&#43;xml" />   
       的所有元素之和等于
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-7945306b3e3844fe8620eb2cb14f2f18.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271948762.svg&#43;xml" />   
       ，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-de6a41659077480bb3f9299d626f6004.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949834.svg&#43;xml" />   
       为矩阵的迹。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-af98558fe04b4951a07f5cee50cd8151.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949754.svg&#43;xml" />   
     </p>
 <p>可得，</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-41b6da4a97e84166b41a67d581829ceb.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949382.svg&#43;xml" />   
     </p>
 <p>正式改写：</p>
 <p>有了上述预备知识，可以对公式（2）的二阶项进行推导：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-951c37b4721a4e7bbc2b9fb86cbe1333.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949178.svg&#43;xml" />   
     </p>
 <p>结合（2）（3），可以得到：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-8954162cc3f542789e54ea48cd5b2ad6.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949975.svg&#43;xml" />   
     </p>
 <p>至此，我们得到了想要的模型表达式。</p>
 <p>为什么要将公式（2）改写为公式（4），是因为在改写之前，计算
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-56118c2ad62e4f679822dd9d8203b37f.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949645.svg&#43;xml" />   
       的复杂度为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-10916b0d756a4de487a85d14f4069710.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949201.svg&#43;xml" />   
       ，改写后的计算复杂度为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-3fa8b0808bba4c47a0c81e893efc1892.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949760.svg&#43;xml" />   
       ，提高模型推断速度。</p>
 <h2 id="3-fm-求解"><strong>3. FM 求解</strong></h2>
 <p>到目前为止已经得到了 FM 的模型表示（4），如何对模型参数求解呢？可以使用常见的梯度下降法对参数进行求解，为了对参数进行梯度下降更新，需要计算模型各参数的梯度表达式：</p>
 <p>当参数为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ecaf186a5b4a434aae6d15df44f2f0bf.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949310.svg&#43;xml" />   
       时，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-beaa2aad67d44ff08fc329a573c45f24.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949945.svg&#43;xml" />   
       。</p>
 <p>当参数为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-99919b72aa9b4050984f597e05fb8b2d.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949733.svg&#43;xml" />   
       时，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-c5d994042bc348bb94b5a5049580631e.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949176.svg&#43;xml" />   
       。</p>
 <p>当参数为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ac22f2724eca4cac8f8f67c7b9f63364.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949762.svg&#43;xml" />   
       时，只需要关注模型高阶项，当计算参数
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-4cffc9c9b2364de48959e37bb21d922e.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949454.svg&#43;xml" />   
       的梯度时，其余无关参数可看做常数。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-4b8fcad2c02f48b2b6169cc8d29a3822.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949973.svg&#43;xml" />   
     </p>
 <p>其中：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-9111b42ccfdf418ab00d7779d63603b7.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949708.svg&#43;xml" />   
     </p>
 <p>令
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-54d77718f1eb4cf882aa98e9592f4e17.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949351.svg&#43;xml" />   
       ，则：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-3374d10a286848a6b96f7b9f3a49141c.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949903.svg&#43;xml" />   
     </p>
 <p>结合公式（5~7），可得：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-d87465b571d2462c8c28f8b2b742cd21.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949746.svg&#43;xml" />   
     </p>
 <p>综上，最终模型各参数的梯度表达式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-2c2c6d8a87a544fba219e408fed5c447.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949444.svg&#43;xml" />   
     </p>
 <p><strong>4. 性能分析</strong></p>
 <p>由第 2 小节可知，FM 进行推断的时间复杂度为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-291d4e7a453c418d8fae7d77846d92da.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949264.svg&#43;xml" />   
       。分析训练的复杂度，依据参数的梯度表达式，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-712558fe75714ef9bdf39d9a9730fb5b.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949916.svg&#43;xml" />   
       与
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-3eef88f4591942b28048b62ef46899d1.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949542.svg&#43;xml" />   
       无关，在参数更新时可以首先将所有的
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-bb84d1373fd44dad874c906a714fcde8.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949167.svg&#43;xml" />   
       计算出来，复杂度为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-3f456bd5d73e49ffa93e6a959df3b94d.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949668.svg&#43;xml" />   
       ，后续更新所有参数的时间复杂度均为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-3870e12722964c6f9c686241ca3e26b6.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949183.svg&#43;xml" />   
       ，参数量为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0d4b8b9c597f4ea6adbea35e7cd46917.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949768.svg&#43;xml" />   
       ，所以最终训练的时间复杂度同样为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-c0016396cd5d414fb5692e8ba8f6c256.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949328.svg&#43;xml" />   
       ，其中
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-f92557a8455e40658a76ac8c2bcead68.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949879.svg&#43;xml" />   
       为特征数，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-253b6b94462942cc89aa3eea4fd0fc55.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949490.svg&#43;xml" />   
       为隐向量维数。</p>
 <p>FM 训练与预测的时间复杂度均为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-e2b5418919a94327a4b3aa6d557d213a.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949949.svg&#43;xml" />   
       ，是一种十分高效的模型。</p>
 <h2 id="5-优缺点"><strong>5. 优缺点</strong></h2>
 <p>优点 [1]：</p>
@@ -458,39 +458,39 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>实验</strong></p>
 <p>FM 既可以应用在回归任务，也可以应用在分类任务中。如，在二分类任务中只需在公式（2）最外层套上
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-c9001e228d154ffd8dd3c4d3b60d815b.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949290.svg&#43;xml" />   
       函数即可，上述解析都是基于回归任务来进行推导的。</p>
 <p>关于模型最终的损失函数同样可以有多种形式，如回归任务可以使用
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ab19a44742b34c7fa9859a2428f62871.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949846.svg&#43;xml" />   
       ，分类任务可以使用
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-e7098214441e4bc8a27a0f39dac15b04.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949366.svg&#43;xml" />   
       等。</p>
 <p><strong>1. 代码演示</strong></p>
 <p>虽然知道可以通过引入辅助向量进行计算，但是辅助向量是如何与特征
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-4078506ae55144e7bd34eaadd0cd80c3.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949080.svg&#43;xml" />   
       建立联系的，换句话说，如何通过
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-3a6a788fcfd3474f9efa012675c4f7bc.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271949711.svg&#43;xml" />   
       得到辅助向量
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-25611d579b004d1c91024c2250f9c6fe.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271950298.svg&#43;xml" />   
      ？在使用神经网络实现 FM 的过程中，将
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ec4aba5383b8478ca9898342256c1fcc.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271950369.svg&#43;xml" />   
       的
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-4c9c68abc5f9489ea5d7f64357a8ae43.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271950014.svg&#43;xml" />   
       作为辅助向量，最终得到的
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-9a7858b690ce442ea436cf12281d5ba7.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271950628.svg&#43;xml" />   
       向量组也可以看作是对应特征的低维稠密表征，可以应用到其他下游任务中。</p>
 <h3 id="11-回归任务"><strong>1.1 回归任务</strong></h3>
 <p>本文使用了
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-33ef5059909144a6b8fd85732f8ad214.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271950142.svg&#43;xml" />   
       [3] 作为实验输入，特征组分别为用户编号、电影编号，用户对电影的历史评分作为 。</p>
 <p>具体代码实现如下：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma"># -*- coding:utf-8 -*-
@@ -659,7 +659,7 @@ with tf.Session() as sess:
 </div><h3 id="12-分类任务"><strong>1.2 分类任务</strong></h3>
 <p>使用更全的
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5625bda2cc59448b99318f2cd94c2fb2.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271950930.svg&#43;xml" />   
       特征，将评分大于 3 分的样本作为正类，其他为负类，构造二分类任务。核心代码如下：</p>
 <div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -897,6 +897,10 @@ with tf.Session() as sess:
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -930,10 +934,6 @@ with tf.Session() as sess:
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1312,6 +1312,8 @@ with tf.Session() as sess:
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

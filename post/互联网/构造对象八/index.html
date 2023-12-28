@@ -210,19 +210,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="调用-indexwriter-的构造函数的流程图">调用 IndexWriter 的构造函数的流程图</h1>
 <p>图 1：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/1-354c65dd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101285.png" />   
     </p>
 <h2 id="生成对象-indexfiledeleter">生成对象 IndexFileDeleter</h2>
 <p>  我们紧接上一篇文章，继续介绍剩余的流程点，下面先给出 IndexFileDeleter 的构造函数流程图：</p>
 <h3 id="indexfiledeleter-的构造函数流程图">IndexFileDeleter 的构造函数流程图</h3>
 <p>图 2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/2-e9a294f9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101765.png" />   
     </p>
 <h4 id="执行检查点checkpoint工作">执行检查点（checkPoint）工作</h4>
 <p>图 3：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/3-4e5e0f02.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101462.png" />   
     </p>
 <p>  在介绍当前流程点之前，我们先通过下面的流程图来介绍 <code>执行检查点的工作</code> 这个流程点做了哪些事情。</p>
 <p>  另外 <code>执行检查点（checkPoint）工作</code> 在源码中对应的方法方法定义：</p>
@@ -232,30 +232,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </code></pre><h5 id="执行检查点checkpoint工作的流程图">执行检查点（checkPoint）工作的流程图</h5>
 <p>图 4：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/4-df83272e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101797.png" />   
     </p>
 <h6 id="准备数据">准备数据</h6>
 <p>图 5：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/5-c1e2ace0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101376.png" />   
     </p>
 <p>  图 4 流程图的准备数据就是 checkPoint 方法的两个参数 SegmentInfos 以及 boolean。</p>
 <h6 id="增加-segmentinfos-对应的索引文件的计数引用">增加 SegmentInfos 对应的索引文件的计数引用</h6>
 <p>图 6：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/6-1561aa84.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101626.png" />   
     </p>
 <p>  在后面的流程中，可能会执行索引文件的删除，如果某些索引文件被 SegmentInfos 引用，那么这些索引文件不应该被删除，防止被删除的方法就是增加 SegmentInfos 对应的索引文件的计数引用。</p>
 <h6 id="当-iscommit-为-true-时的处理流程">当 isCommit 为 true 时的处理流程</h6>
 <p>图 7：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/7-f2abf7d6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101522.png" />   
     </p>
 <p>  在执行 commit()操作时，也会执行 checkPoint 的操作，那么此时的 isCommit 是位 true 的，在文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F0909%2F92.html">文档提交之 commit（二）</a> 中介绍了这个流程，不赘述。</p>
 <h6 id="当-iscommit-为-false-时的处理流程">当 isCommit 为 false 时的处理流程</h6>
 <p>图 8：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/8-e7e05409.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101806.png" />   
     </p>
 <p>  lastFiles 是一个 IndexFileDeleter 类的成员变量，它用来存放上次执行 checkPoint 的 SegmentInfos 中对应的索引文件定义如下：</p>
 <p>private final List lastFiles = new ArrayList&lt;&gt;();  所以当 isCommit 为 false 时，先尝试删除 lastFiles 中的索引文件，删除的方式就是减少每一个索引文件的计数引用，如果计数值为 0，那么该索引文件就要被删除，否则不删除，最后清空 lastFiles 中的索引文件后，将这次 SegmentInfos 对应的索引文件添加到 lastFiles 中。</p>
@@ -272,12 +272,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>图 9：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/9-8aae56a6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101242.png" />   
     </p>
 <p>  图 9 中当第 62 行的 oldIndexWriter.commit()操作执行结束后，索引目录中的索引文件如下所示：</p>
 <p>图 10：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/10-f77f7fa7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272102729.png" />   
     </p>
 <p>  接着执行完第 64 行的代码后，我们获得了一个 NRT 的 Reader（见文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F0920%2F95.html">近实时搜索 NRT（三）</a> 的介绍），接着第 70 行代码结束后，oldIndexWriter 新增了一篇文档 2，注意的是并没有执行 commit()操作（即没有生成新的 segments_N 文件），随后通过第 72 行的 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F0925%2F96.html">openIfChange()</a> 方法获得一个包含最新索引信息的 reader（即 StandardDirectoryReader），通过该 reader 获得一个 IndexCommit，IndexCommit 中包含了第 70 行代码增加的索引信息，即图 11 中以_1 为前缀的索引文件，并且在第 76 行通过 IndexWriterConfig.setIndexommit()方法将 IndexCommit 成为 newIndexWriter 的配置，在执行完第 78 行代码后，索引目录中的索引文件如下所示：</p>
 <p>�</p>
@@ -404,6 +404,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -437,10 +441,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -819,6 +819,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

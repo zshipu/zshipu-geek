@@ -206,12 +206,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>导读：</strong> 随着京东零售搜索业务的快速发展，对数据的时效性要求越来越高，要求搜索模型有捕捉更实时信号的能力，在线学习体现了业务对模型时效性的追求，希望能根据在线系统反馈的数据实时得对模型进行调整，使得模型能快速反应环境的变化，提高在线预估的准确率。</p>
 <h2 id="01-背景"><strong>01 背景</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/10532892ebb64f82835b05f86fad3182.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271529058.webp" />   
     </p>
 <p>目前传统模型的实时训练（如FTRL等）无法支持深度模型，这些模型预估的准确率较低，比较适合一些简单的场景；第二种是类似增量训练的一种方式，可支持深度模型预估，这种方式以尽可能短的周期进行模型训练和迭代上线，是一种类实时的更新方式；第三种是以实时更新方式更新模型的局部结构，可支持深度模型的预估，模型的一部分参数直接参与实时训练。</p>
 <h2 id="02-系统概述"><strong>02 系统概述</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ac6113a77b534c44a1ea241bb6a791f8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271529265.webp" />   
     </p>
 <ul>
 <li>模型预估服务：在加载模型时，分为 static 部分和 dynamic 部分，static部分由离线数据训练得的到，主要学习 user 和 doc 的稠密特征表示，dynamic 部分主要包含 doc 粒度的权重向量，这部分由实时的 online learning 的任务进行流式更新；</li>
@@ -220,7 +220,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>Online Learning 任务：负责消费上游生成的实时样本做训练，在训练得到新参数后更新 PS。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/82da490885cf4720a2c049d21af72141.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271529807.png" />   
     </p>
 <p>这里我们介绍整个链路的迭代过程：</p>
 <ul>
@@ -231,30 +231,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h2 id="03-实时特征和样本处理"><strong>03 实时特征和样本处理</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a9790a05c21645f7aaede49968331544.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271530666.webp" />   
     </p>
 <p>实时特征收集的目标是承接搜索在线预估系统所发出的特征数据，对下游屏蔽掉缓存、去重、筛选、分页等搜索系统特有的业务逻辑，提前滤除掉下游一定不会使用的数据，构建出标准Schema的原始特征流。该组件承接来自于搜索召回、排序、相关性等模块的实时特征，每秒需处理约2400W条特征数据。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/81e39aabaca441d8be35f13341abfba8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271530528.webp" />   
     </p>
 <p>实时样本拼接的目标是将搜索特征与用户端的行为埋点实时关联。目前我们的数据数据过滤后的QPS峰值大概在10w，拼接完产生的样本QPS峰值在5w，该flink 任务的特点是多流拼接、时间窗口长、checkpoint size 大。我们采用union + timer 的模式实现多任务场景下的样本拼接，该实现策略的特点是可以随意扩展至N流并进行拼接；为了减少与外部存储的交互来降低网络的开销，我们使用flink 内部的rocksdb state backend，并且对rocksdb 的序列化手段和存储进行了相当的优化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b02477c751284d2cb2fcdc8b543b4d73.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271530857.webp" />   
     </p>
 <p>这里首先列举了一些常见的数据倾斜，比如说key 的设计不合理、flink 的shuffle 方式选择有问题、任务反压、机器资源的问题等，这里我们着重介绍一下这个任务的一些数据倾斜问题。</p>
 <p>无效样本过滤策略，在最开始的时候我们发现某些subtask每次都会在固定的时间点发生checkpoint失败的现象，经过排查我们发现在实际的样本拼接数据里面会有很多的作弊数据，这导致那些checkpoint失败的subtask处理数据的QPS是其它subtask 的好几倍，过滤了这些作弊数据之后，任务恢复正常；我们还遇到过的一个数据倾斜现象是这样的：kafka source 所在的subtasks 莫名其妙的数据倾斜，机器的各个指标都没有到达瓶颈，经过排查之后是kafka producer 产生数据的时候produce 的key 指定了一个空的字符串&quot;&quot;，这种经过hash 之后只会产生到kafka 的固定分区，flink 在接受数据的时候kafka source 所在的subtask是数据倾斜的，如果后面跟着的是一个map 操作（forward），那么后面的map 也就会数据倾斜。</p>
 <p>样本拼接上线之后，任务运行稳定，但是某些subtask处理的数据量是一些数据量少的subtask 的1.5 倍，这种其实不算是严格意义上的数据倾斜，但是会造成资源的一定程度的浪费。利用 flink 中keygroup 的概念，和maxParallelism 大小相同，经过调整maxParallelism 的大小，保证了每个subtask 上面处理的数据量相同，解决数据倾斜问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d83fcae0378a42ecad0da91c37adb735.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271530674.webp" />   
     </p>
 <p>由于数据量大，且存储的特征比较多，导致任务的checkpoint size 达到了TB 级别。最开始的时候我们将数据放到了内存里面，但是因为数据量巨大，导致GC时间特别长，我们将数据放到了rocksdb 里面，并且我们对rocksdb 的blockcache、writebuffer等进行调优，添加了bloomfilter，使得rocksdb 的响应时间优化到了0.04ms 以内；通过合理设置checkpoint 的超时时间、间隔时间和最小暂停时间，使得任务在追数据的时候不至于导致qps突增太明显；最开始做拼接的时候我们将所有的pvid logid 和特征等值放入了一个valuestate，经过jstack 发现所有的线程都在做序列化和反序列化，其实我们做拼接只要pvid 和logid 就好了，因此我们将pvid 和logid 放入valuestate，将特征放入其它的state 里面，这样就少了很耗资源的序列化和反序列化操作，减少了很多系统开销；我们还开启了flink 特有的本地恢复和增量的checkpoint 操作来减少开销。</p>
 <h2 id="04-flink-实时训练"><strong>04 Flink 实时训练</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4a255055aa59459ea538b59b37023d41.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271530902.webp" />   
     </p>
 <p>在线学习过程对实时样本具有一定要求，上游任务产生样本数据之后，因为是乱序的，我们为了保证样本流进入训练时最大程度还原真实事件顺序，利用flink 的watermark机制对样本进行了保序操作，之后我们实现了带有超时时间的countwindow 来做online 的train，通过ps 来更新参数，ps作为线上的inference 后端来直接查询。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8e762d7d5d7540bfbe6659e7f17f986c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271530391.webp" />   
     </p>
 <ul>
 <li>采用 flink 的watermark 和eventtime 作为timecharacteristic 来保证顺序是有序的，尽可能的贴近事件当时的发生场景；样本一旦出现延时，且超过了系统的最大配置，我们会认为该样本不可用，直接丢弃。</li>
@@ -390,6 +390,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -423,10 +427,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -805,6 +805,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

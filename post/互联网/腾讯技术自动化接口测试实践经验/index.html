@@ -208,10 +208,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="11-后台接口测试">1.1 后台接口测试</h4>
 <p>接口测试是功能测试的一种，是测试系统组件间接口的一种测试，重点在于检验对于服务接口的数据交换的正确性，一般全部依赖真实链路，测试时需要启动被测服务。如下图是某个Server A的接口测试：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e6590a5adbfa479f9109d325f63df037.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281745297.webp" />   
      然而，写过接口测试的同学可能都会被复杂的数据构造以及繁杂的断言所困扰，可能需要耗费大半天才能写完一个接口测试用例，浪费了许多宝贵的时间！基于以上考虑，为了提高编写接口测试用例的效率，我们希望能够自动化地协助开发或测试人员完成这些耗时耗力的事情，为此而产生的想法是通过流量的录制，再通过录制的流量自动化生成接口测试用例。基于上述想法，我们提供了从 <strong>录制流量</strong> 到 <strong>生成接口测试用例</strong> 完整链路的工具，辅助开发同学快速完成编写接口测试用例。简单来说，只需要以下三个步骤便可以接入：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b694789e7baf4b6db2b103cda9f677c6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281745146.webp" />   
     </p>
 <p>接下来，我们通过“ <strong>流量录制-&gt;生成用例</strong>” 的流程来进行阐述我们的实现方法和接入方式。我们会说明通用的平台如stke、sumeru服务的接入流程，由于123平台对goreplay等有较好的支持，除了通用流程外会以123平台为例进行说明。最后会说明 <strong>流量频次筛选方案</strong> 帮助大家理解我们的流程。</p>
 <h3 id="二流量录制">二、流量录制</h3>
@@ -221,10 +221,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>通过对多个方案的对比后，我们决定采用goreplay的方式，其开源代码是 <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2Fbuger%2Fgoreplay">goreplay</a> ，基于goreplay 1.2.0版本改造后已经支持trpc, http, gofree, wup, videopacket, 后面会陆陆续续支持其他协议，采用goreplay的主要优势是它可以分析和记录服务的流量但不会影响服务，并且接入流程相对简单。</p>
 <p>goreplay方案其最大好处是与业务代码解耦，不需要入侵代码。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3e901fe42ead4bf48eb8d8300463eb33.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281745293.webp" />   
      在传输层的goreplay录制方式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/af5a75d61f2347f9be67916fefae7ba1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281745246.webp" />   
     </p>
 <h5 id="212-为什么要进行流量录制">2.1.2 为什么要进行流量录制</h5>
 <p>接口测试是在真实运行的服务中测试，若想自动化生成用例，理想的情况下，便是要自动化生成真实数据的接口测试用例，那么首先需要的就是 <strong>真实的接口数据</strong>，数据从何而来呢？自然而然的，我们便会想到到线上去录制（无论是测试环境或者正式环境的）。</p>
@@ -234,13 +234,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>首先我们需要一个能够管理协议的系统，它能够对协议文件（如pb文件等）进行管理，这样当协议有更新时，依然能够对新的协议生成的流量进行解析。</p>
 <p>能够将goreplay录制的二进制数据进行解析：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a95e7b60052a468f832ec9a13c9ad2f1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281745411.png" />   
     </p>
 <p>只需要将依赖的proto文件进行打包（注意依赖多个proto文件时保持相对目录正确）并上传到协议中台即可，并且生成对应此版本pb的版本号，用于我们后续生成goreplay命令。</p>
 <h5 id="222-通用流程生成并执行goreplay命令">2.2.2 「通用流程」生成并执行goReplay命令</h5>
 <p>在上述协议中台获取了版本号之后，我们已知后台服务的ip和端口，已经最新的协议版本。将这些填入我们的goreplay命令中，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/eaa0cdf26d414bb3b77e4375d145791e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281745489.webp" />   
      将上述命令在对应的容器中执行。</p>
 <p>部分参数说明：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">--input-raw-logreplay// 这个其实是rawInput插件的参数, 开启这个参数后, 必须ip和port都要填
@@ -253,15 +253,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 --output-logreplay-env formal // 选填，默认formal，需要注册到logreplay测试环境可填test
 </code></pre><p>在容器中执行 <code>ps -ef|grep goreplay</code> 看到如图进程便表示成功了：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e98d31e048124a928f9caf4a05bb9b39.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281745738.webp" />   
     </p>
 <h5 id="223通用流程查看录制流量">2.2.3「通用流程」查看录制流量</h5>
 <p>当服务在对应环境有流量的话，很快我们就可以查看到通过goreplay录制到并解析成功的流量了。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9796f2ff37de4e47af7392c568597a2a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281745942.webp" />   
      里面的request和respond等数据都一目了然（此处是demo所以数据很少，真实环境中，可能有非常多的参数及数据），根据这些录制的数据，我们下来就可以自动生成接口测试用例了。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/21f6d81f7f5942ab9cc89d7291f411f3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281745915.webp" />   
     </p>
 <h3 id="三生成用例">三、生成用例</h3>
 <p>当录制好流量后，我们会有一个筛选机制来过滤流量，不过这个操作对于用户是无感知的。对于使用方来说，接下来就能够 <strong>自动化</strong> 生成流量了。</p>
@@ -282,7 +282,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">px-cmdline generate -p git.code.oa.com/xxxxprotocol/hello/world
 </code></pre><p>运行后，如果未发生异常，会在当前目录下生成tests子目录，根据每个RPC接口生成独立的__test.go文件，以及一个唯一的suite_bvt_base_test.go用于启动接口测试。testdata目录存放json格式的用例数据。如图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/67a400d994e74923b1a3d8187f8e5abd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281745905.webp" />   
      当服务有多个运行节点的时候，还支持选择运行节点，以便用于本地调试接口用例时请求该目标。建议优先选择test环境或者开发者的特性环境</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">[Info] 请选择本地测试目标服务：可只选择环境，或指定节点
 [Info] (1) 测试环境 test --------
@@ -305,15 +305,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>如果用户希望通过IDE插件，可以通过如下操作</p>
 <p>第一步：我们有相关的插件供安装</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a4fdbad93c3f4f76a9848f1401070556.gif" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281745180.gif" />   
     </p>
 <p>弹出窗里面选择刚才下载的ZIP包，然后确定；</p>
 <p><strong>第二步：安装完成后重启IDE，启用插件</strong> 通过插件简单右键选择来生成接口测试文件可以达到与命令行工具同样的效果：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7ddf0b4a8b0a4754bb33a3175363456f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281745202.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/234d33c6f6ac4f08a8e93852ab6544c4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281745031.webp" />   
     </p>
 <p>然后便可以顺利生成接口和用例在特定的文件夹中，用于接口测试执行。</p>
 <h3 id="四流量频次筛选策略">四、流量频次筛选策略</h3>
@@ -336,7 +336,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>假如一级key完全一样的话，显然要进一步递归比较，但是层级越高我们会设置影响因子越小，对此完成相似度的递归计算。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7fd4727c0dee4840a87bd44b5d6794b9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281745842.webp" />   
     </p>
 <h5 id="422-字符串相似度">4.2.2 字符串相似度</h5>
 <p>一般计算到二级key以后，我们便要开始关心字符串的相似度了，此处我们使用的算法是 [Levenshtein距离](<a href="https://zshipu.com/t?url=https%3A%2F%2Fzh.wikipedia.org%2Fwiki%2F%25E8%2590%258A%25E6%2596%2587%25E6%2596%25AF%25E5%259D%25A6%25E8%25B">https://zshipu.com/t?url=https%3A%2F%2Fzh.wikipedia.org%2Fwiki%2F%25E8%2590%258A%25E6%2596%2587%25E6%2596%25AF%25E5%259D%25A6%25E8%25B</a></p>
@@ -463,6 +463,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -496,10 +500,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -878,6 +878,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -222,7 +222,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>但是现实往往是残酷的，我们目前的计算机技术无法同时满足上述的三个条件，于是现代计算机的存储器设计采用了一种分层次的结构：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/09b63a78154148689cb4a32e8de6e0ca.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271646840.png" />   
     </p>
 <p>从顶至底，现代计算机里的存储器类型分别有：寄存器、高速缓存、主存和磁盘，这些存储器的速度逐级递减而容量逐级递增。存取速度最快的是寄存器，因为寄存器的制作材料和 CPU 是相同的，所以速度和 CPU 一样快，CPU 访问寄存器是没有时延的，然而因为价格昂贵，因此容量也极小，一般 32 位的 CPU 配备的寄存器容量是 32✖️️️32 Bit，64 位的 CPU 则是 64✖️️️64 Bit，不管是 32 位还是 64 位，寄存器容量都小于 1 KB，且寄存器也必须通过软件自行管理。</p>
 <p>第二层是高速缓存，也即我们平时了解的 CPU 高速缓存 L1、L2、L3，一般 L1 是每个 CPU 独享，L3 是全部 CPU 共享，而 L2 则根据不同的架构设计会被设计成独享或者共享两种模式之一，比如 Intel 的多核芯片采用的是共享 L2 模式而 AMD 的多核芯片则采用的是独享 L2 模式。</p>
@@ -251,23 +251,23 @@ add ax, ax
 <p>基本原理就是为每一个 CPU 配备两个特殊的硬件寄存器：基址寄存器和界限寄存器，用来动态保存每一个程序的起始物理内存地址和长度，比如前文中的 A，B 两个程序，当 A 运行时基址寄存器和界限寄存器就会分别存入 0 和 16384，而当 B 运行时则两个寄存器又会分别存入 16384 和 32768。然后每次访问指定的内存地址时，CPU 会在把地址发往内存总线之前自动把基址寄存器里的值加到该内存地址上，得到一个真正的物理内存地址，同时还会根据界限寄存器里的值检查该地址是否溢出，若是，则产生错误中止程序， <code>动态重定位</code> 技术解决了 <code>静态重定位</code> 技术造成的程序装载速度慢的问题，但是也有新问题：每次访问内存都需要进行加法和比较运算，比较运算本身可以很快，但是加法运算由于进位传递时间的问题，除非使用特殊的电路，否则会比较慢。</p>
 <p>然后就是 <code>交换（swapping）</code> 技术，这种技术简单来说就是动态地把程序在内存和磁盘之间进行交换保存，要运行一个进程的时候就把程序的代码段和数据段调入内存，然后再把程序封存，存入磁盘，如此反复。为什么要这么麻烦？因为前面那两种重定位技术的前提条件是计算机内存足够大，能够把所有要运行的进程地址空间都加载进主存，才能够并发运行这些进程，但是现实往往不是如此，内存的大小总是有限的，所有就需要另一类方法来处理内存超载的情况，第一种便是简单的交换技术：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c8ccf42464914109bde25e3f1ad7a269.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271646435.png" />   
     </p>
 <p>先把进程 A 换入内存，然后启动进程 B 和 C，也换入内存，接着 A 被从内存交换到磁盘，然后又有新的进程 D 调入内存，用了 A 退出之后空出来的内存空间，最后 A 又被重新换入内存，由于内存布局已经发生了变化，所以 A 在换入内存之时会通过软件或者在运行期间通过硬件（基址寄存器和界限寄存器）对其内存地址进行重定位，多数情况下都是通过硬件。</p>
 <p>另一种处理内存超载的技术就是 <code>虚拟内存</code> 技术了，它比 <code>交换（swapping）</code> 技术更复杂而又更高效，是目前最新应用最广泛的存储器抽象技术：</p>
 <p>虚拟内存的核心原理是：为每个程序设置一段&quot;连续&quot;的虚拟地址空间，把这个地址空间分割成多个具有连续地址范围的页 (page)，并把这些页和物理内存做映射，在程序运行期间动态映射到物理内存。当程序引用到一段在物理内存的地址空间时，由硬件立刻执行必要的映射；而当程序引用到一段不在物理内存中的地址空间时，由操作系统负责将缺失的部分装入物理内存并重新执行失败的指令：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/17786f1b0edc4fc6a6c52a2e4a199a37.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271646649.png" />   
     </p>
 <p>虚拟地址空间按照固定大小划分成被称为页（page）的若干单元，物理内存中对应的则是页框（page frame）。这两者一般来说是一样的大小，如上图中的是 4KB，不过实际上计算机系统中一般是 512 字节到 1 GB，这就是虚拟内存的分页技术。因为是虚拟内存空间，每个进程分配的大小是 4GB (32 位架构)，而实际上当然不可能给所有在运行中的进程都分配 4GB 的物理内存，所以虚拟内存技术还需要利用到前面介绍的 <code>交换（swapping）</code> 技术，在进程运行期间只分配映射当前使用到的内存，暂时不使用的数据则写回磁盘作为副本保存，需要用的时候再读入内存，动态地在磁盘和内存之间交换数据。</p>
 <p>其实虚拟内存技术从某种角度来看的话，很像是糅合了基址寄存器和界限寄存器之后的新技术。它使得整个进程的地址空间可以通过较小的单元映射到物理内存，而不需要为程序的代码和数据地址进行重定位。</p>
 <p>进程在运行期间产生的内存地址都是虚拟地址，如果计算机没有引入虚拟内存这种存储器抽象技术的话，则 CPU 会把这些地址直接发送到内存地址总线上，直接访问和虚拟地址相同值的物理地址；如果使用虚拟内存技术的话，CPU 则是把这些虚拟地址通过地址总线送到内存管理单元（Memory Management Unit，MMU），MMU 将虚拟地址映射为物理地址之后再通过内存总线去访问物理内存：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b83aa10c6df84d9fbe3a8a3f37deb2bd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271646609.png" />   
     </p>
 <p>虚拟地址（比如 16 位地址 8196=0010 000000000100）分为两部分：虚拟页号（高位部分）和偏移量（低位部分），虚拟地址转换成物理地址是通过页表（page table）来实现的，页表由页表项构成，页表项中保存了页框号、修改位、访问位、保护位和 &ldquo;在/不在&rdquo; 位等信息，从数学角度来说页表就是一个函数，入参是虚拟页号，输出是物理页框号，得到物理页框号之后复制到寄存器的高三位中，最后直接把 12 位的偏移量复制到寄存器的末 12 位构成 15 位的物理地址，即可以把该寄存器的存储的物理内存地址发送到内存总线：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/39198d3e1a0149feb353405a0dfbb497.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271646480.png" />   
     </p>
 <p>在 MMU 进行地址转换时，如果页表项的 &ldquo;在/不在&rdquo; 位是 0，则表示该页面并没有映射到真实的物理页框，则会引发一个 <strong>缺页中断</strong>，CPU 陷入操作系统内核，接着操作系统就会通过页面置换算法选择一个页面将其换出 (swap)，以便为即将调入的新页面腾出位置，如果要换出的页面的页表项里的修改位已经被设置过，也就是被更新过，则这是一个脏页 (dirty page)，需要写回磁盘更新改页面在磁盘上的副本，如果该页面是&quot;干净&quot;的，也就是没有被修改过，则直接用调入的新页面覆盖掉被换出的旧页面即可。</p>
 <p>最后，还需要了解的一个概念是转换检测缓冲器（Translation Lookaside Buffer，TLB），也叫快表，是用来加速虚拟地址映射的，因为虚拟内存的分页机制，页表一般是保存内存中的一块固定的存储区，导致进程通过 MMU 访问内存比直接访问内存多了一次内存访问，性能至少下降一半，因此需要引入加速机制，即 TLB 快表，TLB 可以简单地理解成页表的高速缓存，保存了最高频被访问的页表项，由于一般是硬件实现的，因此速度极快，MMU 收到虚拟地址时一般会先通过硬件 TLB 查询对应的页表号，若命中且该页表项的访问操作合法，则直接从 TLB 取出对应的物理页框号返回，若不命中则穿透到内存页表里查询，并且会用这个从内存页表里查询到最新页表项替换到现有 TLB 里的其中一个，以备下次缓存命中。</p>
@@ -276,7 +276,7 @@ add ax, ax
 <p>一般来说，我们在编写程序操作 Linux I/O 之时十有八九是在用户空间和内核空间之间传输数据，因此有必要先了解一下 Linux 的用户态和内核态的概念。</p>
 <p>首先是用户态和内核态：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2b55b1d3e72e48fd885716f60ce3f6b5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271646948.webp" />   
     </p>
 <p>从宏观上来看，Linux 操作系统的体系架构分为用户态和内核态（或者用户空间和内核）。内核从本质上看是一种软件 —— 控制计算机的硬件资源，并提供上层应用程序 (进程) 运行的环境。用户态即上层应用程序 (进程) 的运行空间，应用程序 (进程) 的执行必须依托于内核提供的资源，这其中包括但不限于 CPU 资源、存储资源、I/O 资源等等。</p>
 <p>现代操作系统都是采用虚拟存储器，那么对 32 位操作系统而言，它的寻址空间（虚拟存储空间）为 2^32 B = 4G。操作系统的核心是内核，独立于普通的应用程序，可以访问受保护的内存空间，也有访问底层硬件设备的所有权限。为了保证用户进程不能直接操作内核（kernel），保证内核的安全，操心系统将虚拟空间划分为两部分，一部分为内核空间，一部分为用户空间。针对 Linux 操作系统而言，将最高的 1G 字节（从虚拟地址 0xC0000000 到 0xFFFFFFFF），供内核使用，称为内核空间，而将较低的 3G 字节（从虚拟地址 0x00000000 到 0xBFFFFFFF），供各个进程使用，称为用户空间。</p>
@@ -295,12 +295,12 @@ add ax, ax
 <li>硬件。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6c7ceaee339f49c48764da9518ddf946.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271646873.png" />   
     </p>
 <h3 id="linux-io">Linux I/O</h3>
 <h4 id="io-缓冲区">I/O 缓冲区</h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2ea41d1badef44a1a39ef705de51e359.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271646773.png" />   
     </p>
 <p>在 Linux 中，当程序调用各类文件操作函数后，用户数据（User Data）到达磁盘（Disk）的流程如上图所示。</p>
 <p>图中描述了 Linux 中文件操作函数的层级关系和内存缓存层的存在位置，中间的黑色实线是用户态和内核态的分界线。</p>
@@ -312,10 +312,10 @@ add ax, ax
 <p><code>Page Cach</code> 会通过页面置换算法如 LRU 定期淘汰旧的页面，加载新的页面。可以看出，所谓 I/O 缓冲区缓存就是在内核和磁盘、网卡等外设之间的一层缓冲区，用来提升读写性能的。</p>
 <p>在 Linux 还不支持虚拟内存技术之前，还没有页的概念，因此 <code>Buffer Cach</code> 是基于操作系统读写磁盘的最小单位 -- 块（block）来进行的，所有的磁盘块操作都是通过 <code>Buffer Cach</code> 来加速，Linux 引入虚拟内存的机制来管理内存后，页成为虚拟内存管理的最小单位，因此也引入了 <code>Page Cach</code> 来缓存 Linux 文件内容，主要用来作为文件系统上的文件数据的缓存，提升读写性能，常见的是针对文件的 <code>read()/write()</code> 操作，另外也包括了通过 <code>mmap()</code> 映射之后的块设备，也就是说，事实上 Page Cache 负责了大部分的块设备文件的缓存工作。而 <code>Buffer Cach</code> 用来在系统对块设备进行读写的时候，对块进行数据缓存的系统来使用，实际上负责所有对磁盘的 I/O 访问：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/93ca9fe1fbe2434d8fd1139b86f0274d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271646018.png" />   
      因为 <code>Buffer Cach</code> 是对粒度更细的设备块的缓存，而 <code>Page Cach</code> 是基于虚拟内存的页单元缓存，因此还是会基于 <code>Buffer Cach</code>，也就是说如果是缓存文件内容数据就会在内存里缓存两份相同的数据，这就会导致同一份文件保存了两份，冗余且低效。另外一个问题是，调用 <code>writ</code> 后，有效数据是在 <code>Buffer Cach</code> 中，而非 <code>Page Cach</code> 中。这就导致 <code>mmap</code> 访问的文件数据可能存在不一致问题。为了规避这个问题，所有基于磁盘文件系统的 <code>writ</code>，都需要调用 <code>update_vm_cache()</code> 函数，该操作会把调用 <code>writ</code> 之后的 <code>Buffer Cach</code> 更新到 <code>Page Cach</code> 去。由于有这些设计上的弊端，因此在 Linux 2.4 版本之后，kernel 就将两者进行了统一， <code>Buffer Cach</code> 不再以独立的形式存在，而是以融合的方式存在于 <code>Page Cach</code> 中：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/51126cb6c4cd4599bacd67e734e47210.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271646837.png" />   
      融合之后就可以统一操作 <code>Page Cach</code> 和 <code>Buffer Cach</code>：处理文件 I/O 缓存交给 <code>Page Cach</code>，而当底层 RAW device 刷新数据时以 <code>Buffer Cach</code> 的块单位来实际处理。</p>
 <h4 id="io-模式">I/O 模式</h4>
 <p>在 Linux 或者其他 Unix-like 操作系统里，I/O 模式一般有三种：</p>
@@ -329,12 +329,12 @@ add ax, ax
 <p>这是最简单的一种 I/O 模式，也叫忙等待或者轮询：用户通过发起一个系统调用，陷入内核态，内核将系统调用翻译成一个对应设备驱动程序的过程调用，接着设备驱动程序会启动 I/O 不断循环去检查该设备，看看是否已经就绪，一般通过返回码来表示，I/O 结束之后，设备驱动程序会把数据送到指定的地方并返回，切回用户态。</p>
 <p>比如发起系统调用 <code>read()</code>：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/12ed1d02ca614645898894d823015679.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271646632.png" />   
     </p>
 <h5 id="中断驱动-io">中断驱动 I/O</h5>
 <p>第二种 I/O 模式是利用中断来实现的：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3511b64dcb3e4604ba27e929ea304405.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271646509.png" />   
     </p>
 <p>流程如下：</p>
 <ol>
@@ -351,7 +351,7 @@ add ax, ax
 <p>DMA 全称是 Direct Memory Access，也即直接存储器存取，是一种用来提供在外设和存储器之间或者存储器和存储器之间的高速数据传输。整个过程无须 CPU 参与，数据直接通过 DMA 控制器进行快速地移动拷贝，节省 CPU 的资源去做其他工作。</p>
 <p>目前，大部分的计算机都配备了 DMA 控制器，而 DMA 技术也支持大部分的外设和存储器。借助于 DMA 机制，计算机的 I/O 过程就能更加高效：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c65560da8ae8406ba255583d79a0d94c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271646323.png" />   
     </p>
 <p>DMA 控制器内部包含若干个可以被 CPU 读写的寄存器：一个主存地址寄存器 MAR（存放要交换数据的主存地址）、一个外设地址寄存器 ADR（存放 I/O 设备的设备码，或者是设备信息存储区的寻址信息）、一个字节数寄存器 WC（对传送数据的总字数进行统计）、和一个或多个控制寄存器。</p>
 <ol>
@@ -374,7 +374,7 @@ ssize_t read(int fd, void *buf, size_t count);
 ssize_t write(int fd, const void *buf, size_t count);
 </code></pre><p>一次完整的读磁盘文件然后写出到网卡的底层传输过程如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c917e4a6a57847f8b75a1a2db950c3fc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271646411.png" />   
     </p>
 <p>可以清楚看到这里一共触发了 4 次用户态和内核态的上下文切换，分别是 <code>read()/write()</code> 调用和返回时的切换，2 次 DMA 拷贝，2 次 CPU 拷贝，加起来一共 4 次拷贝操作。</p>
 <p>通过引入 DMA，我们已经把 Linux 的 I/O 过程中的 CPU 拷贝次数从 4 次减少到了 2 次，但是 CPU 拷贝依然是代价很大的操作，对系统性能的影响还是很大，特别是那些频繁 I/O 的场景，更是会因为 CPU 拷贝而损失掉很多性能，我们需要进一步优化，降低、甚至是完全避免 CPU 拷贝。</p>
@@ -401,7 +401,7 @@ ssize_t write(int fd, const void *buf, size_t count);
 <li><strong>内核缓冲区和用户缓冲区之间的传输优化</strong>：这种方式侧重于在用户进程的缓冲区和操作系统的页缓存之间的 CPU 拷贝的优化。这种方法延续了以往那种传统的通信方式，但更灵活。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d2373e0ef8664f739b737c9b2ce4b577.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647522.png" />   
     </p>
 <h5 id="减少甚至避免用户空间和内核空间之间的数据拷贝">减少甚至避免用户空间和内核空间之间的数据拷贝</h5>
 <h6 id="mmap">mmap()</h6>
@@ -411,7 +411,7 @@ void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset)
 int munmap(void *addr, size_t length);
 </code></pre><p>一种简单的实现方案是在一次读写过程中用 Linux 的另一个系统调用 <code>mmap()</code> 替换原先的 <code>read()</code>， <code>mmap()</code> 也即是内存映射（memory map）：把用户进程空间的一段内存缓冲区（user buffer）映射到文件所在的内核缓冲区（kernel buffer）上。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b8a87a228e2f42ff826c8f1786866f3d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647445.png" />   
     </p>
 <p>利用 <code>mmap()</code> 替换 <code>read()</code>，配合 <code>write()</code> 调用的整个流程如下：</p>
 <ol>
@@ -438,7 +438,7 @@ ssize_t sendfile(int out_fd, int in_fd, off_t *offset, size_t count);
 </code></pre><p>从功能上来看，这个系统调用将 <code>mmap()</code> + <code>write()</code> 这两个系统调用合二为一，实现了一样效果的同时还简化了用户接口，其他的一些 Unix-like 的系统像 BSD、Solaris 和 AIX 等也有类似的实现，甚至 Windows 上也有一个功能类似的 API 函数 <code>TransmitFil</code>。</p>
 <p>out_fd 和 in_fd 分别代表了写入和读出的文件描述符，in_fd 必须是一个指向文件的文件描述符，且要能支持类 <code>mmap()</code> 内存映射，不能是 Socket 类型，而 out_fd 在 Linux 内核 2.6.33 版本之前只能是一个指向 Socket 的文件描述符，从 2.6.33 之后则可以是任意类型的文件描述符。off_t 是一个代表了 in_fd 偏移量的指针，指示 <code>sendfile()</code> 该从 in_fd 的哪个位置开始读取，函数返回后，这个指针会被更新成 <code>sendfile()</code> 最后读取的字节位置处，表明此次调用共读取了多少文件数据，最后的 count 参数则是此次调用需要传输的字节总数。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/20be8612fb5b4935968743a87ac7d593.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647365.png" />   
     </p>
 <p>使用 <code>sendfile()</code> 完成一次数据读写的流程如下：</p>
 <ol>
@@ -461,7 +461,7 @@ ssize_t sendfile(int out_fd, int in_fd, off_t *offset, size_t count);
 <p>上一小节介绍的 <code>sendfile()</code> 技术已经把一次数据读写过程中的 CPU 拷贝的降低至只有 1 次了，但是人永远是贪心和不知足的，现在如果想要把这仅有的一次 CPU 拷贝也去除掉，有没有办法呢？</p>
 <p>当然有！通过引入一个新硬件上的支持，我们可以把这个仅剩的一次 CPU 拷贝也给抹掉：Linux 在内核 2.4 版本里引入了 DMA 的 scatter/gather &ndash; 分散/收集功能，并修改了 <code>sendfile()</code> 的代码使之和 DMA 适配。scatter 使得 DMA 拷贝可以不再需要把数据存储在一片连续的内存空间上，而是允许离散存储，gather 则能够让 DMA 控制器根据少量的元信息：一个包含了内存地址和数据大小的缓冲区描述符，收集存储在各处的数据，最终还原成一个完整的网络包，直接拷贝到网卡而非套接字缓冲区，避免了最后一次的 CPU 拷贝：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5411cdf5b0dd4e779bce4f39383407e3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647462.png" />   
     </p>
 <p><code>sendfile() + DMA gather</code> 的数据传输过程如下：</p>
 <ol>
@@ -506,7 +506,7 @@ bytes = splice(pfd[0], NULL, socket_fd, NULL, bytes, SPLICE_F_MOVE | SPLICE_F_MO
 assert(bytes != -1);
 </code></pre><p>数据传输过程图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6d4b85cb174b4e94bd238afc047b8dfe.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647329.png" />   
     </p>
 <p>使用 <code>splice()</code> 完成一次磁盘文件到网卡的读写过程如下：</p>
 <ol>
@@ -521,7 +521,7 @@ assert(bytes != -1);
 <p>我最开始了解 <code>splice()</code> 的时候，也是这个反应，但是深入学习它之后，才渐渐知晓个中奥妙，且听我细细道来：</p>
 <p>先来了解一下 pipe buffer 管道，管道是 Linux 上用来供进程之间通信的信道，管道有两个端：写入端和读出端，从进程的视角来看，管道表现为一个 FIFO 字节流环形队列：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c6f5bcbe822a4d7faefa343adf3993b2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647112.png" />   
     </p>
 <p>管道本质上是一个内存中的文件，也就是本质上还是基于 Linux 的 VFS，用户进程可以通过 <code>pipe()</code> 系统调用创建一个匿名管道，创建完成之后会有两个 VFS 的 file 结构体的 inode 分别指向其写入端和读出端，并返回对应的两个文件描述符，用户进程通过这两个文件描述符读写管道；管道的容量单位是一个虚拟内存的页，也就是 4KB，总大小一般是 16 个页，基于其环形结构，管道的页可以循环使用，提高内存利用率。Linux 中以 pipe_buffer 结构体封装管道页，file 结构体里的 inode 字段里会保存一个 pipe_inode_info 结构体指代管道，其中会保存很多读写管道时所需的元信息，环形队列的头部指针页，读写时的同步机制如互斥锁、等待队列等：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">struct pipe_buffer {
@@ -712,7 +712,7 @@ uint32_t read_notification(struct msghdr *msg)
 <h5 id="绕过内核的直接-io">绕过内核的直接 I/O</h5>
 <p>可以看出，前面种种的 zero-copy 的方法，都是在想方设法地优化减少或者去掉用户态和内核态之间以及内核态和内核态之间的数据拷贝，为了实现避免这些拷贝可谓是八仙过海，各显神通，采用了各种各样的手段，那么如果我们换个思路：其实这么费劲地去消除这些拷贝不就是因为有内核在掺和吗？如果我们绕过内核直接进行 I/O 不就没有这些烦人的拷贝问题了吗？这就是 <strong>绕过内核直接 I/O</strong> 技术：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/addc55a4ec4d4012b8354dec59b861ff.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647955.png" />   
      这种方案有两种实现方式：</p>
 <ol>
 <li>用户直接访问硬件</li>
@@ -755,7 +755,7 @@ uint32_t read_notification(struct msghdr *msg)
 <p>而如果利用 fbufs 框架来实现数据传输的话，首先可以把 buffers 都缓存到 pool 里循环利用，而不需要每次都去重新分配，而且缓存下来的不止有 buffers 本身，而且还会把虚拟内存地址到物理内存地址的映射关系也缓存下来，也就可以避免每次都进行地址转换，从发送接收数据的层面来说，用户进程和 I/O 子系统比如设备驱动程序、网卡等可以直接传输整个缓冲区本身而不是其中的数据内容。</p>
 <p>也可以理解成是传输内存地址指针，这样就就避免了大量的数据内容拷贝：用户进程/ IO 子系统通过发送一个个的 fbuf 写出数据到内核而非直接传递数据内容，相对应的，用户进程/ IO 子系统通过接收一个个的 fbuf 而从内核读入数据，这样就能减少传统的 <code>read()/write()</code> 系统调用带来的数据拷贝开销：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6262b36ea76a442a8c65ea91082581de.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647764.png" />   
     </p>
 <ol>
 <li>发送方用户进程调用 <code>uf_allocat</code> 从自己的 buffer pool 获取一个 fbuf 缓冲区，往其中填充内容之后调用 <code>uf_writ</code> 向内核区发送指向 fbuf 的文件描述符；</li>
@@ -895,6 +895,10 @@ uint32_t read_notification(struct msghdr *msg)
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -928,10 +932,6 @@ uint32_t read_notification(struct msghdr *msg)
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1310,6 +1310,8 @@ uint32_t read_notification(struct msghdr *msg)
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

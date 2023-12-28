@@ -221,13 +221,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="混排建模">混排建模</h3>
 <p>在美团搜索商品多业务排序场景下，排序需要对不同商品业务：闪购、买菜、优选、团好货等进行统一混合排序，不同业务之间既有共性也有自己的特性。下面介绍我们针对商品多业务排序相关的一些实践。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d778d80e1a1440c2a1cd02556cc5d19f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706981.webp" />   
     </p>
 <p>图1 多业务商品排序示意图</p>
 <p><strong>多子塔结构</strong></p>
 <p>此前，我们在商家多业务排序场景中已经积累了很多的实践经验，详情可参考《 <a href="https://www.6aiq.com/article/1625786203556">多业务建模在美团搜索排序中的实践</a>》一文，所以直接将多子塔结构应用到商品多业务排序场景。商品混排的 item 集合涵盖五个业务，模型结构中具有五个子塔：闪购子网络、买菜子网络、外卖子网络、优选子网络和团好货子网络；与此同时，我们引入 ESMM[2] 模型结构来更好的学习下单信息。整体模型结构如下图 2 所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/551ad9c810cb439fb80c7967ea21d542.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706123.webp" />   
     </p>
 <p>图2 多子塔模型结构示意图</p>
 <p>实践表明，模型离线指标相比基线提升明显；经过线上 AB 实验测试，点击率提升了 20BP（基点），访购率提升了 37BP。</p>
@@ -242,7 +242,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h5 id="特征选择门">特征选择门</h5>
 <p>在上述 Group Lasso 方案中，虽然我们达到了特征选择的目的，但选出的特征对应不同业务的权重是相同的。在多业务排序场景下，不同特征对不同业务的重要性显然不一样，例如“配送时间”这个特征对闪购业务比较重要，但对于团好货影响不是很大。为了分业务建模特征重要性，我们借鉴 Group Lasso 的思想，提出了一个自适应多业务特征选择模块。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ce0b55c4ba0e40198dca8a6788576cc8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706209.webp" />   
      图3 多子塔特征选择门结构</p>
 <p>整体模型结构如上图 3 所示，我们通过一个特征选择门来计算每个特征的权重。特征选择门将 Query 以及上下文相关信息的 Embedding 表征经过一层线性映射以及 Softmax 激活函数，得到归一化的特征的权重向量：</p>
 <p>g_t = softmax(W_t x_{query} + b_t) （2）</p>
@@ -260,7 +260,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 \end{aligned} （4）</p>
 <p>这个公式第一项表示的含义是在训练时，我们从后验网络中拿到对应业务的分布z ，然后根据 z 来判断模型走哪个子塔并进行训练。第二项表示的含义是让先验网络和后验网络的输出尽可能接近，从而在推理阶段也能够根据先验塔的输出来判断走哪个子塔。这个后验网络只会在训练阶段使用。在具体实现上，我们将后验网络简化成一个规则决策模型：根据用户的行为反馈来预测对应的业务。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d6cdd34515254ff9aedde7d6ceb7e9a3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706210.webp" />   
     </p>
 <p>图4 多业务概率图模型</p>
 <p>引入概率图建模后离线 NDCG 提升了 39BP；最终我们将该版本进行线上 AB 测试：线上点击率提升了 25BP。</p>
@@ -269,12 +269,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="聚合建模">聚合建模</h3>
 <p>当对各业务结果进行如图 5 所示的聚合展示时，聚块的位置顺序和聚块大小（即聚块内 item 的数量）共同决定用户的搜索体验。过去很长一段时间的技术方案是先使用排序模型预测业务的先后顺序，然后根据业务预测分数的相对差值通过人工规则来设置聚块大小。这种方案将聚块顺序和聚块大小分两步进行串行建模，距用户体验最优解存在较大差距；其次，聚块排序与聚块大小的串行耦合会降低模型的迭代效果：前者的模型迭代替换，会导致后者规则相关的阈值设定不再合适。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4fce34c3ad2b489f96228b9e1d145ddc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706995.webp" />   
     </p>
 <p>图5 结果聚合展示示意图</p>
 <p>针对聚合展示样式带来的技术挑战，我们提出 GSRM (Grouping Search Results Model) 模型，该模型结构如下图 6 所示。这是一个多任务模型，同时进行聚块位置和大小的预测。聚块位置预测任务我们建模成 CTR 预估的分类问题，输出结果代表业务偏好强弱进行聚块的的位置排序；聚块大小预测任务我们建模成一个回归问题，输出聚块展示结果数。模型的底层输入特征包含查询词维度、用户维度、上下文维度、item 维度、以及各个维度的交叉特征。下面重点介绍两个工作：第一个是用户行为序列建模，第二个是聚块大小预测建模。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/abafc4f1b7814e7cb87ec1bd6bbd67c4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706521.webp" />   
      图6 聚块展示模型示意图</p>
 <h4 id="异构双序列建模">异构双序列建模</h4>
 <p>众所周知，在深度学习 CTR 预估时代，在模型中引入用户行为序列特征能够极大提升模型的效果。业界关于端到端行为序列建模的工作，主要分为以下三类：第一类是基于注意力机制的模型，代表性工作如 DIN[7]、DIEN[8]、DSIN[9] 以及 BST[10] 等等；第二类是基于记忆网络的模型，代表性工作如 HPMN[11] 和 MIMN[12]；第三类是基于检索的模型，代表性工作如 UBR4CTR[13] 和 SIM[14]。这些工作对美团搜索多业务商品排序有很大的落地实践指导。</p>
@@ -283,20 +283,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>模型补充 Context-Aware 的异构双序列建模，离线 NDCG 提升了 10BP；线上 AB 测试也取得稳定正向的效果：点击率提升了 12BP，访购率提升了 9BP。</p>
 <p>为了深入理解行为序列建模的效果，我们对 Context-Aware 部分的 Attention 权重进行可视化如下图 7 所示，发现对于用户最终发生行为的聚块，对应到行为序列中同类别聚块的权重也更大，说明 Context-Aware 能较好捕获用户当前请求的兴趣，在抽取兴趣时能够较好抑制其他行为的噪声。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/12b2712876fb4ca890daf7924a481b69.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706303.webp" />   
     </p>
 <p>图7 Target-Attention 权重示意图</p>
 <h4 id="聚块大小预测建模">聚块大小预测建模</h4>
 <p>针对聚块大小预测的回归任务，考虑到和之前的预估分类任务差异较大，我们在特征共享层采用目前业界常用的 MMoE[16] 多任务参数共享结构，同时从业务场景来看，当偏好预估认为某个业务很强时，应该给与相对多的业务结果数，所以我们借鉴了 AITM[17] 的工作，迁移偏好预估塔中的隐藏层信息到聚块大小预估塔中，整体模型如上图 6 所示。</p>
 <p>模型训练损失函数如公式 (5) 所示，其中 pos 表示聚块的位置信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/57b285d768c64c449cdc39112a6a7ceb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706401.png" />   
     </p>
 <p>其中偏好预估损失函数 Loss_{ctrr}采用 LambdaLoss[18]，如下面公式（6）所示：</p>
 <p>Loss_{ctr}=\sum_{y_{i} &gt;y_{j}}^{}\Delta NDCG(i,j)log_{2}(1+e^{-\sigma (\hat{y_{i}}-\hat{y_{j}})}) （6）</p>
 <p>聚块大小预估损失函数Loss_{size} 采用 HuberLoss[19]，如下面公式（7）所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/40b70aa06d2a4b389b74b3087bccf208.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706294.png" />   
     </p>
 <p>两个损失函数的权重 \lambda_1 和 \lambda_2 根据人工经验设定。针对聚块大小 Loss，考虑到实际我们只调整首位的聚块大小，所以聚块大小 Loss 只对首位聚块生效。其中的 label_{size} 会依据用户的行为反馈进行适当设计：当用户点击“查看更多”或者“聚块标题”时，会对线上历史展示个数适当放大；当用户在非首位下单时，会对首位聚块大小进行适当缩小；当用户在首位下单时，会综合考虑用户的浏览个数、最后点击位置以及历史展示大小进行调整。</p>
 <p>对聚块大小进行联合预测，离线 NDCG持平，线上 AB 测试结果：访购率提升了 3BP。</p>
@@ -437,6 +437,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -470,10 +474,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -852,6 +852,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -199,7 +199,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b89372b10df34e10b23e0189a6181de6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271932768.webp" />   
     </p>
 <blockquote>
 <p>作者： 58技术 曹冉冉 稿</p>
@@ -209,7 +209,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>因此，我们重构了搜索场景的检索逻辑，打破类目限制，展示全职招聘一级类下相关的信息。同时，将用户的搜索意图贯穿召回、排序等全检索环节策略，更好的匹配用户需求。</p>
 <p>本文主要介绍在58商业招聘搜索打破类目限制的条件下，智能召回策略体系的搭建。58招聘搜索query文本特点比较突出，多为短文本，结构化程度较高，集中在职位词、工作性质词、工作场所等类型上，而在帖子侧，描述中存在大量UGC内容，其多样的文本表述方式对召回产生较大的干扰。在这样的特点下，我们把对C端query的分析和B端帖子doc的理解作为搜索策略优化的切入点，召回更多符合用户意图的帖子，并在此基础上，各个环节能力相互贯通，搭建了覆盖全检索流程的搜索策略体系。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/185347dc424847858c810f2837a4f877.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271932493.webp" />   
     </p>
 <h1 id="02-智能搜索策略能力体系">02 <strong>智能搜索策略能力体系</strong></h1>
 <p>招聘商业搜索策略系统整体上包括Query理解、帖子Doc理解、召回、粗排过滤、精排五个模块，我们在各个模块均有不同策略点的落地：</p>
@@ -220,7 +220,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>排序模块</strong> ，包含粗排过滤和精排等环节，结合搜索场景的特点，分别考虑文本相关性、ctr、收入等因素，兼顾连接效率及商业变现效率。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/82774386aefa45268ccae45460c8c407.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271932481.webp" />   
     </p>
 <h1 id="03-搜索召回算法架构">03 <strong>搜索召回算法架构</strong></h1>
 <p>为了在兼顾相关性的基础上最大限度提升搜索系统的召回能力，检索召回环节针对C端query特点和B端帖子特点等建设了多个召回通道，各个通道算法能力具有各自相对的优势，覆盖query分析、doc理解、索引过滤、检索触发等搜索召回阶段所涉及的所有环节：</p>
@@ -230,7 +230,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>向量通道：</strong> 具备向量召回能力。将query和帖子表征为向量，通过向量相似度判断帖子是否召回，避免query改写、标签映射、文本切词等多个环节对最终效果的影响，对语义相近但文本不包含类帖子的召回效果较突出。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d4ac4251832d46788e1757039ada6c79.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271932290.webp" />   
     </p>
 <p>下文围绕在各个通道涉及的query改写、doc理解、意图识别、向量召回等算法能力做详细的介绍。</p>
 <h1 id="04-基础能力">04 <strong>基础能力</strong></h1>
@@ -244,28 +244,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>a) 对于语料较丰富的场景，可以考虑采用业务语料训练词向量模型，计算query间相似度。</p>
 <p>初版我们采用了基于语料的方式，将query输入预训练模型生成其embedding表示，利用不同query embedding的内积表示query的相似度，从而能拓展出相关的query。首先预训练模型帮助我们在语料有限的条件下，学习到更多语义通用知识，同时相比word2vec等其他常用文本embedding表示方式，基于字级别的输入，解决了长尾词oov问题，避免了基于滑动窗口的训练方式对语料质量的强依赖问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/040baffdf71a47e7b5a5a836dc947062.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271932953.webp" />   
     </p>
 <p>第一版上线后，我们发现存在如“英语老师”被改写成“日语老师”、“法语老师”的case，在58招聘的场景下，该类扩展会导致不相关职位被误召回。其问题原因在于，我们仅仅基于预训练模型进行无监督学习，未学习到58场景下的业务信息，同时，字级别encoding方式，容易对不同义但多字重合的query表示成相近的embedding，如“药店店员”改写成“商店店员”。因此，在第一版模型的基础上，我们采用finetune进一步有监督学习query与query之间的相关性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1b31e90c561c4e138f2b668d6d4b7513.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271932071.webp" />   
     </p>
 <p>样本方面，大规模的人工样本标注成本过高，正样本的标注我们利用query与query之间点击帖子的共现关系，当两个query下点击的帖子重合程度超过一定阈值后被标记为相似query，从而将业务信息通过用户行为融入样本中。提高了样本的置信度，一定程度上避免随机点击给样本带来噪声。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/500e862a47374530ae93e678ecb1aea2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271933753.webp" />   
     </p>
 <p>负样本的选择我们采用在不同业务意义下的随机选择方式，避免检索各环节对行为分布的影响，扩大了样本的泛化能力。但同时随机选择也造成样本存在easy learning的问题，为了更好的捕捉易错样本，我们同步对损失函数进行更新，将loss由一个batch下交叉熵的平均值更新为最大值，一定程度可以使每个batch的hard sample影响更大。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/51f5ef6601fa481983353b74c379b5ab.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271933543.webp" />   
     </p>
 <p>通过两版优化，我们query改写离线准确率提升20%，上线后由query改写导致的badcase也降低10%+。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/80d413e54301413bb1e308b7afc6b21e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271933366.webp" />   
     </p>
 <h2 id="42-意图通道---意图识别能力"><strong>4.2 意图通道</strong> <strong>-</strong> <strong>意图识别能力</strong></h2>
 <p>在通过query改写对用户输入搜索词进行拓展的同时，因为query结构化程度高的特点，也启发我们将query文本转化成系统能更好理解的标签体系，从而通过对query的分析捕捉到结构化的用户意图信息，并传递到包括召回、排序、创意展示等全检索环节，针对性地进行更加个性化的适配。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/525f14ce6cbc4936a0010abd4a042120.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271933265.webp" />   
     </p>
 <p>意图识别的基本思路是首先对query进行切词，对切词后的每一部分term进行意图分类。属性类别包括职位、公司名称、工作场所等9类，基本上覆盖线上query描述中招聘业务相关的所有属性。我们前期的策略设计思路主要包含三个步骤：</p>
 <p><strong>1. 精确规则匹配</strong></p>
@@ -277,19 +277,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>3. 构建query文本分类模型实现对实体的识别</strong></p>
 <p>a) 采用模型有监督分类识别，计划采用预训练-微调的架构，实现对实体的分类功能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b1ca82d447a64387895af49c1e3e06f7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271933906.webp" />   
     </p>
 <p>在实际优化过程中，因为query的结构化程度相对较高，且目前招聘业务已有的标签体系对各类属性的覆盖程度较高，我们主要进行了上述精确匹配和文本编辑距离计算两个环节的优化，对于query意图的覆盖率和准确率均达到90%以上，满足线上的使用要求。</p>
 <h2 id="43-文本-意图-通道---doc理解"><strong>4.3 文本</strong> <strong>&amp;意图</strong> <strong>通道</strong> <strong>-</strong> <strong>doc理解</strong></h2>
 <p>在C端对query进行改写和意图识别后，我们可以确保打破类目的限制后，直接通过文本和标签两个体系召回相关的帖子，但线上仍存在大量与query不相关的帖子被召回的现象，影响了用户的搜索体验，经过对不相关case分析发现，超过一半的误召回原因是“内容包含文本关键字但实际内容不相关”，例如，在实际招聘送餐员的帖子详情描述中包含“服务员不如送餐员”等语句，用户在搜索“服务员”时会命中该类帖子，导致与query不相关的帖子被召回。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d961849ab9bb450e971f7c8976cf4d91.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271933662.webp" />   
     </p>
 <p>因此，为了解决该类问题，我们构建了doc理解的能力，从文本语义角度出发，明确帖子真实在招的职位，过滤掉帖子标记不合理的文本及职位标签。</p>
 <p>在策略方案选择上，因为badcase模式多样且不断更新，无法基于模式匹配或文本统计特征等方式完全识别，经过调研，我们决定构建基于语义理解的深度网络模型，学习帖子描述和职位、类别等之间的关系。</p>
 <p>在模型训练阶段，将query和对应的帖子文本作为pair对输入模型，学习query和帖子文本的相关性。考虑到帖子的详情内容多为长文本，且大多数带有干扰项的描述有较突出的文本特点，为了能更好的捕捉长文本的位置关系，我们选用bert作为相关性识别的主要模型，其双向transformer结构能帮助我们识别多种文本模式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/34fd12be2c9f4aaf9b227dccb2897875.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271933725.webp" />   
     </p>
 <p>在样本准备阶段，除了利用已知的行为信息标注样本外，我们也人工标注了2w+的样本，覆盖已知主要的badcase文本描述模式，同时，为了增加模型的泛化能力，采用随机职位替换、关键信息调换等数据增强的方式提高模型的鲁棒性。如“服务员不如送餐员”的case，前期会做如下三种样本补充：</p>
 <ul>
@@ -299,26 +299,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>线上环节，我们对帖子真实在招的职位进行预测，直接在索引建库环节过滤掉不相关的文本及职位标签，避免在检索阶段重复召回造成对资源的浪费。同时，索引写入阶段异步的调用方式对时效性要求相对较低，支持采用bert等参数量级较大的模型进行在线预测。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f6030bf116c14268a16c9cfdba111098.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271933451.webp" />   
     </p>
 <p>一期模型上线后，线上综合搜流量下，策略影响产品的准确率提升17%，极大提升了搜索体验。二期，我们将识别的范围扩大到对非职位词、类别与帖子文本相关性的识别上，目前相关能力已经在58搜索主要商业产品的全部流量上应用，在通过文本和标签通道召回的帖子中，各产品线上正确率均提升10%-20%。</p>
 <h2 id="44-向量通道---向量召回-能力"><strong>4.4 向量通道</strong> <strong>-</strong> <strong>向量召回</strong> <strong>能力</strong></h2>
 <p>通过以上意图及文本等召回策略，已经极大地提高了搜索召回能力，但分析发现，存在大量语义相近但文本不包含的帖子未被召回，如搜索“寒假工”，可以召回在帖子描述中不包含寒假工，但包含“学徒”、“短期工”等的帖子，这部分通过标签及文本匹配等方式难以被召回。另一方面，其他通道存在标签映射、切词、文本匹配等多个环节，每个环节的问题都会对最终召回效果产生影响。为了解决上述问题，需要直接从语义出发，根据query和doc的相关性直接召回帖子。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dafd5967951e4c198c538fde4af191a0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271933228.webp" />   
     </p>
 <p>相关性表示在策略层面已经有较成熟的方案，问题的难点主要集中在相关性学习能力和召回阶段检索性能的权衡。为了解决上述问题，策略框架层面，我们采用业界常用的表示型语义匹配方式 - 双塔结构对query和帖子doc进行向量表征，通过向量空间距离去刻画query和doc的相关性。双塔结构既满足了召回阶段对性能的要求，同时也能更好地适配现有的检索架构，从而支持算法快速落地及迭代。从算法角度，双塔结构虽不能最大限度学习到帖子和query特征交叉的信息，但对于在召回阶段更大限度扩充候选集的目的，该结构已基本能满足算法要求。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/468f9c5355d1457890e2aceca7db1400.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271933943.webp" />   
     </p>
 <p>模型部分，在传统DSSM结构下我们加入CNN的网络结构。CNN的学习方式能更好地帮助我们学习到帖子上下文信息。</p>
 <p>同时，为了能更好提高短-长文本匹配的效果，我们将注意力放在对帖子doc的长文本处理上，初版模型我们将帖子标题加详情全文作为doc侧的输入，发现效果远不如只将帖子标题或标题加详情首句输入的效果好，说明长篇幅的详情内容加入了过多的冗余信息，反而不利于模型学习到帖子描述的核心内容。同时，因为帖子描述存在误导性信息，我们利用上文已经建设成熟的doc理解能力，对帖子文本内容进行过滤，剔除掉一些不相关的干扰文本。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7ac4d5698a4e4958aea1fd2b35813d9e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271933609.webp" />   
     </p>
 <p>模型评测方面，除了考虑auc等常规评估方式外，为了能更直观评估召回阶段的效果，我们也抽样评估了单query下，在相似度头部排序区间的正样本数量，如下表所示，在相似度排名前60的样本中，表现较好的query如“淘宝客服”下，正样本多集中在排名靠前区域，说明该query下模型效果较好。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/61000425bdc94bb38cc9f963499f0a11.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271933520.webp" />   
     </p>
 <p>上线后，在向量召回生效的流量下，pvr及asn均取得了15%~20%的增长，带来cash/uv和resume/uv 10%的增长，在扩大召回能力的同时，人工评估线上整体准确率也保持不变，满足对搜索相关性的要求。</p>
 <p>对效果进一步分析发现，样本质量很大程度上决定了最终的效果上限。模型在高频词上相关性表现更好，主要因为高频词对应的样本相关性更好，样本量也更丰富，使模型可以充分学习，而目前基于行为的样本标注方式，使低频query下因为行为数据稀疏导致样本不足，或样本噪声过大。针对以上问题，目前我们也在探索通过word2vec、EGES等方式，挖掘帖子与帖子间关系，更好地对低</p>
@@ -447,6 +447,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -480,10 +484,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -862,6 +862,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

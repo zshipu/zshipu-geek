@@ -217,7 +217,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在这个工作中，我们尝试赋予推荐系统相关推荐的能力，使用户能够进行深度拓展阅读，提升用户体验和黏性，而一个直观的想法就是参考搜索引擎中的主动信息获取。</p>
 <p>在搜索中，query suggestion需要基于用户已经输入的query，预测用户意图，根据语义相似度输出符合用户意图的一组query候选。query suggestion可以看作是在搜索中的相关query的推荐。类似query suggestion，在推荐中，我们提出了一个新的任务——推荐建议（recommendation suggestion），基于用户刚刚点击过的文章，预测用户是否需要相关推荐以及在相关推荐上的偏好，输出合适的相关文章。这个任务可以看作是在推荐中的搜索，用户刚点击过的文章即为query suggestion中的query，可以看做是用户潜意识中给系统的重要反馈。图1给出了在微信看一看中的相关推荐建议系统示意图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/680ea9730262428182ae702525ac051b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281734124.png" />   
     </p>
 <p>图1：相关推荐系统示意图</p>
 <p>右屏展示了实时相关推荐的产品形态和效果。相关文章都被组织在relevant box中，实时插入至紧靠主推荐流里刚点击的文章的后面。</p>
@@ -244,45 +244,45 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>延迟成本（delay cost）</strong>：相关box实时插入时会导致原推荐流中种子文章之下的文章曝光延迟或者无法曝光。这种曝光损失被称为延迟成本。</p>
 <p>R3S系统包含了文章推荐（Item recommender）和Box触发（Box trigger）两个模块。首先，在文章推荐模块中，输入特征被划分成四个特征组，分别是种子文章特征、候选文章特征、用户属性特征以及推荐上下文特征。前两个特征组内拥有相同数量的特征域。具体地，我们使用了Multi-critic multi-gate mixture-of-experts (M3oE)模型抽取有用的特征，M3oE模型示意图如下图2。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/81c2960be5f4432ab1df0defbfdcb0f3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281734699.png" />   
     </p>
 <p>图2：M3oE模型示意图</p>
 <p>我们设置了FINet，SimNet和IGNet作为三个专家网络，分别专注抽取（1）基于self-attention的特征交互、（2）种子文章和候选相关文章的语义相似性，和（3）候选相关文章对比种子文章的信息增益。三个专家网络的结构图如图3。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b9df0527da2d4b8091852a2f968634b4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281734938.png" />   
     </p>
 <p>图3：FINet，SimNet和IGNet专家网络示意图</p>
 <p>具体地，FINet关注基本特征交互，我们使用multi-head attention计量特征交互：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/aaa6557d8a6f4ab1bc14cadac75a0aaa.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281734337.png" />   
     </p>
 <p>对于SimNet（负责语义相似度），我们重点关注了种子文章特征组和候选文章特征组之间的相似性，使用向量点乘和按位乘计算语义相关性：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fdc92c5e551948b48a2befd66b3cfc86.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281734459.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/61a923857b9f488692be0900c533a45c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281734284.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c47adf878558425fa324e5e7bdbcd849.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281734112.png" />   
     </p>
 <p>对于IGNet（负责信息增益），我们关注了候选文章特征组比种子文章特征组新增的信息，根据特征组的类别设置了两种计算方式。对于类别型的特征域（如用户感兴趣的tag），我们关注种子和候选文章的差集；对于连续型的特征域（如用户年龄、性别等），我们关注特征向量的差。具体形式化定义如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/afa2ef89d4734272baf0a53ba7ed352a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281734093.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/15befc5b96ca448ea2bf895467e61f34.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281734082.webp" />   
     </p>
 <p>对于这些专家的特征聚合，我们参考MMoE模型，设计了M3oE模型。具体地，我们使用multi-head策略产生不同的评论家（critic），然后每个评论家分别对各个专家计算权值，最终进行加权聚合。具体如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bc106d421aa3494b81e6681142b73a85.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281734915.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/418111580a8140439c167cb2c951fcc1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281734631.png" />   
     </p>
 <p>最后，加权聚合特征加入到具体MSE loss中训练模型：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/96dd225109f0403f95a2de7e4144910a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281734511.png" />   
     </p>
 <p>Box触发模块和文章推荐模块类似，也是使用M3oE和三个专家网络进行特征交互。除此之外，Box触发模块在特征计算上，还考虑了用户对于种子文章的满意度，以及相关推荐文章实时插入带来的延迟</p>
 
@@ -410,6 +410,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -443,10 +447,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -825,6 +825,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

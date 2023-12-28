@@ -218,11 +218,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>导读</strong></p>
 <p>在单 GPU 上就可以运行的 Transformer 模型，而且几乎不损失精度，了解一下？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-fcac52f37cd54e1498f515896677db6a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734709.jpeg" />   
     </p>
 <p>如果你一直在开发机器学习算法用于处理连续数据 —— 例如语言处理中的文本，语音信号，或视频 —— 你可能听说过或使用过 Transformer，你可能知道这和是推特中认为的不同于一个东西。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-8d3dcdf79b0e4bb1bfd1776b1fc6f812.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734731.jpeg" />   
     </p>
 <p>图 1，打破僵局，摘自 Chris Manning 教授的推特</p>
 <p>最近，谷歌推出了 Reformer 架构，Transformer 模型旨在有效地处理处理很长的时间序列的数据(例如，在语言处理多达 100 万个单词)。Reformer 的执行只需要更少的内存消耗，并且即使在单个 GPU 上运行也可以获得非常好的性能。论文 Reformer: The efficient Transformer 将在 ICLR 2020 上发表(并在评审中获得了近乎完美的分数)。Reformer 模型有望通过超越语言应用(如音乐、语音、图像和视频生成)对该领域产生重大影响。</p>
@@ -234,7 +234,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在深入研究 reformer 之前，让我们回顾一下 Transformer 模型的挑战之处。这需要对 transformer 体系结构本身有一定的了解，在这篇文章中我们无法一一介绍。然而，如果你还不知道，Jay Alamar 的 The Illustrated Transformer： <a href="https://zshipu.com/t?url=http%3A%2F%2Fjalammar.github.io%2Ftransformer%2F">http://jalammar.github.io/transformer/</a> 是迄今为止最好的可视化解释，我强烈建议在阅读本文其余部分之前先阅读他的文章。</p>
 <p>尽管 transformer 模型可以产生非常好的结果，被用于越来越多的长序列，例如 11k 大小的文本，许多这样的大型模型只能在大型工业计算平台上训练，在单个 GPU 上一步也跑不了，因为它们的内存需求太大了。例如，完整的 GPT-2 模型大约包含 1.5B 参数。最大配置的参数数量超过每层 0.5B，而层数有 64 层。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-dc8d8b62220e402db8be56aa99e06524.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734626.jpeg" />   
     </p>
 <p>图 2：标准 Transformer 模型的简化图</p>
 <p>如果这个模型看起来不熟悉或似乎很难理解，我劝你们暂停在这里回顾一下 Transformer。</p>
@@ -253,16 +253,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="-注意力以及最近的邻居">💭 注意力以及最近的邻居</h2>
 <p>在深度学习中，注意力是一种机制，它使网络能够根据上下文的不同部分与当前时间步长之间的相关性，将注意力集中在上下文的不同部分。transformer 模型中存在三种注意机制：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-7888b060efa74ba59b5a4fc9c82a220c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734389.png" />   
     </p>
 <p>图 3：在 Transformer 模型三种类型的注意力</p>
 <p>在 Transformer 中使用的标准注意里是缩放的点积，表示为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-16888f10389446b5813b2dc0fb938c05.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734235.png" />   
     </p>
 <p>从上面的方程和下面的图，它可以观察到，QK ᵀ的计算和内存的消耗都是 O (L ²) 复杂度的，这是主要的内存瓶颈。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-d31a3975121a40c49b13c3a7694a4d7a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734230.jpeg" />   
     </p>
 <p>图 4：(左)：点积注意力的主要计算，(右)token(“it”)对于序列(“the”、“animal”、“street”、“it”、“it”)的注意力子集。</p>
 <p>但这是计算和存储完整的矩阵 QK ᵀ是必要的吗 ?答案是不， <em>,</em> 我们感兴趣的是 softmax*( <em>QK ᵀ</em> )，它是由最大的元素决定的，通常是稀疏矩阵。因此，正如你在上面的示例中所看到的，对于每个查询 <em>q</em>，我们只需要注意最接近 <em>q</em> 的键 <em>k</em>。例如，如果长度是 64K，对于每个 <em>q</em>，我们可以只考虑 32 或 64 个最近的键的一个小子集。因此，注意力机制查找 query 的最近邻居键，但效率不高。这是不是让你想起了最近邻搜索？</p>
@@ -271,18 +271,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>LSH 是一种著名的算法，它在高维数据集中以一种“高效”和“近似”的方式搜索“最近的邻居”。LSH 背后的主要思想是选择 <em>hash</em> 函数，对于两个点 p 和 q，如果 q 接近 p，那么很有可能我们有 hash(q) == hash(p) 。</p>
 <p>做到这一点最简单的方法是用随机超平面不断的分割空间，并在每个点上加上 sign(p ᵀH)作为 hash 码。让我们来看一个例子：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-a93ad64fe1484733bcb71ead2ad93cd6.gif" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734242.gif" />   
     </p>
 <p>图 5：用于最近邻搜索的局部敏感哈希的简化动画</p>
 <p>一旦我们找到所需长度的哈希码，我们就根据它们的哈希码将这些点分成桶 —— 在上面的例子中，a 和 b 属于同一个桶，因为 <em>hash(a) == hash(b)</em>。现在，查找每个点的最近邻居的搜索空间大大减少了，从整个数据集到它所属的桶中。</p>
 <p>Angular LSH：普通 LSH 的一个变化，成为 Angular LSH，使用不同的编码把点投影到单位球上预先定义好的区域里。然后一系列随机旋转的点定义了这些点所属的桶。让我们通过一个简单的 2D 例子来说明这一点，这个例子来自于 Reformer 的论文：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-babc2f0983d6414e9e992703782cd28e.gif" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734831.gif" />   
     </p>
 <p>图 6：Angular LSH 最近邻搜索的简化动画，两个点在不同的桶</p>
 <p>这里我们有两个点，它们投影到一个单位圆上，并随机旋转 3 次，角度不同。我们可以观察到，它们不太可能共享同一个 hash 桶。在下一个例子中，我们可以看到两个非常接近的点在 3 次随机循环后将共享相同的 hash 桶：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-6f726711a8eb4e3cb82b56eeda251e0b.gif" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734489.gif" />   
     </p>
 <p>图 7：Angular LSH 最近邻搜索的简化动画：两个点很近</p>
 <h2 id="-lsh-注意力">🚀 LSH 注意力</h2>
@@ -298,7 +298,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>多回合的 LSH 注意力</strong>：重复以上步骤几次，以增加相似的物品落入相同的桶中的概率。</p>
 <p>下面的动画演示了一个 LSH 注意力的简化版本。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-94575f3a9cfc4060b4af51b105c2c3f9.gif" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734140.gif" />   
     </p>
 <p>图 6：LSH 注意机制的简化示意图</p>
 <h1 id="-2-可逆-transformer-和分块">💥 2. 可逆 Transformer 和分块</h1>
@@ -307,7 +307,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>仔细观察图 2 中的编码器和解码器块，我们发现每个注意力层和前馈层都被包装成一个残差块(类似于图 6(左)所示)。残差网络*(*ResNets)，是用来帮助解决深层网络(多层)中的消失梯度问题的强大组件。然而，ResNets 的内存消耗是一个瓶颈，因为需要在内存中存储每一层的激活来计算反向传播期间的梯度。内存成本与网络中的单元数量成正比。</p>
 <p>为了解决这个问题，由一系列可逆块组成的[可逆残差网络(RevNet)]( <a href="https://zshipu.com/t?url=https%3A%2F%2Fpapers.nips.cc%2Fpaper%2F6816reversib-resinetworkworkbackwithoutoutstorings">https://papers.nips.cc/paper/6816reversib-resinetworkworkbackwithoutoutstorings</a> -activations.pdf)。在 Revnet 中，每一层的激活都可以从后续层的激活中精确地重建，这使得我们可以在不将激活存储在内存的情况下执行反向传播。图 6 表示了残差块和可逆残差块。注意我们如何从它的输出(Y ₁, Y ₂)计算物体的输入(X ₁, X ₂)。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-cad30d1d9d704a61bdb0890b41f172a3.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734638.jpeg" />   
     </p>
 <p>图 6：残差网络块(左)和可逆残差块(右)</p>
 <h2 id="-可逆-transformer">🚀 可逆 Transformer</h2>
@@ -317,14 +317,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="-分块">🚀 分块</h2>
 <p>在 Reformer 的效率改进的最后一部分处理第三个问题，即前馈层的高维中间向量 — 可以达到 4K 和更高的维度。由于前馈层的计算是独立于序列的各个位置的，所以前向和后向的计算以及反向的计算都可以被分割成块。例如，对于向前传递，我们将有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-146110091d5f45089ef28761ae95e524.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734392.png" />   
     </p>
 <p>前向通道计算中的分块</p>
 <h1 id="-实验结果">🚀 实验结果</h1>
 <p>作者分别对图像生成任务 <em>imagenet64</em>(长度为 12K)和文本任务 <em>enwik8</em>(长度为 64K)进行了实验，评价了可逆 Transformer 和 LSH 哈希对内存、精度和速度的影响。</p>
 <p>🎉可逆 Transformer 匹配基准：他们的实验结果表明，可逆的 Transformer 可以节省内存不牺牲精度：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-f8a161cf10864011bc981c14287bf9ff.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734039.png" />   
     </p>
 <p>在 enwik8 和 imagenet64 训练中，可逆性对性能的影响</p>
 <p>🎉LSH 注意力匹配基准：📔注意 LSH 注意力是一个近似的全注意力，其准确性随着散列值的增加而提高。当哈希值为</p>
@@ -455,6 +455,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -488,10 +492,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -870,6 +870,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

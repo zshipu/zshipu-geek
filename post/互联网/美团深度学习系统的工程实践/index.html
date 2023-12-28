@@ -223,7 +223,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>本文将首先列举部分深度学习算法所需的计算量，然后再介绍为满足这些计算量，目前业界比较常见的一些解决方案。最后，我们将介绍美团平台在NLU和语音识别两个领域中，设计相关系统的经验。</p>
 <h1 id="深度学习的计算量"><strong>深度学习的计算量</strong></h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/03b637e15ef841929c4b142e5d4cc45b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281712324.webp" />   
     </p>
 <blockquote>
 <p><a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2Falbanie%2Fconvnet-burden">数据来源</a></p>
@@ -247,21 +247,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="数据并行data-parallelism"><strong>数据并行（Data Parallelism）</strong></h3>
 <p>数据并行，即每个计算单元都保留一份完整的模型拷贝，分别训练不同的数据，经过一个Iteration或若干个Iteration后，把各个计算单元的模型做一次同步。这是最常见的深度学习训练方式，好处在于逻辑简单、代码实现方便。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0da349b333024818976ff2346b87cacf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281712282.webp" />   
     </p>
 <h3 id="模型并行model-parallelism"><strong>模型并行（Model Parallelism）</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6c6df1b093514233a2413663886ef492.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281712261.webp" />   
     </p>
 <p>模型并行，即各个计算单元存储同一层模型数据的不同部分，训练相同的数据。相对于数据并行，因为各个运算单元每训练完一层神经网络，就必须要同步一次，频繁的同步通信导致系统不能充分地利用硬件的运算能力，所以更为少见。但是在一些业务场景下，Softmax层需要分类的类别可能会有很多，导致Softmax层太大，单个计算单元无法存储，这时需要把模型切割成若干部分，存储在不同的运算单元。模型并行常见于NLU、推荐、金融等领域。</p>
 <h3 id="流式并行stream-parallelism"><strong>流式并行（Stream Parallelism）</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3d8fdb1de02644bda8b79f36bc9e382b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281712326.webp" />   
     </p>
 <p>流式并行，即每个计算单元都存储不同层的模型数据，训练相同的数据。如上图所示，GPU1只负责第一层神经网络的计算，GPU2只负责2~5层神经网络的计算，GPU3只负责第6层的计算。流式并行的好处在于每个运算单元之间的通信和计算重叠（overlap），如果配置得当，可以非常充分地利用硬件资源。缺点在于，根据不同的模型，需要平衡好各个计算单元的计算量，如果配置不好，很容易形成“堰塞湖”。如上图所示，很有可能出现GPU1 负责的运算量太少，而GPU2 负责的运算量太多，导致GPU1 和GPU2 之间堵塞住大量的Mini-batch，更常见于线上环境。</p>
 <h3 id="混合并行hybrid-parallelism"><strong>混合并行（Hybrid Parallelism）</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5e6c66bdff32468cb5dd325058937009.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281713381.webp" />   
     </p>
 <p>混合并行，即上面提到的并行方式的混合。如对于一些图像识别任务来说，可能前几层使用数据并行，最后的Softmax层，使用模型并行。</p>
 <h2 id="异构计算的硬件解决方案"><strong>异构计算的硬件解决方案</strong></h2>
@@ -297,16 +297,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>根据上面的数据结果，我们似乎可以得出一个结论：PCI-E和网络的传输耗时，相对于GPU来说，整整少了一个数量级，所以网络通信同步的时间可以忽略不计。然而问题并没有那么简单，上面例子中的耗时只是单个模型的耗时，但是对于8卡的集群来说，如果使用数据并行，每次同步就需要传输8份模型，这就导致数据传输的时间和GPU的计算时间“旗鼓相当”。这样的话，GPU就得每训练完一个Mini-batch，都得等候很久的一段时间（采取同步更新），这会浪费很多计算资源。因此，网络通信也需要制定对应的解决方案。下面我们以Nvidia NCCL中单机多卡的通信解决方案为例介绍，而多机多卡的通信解决方案其实是类似的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0db29c3ebbaa430cb2601ce15274d32a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281713615.webp" />   
     </p>
 <p>上图是单机4卡机器，在硬件上是两种不同的通信体系。左边为普通的PCI-E通信，即4个GPU之间组成一个环状。右边为NVLink通信，即两两之间相互连接。</p>
 <p>常见的通信类型如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6bfa331b44ea4843aee4510bc50d3f6f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281713589.webp" />   
     </p>
 <p>对于深度学习训练而言，关键的两种通信类型为：Broadcast和Reduce。Broadcast用于Master分发最新的模型给各个GPU。Reduce 用于各个GPU计算完Mini-batch后，把模型更新值汇总到Master上。以Broadcast为例，最简单的通信方式是Master往各个GPU上发送数据，这样的耗时就是4次模型传输的时间，通信时间就会太长，一种简单的优化方法如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6f251e6d6fa049ba9c67ffda8a1aebc6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281713452.webp" />   
     </p>
 <p>即把所需要传输的数据分成若干块，然后通过接力的方式逐个传递，每个GPU都把自己最新的一块数据发送到下一个GPU卡上。这种传输方式能充分利用硬件层面的通信结构，使得需要的耗时大幅缩减。与此类似，Reduce的通信优化也可以采取相同的方式进行提速。</p>
 <h1 id="美团的定制化深度学习系统"><strong>美团的定制化深度学习系统</strong></h1>
@@ -345,34 +345,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="业务多变">业务多变</h4>
 <p>NLU任务的算法流程是多层级的，并且业务经常发生变化。如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4e7aaf06203946f8a767893ec268607c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281713287.webp" />   
     </p>
 <p>即随着业务要求的变化，NLU系统一开始的算法流程，只需要把一个Query分为两个类，但是到后面，极有可能会变成需要分为三个类别。</p>
 <h4 id="热更新">热更新</h4>
 <p>根据业务需求，或者为了紧急处理一些特殊问题，NLU线上系统经常需要做出快速响应，热更新算法模型。如最近的热点词“skr”，几乎是一夜之间，突然火爆起来。如下图所示的微博，如果不能正确理解“skr”的正确语义，可能就不能准确理解这条微博想要表达的意思。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/98a2713eb7b24a1eafd9aa209bfbba8a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281713035.webp" />   
     </p>
 <p>为了避免影响用户体验，我们可能会对NLU系统，马上进行热更新，把新模型紧急进行上线。</p>
 <h4 id="数据驱动的自动迭代闭环"><strong>数据驱动的自动迭代闭环</strong></h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/87d125c18ba04dfe8bc4b0692621f23e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281713985.webp" />   
     </p>
 <p>对于线上系统而言，构建如上图所示的自动迭代闭环，能更好地利用业务数据来提升服务质量。</p>
 <h3 id="nlu线上系统的核心设计"><strong>NLU线上系统的核心设计</strong></h3>
 <h4 id="算法流程的抽象"><strong>算法流程的抽象</strong></h4>
 <p>为了适应线上系统串联、多变的算法流程，我们把线上系统的算法进行抽象，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4bacd0f86ae445e69fa587d41a8beec9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281713941.webp" />   
     </p>
 <p>即每一个算法，都依赖于若干个槽位（Slot）和资源（Resource），一旦槽位和资源就位，就会触发对应的算法执行。算法的执行先通过算法适配器，来适配槽位和资源中的数据，转换成算子的输入格式。然后算子执行算法本身，执行完算子后，再经过算法解析器。算法解析器主要用于解析算法执行的结果，触发对应的槽位。如根据算法的结果，触发Top 3的结果。</p>
 <p>多个算法串联起来，就构建成如下结果：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/83b90dc5dffa42d8b5350cff63151d90.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281713812.webp" />   
     </p>
 <h4 id="热更新流程的设计"><strong>热更新流程的设计</strong></h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8a2bbd226f164b8299c9404fb8c13fb8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281713574.webp" />   
     </p>
 <p>如上图所示，我们把算法的热更新流程设计如上。初试状态为左上角，即多个Query使用同一份模型数据。当遇到模型更新的请求后，系统将会block住新�</p>
 
@@ -504,6 +504,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -537,10 +541,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -919,6 +919,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

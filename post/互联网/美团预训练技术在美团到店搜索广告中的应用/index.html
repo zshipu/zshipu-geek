@@ -269,7 +269,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>由于美团搜索广告涉及餐饮、休娱亲子、丽人医美等大量业务场景，并且不同场景之间差异较大。从过去的实践经验可知，对于某个业务场景下的相关性优化，利用该业务数据训练的子模型相比利用全业务数据训练的通用模型往往效果更佳，但这种方法存在几个问题：1) 多个子模型的维护和迭代成本更高；2) 某些小场景由于训练数据稀疏难以正确学习到文本表示。</p>
 <p>受到多业务子模型优缺点的启发，我们尝试了区分业务场景的多任务学习，利用BERT作为共享层学习各个业务的通用特征表达，采用对应不同业务的多个分类器处理BERT输出的中间结果，实际应用中根据多个小场景的业务相似程度划分成N类，亦对应N个分类器，每个样本只经过其对应的分类器。多业务模型的主要优势在于，能够利用所有数据进行全场景联合训练，同时一定程度上保留每个场景的特性，从而解决多业务场景下的相关性问题，模型结构如下图1所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2f6ed6136dba452cb4e03e1dcf94eede.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281717532.webp" />   
     </p>
 <p>图1 多业务模型结构</p>
 <h4 id="引入品类信息的预训练">引入品类信息的预训练</h4>
@@ -277,13 +277,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>为了更合理的引入品类信息，我们对BERT模型的输入编码部分进行改造，除了与原始BERT一致的Query、Doc两个片段外，还引入了品类文本作为第三个片段，将品类文本作为额外片段的作用是防止品类信息对Query、Doc产生交叉干扰，使模型对于POI文本和品类文本区别学习。</p>
 <p>下图2为模型输入示意图，其中红色框内为品类片段的编码情况，Ec为品类片段的片段编码（Segment Embedding）。由于我们改变了BERT输入部分的结构，无法直接基于标准BERT进行相关性微调任务。我们对BERT重新进行预训练，并对预训练方式做了改进，将BERT预训练中用到的NSP（Next Sentence Prediction）任务替换为更适合搜索广告场景的点击预测任务，具体为“给定用户的搜索关键词、商户文本和商户品类信息，判断用户是否点击”。预训练数据采用自然及广告搜索曝光点击数据，大约6千万样本。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/194c6b6b5c924118b0882a25112a4e26.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281717502.webp" />   
     </p>
 <p>图2 BERT输入部分引入POI品类信息</p>
 <h4 id="模型优化离线效果">模型优化离线效果</h4>
 <p>为了清晰准确地反映模型迭代的离线效果，我们通过人工标注的方法构建了一份广告相关性任务Benchmark。基线ESIM模型、BERT模型以及本文提到的优化后BERT模型在Benchmark上的评估指标如下表1所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9dcef8a27dd247ceba468037c73697bd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281717516.webp" />   
     </p>
 <p>表1 广告相关性任务模型优化迭代指标</p>
 <p>我们首先利用上文介绍的数据增强后的训练样本训练了MT-BERT-Base模型（12层768维），与ESIM模型相比，各项指标均显著提升，其中AUC提升6.6PP。在BERT模型优化方面，多任务学习和引入品类信息这两种方式均能进一步提升模型效果，其中引入品类信息的MT-BERT-Base模型效果更佳，相比标准的MT-BERT-Base模型AUC提升1.2PP。</p>
@@ -295,24 +295,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>由于BERT模型的庞大参数量和前向预测耗时，直接部署上线会面临很大的性能挑战，通常需要将训练好的模型压缩为符合一定要求的小模型，业内常用模型压缩方案包括模型裁剪、低精度量化和知识蒸馏等。知识蒸馏[12]旨在有效地从大模型（教师模型）中迁移知识到小模型（学生模型）中，在业内得到了广泛的研究和应用，如HuggingFace提出的DistillBERT[13]和华为提出的TinyBERT[14]等蒸馏方法，均在保证效果的前提下大幅提升了模型性能。</p>
 <p>经过在搜索等业务上的探索和迭代，美团NLP团队沉淀了一套基于两阶段知识蒸馏的模型压缩方案，包括通用型知识蒸馏和任务型知识蒸馏，具体过程如下图3所示。在通用型知识蒸馏阶段，使用规模更大的预训练BERT模型作为教师模型，对学生模型在无监督预训练语料上进行通用知识蒸馏，得到通用轻量模型，该模型可用于初始化任务型知识蒸馏里的学生模型或直接对下游任务进行微调。在任务型知识蒸馏阶段，使用在有监督业务语料上微调的BERT模型作为教师模型，对学生模型在业务语料上进行领域知识蒸馏，得到最终的任务轻量模型，用于下游任务。实验证明，这两个阶段对于模型最终效果的提升都至关重要。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/de6837d3ff854380b6df214b02badbd5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281717513.webp" />   
      图3 两阶段知识蒸馏</p>
 <p>在美团搜索广告场景下，首先我们基于MT-BERT-Large（24层1024维）在大规模无监督广告语料上进行第一阶段通用型知识蒸馏，得到MT-BERT-Medium（6层384维）通用轻量模型，在下游的广告相关性任务上进行微调。MT-BERT-Medium属于单塔交互结构，如图4(a)所示。</p>
 <p>目前，每个Query请求会召回上百个POI候选，交互模型需要分别对上百个Query-POI对进行实时推理，复杂度较高，很难满足上线条件。常见解决方案是将交互模型改造成如图4(b)所示的双塔结构，即分别对Query和POI编码后计算相似度。由于大量候选POI编码可以离线完成，线上只需对Query短文本实时编码，使用双塔结构后模型效率大幅提升。我们使用通用型蒸馏得到的MT-BERT-Medium模型对双塔模型中Query和POI的编码网络进行初始化，并且在双塔在微调阶段始终共享参数，因此本文将双塔模型记为Siamese-MT-BERT-Medium（每个塔为6层384维）。双塔结构虽然带来效率的提升，但由于Query和POI的编码完全独立，缺少上下文交互，模型效果会有很大损失，如表2所示，Siamese-MT-BERT-Medium双塔模型相比MT-BERT-Medium交互模型在相关性Benchmark上各项指标都明显下降。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8eccc8f38cfd4e0ea472ec53b73aad00.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281717413.webp" />   
     </p>
 <p>图4 相关性模型结构对比</p>
 <p>为了充分结合交互结构效果好和双塔结构效率高的优势，Facebook Poly-encoder[15]、斯坦福大学ColBERT[16]等工作在双塔结构的基础上引入不同复杂程度的后交互层（Late Interaction Layer）以提升模型效果，如图4(c)所示。后交互网络能提升双塔模型效果，但也引入了更多的计算量，在高QPS场景仍然很难满足上线要求。针对上述问题，在第二阶段任务型知识蒸馏过程中，我们提出了虚拟交互机制（Virtual InteRacTion mechanism, VIRT），如图4(d)所示，通过在双塔结构中引入虚拟交互信息，将交互模型中的知识迁移到双塔模型中，从而在保持双塔模型性能的同时提升模型效果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8ef672d2c2a648eaa9aba649d80c514b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281718361.webp" />   
      图5 任务型知识蒸馏&amp;虚拟交互</p>
 <p>任务型知识蒸馏及虚拟交互的具体过程如上图5所示。在任务型知识蒸馏阶段，我们首先基于MT-BERT-Large交互模型在业务语料上进行微调得到教师模型。由于学生模型Siamese-MT-BERT-Medium缺乏上下文交互，如图5(b)所示，注意力矩阵中的灰色部分代表了2块缺失的交互信息，我们通过虚拟交互机制对缺失部分进行模拟，计算公式如下为：</p>
 <p>\widetilde{\mathbf{M}}_{\mathbf{x}\rightarrow\mathbf{y}} = \operatorname{softmax}\left( \mathrm{Attention}( \widetilde{\mathbf{H}}_{\mathbf{x}}\widetilde{\mathbf{W}}_q, \widetilde{\mathbf{H}}_{\mathbf{y}} \widetilde{\mathbf{V}}_k)\right)</p>
 <p>\widetilde{\mathbf{M}}_{\mathbf{y}\rightarrow\mathbf{x}} = \operatorname{softmax}\left( \mathrm{Attention}( \widetilde{\mathbf{H}}_{\mathbf{y}}\widetilde{\mathbf{V}}_q, \widetilde{\mathbf{H}}_{\mathbf{x}} \widetilde{\mathbf{W}}_k)\right)</p>
 <p>其中，\widetilde{\mathbf{H}}_{\mathbf{x}} 和\widetilde{\mathbf{H}}_{\mathbf{y}} 分别代表双塔模型中Query和POI表示，和分别是Query和POI进行编码时的模型参数， \widetilde{\mathbf{M}}_{\mathbf{x}\rightarrow\mathbf{y}} 代表了\widetilde{\mathbf{H}}_{\mathbf{x}} 到\widetilde{\mathbf{H}}_{\mathbf{y}} 的注意力（即图5(b)右上角缺失部分）， \widetilde{\mathbf{M}}_{\mathbf{y}\rightarrow\mathbf{x}} 代表了\widetilde{\mathbf{H}}_{\mathbf{y}} 到\widetilde{\mathbf{H}}_{\mathbf{x}} 的注意力（即图5(b)左下角缺失部分）。而交互模型包含了Query和POI的全交互，计算公式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/12/image-31f26f25.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281718365.png" />   
     </p>
 <p>其中，\mathbf{H}是交互模型中Query和POI的融合表示，可以分解为\mathbf{H}_x和\mathbf{H}_y，分别代表Query和POI，\mathbf{W}是模型参数。交互模型的自注意力矩阵可以分解为4个部分，其中\mathbf{S}_{\mathbf{x}\rightarrow\mathbf{y}}和\mathbf{S}_{\mathbf{y}\rightarrow\mathbf{x}}则是Query和POI之间的交互，也即双塔模型的缺失部分。我们对交互模型的交互矩阵和双塔模型的虚拟交互矩阵之间的L2距离进行最小化，从而将交互模型中的核心交互知识迁移到双塔模型中，计算过程为：</p>
 <p>\mathbf{M}_{\mathbf{x}\rightarrow\mathbf{y}} = \operatorname{softmax} \left( \mathbf{S}_{\mathbf{x}\rightarrow\mathbf{y}} \right) \\
@@ -321,7 +321,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>+ \left\|\widetilde{\mathbf{M}}_{\mathbf{y}\rightarrow\mathbf{x}} - \mathbf{M}_{\mathbf{y}\rightarrow\mathbf{x}} \right\|_2</p>
 <p>我们对蒸馏阶段各个模型进行了Benchmark上的效果评估以及线上QPS=50时的性能测试，结果如表2所示。通过虚拟交互进行任务型知识蒸馏得到的任务轻量模型Siamese-MT-BERT-Medium相较于直接对通用轻量模型进行微调得到的同结构的Siamese-MT-BERT-Medium（W/O任务型知识蒸馏）模型，各项效果指标明显提升，其中Accuracy提升1.18PP，AUC提升1.66PP，F1-Score提升1.54PP。最终我们对任务轻量模型Siamese-MT-BERT-Medium进行上线，相较于最初的MT-BERT-Large模型，线上推理速度提升56倍，完全满足线上服务的性能要求。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5bef5734ad764bbbbe148baa82bf5d43.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281718492.webp" />   
     </p>
 <p>表2 模型效果对比</p>
 <h3 id="相关性服务链路优化">相关性服务链路优化</h3>
@@ -336,13 +336,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>TOP位次相关性门槛</strong> ：首位、首屏等排序靠前的广告结果对于用户体验影响更大，因此针对TOP位次设置了相关性门槛，进一步改善用户体验。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/28774ac76b3b4fb79feffd94a1fba516.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281718348.webp" />   
     </p>
 <p>图6 相关性服务链路示意图</p>
 <h4 id="模型部署">模型部署</h4>
 <p>为了进一步提升服务性能并且能有效利用计算资源，模型部署阶段我们采用高频流量缓存、长尾流量实时计算的方案。对高频Query-POI对进行离线相关性计算并写入缓存，每日对新增或商品信息变化的Query-POI对进行增量计算并更新缓存，线上相关性服务优先取缓存数据，如果失效则基于蒸馏后的任务轻量模型进行实时计算。对于输入相关性服务的Query-POI对，缓存数据的覆盖率达到90%以上，有效缓解了在线计算的性能压力。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9dbc5e922b934bc7ba57193918caf7fa.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281718358.webp" />   
      图7 相关性分数离线/在线计算流程图</p>
 <p>线上实时计算的任务轻量模型使用TF-Serving进行部署，TF-Serving预测引擎支持使用美团机器学习平台的模型优化工具—ART框架（基于Faster-Transformer改进）进行加速，在将模型转为FP16精度后，最终加速比可达到5.5，数值平均误差仅为5e-4，在保证精度的同时极大地提高了模型预测的效率。</p>
 <h3 id="线上效果">线上效果</h3>
@@ -350,7 +350,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>除此之外，由于CTR能够通过用户行为间接反映广告的相关程度，并且便于在线上进行AB实验评估，而NDCG可以反映相关性分数用于广告列表排序的准确性，所以我们选取CTR和NDCG作为间接指标来辅助验证相关性模型迭代的有效性。我们对本文的优化进行了线上小流量实验，结果显示，实验组CTR提升1.0%，覆盖率降低1.0%，变现效率基本没有损失。并且经过人工评测，Badcase@5降低2.2PP，NDCG提升2.0PP，说明优化后的相关性模型能够对召回广告列表进行更加准确的校验，有效提升了广告相关性，从而给用户带来更好的搜索体验。</p>
 <p>下面列举了两个Badcase解决示例，图8(a)和8(b)分别包含了搜索“登记照”和“头皮SPA”时的基线返回结果（左侧截图）和实验组返回结果（右侧截图），截图第一位是广告结果。在这两个示例中，实验组相关性模型将不相关结果“麻朵新生儿摄影”和“莲琪科技美肤抗衰中心”检测出来并过滤掉，让相关广告得以首位展示曝光。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9111da59571b416182bc56f5a06e062b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281718586.webp" />   
      图8 Badcase解决示例</p>
 <h2 id="总结与展望">总结与展望</h2>
 <p>本文介绍了预训练技术在美团到店搜索广告相关性上的应用，主要包括样本数据增强、模型结构优化、模型轻量化及线上部署等优化方案。在数据增强方面，为了基于曝光点击数据构造出适合美团广告场景下相关性任务的训练数据，我们构造了多种类型负样本，在采样时考虑正样本置信度、关键词频率平滑、正负样本均衡等因素，另外也对POI和团单商品文本进行关键词抽取得到更加简短有效的文本特征。</p>
@@ -499,6 +499,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -532,10 +536,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -914,6 +914,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

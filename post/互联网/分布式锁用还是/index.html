@@ -209,20 +209,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>由于系统有一定的并发，所以会预先将商品的库存保存在 Redis 中，用户下单的时候会更新 Redis 的库存。</p>
 <p>此时系统架构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0680deede51441439b860ee20e8b8ecf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281600700.webp" />   
     </p>
 <p><strong>但是这样一来会产生一个问题：</strong> 假如某个时刻，Redis 里面的某个商品库存为 1。</p>
 <p>此时两个请求同时到来，其中一个请求执行到上图的第 3 步，更新数据库的库存为 0，但是第 4 步还没有执行。</p>
 <p>而另外一个请求执行到了第 2 步，发现库存还是 1，就继续执行第 3 步。这样的结果，是导致卖出了 2 个商品，然而其实库存只有 1 个。</p>
 <p>很明显不对啊！这就是典型的库存超卖问题。此时，我们很容易想到解决方案：用锁把 2、3、4 步锁住，让他们执行完之后，另一个线程才能进来执行第 2 步。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f2f43635365b44089a28be6463bef21d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281600250.webp" />   
     </p>
 <p>按照上面的图，在执行第 2 步时，使用 Java 提供的 Synchronized 或者 ReentrantLock 来锁住，然后在第 4 步执行完之后才释放锁。</p>
 <p>这样一来，2、3、4 这 3 个步骤就被“锁”住了，多个线程之间只能串行化执行。</p>
 <p>但是好景不长，整个系统的并发飙升，一台机器扛不住了。现在要增加一台机器，如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/88e03a4fdfef4969a468825cd6738b72.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281600867.webp" />   
     </p>
 <p>增加机器之后，系统变成上图所示，我的天！假设此时两个用户的请求同时到来，但是落在了不同的机器上，那么这两个请求是可以同时执行了，还是会出现库存超卖的问题。</p>
 <p>为什么呢？因为上图中的两个 A 系统，运行在两个不同的 JVM 里面，他们加的锁只对属于自己 JVM 里面的线程有效，对于其他 JVM 的线程是无效的。</p>
@@ -231,7 +231,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>分布式锁的思路是：</strong> 在整个系统提供一个全局、唯一的获取锁的“东西”，然后每个系统在需要加锁时，都去问这个“东西”拿到一把锁，这样不同的系统拿到的就可以认为是同一把锁。</p>
 <p>至于这个“东西”，可以是 Redis、Zookeeper，也可以是数据库。文字描述不太直观，我们来看下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/aa1b0ccb72f54840a86be52dd8c267b4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281600492.webp" />   
     </p>
 <p>通过上面的分析，我们知道了库存超卖场景在分布式部署系统的情况下使用 Java 原生的锁机制无法保证线程安全，所以我们需要用到分布式锁的方案。</p>
 <p>那么，如何实现分布式锁呢？接着往下看！</p>
@@ -264,7 +264,7 @@ end
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9db58f930f1c45149c1c6c13cdb33594.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281600388.webp" />   
     </p>
 <p>除了要考虑客户端要怎么实现分布式锁之外，还需要考虑 Redis 的部署问题。</p>
 <p>Redis 有 3 种部署方式：</p>
@@ -306,7 +306,7 @@ end
 </ul>
 <p>但是这样的这种算法还是颇具争议的，可能还会存在不少的问题，无法保证加锁的过程一定正确。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d8ebc4a6caff436eb26c01910b23da96.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281600217.webp" />   
     </p>
 <h3 id="另一种方式redisson"><strong>②另一种方式：Redisson</strong></h3>
 <p>此外，实现 Redis 的分布式锁，除了自己基于 Redis Client 原生 API 来实现之外，还可以使用开源框架：Redission。</p>
@@ -346,7 +346,7 @@ lock.unlock();
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1bfdef0470a440d485873c00ceb694b3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281600971.webp" />   
     </p>
 <p>这里稍微贴出来其实现代码：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">// 加锁逻辑
@@ -514,7 +514,7 @@ multiLock.unlock();
 <p>比如 /lock/001 释放了，/lock/002 监听到时间，此时节点集合为[/lock/002，/lock/003]，则 /lock/002 为最小序号节点，获取到锁。</p>
 <p>整个过程如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/814c424755f1445088f767c2001187b2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281601718.webp" />   
     </p>
 <p>具体的实现思路就是这样，至于代码怎么写，这里比较复杂就不贴出来了。</p>
 <hr>
@@ -578,7 +578,7 @@ interProcessMutex.release();
 }
 </code></pre><p>其实 Curator 实现分布式锁的底层原理和上面分析的是差不多的。这里我们用一张图详细描述其原理：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/eb4fcff2f1d74294bf17e53994ed6e19.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281601490.webp" />   
     </p>
 <p><strong>小结：</strong> 本节介绍了 ZK 实现分布式锁的方案以及 ZK 的开源客户端的基本使用，简要的介绍了其实现原理。</p>
 <h2 id="两种方案的优缺点比较">两种方案的优缺点比较</h2>
@@ -728,6 +728,10 @@ interProcessMutex.release();
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -761,10 +765,6 @@ interProcessMutex.release();
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1143,6 +1143,8 @@ interProcessMutex.release();
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

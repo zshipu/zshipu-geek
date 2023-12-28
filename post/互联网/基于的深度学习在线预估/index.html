@@ -234,7 +234,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>TensorFlow Serving是一个用于机器学习模型Serving的高性能开源库，它可以将训练好的机器学习模型部署到线上，使用gRPC作为接口接受外部调用。TensorFlow Serving支持模型热更新与自动模型版本管理，具有非常灵活的特点。</p>
 <p>下图为TensorFlow Serving整个框架图。Client端会不断给Manager发送请求，Manager会根据版本管理策略管理模型更新，并将最新的模型计算结果返回给Client端。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2018/10/d05c82508487493dbfabb2dedbcef427.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271756705.png" />   
     </p>
 <p>TensorFlow Serving架构，图片来源于TensorFlow Serving官方文档</p>
 <p>美团内部由数据平台提供专门TensorFlow Serving通过YARN分布式地跑在集群上，其周期性地扫描HDFS路径来检查模型版本，并自动进行更新。当然，每一台本地机器都可以安装TensorFlow Serving进行试验。</p>
@@ -258,25 +258,25 @@ for (int i = 0; i &lt; request-&gt;ad_feat_size(); ++i) {
                                       params=hparams)
 </code></pre><p>下图为使用tf.profiler，网络在向前传播的耗时分布图，可以看出使用feature_column API的特征处理耗费了很大时间。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2018/10/b414306c61be431d8f6afab5ee204940.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271756815.png" />   
     </p>
 <p>优化前profiler记录， 前向传播的耗时占总训练时间55.78%，主要耗费在feature_column OPS对原始数据的预处理</p>
 <p>为了解决特征在模型内做处理耗时大的问题，我们在处理离线数据时，把所有string格式的原生数据，提前做好One Hot的映射，并且把映射关系落到本地feature_index文件，进而供线上线下使用。这样就相当于把原本需要在模型端计算One Hot的过程省略掉，替代为使用词典做O(1)的查找。同时在构建模型时候，使用更多性能有保证的低阶API替代feature_column这样的高阶API。下图为性能优化后，前向传播耗时在整个训练流程的占比。可以看出，前向传播的耗时占比降低了很多。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2018/10/22d62960dd8c4010ac915fd5eb7be4f1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271756288.png" />   
     </p>
 <p>优化后profiler记录，前向传播耗时占总训练时间39.53%</p>
 <h4 id="323-xlajit编译优化">3.2.3 XLA，JIT编译优化</h4>
 <p>TensorFlow采用有向数据流图来表达整个计算过程，其中Node代表着操作（OPS），数据通过Tensor的方式来表达，不同Node间有向的边表示数据流动方向，整个图就是有向的数据流图。</p>
 <p>XLA（Accelerated Linear Algebra）是一种专门对TensorFlow中线性代数运算进行优化的编译器，当打开JIT（Just In Time）编译模式时，便会使用XLA编译器。整个编译流程如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://segmentfault.com/img/remote/1460000016659536" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271756826.png" />   
     </p>
 <p>TensorFlow计算流程</p>
 <p>首先TensorFlow整个计算图会经过优化，图中冗余的计算会被剪掉。HLO（High Level Optimizer）会将优化后的计算图 生成HLO的原始操作，XLA编译器会对HLO的原始操作进行一些优化，最后交给LLVM IR根据不同的后端设备，生成不同的机器代码。</p>
 <p>JIT的使用，有助于LLVM IR根据 HLO原始操作生成 更高效的机器码；同时，对于多个可融合的HLO原始操作，会融合成一个更加高效的计算操作。但是JIT的编译是在代码运行时进行编译，这也意味着运行代码时会有一部分额外的编译开销。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2018/10/62966dbc0043483eb8b3a0b5ad411048.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271756592.png" />   
     </p>
 <p>网络结构、Batch Size对JIT性能影响[7]</p>
 <p>上图显示为不同网络结构，不同Batch Size下使用JIT编译后与不使用JIT编译的耗时之比。可以看出，较大的Batch Size性能优化比较明显，层数与神经元个数变化对JIT编译优化影响不大。</p>
@@ -284,13 +284,13 @@ for (int i = 0; i &lt; request-&gt;ad_feat_size(); ++i) {
 <h4 id="324-最终性能">3.2.4 最终性能</h4>
 <p>经过上述一系列的性能优化，模型预估时间从开始的10ms降低到1.1ms，请求时间从5ms降到2ms。整个流程从打包发送请求到收到结果，耗时大约6ms。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2018/10/688e092530cf4457a6822729ee6a0611.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271756257.png" />   
     </p>
 <p>模型计算时间相关参数：QPS:1308，50line:1.1ms，999line:3.0ms。下面四个图分别为：耗时分布图显示大部分耗时控制在1ms内；请求次数显示每分钟请求大约8万次，折合QPS为1308；平均耗时时间为1.1ms；成功率为100%</p>
 <h3 id="33-模型切换毛刺问题">3.3 模型切换毛刺问题</h3>
 <p>通过监控发现，当模型进行更新时，会有大量的请求超时。如下图所示，每次更新都会导致有大量请求超时，对系统的影响较大。通过TensorFlow Serving日志和代码分析发现，超时问题主要源于两个方面，一方面，更新、加载模型和处理TensorFlow Serving请求的线程共用一个线程池，导致切换模型时候无法处理请求；另一方面，模型加载后，计算图采用Lazy Initialization方式，导致第一次请求需要等待计算图初始化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2018/10/88f9ce60d1644ee9a884324e6e42026f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271756212.png" />   
     </p>
 <p>模型切换导致请求超时</p>
 <p>问题一主要是因为加载和卸载模型线程池配置问题，在源代码中：</p>
@@ -301,7 +301,7 @@ uint32 num_unload_threads = 0;
 <p>对于问题二，模型首次运行耗时较长的问题，采用在模型加载完成后提前进行一次Warm Up运算的方法，可以避免在请求时运算影响请求性能。这里使用Warm Up的方法是，根据导出模型时设置的Signature，拿出输入数据的类型，然后构造出假的输入数据来初始化模型。</p>
 <p>通过上述两方面的优化，模型切换后请求延迟问题得到很好的解决。如下图所示，切换模型时毛刺由原来的84ms降低为4ms左右。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2018/10/f5716a4160fa4ea68e91233aa00d1c6f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271756222.png" />   
     </p>
 <p>优化后模型切换后，毛刺降低</p>
 <h2 id="四总结与展望">四、总结与展望</h2>
@@ -435,6 +435,10 @@ uint32 num_unload_threads = 0;
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -468,10 +472,6 @@ uint32 num_unload_threads = 0;
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -850,6 +850,8 @@ uint32 num_unload_threads = 0;
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

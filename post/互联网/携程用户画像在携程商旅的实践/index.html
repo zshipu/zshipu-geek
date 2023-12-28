@@ -206,7 +206,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>用户画像这一概念最早源于交互设计领域，由交互设计之父Alan Cooper提出。其指出用户画像是真实用户的虚拟代表，是建立在真实数据之上的目标用户模型。具体而言，在互联网用户分析领域，用户画像可以简单描述为用户信息标签化，即通过收集并分析用户的社会属性、生活习惯、消费偏好等各维度的数据，从而抽象出用户的全方位多视角的特征全貌，最终就是让用户画像比用户更了解自己。</p>
 <p>用户画像作为让大数据“走出”数据仓库的典型落地应用之一，是企业精细化运营和精准营销服务的基础服务设施。本文将主要围绕画像数据流转结构设计与画像查询服务架构设计两个方面探讨用户画像在携程商旅的实践。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-57a847ff76e24ac58e45af841356e9e0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272027615.png" />   
     </p>
 <p>图片为某公司用户画像 dashboard 示例，涉及数据为脱敏数据</p>
 <h2 id="二携程商旅用户画像标签体系"><strong>二、携程商旅用户画像标签体系</strong></h2>
@@ -237,7 +237,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="三携程商旅用户画像数据流转结构"><strong>三、携程商旅用户画像数据流转结构</strong></h2>
 <p>用户画像数据的生产与消费通常涉及数据收集、数据清洗、特征生成、标签建模、标签应用等多个环节。整个工程实现方案中离线计算主要涉及Spark、Hive等框架 ，实时计算采用的是Flink、Kafka等框架，数据存储主要涉及Hive、Redis、MongoDB。下图为携程商旅用户画像的数据流转整体结构图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-7690a2b3b7b54e5881ffa0ab6e01fb41.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272027276.webp" />   
     </p>
 <p><strong>1）数据收集</strong></p>
 <p>携程商旅用户画像数据主要来源于离线数据和线上实时埋点数据。离线数据主要存储在Hive数据仓库，包括业务数据、日志数据、其他BU共享的三方数据。线上实时埋点数据主要推送到Kafka集群，如用户点击数据、浏览数据等。</p>
@@ -280,7 +280,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>针对这个问题，我们参考了 Storm 的作者 Nathan Marz 提出的 Lambda 三层架构，包括批处理层 （Batch Layer） 、流数据层（Speed Laye）、服务层（Serving Layer）。</p>
 <p>Lambda 架构的设计是为了在处理大规模数据时，同时发挥流处理和批处理的优势。通过批处理提供全面、准确的数据，通过流处理提供低延迟的数据，从而达到平衡延迟、吞吐量和容错性的目的。这三层架构，应该可以覆盖绝大多数的大数据团队架构的场景。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-c0a1b26a08dc4331839c473252b45488.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281604778.png" />   
     </p>
 <ul>
 <li><strong>Batch Layer 批处理层</strong>，对历史数据进行批计算，数据可以T+1生产。由于批处理是基于完整的历史数据集，对用户画像的刻画更加完备准确，所以准确性是可以保证的。批处理无法满足实时性要求，对最近那一次运行之后产生的数据就无能为力。</li>
@@ -290,7 +290,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>4.2 组件选择</strong></p>
 <p>Lambda三层架构只是一个思想，具体的实施还是要根据业务进行灵活变通，不能生搬硬套，我们可以根据自己的应用场景，自由选择技术框架组件来实现每一层的功能。以携程商旅画像查询服务为例，下图为Lambda三层架构的具体实现。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-f41709bf2a0641c4b2a431332c44d15f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272027565.png" />   
     </p>
 <p>批处理层我们主要选择了 Spark、Hive 进行离线数据处理，得到批数据视图，流处理层我们选用了 Flink 进行实时计算，得到实时数据视图，分别存储在 MongoDB 和 Redis 数据库中。其中对于 MongoDB 中的热数据我们也增加了持久化缓存层，以进一步提高数据查询性能，MongoDB 对于冷数据也具备高效的读写性能。</p>
 <h2 id="五小结"><strong>五、小结</strong></h2>
@@ -420,6 +420,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -453,10 +457,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -835,6 +835,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

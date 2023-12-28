@@ -207,7 +207,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <p>上一篇文章中，我们介绍了在索引（index）阶段，Lucene 收集了跟点数据相关的信息，这些信息在 <a href="https://zshipu.com/t?url=%255B%25E6%2596%2587%25E6%25A1%25A3%25E6%258F%2590%25E4%25BA%25A4%25E4%25B9%258Bflush%25EF%25BC%2588%25E4%25B8%2580%25EF%25BC%2589%255D%28https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F0716%2F74.html%29">flush</a> 阶段会被读取，用于生成索引文件。dim&amp;&amp;.dii，从本文开始介绍索引文件。dim&amp;&amp;.dii 生成的详细过程，如图 1 所示，另外阅读本文中需要前置知识： <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2Fsuoyinwenjian%2F2019%2F0424%2F53.html">索引文件之 dim&amp;&amp;dii</a>：</p>
 <p>图 1：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/1-0cbddb60.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218780.png" />   
     </p>
 <h2 id="mutablepointvalues">MutablePointValues</h2>
 <p>  MutablePointValues 为图 1 流程图的准备数据，该对象中包含了在索引阶段收集的点数据的信息，我们在文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2020%2F0329%2F128.html">索引文件的生成（八）之 dim&amp;&amp;dii</a> 中已经详细的展开介绍了，故这里只简单的列出这些信息：</p>
@@ -254,7 +254,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>  在后面的流程中，我们可以根据当前处理的节点编号来判断当前节点是内部节点（inner node）还是叶子节点（leaf node），在介绍 <code>构建BKD树的节点值（node value）</code> 时会详细展开介绍 numLeaves 的作用，这里先介绍下节点编号是什么：</p>
 <p>图 2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/2-70926ace.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218309.png" />   
     </p>
 <p>  图 2 中，按照广度遍历的顺序，依次为每一个节点赋予一个节点编号，节点编号的作用在后面的流程中会使用到。</p>
 <p>  另外 numLeaves 也用来初始化例如 splitPackedValues、leafBlockFPs，见下文。</p>
@@ -282,19 +282,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div><p>  leafBlockFPs 在随后的流程中会记录每一个叶子节点的信息在索引文件。dim 中的起始位置，如下所示：</p>
 <p>图 3：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/3-b9b50ab9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272219859.png" />   
     </p>
 <p>  图 2 中的 LeafNodeData 描述的是每个叶子节点的信息，可见 leafBlockFPs 数组中的数组元素数量为叶子节点的数量，即上文中的 numLeaves。</p>
 <h2 id="docsseen">docsSeen</h2>
 <p>  docsSeen 是一个 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2Fgongjulei%2F2019%2F0404%2F45.html">FixedBitSet</a> 对象，用来 <strong>去重记录</strong> 包含当前点数据域的文档的数量，例如我们添加下面两篇文档：</p>
 <p>图 4：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/4-41fa2e9d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272219352.png" />   
     </p>
 <p>  图 3 中，尽管有 3 条点数据内容，但是文档 1 中包含了 2 条，那么包含域名为&quot;content&quot;的点数据的文档的数量为 2，docsSeen 中统计的文档数量在后面的流程会被写入到索引文件。dim 中，如下红框所示：</p>
 <p>图 5：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/5-40fe66ba.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272219769.png" />   
     </p>
 <h2 id="parentsplits">parentSplits</h2>
 <p>  parentSplits 是一个 int 类型的数组，首先看下初始化这个数组的源码：</p>
@@ -439,6 +439,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -472,10 +476,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -854,6 +854,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

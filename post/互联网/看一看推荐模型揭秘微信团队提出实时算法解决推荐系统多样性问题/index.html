@@ -220,7 +220,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>本论文题为《Real-time Attention based Look-alike Model for Recommender System》，作者 Yudan Liu, Kaikai Ge, Xu Zhang, Leyu Lin，已被 KDD 19 接收，原文见附录。</p>
 <p>Look-alike 是广告领域经典的推荐算法，拥有定向能力强、用户扩展精准等优点。本文在微信看一看的推荐场景下对传统 look-alike 进行了改造，使之更适合高时效性的资讯推荐系统。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6d208ab568744432a633c949573a6a5a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281606913.jpeg" />   
     </p>
 <p>Fig.0. 微信看一看</p>
 <p>微信看一看面向全体微信用户，每天有数百万新闻、视频和公众号文章借由个性化推荐系统完成分发。在微信看一看，我们将各类深度学习算法广泛应用到了推荐系统的各个环节中。新闻资讯、运营专题和小众文章由于缺少历史行为或者倾向长尾，往往曝光效率不高，对此我们提出 RALM 模型尝试解决这个问题。</p>
@@ -237,7 +237,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="12-look-alike-model">1.2. Look-alike Model</h2>
 <p>综上所述，我们需要的是一个能精准建模 item 历史行为的模型。Look-alike 是广告领域流行的一类方法，其核心思想是针对某个 item，先根据历史行为圈定一部分种子用户，然后通过模型寻找与种子用户相似的人群，为他们推荐该 item。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fb518f75eded4dc38c3f37a478e640c7.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281606804.jpeg" />   
     </p>
 <p>Fig.1. Look-alike 算法原理</p>
 <p>由于 look-alike 充分利用了 item 的所有行为信息，因此在定向挖掘长尾内容受众上具有独特的优势。然而相较于广告系统，我们的资讯推荐有如下差异：</p>
@@ -257,31 +257,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>RALM 模型能实现实时扩散的核心在于，我们使用种子用户的特征来代替 item 的历史行为特征，从而将常规 user-item 的模型转换成了 user-users 模型，这意味着任何在系统中有过行为的 item ，都能被表示为 <em>I = Eseeds= f({E(u1), E(u2), &hellip;, E(un)})</em>，其中_ un ∈ U_，U 为系统用户全集； <em>Eseeds</em> 是 item 种子用户集合的表示。</p>
 <p>RALM 的训练包含两部分：User Representation learning 和 Look-alike learning。User Representation learning 的任务是学习_E(un)_；Look-alike learning 的任务则是基于 <em>E(un)</em> 学习 <em>Eseeds</em>。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d46e49b78bfc41c39acc8506c35a1bfe.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281606586.jpeg" />   
     </p>
 <p>Fig.2. RALM 算法流程</p>
 <h2 id="21-user-representation-learning">2.1. User Representation learning</h2>
 <p>User Representation learning 的任务是学习用户的高阶表示，目的是对繁杂的多域低阶特征做抽象，尽可能全面地表达用户在系统中的状态，便于后续模型的利用。这里可以是个多任务学习，或者输出不同向量空间的多个 embeddings。</p>
 <p>我们改进了 Youtube DNN 模型，针对点击样本训练了一版模型，取最后一层隐层作为用户行为 embedding，供后续使用。模型细节计划在CF优化专题里详细说明，在此不再赘述。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/aabf2d60271e44418aa26da63407d16c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281606314.jpeg" />   
     </p>
 <p>Fig.3. 用户行为表示学习</p>
 <h2 id="22-look-alike-learning">2.2. Look-alike learning</h2>
 <p>从 User Representation learning 得到 user embedding 后，我们将其作为 user 特征，学习种子用户到目标用户的关系，即上文提到的 user-users model。</p>
 <h3 id="模型结构">模型结构</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b014d79b8e614d82b18b984bc2585593.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281606183.jpeg" />   
     </p>
 <p>Fig.4. Look-alike learning</p>
 <p>模型结构比较简单，是一个双塔结构。左边称为“seeds tower”，以种子用户的 embeddings 作为输入，经过一层空间转换（全连接+pRELU），然后分别经过一个 self-attention 单元和一个 productive attention 单元，pooling 后输出向量；模型右边结构称为“target tower”，目标用户 embedding 输入后经过空间转换（与seeds tower共享参数），直接与左边向量计算 cosine 相似度。</p>
 <h3 id="local-attention">Local attention</h3>
 <p>为了计算种子用户群体和目标用户的相似度，我们需要首先把多个用户向量 pooling 成一条。Average 是常用的 pooling 方式，但取均值的结果是趋向群体的中心，也就是大众化的兴趣，丢失了群体中的离群点和个性化兴趣。而一个群体中，必然只有一部分用户是和目标用户兴趣相仿的。基于这些假设，我们加入了 <strong>local attention unit</strong>，激活种子用户群的局部兴趣点，并且学习到一个和目标用户紧密关联的用户群表达方式，公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c871c883b8434263830f4b862e4a81e6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281606963.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/04d5270e9e784213a86e222f9ec354d9.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281606656.jpeg" />   
     </p>
 <p>Fig.5. Attention units</p>
 <p>这是一个乘法注意力， <strong><em>Wl ∈ Rhxh</em></strong> 表示转换矩阵， <strong><em>Es</em></strong> 表示种子用户， <strong><em>Eu</em></strong> 表示目标用户，**_Elocal _**为种子用户的 local info。</p>
@@ -289,21 +289,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="global-attention">Global attention</h3>
 <p>除了个性化信息，用户群体还有共性的、与自身组成相关的全局信息。因此我们引入 **global attention unit **来捕获这部分群体信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9ff3c07b81b84465a4da2429c36c7002.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281606519.png" />   
     </p>
 <p><strong><em>Wg ∈ Rsxn</em></strong> 表示全连接矩阵，**_Eglobal _**为种子用户的 global info。本质上这是一个 self-attention，与群体分布更相似的兴趣将会被提取出来。最终我们令 <strong>_Elocal _</strong>， **_Eglobal _**分别与 <strong><em>Eu</em></strong> 求 cosine，加权求和即得到目标用户与种子用户的相似度分数。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/871b727ac1b44017ad04fffa32ec61c8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281606066.png" />   
     </p>
 <h3 id="loss">Loss</h3>
 <p>RALM 是个多分类任务（目标用户属于哪一个种子用户群），我们用 negative sampling 的方式采多正多反（点击item的种子用户做正例，随机采负例），使用多组交叉熵作为模型 loss 函数。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1149e9b450124bb58d09759bd3e4763c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281607674.jpeg" />   
     </p>
 <h2 id="3-系统架构">3. 系统架构</h2>
 <p>RALM 模型框架现在已经部署在微信看一看，整体流程如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/682ce7a42f5d44678147e54166933126.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281607284.jpeg" />   
     </p>
 <p>Fig.6. 系统架构图</p>
 <h2 id="31-离线训练">3.1. 离线训练</h2>
@@ -450,6 +450,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -483,10 +487,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -865,6 +865,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -222,14 +222,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>话题：架构大数据</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b72293f80bbf47b19db199f7f7817eb4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281755336.png" />   
     </p>
 <h2 id="背景说明">背景说明</h2>
 <p>苏宁易购商品评价系统主要提供商品维度评价数量聚合、评价列表展示功能，并为其他业务系统提供商品评价数据支撑服务。功能涉及对亿级数据的数量聚合、排序、多维度查询等复杂的业务场景，关系型数据库的索引为 B-Tree 结构，适合数值区分度或离散度高的数据，而评价系统中单个商品评价可以达到数十万条，相同星级的评价数则为亿级，故不适宜使用关系型数据库。解决此类海量数据准实时聚合的技术选型有以倒排表作为索引结构的 Solr 和 Elasticsearch（底层都是 Apache Lucene）搜索引擎服务，还有以 bitmap 作为底层索引结构的实时分析统计数据库 Druid，但 Druid 只是支持数据统计功能并不保存原始数据，无法满足商品评价类的功能需求。系统建设之初对团队对 Solr 更为熟悉，故在 Solr 和 Elasticsearch 两者之间选择的 Solr 作为商品评价索引数据存储服务。</p>
 <h2 id="评价系统架构">评价系统架构</h2>
 <p>苏宁易购商品评价系统架构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/34ec4227942748799b82e32228b6bb34.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281755183.png" />   
     </p>
 <p>图 2-1</p>
 <h4 id="应用服务模块">应用服务模块</h4>
@@ -268,7 +268,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="搜索引擎基础原理">搜索引擎基础原理</h3>
 <p>搜索引擎的索引称为反向索引，俗称倒排表，把文本分词得到字典，保存字典项与文档 ID（Lucene 自身 doc ID 而非应用端文档 ID）的关系，在查询时根据字典查询到倒排表文档 ID 集合，再进行交并集操作即可得到结果，其主要结构是字典域、索引域和字段存储域。反向索引如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/55c1cd92cea84cb8a1e7da6f59e5cde2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281755509.png" />   
     </p>
 <p>图 3-1</p>
 <p>在 Solr4.0 之后为了满足排序和关键字聚合的需求场景，Lucene 提供了 DocValues 特性，又被称为正排表，使用列式存储保存文档 ID 和字典项的关系，不再使用之前 FieldValue Cache 机制，提升性能并降低对内存的使用和虚拟机 Full GC 的风险。在 Elasticsearch 中所有字段都是默认开启此特性，但在 Solr 中需要使用者进行显式配置生效。DocValues 存储结构可分为两种，一种是原值，一种是字典项 ID。</p>
@@ -295,7 +295,7 @@ term[1] = &#34;beaver&#34;
 <h3 id="solrlucene-架构体系">Solr&amp;Lucene 架构体系</h3>
 <p>Solr 是一个高性能、基于 Lucene 的开源全文搜索服务，提供丰富的查询语言，同时实现了可配置、可扩展并对查询性能提供了优化，提供完善的功能管理界面；在 Lucene 基础上对易用性和可用性进行了大量封装如 Schema 配置化、请求分发处理机制、插件化机制、数据导入、分布式、监控指标采集等，架构体系如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d9d8a9f9e5dd4d8ba3b45f3eadef9d6b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281755712.png" />   
     </p>
 <p>图 3-2</p>
 <p>苏宁商品评价系统结合自身业务特点采用了 Solr 主从节点和聚合查询节点的组合架构，而不是通用的 Solr Cloud 架构，主要考虑到两点：</p>
@@ -307,7 +307,7 @@ term[1] = &#34;beaver&#34;
 <h3 id="多维度数量聚合">多维度数量聚合</h3>
 <p>商品详情页展示商品 / 供应商维度审核通过的好中差评数量、标签数量、个性化评价项等数量，使用的是 Solr facet 机制。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/85880652995c4d38b42afc7b1804c553.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281755910.png" />   
     </p>
 <p>图 4-1</p>
 <ul>
@@ -325,7 +325,7 @@ term[1] = &#34;beaver&#34;
 <h3 id="分组查询">分组查询</h3>
 <p>需要说明的是 Solr 分组关键字 group 的含义与关系型数据库的 group by 中的 group 并不相同，在 Solr 中指的是对查询的结果文档根据指定的字段进行分组，而非关系型数据库对字段分组，如苏宁商品评价需要展示每个评价的第一条商家回复内容，通过 Solr 查询商家回复并根据评价 ID 进行分组后取第一条记录即可（查询条件为评价 ID 列表），参数说明如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c14c9daaa05e42fca062bb432b612490.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281755922.png" />   
     </p>
 <p>表 4-1</p>
 <h3 id="自定义排序">自定义排序</h3>
@@ -485,6 +485,10 @@ term[1] = &#34;beaver&#34;
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -518,10 +522,6 @@ term[1] = &#34;beaver&#34;
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -900,6 +900,8 @@ term[1] = &#34;beaver&#34;
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

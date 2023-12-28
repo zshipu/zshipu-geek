@@ -198,7 +198,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/00fb36360a174c03be667fa339db42ad.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272159614.webp" />   
     </p>
 <blockquote>
 <p>文章作者：懿林</p>
@@ -206,7 +206,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p><strong>导读：</strong> 高德地图拥有着数千万的 POI ( Point of Interest ) 兴趣点，如学校、酒店、加油站、超市等。其中伴随着众多 POI 创建的同时，会有大量的 POI 过期，如停业、拆迁、搬迁、更名。这部分 POI 对地图鲜活度和用户体验有着严重的负面影响，需要及时有效地识别并处理。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-daadf8eca8c44b679977b4f16c285228.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272159618.webp" />   
     </p>
 <p>由于实地采集的方式成本高且时效性低，挖掘算法则显得格外重要。其中基于趋势大数据的时序模型，能够覆盖大部分挖掘产能，对 POI 质量提升有着重要意义。</p>
 <p>过期 POI 识别本质上可以抽象为一个数据分布非对称的二分类问题。项目中以多源趋势特征为基础，并在迭代中引入高维度稀疏的属性、状态特征，构建符合业务需求的混合模型。</p>
@@ -224,25 +224,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>序列长度不变，添加一维&quot;门&quot;序列特征，序列在 POI 创建时间之前的部分数值为 0，之后为 1。如图所示。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-41c599e027194387a9dbe5e50f47e3dc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272159472.webp" />   
     </p>
 <p>对比采用第二种方案效果更优。考虑到我们只有 POI 的入库创建时间信息，而不了解门店的具体诞生时间，直接按入库时间截取序列，会造成门店诞生和 POI 创建时间段内的特征信息损失；而添加&quot;门&quot;序列则可以在保持信息完备的同时约束高可信区间。最后构建的混合特征示意图如下所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-353a9a5a46394256a885bd7cb51ec273.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272159391.webp" />   
     </p>
 <h2 id="02rnn-阶段"><strong>02RNN 阶段</strong></h2>
 <p>循环神经网络 ( RNN，Recurrent Neural Network ) 凭借强大的表征能力在序列建模问题上有非常突出的表现，业务中采用了其变种模型 LSTM。</p>
 <p><strong>1. RNN1.0</strong></p>
 <p>以前述的时序特征和辅助特征为基础，我们采用多层 LSTM 搭建了第一版 RNN 过期挖掘模型，结构如图所示。主要逻辑为，将逐时间点对齐后的特征输入到深度 LSTM 中，在网络最后时刻的输出后，接入一层 SoftMax 计算过期概率。最后根据结果匹配不同的置信度区段，分别进行自动化处理或人工作业等任务。模型初步验证了 RNN 在过期趋势挖掘领域落地的可行性和优势。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5a25108fd630451cb62b1f6fdf9ad21a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272159292.webp" />   
     </p>
 <p><strong>2. RNN2.0</strong></p>
 <p>高德地图基于导航、搜索或点击等操作频度对 POI 进行了热度排名。头部的热门 POI 如果过期但未及时发现对用户体验的伤害更大。2.0 版本模型升级的主要目标便是进一步提升头部热门段位的过期 POI 发现能力。</p>
 <p>分析发现热门 POI 的数据分布相比尾部有较大差异性。头部 POI 的数据量丰富，且数值为 0 的月份很少；相反尾部 POI 则数据稀疏，且有数值月份量级可能也仅为个位数。对于这种头部效应特别明显的状况，单独开发了高热度段特征的头部 RNN 模型，实现定制化挖掘。</p>
 <p>另一方面，对于单维度特征缺失的情况，也区分热度采用了不同的填充方式。头部 POI 特征信息丰富，将缺失维度补零让其保持&quot;静默&quot;防止干扰；而尾部特征稀疏，本身已有较多零值，需要插值处理使缺失特征和整体保持相近趋势。方法为将其他维度的数据规范化处理后，采用加权的方式得到插值。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0abbf092b7f04ff5817657907bc20d77.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272159177.webp" />   
     </p>
 <p>2.0 版模型对头部和尾部的召回能力都有提升，对头部的自动化能力提升尤为明显。</p>
 <h2 id="03widedeep-阶段"><strong>03Wide&amp;Deep 阶段</strong></h2>
@@ -253,13 +253,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们将非时序特征经过编码后构建 Wide 模块。主要包括属性、状态，以及细分行业类型三种特征。</p>
 <p>考虑到某些 POI 属性存在缺失的情况，故编码中第 1 位表示特征是否存在的标志位，后面则为 One-Hot 编码后的对应的属性类型；对于状态特征，同样有一位表示是否特征缺失的标志位，而后面的 One-Hot 编码则表示最新时刻的状态类型；由于不同行业类型有着不同的背景过期率，我们将细分的行业类型做 One-Hot 编码后作为第三种特征。最后将各特征编码依次连接，得到一个高维度的稀疏向量。特征编码的过程如图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0997174d47e64d5b97c2ad452870773b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272159016.webp" />   
     </p>
 <p><strong>特征耦合：</strong></p>
 <p>特征完备之后，将各类特征耦合及模型训练便成为关键。耦合点选在了 SoftMax 输出的前一层。对于 Deep 部分的 RNN 结构，参与耦合的便是最后时间节点的隐层；而对于 Wide 部分的高维度稀疏向量，我们通过一层全连接网络来降维，便得到 Wide 部分的隐层。最后将两部分的隐层连接，输出到 SoftMax 来计算过期概率。</p>
 <p>模型采用同步输入 Wide 和 Deep 部分特征的方式联合训练，并调节两部分的耦合隐层的维度来平衡两部分的权重。过期挖掘场景的 Wide &amp; LSTM 模型结构如图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ffe3f7c3a1454978a4469a74eed0811c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272159039.webp" />   
     </p>
 <p>模型经过多次迭代优化后稳定投产，已成为过期挖掘</p>
 
@@ -385,6 +385,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -418,10 +422,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -800,6 +800,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

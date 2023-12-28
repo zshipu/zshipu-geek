@@ -292,19 +292,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>由此可知，准确的预测广告的点击率是保障广告收入和用户体验的前提。广告点击率预估问题是一个典型的监督机器学习问题，它的目标是在给定广告商户、用户和查询上下文的前提下准确预测点击行为发生的概率。这个监督学习问题的特征我们用x表示，目标用y∈{1，-1}表示（广告曝光后获得点击为1，否则为-1）。通过收集线上的广告曝光和点击日志，我们可以获得大量的标注样本{（?i，?i）}作为监督学习的训练数据。</p>
 <p>我们使用参数模型拟合这个概率：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2b87958b4d7140318ed09eeb45f63f0f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659806.png" />   
     </p>
 <p>其中，?监督学习问题即是搜索?使得目标损失函数最小的一个优化问题:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/166fb94d25e64751820f5ee38ca72fe2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659729.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/892921c305ac4774aeaaec39d92076f6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659685.png" />   
     </p>
 <p>其中，?(?, ?(?, ?))是模型的损失函数，在点击率预估问题中一般使用负Log似然函数（Negative Log-Likelihood）作为损失函数。优化问题（公式1）是原始的点击率预估问题，优化问题（公式2）引入了正则项?(?)，用以控制模型的复杂度，防止模型过拟合。此外当我们选择L1范数作为正则项的时候，我们能获得稀疏解，缩减模型大小，进而减少线上服务加载模型的内存需求，提升模型的预测速度。下面我们简要介绍几种常用的点击率预估模型。</p>
 <p><strong>逻辑回归模型</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1044514d202540c393252c0404db0319.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659600.png" />   
     </p>
 <p>逻辑回归模型是广泛应用的点击率预估模型，它是一种线性模型，相应的优化问题有非常好的性质。它是一个无约束的凸优化问题，有全局唯一的最优解。它支持大规模的特征，通过常用的梯队方法能较快收敛到最优解。逻辑回归模型的可解释性十分优良，通过特征对应的权重我们能很好分析各个特征的重要性以及它们对点击率的影响关系。</p>
 <p>逻辑回归也有它的劣势：首先，作为线性模型，它的表达能力相对较弱，需要通过大量的特征工程工作（例如，特征组合）来弥补和提升模型的表达能力；其次，它需要进行大量的特征预处理工作，例如特征归一化、离散化等。</p>
@@ -314,7 +314,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <img class="mx-auto" alt="" src="https://tech.meituan.com/img/O2O_advertising/g6.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/30a9898b35fa4361989419adfbd4822a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659672.png" />   
     </p>
 <p>FM模型和FFM模型是非线性模型，它们对特征进行两两组合，提升了模型的表达能力。此外FM和FFM模型都对特征进行向量化的表达和学习（Wi，Wi,fj）提升模型的泛化能力。FFM相对于FM引入了域的概念，在FM中特征i和其他特征组合用的是同一个向量表示，而在FFM中特征i和不同域的特征组合会使用不同的向量表示，进一步提升了模型的复杂度和表达力。</p>
 <p><strong>人工神经网络（Artificial Neural Network，ANN）</strong></p>
@@ -326,12 +326,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>梯度方法是模型的优化（优化问题的求解）的基础方法。公式3是使用标准梯度方法求解点击率预估优化问题公式1的迭代步骤。在点击率预估问题中，由于训练样本数量庞大（十亿、百亿），直接应用公式3计算量巨大，迭代速度受限。因此在点击率预估问题中，我们一般使用随机梯度下降法（Stochastic Gradient Descent，SGD）进行问题求解。在SGD方法（公式4）中，我们使用一小部分样本上的梯度对整体优化目标的梯度进行近似估计，加快参数迭代速度。其中b是样本集合大小，当b=1时，我们用单样本的梯度来近似整体目标函数的梯度值。</p>
 <p>在美团我们使用参数服务器框架（Parameter Server）实现模型并行和数据并行，以解决包含大规模训练数据和特征的复杂模型求解问题，如图1所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7e8bc1810a124eee89101979b75ee2de.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659461.png" />   
     </p>
 <p>图1　参数服务器框架</p>
 <p>特征工程方面，点击率预估特征主要从广告、用户和查询这三个方面来挖掘和刻画广告展现场景（见图2），特征需要包含影响点击率的方方面面，是模型成败的重要因素。特征的选取需要从业务场景出发。在O2O场景下，一个影响点击率的重要特征就是商户和用户之间的距离。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7e71f9671f2c4de099aab8b519da65b0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659343.png" />   
     </p>
 <p>图2　点击率预估的特征</p>
 <h2 id="o2o推送广告">O2O推送广告</h2>
@@ -361,7 +361,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>用户在平台上的搜索、浏览、收藏、购买等行为会被记录下来，形成用户日志。通过对用户日志的分析和挖掘得到用户画像，包括用户基本属性、兴趣偏好、行为标签等。广告定向是广告和用户匹配的过程，为每个广告找到适合的受众群体。广告投放后，需要统计定向效果，包括定向精准程度和覆盖率。精准定向广告的运作流程如图3所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7ff1ebc4fd2a4ce280723d87f2b900b2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659091.png" />   
     </p>
 <p>图3　精准定向广告流程</p>
 <p>为了实现广告和用户的匹配，首先需要为广告的受众人群进行初步假设，即确定广告感兴趣的人群，并将其与用户画像标签映射起来，这一步要靠产品调研和分析得到。然后根据这个初步假设确定广告投放的定向条件，匹配到符合条件的人群。</p>
@@ -395,12 +395,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>离线数据分析工具支持从各个维度（广告位、广告类型、时间、区域、算法策略等）统计广告业务的各项关键指标（召回率、点击率、转化率、RPS/RPM、CPC等），检视广告系统的短板和漏洞，帮助广告算法和工程团队发现问题和寻找潜力。</p>
 <p>实时数据分析工具从时效性角度弥补离线数据分析的缺点，帮助开发者尽早发现数据异常，更快地响应和修复问题。在背后支撑这些分析方法的是Hive、Spark、Elasticsearch和Druid等大数据处理工具。如图5所示是实时消耗数据分析工具。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/79c835413aea44eb812f2bc6f5aa11fa.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659195.png" />   
     </p>
 <p>图5　实时消耗数据分析工具</p>
 <p>在线广告系统调试工具是针对单个广告主或单个查询等具体问题的排查。通过调试工具可方便构造模拟请求并查看单个服务处理详细信息，收集各个广告流程步骤（召回、排序和创意优选等）的信息，跟踪和定位线上实时环境中各步骤的问题。除了线上问题排查之外，调试工具也是开发阶段用于验证策略效果和算法正确性不可或缺的手段。如图6所示是在线广告调试工具的基本界面。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/de088832f1fa4b0393a0a4f24eff23ba.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659770.png" />   
     </p>
 <p>图6　在线广告调试工具界面</p>
 <h3 id="面向广告主和运营人员的工具">面向广告主和运营人员的工具</h3>
@@ -408,26 +408,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>1.</strong> <strong>效果漏斗分析工具</strong></p>
 <p>如前文所述，O2O广告从在线展示到用户进店消费需要经过点击和转化多个流程，为了帮助广告主优化整体投放效果，我们在推广后台提供了效果漏斗分析工具。效果漏斗分析工具主要包括曝光/访问量/感兴趣/到店三层漏斗，同时给出相应的问题诊断和优化建议，如图7所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fbed1f48e51b46209c578766161262cc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659082.png" />   
     </p>
 <p>图7　效果漏斗分析工具</p>
 <p><strong>2.</strong> <strong>推广实况工具</strong></p>
 <p>感知广告展示位置以及竞价实况是投放中的广告主核心需求之一。但个性化智能排序技术体系和带有地理位置限制属性的O2O广告场景下，由于用户个性标签、地理位置等原因会导致广告主看不到自己投放中的广告在客户端曝光，广告主难以分析原因，也不知道如何优化现有的广告投放。</p>
 <p>推广实况工具提供查看排名、模拟出价和诊断优化功能。广告主可以查看选定商圈、类目、地理位置等特定条件下的实时排名，也可以查看去个性化后一般情况下的平均排名。同时工具对于广告展现位次过低或得不到展示的情况会给出具体的原因和相应提示。广告主可根据提示调整投放设置，比如对出价过低导致排名靠后情况建议调高出价，通过工具可以实时查看调整后的新排名情况，如图8所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/13e4d637d107473191b3d08b19daeae2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659921.png" />   
     </p>
 <p>图8　推广实况工具</p>
 <p><strong>3.</strong> <strong>流失订单分析工具</strong></p>
 <p>流失订单分析工具基于门店流失订单记录提供对比分析功能。流失订单是指最近一周内用户对商家A进行了点击，但实际去B、C商家下单的流量算作A的流失订单。分析工具根据用户的点击下单行为数据帮商家分析自身与用户最终下单商家之间的差距在哪里。比如对酒店商家，工具会提供商家平均房价、平均评分、商家首图等信息对比，广告主从中可以分析出订单流失原因，如图9所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/27d9667ce536434aa348c10f37f44216.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659375.png" />   
     </p>
 <p>图9 流失订单分析工具</p>
 <p><strong>4.</strong> <strong>广告收益模拟器</strong></p>
 <p>为吸引潜在新广告客户入驻，广告收益模拟器为商家提供广告收益预估功能。该工具基于门店的历史非广告时期点击转化率、门店所在商圈流量以及竞争对手状态等信息，预估门店投放广告后能够带来的新增流量和订单量，帮助新客户快速了解广告产品，建立投资回报预期。同时通过该工具，商户可以方便地跳转到推广通平台进行注册和投放。此外，模拟器也可协助销售人员对商圈流量以及商圈可承载广告数进行预估，让销售人员更有针对性地开拓市场，提升新签成功率，如图10所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8804ab66a6eb4c04b7e44d49b1b74783.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281659175.png" />   
     </p>
 <p>图10 广告收益模拟器</p>
 <h2 id="总结">总结</h2>
@@ -569,6 +569,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -602,10 +606,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -984,6 +984,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

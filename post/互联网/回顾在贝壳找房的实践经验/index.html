@@ -197,167 +197,167 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="post-content">
             <p>本文转发于 DataFunTalk 公众号</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cff01cc8cff749ca81be6634f1726e31.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716735.webp" />   
     </p>
 <blockquote>
 <p>本文根据贝壳找房邓钫元老师在中国HBase技术社区第二届MeetUp：“HBase技术解析及应用实践”中分享的《HBase在贝壳找房的实践经验》编辑整理而成，在未改变原意的基础上稍做整理。</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/64eff06803764923a4b247d9a38781d2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716415.webp" />   
     </p>
 <p>钫元老师</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d73d0438e0114b0098f1c46ee84216b1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716092.webp" />   
     </p>
 <p>首先给大家介绍一下贝壳，贝壳是链家一个房地产品牌，链家的愿景是把贝壳打造为一个大的互联网房地产入口品牌，也允许第三方品牌接入我们的贝壳平台。类似于京东商城与京东自营的关系。我们的愿景是把链家的数据与行业的品牌结合起来，更好的服务整个行业的消费者。</p>
 <p>本次分享从以下四个部分介绍：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8284180007b44c199dd59e6ec008617f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716703.webp" />   
     </p>
 <p><strong>第一部分 HBase简介</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/225f0646a8fc4826870f2837518f9cb8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716188.webp" />   
     </p>
 <p><strong>（1）数据模型</strong></p>
 <p>它的几个程式是一张表，有一个行键，叫做rowkey，它用来确定每一行，然后每一行里面会分为很多个列族，每一个列族下面有不限量的列。每一个列上可以存储数据，每一个数据都是有版本的，可以通过时间戳来区别。所以我们在一张表中，知道行键，列族，列，版本时间戳可以确定一个唯一的值。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/77910a410fde415796e95b90de4fcd1d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716913.webp" />   
     </p>
 <p><strong>（2）逻辑架构</strong></p>
 <p>任何一张表，他的rowkey是全局有序的，由于对物理存储上的考虑，我们把它放在多个机器上，我们按照大小或者其他策略，分为多个region。每一个region负责表示一份数据，region会在物理机器上，保证是一个均衡的状态。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/97fc057aede942c4aac445bc15f0964e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716440.webp" />   
     </p>
 <p><strong>（3）系统架构</strong></p>
 <p>首先它也是一套标准的存储架构。他的Hmaster主要负责简单的协调服务，比如region的转移，均衡，以及错误的恢复，实际上他并不参与查询，真正的查询是发生在region server。region server事负责存储的，刚才我们说过，每一个表会分为几个region。然后存储在region server。这里最重要的部分是hlog。为了保证数据一致性，首先会写一份日志文件，这是数据库系统里面以来的一种特性，创建了日志以后，我们才能写入成功。我们刚才提到HBase里面有很多column-family列族，没个列族在一个region里对应一个store，store分别包含storefile和menstore。为了后续对HBase可以优化，我们首先考虑把文件写入menstore里面，随着menstore里面的数据满了之后，会把数据分发到磁盘里，然后storefile和memstore整体的话，依赖一个数据模型，叫做lmstree。然后，数据是采用append方式写入的，无论是插入，修改，删除。实际上都是不断的append的。比如说你的更新，删除的操作方式，都是以打标记方式写入，所以它避免了磁盘的随机io，提高了写入性能，当然的话，它的底层的话是建立在hdfs之上。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/66af0de91b5d433db861849396d667c4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716190.webp" />   
     </p>
 <p><strong>第二部分 HBase在贝壳中的使用经验</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2c28e4902c6d4d1ca7b978bd230db4b6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716959.webp" />   
     </p>
 <p><strong>（1）总体介绍</strong></p>
 <p>我们贝壳使用HBase是非常多的。这边也搭建了一套系统，部署在我们机器上，目前我们应用在房客源轨迹跟踪，我们制订了一个指标平台，这个平台依赖于另外一个引擎—kylin。借助HBase实现一套多维分析，比如用户的画像，还有日志统计分析等这几个方面。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4d39762642624f1984b3fdc4f15a9fc2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716643.webp" />   
     </p>
 <p><strong>（2）房客源轨迹产品介绍</strong></p>
 <p>这就是我们房客源轨迹的一个产品，其实这个产品主要使用者是经纪人，这个产品可以根据客户的一套房子去跟踪它的所有信息，包括它挂牌成交后的电话以及房源状态的跟新。实际上这个状态量是非常大。我们使用HBase来存储这些数据。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/243c43ca42d44134932e128f44dcd415.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716255.webp" />   
     </p>
 <p>其实这个模型是非常适合HBase存储的模型，比如说，对于房源轨迹的存储我们做了如下设计，因为它就依赖于房价来做索引，我们把它的row-key设计成房源Id+时间+操作类型。value的话，就是具体操作的值。为了保证HBase序列的均衡性，我们对Id加一个md5,做一个哈希，这样可以保证数据的分配均衡。这是一个非常典型的使用场景。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/96c9c6c1382c4af19555d1aeca96d4e3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716919.webp" />   
     </p>
 <p><strong>（3）指标平台</strong></p>
 <p>第二个场景叫做指标平台，首先给大家展示一下平台。这是一个可视化的分析平台，在这上面可以选择我们在HBase存储好的数据，可以选择哪些维度，去查询哪些指标。比如这个成交数据，可以选择时间，城市。就会形成一张图，进而创建一张报表。然后这张报表可以分享给其他人使用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4e24a8a07437479ea2d49c03bc5afb96.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716484.webp" />   
     </p>
 <p>这张表，应该从时间和组织架构这两个维度，我们现在看到的是一个大区的情况，这是每个大区的成交量。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3c818ac360e841f48e177521927a87cf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716110.webp" />   
     </p>
 <p>多维分析的话，包括上卷和下钻。刚才我么刚到大区的情况，我想往上一层，看全国的区域，比如说东北区域或者华南区域的情况。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b40cb1d978b04dd38d9208151d269825.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716702.webp" />   
     </p>
 <p>第二个是下钻，这就是看某个区域的情况，比如说我们想看某个区域作业的经纪人或者作业的店，可以往下查询，分析到每一个人。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6035f5299eab4785b393f3a54e030622.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716247.webp" />   
     </p>
 <p><strong>（4）引擎选型</strong></p>
 <p>指标平台的话，前面是从一个产品方面展示。他后台依赖的一个引擎是Kylin。为什么会选择Kylin呢，因为Kylin是一个molap引擎，他是一个运算模型，他满足我们的需求，对页面的相应的话，需要亚秒级的响应。第二，他对并发有一定的要求，原始的数据达到了百亿的规模。另外需要具有一定的灵活性，最好有sql接口，以离线为主。综合考虑，我们使用的是Kylin。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7588fe11ae9e4ebca189ce1f3046be23.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716730.webp" />   
     </p>
 <p><strong>（5）Kylin简介</strong></p>
 <p>Kylin给他家简单介绍一下，Apache Kylin™是一个开源的分布式分析引擎，提供Hadoop之上的SQL查询接口及多维分析（OLAP）能力以支持超大规模数据，最初由eBay Inc.开发并贡献至开源社区。它能在亚秒内查询巨大的Hive表。他的原理比较简单，基于一个并运算模型，我预先知道，我要从那几个维度去查询某个指标。在预定好的指标和维度的情况下去把所有的情况遍历一遍。利用molap把所有的结果都算出来，在存储到HBase中。然后根据sql查询的维度和指标直接到HBase中扫描就行了。为什么能够实现亚秒级的查询，这就依赖于HBase的计算。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8a99f49e0b404b3a9b81da650a5b21f8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716271.webp" />   
     </p>
 <p><strong>（6）kylin架构</strong></p>
 <p>和刚才讲的逻辑是一致的，左边是数据仓库。所有的数据都在数据仓库中存储。中间是计算引擎，把每天的调度做好，转化为HBase的KY结构存储在HBase中，对外提供sql接口，提供路由功能，解析sql语句，转化为具体的HBase命令。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/30d4e4bec8df48d484eb4a792a02fac2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716888.webp" />   
     </p>
 <p>Kylin中有一个概念叫Cube和Cubold，其实这个逻辑也非常简单，比如已经知道查询的维度有A，b,c,d四个。那abcd查询的时候，可以取也可以不取。一共有16种组合，整体叫做，cube。其中每一种组合叫做Cuboid。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/34ac9ede37f4427db23beafbdc2c1b39.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716680.webp" />   
     </p>
 <p><strong>（7）Kylin如何在Hbase中进行物理存储的</strong></p>
 <p>首先定义一张原始表，有两个维度，year和city。在定义一个指标，比如总价。下面是所有的组合，刚才说到Kylin里面有很多cuboid组合，比如说前面三行有一个cuboid：00000011组合，他们在HBase中的RowKey就是cuboid加上各维度的取值。这里面会做一点小技巧，对维度的值做一些编码，如果把程式的原始值放到Rowkey里，会比较长。Rowkey也会存在一个sell里任何一个版本的值都会存在里面。如果rowkey变的非常长，对HBase的压力会非常大，所有通过一个字典编码去减少长度，通过这种方法，就可以把kylin中的计算数据存储到HBase中。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c97f3ce7bcfa4f44af50d6f55039ce83.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716223.webp" />   
     </p>
 <p><strong>（7）平台架构</strong></p>
 <p>这就是我们链家多维分析的平台架构，左边是一套主集群，数据仓库和离线计算在上面，右边是Kylin的系统，分为查询和构件两部分，通过一个调度系统，定时去调度计算任务，把数据导入独立的HBase中，这套独立的HBase是为了保证线上查询不会受影响。最右边，我们做了一套Kylin中间件，因为Kylin本身会有很多问题，比如任务数有限制，任务之间没有优先级，错误重试等问题，通过自研了一套中间件来解决这些问题。最右边是使用这些系统和集群的平台。它底层就依赖于kylin的数据查询服务，同时也会做一些数据缓存。使用系统中的通用模块，比如权限管理，监控管理，元数据管理，调度系统。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/30593820e5624873a417b601e49e37cf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716926.webp" />   
     </p>
 <p><strong>（8）Kylin自研中间件</strong></p>
 <p>这就是我们自研的Kylin中间件，原生的话，本身有很多问题，我们做的工作支持如下功能：无限容量队列，针对特定cube的优先调度，权限的管理， 重试任务执行，实现任务的并发控制。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5f4c27d12de84a3e8d8710817434316e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271716871.webp" />   
     </p>
 <p>这是中间件的另一个功能：cube管理，Kylin原生也有一套cube管理，但是会有很多问题，比如说性能问题，cube会很卡，另外一个是权限问题，我们希望可以对接到链家的权限，优化前端页面，简化配置，提升管理效率。右边是我们自主创建cube的过程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/69f79525a89e4568882ede2117680312.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271717435.webp" />   
     </p>
 <p>这里是我们Kylin使用的情况。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3aa516f24f5a4a3198e9c02f18ae89d5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271717007.webp" />   
     </p>
 <p>这里是我们链家对Kylin的定制改造。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5e3d5bc3632d47319bbad11ad4be9361.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271717680.webp" />   
     </p>
 <h2 id="第三部分hbase的优化经验"><strong>第三部分 HBase的优化经验</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/aa12acc9049241f58050259d2eba241f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271717224.webp" />   
     </p>
 <p><strong>（1）HBase部署上的链路</strong></p>
 <p>我们优化也是针对这个链路做优化，第一步：Kylin及各类应用，由HBase调用，HBase数据又存储在HDFS上。同时HBase和HDFS又运行在操作系统上。我们会从这几层做优化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/37965098ebed4c32881aa1dd961b224e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271717513.webp" />   
     </p>
 <p><strong>（2）性能优化工具</strong></p>
 <p>首先给大家介绍一个性能优化的工具，是Profile利器-火焰图。首先看右边的图，表示的是代码在我们CPU上运行的逻辑。AB就是两个函数，A会调用B，然后时序会从左到右。上面的每个箭头，是每个堆栈的切片，on-CPU表示你的代码正在运行，off-cpu表示你的代码调用其他读写功能，让出线程。把这些切片信息累加起来，就可以得到在右下角的一张图，叫做火焰图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2dda7d69c2d640e68ad844e59c93887f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271717069.webp" />   
     </p>
 <p>这是一张火焰图的样例，这张图是对Firefox进行采样的，一般分析火焰图，是从下往上的。我们可以看到非常多的“山峰”。一般我们关注的是，“山峰”从下往上一直没有缩减。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/61e4a85acfe54301a01bbf47700b4edc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271717601.webp" />   
     </p>
 <p><strong>（3）优化实例</strong></p>
 <p>这里讲一个优化实例，之前某一个查询服务，当时发现，并发的时候CPU满载，用火焰图做一个采样分析，左上角是一个认证模块加密算法，他消耗百分之七八十的CPU资源，下面的弹窗显示的是具体处理过程，也是占用百分之八九十的CPU资源，他为了实现长加密，使用了一套Base的加密算法，这套算法对CPU的消费非常高，实际上在内网环境上，对安全的要求没有那么高，所以换成了MD5加密算法，大家可以看到，优化之后，处理的时间大大降低了。通过对比，提升了四五倍的qps。右边是火焰图的创造者。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dce09312decf4d0ebaf5396da58b917a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271717489.webp" />   
     </p>
 <p><strong>（4）GC算法</strong></p>
 <p>HBase是内存消耗的大户，它分为两部分，一个是写入的时候，里那个一个是cache。他们对内存的消耗是非常大，我们这边对Java的堆开到了将近100g左右，如果使用CMS算法的话，对其进行调优。都会出现暂停时间比较长的情况，满足线上的重调业务，后期的话，我们改成了G1，G1就是把内存的堆分成region，然后每一个region有各自的功能，G1有预测算法，比如，我指定一个暂停时间100ms，他能够通过预测算法，能够预算到在这100ms内能够搜集多少垃圾，然后他会收集指定的region，这样就可以做到时间可控。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a64968e46c914038aab931cdbcfb620b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271717319.webp" />   
     </p>
 <p>这是我们线上使用java的执行参数。第一个框我们指定暂停时间100ms，有几个重要的参数，比如有几个并行数，另外alwayspretouch这个参数比较有意思，当我们启动java程序的时候，他向操作系统申请96M的空间，实际上这个空间是虚拟内存，当你有反馈的时候，操作系统才会把虚拟内存映射到物理内存上，这样一个操作叫做区域中断，这一个负载比较高的系统中，会对你的处理有一些延迟，你开启这个参数，就会把所有的清零。因为每次写入新数据，会产生一个回升带，回升带设置比较大的话，造成暂停的时间比较长，所以建议设置一个比较小的数，百分之1就可以。右边是一个优化的图，上边是使用GMS的时间，下面是G1算法的。可以看到得到了很好的缩短。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a6e90acbf5db48a19af12a45dc30802e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271717974.webp" />   
     </p>
 <p><strong>（5）HBase在IO上优化</strong></p>
 <p>我们也了解到HBase在IO上可以做很多优化，但是对IO最好的优化，还是基于硬件。左边的话，最上方主要依赖Hbase对多存储的支持，叫做异构存储，可以标记存储页，同时，HBase上也会有有一些策略，比如ALL_SSD,(F副本全部放在SSD上)ONE_SSD（一个副本放在SSD上）。目前，我们把HBase核心业务和预写日志用ALL_SSD这种策略上，一些重要业务会使用ONE_SSD，普通的话，使用村纯硬盘就可以了。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3885db3a9d15482480bbf277b60ef203.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271717694.webp" />   
     </p>
 <p>下面说一下，在ONE_SSD测策略下，会有一些性能会出现问题，比如第一个文件块，会有三个副本，其中某一块SSD，当我发起读取的请求时，根据原生hadoop的策略，会优先去读本地，但实际上，在目前的架构下，远程去读SSD的性能是远超读取本地硬盘的。所以在架构上增加了SSD-FIRST策略，优先读取远程SSD。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/315a7ab891384c81abb8e94a5f2402a3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271717278.webp" />   
     </p>
 <p>另外就是HBase的读写分离，原生HBase可以生成队列树和线程树，想很多读写请求和scan请求都会统一并发，这样的话会出现一个问题，当我有一个scan请求，会扫面很多行，把队列都堵住了，后续的请求可能会无法响应，上边是1.2里的功能，我可以把队列和线程分组，比如80%负责读，15%负责写，5%负责scan。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/40d1fddff75748fcb53f5c7419ea7cd3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271717960.webp" />   
     </p>
 <p>这是HBase基于wasd的性能测试，左边是测试的设备和配置。可以看硬盘与SSD的IO差别很大，绿色的这条线，代表的是qps这条线。大家可以看到，最开始全部使用硬盘的时候，qps大概在一万左右，�</p>
 
@@ -485,6 +485,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -518,10 +522,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -900,6 +900,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

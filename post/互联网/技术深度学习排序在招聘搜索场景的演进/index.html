@@ -208,13 +208,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>58同城 白博 稿</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b3cf3cee134a4d7d8630e199aa63cdd4.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271935488.jpeg" />   
     </p>
 <h1 id="01-背景">01 <strong>背景</strong></h1>
 <p>搜索推荐部作为中台部门为整个58集团提供搜索基础服务能力，我们在20年成功落地了深度学习模型，并在租房业务取得了不错的效果[1]。本着深入产业化的原则，我们后续又落地到招聘、黄页等多个场景。本文针对我们在招聘业务的深度学习排序工作，做一个简要介绍。首先从模型特征出发，结合招聘业务的多角度信息挖掘，介绍了模型演进的几个关键成果，之后从效能提升出发，介绍了离线工程方面的几个优化点，最后对未来的工作重点进行了简述。</p>
 <p>初期落地在58租房业务的深度学习排序模型为DIEN[2]，具有如下结构：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2022/02/image-c6de8962.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271935397.png" />   
     </p>
 <p>DIEN可以很好的捕获用户历史兴趣，相比DNN，额外构建了兴趣提取层（Interest Extract Layer）和兴趣发展层（Interest Evolving Layer），综合利用GRU和Attention结构，专门针对用户的历史点击序列提取了更合理的embedding表征。我们先前的模型对于用户历史兴趣信息的应用局限于各种统计特征，在换用DIEN处理更原始的用户历史序列特征时，拿到了很不错的线上效果。</p>
 <h1 id="02-模型特征挖掘">02 <strong>模型特征挖掘</strong></h1>
@@ -222,34 +222,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>业务之间蕴含不同的特征信息，建模时需要考虑特殊性，以更好的应对具体场景的优化任务。考虑到为模型提供更多维度更丰富的输入信息，我们更新了模型的输入层，新增了两种输入特征：多值特征和语义向量特征。</p>
 <p>多值特征，是指一个帖子特征，可能包含了多个特征值，如下表所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2022/02/image-cc83cd91.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271935788.png" />   
     </p>
 <p>语义向量特征，是指搜索召回侧使用的query、帖子的语义向量，这部分由负责召回的同学优化落地，通常是由BERT等其他语义深度模型提取得到的信息表征，蕴含了更高阶的语义，是现有特征集所缺乏的信息。</p>
 <p>因此，DIEN模型结构更新为如下图所示形式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2022/02/image-b5e844b7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271935920.png" />   
     </p>
 <p>具体在映射特征到embedding时，多值特征采用了multi-hot编码方式，语义向量直接使用原浮点值不做映射。</p>
 <p>在加入如上新特征后，离线验证效果如下表：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2022/02/image-3347db65.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271935400.png" />   
     </p>
 <p>可以看出，相比原始DIEN，增加了更多维度信息的优化版DIEN，在模型评测指标AUC上有3-4个点的提升，因此我们将模型在招聘的四个子场景上线，线上的效果表现如下表：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2022/02/image-0c054c30.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271935355.png" />   
     </p>
 <p>搜索侧在招聘有四种子场景：用户通过输入框键入搜索词后，发起的搜索我们称为关键词搜索；用户通过点击页面的筛选列表进入某个职位，我们称为点击搜索。每种搜索场景下，搜索侧包含两种帖子类型：普通和精品，区别在于两种帖子展现的位置略有区别，精品贴相对普通贴会更靠上。从表3可以看出，加入了更多特征信息的优化版DIEN模型，在招聘多个子场景的提升相对明显。</p>
 <h2 id="22-更合理的模型应用和更新策略"><strong>2.2 更合理的模型应用和更新策略</strong></h2>
 <p>招聘业务C端用户的检索词符合典型的长尾分布，长尾检索往往因为意图小众、数据稀疏等原因，更容易出现高质量检索结果少的情况。我们统计了单天某时间段的用户搜索情况，具体见下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2022/02/image-6e69aa19.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271936564.png" />   
     </p>
 <p>结合表3和图3，对于流量占比最大的关键词搜索，尤其是曝光占比最多的普通关键词场景，用户搜索后获取结果较少的情况比较明显，比如图3中，小于20条搜索结果的query占比达到了30%，在这种情况下，参与排序的帖子数量很少，极大限制了排序空间，导致离线提升兑换到线上的提升幅度大打折扣，DIEN模型排序的重要性被大大降低。因此表2中离线指标提升巨大的情况下，表3中的关键词场景收益却比预想中低很多。</p>
 <p>基于招聘搜索召回结果少的情况，我们组负责召回的同学，进行了系统的召回优化，通过query理解、语义召回等技术手段，在一定的搜索质量约束下，将更多有投递可能性的帖子召回，参与后面的粗排、精排，以更充分的发挥DIEN模型的能力。所以在初期增加了更多特征信息的DIEN模型上线后，我们进一步在语义召回结果上应用了DIEN模型排序。</p>
 <p>上线观察一段时间后，我们发现在招聘场景下，模型随日期的衰减相比租房要快的多，一周后模型线下AUC指标就会掉1个点左右，因此为了保证模型效果的稳定性，进一步完成了模型按天自动更新的策略，从离线数据、模型训练到模型更新，制定了完整的流程。</p>
 <p>上线的具体效果如下表：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2022/02/image-e6ee4440.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271936678.png" />   
     </p>
 <p>注意我们只在关键词场景上做了优化，这是因为点击场景的流量占比很小，因此我们优先集中精力优化了关键词场景。其中，精品关键词的收益来自于模型自动更新策略，说明离线数据合理利用的重要性，保持模型对新数据的敏感，可以有效提升模型的线上表现。</p>
 <p>普通关键词场景的显著提升一部分来自于自动更新策略，更大的一部分得益于召回、粗排优化，增加了DIEN模型精排的优化空间。因此，从召回、粗排到模型精排，全流程的协作至关重要，通过召回等前置路径扩大模型的排序应用范围是很有效的手段。排序能力依赖于各个子环节，全链路的优化才可能获得最好的线上效果。</p>
@@ -258,40 +258,40 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>因此除点击序列外，我们从点击序列中进一步抽取了有用户转化行为的部分，具体为提取用户曾打过电话、投过简历的帖子次数构成转化序列。</p>
 <p>针对新构建的转化序列，主要在DIEN的兴趣发展层强化了转化行为的信息，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1e22514bf1074e19bcbdbc2e3548fdd9.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271936743.jpeg" />   
     </p>
 <p>图4 DIEN加入转化序列示意图</p>
 <p>我们在兴趣发展层的Attention部分，为Q查询得到的V1，附加了转化序列作为mask，新建了V2，并将V1与V2叠加作为最终的V，相当于加强了序列中有转化行为的部分权重。</p>
 <p>不论用户的点击或转化序列，都是从用户历史浏览过的帖子维度建模了用户信息，为了引入更多维度的信息，我们还新增了用户历史搜索过的关键词序列，其中包含了用户搜索query、query对应语义向量、搜索时地域等信息。使用时对应帖子侧的语义向量，与搜索关键词序列中的query侧语义向量做点积得到相似度，再选取最大相似度作为候选贴和历史关键词序列的匹配特征。</p>
 <p>除上述对序列信息的更新外，我们还对模型的多目标学习做了调整，之前多目标loss定义如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a5871594d01345ad9fc1faabea3bb255.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271936508.png" />   
     </p>
 <p>整体优化目标采用多个子目标的加权和，是比较简单的多目标优化方法。为了更合理的建模多目标，我们参考ESMM[3]对loss进行了改造，采用CTR和CTCVR的连乘来构造CVR的学习目标，隐式的建模转化行为，更符合实际情况即用户先点击进入某个帖子，才能继续产生转化。</p>
 <h2 id="24-更合理的特征交叉信息"><strong>2.4 更合理的特征交叉信息</strong></h2>
 <p>在租房业务时，DIEN之前落地更早的一版模型为DeepFM[4]，也取得了一定的线上效果，招聘场景针5DIEN进行了几轮优化后，将视角返回到特征信息的使用上。DIEN主要的效果提升，在于对用户的历史行为做了合理且充分的建模，但对于特征和特征之间的关联关系，没有像DeepFM一样显式建立交叉机制，因此，我们整合了DeepFM和DIEN，对于不同类特征间的关联信息进行建模，但初期实验效果较差，DeepFM部分对于整体的贡献很少，提升仅在千分之三左右。</p>
 <p>为更好的建模特征间的关联关系，我们落地了阿里提出的CAN[5]模型。CAN从笛卡尔积的角度出发，认为笛卡尔积方式建模特征和特征间的关联，相比FM隐向量方式更合理，但笛卡尔积会导致参数膨胀，对于取值为N、M的特征建模，笛卡尔积取值为N*M，对于线上实时性要求很高的排序模型是不可接受的。CAN提出了一种MLP拟合笛卡尔积的替代框架，如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/60425996d7494911ba75886d7977e058.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271936066.png" />   
     </p>
 <p>图5 CAN特征交互结构</p>
 <p>图中Pitem为候选item的特征，Puser为用户序列里的特征。CAN将候选item的特征构建一个embedding表，从中取出一部分当做MLP的参数，将序列里的特征作为MLP的输入，这样MLP的输出就作为特征关联信息。</p>
 <p>进一步的，我们改进了特征交互结构，除用户序列和候选贴的特征关联外，也支持任意种类特征间的关联，如用户特征中的用户薪资画像和候选贴特征中的职位。最终形成的DIEN和CAN的联合结构类似于Wide&amp;Deep的方式，如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9b011e235f56429d8df4fccc78cf95a5.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271936896.jpeg" />   
     </p>
 <p>图6 DIEN融合CAN特征交互结构示意图</p>
 <p>可看出，CAN结构从输入层交叉任意两组特征，每个结构保持自己的独立参数，从而在获取特征关联关系时，不受embedding方式影响，相比FM提前了特征交互的时机且不共享不同特征组合间的交互信息，能够更合理的建模两种特征的共现关系。</p>
 <p>离线实验时，我们结合2.3节所述的新序列信息建模进行了对比实验，结果如下表：</p>
 <p>表5 DIEN优化离线实验结果</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d40869a99aa142c39b6b8d28bb16dcf4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271936866.png" />   
     </p>
 <p>从表中可以看出合理的建模特征间的关联关系的重要性，在转化序列和ESMM带来更多用户转化行为信息的基础上，进一步借助特征间的关联提升了模型效果。值得一提的是，相比于CAN论文中所说同类特征间的关联关系，我们发现在招聘场景下，不同类特征间的关联信息为我们带来了更多的效果提升，仅将同类特征建模，比如候选贴的职位与用户历史点击序列的职位，线下只拿到了千分之四的收益。我们认为DIEN在建模用户序列时，已经包含了同类特征间的关联关系，所以CAN结构引入的额外信息收效甚微，但DIEN对不同类特征间的关联信息捕获不充分，因此CAN收益明显。</p>
 <p>带有CAN结构的模型上线时，虽然MLP参数量相比笛卡尔积小很多，但特征组合间参数独立，过多的特征组合也会拖慢模型预测速度，因此我们依据业务知识，从82个特征中筛选了22组特征组合，最终上线效果如下：</p>
 <p>表6 DIEN优化模型在普通关键词场景上线效果</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5e0c698244fc4292805b26934ba0f77f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271936694.png" />   
     </p>
 <p>上线后观测，带有CAN结构的DIEN模型相比基线DIEN，预测平均耗时增加5ms，T99增加8ms，超时控制在0.5%左右，能够满足线上预测实时性的要求。</p>
 <h1 id="03-离线流程优化">03 <strong>离线流程优化</strong></h1>
@@ -299,20 +299,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="31-离线数据优化"><strong>3.1 离线数据优化</strong></h2>
 <p>从2节所述模型的信息更新可以看出，我们持续不断的为模型引入更多维度的特征信息，这也客观的带来了离线数据的膨胀。尤其是语义向量的引入，序列中的每个点击帖子都有自己的向量，并且向量我们直接用了召回侧同学的优化结果，召回侧的版本迭代优化也促使我们不断变更离线数据，在租房业务构建的离线数据生产流程时间成本过高，所以我们重构了招聘场景的离线数据流程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1b108f3a97ec4220b3693375d1b1930b.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271936466.jpeg" />   
     </p>
 <p>图7 招聘模型离线数据生产流程</p>
 <p>原先序列数据为串行生成，我们调整为并行生成多份序列，待招聘标准样本产出后整合为模型全量样本，极大提升了数据的生产效率。此外，样本加入语义向量时，由于帖子和用户维度都有向量特征，所以除了标准样本之外，对于用户序列中的每个帖子，也需要加入语义向量信息。因此向量信息的获取数目极其庞大，以21年6月6日单天数据为例，需要加入向量的帖子ID在请求多个向量版本时的访问量在33亿多。</p>
 <p>因此，如何更合理高效的加入语义向量特征，先后迭代了3个不同的版本，见下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e971729e489c47078abae4b910d2fa3a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271936287.jpeg" />   
     </p>
 <p>图8 多版本语义向量加入离线数据优化流程</p>
 <p>版本2在1的基础上，采用用户的唯一搜索标识优化了请求量，版本3进一步的先获取所有帖子ID，去重得到向量后再拼接回原有样本，大幅度减少了单日样本所需的帖子请求量，在运行时长上相比先前版本提速明显。如图所示，优化后的版本效率提升显著，使整体模型所需训练样本的生成时间进一步减少，从而满足模型高频率更新的要求。</p>
 <h2 id="32-线上效果监控"><strong>3.2 线上效果监控</strong></h2>
 <p>此外，上线后模型的效果在某些天内会有较大波动，为了确保离线流程稳定可控，除了在上述序列数据生产、多版本语义向量请求时加了失败率监控外，对于实时性要求比较高的几类特征，我们都在线下补充完善了数据监控，针对线上线下的数据一致进行校验，以便及时发现数据问题。同时，为了及时监控模型的线上效果，我们也建立了模型的AB实验报表，更方便的观测模型实际效果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/08fc591dfde645f6ad1efaf8e73d9024.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271936233.png" />   
     </p>
 <p>图9 某特征数据监控示意图</p>
 <h2 id="33-模型提效"><strong>3.3 模型提效</strong></h2>
@@ -322,7 +322,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>此外，我们构建dataset时，在map操作构建了处理样本行的dataset后，使用了padded_batch操作，能够对batch内不同长度的序列数据自动补零对齐维度。但原先只在map时做了prefetch的预加载优化，tensorflow在dataset的转换操作时，每次转换都相当于构建一个新的dataset对象，因此padded_batch没有接收到之前的优化逻辑，需要单独再进行一次prefetch优化。</p>
 <p>如上操作后，优化效果如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/64a94e8abefd446b9cacadd94bc46e6d.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271936155.jpeg" />   
     </p>
 <p>图10 模型训练提效</p>
 <p>经过离线流程的优化后，模型优化迭代的效率大大提升，我们不论是更新模型结构加入更多维度的特征，还是保持较高频率的模型更新，都更为便捷。如2.2节所述，自动更新策略也能为我们带来线上效果2个点左右的提升，充分表明了算法同学在拓展模型能力的同时，也应该不断完善数据的基础建设，从而更从容的完成业务目标。</p>
@@ -331,7 +331,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们参考STAR[7]模型的思想，初步进行了一些工作，结合现有模型框架，实现了不同场景间的信息独立和共享，仅采用一天数据训练和测试的实验结果如下表：</p>
 <p>表7 STAR初步实验结果</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4d7e5f61b9b949a397143edee7ea7251.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271936828.png" />   
     </p>
 <p>通过场景间的数据交互，小流量场景的模型效果得到了增强，但大流量场景没有收益。后续我们会继续调整STAR的结构，实现所有场景的效果提升，并在上线时只部署一个模型，来提供不同场景下的模型预测服务，降低我们的维护成本，使我们能集中力量在模型优化上做出更多成果。</p>
 <p>搜索排序的核心目标是更好的对用户需求与帖子做匹配，因此对于返回结果的相关性有着强要求。可以看到经过模型层面的几轮优化，投递收益逐渐缩小，所以我们之后会花更大的精力在提升用户搜索体验上。目前我们为了保证相关性约束，在精排模型上叠加了相关性分层的策略，但未来希望将相关性和现有模型深入结合，在兼顾转化率的同时，不断提升排序结果的相关性。目前我们在召回和粗排侧有一些相关性的工作，精排加入相关性目标后，也可以更好的和前述环节配合优化，从召回开始打通模型的全链路优化。</p>
@@ -474,6 +474,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -507,10 +511,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -889,6 +889,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

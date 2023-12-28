@@ -236,7 +236,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>本文接下去会深入细节，一起看看是如何一一解决这些问题的。</p>
 <h2 id="1-模型结构">1. 模型结构</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4ee300dc982d45f3b58f1ff7af2bae42.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281554837.jpeg" />   
      Que2Search模型结构整体模型架构如上，还是使用普遍的双塔形式。</p>
 <h3 id="11-query-tower">1.1 Query Tower</h3>
 <p>query侧的特征输入有三部分：</p>
@@ -262,7 +262,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>作者通过实验发现简单的 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.zhihu.com%2Fsearch%3Fq%3D%25E6%25B3%25A8%25E6%2584%258F%25E5%258A%259B%26search_source%3DEntity%26hybrid_search_source%3DEntity%26hybrid_search_extra%3D%257B%2522sourceType%2522%253A%2522article%2522%252C%2522sourceId%2522%253A428495241%257D">注意力</a> 形式效果更好，</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Cbegin%7Barray%7D%7Blr%7D&#43;%5Cvarphi%3D%5Cleft%5C%7B%5Cvarphi_%7Bi%7D%5Cright%5C%7D_%7Bi%3D1%7D%5E%7BN%7D&#43;%5Cquad&#43;%5Ctext&#43;%7B&#43;representations&#43;of&#43;%7D&#43;%5Cmathrm%7BN%7D&#43;%5Ctext&#43;%7B&#43;channels&#43;%7D&#43;%5C%5C&#43;%5CPhi%3D%5Cvarphi_%7B1%7D%5C%7C%5Cldots%5C%7C&#43;%5Cvarphi_%7BN%7D&#43;%26&#43;%5Ctext&#43;%7B&#43;concatenation&#43;%7D&#43;%5C%5C&#43;a%3D%5Coperatorname%7BSoftmax%7D%28%5CPhi&#43;W%29&#43;%26&#43;W&#43;%5Cin&#43;%5Cmathbb%7BR%7D%5E%7BN&#43;D&#43;%5Ctimes&#43;N%7D&#43;%5C%5C&#43;f%3D%5Csum_%7Bi%3D1%7D%5E%7BN%7D&#43;a_%7Bi%7D&#43;%5Cdot%7B%5Cvarphi%7D_%7Bi%7D&#43;%5Cquad&#43;%5Ctext&#43;%7B&#43;final&#43;tower&#43;representation&#43;%7D&#43;%5Cend%7Barray%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281554284.svg&#43;xml" />   
     </p>
 <h2 id="2-训练阶段">2. 训练阶段</h2>
 <p>模型整体如上，引入了更多的特征+更精细的融合方式，再来看看训练过程是如何操作的。</p>
@@ -280,7 +280,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>负样本来自batch内负采样，也是属于应用很广泛的负样本策略，譬如可以参考我们之前分享的： <strong><a href="https://zshipu.com/t?url=https%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttp%253A%2F%2Fmp.weixin.qq.com%2Fs%253F__biz%253DMzIxMzkwNjM2NQ%253D%253D%2526mid%253D2247504279%2526idx%253D1%2526sn%253D8d02ecbde4076932d4d5260379d32780%2526chksm%253D97ad3745a0dabe532b697b4407c4f947ce94a5a6a6cae0df534fd290a97fd2bdd2467bd81e86%2526scene%253D21%2523wechat_redirect">大规模搜索+预训练，百度是如何落地的？</a></strong> 。不过这里对负样本的利用，还是有一点点不同，后面会具体介绍。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/58226e04f6e64ea697f538a6cc6d8754.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281554100.jpeg" />   
      batch内负采样</p>
 <h3 id="22-多阶段训练">2.2 多阶段训练</h3>
 <p>模型训练分为两个阶段，</p>
@@ -288,19 +288,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>第一阶段：batch内简单负样本训练，即其他record的doc作为当前query的负样本，然后做一个 multi-class cross-entropy。损失函数为：</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Coperatorname%7Bloss%7D_%7Bi%7D%3D-%5Clog&#43;%5Cfrac%7B%5Cexp&#43;%5Cleft%28s&#43;%5Ccdot&#43;%5Ccos&#43;%5Cleft%5C%7Bq_%7Bi%7D%2C&#43;d_%7Bi%7D%5Cright%5C%7D%5Cright%29%7D%7B%5Csum_%7Bj%3D1%7D%5E%7BB%7D&#43;%5Cexp&#43;%5Cleft%28s&#43;%5Ccdot&#43;%5Ccos&#43;%5Cleft%5C%7Bq_%7Bi%7D%2C&#43;d_%7Bj%7D%5Cright%5C%7D%5Cright%29%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281554997.svg&#43;xml" />   
     </p>
 <p>其中 为温度系数，目的是拉大logits的区分度，使其更sharpen，需要做实验调参确定值。</p>
 <ul>
 <li>第二阶段：batch内困难负样本训练，文中称为『课程学习』。使用困难负样本也是比较常见的套路，一般是离线通过各种策略采样得到。不过这里作者还是使用了batch内的数据，具体地，对于每个query ，选取除 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.zhihu.com%2Fsearch%3Fq%3D%25E5%25AF%25B9%25E8%25A7%2592%25E7%25BA%25BF%26search_source%3DEntity%26hybrid_search_source%3DEntity%26hybrid_search_extra%3D%257B%2522sourceType%2522%253A%2522article%2522%252C%2522sourceId%2522%253A428495241%257D">对角线</a> 外的相似度分数最高的doc作为负样本 ，因为对角线的doc为该query对应的正样本 。于是这样就有了三元组 ，尝试了二分类交叉熵损失和最大间隔损失函数两种方法，发现margin设置为0.1~0.2的margin rank loss表现最好</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Coperatorname%7Bloss%7D_%7Bi%7D%3D%5Cmax&#43;%5Cleft%280%2C-%5Cleft%5B%5Ccos&#43;%5Cleft%28q_%7Bi%7D%2C&#43;d_%7Bi%7D%5Cright%29-%5Ccos&#43;%5Cleft%28q_%7Bi%7D%2C&#43;d_%7Bn%7D&#43;q_%7Bi%7D%5Cright%29%5Cright%5D%2B%5Ctext&#43;%7B&#43;margin&#43;%7D%5Cright%29&#43;" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281554705.svg&#43;xml" />   
     </p>
 <h3 id="23-多任务学习">2.3 多任务学习</h3>
 <p>除了上述双塔任务之外，作者还在document tower额外引入了一个任务，document classification。具体地，针对每个doc，选取一系列相关的query。总共保留头部45000的query，然后用doc塔产出的向量做多标签分类</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4900019e3dda4d2890ae7efceca85a7b.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281554565.jpeg" />   
      document classification### 2.4 多模态融合</p>
 <p>一般而言， <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.zhihu.com%2Fsearch%3Fq%3D%25E6%25A8%25A1%25E6%2580%2581%26search_source%3DEntity%26hybrid_search_source%3DEntity%26hybrid_search_extra%3D%257B%2522sourceType%2522%253A%2522article%2522%252C%2522sourceId%2522%253A428495241%257D">模态</a> 指的是不同类型的数据，譬如文本、图像、视频、语音等等，而常见的融合方式就是Attention。在本文中，模态的概念更加宽泛，作者把不同路的输入认为是不同的模态，同时将 Grandient Blending 梯度融合的形式引入 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.zhihu.com%2Fsearch%3Fq%3D%25E5%258F%258C%25E5%25A1%2594%25E7%25BB%2593%25E6%259E%2584%26search_source%3DEntity%26hybrid_search_source%3DEntity%26hybrid_search_extra%3D%257B%2522sourceType%2522%253A%2522article%2522%252C%2522sourceId%2522%253A428495241%257D">双塔结构</a>。</p>
 <p>梯度融合来源于 CVPR 2020 论文What Makes Training Multi- Modal Networks Hard ，具体做法如下：</p>
@@ -312,11 +312,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>单模态特征训练。因为是双塔，需要&quot;控制变量&quot;，及一侧的塔每次只使用一路特征，另一侧塔使用全部特征</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Cbegin%7Baligned%7D&#43;%5Cmathcal%7BL%7D_%7Bi%7D%5E%7B1%7D&#43;%26%3DL%5Cleft%28%5Ccos&#43;%5Cleft%28%5Cvarphi_%7Bi%7D%5E%7B1%7D%2C&#43;%5Cvarphi_%7B1%7D%5E%7B2%7D&#43;%5Coplus&#43;%5Cldots&#43;%5Coplus&#43;%5Cvarphi_%7Bn%7D%5E%7B2%7D%5Cright%29%5Cright%29&#43;i&#43;%5Cin%5B1%2C&#43;m%5D&#43;&#43;%5C%5C&#43;%5Cmathcal%7BL%7D_%7Bj%7D%5E%7B2%7D&#43;%26%3DL%5Cleft%28%5Ccos&#43;%5Cleft%28%5Ccos&#43;%5Cleft%28%5Cvarphi_%7B1%7D%5E%7B1%7D&#43;%5Coplus&#43;%5Cldots&#43;%5Coplus&#43;%5Cvarphi_%7Bm%7D%5E%7B1%7D%2C&#43;%5Cvarphi_%7Bj%7D%5E%7B2%7D%5Cright%29%5Cright%29%5Cright.&#43;j&#43;%5Cin%5B1%2C&#43;n%5D&#43;%5Cend%7Baligned%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281554673.svg&#43;xml" />   
     
 2. 全模态特征训练。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Cmathcal%7BL%7D_%7B%5Ctext&#43;%7Bmulti&#43;%7D%7D%3DL%5Cleft%28%5Ccos&#43;%5Cleft%28%5Cvarphi_%7B1%7D%5E%7B1%7D&#43;%5Coplus&#43;%5Cldots&#43;%5Coplus&#43;%5Cvarphi_%7Bm%7D%5E%7B1%7D%2C&#43;%5Cvarphi_%7B1%7D%5E%7B2%7D&#43;%5Coplus&#43;%5Cldots&#43;%5Coplus&#43;%5Cvarphi_%7Bn%7D%5E%7B2%7D%5Cright%29%5Cright%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281554420.svg&#43;xml" />   
     
 3. 损失加权融合。</p>
 <p>注意，梯度融合只在训练阶段使用，预测时使用全部的模态。</p>
@@ -450,6 +450,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -483,10 +487,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -865,6 +865,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

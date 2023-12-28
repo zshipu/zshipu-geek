@@ -217,16 +217,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>BOX-COX 转换</strong></p>
 <p>关于 box-cox 转换，一般是用于连续的变量不满足正态的时候，在做线性回归的过程中，一般线性模型假定：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-935fd6ea32804c7caa9fb0c4559c0ba3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950250.png" />   
     </p>
 <p>其中ε满足正态分布，但是利用实际数据建立回归模型时，个别变量的系数通不过。例如往往不可观测的误差 ε 可能是和预测变量相关的，不服从正态分布，于是给线性回归的最小二乘估计系数的结果带来误差，为了使模型满足线性性、独立性、方差齐性以及正态性，需改变数据形式，故应用 BOX-COX 转换。具体详情这里不做过多介绍，当然还有很多转换非正态数据分布的方式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-1fb3fd8075034efba7e9ab3782a3ced7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950643.png" />   
     </p>
 <p>在一些情况下（P 值 &lt;0.003）上述方法很难实现正态化处理，所以优先使用 BOX-COX 转换，但是当 P 值 &gt;0.003 时两种方法均可，优先考虑普通的平方变换。</p>
 <p>BOX-COX 的变换公式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-fbecd730db61437492af057a2be9b034.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950740.png" />   
     </p>
 <p>具体实现：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">from scipy.stats import boxcoxboxcox_transformed_data = boxcox(original_data)
@@ -236,7 +236,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma"># power 属性是有异常点的 num_data.boxplot([&#39;power&#39;])
 </code></pre><p>结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-9de2fdf5e0b2416a8c0b65ab603cb9f8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950733.png" />   
     </p>
 <p>所以，下面用箱线图去捕获异常，然后进行截尾， 这里不用删除，其原因为：</p>
 <ul>
@@ -266,7 +266,7 @@ def outliers_proc(data, col_name, scale=3):
 num_data[&#39;power&#39;] = outliers_proc(num_data, &#39;power&#39;)
 </code></pre><p>再看一下数据：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-7bcf27b533174460b4d705835245ff02.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950191.png" />   
     </p>
 <p>当然，如果想删除这些异常点，可参考下列代码：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">
@@ -316,7 +316,7 @@ def outliers_proc(data, col_name, scale=3):
     return data_n
 </code></pre><p>这个代码是直接删除数据，这个如果要使用，不要对测试集用哈。下面看看 power 这个特征的分布也不错了，所以就没再进一步处理 power，至于其他的数值型是不是需要截尾，需要自己决策。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-56da638d7c784b3899579900c1d2dbbb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950101.png" />   
     </p>
 <h2 id="缺失值处理">缺失值处理</h2>
 <p>关于缺失值处理的方式， 有几种情况：</p>
@@ -355,7 +355,7 @@ train_data_x = pd.DataFrame(KNN(k=6).fit_transform(train_data_x), columns=featur
 # 还可以填充模型预测的值， 这一个在我正在写的数据竞赛修炼笔记的第三篇里面可以看到，并且超级精彩，还在写
 </code></pre><p>再回到这个比赛中，在数据探索中已经看到了缺失值的情况：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-e131347893024527961a3466eab9b804.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950928.png" />   
      上图可以看到缺失情况， 都是类别特征的缺失，notRepaired 这个特征的缺失比较严重， 可以尝试填充， 但目前关于类别缺失，感觉上面的方式都不太好，所以这个也是一个比较困难的地方，感觉用模型预测填充比较不错。但目前不做进一步处理，因为后面的树模型可以自行处理缺失。当然 OneHot 的时候，会把空值处理成全 0 的一种表示，类似于一种新类型了。</p>
 <h2 id="数据分桶">数据分桶</h2>
 <p>连续值经常离散化或者分离成“箱子”进行分析， 为什么要做数据分桶呢？</p>
@@ -410,7 +410,7 @@ cats = pd.qcut(data3, 4)
 print(pd.value_counts(cats))
 </code></pre><p>结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-c2678fbd1b844d4c80077470ebdffd27.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950832.png" />   
     </p>
 <h2 id="数据转换">数据转换</h2>
 <p>数据转换的方式有：</p>
@@ -453,7 +453,7 @@ cat_data_hot[&#39;model_fea&#39;] = model_fea
 cat_data_hot = pd.get_dummies(cat_data_hot, columns=[&#39;model_fea&#39;])
 </code></pre><p>效果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-3880f7b36a1d4da08ddd0ab39a60e20f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950553.png" />   
     </p>
 <p>但是发现 KMeans 聚类不好，可以尝试层次聚类试试，并且这个聚类数量啥的应该也会有影响，这里只是提供一个思路，我觉得这个特征做的并不是太好，还需改进。</p>
 <h2 id="特征构造">特征构造</h2>
@@ -465,7 +465,7 @@ cat_data_hot = pd.get_dummies(cat_data_hot, columns=[&#39;model_fea&#39;])
 </ul>
 <p>从这个比赛开始，看看这几种类型的特征如何进行构造新特征出来。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5113a39ac2e748b9a430c972cb2119e1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950842.png" />   
     </p>
 <p>根据上面的描述， 下面就可以着手进行构造特征了，由于在数据清洗的时候就根据字段的类型不同把数据进行了划分，现在可以直接对特征进行构造。</p>
 <p><strong>时间特征的构造(time_data)</strong></p>
@@ -527,7 +527,7 @@ del time_data[&#39;regDate&#39;]
 del time_data[&#39;creatDate&#39;]
 </code></pre><p>看一下最后的构造结果， 报废特征没有构造，因为发现了一个特点就是这里的数据 10 年以上的车会偏斜，所以感觉这个用 10 年作为分界线不太合适，只是提供一种思路。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/aa2bdd5b07034c2ea6baa994e5c759d4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950113.png" />   
     </p>
 <p><strong>根据汽车的使用时间或者淡旺季分桶进行统计特征的构造</strong></p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma"># 构造统计特征的话需要在训练集上先计算
@@ -554,7 +554,7 @@ estivalue_fe = pd.DataFrame(all_info).T.reset_index().rename(columns={&#34;index
 time_data = time_data.merge(estivalue_fe, how=&#39;left&#39;, on=&#39;estivalue&#39;)
 </code></pre><p>这样， 时间特征就基本构造完毕，最后的结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c281c8eca5074490b288c6f2b543e131.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950033.png" />   
     </p>
 <p>这样，时间特征这块就构造了 10 个特征出来， 当然还可以更多， 由于篇幅原因，其他的可以自行尝试。</p>
 <p><strong>类别特征的构造（cat_data）</strong></p>
@@ -623,7 +623,7 @@ del cat_data[&#39;fuelType&#39;]
 cat_data = pd.get_dummies(cat_data, columns=[&#39;gearbox&#39;, &#39;car_class&#39;, &#39;is_fuel&#39;, &#39;notRepairedDamage&#39;])
 </code></pre><p>这样，把类别特征构造完毕。最终结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/040673f50c3c456db8011ede04077d41.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950990.png" />   
     </p>
 <p>本文构造了 41 个特征，当然可以更多， 也是自己尝试。</p>
 <p><strong>数值特征的构造(num_data)</strong></p>
@@ -642,7 +642,7 @@ num_data[&#39;v_mean&#39;] = num_data[v_features].apply(lambda x: x.mean(), axis
 num_data[&#39;v_std&#39;] = num_data[v_features].apply(lambda x: x.std(), axis=1)
 </code></pre><p>这样，数值特征构造完毕，最终构造的结果特征如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/acad0b2dfad64d0781bc97661628cc56.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281950382.png" />   
     </p>
 <p>通过上面的步骤，特征工程就完成了。简单的梳理一下， 基于二手车的背景信息进行特征构造的，首先是构造的时间特征， 构造了使用时间，是否报废，使用时间分箱， 是否淡旺季等特征；然后是类别特征，构造了邮编特征，是否私用，是否新能源，是否微型车，并且还提取了大量统计特征；最后是数值特征，给 kilometer 分箱， 对 V 特征进行了统计等。</p>
 <p>最后我们合并一下所有的数据</p>
@@ -651,7 +651,7 @@ final_data.shape  # (200000, 74)
 final_data.head()
 </code></pre><p>特征构造后的最终数据：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4a270c0a75df4d69815f826e2183b142.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281951813.png" />   
     </p>
 <p>最终有 74 个特征， 当然还可以更多，但是太多了也不是个好事，会造成冗余，特征相关等特征，对后面的模型造成一些负担。所以，还得进行特征筛选才可以，毕竟上面的 74 个特征不可能都是有用的，甚至有些还会造成负面影响。</p>
 <h2 id="特征选择">特征选择</h2>
@@ -678,7 +678,7 @@ final_data.head()
 final_data = pd.read_csv(&#39;./pre_data/pre_data_beifen.csv&#39;)
 </code></pre><p>还是上面的 final_data, 看一下构造的特征：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/37f72e4f1ca04ae499c2ca8ffbfb69f9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281951025.png" />   
     </p>
 <p><strong>过滤式</strong></p>
 <p><strong>主要思想</strong>: 对每一维特征“打分”，即给每一维的特征赋予权重，这样的权重就代表着该特征的重要性，然后依据权重排序。先进行特征选择，然后去训练学习器，所以特征选择的过程与学习器无关。相当于先对特征进行过滤操作，然后用特征子集来训练分类器。</p>
@@ -714,7 +714,7 @@ corr[&#39;price&#39;].sort_values(ascending=False)[1:].plot(kind=&#39;bar&#39;)
 plt.tight_layout()
 </code></pre><p>结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0c760f0f94fd4988b4358d295b4d97b1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281951044.png" />   
     </p>
 <p>当然，这个数据用 pearson 系数可能不是那么合理，可以使用 spearman 系数，这个被认为是排列后的变量的 pearson 的相关系数， 具体的可以看(Pearson)皮尔逊相关系数和 spearman 相关系数， 这里只整理两者的区别和使用场景， 区别如下：</p>
 <ul>
@@ -730,7 +730,7 @@ f, ax = plt.subplots(figsize=(50, 30))
 sns.heatmap(corr, annot=True)
 </code></pre><p>结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a1e977a874224457b430159287b2c163.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281951466.png" />   
     </p>
 <p>从上面两个步骤中，就可以发现一些结论：</p>
 <ul>
@@ -768,7 +768,7 @@ for column in X.columns:
 print(sorted(scores, reverse=True))
 </code></pre><p>这里对喜欢的特征排序并打分，结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ef7956ace74340dfabc513809222311f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281951289.png" />   
     </p>
 <p>这里就可以看出随机森林有用的特征排序，如果我们后面选择随机森林作为模型，就可以根据这个特征重要度选择特征。当然，如果你是 xgboost，xgboost 里面有个画特征重要性的函数，可以这样做：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma"># 下面再用xgboost跑一下
@@ -783,7 +783,7 @@ plot_importance(xgb)
 plt.show()
 </code></pre><p>这样，直接把 xgboost 感兴趣的特征画出来：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fc340f7d3fdb4ea9a02f8cd3775a94cb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281951505.png" />   
     </p>
 <p>最后，我们把上面的这两种方式封装起来， 还可以画出边际效应：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">
@@ -800,7 +800,7 @@ sfs.fit(X, Y)
 sfs.k_feature_names_    # 随机森林放这里跑太慢了，所以中断了
 </code></pre><p>结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/98bdbc5ea989431aa448edfe74860d79.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281951518.png" />   
     </p>
 <p>画出边际效应：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma"># 画出边际效应
@@ -811,7 +811,7 @@ plt.grid()
 plt.show()
 </code></pre><p>这个也是看选出的特征的重要性：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/08869a2f881e4656951984c3b2490674.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281951469.png" />   
     </p>
 <p>这样，根据我们使用的模型，我们可以对特征进行一个选择，综合上面的这几种方式，我们就可以把保留和删除的特征给选出来了，该删除的可以删除了。</p>
 <p>如果真的这样尝试一下，就会发现保留的特征里面， v_std, v_3, used_time, power, kilometer, estivalue 等这些特征都在，虽然我们不知道 v 系列特征的含义，但是汽车使用时间，发动机功率，行驶公里， 汽车使用时间的分箱特征其实对 price 的影响都是比较大的。</p>
@@ -955,6 +955,10 @@ for model in models:
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -988,10 +992,6 @@ for model in models:
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1370,6 +1370,8 @@ for model in models:
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

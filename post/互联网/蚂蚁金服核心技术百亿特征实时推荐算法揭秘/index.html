@@ -216,7 +216,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2a5b881e7b93428f95e41753104237a7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804903.webp" />   
     </p>
 <p>阿里妹导读：本文来自蚂蚁金服人工智能部认知计算组的基础算法团队，文章提出一整套创新算法与架构，通过对TensorFlow底层的弹性改造，解决了在线学习的弹性特征伸缩和稳定性问题，并以GroupLasso和特征在线频次过滤等自研算法优化了模型稀疏性，在支付宝核心推荐业务获得了uvctr的显著提升，并较大地提升了链路效率。</p>
 <p><strong>0.综述</strong></p>
@@ -252,23 +252,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>2）在online learning场景下，为了容纳新出现的特征，需要预留一部分维度空间，并在线上不断修改映射表，超过预留空间则需要重新启动在线任务。</p>
 <p>为了突破固定维度限制，实现特征的动态增加和删除，最朴素的优化想法是在TensorFlow底层实现模拟字典行为的Variable，并在此基础上重新实现Tensorflow上层API。由此我们进行了优化，在server新增了基于HashMap的HashVariable，其内存结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/232b92aae0c648e79af7818909da74fd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804802.webp" />   
     </p>
 <p>在声明该变量时，只需增加一句，其他训练代码皆不需改动：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/62adbed6ae104e97a6922a07fd339be9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804873.webp" />   
     </p>
 <p>每个特征都通过hash函数映射到一个2的64次方大小的空间内。当需要计算该特征时，PS会按需惰性创建并返回之。但其上层行为与原生TF一致。由于去掉了featuremap转ID的过程，我们内部形象地将其称为“去ID化”。在此之上我们实现了Group Lasso FTRL，频次过滤和模型压缩等一系列算法。</p>
 <p>备注：弹性特征带来一个显著的优势：只要用足够强的L1稀疏性约束，在单机上就能调试任意大规模的特征训练，带来很多方便。我们的hashmap实现是KV化的，key是特征，value是vector的首地址。</p>
 <h3 id="离线训练优化"><strong>离线训练优化</strong></h3>
 <p>经过这样的改造后，在离线批量学习上，带来了以下变化：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/12bc477c7ef843b7bd4517b9c1ec2763.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804744.webp" />   
     </p>
 <h3 id="在线训练优化"><strong>在线训练优化</strong></h3>
 <p>online learning上，能带来如下变化：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c624a465ddaa4f3cb84dcdfe53691177.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804864.webp" />   
     </p>
 <p>除了性能有明显的提升之外，其最大的优势是不需提前申请空间，训练可以无缝稳定运行。</p>
 <h2 id="2-特征动态增删技术"><strong>2. 特征动态增删技术</strong></h2>
@@ -285,18 +285,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>稀疏化是算法追求的重要模型特性，从简单的L1正则化和Truncated Gradient[9]， 再到讨论累积梯度平均值的RDA(Regularized Dual Averaging)[10]， 再到目前常见的 FTRL[2] 。 然而它们都是针对广义线性模型优化问题提出的稀疏性优化算法，没有针对sparse DNN中的特征embedding层做特殊处理。把embedding参数向量当做普通参数进行稀疏化，并不能达到在线性模型中能达到的特征选择效果，进而无法有效地进行模型压缩。</p>
 <p>例如：当包含新特征的样本进入时，一个特征对应的一组参数（如embedding size为7，则参数数量为7）被激活，FTRL判定特征中的部分参数无效时，也不能安全地将该特征删除。如图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e06a1b31624c4edfaa24a0eb1c554974.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804738.webp" />   
     </p>
 <p>因此，在L1和L2正则的基础上，人们引入L21正则(group lasso)和L2正则(exclusive sparsity)，分别表示如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0646d7da952b43789dcf938149bd21ff.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804615.webp" />   
     </p>
 <p>L21早在2011年已经引入，它最初目的是解决一组高度关联特征（如男\女）应同时被保留或删除的问题，我们创新地扩展到embedding的表示上，以解决类似的问题。</p>
 <p>在L21中，由于内层L2正则将一个特征的所有参数施加相同的约束，能将整组参数清除或保留，由此决定embedding层中的某些特征对应的embedding向量是否完全删除，提升模型泛化性。因此称为group lasso。</p>
 <p>而L12则正好相反，它迫使每组参数中的非0参数数量一致但值又尽可能不同，但使输出神经元互相竞争输入神经元，进而使特征对目标更具区分性。</p>
 <p>对于DNN分类网络，底层表示要求有足够的泛化性和特征抽象能力，上层接近softmax层，需要更好的区分性。因此我们通常在最底层的embedding层使用group lasso。即如下的优化目标：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e4f8e010fbe9457496aae72cab564317.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804442.webp" />   
     </p>
 <p>直接将L21正则项惩罚加入loss，模型最终也能收敛，但并不能保证稀疏性。因此Group lasso优化器参考了FTRL，将梯度迭代分成两个半步，前半步按梯度下降，后半步微调实现稀疏性。通过调节L1正则项（即公式中的λ），能有效地控制模型稀疏性。</p>
 <p>Group lasso是弹性计算改造后，模型性能提升和压缩的关键。值得指出：</p>
@@ -317,20 +317,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在Google讨论FTRL的文章1中提到， 在高维数据中大部分特征都是非常稀疏的，在亿级别的样本中只出现几次。那么一个有趣的问题是，FTRL或Group FTRL优化器能否能删除(lasso)极低频特征？</p>
 <p>在RDA的优化公式中，满足以下条件的特征会被置0：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9249dd299bad4c968dd01a787a6d74ba.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804181.webp" />   
     </p>
 <p>若在t步之前，该特征只出现过几次，未出现的step的梯度为0，随着步数增大，满足上述条件变得越来越容易。由此RDA是可以直观处理极稀疏特征的。 但对于FTRL，要满足：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9756e3af20f04fa2bc29a65e1a7155b7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804933.webp" />   
     </p>
 <p>其中，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8d7725905e034a798d6de613660827d8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804874.webp" />   
     
 不仅和历史梯度有关，还与历史学习率和权重w有关。 因此FTRL虽然也能处理极稀疏特征，但并没有RDA那么aggressive（此处还待详细地分析其下界，Group FTRL与此类似）。</p>
 <p>由于FTRL在设计和推导时并未明确考虑极低频特征，虽然通过增大λ，确实能去除大量极低频特征，但由于约束太强，导致部分有效特征也被lasso，在离线实验中被证明严重影响性能。其次，对这些巨量极低频特征，保存历史信息的工程代价是很高昂的（增加几倍的参数空间和存储需求），如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4f81cbbabf544f6e951d502484763bbf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804753.webp" />   
     </p>
 <p>因此我们提出，能否在实时数据流上模拟离线频次过滤，为特征提供准入门槛，在不降低模型性能的基础上，尽量去除极低频特征，进一步实现稀疏化？</p>
 <h4 id="222-频次过滤的几种实现">2.2.2 频次过滤的几种实现</h4>
@@ -343,30 +343,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>在离线shuffle后的特征满足均匀分布，但对在线数据流，特征进入训练系统可看做泊松过程，符合泊松分布：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/132d77b35176489ca3958b4db9f63ff8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804749.webp" />   
     </p>
 <p>其中n为当前出现的次数，t为当前的步数，λ为单位时间发生率，是泊松分布的主要参数，T为训练总步数。
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/db0437bcb4724e0880f700192e7819b2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804541.webp" />   
      为特征最低门限（即最少在T时间内出现的次数）。</p>
 <p>因此我们能通过前t步的特征出现的次数n，将t时刻当做单位时间，则
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/14505dd7ca4c47d9a9f4b93028583a8b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804330.webp" />   
      。 根据泊松分布，我们可以算出剩余
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f69723fefa5b48fd98f4dd2bd5b9cb26.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804220.webp" />   
      时间内事件发生大于等于
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/603f7294279c44f295df5c4727692109.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804002.webp" />   
      次的概率
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ffb02ee7963446698bacabded31ddadf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804854.webp" />   
      。 每次该特征出现时，都可按该概率
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ea45464953b5479c86949888cba502d9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804708.webp" />   
      做伯努利采样，特征在t步进入系统的概率用下式计算：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c631fe3a252f41f799aad905d9ba913b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804477.webp" />   
     </p>
 <p>通过真实线上数据仿真，它能接近离线频次过滤的效果，其λ是随每次特征进入时动态计算的。它的缺陷是：</p>
 <ol>
@@ -385,18 +385,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>在经典的FTRL实现中，L1正则对每个特征都是一致的。这导致了2.2.1 中提到的问题：过大的L1虽然过滤了极低频特征，但也影响的了模型的性能。参考各类优化器（如Adam）对learning_rate的改进，我们提出：通过
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9e95ea6f6db8488ab0ab8228d45b33fd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804242.webp" />   
      特征频次影响L1正则系数，使得不同频次的特征有不同的lasso效果。</p>
 <p>特征频次和基于MLE的参数估计的置信度相关，出现次数越低置信度越低。如果在纯频率统计基础上加入一个先验分布（正则项），当频率统计置信度越低的时候，越倾向于先验分布，相应的正则系数要更大。我们经过多个实验，给出了以下的经验公式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/306dec1d2b134226b62f214cb5054f4d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804044.webp" />   
     </p>
 <p>其中c是惩罚倍数，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4ff2f92bcaa54967826ec71de1bae497.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804907.webp" />   
      为特征最低门限，这两者皆为超参，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2d1f756ce890449dbad110db2bc6e8e3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804924.webp" />   
      是当前特征出现的频次。</p>
 <p>我们在线上环境，使用了动态调节L1正则的方案 。在uvctr不降甚至有些微提升的基础上，模型特征数比不使用频次过滤减少75%，进而从实验证明了频次过滤对稀疏化的正向性。它的缺点也很明显：特征频次和正则系数之间的映射关系缺少严谨证明。</p>
 <p>频次过滤作为特征管理的一部分，目前还少有相关论文研究，亟待我们继续探索。</p>
@@ -440,11 +440,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>线上与训练指标之间的对应关系如下表：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b0f1b3c0eb294d8f85f1186f9794893f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804662.webp" />   
     </p>
 <p>通过http接口，每隔一段时间发送监控数据，出现异常会及时产生钉钉和邮件报警。下图是对9月20日到27号的监控，从第二张图表来看，模型能较好的适应当前数据流的打分分布。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4ddacf4e97594a008733829132807982.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281804376.webp" />   
     </p>
 <p>User-AUC：传统的AUC并不能完全描述uvctr，因为模型很可能学到了不同用户间的偏序关系，而非单个用户在不同offer下的点击偏序关系。为此，我们使用了User-AUC，它尽可能地模拟了线上uvctr的计算过程，在真实实验中，监控系统的uvctr小时报表，与实时模型输出的User-AUC高度一致。</p>
 <h2 id="4-工程实现和效果"><strong>4. 工程实现和效果</strong></h2>
@@ -596,6 +596,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -629,10 +633,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1011,6 +1011,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

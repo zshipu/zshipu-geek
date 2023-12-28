@@ -228,7 +228,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>平台整体架构</strong></p>
 <p>以下是平台整体的架构示意图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/58f1798bedeb46efab875ca9967cc07d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271750106.webp" />   
     </p>
 <p>整个平台由四部分组成：</p>
 <ul>
@@ -260,13 +260,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="调度流程">调度流程</h3>
 <p>下图为作业调度的流程图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/29cc49f8a1de4615ab0bd99c08ecde62.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271750789.webp" />   
     </p>
 <p>palink pod 异步执行竞争分布式锁操作，保证同一时刻有且仅有一个实例获取周期性监测权限，满足条件的 Command 将直接被发送到 Kafka 待执行队列，同时变更其状态，保证之后不再被调度。此外，所有的 palink pod 将充当待执行队列消费者的角色，并归属于同一个消费者组，消费到消息的实例将获取到最终的执行权。</p>
 <h3 id="执行流程"><strong>执行流程</strong></h3>
 <p>作业的执行实则是作业提交的过程，根据作业类型的不同提交工作流有所区别，可细分为三类：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1e74edf09bad4d418370c1134bb9189b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271750427.webp" />   
     </p>
 <ul>
 <li>Flink JAR 作业：我们摒弃了用户直接上传 JAR 文件的交互方式。用户只需提供作业 gitlab 仓库地址即可，打包构建全流程平台直接完成。由于每一个服务实例都内嵌 Flink 客户端，任务是直接通过 Flink run 方式提交的。</li>
@@ -276,7 +276,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="command-状态机"><strong>Command 状态机</strong></h3>
 <p>PalinkJobCommand 的状态流转如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1d9722d8f90246d696b24b5af6021ce3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271750191.webp" />   
     </p>
 <ul>
 <li>UNDO：初始状态，将被调度实例监测。</li>
@@ -293,14 +293,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>但仔细分析，其实二者的状态对于平台而言没有太大区别，只是状态的粒度有所不同而已，yarn application 的状态已经是对 Flink 状态做了一次 state mapping。可是考虑到，Flink 在 HA 的时候，作业对外暴露的 URL 会发生变更，这种情况下只能通过获取作业对应的 application 信息才能拿到最新的地址。</p>
 <p>与此同时，一次状态同步的过程不仅仅只是希望拿到最新的状态，对于任务的 checkpoint 等相关信息同样是有同步的诉求。看来二者的信息在一次同步的过程中都需要获取，最终的状态同步设计如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/db68a226fecb4c98afb14cacbb89b97e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271750843.webp" />   
     </p>
 <p>前置流程和作业调度流程类似，有且仅有一个实例负责周期性监测工作，符合条件的 Job ID（注，并非所有的作业都用同步的必要，比如一些处于终态的作业）将发送到内部延迟队列。之所以采用延迟队列而非 Kafka 队列，主要是为了将同一时间点批量同步的需求在一定时间间隔内随机打散，降低同步的压力。最后，在获取到作业的完整信息后，再做一次 state mapping 将状态映射为平台抽象的状态类型。</p>
 <p>由于状态同步是周期性进行的，存在一定的延迟。因此在平台获取作业详情时，也会同步触发一次状态同步，保证获取最新数据。</p>
 <h3 id="job-状态机"><strong>Job 状态机</strong></h3>
 <p>PalinkJob 的状态流转如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1bea0d6ce5204bcd8bcb43360357ba6c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271750462.webp" />   
     </p>
 <ul>
 <li>DEPLOYING：作业初始状态，将随着 PalinkJobCommand 的状态驱动向 DEPLOY_SUCCESSED 和 DEPLOY_FAILED 流转。</li>
@@ -320,7 +320,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Flink 提供了两种机制用于恢复作业：Checkpoint 和 Savepoint，本文统称为保存点。Savepoint 可以看作是一种特殊的 Checkpoint ，只不过不像 Checkpoint 定期的从系统中生成，它是用户通过命令触发的，用户可以控制保存点产生的时间点。</p>
 <p>任务启动时，通过指定 Checkpoint 或 Savepoint 外部路径，就可以达到从保存点恢复的效果。我们对于平台作业 HA 的管理也是基于这两者展开的。下图为管理的流程图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/63a9022a0b474ac7957e29f00cfc9a7e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271751155.webp" />   
     </p>
 <p>用户有两种方式来手动停止一个作业：暂停和终止。</p>
 <ul>
@@ -342,7 +342,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="实现机制"><strong>实现机制</strong></h3>
 <p>下图为 Flink 官方提供的作业角色流程图，由图可知，用户提交的代码将在 Client 端进行加工、转换（最终生成 Jobgraph ）然后提交至远程集群。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6e316e8d39d143bea93f85656ad08b1e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271751809.webp" />   
     </p>
 <p>那么要实现用户层面的作业 SQL 化，底层的实现同样是绕不开这个流程。实际上 FlinkStreamSQL 项目就是通过定制化的手段实现了 Client 端的逻辑，可以将整个过程简要地描述为：</p>
 <h3 id="构建-packagedprogram"><strong>构建 PackagedProgram</strong></h3>
@@ -377,15 +377,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="三线上效果"><strong>三、线上效果</strong></h2>
 <p><strong>■ 作业总览</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fbe5fb3f4c0f41dc8f9dfd8abdff877b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271751643.webp" />   
     </p>
 <p><strong>■ 作业详情</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d8e0a3b0a5024294bd385c17bb7f75b0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271751329.webp" />   
     </p>
 <p><strong>■ 作业监控</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9b33b11ccb8c436faab15689fdb55b8a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271751985.webp" />   
     </p>
 <h2 id="四未来工作"><strong>四、未来工作</strong></h2>
 <p>随着业务的继续推进，平台将在以下几方面继续迭代优化：</p>
@@ -516,6 +516,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -549,10 +553,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -931,6 +931,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

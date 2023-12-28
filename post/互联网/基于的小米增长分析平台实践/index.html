@@ -219,7 +219,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>基于上述需求和痛点，小米大数据和云平台联合开发了增长分析系统(Growing Analytics, 下面简称GA)，旨在提供一个灵活的多维实时查询和分析平台，统一数据接入和查询方案，帮助业务线做精细化运营。</p>
 <h2 id="2增长分析场景介绍"><strong>2、增长分析场景介绍</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9ab9bb8a18114bf9bc03bd36d7b72651.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755317.webp" />   
     </p>
 <p>如上图所示，分析、决策、执行是一个循环迭代的过程，因此，增长分析查询非常灵活，涉及分析的维度有几十上百个，我们无法预先定义好所有要计算的结果，代价太高，所以这也就要求了所有的数据需要即时计算和分析。同时，决策具有时效性，因此数据从摄入到可以查询的时延不能太高。另外，业务发展迅速，需要增加新的分析维度，所以我们需要能够支持schema的变更（主要是在线增加字段）。</p>
 <p>在我们的业务中，增长分析最常用的三个功能是事件分析（占绝大多数）、留存分析和漏斗分析；这三个功能业务都要求针对实时入库（只有append）的明细数据，能够即席选择维度和条件（通常还要join业务画像表或者圈选的人群包），然后在秒级返回结果（业界相关的产品如神策、GrowingIO等都能达到这个性能）。一些只支持提前聚合的预计算引擎（如Kylin），虽然查询性能优秀，但难以支持schema随时变更，众多的维度也会造成Cube存储占用失控，而Hive能够在功能上满足要求，但是性能上较差。</p>
@@ -228,7 +228,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="31-初始架构"><strong>3.1 初始架构</strong></h3>
 <p>GA立项于2018年年中，当时基于开发时间和成本，技术栈等因素的考虑，我们复用了现有各种大数据基础组件(HDFS, Kudu, SparkSQL等)，搭建了一套基于Lamda架构的增长分析查询系统。GA系统初代版本的架构如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7126599bfc8f49ebae835f7fc86ba4a0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755993.webp" />   
     </p>
 <p>GA系统涵盖了数据采集、数据清洗、数据查询和BI报表展示等一整套流程。首先，我们将从数据源收集到的数据进行统一的清洗，以统一的json格式写入到Talos(注：小米自研的消息队列)中。接着我们使用Spark Streaming将数据转储到Kudu中。Kudu作为一款优秀的OLAP存储引擎，具有支持实时摄取数据和快速查询的能力，所以这里将Kudu作为热数据的存储，HDFS作为冷数据的存储。为了不让用户感知到冷热数据的实际存在，我们使用了动态分区管理服务来管理表分区数据的迁移，定期将过期的热数据转化为冷数据存储到HDFS上，并且更新Kudu表和HDFS表的联合视图，当用户使用SparkSQL服务查询视图时，计算引擎会根据查询SQL自动路由，对Kudu表的数据和HDFS表的数据进行处理。</p>
 <p>在当时的历史背景下，初代版本的GA帮助我们用户解决了运营策略较为粗放、运营效率较低的痛点，但同时也暴露了一些问题。首先是运维成本的问题，原本的设计是各个组件都使用公共集群的资源，但是实践过程中发现执行查询作业的过程中，查询性能容易受到公共集群其他作业的影响，容易抖动，尤其在读取HDFS公共集群的数据时，有时较为缓慢，因此GA集群的存储层和计算层的组件都是单独搭建的。另一个是 <strong>性能</strong> 的问题，SparkSQL是基于批处理系统设计的查询引擎，在每个Stage之间交换数据shuffle的过程中依然需要落盘操作，完成SQL查询的时延较高。为了保证SQL查询不受资源的影响，我们通过添加机器来保证查询性能，但是实践过程中发现，性能提升的空间有限，这套解决方案并不能充分地利用机器资源来达到高效查询的目的，存在一定的资源浪费。因此，我们希望有一套新的解决方案，能够提高查询性能和降低我们的运维成本。</p>
@@ -250,30 +250,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>Doris是百度开源到Apache社区的基于 MPP 的交互式 SQL 数据仓库， 主要用于解决报表和多维分析。它主要集成了 Google Mesa 和 Cloudera Impala 技术，满足了我们的上述要求。我们对Doris进行了内部的性能测试并和社区沟通交流，确定了Doris替换原来的计算存储组件的解决方案，于是我们新的架构就简化为如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/905f34df8e0a443bb9ebac6a0d8d9f73.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271755681.webp" />   
     </p>
 <h3 id="33-性能测试"><strong>3.3 性能测试</strong></h3>
 <p>在配置大体相同计算资源的条件下，我们选取了一个日均数据量约10亿的业务，分别测试不同场景下（6个事件分析，3个留存分析，3个漏斗分析），不同时间范围（一周到一个月）的SparkSQL和Doris的查询性能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b9e72a349b8b4b5faab0a7c2620c15fb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271756121.webp" />   
     </p>
 <p>如上图测试结果，在增长分析的场景下，Doris查询性能相比于SparkSQL+Kudu+HDFS方案具有明显的提升，在事件分析场景下平均降低约85%左右的查询时间，在留存和漏斗场景下平均降低约50%左右的查询时间。对于我们我们业务大多数都是事件分析需求来讲，这个性能提升很大。</p>
 <h2 id="4doris实践与优化"><strong>4、Doris实践与优化</strong></h2>
 <h3 id="41-doris在增长分析平台的使用情况"><strong>4.1 Doris在增长分析平台的使用情况</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8143b71a14984d76b406e0f290d67db2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271756737.webp" />   
     </p>
 <p>随着接入业务的增多，目前，我们的增长分析集群单集群最大规模已经扩展到了近百台，存量数据到了PB级别。其中，近实时的产品线作业有数十个，每天有几百亿条的数据入库，每日有效的业务查询SQL达1.2w+。业务的增多和集群规模的增大，让我们也遇到不少问题和挑战，下面我们将介绍运维Doris集群过程中遇到的一些问题和应对措施或改进。</p>
 <h3 id="42-doris数据导入实践"><strong>4.2 Doris数据导入实践</strong></h3>
 <p>Doris大规模接入业务的第一个挑战是数据导入，基于我们目前的业务需求，数据要尽可能实时导入。而对于增长分析集群，目前有数十个业务明细数据表需要近实时导入，这其中还包含了几个大业务(大业务每天的数据条数从几十亿到上百亿不等，字段数在200~400)。为了保证数据不重复插入，Doris采用label标记每批数据的导入，并采用两阶段提交来保证数据导入的事务性，要么全部成功，要么全部失败。为了方便监控和管理数据导入作业，我们使用Spark Streaming封装了stream load操作，实现了将Talos的数据导入到Doris中。每隔几分钟，Spark Streaming会从Talos读取一个批次的数据并生成相应的RDD，RDD的每个分区和Talos的每个分区一一对应，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d8667abfbc27426ab24a490c8a4cf039.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271756297.webp" />   
     </p>
 <p>对于Doris来说，一次stream load作业会产生一次事务，Doris的fe进程的master节点会负责整个事务生命周期的管理，如果短时间内提交了太多的事务，则会对fe进程的master节点造成很大的压力。对于每个单独的流式数据导入产品线作业来说，假设消息队列一共有m个分区，每批次的每个分区的数据导入可能执行最多n次stream load操作，于是对消息队列一个批次的数据的处理就可能会产生m*n次事务。为了Doris的数据导入的稳定性，我们把Spark Streaming每批次数据的时间间隔根据业务数据量的大小和实时性要求调整为1min到3min不等，并尽量地加大每次stream load发送的数据量。</p>
 <p>在集群接入业务的初期，这套流式数据导入Doris的机制基本能平稳运行。但是随着接入业务规模的增长，问题也随之而来。首先，我们发现某些存了很多天数据的大表频繁地出现数据导入失败问题，具体表现为数据导入超时报错。经过我们的排查，确定了导致数据导入超时的原因，由于我们使用stream load进行数据导入的时候，没有指定表的写入分区(这里线上的事件表都是按天进行分区)，有的事件表已经保留了三个多月的数据，并且每天拥有600多个数据分片，加上每张表默认三副本保存数据，所以每次写入数据之前都需要打开约18万个writer，导致在打开writer的过程中就已经超时，但是由于数据是实时导入，其他天的分区没有数据写入，所以并不需要打开writer。定位到原因之后，我们做了相应的措施，一个是根据数据的日期情况，在数据导入的时候指定了写入分区，另一个措施是缩减了每天分区的数据分片数量，将分片数据量从600+降低到了200+(分片数量过多会影响数据导入和查询的效率)。通过指定写入数据分区和限制分区的分片数量，大表也能流畅稳定地导入数据而不超时了。</p>
 <p>另一个困扰我们的问题就是需要实时导入数据的业务增多给fe的master节点带来了较大的压力，也影响了数据导入的效率。每一次的 stream load操作，coordinator be节点都需要多次和fe节点进行交互，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-25a46893e190417d8acaec9674b54106.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271756810.webp" />   
     </p>
 <p>曾经有段时间，我们发现master节点偶尔出现线程数飙升，随后cpu load升高, 最后进程挂掉重启的情况。我们的查询并发并不是很高，所以不太可能是查询导致的。但同时我们通过对max_running_txn_num_per_db参数的设置已经对数据导入在fe端做了限流，所以为何fe的master节点的线程数会飙升让我们感到比较奇怪。经过查看日志发现，be端有大量请求数据导入执行计划失败的日志。我们的确限制住了单个db能够允许同时存在的最大事务数目，但是由于fe在计算执行计划的时候需要获取db的读锁，提交和完成事务需要获取db的写锁，一些长尾任务的出现导致了好多计算执行计划的任务都堵塞在获取db锁上边，这时候be客户端发现rpc请求超时了，于是立即重试，fe端的thirft server需要启动新的线程来处理新的请求，但是之前的事务任务并没有取消，这时候积压的任务不断增多，最终导致了雪崩效应。针对这种情况，我们对Doris主要做了以下的改造：</p>
 <ol>
@@ -309,21 +309,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在增长分析业务场景中，事件表是我们的核心表，需要实时导入明细日志。这些事件表没有聚合和去重需求，而且业务需求是能够查询明细信息，所以都选用了冗余模型（DUPLICATE KEY）。事件表根据天级别分区，分桶字段使用了日志id字段（实际上是一个随机产生的md5），其hash值能够保证分桶之间数据均匀分布，避免数据倾斜导致的写入和查询问题。</p>
 <p>下图是我们线上规模最大的集群最近30天的查询性能统计（查询信息的统计来自于Doris的查询审计日志），最近一周每天成功的SQL查询数在1.2w~2w之间。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-19ef0991442a49fba2b537c8e766d69e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271756476.webp" />   
     </p>
 <p>从图中可以看出，使用了Doris后，平均查询时间保持在10秒左右，最大不超过15秒；查询时间P95一般能保证在30秒内。这个查询体验，相对于原来的SparkSQL，提升效果比较明显。</p>
 <p>Doris提供了查询并发度参数parallel_fragment_exec_instance_num，查询服务端根据正在运行的任务个数动态调整它来优化查询，低负载下增加并发度提高查询性能，高负载下减少并发度保证集群稳定性。在分析业务查询profile时，我们发现Doris默认执行过程中exchange前后并发度是一样的，实际上对于聚合型的查询，exchange后的数据量是大大减少的，这时如果继续用一样的并发度不仅浪费了资源，而且exchange后较少数据量用较大的并发执行，理论上反而降低了查询性能。因此，我们添加了参数doris_exchange_instances控制exchange后任务并发度（如下图所示），在实际业务测试中取得了较好的效果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-1b77ea89fb0047f8ac11a89e2003d595.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271756269.webp" />   
     </p>
 <p>这个对数据量巨大的业务或者exchange后不能明显降低数据量级的查询并不明显，但是这个对于中小业务（尤其是那些用了较多bucket的小业务）的聚合或join查询，优化比较明显。我们对不同数量级业务的测试，也验证了我们的推断。我们选取了一个数据量4亿/日的小业务，分别测试了不同场景下查询性能：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-c2e53aaaf75b4d7996267c03286b2bb1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271756820.webp" />   
     </p>
 <p>从上图结果可以看出，doris_exchange_instances对于聚合和join类型的小查询改进明显。当然，这个测试是在很多次测试之后找到的最优doris_exchange_instances值，在实际业务中每次都能找到最优值可行性较低，一般对于中小业务根据查询计划中需要扫描的buckets数目结合集群规模适当降低，用较小的代价获得一定性能提升即可。后来我们将这个改进贡献到社区，该参数名被修改为parallel_exchange_instance_num。</p>
 <p>为了扩展SQL的查询能力，Doris也提供了和SparkSQL，Hive类似的UDF（User-Defined Functions）框架支持。当Doris内置函数无法满足用户需求时，用户可以根据Doris的UDF框架来实现自定义函数进行查询。Doris支持的UDF分成两类（目前不支持UDTF，User-Defined Table-Generating Functions，一行数据输入对应多行数据输出），一类是普通UDF，根据单个数据行的输入，产生一个数据行的输出。另一类是UDAF(User-Defined Aggregate Functions)，该类函数属于聚合函数，接收多个数据行的输入并产生一个数据行的输出。UDAF的执行流程如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-4c24fb9c5c6e4e35995ba34c0a6154ca.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271756404.webp" />   
     </p>
 <p>UDAF一般需要定义4个函数，分别为Init、Update、Merge、Finalize函数，若为中间输出的数据类型为复杂数据类型时，则还需要实现Serialize函数，在Shuffle过程中对中间类型进行序列化，并在Merge函数中对该类型进行反序列化。在增长分析场景中，留存分析、漏斗分析等都使用到了UDAF。以留存分析为例，它是一种用来分析用户参与情况/活跃程度的分析模型，考查进行初始行为后的用户中有多少人会进行后续行为。针对以上需求，我们首先定义了函数retention_info，输入是每个用户的行为信息，然后以每个用户的id为key进行分组，生成每个用户在指定时间内的每个时间单元（如天，周，月等）的留存信息，然后定义函数retention_count，输入是retention_info函数生成的每个用户的留存信息，然后我们以留存的时间单位（这里通常是天）为key进行分组，就可以算出每个单位时间内留存的用户数。这样在UDAF的帮助下，我们就可以顺利完成留存分析的计算。</p>
 <p><strong>4.4 Doris表的管理</strong></p>
@@ -452,6 +452,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -485,10 +489,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -867,6 +867,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

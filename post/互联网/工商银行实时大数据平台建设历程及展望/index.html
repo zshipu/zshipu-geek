@@ -194,88 +194,88 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <p>袁一@工商银行</p>
 <p><strong>摘要：</strong> 本文整理自中国工商银行大数据平台负责人袁一在 Flink Forward Asia 2021 的分享</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1548f02aad3045d589031096a0c667a7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271833064.webp" />   
     </p>
 <h1 id="一工行实时大数据平台建设历程"><strong>一、工行实时大数据平台建设历程</strong></h1>
 <p>工商银行从 2002 年开始建设数据集市，当时主要使用 Oracle 类单机版的关系型数据库。随着数据量不断增加，开始引入 TD、ED 等国外高端一体机。2014 年工行正式基于 Hadoop 技术建设了大数据平台，在其之上构建了企业级数据湖及数据仓库。2017 年，随着 AI 技术的兴起，又开始建设机器学习平台，2020 年开始建设数据中台和高时效类场景。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2191aa3be43643fa829818d253845c9a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271833714.webp" />   
     </p>
 <p>为了满足数据时效，以及企业级大规模普惠用数的诉求，企业内部的大数据平台需要不仅支持批量计算，还需要满足各类用数场景全栈覆盖的技术体系。以工行为例，大数据平台内部除批量计算之外，包含实时计算，联机分析、数据 API 等平台，主要以 Flink 作为内部引擎，用于缩短数据端到端闭环时间，形成联机高并发的访问能力，提升数据赋能业务的时效。除此之外，还包含数据交换、数据安全等面向特定技术领域的二级平台。在最上面一层，我们向开发人员、数据分析师、运维人员提供了可视化的支撑工具。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d54fc2f916674977ba9754e256af83c7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271833457.webp" />   
     </p>
 <h1 id="二工行实时大数据平台建设思路"><strong>二、工行实时大数据平台建设思路</strong></h1>
 <p>工行实时大数据平台建设思路，主要会围绕时效、易用、安全可靠和降本增效来展开。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1774e413970249ab905656c3f7585def.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271833102.webp" />   
     </p>
 <p>在数据时效方面，上图是描述数据流向的示意图，原始数据从左上角的应用产生，经过蓝色和粉色两条链路。其中，蓝色链路是业务视角上端到端闭坏的链路，应用产生的数据会写入 MySQL 或者 Oracle 等关系型数据库，之后通过 CDC 相关技术，将数据库产生的日志复制到 Kafka 消息队列中，将同一份数据的共享，避免多次读取数据库日志。</p>
 <p>在 Kafka 之后，是实时计算平台。实时计算平台除了实现对时效要求较高的计算处理场景之外，它还可以通过 Flink 结合 HUDI/IceBerg 等产品实现实时数据入湖。而且能将 Flink 的结果输出到 HBase\ES 等联机数据库中。将这部分数据以服务的形式暴露，即数据中台服务，从而提供给应用调用。</p>
 <p>粉色链路的数据，最终回到数据分析师那里，是蓝色链路的衍生。各个应用产生的数据，通过 Flink 和 Hudi 的实时数据入湖，通过 Presto 或 CK 等分析型引擎，供数据分析师进行 BI 分析。通过这条链路，数据时效得以提升，让分析师访问到分钟级延时的热数据，更加实时、准确地做出运营决策。一般高时效的业务场景，都包含在这条技术链路的体系之内。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9253c723450542c8a316db62bca10337.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271833703.webp" />   
     </p>
 <p>在余额变动场景，客户进行一次动账交易，可能触发多种通知内容，例如账户支出提醒、账户收入提醒、积分消费提醒等，造成客户手机连续收到短信提醒，用户体验不佳。因此，工行基于 Flink 多流合并和会话窗口的能力，将同一时刻发生的多条消息关联，将通知的逻辑合并在一起发送给客户。而当一条消息出现晚到的情况，通过会话窗口的 GAP 设置能自动降级，将逻辑分为两条消息发出去。大幅提升对用户的友好性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0217aa5b119744d28331075d277de5be.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271833303.webp" />   
     </p>
 <p>每家商业银行在每年 12 月 31 日时需要出年报，所以那天银行需要对全年的利润分配等指标进行试算。工行和其它商业银行一样早期使用 DB2 主机实现核心交易，年终时的损益、预查询都在主机上实现。但主机是按 MIPS 收费，所以当这种预查询多次执行时，成本很高。</p>
 <p>因此工行做了架构改造，通过 CDC 数据复制技术，将主机实时发生的数据复制到大数据平台，通过 Flink 进行实时 ETL，数据搬运过来之后，充分利用大数据平台海量的计算能力，大幅提升预查询效率。原来每天跑 10 轮，现在每天可以跑 30 轮，原来每轮 30 分钟，现在每轮只要 10 分钟，既提升了时效又节省了成本。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b69b9bd015224435a8eb3d3d42d54a5f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271833948.webp" />   
     </p>
 <p>实时大屏场景一般都是基于日志采集或 CDC 技术实现数据的统一汇集，基于 Flink 进行实时的业务量统计。工行也是通过这种方式实现的实时大屏，并使用了 Flink 的 mini-batch 的特性。虽然 Flink 能逐条实时处理数据，但在大部分场景，它会有 1ms 和 100ms 的延时，mini-batch 的特性类似于 Spark Streaming 微批的处理方式，在增加小量数据延时的情况下，大幅提升海量数据的吞吐能力，非常适用于实时大屏的场景。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/172346e0d98f4b19b61c109334a0bd9a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271833865.webp" />   
     </p>
 <p>在银行业早期，大家基于 DB2 主机支撑核心业务。随着国内去 IOE 以及自主可控转型的浪潮，各家商业银行都开始将主机上的业务，迁移到分布式体系上，通过服务化接口的调用，满足不同业务系统之间的协作。业务迁移到分布式体系后，在调用多个服务化接口时，由于网络抖动等影响，会出现交易中，部分环节失败的情况。</p>
 <p>为了解决这个问题，工行基于 Flink 研发了业务一致性对账中心，将服务化接口调用过程中的调用日志，统一汇集到 Kafka。基于 Flink 会话窗口的特性，判断交易中各个环节的调用是否完整。如果发现不完整的情况，会触发业务上的补账 / 核对动作，及时消除对客户账务的影响。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/73386128b4434842982c8c7b0340b91b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271833534.webp" />   
     </p>
 <p>早期的实时计算模型都是基于 Java 等高级语言进行开发。在 Spark Dataframe 以及 Flink SQL 出现之后，开发人员可以通过 SQL 来开发实时计算模型。随着分布式体系以及数据中台的发展，很多实时计算模型在处理业务逻辑过程中，需要访问外部联机接口。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7e5b348ddd6b4fa6965a72f1e03d7ad6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271833248.webp" />   
     </p>
 <p>工行将调用的 HTTP、Dubbo、Redis 等外部接口，抽象成一张张外部表。直接通过一句 SQL 就能将 Kafka 中的流表与 Dubbo 的维表关联，然后将结果送到 HTTP 接口，大幅提升开发效率。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b7649bed529e4dcaa02a495ef3df6e13.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271833838.webp" />   
     </p>
 <p>接下来，给大家分享一下工行在用数支撑工具方面的实践。在业务研发方面，通过借鉴业界 DataOps 的理念，工行打造了一条集开发、测试、版本制作及发布于一体的研发流水线。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4fddac4ce79546b8b5a125faaef403f8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271833555.webp" />   
     </p>
 <p>相比于早期大数据工程师基于 UltraEdit 开发的模型，这种可视化 IDE 的开发效率至少提升 10 倍以上。同时工行的开发平台也于今年通过了中国信通院“数据开发平台”的认证测评，信通院在 12 月 10 日通过官方公众号公布了测评的结果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c487e86261484b728bbb9e4ff7947d8a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271833297.webp" />   
     </p>
 <p>在生产运维方面，工行为运维人员提供多个用于展示平台健康状态的仪表盘。同时，并通过机器学习和专家规则相结合的方式，实现了面向多类场景的故障根因自动分析的能力，降低运维门槛。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/387d4171316b409f82731e0268abba00.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271834971.webp" />   
     </p>
 <p>对于开发人员来说，他们更关心作业中断后运维平台能否帮助分析问题，所以在作业中断时，为开发人员提供问题诊断能力，95% 以上的常见问题都可以自动完成分析。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/777e8713b2d041a0b582ef193231a8ef.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271834702.webp" />   
     </p>
 <p>在 BI 平台，工行面向业务人员提供了自助数据分析探索的能力。主要解决用数最后一公里的问题。分析结果提供了多样化的展示仪表盘，不但支持基于拖拉拽的多维分析，而且支持数据下钻挖掘等功能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8358a6bbdeb941c2922703dc64a072b8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271834379.webp" />   
     </p>
 <p>接下来，给大家介绍工行在大数据平台安全可靠性方面的实践。</p>
 <p>近几年各个行业对数据安全的重视程度都越来越高，而大数据平台作为全集群数据的汇集地，对数据安全保障方面能力的建设就显得更加重要。大数据平台不但要存储很多数据，而且要提供的各式各样的数据访问方式。</p>
 <p>因此工行设计了一套全生命周期用数监控审计，类似于 Ngnix 的 access.log，主要用于事后追溯审计。当用户将数据拖回到本地时，平台会对数据加上水印，当有些数据被非正常公开后，就可以知晓数据泄漏的来源，同时对身份证、手机号、卡号等敏感字段，在返回时动态脱敏，比如 11 号的手机号中间几位都会变成 “********”。</p>
 <p>动态控权是因为有些数据访问权限控制粒度较细，工行实现了一套 SQL 改写引擎，在运行时对 SQL 进行解析，根据用户与表权限的对照关系，对 SQL 加上控制条件及脱敏函数，避免数据被越权访问。敏感数据识别是基于专家规则或 ML 模型，自动识别海量数据中的敏感信息，并自动进行分类分级。同时，提醒管理员对敏感信息和分类分级结果进行核实确认。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c45c0d7d44ab40eda8b01c9d8c901314.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271834291.webp" />   
     </p>
 <p>在大数据平台建设的早期，大家主要将一些非关键的增值类业务放到大数据平台。随着技术的不断成熟，很多机构开始将核心的业务部署到大数据平台。为此工行在上海外高桥和嘉定两个数据中心建立了双活的大数据平台，通过系统级复制确保两边基础数据同步。对于部分关键业务会在两边同时运行，通过这种架构来确保关键业务的稳定。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/19bde9aa1b104a35827b1ea5ba4ec27d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271834987.webp" />   
     </p>
 <p>上图是数据离线备份架构。金融机构在监管方面，对于数据存储可靠性的要求很高，所以，我们将 NBU 磁带备份系统和 Hadoop 以及 MPPDB 数据库的接口做了集成，实现了类似于 Oracle RMAN 的数据存储，增量备份的能力。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7b0bfef34aaf4a88955df0f0eb019320.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271834820.webp" />   
     </p>
 <p>根据国家监管的要求，大部分金融机构的大数据平台一般都以私有化的部署方式为主。在早期 Hadoop 技术刚出现时，大数据平台的设备选型以物理机 + 本地磁盘为主，尽可能实现本地计算。目前，主流的公有云大数据云服务以存算分离的架构为主。那么在建设金融机构大数据私有云时，到底应为物理机 + 本地磁盘为主，还是以存算分离架构为主呢？</p>
 <p>在公有云实现存算分离的最重要的原因就是：资源的超分配。超分配就是，假设公有云上有 10 个租户，每个租户分别申请了一个 10 节点的集群，但由于这 10 个租户的资源使用都会存在错峰的情况，因此云平台只要准备 50 台设备就可以满足上述需求，并不需要实际准备 100 台设备，这就是超分配。</p>
@@ -406,6 +406,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -439,10 +443,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -821,6 +821,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

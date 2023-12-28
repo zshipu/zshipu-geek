@@ -221,20 +221,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7d7f02ba7085442aa203f7bcdb39b85f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231196.webp" />   
     </p>
 <p><strong>桔妹导读：</strong> 滴滴是一个让出行变得更美好的公司，语音交互作为出行领域最安全，最自然的交互方式在滴滴内部有着广泛的应用前景，目前滴滴语音交互已经应用在智能外呼，司机端，地图，车机系统多个领域中。语音交互离不开自然语言理解，用户说的每一句话都应该得到正确的理解和反馈，自然语言理解技术让语音助手变得像人一样和用户进行交流。本文主要讲解滴滴语音交互中自然语言理解技术的一些探索和实践。</p>
 <h1 id="1-模块介绍"><strong>1. 模块介绍</strong></h1>
 <p>语音交互在滴滴有非常丰富的应用场景，因为它可以解放双手，让人们在出行过程中更方便，更安全，实现我们美好出行的愿景。目前语音交互已经应用在滴滴司机端，四轮车，外呼等多个业务中。</p>
 <p><strong>滴滴语音交互的整体算法框架如下:</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a68c5a1528874153881970aef92daafa.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231162.png" />   
     </p>
 <p>图1 语音交互整体流程</p>
 <p>下面着重介绍下交互引擎和纠错引擎中用到的一些算法和算法使用中的一些思考。</p>
 <h1 id="2-asr纠错">2. ASR纠错</h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a4201731bc774b7d91251514fdf93cf2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231182.webp" />   
     </p>
 <h2 id="21-概述"><strong>▍2.1 概述</strong></h2>
 <h3 id="211背景介绍"><strong>2.1.1背景介绍</strong></h3>
@@ -258,30 +258,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="221-基础方案"><strong>2.2.1 基础方案</strong></h3>
 <p>我们采用分阶段的纠错架构，来解决任务型语音交互中的识别错误问题。纠错系统主要有三个模块组成，分别是错误检测、候选召回和候选排序。纠错系统的最终输出，可以用于后续链路的解析处理。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c9a4e5cbc1ab45be86cc1f939b0a676c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231913.png" />   
     </p>
 <p>图2 纠错整体框架</p>
 <h3 id="222-错误检测"><strong>2.2.2 错误检测</strong></h3>
 <p>根据语音识别的评价指标，语音识别项目中的错误分为3种类型，分别是替换错误、删除错误和插入错误，其中替换错误占70~80%左右。这里的错误检测主要针对的是发音相同或相似的替换错误。使用的方法是利用识别的混淆集和关键词构建AC自动机，将待纠句子的音节序列来寻找适配的热词。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d07687d88d07408e9d6e6b0ae63d9877.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231422.png" />   
     </p>
 <p>图3 纠错技术方案</p>
 <p>**混淆集的构建：**基于识别结果和标注文本进行对齐得到混淆字对，对应的不同音节则视为发音混淆集。当然由于识别结果中删除错误和插入错误的存在，获取的混淆集并非可能性都一致。此处不同发音混淆集的概率由出现的频次来决定，概率和门限值均是经验值。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/af7d40f1238d4f46aadaa1d7ef0bf4b8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231506.png" />   
     </p>
 <p>**AC自动机构建错误检测网络：**以关键词表的音节作为模式串，如yu shi ju jin, yu ren wei shan, ju jing hui shen, shan gu作为模式串，以音节为单位，在初步的图网络上再创建fail指针。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5c309e358abd4dfba67f9e265dec9bf7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231452.png" />   
     </p>
 <p>图4 音节图网络</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/75a7092d78c84578a92de3e4f2d94bba.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231941.png" />   
     </p>
 <p>图5 创建FAIL指针</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-16e0650685764890838d904b466c8cbf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231058.png" />   
     </p>
 <p>图6 AC自动机错误检测网络</p>
 <p><strong>2.2.3 候选召回</strong></p>
@@ -291,21 +291,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>无法满足数量阈值时回退到低阶键值查询，保证召回数量。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-302556c738ef48eaacf2bc69a512793a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231507.png" />   
     </p>
 <p>表1 拼音ngram候选</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-78c26cdba1934b8d8af3887325fd39d2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231727.png" />   
     </p>
 <p>表2 badcase上性能结果</p>
 <h3 id="224-候选排序"><strong>2.2.4 候选排序</strong></h3>
 <p>RNNLM转换成WFST后，compose到包含错误候选的句子主题上，对FST的候选排序进行打分，维特比解码后最终输出1best的结果。当然对于ngram语言模型也适用，在相同的合适语料上，RNNLM的效果相对较好，ngram模型的优点在于简单高效。在智能客服项目上，此种方式纠错后字准提升2% (90.17%-92.16%)。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6ee58415df9442259a02f31107c815b8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231998.png" />   
     </p>
 <p>图7 结果示例</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-47082b46b3ed4ae5b1ab0e37bde31dac.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231874.png" />   
     </p>
 <p>图8 打分路径示例</p>
 <h2 id="23-应用"><strong>▍2.3 应用</strong></h2>
@@ -365,12 +365,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>使用k-max-pooling代替max-pooling，可以获取更多的局部信息。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-8b8829a978d74315a373ecfb65c3fb54.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231826.png" />   
     </p>
 <p>图9 TEXTCNN网络</p>
 <p>在细粒度的意图分类中，我们使用了bert-classifier模型，我们用来fine-tune的bert base版本做了相应领域的adaptation训练（word mask+ sentence prediction），因为用来做adaptation的领域数据噪声较大，所以在训练的时候固定前9层取得最好的效果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-468f98c16beb46b9a910606e344774df.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231923.png" />   
     </p>
 <p>图10 BERT-CLA网络</p>
 <h3 id="322-文本匹配算法"><strong>3.2.2 文本匹配算法</strong></h3>
@@ -392,19 +392,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>在我们的任务中，我们做了一些实验，发现对BERT第一层的token做mean-pooling得到的句向量表示效果最好。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-4727dde81dfc4924988cb83347e2d284.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231649.png" />   
     </p>
 <p>可以看到Mean-pooling的效果远好于CLS-pooling和Max-pooling，使用第一层的特征优于使用其他层的。</p>
 <p>有监督的方法是使用的基于Regression Objective Function的Siamese-BERT网络。两个句向量u和v的相似度计算结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-31134c2ddd904e198c7fc71eb1080899.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272232977.png" />   
     </p>
 <p>图11 REGRESSION OBJECTIVE FUNCTION</p>
 <p>此方法使用MSE(mean squared error)作为损失函数。</p>
 <p>在离线计算时将doc从Sentence A位置输入，得到u为此doc的句向量，然后缓存在索引中。当输入一个query时，只有计算query的句向量才用到在线计算，此方法需要很小的在线计算量，可以作为召回策略。</p>
 <p>对于基于交互的匹配方法，我们是使用Siamese-BERT中的Classification Objective Function，在这种方法中会将u和v拼接在一起组成一个新的向量去做分类，他们的相似度计算结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-f8a8c95e7b87452e9780ea178384be1e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272232779.png" />   
     </p>
 <p>图12 REGRESSION OBJECTIVE FUNCTION</p>
 <p>在这个地方我们的实验结果和论文中一样，把u，v以及它们的差拼接在一起，然后乘以权重参数Wt最终得到的效果最好。此方法使用交叉熵作为损失函数。</p>
@@ -417,7 +417,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Bi-GRU 即 Bi-directional GRU，也就是有两个 GRU cell，一个得到前向表征向量 l，一个得到反向表征向量 r，然后两层向量加一起得到最终向量。</p>
 <p>如果不使用CRF的话，这里就可以直接接一层全连接层过softmax得到输出结果了；如果用CRF的话，CRF 层以 Bi-GRU 层的输出为输入，其可以通过学习数据集中不同 label 间的转移概率从而修正 Bi-GRU层的输出，这时损失函数由预测结果的softmax和CRF中的转移概率共同决定，这样可以在条件随机场里面考虑预测结果之间的合理性(比如说B-city后面不可能跟着I-music，更有可能是I-city)。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-cbe65ace9b664baf9b01d7a523151bf9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272232875.png" />   
     </p>
 <p>图13 BI-GRU-CRF</p>
 <p>这里说一下用于表示序列标注结果的 BIO 标记法。序列标注里标记法有很多，主流的是 BIO 与 BIOES 这两种。B 就是标记某个实体词的开始，I 表示某个实体词的中间，E 表示某个实体词的结束，S 表示这个实体词仅包含当前这一个字。因为交互相关的业务中有很多实体变量，BIOES方法会引入过多的label类型，所以我们使用的是BIO标记法。</p>
@@ -574,6 +574,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -607,10 +611,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -989,6 +989,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

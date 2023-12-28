@@ -243,7 +243,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>适用于搜索场景的深度学习Listwise排序算法——LambdaDNN。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1ec22b9a59ed43be8a3bb6362064580b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271804797.png" />   
     </p>
 <p>图1 基于知识图谱的点评搜索5层架构</p>
 <h2 id="2-排序模型探索与实践">2. 排序模型探索与实践</h2>
@@ -255,7 +255,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在排序模型方面，点评搜索也经历了业界比较普遍的迭代过程：从早期的线性模型LR，到引入自动二阶交叉特征的FM和FFM，到非线性树模型GBDT和GBDT+LR，到最近全面迁移至大规模深度学习排序模型。下面先简单介绍下传统机器学习模型（LR、FM、GBDT）的应用和优缺点，然后详细介绍深度模型的探索实践过程。</p>
 <h4 id="传统机器学习模型">传统机器学习模型</h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f6a06e7c541a4c4d8927b0b50764f758.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271805031.png" />   
     </p>
 <p>图2 几种传统机器学习模型结构</p>
 <ol>
@@ -272,7 +272,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>下图是我们基于Google提出的Wide&amp;Deep模型搭建的网络结构[2]。其中Wide部分输入的是LR、GBDT阶段常用的一些细粒度统计特征。通过较长周期统计的高频行为特征，能够提供很好的记忆能力。Deep部分通过深层的神经网络学习Low-Order、高纬度稀疏的Categorical型特征，拟合样本中的长尾部分，发现新的特征组合，提高模型的泛化能力。同时对于文本、头图等传统机器学习模型难以刻画的特征，我们可以通过End-to-End的方式，利用相应的子网络模型进行预处理表示，然后进行融合学习。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fa6feda3816b459ca10549e836c5782f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271805102.png" />   
     </p>
 <p>图3 Deep&amp;Wide模型结构图</p>
 <h2 id="3-搜索深度排序模型的特征工程实践">3. 搜索深度排序模型的特征工程实践</h2>
@@ -308,7 +308,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>Attention</strong>：序列Embedding后引入Attention机制，表现为加权的Sum Pooling；相比LSTM/GRU计算开销更低[4]。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7cca3ae7ee0c42a58b4575cafb834a83.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271805998.png" />   
     </p>
 <p>图4 行为序列特征接入的几种方法</p>
 <p>同时，为了突显用户长期偏好和短期偏好对于排序的不同影响，我们按照时间维度对行为序列进行了划分：Session、半小时、一天、一周等粒度，也在线上取得了收益。</p>
@@ -316,7 +316,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>一种更常见的刻画用户偏好的方式，是直接将用户ID经过Embedding后作为特征接入到模型中，但是最后上线的效果却不尽如人意。通过分析用户的行为数据，我们发现相当一部分用户ID的行为数据较为稀疏，导致用户ID的Embedding没有充分收敛，未能充分刻画用户的偏好信息。</p>
 <p>Airbnb发表在KDD 2018上的文章为这种问题提供了一种解决思路[9]——利用用户基础画像和行为数据对用户ID进行聚类。Airbnb的主要场景是为旅游用户提供民宿短租服务，一般用户一年旅游的次数在1-2次之间，因此Airbnb的用户行为数据相比点评搜索会更为稀疏一些。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bcdb49af9ca24ee6b9b8094a3e307cec.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271805377.png" />   
     </p>
 <p>图5 按照用户画像和行为信息聚类</p>
 <p>如上图所示，将用户画像特征和行为特征进行离散分桶，拼接特征名和所属桶号，得到的聚类ID为：US_lt1_pn3_pg3_r3_5s4_c2_b1_bd2_bt2_nu3。</p>
@@ -324,7 +324,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="323-商户信息embedding">3.2.3 商户信息Embedding</h4>
 <p>商户Embedding除了可以直接将商户ID加入模型中之外，美团大脑也利用深度学习技术对UGC进行大量挖掘，对商家的口味、特色等细粒度情感进行充分刻画，例如下图所示的“好停车”、“菜品精致”、“愿意再次光顾”等标签。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/00a5e817a245453085eebd52076f4bb1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271805477.png" />   
     </p>
 <p>图6 美团大脑提供的商家细粒度情感标签</p>
 <p>这些信息与单纯的商户星级、点评数相比，刻画的角度更多，粒度也更细。我们将这些标签也进行Embedding并输入到模型中：</p>
@@ -351,7 +351,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/db0beb35594443779cc6e6e993fe2056.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271805023.png" />   
     </p>
 <p>图7 Multi-Task加速Embedding特征收敛</p>
 <h3 id="33-图片特征">3.3 图片特征</h3>
@@ -363,7 +363,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>标签特征</strong>：提取图片是否是食物、环境、价目表、Logo等作为图片分类和标签特征。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6bb21a651aa24345b502979e4ca49a25.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271805110.png" />   
     </p>
 <p>图8 图片特征接入</p>
 <h2 id="4-适用于搜索场景的深度学习listwise排序算法lambdadnn">4. 适用于搜索场景的深度学习Listwise排序算法：LambdaDNN</h2>
@@ -374,36 +374,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>搜索业务更关心排在页面头部结果的好坏，而Pointwise的方法则对于所有位置的样本一视同仁。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/825adca372c44379aad4a82cc17626b9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271805150.png" />   
     </p>
 <p>图9 Pointwise和Listwise优化目标的区别</p>
 <p>基于上述理由，我们对于深度学习模型的损失函数进行了优化。</p>
 <h3 id="42-优化目标改进从log-loss到ndcg">4.2 优化目标改进：从Log Loss到NDCG</h3>
 <p>为了让排序模型的优化目标尽量贴近搜索业务指标，需要按照Query计算损失，且不同位置的样本具有不同的权重。搜索系统常用的指标NDCG(Normalized Discounted Cumulative Gain)相较于Log Loss显然更贴近搜索业务的要求，NDCG计算公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ef190fab50074e1c8609372cc95c0819.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271805597.png" />   
     </p>
 <p>累加部分为DCG(Discounted Cumulative Gain)表示按照位置折损的收益，对于Query下的结果列表l，函数G表示对应Doc的相关度分值，通常取指数函数，即G(lj)=2lj-1（lj表示的是相关度水平，如{0，1，2}）；函数 η 即位置折损，一般采用 η(j)=1/log(j+1)，Doc与Query的相关度越高且位置越靠前则DCG值会越大。另外，通常我们仅关注排序列表页前k位的效果，Zk 表示 <a href="https://zshipu.com/t?url=mailto%3ADCG%40k">DCG@k</a> 的可能最大值，以此进行归一化处理后得到的就是NDCG@k。</p>
 <p>问题在于NDCG是一个处处非平滑的函数，直接以它为目标函数进行优化是不可行的。LambdaRank提供了一种思路：绕过目标函数本身，直接构造一个特殊的梯度，按照梯度的方向修正模型参数，最终能达到拟合NDCG的方法[6]。因此，如果我们能将该梯度通过深度网络进行反向传播，则能训练一个优化NDCG的深度网络，该梯度我们称之为Lambda梯度，通过该梯度构造出的深度学习网络称之为LambdaDNN。</p>
 <p>要了解Lambda梯度需要引入LambdaRank。LambdaRank模型是通过Pairwise来构造的，通常将同Query下有点击样本和无点击样本构造成一个样本Pair。模型的基本假设如下式所示，令Pij为同一个Query下Doci相比Docj更相关的概率，其中si和sj分别为Doci和Docj的模型得分：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/500e2c75381142b0a120025290ab633d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271805339.png" />   
     </p>
 <p>使用交叉熵为损失函数，令Sij表示样本Pair的真实标记，当Doci比Docj更相关时（即Doci有被用户点击，而Docj没有被点击），有Sij=1，否则为-1；则损失函数可以表示为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/73725b1fce5c42d99f95e1432b45db08.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271805951.png" />   
     </p>
 <p>在构造样本Pair时，我们可以始终令i为更相关的文档，此时始终有Sij≡1，代入上式并进行求导，则损失函数的梯度为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1f1e8d11610b48b49e0170ab65a4351d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271805663.png" />   
     </p>
 <p>到目前为止，损失函数的计算过程中并未考虑样本所在的位置信息。因此进一步对梯度进行改造，考虑Doci和Docj交换位置时的NDCG值变化，下式即为前述的Lambda梯度。可以证明，通过此种方式构造出来的梯度经过迭代更新，最终可以达到优化NDCG的目的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b06eb8b360d4461c92eafdab5f2b4fdb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271805326.png" />   
     </p>
 <p>Lambda梯度的物理意义如下图所示。其中蓝色表示更相关（用户点击过）的文档，则Lambda梯度更倾向于位置靠上的Doc得到的提升更大（如红色箭头所示）。有了Lambda梯度的计算方法，训练中我们利用深度网络预测同Query下的Doc得分，根据用户实际点击Doc的情况计算Lambda梯度并反向传播回深度网络，则可以得到一个直接预测NDCG的深度网络。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ddab220a56104d53aea31e1255e2b312.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271805059.png" />   
     </p>
 <p>图10 Lambda梯度的物理意义</p>
 <h3 id="43-lambdadnn的工程实施">4.3 LambdaDNN的工程实施</h3>
@@ -418,7 +418,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/874183daa97b471d8fc661c1baa7c045.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271805056.png" />   
     </p>
 <p>图11 Lambda梯度的分布式实现</p>
 <p>为了提升训练效率，我们与基础研发平台数据平台中心紧密协同，一起探索并验证了多项优化操作：</p>
@@ -438,23 +438,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>计算Position Bias作为位置折损</strong>：Position Bias在业界有较多的讨论，其中[7][8]将用户点击商户的过程分为观察和点击两个步骤：a.用户需要首先看到该商户，而看到商户的概率取决于所在的位置；b.看到商户后点击商户的概率只与商户的相关性有关。步骤a计算的概率即为Position Bias，这块内容可以讨论的东西很多，这里不再详述。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f4a4e8ed64994f17aca8f412178a045a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271805401.png" />   
     </p>
 <p>图12 真实位置折损与理论折损的差别</p>
 <p>经过上述对NDCG计算改造训练出的LambdaDNN模型，相较Base树模型和Pointwise DNN模型，在业务指标上有了非常显著的提升。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d0f3a6719fe547d8ad7b47475777e27a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271805366.png" />   
     </p>
 <p>图13 LambdaDNN离线NDCG指标与线上PvCtr效果对比</p>
 <h3 id="45-lambda深度排序框架">4.5 Lambda深度排序框架</h3>
 <p>Lambda梯度除了与DNN网络相结合外，事实上可以与绝大部分常见的网络结构相结合。为了进一步学习到更多交叉特征，我们在LambdaDNN的基础上分别尝试了LambdaDeepFM和LambdaDCN网络；其中DCN网络是一种加入Cross的并行网络结构，交叉的网络每一层的输出特征与第一层的原始输入特征进行显性的两两交叉，相当于每一层学习特征交叉的映射去拟合层之间的残差。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/72352983ab6f44c28246b2949883140b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271805474.png" />   
     </p>
 <p>图14 DCN模型结构</p>
 <p>离线的对比实验表明，Lambda梯度与DCN网络结合之后充分发挥了DCN网络的特点，简洁的多项式交叉设计有效地提升模型的训练效果。NDCG指标对比效果如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d548996443b3469ba02c65b04f260d71.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271805214.png" />   
     </p>
 <p>图15 Lambda Loss与DCN网络结果的效果</p>
 <h2 id="5-深度学习排序诊断系统">5. 深度学习排序诊断系统</h2>
@@ -467,7 +467,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>这些问题都会潜在带来一些用户无法理解的排序结果。我们需要对深度排序模型清晰地诊断并解释。</p>
 <p>关于机器学习模型的可解释性研究，业界已经有了一些探索。Lime(Local Interpretable Model-Agnostic Explanations)是其中的一种，如下图所示：通过对单个样本的特征生成扰动产生近邻样本，观察模型的预测行为。根据这些扰动的数据点距离原始数据的距离分配权重，基于它们学习得到一个可解释的模型和预测结果[5]。举个例子，如果需要解释一个情感分类模型是如何预测“我讨厌这部电影”为负面情感的，我们通过丢掉部分词或者乱序构造一些样本预测情感，最终会发现，决定“我讨厌这部电影”为负面情感的是因为“讨厌”这个词。
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c357203f533f4ce58ab4c55141dc6f94.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271805947.png" />   
     </p>
 <p>图16 Lime解释器的工作原理</p>
 <p>基于Lime解释器的思想，我们开发了一套深度模型解释器工具——雅典娜系统。目前雅典娜系统支持两种工作模式，Pairwise和Listwise模式：</p>
@@ -476,7 +476,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>Listwise模式与Lime的工作模式基本类似，通过整个列表的样本生成扰动样本，训练线性分类器模型输出特征重要度，从而达到对模型进行解释的目的。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6f239dd575784a1fa08893984e3dd3fb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271805641.png" />   
     </p>
 <p>图17 深度学习排序诊断系统：雅典娜</p>
 <h2 id="6-总结与展望">6. 总结与展望</h2>
@@ -631,6 +631,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -664,10 +668,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1046,6 +1046,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

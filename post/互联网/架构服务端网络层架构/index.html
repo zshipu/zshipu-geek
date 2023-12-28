@@ -194,7 +194,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <p><strong>1. Reactor 模式</strong></p>
 <p>Kafka 网络层采用的是Reactor模式，是一种基于事件驱动模式。对应于Java的NIO 提供了Reactor模式的API.常见的单线程Java NIO 的线程模型为</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/63e2f5b65e6141098557e9f58df8110a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272104448.webp" />   
     </p>
 <p><strong>流程：</strong></p>
 <p>首先创建ServerSocketChannel 对象并在Selector 上注册OP_ACCEPT 事件，ServerSockeChannel 负责监听指定网络端口上的连接请求。</p>
@@ -204,12 +204,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>这里的所有事件处理逻辑都是在同一线程中完成的，这种设计适合并发连接数较小，数据量较小的场景，对于服务端来说就有些缺点，例如某请求的处理过程比较复杂会造成线程阻塞，那么所有后续。</p>
 <p>请求无法被处理，就会导致大量的请求超时。为了避免这种情况，要求服务端在读取请求，处理请求已经发送响应等各个环节迅速完成。为了解决这种问题，服务端引入了多线程来满足高并发的需求。将网络读写逻辑与业务处理逻辑进行拆分，让其由不同的线程池来处理，从而实现多线程处理。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9e9d56ec891545948d62ff664a833fed.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272104381.webp" />   
     </p>
 <p>Acceptor 单独运行在一个线程中，也可以使用单线程的ExecutorService 实现，因为ExecutorService 会在线程异常退出时，创建新的线程进行补偿，所以可以防止出现线程异常退出后整个服务端不能接收请求的异常情况。ReaderThreadPool 线程池中的所有线程都会在Selector 上注册OP_READ 事件，负责服务端读取请求逻辑，当然也是一个线程对应多个socket 连接。ReaderThreadPool中的线程成功读取请求过后，将请求组放入MessageQueue这个共享队列之中，HandlerTreadPool 线程池中的线程会从MessageQueue 取出请求，然后执行业务逻辑请求处理。在中模式下，即使摸个业务请求的线程阻塞了，池中还有其他线程继续从MessageQueue 中获取请求并进行处理，从而避免整个服务端阻塞。Handler 线程还负责产生响应并发送给客户端，这就要求Handler ThreadPool 中的线程在Selector 中注册OP_WRITE 事件，实现发送响应的功能。</p>
 <p>同时这里需要注意，当读取与处理的速度不配时候，MessageQueue 的队列长度尤为重要。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0c48954ebe8448e4a129b8bd2748ebc1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272104352.webp" />   
     </p>
 <p>一般情况，Acceptor 单独占用一个Selector.当AcceptorSelector 监听到OP_ACCEPT时，会创建个相应的socketchannel，使用一定的策略例如轮休 selector 集合或者选择最少的selector 让不同的连接不同的selector上</p>
 <p>注册I/0事件，之后就有此Selector 负责监听此socketchannel 上的事件</p>
@@ -217,7 +217,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>2. SocketServer-kafka</strong></p>
 <p>1, kafka 的网络层采用的是多线程，多个selector 的设计实现的。核心类是SocketServer，其中包含一个Acceptor 用于接受并处理所有的新连接，每个Acceptor对应多个Processor线程，每个Processor线程拥有自己的Selector，主要用于从连接中读取请求和写回响应。每个Acceptor对多个Handler线程，主要用于处理请求并将产生响应返回Processor线程。Processor 线程与Handler 线程之间通过RequestChannel 进行通讯。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/87f3e58129a04679812dacf424635f72.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272104256.webp" />   
     </p>
 <blockquote>
 <p><strong>出处：</strong></p>
@@ -348,6 +348,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -381,10 +385,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -763,6 +763,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -217,527 +217,527 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>本文重点解析XGBoost算法框架的原理，希望通过本文能够洞悉XGBoost核心算法的来龙去脉。对于XGBoost算法，最先想到的是Boosting算法。Boosting提升算法是一种有效且被广泛使用的模型训练算法，XGBoost也是基于Boosting来实现。Boosting算法思想是对弱分类器基础上不断改进提升，并将这些分类器集成在一起，形成一个强分类器。简而言之，XGBoost算法可以说是一种集成式提升算法，是将许多基础模型集成在一起，形成一个很强的模型。这里的基础模型可以是分类与回归决策树CART（Classification and Regression Trees），也可以是线性模型。如果基础模型是CART树（如图1所示），比如第1颗决策树tree1预测左下角男孩的值为+2，对于第1颗决策树遗留下来的剩余部分，使用第2颗决策树预测值为+0.9，则对男孩的总预测值为2+0.9=2.9。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8c9685a570c944bf9f048aaa3b267a8c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281737621.jpeg" />   
      XGBoost算法框架可以分为四个阶段来理解（如图2所示）。 <strong>第一个阶段，如何构造目标函数？</strong> 在进行优化求解时，首先需要构造目标函数，有了目标函数才能进行优化求解。这种思路和LR模型（Logistic Regression）是一致。在LR模型中，首先，对于回归问题构造平方项损失，对于分类问题构造最大似然损失作为目标函数，然后基于构造好的目标函数，才会考虑采用梯度下降算法进行优化求解，比如随机梯度下降、Mini-Batch批量梯度下降、梯度下降等。在这个阶段，我们可以得到XGBoost的基本目标函数结构。</p>
 <p><strong>第二个阶段，目标函数优化求解困难，如何对目标函数近似转换？</strong> 在第一个阶段得到的基本目标函数较为复杂，不是凸函数，没法使用连续性变量对目标函数直接优化求极值。因此，使用泰勒级数对目标函数进行展开，对目标函数规整、重组后，将目标函数转换为 <strong>关于预测残差的多项式函数</strong>。</p>
 <p><strong>第三个阶段，如何将树的结构引入到目标函数中？</strong> 第二个阶段得到的多项式目标函数是一个复合函数。被预测的残差和模型复杂度还是未知的函数，需要对这两个函数进行参数化表示，即将决策树的结构信息通过数学符号表示出来。在第三个阶段，在树的形状确定情况下，可以优化求解出局部最优解。</p>
 <p><strong>第四个阶段，如何确定树的形状，要不要使用贪心算法？</strong> 如何在模型空间里面寻找最优的决策树形状，这是一个NP-Hard问题，我们很难对可能存在的树结构全部罗列出来，尤其在特征个数很多情况下。因此，在这里需要使用贪心算法来求得局部最优解。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e33d1cf070014d7baee1cbbc8944bf04.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281737664.jpeg" />   
     </p>
 <h3 id="1如何构造目标函数"><strong>1.如何构造目标函数？</strong></h3>
 <p>当使用多棵树来预测时，假设已经训练了
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=K" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281737100.svg&#43;xml" />   
     棵树，则对于第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281737970.svg&#43;xml" />   
     个样本的（最终）预测值为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Chat%7By%7D_%7Bi%7D%3D%5Csum_%7Bk%3D1%7D%5E%7BK%7D&#43;f_%7Bk%7D%5Cleft%28%5Cmathbf%7Bx%7D_%7Bi%7D%5Cright%29%2C&#43;%5Cquad&#43;f_%7Bk%7D&#43;%5Cin&#43;%5Cmathcal%7BF%7D&#43;%5Ctag&#43;%7B1%7D&#43;" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281737865.svg&#43;xml" />   
     </p>
 <p>在公式1中，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Chat%7By%7D_%7Bi%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281737552.svg&#43;xml" />   
      表示对
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281737234.svg&#43;xml" />   
     个样本的预测值，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f_%7Bk%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281737929.svg&#43;xml" />   
     属于
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Cmathcal%7BF%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281737799.svg&#43;xml" />   
     集合范围内，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f_%7Bk%7D%5Cleft%28%5Cmathbf%7Bx%7D_%7Bi%7D%5Cright%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281737405.svg&#43;xml" />   
      表示通过第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=k" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738110.svg&#43;xml" />   
     棵树对第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738166.svg&#43;xml" />   
     个样本进行预测，比如第1棵树预测值为
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f_%7B1%7D%5Cleft%28%5Cmathbf%7Bx%7D_%7Bi%7D%5Cright%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738782.svg&#43;xml" />   
     ，第2棵树预测值为
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f_%7B2%7D%5Cleft%28%5Cmathbf%7Bx%7D_%7Bi%7D%5Cright%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738958.svg&#43;xml" />   
     ，依次类推，将这些树的预测值累加到一起，则得到样本的最终预测值
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Chat%7By%7D_%7Bi%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738565.svg&#43;xml" />   
     。因此，如果要得到样本的最终预测值，需要训练得到
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=K" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738264.svg&#43;xml" />   
     棵树。</p>
 <p>如果要训练得到
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=K" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738961.svg&#43;xml" />   
     棵树，首先需要构造训练的目标函数(如公式2所示)。在构建模型时， <strong>不仅需要考虑到模型的预测准确性，还需要考虑到模型的复杂程度，既准确又简单的模型在实际应用中的效果才是最好的</strong>。因此，目标函数由两部分构成，第一部分表示损失函数，比如平方损失、交叉熵损失、折页损失函数等。第一部分表示
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=n" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738756.svg&#43;xml" />   
     个样本总的损失函数值。因为在这里通过样本预测值
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Chat%7By%7D_%7Bi%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738443.svg&#43;xml" />   
     和样本真实值
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=y_i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738147.svg&#43;xml" />   
     的比较，可以计算出针对样本
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738867.svg&#43;xml" />   
     的模型预测损失值
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=Loss" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738763.svg&#43;xml" />   
     。这里可以暂时先不用考虑损失函数的具体形式，因为这里的损失函数，可以统一表示回归与分类问题的损失函数形式。</p>
 <p>公式2的第二部分表示正则项，是用来控制模型的复杂度，模型越复杂，惩罚力度越大，从而提升模型的泛化能力，因为越复杂的模型越容易过拟合。XGBoost的正则化思路跟
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=LR" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738563.svg&#43;xml" />   
     模型中加
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=L1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738273.svg&#43;xml" />   
     /
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=L2" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738162.svg&#43;xml" />   
     正则化思路一致，不同的地方在于正则化项具体物理含义不同。在这里
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5COmega%5Cleft%28f_%7Bk%7D%5Cright%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738943.svg&#43;xml" />   
     表示第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=K" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738819.svg&#43;xml" />   
     棵树的复杂度，接下来的问题是如何对树的复杂度进行参数化表示，这样后面才能进行参数优化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=obj%3D%5Cunderbrace%7B%5Csum_%7Bi%3D1%7D%5E%7Bn%7D&#43;l%5Cleft%28y_%7Bi%7D%2C%5Chat%7By%7D_%7Bi%7D%5Cright%29%7D_%7B%E6%8D%9F%E5%A4%B1%E5%80%BC%7D%2B%5Cunderbrace%7B%5Csum_%7Bk%3D1%7D&#43;%5COmega%5Cleft%28f_%7Bk%7D%5Cright%29%7D_%7B%E6%AD%A3%E5%88%99%E9%A1%B9%7D&#43;%5Ctag&#43;%7B2%7D&#43;" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738579.svg&#43;xml" />   
     </p>
 <p>在损失函数中
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=l%5Cleft%28y_%7Bi%7D%2C%5Chat%7By%7D_%7Bi%7D%5Cright%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738622.svg&#43;xml" />   
     ，是有很多个模型（决策树）共同参与，通过叠加式的训练得到。如图2所示，训练完第一颗树
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f_%7B1%7D%28x_i%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738420.svg&#43;xml" />   
     后，对于第一棵树没有训练好的地方，使用第二颗树
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f_%7B2%7D%28x_i%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738655.svg&#43;xml" />   
     训练，依次类推，训练第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=K-1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738401.svg&#43;xml" />   
     个棵树，最后训练第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=K" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738488.svg&#43;xml" />   
     颗树
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f_%7Bk%7D%28x_i%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738332.svg&#43;xml" />   
     。当在训练第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=K" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738168.svg&#43;xml" />   
     棵树时，前面的第1棵树到第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=K-1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738842.svg&#43;xml" />   
     颗树是已知的，未知的是第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=K" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738518.svg&#43;xml" />   
     棵树，即 <strong>基于前面构建的决策树已知情况下，构建第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=K" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738283.svg&#43;xml" />   
     棵树</strong>。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/12e0f3d4418240c383f7215ea1298cd8.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738560.jpeg" />   
      对于样本
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x_i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738548.svg&#43;xml" />   
     ，首先初始化假定第0棵树为
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f_%7B0%7D%28x_i%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738322.svg&#43;xml" />   
     ，预测值为
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Chat%7By%7D_%7Bi%7D%5E%7B%280%29%7D%3D0" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281738112.svg&#43;xml" />   
     ，然后在第0棵树基础上训练第1棵树，得到预测值
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Chat%7By%7D_%7Bi%7D%5E%7B%281%29%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739298.svg&#43;xml" />   
     ，在第1棵树基础上训练第2颗树，又可以得到预测值
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Chat%7By%7D_%7Bi%7D%5E%7B%282%29%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739974.svg&#43;xml" />   
     ，依次类推，当训练第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=k" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739716.svg&#43;xml" />   
     棵树的时候，前面
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=k-1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739463.svg&#43;xml" />   
     棵树的总预测值为
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Chat%7By%7D_%7Bi%7D%5E%7B%28k-1%29%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739706.svg&#43;xml" />   
     ，递推训练具体过程如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Cbegin%7Baligned%7D&#43;%26&#43;%5Chat%7By%7D_%7Bi%7D%5E%7B%280%29%7D%3D0&#43;%5C%5C&#43;%26&#43;%5Chat%7By%7D_%7Bi%7D%5E%7B%281%29%7D%3Df_1%28x_i%29%3D%5Chat%7By%7D_%7Bi%7D%5E%7B%280%29%7D%2Bf_1%28x_i%29&#43;%5C%5C&#43;%26&#43;%5Chat%7By%7D_%7Bi%7D%5E%7B%282%29%7D%3Df_1%28x_i%29%2Bf_2%28x_i%29%3D%5Chat%7By%7D_%7Bi%7D%5E%7B%281%29%7D%2Bf_2%28x_i%29&#43;%5C%5C&#43;%26&#43;......&#43;%5C%5C&#43;%26&#43;%5Chat%7By%7D_%7Bi%7D%5E%7B%28k%29%7D%3D%5Cunderbrace%7B%5Cleft%28f_1%28x_i%29%2Bf_2%28x_i%29%2B......%2Bf_%7Bk-1%7D%28x_i%29%5Cright%29%7D_%7B%E5%89%8D%E9%9D%A2k-1%E6%A3%B5%E6%A0%91%E5%AF%B9%E6%AE%8B%E5%B7%AE%E7%9A%84%E9%A2%84%E6%B5%8B%E5%80%BC%7D%2Bf_k%28x_i%29%3D%5Csum_%7Bj%3D1%7D%5E%7Bk-1%7D&#43;f_%7Bj%7D%28x_%7Bi%7D%29%2Bf_k%28x_i%29&#43;%5C%5C&#43;%26&#43;%3D%5Cunderbrace%7B%5Chat%7By%7D_%7Bi%7D%5E%7B%28k-1%29%7D%7D_%7B%E7%AC%ACk-1%E6%A3%B5%E6%A0%91%E7%9A%84%E9%A2%84%E6%B5%8B%E5%80%BC%7D%2Bf_k%28x_i%29&#43;%5Cend%7Baligned%7D&#43;%5C%5C" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739591.svg&#43;xml" />   
     </p>
 <p>根据XGBoost的递推训练过程，每棵决策树训练时会得到样本对应的预测值，根据样本预测值和真实值比较，可以计算得到模型预测损失值。又因为训练所得的每棵决策树都有对应的结构信息，因此可以得到每棵决策树的复杂度
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5COmega%28f_%7Bj%7D%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739534.svg&#43;xml" />   
     。根据这些信息，可以对目标函数公式2进行简化，得到公式3。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=obj%3D%5Csum_%7Bi%3D1%7D%5E%7Bn%7D&#43;l%5Cleft%28y_%7Bi%7D%2C%5Chat%7By%7D_%7Bi%7D%5E%7B%28k-1%29%7D%2Bf_k%28x_i%29%5Cright%29%2B%5Csum_%7Bj%3D1%7D%5E%7Bk-1%7D&#43;%5COmega%5Cleft%28f_%7Bj%7D%5Cright%29%2B%5COmega%28f_%7Bk%7D%29&#43;%5Ctag&#43;%7B3%7D&#43;" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739169.svg&#43;xml" />   
     </p>
 <p>在公式3中，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=n" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739194.svg&#43;xml" />   
     表示训练样本个数，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Chat%7By%7D_%7Bi%7D%5E%7B%28k-1%29%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739930.svg&#43;xml" />   
     为
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=k-1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739710.svg&#43;xml" />   
     颗决策树累加的预测值，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Csum_%7Bj%3D1%7D%5E%7Bk-1%7D&#43;%5COmega%5Cleft%28f_%7Bj%7D%5Cright%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739761.svg&#43;xml" />   
     为
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=k-1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739449.svg&#43;xml" />   
     颗决策树总的复杂度，在训练第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=k" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739099.svg&#43;xml" />   
     颗决策树时，这两个东西是已知的，即 <strong>在对目标函数进行求最小值优化时候，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Chat%7By%7D_%7Bi%7D%5E%7B%28k-1%29%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739962.svg&#43;xml" />   
     和
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Csum_%7Bj%3D1%7D%5E%7Bk-1%7D&#43;%5COmega%5Cleft%28f_%7Bj%7D%5Cright%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739691.svg&#43;xml" />   
     为已知</strong>。因此，将常数项
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Csum_%7Bj%3D1%7D%5E%7Bk-1%7D&#43;%5COmega%5Cleft%28f_%7Bj%7D%5Cright%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739481.svg&#43;xml" />   
     拿掉，得到公式4作为XGBoost的目标函数。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=Minimize_%7BObj%7D%3D%5Csum_%7Bi%3D1%7D%5E%7Bn%7D&#43;l%5Cleft%28y_%7Bi%7D%2C%5Chat%7By%7D_%7Bi%7D%5E%7B%28k-1%29%7D%2Bf_k%28x_i%29%5Cright%29%2B%5COmega%28f_%7Bk%7D%29&#43;%5Ctag&#43;%7B4%7D&#43;" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739374.svg&#43;xml" />   
     </p>
 <h3 id="2目标函数优化困难如何对函数近似转换"><strong>2.目标函数优化困难，如何对函数近似转换？</strong></h3>
 <p>在公式4中，已经得到了需要优化的目标函数，这个目标函数已经是简化后的函数。对于公式4，没法进行进一步优化。为了解决目标函数无法进行进一步优化， <strong>XGBoost原文是使用泰勒级数展开式技术对目标函数进行近似转换，即使用函数的1阶、2阶、3阶&hellip;
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=n" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739422.svg&#43;xml" />   
     阶导数和对应的函数值，将目标函数进行多项式展开，多项式阶数越多，对目标函数的近似程度越高。这样做的好处是便于后面优化求解</strong>。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=TaylorExpression%3A&#43;f%28x%2B%5CDelta&#43;x%29&#43;%5Capprox&#43;f%28x%29%2Bf%5E%7B%5Cprime%7D%28x%29&#43;%5Ccdot&#43;%5CDelta&#43;x%2B%5Cfrac%7B1%7D%7B2%7D&#43;f%5E%7B%5Cprime&#43;%5Cprime%7D%28x%29&#43;%5Ccdot&#43;%5CDelta&#43;x%5E%7B2%7D&#43;%5C%5C" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739133.svg&#43;xml" />   
     </p>
 <p>令
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f%28x%29%3D%5Cell%28y_%7Bi%7D%2C&#43;%5Cunderbrace%7B%5Chat%7By%7D_%7Bi%7D%5E%7B%28k-1%29%7D%7D_%7Bx%7D%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739144.svg&#43;xml" />   
     ，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f%28x%2B%5CDelta&#43;x%29%3D%5Cell%28y_%7Bi%7D%2C&#43;%5Cunderbrace%7B%5Chat%7By%7D_%7Bi%7D%5E%7B%28k-1%29%7D%7D_%7Bx%7D%2B%5Cunderbrace%7B%5Cleft.f_%7Bk%7D%5Cleft%28x_%7Bi%7D%5Cright%29%5Cright%29%7D_%7B%5CDelta&#43;x%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739887.svg&#43;xml" />   
     ，带入到目标函数公式4，得到基于二阶泰勒展开式的函数(如公式5所示)，其中
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=g_i%3D%5Cpartial_%7B%5Chat%7By%7D_%7Bi%7D%5E%7B%28k-1%29%7D%7D&#43;%5Cell%5Cleft%28y_%7Bi%7D%2C&#43;%5Chat%7By%7D_%7Bi%7D%5E%7B%28k-1%29%7D%5Cright%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739661.svg&#43;xml" />   
     ，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=h_i%3D%5Cpartial_%7B%5Chat%7By%7D_%7Bi%7D%5E%7B%28k-1%29%7D%7D%5E%7B2%7D%5Cell%5Cleft%28y_%7Bi%7D%2C&#43;%5Chat%7By%7D_%7Bi%7D%5E%7B%28k-1%29%29%7D%5Cright%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739424.svg&#43;xml" />   
     。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Cbegin%7Baligned%7D&#43;Obj_k&#43;%26&#43;%3D&#43;%5Csum_%7Bi%3D1%7D%5E%7Bn%7D&#43;%5Cell%28y_%7Bi%7D%2C&#43;%5Cunderbrace%7B%5Chat%7By%7D_%7Bi%7D%5E%7B%28k-1%29%7D%7D_%7Bx%7D%2B%5Cunderbrace%7B%5Cleft.f_%7Bk%7D%5Cleft%28x_%7Bi%7D%5Cright%29%5Cright%29%7D_%7B%5CDelta&#43;x%7D%2B%5COmega%28f_%7Bk%7D%29&#43;%5C%5C&#43;%26&#43;%3D&#43;%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%5B&#43;%5Cell%5Cleft%28y_%7Bi%7D%2C&#43;%5Chat%7By%7D_%7Bi%7D%5E%7B%28k-1%29%7D%5Cright%29&#43;%2B&#43;%5Cpartial_%7B%5Chat%7By%7D_%7Bi%7D%5E%7B%28k-1%29%7D%7D&#43;%5Cell%5Cleft%28y_%7Bi%7D%2C&#43;%5Chat%7By%7D_%7Bi%7D%5E%7B%28k-1%29%7D%5Cright%29&#43;%5Ccdot&#43;f_%7Bk%7D%5Cleft%28x_%7Bi%7D%5Cright%29%2B%5Cfrac%7B1%7D%7B2%7D&#43;%5Cpartial_%7B%5Chat%7By%7D_%7Bi%7D%5E%7B%28k-1%29%7D%7D%5E%7B2%7D%5Cell%5Cleft%28y_%7Bi%7D%2C&#43;%5Chat%7By%7D_%7Bi%7D%5E%7B%28k-1%29%29%7D%5Cright%29&#43;%5Ccdot&#43;f_%7Bk%7D%5E%7B2%7D%5Cleft%28x_%7Bi%7D%5Cright%29&#43;%5Cright%5D%2B%5COmega%28f_%7Bk%7D%29&#43;%5C%5C&#43;%26&#43;%3D&#43;%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cleft%5B&#43;%5Cunderbrace%7B%5Cell%5Cleft%28y_%7Bi%7D%2C&#43;%5Chat%7By%7D_%7Bi%7D%5E%7B%28k-1%29%7D%5Cright%29%7D_%7B%E7%AC%ACk-1%E9%A2%97%E6%A0%91%E9%A2%84%E6%B5%8B%E6%8D%9F%E5%A4%B1%E5%80%BC%7D&#43;%2B&#43;g_i&#43;%5Ccdot&#43;f_%7Bk%7D%5Cleft%28x_%7Bi%7D%5Cright%29%2B%5Cfrac%7B1%7D%7B2%7D&#43;h_i&#43;%5Ccdot&#43;f_%7Bk%7D%5E%7B2%7D%5Cleft%28x_%7Bi%7D%5Cright%29&#43;%5Cright%5D%2B%5COmega%28f_%7Bk%7D%29&#43;%5Cend%7Baligned%7D&#43;%5Ctag&#43;%7B5%7D&#43;" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739263.svg&#43;xml" />   
     </p>
 <p>在训练第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=k" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739429.svg&#43;xml" />   
     颗树时，目标函数（公式5）中，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Cell%5Cleft%28y_%7Bi%7D%2C&#43;%5Chat%7By%7D_%7Bi%7D%5E%7B%28k-1%29%7D%5Cright%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739168.svg&#43;xml" />   
     ，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=g_i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739951.svg&#43;xml" />   
     、
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=h_i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739303.svg&#43;xml" />   
     是已知的。因此，可以将已知常数项
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Cell%5Cleft%28y_%7Bi%7D%2C&#43;%5Chat%7By%7D_%7Bi%7D%5E%7B%28k-1%29%7D%5Cright%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739266.svg&#43;xml" />   
     去掉，得到进一步简化后的目标函数（公式6）。
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=g_i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281739284.svg&#43;xml" />   
     、
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=h_i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740549.svg&#43;xml" />   
     分别表示第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=k-1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740366.svg&#43;xml" />   
     颗决策树的损失函数的1阶、2阶导数。 <strong>前面
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=k-1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740031.svg&#43;xml" />   
     颗决策树预测后，通过
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=g_i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740788.svg&#43;xml" />   
     、
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=h_i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740437.svg&#43;xml" />   
     将前面第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=k-1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740106.svg&#43;xml" />   
     颗决策树的预测损失信息传递给第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=k" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740884.svg&#43;xml" />   
     颗决策树</strong>。在公式6中，第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=k" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740648.svg&#43;xml" />   
     颗树的预测函数
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f_%7Bk%7D%5Cleft%28x_%7Bi%7D%5Cright%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740431.svg&#43;xml" />   
     、树复杂度函数
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5COmega%28f_%7Bk%7D%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740161.svg&#43;xml" />   
     对于我们来说，仍然都是未知的，因此需要将其参数化，通过参数形式表示出来，才能进行下一步的优化求解。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=Minimize_%7Bobj%7D&#43;%3D&#43;%5Csum_%7Bi%3D1%7D%5E%7Bn%7D&#43;%5Cleft%5B&#43;g_i&#43;%5Ccdot&#43;f_%7Bk%7D%5Cleft%28x_%7Bi%7D%5Cright%29%2B%5Cfrac%7B1%7D%7B2%7D&#43;h_i&#43;%5Ccdot&#43;f_%7Bk%7D%5E%7B2%7D%5Cleft%28x_%7Bi%7D%5Cright%29&#43;%5Cright%5D%2B%5COmega%28f_%7Bk%7D%29&#43;%5Ctag&#43;%7B6%7D&#43;" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740962.svg&#43;xml" />   
     </p>
 <h3 id="3如何将树结构引入到目标函数中"><strong>3.如何将树结构引入到目标函数中？</strong></h3>
 <p>接下来的问题是如何对函数
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f_%7Bk%7D%5Cleft%28x_%7Bi%7D%5Cright%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740735.svg&#43;xml" />   
     、
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5COmega%28f_%7Bk%7D%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740433.svg&#43;xml" />   
     进行参数化表示。首先，对于 <strong>叶子权重函数</strong>
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f_%7Bk%7D%5Cleft%28x_%7Bi%7D%5Cright%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740226.svg&#43;xml" />   
     ，如图4所示决策树，有1号、2号、3号叶子节点，这三个叶子节点对应的取值分别为15，12，20，在1号叶子节点上，有{1,3}两个样本，在2号叶子节点上，有{4}一个样本，在3号叶子节点上，有{2,5}两个样本。在这里，使用
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=W" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740015.svg&#43;xml" />   
      来表示决策树的叶子权重值，三个叶子节点对应的叶子权重值为
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%28w_1%E3%80%81w_2%E3%80%81w_3%29%3D%2815%2C12%2C20%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740830.svg&#43;xml" />   
     。对于样本
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740464.svg&#43;xml" />   
     落在决策树叶子节点的位置信息，使用
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=q%28x%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740233.svg&#43;xml" />   
     表示，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=q%28x_1%29%3D1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740999.svg&#43;xml" />   
     表示样本1落在第1个叶子节点上，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=q%28x_2%29%3D3" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740829.svg&#43;xml" />   
     表示样本1落在第3个叶子节点上，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=q%28x_4%29%3D2" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740584.svg&#43;xml" />   
     表示样本4落在第2个叶子节点上。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c5d13433d2f740e6be5921039c5c1b8e.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740934.jpeg" />   
      对于第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=k" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740966.svg&#43;xml" />   
     颗树的叶子权重函数
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f_k%28x_i%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740734.svg&#43;xml" />   
     ，根据叶子权重值和样本所在叶子的位置信息，即可确定函数
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f_k%28x_i%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740552.svg&#43;xml" />   
     。因此，我们引入决策树叶子权重值
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=W" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740308.svg&#43;xml" />   
      和样本所在叶子的位置信息
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=q%28x_i%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740142.svg&#43;xml" />   
     两个变量，将其参数化表示成
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f_k%28x_i%29%3Dw_%7Bq%28x_i%29%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740837.svg&#43;xml" />   
     。然而，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=q%28x_i%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740687.svg&#43;xml" />   
     是一个函数，作为
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=W" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740467.svg&#43;xml" />   
      的下标是不利于优化求解。因此，这里需要将
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=w_%7Bq%28x_i%29%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740162.svg&#43;xml" />   
     转化为
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=w_j" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740223.svg&#43;xml" />   
     形式。
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=w_%7Bq%28x_i%29%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281740876.svg&#43;xml" />   
     是根据样本落在叶子节点的位置信息直接遍历计算损失函数。 **
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=w_j" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741599.svg&#43;xml" />   
     是从叶子节点的角度，对每个叶子节点中的样本进行遍历计算损失函数，其中，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=j" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741296.svg&#43;xml" />   
     表示树的叶子节点**。假设
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=I_j%3D%5C%7Bi%7Cq%28x_i%29%3Dj%5C%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741995.svg&#43;xml" />   
     ，即
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=I_j" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741753.svg&#43;xml" />   
     表示 <strong>有哪些样本落在第j个叶子节点上</strong>，比如
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=I_1%3D%5C%7B1%2C3%5C%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741424.svg&#43;xml" />   
     表示样本{1,3}落在叶子节点1上，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=I_2%3D%7B4%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741265.svg&#43;xml" />   
     表示样本{4}落在叶子节点2上，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=I_3%3D%5C%7B2%2C5%5C%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741922.svg&#43;xml" />   
     表示样本{2,5}落在叶子节点3上（如上文图4所示）。在这里强调一下，将
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=w_%7Bq%28x_i%29%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741684.svg&#43;xml" />   
     转换为
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=w_j" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741460.svg&#43;xml" />   
     形式，是可以从数学公式推到得到（比如下式）。根据样本所在叶子节点位置，计算所有样本的一阶损失得到第一行等式，其中，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=g_i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741192.svg&#43;xml" />   
     表示样本
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741985.svg&#43;xml" />   
     的一阶损失，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=q%28x_i%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741773.svg&#43;xml" />   
     表示样本
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741672.svg&#43;xml" />   
     对应的叶子节点，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=w_%7Bq%28x_i%29%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741456.svg&#43;xml" />   
     表示叶子节点
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=q%28x_i%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741127.svg&#43;xml" />   
     对应的叶子权重值。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Cbegin%7Baligned%7D&#43;%5Csum_%7Bi%3D1%7D%5E%7Bn%7D&#43;g_i&#43;%5Ccdot&#43;f_%7Bk%7D%28x_i%29&#43;%26&#43;%3D&#43;g_1%5Ccdot&#43;w_%7Bq%28x_1%29%7D%2Bg_2%5Ccdot&#43;w_%7Bq%28x_2%29%7D%2Bg_3%5Ccdot&#43;w_%7Bq%28x_3%29%7D%2Bg_4%5Ccdot&#43;w_%7Bq%28x_4%29%7D%2Bg_5%5Ccdot&#43;w_%7Bq%28x_5%29%7D&#43;%5C%5C&#43;%26&#43;%3D&#43;%5Cunderbrace%7B%28g_1%5Ccdot&#43;w_1&#43;%2B&#43;g_3%5Ccdot&#43;w_1%29%7D_%7B%E7%AC%AC1%E4%B8%AA%E5%8F%B6%E5%AD%90%E6%A0%B7%E6%9C%AC%E7%9A%841%E9%98%B6%E6%8D%9F%E5%A4%B1%7D&#43;%2B&#43;%5Cunderbrace%7Bg_4%5Ccdot&#43;w_2%7D_%7B%E7%AC%AC2%E4%B8%AA%E5%8F%B6%E5%AD%90%E6%A0%B7%E6%9C%AC%E7%9A%841%E9%98%B6%E6%8D%9F%E5%A4%B1%7D&#43;%2B&#43;%5Cunderbrace%7B%28g_2%5Ccdot&#43;w_3%2Bg_5%5Ccdot&#43;w_3%29%7D_%7B%E7%AC%AC3%E4%B8%AA%E5%8F%B6%E5%AD%90%E6%A0%B7%E6%9C%AC%E7%9A%841%E9%98%B6%E6%8D%9F%E5%A4%B1%7D&#43;%5C%5C&#43;%26&#43;%3D&#43;%5Csum_%7Bj%3D1%7D%5E%7BT%7D&#43;%5Cleft%28%5Csum_%7Bi&#43;%5Cin&#43;I_%7Bj%7D%7D&#43;g_%7Bi%7D%5Cright%29&#43;%5Ccdot&#43;w_j&#43;%5Cend%7Baligned%7D&#43;%5C%5C" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741225.svg&#43;xml" />   
     </p>
 <p>对于 <strong>模型复杂度</strong>，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5COmega%28f_%7Bk%7D%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741447.svg&#43;xml" />   
     表示第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=k" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741663.svg&#43;xml" />   
     颗树的复杂度。在决策树里面，如果要降低树的复杂度，在训练决策树时，可以通过叶子节点中样本个数、树的深度等控制决策树的复杂度。 <strong>在XGBoost中，是通过叶子节点个数、树的深度、叶子节点值来控制模型复杂度</strong>。XGBoost中的决策树是分类与回归决策树CART（Classification and Regression Trees）。由于CART是二叉树，控制叶子节点个数等同于控制了树的深度。因此，可以使用叶子节点个数来评估树的复杂度，即叶子节点个数越多（树的深度越深），决策树结构越复杂。对于叶子节点值，由于叶子节点值越大，相当于样本预测值分布在较少的几颗决策树的叶子节点上，这样容易出现过拟合。如果叶子节点值越小，相当于预测值分布在较多的决策树叶子节点上，每颗决策树参与预测其中的一小部分，过拟合的风险被分散。因此，叶子节点值越大，模型越容易过拟合，等同于决策树的复杂度越高。综合起来，如公式7所示，使用叶子节点个数
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=T" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741426.svg&#43;xml" />   
     、叶子节点值
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=w_j" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741194.svg&#43;xml" />   
     评估第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=k" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741912.svg&#43;xml" />   
     颗决策树的复杂度，其中
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Cgamma" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741654.svg&#43;xml" />   
     、
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Clambda" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741792.svg&#43;xml" />   
     为超参数。如果希望叶子个数尽量少，则将
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Cgamma" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741081.svg&#43;xml" />   
     值尽量调大，如果希望叶子权重值尽量小，则将
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Clambda" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741824.svg&#43;xml" />   
     尽量调大。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5COmega%5Cleft%28f_%7Bk%7D%5Cright%29%3D%5Cgamma&#43;T%2B%5Cfrac%7B1%7D%7B2%7D&#43;%5Clambda&#43;%5Csum_%7Bj%3D1%7D%5E%7B%5Ctop%7D&#43;w_%7Bj%7D%5E%7B2%7D&#43;%5Ctag&#43;%7B7%7D&#43;" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741648.svg&#43;xml" />   
     </p>
 <p>将
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f_k%28x_i%29%3Dw_%7Bq%28x_i%29%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741395.svg&#43;xml" />   
     和公式7带入目标函数（公式6）中，可以得到参数化的目标函数（公式8）。在公式8中，在训练第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=k" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741415.svg&#43;xml" />   
     颗决策树时，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Csum_%7Bi&#43;%5Cin&#43;I_%7Bj%7D%7D&#43;g_%7Bi%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281741429.svg&#43;xml" />   
     和
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Csum_%7Bi&#43;%5Cin&#43;I_%7Bj%7D%7D&#43;h_%7Bi%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742246.svg&#43;xml" />   
     这两部分是已知，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Cgamma%2C%5Clambda" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742059.svg&#43;xml" />   
     为超参数。令
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=G_j%3D%5Csum_%7Bi&#43;%5Cin&#43;I_%7Bj%7D%7D&#43;g_%7Bi%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742896.svg&#43;xml" />   
     ，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=H_j%3D%5Csum_%7Bi&#43;%5Cin&#43;I_%7Bj%7D%7D&#43;h_%7Bi%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742665.svg&#43;xml" />   
     ，对公式8进行调整，此时得到 <strong>目标函数是关于
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=w_j" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742393.svg&#43;xml" />   
     的一元二次抛物线，是目标函数最终的参数化表示形式</strong>。抛物线是有极值，对抛物线求极值可以直接套用抛物线极值公式，求解很方便。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Cbegin%7Baligned%7D&#43;Minimize_%7Bobj%7D&#43;%26&#43;%3D&#43;&#43;%5Csum_%7Bi%3D1%7D%5E%7Bn%7D&#43;%5Cleft%5B&#43;g_i&#43;%5Ccdot&#43;w_%7Bq%28x_i%29%7D%2B%5Cfrac%7B1%7D%7B2%7D&#43;h_i&#43;%5Ccdot&#43;w_%7Bq%28x_i%29%7D%5E2&#43;%5Cright%5D%2B%5Cgamma&#43;T%2B%5Cfrac%7B1%7D%7B2%7D&#43;%5Clambda&#43;%5Csum_%7Bj%3D1%7D%5E%7B%5Ctop%7D&#43;w_%7Bj%7D%5E%7B2%7D&#43;%5C%5C&#43;%26&#43;%3D&#43;%5Csum_%7Bj%3D1%7D%5E%7BT%7D%5Cleft%5B%5Cleft%28%5Csum_%7Bi&#43;%5Cin&#43;I_%7Bj%7D%7D&#43;g_%7Bi%7D%5Cright%29&#43;%5Ccdot&#43;%5Comega_%7Bj%7D%2B%5Cfrac%7B1%7D%7B2%7D%5Cleft%28%5Csum_%7Bi&#43;%5Cin&#43;I_%7Bj%7D%7D&#43;h_%7Bi%7D%2B%5Clambda&#43;%5Cright%29&#43;%5Ccdot&#43;%5Comega_%7Bj%7D%5E%7B2%7D&#43;%5Cright%5D%2B%5Cgamma&#43;%5Ccdot&#43;T&#43;&#43;%5C%5C&#43;%26&#43;%3D&#43;%5Csum_%7Bj%3D1%7D%5E%7BT%7D%5Cleft%5BG_j&#43;%5Ccdot&#43;%5Comega_%7Bj%7D%2B&#43;%5Cfrac%7B1%7D%7B2%7D%5Cleft%28H_j%2B%5Clambda&#43;%5Cright%29%5Ccdot&#43;%5Comega_%7Bj%7D%5E%7B2%7D&#43;%5Cright%5D%2B%5Cgamma&#43;%5Ccdot&#43;T&#43;&#43;%5Cend%7Baligned%7D&#43;%5Ctag&#43;%7B8%7D&#43;" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742320.svg&#43;xml" />   
     </p>
 <p>基于公式8，对目标函数关于
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=w_j" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742161.svg&#43;xml" />   
     求导，可以求得树的叶子节点
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=j" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742863.svg&#43;xml" />   
     最优的权重值，如公式9所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Cbegin%7Baligned%7D&#43;w_%7Bj%7D%5E%7B%2A%7D&#43;%26&#43;%3D&#43;-%5Cfrac%7B%5Csum_%7Bi&#43;%5Cin&#43;I_%7Bj%7D%7D&#43;g_%7Bi%7D%7D%7B%5Csum_%7Bi&#43;%5Cin&#43;I_%7Bj%7D%7D&#43;h_%7Bi%7D%2B%5Clambda%7D&#43;%5C%5C&#43;%26&#43;%3D&#43;-%5Cfrac%7BG_j%7D&#43;%7BH_j%2B%5Clambda%7D&#43;%5Cend%7Baligned%7D&#43;%5Ctag&#43;%7B9%7D&#43;" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742693.svg&#43;xml" />   
     </p>
 <p>将等式9带入到公式8中，计算得到树的目标损失值（如等式10），该等式表示决策树损失分数
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=q" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742810.svg&#43;xml" />   
     ，分数越小，说明树的预测准确度越高、复杂度越低。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Cbegin%7Baligned%7D&#43;obj%5E%7B%2A%7D&#43;%26&#43;%3D&#43;-%5Cfrac%7B1%7D%7B2%7D&#43;%5Csum_%7Bj%3D1%7D%5E%7BT%7D&#43;%5Cfrac%7B%5Cleft%28%5Csum_%7Bi&#43;%5Cin&#43;I_%7Bj%7D%7D&#43;g_%7Bi%7D%5Cright%29%5E%7B2%7D%7D%7B%5Csum_%7Bi&#43;%5Cin&#43;I_%7Bj%7D%7D&#43;h_%7Bi%7D%2B%5Clambda%7D%2B%5Cgamma&#43;T&#43;%5C%5C&#43;%26&#43;%3D&#43;-%5Cfrac%7B1%7D%7B2%7D&#43;%5Csum_%7Bj%3D1%7D%5E%7BT%7D&#43;%5Cfrac%7BG_j%5E%7B2%7D%7D%7BH_j%2B%5Clambda%7D%2B%5Cgamma&#43;T&#43;&#43;%5Cend%7Baligned%7D&#43;%5Ctag&#43;%7B10%7D&#43;" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742475.svg&#43;xml" />   
     </p>
 <h3 id="4如何确定树的形状"><strong>4.如何确定树的形状？</strong></h3>
 <p>这里需要注意到一点， <strong>树的叶子节点最优解
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=w_j%5E%7B%2A%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742430.svg&#43;xml" />   
     和损失函数极小值
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%7Bobj%5E%7B%2A%7D%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742145.svg&#43;xml" />   
     是在树的形状给定后的优化求解</strong>。因此，如果要求得叶子节点最优解和损失函数极小值，首先需要确定树的形状。如何寻找树的形状？最直接的方式是枚举所有可能的形状，然后计算每种形状的损失函数
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=obj" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742788.svg&#43;xml" />   
     ，从中选择损失函数最小的形状作为模型训练使用。这样在树的形状确定后，就可以对叶子节点值和损失函数值进行优化求解。这种方式在实际应用中一般不会采用，因为当样本的特征集很大时，树的形状个数是呈指数级增加，计算这些形状树对应损失函数
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=obj" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742597.svg&#43;xml" />   
     需要消耗大量的计算资源。</p>
 <p>为了寻找树的形状，我们一般使用贪心算法来简化计算，降低计算的复杂度。贪心算法是在局部寻找最优解，在每一步迭代时，选择能使当前局部最优的方向。XGBoost寻找树的形状的思路和传统决策树模型建立树的思路一致。比如传统决策树在进行节点分割时，基于信息熵，选择信息熵下降最大的特征进行分割；对于XGBoost树模型，基于损失函数，选择能让损失函数下降最多的特征进行分割。如图5所示，虚线框是已经构造好的树形状，如果需要在蓝色节点做进一步分裂，此时需要按照某种标准，选择最好的特征进行分割。在这里，XGBoost使用损失函数下降最大的特征作为节点分裂。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b259e6d490f84325ace45f1ee695f543.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742449.jpeg" />   
      根据公式10，可以计算到蓝色节点在分裂前和分裂后的的损失函数值：
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=obj_%7Bold%7D%5E%7B%2A%7D%2Cobj_%7Bnew%7D%5E%7B%2A%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742578.svg&#43;xml" />   
     。两式相减，则得到特征如果作为分裂节点时，所能带来的损失函数下降值大小。因此，依据如下等式，选择能使
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=obj_%7Bold%7D%5E%7B%2A%7D-obj_%7Bnew%7D%5E%7B%2A%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742222.svg&#43;xml" />   
     最大的特征作为分裂节点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=obj_%7Bold%7D%5E%7B%2A%7D%3D&#43;-%5Cfrac%7B1%7D%7B2%7D&#43;%5Cleft%5B%5Cfrac%7Bg_7%2Bg_8%7D%7Bh_7%2Bh_8%2B%5Clambda%7D%2B&#43;%5Cfrac%7Bg_1%2Bg_2%2B...%2Bg_6%7D%7Bh_1%2Bh_2%2B...%2Bg_6%2B%5Clambda%7D&#43;%5Cright%5D&#43;%2B&#43;2%5Cgamma&#43;&#43;%5C%5C" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742936.svg&#43;xml" />   
     
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=obj_%7Bnew%7D%5E%7B%2A%7D%3D&#43;-%5Cfrac%7B1%7D%7B2%7D&#43;%5Cleft%5B%5Cfrac%7Bg_7%2Bg_8%7D%7Bh_7%2Bh_8%2B%5Clambda%7D%2B&#43;%5Cfrac%7Bg_1%2Bg_3%2Bg_5%7D%7Bh_1%2Bh_3%2Bg_5%2B%5Clambda%7D&#43;%2B&#43;%5Cfrac%7Bg_2%2Bg_4%2Bg_6%7D%7Bh_2%2Bh_4%2Bg_6%2B%5Clambda%7D%5Cright%5D&#43;%2B&#43;3%5Cgamma&#43;&#43;%5C%5C" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742806.svg&#43;xml" />   
     
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=obj_%7Bold%7D%5E%7B%2A%7D-obj_%7Bnew%7D%5E%7B%2A%7D%3D&#43;%5Cfrac%7B1%7D%7B2%7D&#43;%5Cleft%5B&#43;%5Cfrac%7BG_L%5E2%7D%7BH_L%2B%5Clambda%7D%2B%5Cfrac%7BG_R%5E2%7D%7BH_R%2B%5Clambda%7D&#43;-&#43;%5Cfrac%7B%28G_L%2BG_R%29%5E2%7D%7B%28H_L%2BH_R%2B%5Clambda%29%5E2%7D&#43;%5Cright%5D&#43;-&#43;%5Cgamma&#43;%5C%5C" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742945.svg&#43;xml" />   
     </p>
 <h3 id="5其它常见问题"><strong>5.其它常见问题</strong></h3>
 <p>关于XGBoost的常见经典问题，这类问题对于深入理解XGBoost模型很重要，因此，本文对此也进行了梳理小结。</p>
 <h3 id="1-xgboost为什么需要对目标函数进行泰勒展开"><strong>(1) XGBoost为什么需要对目标函数进行泰勒展开？</strong></h3>
 <p>根据XGBoost官网（如图6所示），目标损失函数之间存在较大的差别，比如平方损失函数、逻辑损失函数等。对目标函数进行泰勒展开，就是为了统一目标函数的形式，针对回归和分类问题，使得平方损失或逻辑损失函数优化求解，可以共用同一套算法框架及工程代码。另外，对目标函数进行泰勒展开，可以使得XGBoost支持自定义损失函数，只需要新的损失函数二阶可导即可，从而 <strong>提升算法框架的扩展性</strong>。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/94b03c62d4e24bca849562e571032804.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742883.jpeg" />   
      相对于GBDT的一阶泰勒展开，XGBoost采用二阶泰勒展开，可以更精准的逼近真实的损失函数， <strong>提升算法框架的精准性</strong>。另外，一阶导数描述梯度的变化方向，二阶导数可以描述梯度变化方向是如何变化的，利用二阶导数信息更容易找到极值点。因此，基于二阶导数信息能够让梯度收敛的更快，类似于牛顿法比SGD收敛更快。</p>
 <h3 id="2-xgboost如何进行采样"><strong>(2) XGBoost如何进行采样？</strong></h3>
 <p>XGBoost算法框架，参考随机森林的Bagging方法，支持样本采样和特征采样。由于XGBoost里没有交代是有放回采样，认为这里的样本采样和特征采样都是无放回采样。每次训练时，对数据集采样，可以增加树的多样性，降低模型过拟合的风险。另外，对数据集采样还能减少计算，加快模型的训练速度。在降低过拟合风险中，对特征采样比对样本采样的效果更显著。</p>
 <p><strong>样本采样</strong>（如图7所示），默认是
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=default%3D1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742226.svg&#43;xml" />   
     不进行样本采样。样本的采样的方式有两种，一种是认为每个样本平等水平，对样本集进行相同概率采样；另外一种认为每个样本是不平等，每个样本对应的一阶、二阶导数信息表示优先级，导数信息越大的样本越有可能被采到。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/851d4dbb34ec4b3e9f32dbf562c764c6.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742938.jpeg" />   
      <strong>特征采样</strong>（如图8所示），默认
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=default%3D1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742148.svg&#43;xml" />   
     对特征不进行采样。对特征的采样方式有三种，第一种是在建立每棵树时进行特征采样；第二种特征采样范围是在第一种的基础上，对于树的每一层级（树的深度）进行特征采样；第三种特征采样范围是在第二种的基础上，对于每个树节点进行特征采样。这三种特征采样方式有串行效果。比如，当第一、二、三种的特征采样比例均是0.5时，如果特征总量为64个，经过这三种采样的综合效果，最终采样得到的特征个数为8个。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/acf88da1fcbc4d7398bb29aa527e367f.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742038.jpeg" />   
     </p>
 <h3 id="3xgboost为什么训练会比较快"><strong>（3）XGBoost为什么训练会比较快？</strong></h3>
 <p>XGBoost训练速度快，这个主要是工程实现优化的结果，具体的优化措施如下几点： <strong>第一、支持并行化训练</strong>。XGBoost的并行，并不是说每棵树可以并行训练，XGBoost本质上仍然采用Boosting思想，每棵树训练前需要等前面的树训练完成后才能开始训练。XGBoost的并行，指的是 <strong>特征维度的并行</strong>。在训练之前，每个特征按特征值大小对样本进行预排序，并存储为Block结构（如图8所示），在后面查找特征分割点时可以重复使用，而且特征已经被存储为一个个Block结构，那么在寻找每个特征的最佳分割点时，可以利用多线程对每个Block并行计算。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f6b4cfeedd254e28b158fd8cf9bf5aa0.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742619.jpeg" />   
      <strong>第二、采用近似算法技术，得到候选分位点</strong>。在构造决策树分裂节点时，当采用 <strong>精确贪心算法</strong> 穷举计算每个特征下的所有特征值增益，如果特征个数多、特征取值大，会造成较大的计算量。当样本数据量大时，特征值无法完全加载到内存中，计算效率低。对于分布式数据集，同样会面临无法将特征值全部加载到本地内存的问题。因此，基于这两个现实问题，采用 <strong>近似直方图算法</strong>，将每个特征取值划分为常数个分位点，作为候选分割点，从中选择相对最优的分割点作为决策树分裂节点。</p>
 <p><strong>第三、缓存感知访问技术</strong>。对于有大量数据或者说分布式系统来说，不可能将所有的数据都放进内存里面。因此，需要将其放在外存上或者将数据分布式存储。但是会有一个问题，这样做每次都要从外存上读取数据到内存，这将会是十分耗时的操作。在XGBoost中，采用预读取的方式， <strong>将下一块将要读取的数据预先放进内存里面</strong>。这个过程是多开了一个线程，该线程与训练的线程独立并负责数据读取。此外，还要考虑Block的大小问题。如果设置最大的Block来存储所有样本在
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=k" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742192.svg&#43;xml" />   
     特征上的值和梯度，Cache未必能一次性处理如此多的梯度做统计。如果设置过小的Block-size，这样不能充分利用多线程的优势。这样会出现训练线程已经训练完数据，但是预读取线程还没把数据放入内存或者cache中。经过测试，Block-size设置为2^16个特征值是效果最好。</p>
 <p><strong>第四、Blocks核外计算优化技术</strong>。为了高效使用系统资源，对于机器资源，除了CPU和内存外，磁盘空间也可以利用起来处理数据。为了实现这个功能，XGBoost在模型训练时，会将数据分成多个块并将每个块存储在磁盘上。在计算过程中，使用独立的线程将Block预提取到主内存缓冲区，这样数据计算和磁盘读取可以同步进行，但由于IO非常耗时，所以还采用了两种技术来改进这种核外计算。</p>
 <ul>
@@ -748,16 +748,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="4xgboost如何处理缺失值问题"><strong>（4）XGBoost如何处理缺失值问题？</strong></h3>
 <p>XGBoost的一个优点是允许特征存在缺失值。对缺失值的处理方式如图9所示： 在特征
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=k" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742411.svg&#43;xml" />   
     上寻找最佳分割点时， <strong>不会对该列特征missing的样本进行遍历</strong>，而只对该特征值为non-missing的样本上对应的特征值进行遍历。对于稀疏离散特征，通过这个技巧可以大大减少寻找特征最佳分割点的时间开销。</p>
 <p>在逻辑实现上，为了保证完备性，会将该特征值missing的样本分别分配到左叶子节点和右叶子节点，两种情形都计算一遍后，选择分裂后增益最大的那个方向（左分支或是右分支），作为预测时特征值缺失样本的默认分支方向。 如果在训练中没有缺失值而在预测中出现缺失，那么会自动将缺失值的划分方向放到右子节点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ce458eb89a5d4ad589a56e8075e75a69.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742273.jpeg" />   
     </p>
 <h3 id="5xgboost和gbdt的区别是什么"><strong>（5）XGBoost和GBDT的区别是什么？</strong></h3>
 <p>XGBoost和GBDT都是基于Boosting思想实现。XGBoost可以认为是在GBDT基础上的扩展。两者的主要不同如下： <strong>基分类器</strong>：GBDT是以分类与回归决策树CART作为基分类器，XGBoost的基分类器不仅支持CART决策树，还支持线性分类器，此时XGBoost相当于带L1和L2正则化项的Logistic回归（分类问题）或者线性回归（回归问题）。 <strong>导数信息</strong>：GBDT在优化求解时，只是用到一阶导数信息，XGBoost对代价函数做了二阶泰勒展开，同时用到一阶和二阶导数信息。另外，XGBoost工具支持自定义代价函数，只要函数可以一阶和二阶求导即可。 <strong>正则项</strong>：XGBoost在代价函数里加入正则项，用于控制模型的复杂度。正则项里包含了树的叶子节点个数、每个叶子节点上输出的预测值的
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=L2" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281742698.svg&#43;xml" />   
     模的平方和。正则项有利于降低模型的方差variance，使学习出来的模型更加简单，防止过拟合。GBDT的代价函数中是没有正则项。 <strong>缺失值处理</strong>：对于特征的取值有缺失的样本，XGBoost可以自动学习出它的分裂方向。 另外，XGBoost还做了其它工程优化，包括 <strong>特征值Block化、并行化计算特征增益、近似直方图算法、特征采样技术</strong> 等</p>
 <h3 id="6如何使用xgboost进行模型训练"><strong>（6）如何使用XGBoost进行模型训练？</strong></h3>
 <p>在使用XGBoost前，可以根据官网说明文档进行安装（下面有链接，这里不赘述）。本文采用的数据集是Kaggle平台房价预测开源数据集（地址如参考文章8所示）。值得说明的一点，在进行模型训练前，一般需要做数据清洗、特征工程、样本划分、模型参数调优这些过程。针对这些过程，本文在这里不展开细讲。在进行模型训练前，本文已经完成数据清洗、特征工程、模型参数调优过程，并得到最终用于模型训练的样本集和最优模型参数。如下代码，是使用XGBoost进行模型训练过程。</p>
@@ -1019,6 +1019,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -1052,10 +1056,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1434,6 +1434,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

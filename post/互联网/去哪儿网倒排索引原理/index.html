@@ -237,7 +237,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>倒排索引：Inverted index，指的是将文档内容中的单词作为索引，将包含该词的文档 ID 作为记录的结构。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7f820bf41bcd4066923ee2f3c6e3fa77.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647633.png" />   
     </p>
 <p>下面通过一个例子来说明下倒排索引的生成过程。</p>
 <p>假设目前有以下两个文档内容：</p>
@@ -268,7 +268,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>有了倒排索引，能快速、灵活地实现各类搜索需求。整个搜索过程中我们不需要做任何文本的模糊匹配。</p>
 <p>例如，如果需要在上述两个文档中查询 <em>苏州街桔子</em> ，可以通过分词后通过 *苏州街 <em>查到 1、2，通过 桔子 \* 查到 2</em>，然后再进行 <strong>取交取并</strong> 等操作得到最终结果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bc17e3911e8d474aae849792f30e1b59.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647463.webp" />   
     </p>
 <h3 id="22-倒排索引的结构"><strong>2.2 倒排索引的结构</strong></h3>
 <p>根据倒排索引的概念，我们可以用一个 Map来简单描述这个结构。这个 Map 的 Key 的即是分词后的单词，这里的单词称为 Term，这一系列的 Term 组成了倒排索引的第一个部分 —— Term Dictionary (索引表，可简称为 Dictionary)。</p>
@@ -281,7 +281,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>偏移（Offset），记录 Term 在每篇文档的开始和结束位置，用于高亮显示等。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fbebe02b98fe4b0292c2fd3f4c5c1f10.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647907.webp" />   
     </p>
 <h2 id="3-lucene-倒排索引实现"><strong>3 Lucene 倒排索引实现</strong></h2>
 <p>全文搜索引擎在海量数据的情况下是需要存储大量的文本，所以面临以下问题：</p>
@@ -309,7 +309,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>.doc 文件存储的是每个 Term 对应的文档 Id 和词频。每个 Term 都包含一对 TermFreqs 和 SkipData 结构。</p>
 <p>其中 TermFreqs 存放 docId 和词频信息，SkipData 为跳表信息，用于实现 TermFreqs 内部的快速跳转。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/237665af6a6040ffbcb2494012cf793b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647573.webp" />   
     </p>
 <p><strong>3.1.1 TermFreqs</strong></p>
 <p>TermFreqs 存储文档号和对应的词频，它们两是一一对应的两个 int 值。Lucene 为了尽可能的压缩数据，采用的是混合存储 ，由 PackedBlock 和 VIntBlocks 两种结构组成。</p>
@@ -317,18 +317,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>其采用 PackedInts 结构将一个 int[] 压缩打包成一个紧凑的 Block。它的压缩方式是取数组中最大值所占用的 bit 长度作为一个预算的长度，然后将数组每个元素按这个长度进行截取，以达到压缩的目的。</p>
 <p>例如：一个包含128个元素的 int 数组中最大值的是 2，那么预算长度为2个 bit, PackedInts 的长度仅是 2 * 128 / 8 = 32个字节，然后就可以通过4个 long 值存储。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f2b7306c255c409abd15ce3d6c02134f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647240.webp" />   
     </p>
 <p><strong>VIntBlock</strong></p>
 <p>VIntBlock 是采用 VInt 来压缩 int 值，对于绝大多数语言，int 型都占4个字节，不论这个数据是1、100、1000、还是1000,000。VInt 采用可变长的字节来表示一个整数。数值较大的数，使用较多的字节来表示，数值较少的数，使用较少的字节来表示。每个字节仅使用第1至第7位(共7 bits)存储数据，第8位作为标识，表示是否需要继续读取下一个字节。</p>
 <p>举个例子：</p>
 <p>整数130为 int 类型时需要4个字节，转换成 VInt 后仅用2个字节，其中第一个字节的第8位为1，标识需要继续读取第二个字节。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/56590f7a3d894c44985d20c7ded8edd3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647906.png" />   
     </p>
 <p>根据上述两种 Block 的特点，Lucene 会每处理包含 Term 的128篇文档，将其对应的 DocId 数组和 TermFreq 数组分别处理为 PackedDocDeltaBlock 和 PackedFreqBlock 的 PackedInt 结构，两者组成一个 PackedBlock，最后不足128的文档则采用 VIntBlock 的方式来存储。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/33e1f6650f664f2ba69d0e48768189a5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647816.png" />   
     </p>
 <p><strong>3.1.2 SkipData</strong></p>
 <p>在搜索中存在将每个 Term 对应的 DocId 集合进行取交集的操作，即判断某个 Term 的 DocId 在另一个 Term 的 TermFreqs 中是否存在。TermFreqs 中每个 Block 中的 DocId 是有序的，可以采用顺序扫描的方式来查询，但是如果 Term 对应的 doc 特别多时搜索效率就会很低，同时由于 Block 的大小是不固定的，我们无法使用二分的方式来进行查询。因此 Lucene 为了减少扫描和比较的次数，采用了 SkipData 这个跳表结构来实现快速跳转。</p>
@@ -336,13 +336,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>跳表是在原有的有序链表上面增加了多级索引，通过索引来实现快速查找。</p>
 <p>实质就是一种可以进行二分查找的有序链表。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/215c547f40584b84a77bd548fd570810.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647823.webp" />   
     </p>
 <p><strong>SkipData结构</strong></p>
 <p>在 TermFreqs 中每生成一个 Block 就会在 SkipData 的第0层生成一个节点，然后第0层以上每隔 N 个节点生成一个上层节点。</p>
 <p>每个节点通过 Child 属性关联下层节点，节点内 DocSkip 属性保存 Block 的最大的 DocId 值，DocBlockFP、PosBlockFP、PayBlockFP 则表示 Block 数据对应在 .pay、.pos、.doc 文件的位置。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8f97f10a941049af9ca2d60a61510eda.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647348.png" />   
     </p>
 <p><strong>3.1.3 Posting 最终数据</strong></p>
 <p>Posting List 采用多个文件进行存储，最终我们可以得到每个 Term 的如下信息：</p>
@@ -355,17 +355,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="32-term-dictionary-实现"><strong>3.2 Term Dictionary 实现</strong></h3>
 <p>Terms Dictionary（索引表）存储所有的 Term 数据，同时它也是 Term 与 Postings 的关系纽带，存储了每个 Term 和其对应的 Postings 文件位置指针。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0957b7dddd6d42e1984158e8e997a12d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647278.png" />   
     </p>
 <p><strong>3.2.1 数据存储</strong></p>
 <p>Terms Dictionary 通过 .tim 后缀文件存储，其内部采用 NodeBlock 对 Term 进行压缩前缀存储，处理过程会将相同前缀的的 Term 压缩为一个 NodeBlock，NodeBlock 会存储公共前缀，然后将每个 Term 的后缀以及对应 Term 的 Posting 关联信息处理为一个 Entry 保存到 Block。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/18fc69c06c6043e1861cbbd41e5d3f70.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647237.png" />   
     </p>
 <p>****在上图中可以看到 Block 中还包含了 Block，这里是为了处理包含相同前缀的 Term 集合内部部分 Term 又包含了相同前缀。</p>
 <p>举个例子，在下图中为公共前缀为 a 的 Term 集合，内部部分 Term 的又包含了相同前缀 ab，这时这部分 Term 就会处理为一个嵌套的 Block。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f16f2e10adb14927b55d2121bfdbe77c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647032.webp" />   
     </p>
 <p><strong>3.2.2 数据查找</strong></p>
 <p>Terms Dictionary 是按 NodeBlock 存储在.tim 文件上。当文档数量越来越多的时，Dictionary 中的 Term 也会越来越多，那查询效率必然也会逐渐变低。</p>
@@ -381,7 +381,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>如下图为 mon/1，thrus/4，tues/2 生成的 FST，可以看到 thrus 和 tues 共享了前缀 t 以及后缀 s。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/257a402e65834f42886013b47e050064.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647428.webp" />   
     </p>
 <p>根据 FST 就可以将需要搜索 Term 作为 Input，对其途径的边上的值进行累加就可以得到 output，下述为以 input 为 thrus 的读取逻辑：</p>
 <ul>
@@ -410,7 +410,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>如果需要获取 Term 对应的所有 DocId 则直接遍历 TermFreqs，如果获取指定 DocId 数据则通过 SkipData 快速跳转</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cfc4cb623a0a44e3ac2a882569f5dae1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647988.png" />   
     </p>
 <h2 id="4-lucene-数值类型处理"><strong>4 Lucene 数值类型处理</strong></h2>
 <p>上述 Terms Dictionary 与 Posting List 的实现都是处理字符串类型的 Term，而对于数值类型，如果采用上述方式实现会存在以下问题：</p>
@@ -423,7 +423,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>BKDTree 是基于 KDTree，KDTree 实现起来很像是一个二叉查找树。主要的区别是，KDTree 在不同的层使用的是不同的维度值。</p>
 <p>下面是一个2维树的样例 ，其第一层以 x 为切分维度，将 x&gt;30的节点传递给右子树，x&lt;30的传递给左子树，第二层再按 y 维度切分，不断迭代到所有数据都被建立到 KD Tree 的节点上为止。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/af8e23a8ba9f454db847750156cdf982.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271648007.png" />   
     </p>
 <h3 id="42-bkdtree"><strong>4.2 BKDTree</strong></h3>
 <p>BKD 树是 KD 树和 B+ 树的组合，拥有以下特性：</p>
@@ -432,7 +432,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>叶子节点存储点数据，降低层高度，减少磁盘 IO</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a7f03255a14f4827bf9784190c4997a5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271648898.png" />   
     </p>
 <h2 id="5-总结"><strong>5 总结</strong></h2>
 <p>本文先介绍了倒排索引的概念和结构，然后对 Lucene 倒排索引的 Terms Dictionary 和 Posting List 的整体结构以及倒排索引的查询逻辑，最后介绍了 Lucene 对数值类型所做的处理。</p>
@@ -571,6 +571,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -604,10 +608,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -986,6 +986,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -216,7 +216,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/11825d2d2ef848d090e6f4af90e77480.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272312550.webp" />   
     </p>
 <p><strong>导读</strong>：在模型的全链路测试过程中，模型的问题统一定义成广义一致性性问题，一致性问题也是模型稳定性的基础保障，落地到具体点上从维度上划分可以分为数据不一致、延时不一致、策略机制不一致、性能不一致等几个方向，在后果衍生上都会导致模型稳定性指标抖动，预估效果不符合预期，所以一致性测试在当前大规模机器学习的测试过程中有着非常重要的作用，但是在通常对于模型的测试方案也很难做到全局解决，其中也牵扯到效果和效率的折中。文章在一致性几个方面要做到核心节点的策略和效果重点保障，最大限度保障停更和回滚的发生，当前一致性方案在百度商业内部落地收益较好，在效果和效率上也做了很多的优化策略，整体方案满足业务线的需求。</p>
 <p><em>全文6948字，预计阅读时间 12分钟。</em></p>
@@ -224,20 +224,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>点击率模型在广告检索阶段预估广告可能被点击的概率，在广告的排序、截断中起着重要的作用。</p>
 <p>点击率模型分为在线预估和离线训练两部分，离线训练主要进行模型的训练和评估，在线预估主要是模型的应用和反馈。具体的在离线模型闭环链路如图1所示，线上点击和展现的广告数据到视图日志，经过反作弊系统和流式特征抽取后得到样本作用于模型训练，训练好的模型经过评估后应用到线上进行广告粗选和精选阶段点击率的预估， 预估的点击率q值又作用于广告的排序、截断，进而形成完整的处理链路。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5ef87dd720ec486aa8eeede79f977e1c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272312464.webp" />   
     </p>
 <p><em>△图1：在离线模型闭环</em></p>
 <p>但因为系统的复杂性包括特征工程、训练损失、存储精度损失等，导致在策略迭代中经常出现在、离线模型作用效果不一致，例如新增加的策略在离线训练阶段得到模型，该模型在评估数据中表现优异，但是在线上系统中的广告效果指标如点击率，千次点击展现值等方面不尽人意。</p>
 <p>如图2所示，广告在线上预估需要经历：预估样本 → 线上特征集 → 离散embedding向量查询 → 离散 embedding 向量聚合 → dnn 网络计算 → 预估Q值， 而在线下训练的时候也需要经历：训练样本 → 线下特征集 → 离散模型查询 → embedding 向量聚合 → dnn 网络计算 → Q/模型。在q值计算的任何一个过程中出现差异，就会造成预估结果和模型训练的结果不匹配，影响模型的线上效果，进而影响广告的效果指标。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4aeed4d118274a08802d9fa5d127a3ee.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272312301.webp" />   
     </p>
 <p><em>△图2：模型在离线完整处理流程</em></p>
 <h1 id="二一致性保障的定义与目标"><strong>二、一致性保障的定义与目标</strong></h1>
 <h2 id="21-一致性问题的定义"><strong>2.1 一致性问题的定义</strong></h2>
 <p>机器学习可以按照是否有标记划分为监督学习/非监督学习，广告的点击率预估问题属于监督学习中的排序问题，这也是互联网中常见的一类学习业务。分类学习迭代过程的基本步骤如下图，每个方框表示一种数据形态，图例中给出了每个字面代表的含义，其下标表征了数据的上游来源及版本。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5187ab0d7901428393dbabb830324294.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272312116.webp" />   
     </p>
 <p><em>△图3：分类学习机制</em></p>
 <p>步骤1展示了训练过程：训练集经过特征抽取和训练过程产出了模型，在步骤2的评估阶段使用训练产出的模型，并输入未进入训练集的样本进行预估，从而评估该模型的效果。当评估的模型指标符合预期时，便会将该模型应用于进行线上的预估（步骤3），预估后的值又应用于具体的问题（步骤4），而应用后又会产生新的训练集，回到步骤1。</p>
@@ -245,12 +245,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>数据一致性包括样本一致性和模型一致性，这里所说的样本一致是逻辑上的，不是说训练、评估、预估使用完全相同的样本数据，而是指相同的输入数据集在经过这几个阶段处理后的值一致；模型的一致性是指离线训练后产出的模型和线上预估使用的模型转换精度在预期范围内，这块的一致也是指逻辑上的，因为离线训练后的模型到预估系统的加载会经过离线离散模型 → 中间态压缩数据 → 线上加载的离散模型这三种状态，经过部分特征的过滤和精度的转换，会存在预期内的损失。</p>
 <p>如下图4所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/60b7cb02dc2f4f46be053a0babb47403.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272313203.webp" />   
     </p>
 <p><em>△图4：数据一致性</em></p>
 <p>保持数据一致后，处理逻辑一致同样重要。如图5圈出的部分，逻辑一致包括步骤1-3中特征抽取的逻辑一致以及产出的模型在评估、预估的使用逻辑匹配。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a6c695703b16408191639aa080d9abd4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272313269.webp" />   
     </p>
 <p><em>△图5：逻辑一致性</em></p>
 <p>特征抽取的逻辑一致是指相同的输入数据经过特征抽取库后，产出的特征签名一致。而产出模型的预估、评估逻辑一致主要是通过保证模型使用逻辑一致进而保证模型效果。分类学习中一般的假设函数为：</p>
@@ -267,7 +267,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>如何针对上述的目标进行一一验证呢？可以采用补充校验流的方式。</p>
 <p>如下图6所示，当P1预估集预测出的Qp1作用于策略，产生新的训练集T2 后，我们可以使用T2 来代替评估步骤中的E1，作为补充流的输入：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2607064852664f208f779c8bab48f2b9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272313383.webp" />   
     </p>
 <p><em>△图6：补充校验流</em></p>
 <p>预估过程可代表在线下同的数据和逻辑流，附加的校验流可以代表离线系统的数据和逻辑流，并且，由于统一了预估和校验的输入（T2理论是P1的子集，P1是全部预估结果，T2是展现点击之后的数据）。将目标验证和实际的处理阶段对应起来，模型一致性问题的验证内容转化为：</p>
@@ -281,7 +281,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="31-全链路一致性方案"><strong>3.1 全链路一致性方案</strong></h2>
 <p>点击率q的计算分为多个步骤，以其中一个q为例，其处理步骤如下图7所示，主要包括参数解析、特征抽取、离散embedding向量查询、dnn网络计算、隐层信息写入、结果填充等多个操作算子，不同的操作算子之间串行执行，后一个算子的执行依赖于前一个算子的输出。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d3a2d3198d474e91be41ff3c0e6b191b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272313172.webp" />   
     </p>
 <p><em>△图7：预估处理步骤</em></p>
 <p>我们考虑预估所经历的整个过程，采用归一变量、逐步替换的方式覆盖预估的每个环节，来对比是否有不一致，以及寻找不一致出现的位置和原因，由于离散模型数据的量级在TB级别，直接对比数据diff的方式不可行，我们也通过对比输出q值的方式来间接评估使用的模型是否一致。首先对下图8中每个部分的具体含义进行解释：</p>
@@ -296,7 +296,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>offline_calc_dnn：离线训练加载模型进行dnn 前向计算。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a03428ea424f4888bf61d72e3f87754d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272313867.webp" />   
     </p>
 <p><em>△图8：计算与验证流</em></p>
 <p>考虑特征抽取、大模型查询、Dnn计算这三大部分，总共计算和验证5条流。</p>
@@ -307,7 +307,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>关键问题2：不一致产生的位置</strong></p>
 <p>对输出的 q 值逐步进行对比，可以判定不一致产生的位置，如下图9所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b8751c94db2647b6a4cb9352bd4ebf87.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272313685.webp" />   
     </p>
 <p><em>△图9：q值对比流程</em></p>
 <ul>
@@ -320,7 +320,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="321-在线数据获取"><strong>3.2.1 在线数据获取</strong></h3>
 <p>在线数据的获取需要从预估模块中采集，即同步线上的预估模块到测试环境，复制线上流量，打开debug开关，导出预估步骤中所有的数据，包括特征抽取结果、聚合后的网络输入数据、真是预估后的q值等。而通常预估模块都是采用多线程处理预估请求，典型的debug日志打印形式如下图10所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4f48a340e0704422a0f5a68a46950324.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272313116.webp" />   
     </p>
 <p><em>△图10：debug 日志形式</em></p>
 <p>图9中A-E是不同信息下样本的序号，可以看出debug日志的特点为：</p>
@@ -332,12 +332,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>4）完整的样本处理信息可能跨文件，而能够对比的日志是顺序排列的。</p>
 <p>因此，在替换和计算前需要对在线采集的debug日志进行解析和格式化，由于待处理的日志数据量很大，单机执行耗时很长，可以采取边引流、边解析的实时处理策略，如下图11所示，提升数据的处理效率。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c721e06b3697454382677be6c7d32f31.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272313038.webp" />   
      <em>△图11：debug日志处理</em></p>
 <h3 id="322-在离线数据拼接"><strong>3.2.2 在离线数据拼接</strong></h3>
 <p>获取得到在线数据后，需要找到相同时间段所对应的样本数据，在离线数据集合的关系如下图12所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/069a21fbcec34b77a2d12c724f1c8f2c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272313953.webp" />   
     </p>
 <p><em>△图12：在离线数据集合关系</em></p>
 <p>对于预估的请求样本，在样本阶段会有一部分被策略过滤掉，而训练样本中也可能存在一些样本未经过在线预估，因此在离线对比有效的数据是两者的合集，需要进行拼接。因离线数据用于训练，为了方便查询和存储，一般采用一个字段唯一标识样本行号, 但是在线部分中并不存在，因此无法通过该字段进行拼接，需要寻找其他字段进行拼接，拼接的字段称为“主键”，而对于主键的选择，需要遵循如下原则：</p>
@@ -348,12 +348,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="323-离线预估输出"><strong>3.2.3 离线预估输出</strong></h3>
 <p>如2.1介绍，训练的过程就是已知输入x和输出y，求解参数w的过程，深度神经网络在训练时，输入x经过模型参数计算得到网络的输出，网络输出与实际y计算得到误差，计算误差关于模型参数的梯度，反向传播不断更新模型参数，最终使得系统误差最小。Dnn网络的结构如下图所示，是一个四层的dnn网络：一层input，一层output，一层归一化层，中间一层隐层。整体结构如下图13所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7fa582a03c66419d9b087be9089ffcab.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272313920.webp" />   
     </p>
 <p><em>△图13：dnn 网络结构</em></p>
 <p>模型训练非阶段进行，分别更新dnn网络参数和离散特征信息。离线训练中要想输出和在线预估逻辑一致的q值，需要开启test模式，即只进行网络的前向传播不进行梯度的回传。同时为了得到最终的q值，需要对dnn网络的输出经过sigmoid函数之后的结果进行打印输出，如下图14所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7e5b48e461c047189936fda0f64ed2bb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272313892.webp" />   
     </p>
 <p><em>△图14 dnn 网络输出</em></p>
 <h3 id="324-q对比与结果展示"><strong>3.2.4 q对比与结果展示</strong></h3>
@@ -385,21 +385,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>每个阶段具体的实现方式如下图15所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1482507acdc54165b628d5e6c74850af.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272313586.webp" />   
     </p>
 <p><em>△图15：端到端一致性完整执行步骤</em></p>
 <h3 id="332-任务提测"><strong>3.3.2 任务提测</strong></h3>
 <p>将上述的处理过程进行平台化，支持自助任务提测和任务查看，并根据提测的参数，进行引流获取线上q值、ins、离散向量等信息，用来替换离线训练的ins/离散模型/dnn计算等逻辑去计算q值并产出最终的报告。</p>
 <p>提测页面需要填入的参数如下，主要用于输入数据处理和q值计算，如下图16所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a6319eb2fa4b47148868c109ee5db02d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272313663.webp" />   
     </p>
 <p><em>△图16：提测输入参数</em></p>
 <p>为了提升处理和排查效率，我们将每个步骤的耦合进行拆分，根据排查需求选择性的执行任务的特定步骤，如下图17所示。当完全新增一个问题排查时，需要执行完整的步骤，包括引流/日志切分 → 日志格式化 → 日志拼接 → online解析 → 替换预估q值 → q值计算 → q分布报告 → 日志对比 → 特征一致性报告 → 完整报告。</p>
 <p>若当前已经存在引流日志，则可以跳过线上引流直接进行后续的2-10步骤；若引流日志已经进行格式化，则可以跳过线上引流和日志格式化，依次类推。</p>
 <p>值得说明的是：由于在离线ins是整体排查的原始输入且产生diff的可能性比较大，总是默认产出特征一致性报告，如果分析了q值分布报告后，发现特征完全一致或在预期范围内，可以设定不产出特征一致性报告, 提升任务执行效率。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/59c8636d6a98407d96a845d73cd9a309.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272313715.webp" />   
      <em>△图17：任务执行设定与划分</em></p>
 <h3 id="333-任务查看与报告示例"><strong>3.3.3 任务查看与报告示例</strong></h3>
 <p>当前存在两种查看任务的形式：</p>
@@ -409,7 +409,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>产出的报告范例如下图18所示，包含q精度diff和q值分布，可以根据不同阶段对比得到diff位置等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/372928da047e483a95919d60e5c437b7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272313689.webp" />   
     </p>
 <p><em>△图18：端到端一致性报告示例</em></p>
 <h1 id="四效果与后续"><strong>四、效果与后续</strong></h1>
@@ -540,6 +540,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -573,10 +577,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -955,6 +955,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

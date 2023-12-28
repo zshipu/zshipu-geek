@@ -219,7 +219,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="是否使用多线程">是否使用多线程</h2>
 <p>图 2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/2-4b610b67.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272215381.png" />   
     </p>
 <p>  在生成 IndexSearcher 对象时，用户可以提供参数 <a href="https://zshipu.com/t?url=https%3A%2F%2Fdocs.oracle.com%2Fjavase%2F8%2Fdocs%2Fapi%2Fjava%2Futil%2Fconcurrent%2FExecutorService.html">ExecutorService</a>，调用下面的 <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2FLuXugang%2FLucene-7.5.0%2Fblob%2Fmaster%2Fsolr-7.5.0%2Flucene%2Fcore%2Fsrc%2Fjava%2Forg%2Fapache%2Flucene%2Fsearch%2FIndexSearcher.java">构造函数</a>，来实现多线程搜索：</p>
 <div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
@@ -239,45 +239,45 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="是否还有未查询的段">是否还有未查询的段</h2>
 <p>图 3：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/3-1de35e92.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272215158.png" />   
     </p>
 <p>  当索引目录中有多个段，那么每次从一个段中查询数据，直到所有的段都处理结束。</p>
 <h2 id="生成-bulkscorer">生成 BulkScorer</h2>
 <p>图 4：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/4-aaa9aa3b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272215989.png" />   
     </p>
 <p>  该流程点将会获得查询对应的文档和词频，这些信息被封装在 BulkScorer 中。</p>
 <p>  如图 5 所示，不同的查询方式（见第一小节）有不一样 BulkScorer 对象（通过装饰者模式层层包装 BulkScorer 来实现多样的 BulkScorer），在本篇文章中只根据图 6、图 7 的中的 BooleanQuery 对应的 BulkScorer 展开介绍，其生成的 BulkScorer 对象为 ReqExclBulkScorer。</p>
 <p>  图 5 中是 BulkScorer 的类图：</p>
 <p>图 5</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/5-1965afa6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272215714.png" />   
     </p>
 <p>图 6，索引阶段的内容：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/6-8c1cbfae.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272215130.png" />   
     </p>
 <p>图 7，查询阶段的内容：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/7-dcd37324.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272215892.png" />   
     </p>
 <p>  注意的是本文中的例子跟 <a href="https://www.6aiq.com/article/1586725343175">查询原理（上）</a> 中的 BooleanQuery 例子是不同的。</p>
 <h3 id="reqexclbulkscorer">ReqExclBulkScorer</h3>
 <p>  图 8 中描述的是 ReqExclBulkScorer 中包含的两个对象，其中 BooleanScorer 描述了 <strong>BooleanClause.Occure.SHOULD</strong> 的 TermQuery 的信息，BlockDocsEnum 描述了 <strong>BooleanClause.Occure.MUST_NOT</strong> 的 TermQuery 的信息。</p>
 <p>图 8</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/8-8d88b1ba.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216599.png" />   
     </p>
 <h4 id="booleanscorer">BooleanScorer</h4>
 <p>图 9</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/9-9deee4d5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216548.png" />   
     </p>
 <p>  图 9 中描述的是 BooleanScorer 中的主要信息， <strong>其包含的 BulkScorerAndDoc 的个数跟图 7 中 BooleanClause.Occure.SHOULD 的 TermQuery 的个数一致</strong>。</p>
 <p>图 10</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/10-6b1fa2a3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216292.png" />   
     </p>
 <p>  图 10 中描述的是 BulkScorerAndDoc 中包含的主要信息。</p>
 <h5 id="costnext">cost、next</h5>
@@ -288,41 +288,41 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h6 id="子查询-1">子查询 1</h6>
 <p>图 11</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/11-67d4f9bf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216431.png" />   
     </p>
 <h6 id="子查询-2">子查询 2</h6>
 <p>图 12</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/12-5aa8998c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216528.png" />   
     </p>
 <h6 id="子查询-3">子查询 3</h6>
 <p>图 13</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/13-190e2a2d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216393.png" />   
     </p>
 <h6 id="子查询-4">子查询 4</h6>
 <p>图 14</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/14-5835b8ea.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216496.png" />   
     </p>
 <p>  图 14 中我们没有列出该查询对应的 freqBuffer，原因是图 7 中子查询 4 属于 BooleanClause.Occure.MUST_NOT，我们只关心这个查询对应的文档号。</p>
 <h5 id="docdeltabufferfreqbuffer-的关系">docDeltaBuffer、freqBuffer 的关系</h5>
 <p>  两个数组的同一个数组下标值对应的数组元素描述的是域值在文档号中的词频，如图 15 所示：</p>
 <p>图 15</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/15-bf1dcf8c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216316.png" />   
     </p>
 <p>  在图 15 中，结合图 6，描述的是域值&quot;h&quot;在文档 3 中的词频是 2。</p>
 <p>  docDeltaBuffer、freqBuffer 数组的信息是通过读取索引文件 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2Fsuoyinwenjian%2F2019%2F0324%2F42.html">.doc</a> 获得的。</p>
 <p>图 16</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/16-14b296cd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216347.png" />   
     </p>
 <p>  docDeltaBuffer、freqBuffer 数组的信息要么分别从图 16 中红框标注的 PackedDocDeltaBlock 跟 PackedFreqBlock 中获取，要么分别从 DocDelta 跟 Freq 获得，其选择方式和读取索引文件 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2Fsuoyinwenjian%2F2019%2F0324%2F42.html">.doc</a> 的过程不在本篇文章中介绍，本人不想介绍的原因是，只要了解索引文件的数据结构是如何生成的，自然就明白如何读取索引文件~~</p>
 <p>  在 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2Fsuoyinwenjian%2F2019%2F0324%2F42.html">索引文件之 doc</a> 文章中我们提到，文档号使用差值存储，所以实际在搜索阶段，我们获得的 docDeltaBuffer 数组中的数组元素都是差值，还是以图 7 中的子查询 1 为例，它获得真正的 docDeltaBuffer 数组如下所示：</p>
 <p>图 17</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/17-98f4dcac.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216458.png" />   
     </p>
 <p>  注意的是图 17 中使用差值存储的 docDeltaBuffer 数组， <strong>它的第一个数组元素是原始值</strong>。</p>
 <p><strong>为什么要使用差值存储：</strong></p>
@@ -335,7 +335,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>  最后给出完整 ReqExclBulkScorer 包含的主要信息：</p>
 <p>图 18</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/18-3f0a54dd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216617.png" />   
     </p>
 <h1 id="结语">结语</h1>
 <p>  本篇文章中我们只介绍了在生成 BulkScorer 的过程中，我们获得了每一个子查询对应的文档号跟词频，实际上还有几个重要的内容没有讲述，这些内容用来描述在 <code>Collector处理查询结果</code> 的流程中如何对每一个子查询的文档号进行遍历筛选（即上文中为介绍的 next、cost 的信息），基于篇幅，这些内容在下一篇文章中展开介绍。</p>
@@ -344,27 +344,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>  图 2、图 3 是 BooleanQuery 的查询实例，在第三小节中我们根据这个例子介绍了 <code>生成BulkScorer</code> 的流程点，本篇文章根据这个例子，继续介绍图 1 中剩余的流程点。</p>
 <p>图 2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/2-12f9af8c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216420.png" />   
     </p>
 <p>图 3：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/3-bc4f9a09.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216369.png" />   
     </p>
 <h2 id="collector-处理查询结果">Collector 处理查询结果</h2>
 <p>  在查询原理（三）中的 <code>生成BulkScorer</code> 流程点，我们获得了每一个子查询对应的文档号跟词频，见图 4，结合 <a href="https://www.6aiq.com/article/1586725343175">查询原理（上）</a> 文章中的 <code>生成Weight</code> 流程点，我们就可以在当前流程点获得满足查询条件（图 3）的文档集合及对应的文档打分值。</p>
 <p>图 4：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/4-cd3a5cd8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216806.png" />   
     </p>
 <h3 id="collector处理查询结果-的流程图"><code>Collector处理查询结果</code> 的流程图</h3>
 <p>图 5：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/5-c663c65b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216013.png" />   
     </p>
 <h4 id="是否还有遍历区间">是否还有遍历区间？</h4>
 <p>图 6：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/6-350b2e2d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216259.png" />   
     </p>
 <p>  图 4 中的子查询 4，该查询对应的文档号集合不是用户期望返回的，那么可以根据这些文档号划分出多个左闭右开的遍历区间。</p>
 <p>  满足子查询 4 条件的文档号集合为 3、8，故可以划分出 3 个遍历区间：</p>
@@ -381,7 +381,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="处理子查询的所有文档号">处理子查询的所有文档号</h4>
 <p>图 7：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/7-04dc7cd5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216399.png" />   
     </p>
 <p>  该流程处理子查询的所有文档号，先看下 Bucket 数组，该数组的数组下标用来描述文档号，数组元素是 Bucket 对象，它用来记录该文档的打分值跟满足子查询条件的查询个数，Bucket 类如下所示：</p>
 <div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
@@ -408,20 +408,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>  图 8 为 BM25 模型的理论打分公式：</p>
 <p>图 8：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/8-f4ced91b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216486.png" />   
     </p>
 <p><strong>图 17 源自于 &laquo; 这就是搜索引擎 &raquo;，作者：张俊林。</strong></p>
 <p>  图 9 为在 Lucene7.5.0 版本中 BM25 模型的具体实现 BM25Similarity 的公式：</p>
 <p>图 9：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/9-5266029a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216784.png" />   
     </p>
 <p>  从图 9 的公式可以看出，一篇文档的打分值是一个 <strong>累加值</strong>，累加的过程即 <code>更新Bucket数组</code> 的流程，如果一篇文档满足多个子查询的条件，那么该文档的打分值是每个子查询对这篇文档打分的和值。</p>
 <p>  例如图 2 中的文档 0，该文档包含了两种 term，分别是 &ldquo;a&rdquo;，&ldquo;h&rdquo;，故文档 0 满足图 3 中的两个子查询的条件，分别是子查询 1、子查询 3，所以文档 0 的打分值是两个查询对这篇文档打分的和值，最后将这个和值添加到 Bucket 数组的数组下标为 0（因为文档 0 的文档号是 0）的数组元素 Bucket 对象中，该对象的 freq 的值同理会被赋值为 2。</p>
 <h6 id="bm25similarity-打分公式">BM25Similarity 打分公式</h6>
 <p>图 10：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/10-eb701d0c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216092.png" />   
     </p>
 <ul>
 <li>Idf、boost、avgdl、docCount、docFreq：这些值在第二小节中计算 SimWeight 时获得，不赘述</li>
@@ -442,28 +442,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>图 11：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/11-76b9d98a.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216416.jpeg" />   
     </p>
 <p>  图 11 中， <strong>横坐标为文档长度值，纵坐标为 dl</strong>，由于数据跨度太大，无法看出文档长度值较小的区间的趋势图，故图 12 给出的是文档长度值在[0，100]区间的映射图</p>
 <p>图 12：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/12-73e1583d.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216046.jpeg" />   
     </p>
 <p>  图 13 中，文档长度值在[0，50]区间的映射图，能进一步看出文档长度值小于等于 40 时，dl 正比于文档长度值</p>
 <p>图 13：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/13-55c89d33.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216741.jpeg" />   
     </p>
 <p>  图 10 中的 normValue 根据文档号从 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2Fsuoyinwenjian%2F2019%2F0305%2F39.html">索引文件.nvd</a> 中获得，图 14 中用红框标识了一篇文档的文档号及其对应的 normValue。</p>
 <p>  读取索引文件的过程不展开介绍，本人不想介绍的原因是，只要了解索引文件的数据结构（见 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2Fsuoyinwenjian%2F">索引文件数据结构</a> ）是如何生成的，自然就明白如何读取索引文件~~</p>
 <p>图 14：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/14-98f5da3a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216740.png" />   
     </p>
 <h4 id="处理-bucket-数组">处理 Bucket 数组</h4>
 <p>图 15：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/15-25468cdd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216032.png" />   
     </p>
 <p>  处理 Buck 数组的过程就是找出所有满足图 3 中 minShouldMatch 的文档，然后分别将文档号交给 <a href="https://www.6aiq.com/article/1586704007975">Collector 收集器</a> 处理</p>
 <p><strong>某个遍历区间</strong> 内的生成 Bucket 数组的过程在 <a href="https://www.6aiq.com/article/1586695513057">文档号合并（SHOULD）</a> 的文章中已经介绍，不过注意的是，在那篇文档中，没有考虑文档的打分值，故 Bucket 数组只介绍了 freq。由于那篇中没有类似图 3 中的子查询 4，所以遍历区间为[0，2147483647]。</p>
@@ -471,7 +471,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h5 id="遍历区间03">遍历区间[0，3)</h5>
 <p>图 16：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/16-64092a25.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272216338.png" />   
     </p>
 <p>  在图 16 中，文档 0 跟文档 2 的 freq 大于等于 minShouldMatch（2），故这两篇文档满足图 3 中的查询要求。</p>
 <h1 id="结语-1">结语</h1>
@@ -485,11 +485,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>  在介绍这个遗留问题前，我们先说下在第三小节的文章中，我们在介绍 ReqExclBulkScorer 时，有两个信息没有介绍，即 cost、next，这两个信息用来选择哪些子查询进行处理。</p>
 <p>图 2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/2-4fdd2b38.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272217362.png" />   
     </p>
 <p>图 3：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/3-03e2cc19.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272217668.png" />   
     </p>
 <ul>
 <li>cost：该值描述的是满足子查询的文档个数，例如图 3 中的子查询 3，因为 docDeltaBuffer 数组有 7 个数组元素（数组元素为满足子查询的文档号），故它的 cost 值为 7</li>
@@ -509,7 +509,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>图 4：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/4-b7f7fb10.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272217280.png" />   
     </p>
 <ul>
 <li>
@@ -554,7 +554,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>图 5：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/5-3ec11ae2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272217745.png" />   
     </p>
 <p>  在图 5 中，最后推导出 BooleanQuery 的总开销为 n-m+1 个查询的开销，所以在 Lucene 中，它使用优先级队列 head（大小为 n-m+1）、tail（大小为 m - 1）来存放子查询的信息（即第三小节中的 BulkScorerAndDoc），优先级队列的排序规则如下：</p>
 <ul>
@@ -686,6 +686,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -719,10 +723,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1101,6 +1101,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

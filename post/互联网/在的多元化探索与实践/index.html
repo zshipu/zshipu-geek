@@ -244,7 +244,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>随着数据应用，数据分析以及数据仓库的普及与完善，越来越多的人对数据的实效性提出了更高的要求。比如，当需要做一些数据的实时推荐时，数据的实效将决定它的价值。在这种情况下，整个实时计算的场景就普遍诞生。</p>
 <p>但在实际的运作过程当中，也遇到了很多场景 ，其实并没有对数据有非常高的实时性要求，在这种情况下必然会存在数据从毫秒，秒或者天的新的一些场景，实时场景数据更多是以分钟为粒度的一些增量计算的场景。对于离线计算，它更加注重成本；对实时计算，它更加注重价值实效；而对于增量计算，它更加注重去平衡成本，以及综合的价值和时间。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a9e43077e65b49058609dc04c02241d4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271744566.webp" />   
     </p>
 <h3 id="2-b-站的时效性"><strong>2. B 站的时效性</strong></h3>
 <p>在三个维度上，B 站的划分是怎样的？对于 B 站而言 ，目前有 75% 的数据是通过离线计算来进行支撑的，另外还有 20% 的场景是通过实时计算， 5% 是通过增量计算。</p>
@@ -254,7 +254,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>对于增量计算，今年才启动一些新的场景，比如说 binlog 的增量 Upsert 场景。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a972c86bcdac44a3b837aa5a2c6e6114.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271744172.webp" />   
     </p>
 <h3 id="3-etl-时效性差"><strong>3. ETL 时效性差</strong></h3>
 <p>对于实效性问题 ，其实早期遇到了很多痛点 ，核心集中在三个方面：</p>
@@ -264,7 +264,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>第三、实时和离线的 gap 是比较难满足的，因为对于大部分的数据来说，纯实时的成本过高，纯离线的实效又太差。同时，MySQL 数据的入仓时效也不太够。举个例子，好比 B 站的弹幕数据 ，它的体量非常夸张，这种业务表的同步往往需要十几个小时，而且非常的不稳定。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f6229e4a4023437ba19f8107cbffa835.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271744857.webp" />   
     </p>
 <h3 id="4-ai-实时工程复杂"><strong>4. AI 实时工程复杂</strong></h3>
 <p>除了实效性的问题 早期还遇到了 AI 实时工程比较复杂的问题：</p>
@@ -274,18 +274,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>第三、随着 AI 人员的增多，算法人员的投入，实验迭代很难横向扩展。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/af761ccc6d6d4577b242b493da5e4871.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271744787.webp" />   
     </p>
 <h3 id="5-flink-做了生态化的实践"><strong>5. Flink 做了生态化的实践</strong></h3>
 <p>在这些关键痛点的背景下，我们集中针对 Flink 做了生态化的实践，核心包括了整个实时数仓的应用以及整个增量化的 ETL 管道，还有面向 AI 的机器学习的一些场景。本次的分享会更加侧重增量管道以及 AI 加 Flink 的方向上。下图展示了整体的规模，目前，整个传输和计算的体量，在万亿级的消息规模有 30000+ 计算核数，1000+ job 数以及 100 多个用户。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2f12376d677d436fbf5e30107b582da1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271744463.webp" />   
     </p>
 <h2 id="二flink-on-yarn-的增量化管道的方案"><strong>二、Flink On Yarn 的增量化管道的方案</strong></h2>
 <h3 id="1-早期的架构">1. 早期的架构</h3>
 <p>先来看一下整个管道早期的架构，从下图可以看出，数据其实主要是通过 Flume 来消费 Kafka 落到 HDFS。Flume 用它的事务机制，来确保数据从 Source 到 Channel， 再到 Sink 时候的一致性，最后数据落到 HDFS 之后，下游的 Scheduler 会通过扫描目录下有没有 tmp 文件，来判断数据是否 Ready，以此来调度拉起下游的 ETL 离线作业。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ae524dab3f6f48398a3371a9d743ba17.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271744165.webp" />   
     </p>
 <h3 id="2-痛点"><strong>2. 痛点</strong></h3>
 <p>在早期遇到了不少痛点：</p>
@@ -297,7 +297,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>第三点是下游的 ETL 联动。前文有提到，我们更多是通过扫描 tmp 目录是否 ready 的方案，这种情况下 scheduler 会大量的和 NameNode 调用 hadoop list 的 api，这样会导致 NameNode 的压力比较大。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/587fd066f6754e3ab8f0827adba1d0f3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271744934.webp" />   
     </p>
 <h3 id="3-稳定性相关的痛点"><strong>3. 稳定性相关的痛点</strong></h3>
 <p>在稳定性上也遇到很多问题：</p>
@@ -307,7 +307,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>第三，Flume 和 HDFS 在通信上有问题。比如说当写 HDFS 出现堵塞的情况，某一个节点的堵塞会反压到 Channel，就会导致 Source 不会去 Kafka 消费数据，停止拉动 offset，一定程度上就会引发 Kafka 的 Rebalance，最后会导致全局 offset 不往前推进，从而导致数据的堆积。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/551006e84c08471686d52655f22b10e1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271744690.webp" />   
     </p>
 <h3 id="4-万亿级的增量管道-dag-视图"><strong>4. 万亿级的增量管道 DAG 视图</strong></h3>
 <p>在如上的痛点下，核心方案基于 Flink 构建了一套万亿级的增量管道，下图是整个运行时的 DAG 视图。</p>
@@ -318,12 +318,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>第三层是 Exporter 模块，它支持将数据导出到不同的存储介质。比如写到 HDFS 时，会导出成 parquet；写到 Kafka，会导出成 pb 格式。同时，在整个 DAG 的链路上引入了 ConfigBroadcast 的模块来解决管道元数据实时更新、热加载的问题。此外，在整个链路当中，每分钟会进行一次 checkpoint，针对增量的实际数据进行 Append，这样就可以提供分钟级的查询。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/23ee675334c241e7aa3e63af0e961f12.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271744341.webp" />   
     </p>
 <h3 id="5-万亿级的增量管道整体视图"><strong>5. 万亿级的增量管道整体视图</strong></h3>
 <p>Flink On Yarn 的整体架构，可以看出其实整个管道视图是划分以 BU 为单位的。每个 Kafka 的 topic，都代表了某一种数据终端的分发，Flink 作业就会专门负责各种终端类型的写入处理。视图里面还可以看到，针对 blinlog 的数据，还实现了整个管道的组装，可以由多个节点来实现管道的运作。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ab4dcee7ed7a4c349d110da75d87a7c3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271744927.webp" />   
     </p>
 <h3 id="6-技术亮点"><strong>6. 技术亮点</strong></h3>
 <p>接下来来看一下整个架构方案核心的一些技术亮点，前三个是实时功能层面的一些特色，后三个主要是在一些非功能性层面的一些优化。</p>
@@ -336,19 +336,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>最后是分区容错的一些优化。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/871b5e954212492a8254be55dbe67af3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271744532.webp" />   
     </p>
 <h4 id="-61-数据模型"><strong>■ 6.1 数据模型</strong></h4>
 <p>业务的开发主要是通过拼装字符串，来组装数据的一条条记录的上报。后期则是通过了模型的定义和管理，以及它的开发来组织的，主要是通过在平台的入口提供给用户去录制每一条流、每个表，它的 Schema ，Schema 会将它生成 Protobuf 的文件，用户可以在平台上去下载 Protobuf 对应的 HDFS 模型文件，这样，client 端的开发完全就可以通过强 Schema 方式从 pb 来进行约束。</p>
 <p>来看一下运行时的过程，首先 Kafka 的 Source 会去消费实际上游传过来的每一条 RawEvent 的记录，RawEvent 里面会有 PBEvent 的对象，PBEvent 其实是一条条的 Protobuf 的记录。数据从 Source 流到的 Parser 模块，解析后会形成 PBEvent，PBEvent 会将用户在平台录入的整个 Schema 模型，存储在 OSS 对象系统上，Exporter 模块会动态去加载模型的变更。然后通过 pb 文件去反射生成的具体事件对象，事件对象最后就可以映射落成 parquet 的格式。这里主要做了很多缓存反射的优化，使整个 pb 的动态解析性能达到六倍的提升。最后，我们会将数据会落地到 HDFS，形成 parquet 的格式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e4ccccb72bd94d0583f2b717605d49a3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271744181.webp" />   
     </p>
 <h4 id="-62-分区通知优化"><strong>■ 6.2 分区通知优化</strong></h4>
 <p>前面提到管道会处理上百条流，早期 Flume 的架构，其实每个 Flume 节点，很难去感应它自己处理的进度。同时，Flume 也没办法做到全局进度的处理。但是基于 Flink，就可以通过 Watermark 的机制来解决。</p>
 <p>首先在 Source 会基于消息当中的 Eventime 来生成 Watermark，Watermark 会经过每一层的处理传递到 Sink，最后会通过 Commiter 模块，以单线程的方式来汇总所有 Watermark 消息的进度。当它发现全局 Watermark 已经推进到下个小时的分区的时候，它会下发一条消息到 Hive MetStore，或者是写入到 Kafka， 来通知上小时分区数据 ready，从而可以让下游的调度可以更快的通过消息驱动的方式来拉起作业的运行。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/25d3d274496f4584bd1b251550c5176c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271744878.webp" />   
     </p>
 <h4 id="-63-cdc管道上的优化"><strong>■ 6.3 CDC管道上的优化</strong></h4>
 <p>下图右侧其实是整个 cdc 管道完整的链路。要实现 MySQL 数据到 Hive 数据的完整映射，就需要解决流和批处理的问题。</p>
@@ -356,12 +356,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>整个链路是要解决数据的不丢不重，重点是针对 Canal 写 Kafka 这块，开了事务的机制，保证数据落 Kafka topic 的时候，可以做到数据在传输过程当中的不丢不重。另外，数据在传输的上层其实也有可能出现数据的重复和丢失，这时候更多是通过全局唯一 id 加毫秒级的时间戳。在整个流式 Job 中，针对全局 id 来做数据的去重，针对毫秒级时间来做数据的排序，这样能保证数据能够有序的更新到的 HUDI。</p>
 <p>紧接着通过 Trace 的系统基于 Clickhouse 来做存储，来统计各个节点数据的进出条数来做到数据的精确对比。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3cdc45c752914b5a8fdfda373d467ecc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271744625.webp" />   
     </p>
 <h4 id="-64-稳定性---小文件的合并"><strong>■ 6.4 稳定性 - 小文件的合并</strong></h4>
 <p>前面提到，改造成 Flink 之后，我们是做了每分钟的 Checkpoint，文件数的放大非常严重。主要是在整个 DAG 当中去引入 merge 的 operater 来实现文件的合并，merge 的合并方式主要是基于并发度横向合并，一个 writer 会对应一个 merge。这样每五分钟的 Checkpoint，1 小时的 12 个文件，都会进行合并。通过种方式的话，可以将文件数极大的控制在合理的范围内。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6b3a48f57c3f45619ad9542f169aad59.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271744236.webp" />   
     </p>
 <h4 id="-65-hdfs-通信"><strong>■ 6.5 HDFS 通信</strong></h4>
 <p>实际运作过程当中经常会遇到整个作业堆积比较严重的问题，实际分析其实主是和 HDFS 通信有很大的关系。</p>
@@ -375,14 +375,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>第三，针对多条流，Snapshot 还做了并行化的处理，每 5 分钟的 Checkpoint， 多条流其实就是多个 bucket，会通过循环来进行串行的处理，那么通过多线程的方式来改造，就可以减少 Checkpoint timeout 的发生。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3229cb0872354bd7976cfae6b0785291.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271744980.webp" />   
     </p>
 <h4 id="-66-分区容错的一些优化"><strong>■ 6.6 分区容错的一些优化</strong></h4>
 <p>实际在管道多条流的情况下，有些流的数据并不是每个小时都是连续的。</p>
 <p>这种情况会带来分区，它的 Watermark 没有办法正常推进，引发空分区的问题。所以我们在管道的运行过程当中，引入 PartitionRecover 模块，它会根据 Watermark 来推进分区的通知。针对有些流的 Watermark，如果在 ideltimeout 还没有更新的情况下，Recover 模块来进行分区的追加。它会在每个分区的末尾到达的时候，加上 delay time 来扫描所有流的 Watermark，由此来进行兜底。</p>
 <p>在传输过程当中，当 Flink 作业重启的时候，会遇到一波僵尸的文件，我们是通过在 DAG 的 commit 的节点，去做整个分区通知前的僵尸文件的清理删除，来实现整个僵尸文件的清理，这些都属于非功能性层面的一些优化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a0212d94d07c4d52bf545b55d6a2144c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745842.webp" />   
     </p>
 <h2 id="三flink-和-ai-方向的一些工程实践"><strong>三、Flink 和 AI 方向的一些工程实践</strong></h2>
 <h3 id="1-架构演进时间表">**1. 架构演进时间表</h3>
@@ -395,12 +395,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>到2020 年的下半年，更多是围绕整个实验的流程化以及引入 AIFlow，方便的去做流批 DAG。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ce104341a26d4cd9b0d62b649b9e47ce.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745993.webp" />   
     </p>
 <h3 id="2-ai-工程架构回顾"><strong>2. AI 工程架构回顾</strong></h3>
 <p>回顾一下整个 AI 工程，它的早期的架构图其实体现的是整个 AI 在 2019 年初的架构视图，其本质是通过一些 single task 的方式，各种混合语言来组成的一些计算节点，来支撑着整个模型训练的链路拉起。经过 2019 年的迭代，将整个近线的训练完全的替换成用 BSQL 的模式来进行开发和迭代。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b41ae5f6595e449385bbc2f768c42161.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745697.webp" />   
     </p>
 <h3 id="3-现状痛点"><strong>3. 现状痛点</strong></h3>
 <p>在 2019 年底，其实又遇到了一些新的问题，这些问题主要集中在功能和非功能两个维度上。</p>
@@ -410,7 +410,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>第二，整个实时的特征、离线特征、以及流批的一体，涉及到非常多的作业组成，整个链路很复杂。同时实验和 online 都要做特征的计算，结果不一致会导致最终的效果出现问题。此外，特征存在哪里也不好找，没办法去追溯。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/514b89c94ded49ebb50821cbbd1246ce.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745395.webp" />   
     </p>
 <ul>
 <li>在非功能性层面，算法的同学经常会遇到，不知道 Checkpoint 是什么，要不要开，有啥配置。此外，线上出问题的时候也不好排查，整个链路都非常的长。</li>
@@ -425,7 +425,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>完整的实验链路，背后其实是包含实时的一条工程加离线的一条工程链路组成，线上的问题很难去排查。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7188ae9889294ccaa0d4e16cf96e1fb3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745224.webp" />   
     </p>
 <h3 id="5-实时-ai-工程的雏形"><strong>5. 实时 AI 工程的雏形</strong></h3>
 <p>在这样的一些痛点下，在 20 年主要是集中在 AI 方向上去打造实时工程的雏形。核心是通过下面三个方面来进行突破。</p>
@@ -435,7 +435,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>第三是整个实验的协作，算法的目的其实在于实验，希望去打造一套端到端的实验协作，最终希望做到面向算法能够“一键实验”。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d2f8a82efdc549e2904f25df40a7ec26.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745143.webp" />   
     </p>
 <h3 id="6-特征工程-难点"><strong>6. 特征工程-难点</strong></h3>
 <p>我们在特征工程中遇到了一些难点。</p>
@@ -445,7 +445,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>第三是整个离线特征的流批一体比较难打通。实时特征的计算逻辑经常会带有窗口时序等等一些流式的概念，但是离线特征是没有这些语义的。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/299b255b0d634eaaaaeeda69d3067d1a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745747.webp" />   
     </p>
 <h3 id="7-实时特征"><strong>7. 实时特征</strong></h3>
 <p>这里看一下我们怎么去做实时特征，图中的右侧是最典型的一些场景。比如说我要实时统计用户最近一分钟、6 小时、12 小时、24 小时，对各个 UP 主相关视频的播放次数。针对这样场景，其实里面有两个点：</p>
@@ -457,7 +457,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>在两个痛点下，针对滑动窗口，主要是改造成为 Group By 的模式，加上 agg 的 UDF 的模式，将整个一小时、六小时、十二小时、二十四小时的一些窗口数据，存放到整个 Rocksdb 当中。这样通过 UDF 模式，整个数据触发机制就可以基于 Group By 实现记录级的触发，整个语义、时效性都会提升的比较大。同时在整个 AGG 的 UDF 函数当中，通过 Rocksdb 来做 state，在 UDF 当中来维护数据的生命周期。此外还扩展了整个 SQL 实现了数组级别的维表查询。最后的整个效果其实可以在实时特征的方向上，通过超大窗口的模式来支持各种计算场景。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/be68d17068c04cbe9e5ef423d61fb394.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745490.webp" />   
     </p>
 <h3 id="8-特征-离线"><strong>8. 特征-离线</strong></h3>
 <p>接下来看一下离线，左侧视图上半部分是完整的实时特征的计算链路，可以看出要解决同样的一条 SQL，在离线的计算上也能够复用，那就需要去解决相应的一些计算的 IO 都能够复用的问题。比如在流式上是通过 Kafka 来进行数据的输入，在离线上需要通过 HDFS 来做数据的输入。在流式上是通过 KFC 或者 AVBase 等等的一些 kv 引擎来支持，在离线上就需要通过 hive 引擎来解决，归根结底，其实需要去解决三个方面的问题：</p>
@@ -467,36 +467,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>第三，需要去模拟 kv 引擎维表化的消费，实现基于 hive 的维表消费。还需要解决一个问题，当从 HDFS 拉取的每一条记录，每一条记录其实消费 hive 表的时候都有对应的 Snapshot，就相当于是每一条数据的时间戳，要消费对应数据时间戳的分区。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9dfe360b22a54bcab27c8c5fa6c1be96.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745261.webp" />   
     </p>
 <h3 id="9-优化"><strong>9. 优化</strong></h3>
 <h4 id="-91-离线-分区有序">■ <strong>9.1 离线-分区有序</strong></h4>
 <p>分区有序的方案其实主要是基于数据在落 HDFS 时候，前置做了一些改造。首先数据在落 HDFS 之前，是传输的管道，通过 Kafka 消费数据。在 Flink 的作业从 Kafka 拉取数据之后，通过 Eventtime 去提取数据的 watermark，每一个 Kafka Source 的并发度会将 watermark 汇报到 JobManager 当中的 GlobalWatermark 模块，GlobalAgg 会汇总来自每一个并发度 Watermark 推进的进度，从而去统计 GlobalWatermark 的进展。根据 GlobalWatermark 的进展来计算出当中有哪些并发度的 Watermark 计算过快的问题，从而通过 GlobalAgg 下发给 Kafka Source 控制信息，Kafka Source 有些并发度过快的情况下，它的整个分区推进就降低速度。这样，在 HDFS Sink 模块，在同时间片上收到的数据记录的整个 Event time 基本上有序的，最终落到 HDFS 还会在文件名上去标识它相应的分区以及相应的时间片范围。最后在 HDFS 分区目录下，就可以实现数据分区的有序目录。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d60d0c4c335a4e6f8ba6d143dde49a32.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745946.webp" />   
     </p>
 <h4 id="-92-离线-分区增量消费"><strong>■ 9.2 离线-分区增量消费</strong></h4>
 <p>数据在 HDFS 增量有序之后，实现了 HDFStreamingSource，它会针对文件做 Fecher 分区，针对每个文件都有 Fecher 的线程，且每个 Fecher 线程会统计每一个文件。它 offset 处理了游标的进度，会将状态根据 Checkpoint 的过程，将它更新到的 State 当中。</p>
 <p>这样就可以实现整个文件消费的有序推进。在回溯历史数据的时候，离线作业就会涉及到整个作业的停止。实际是在整个 FileFetcher 的模块当中去引入一个分区结束的标识，且会在每一个线程去统计每一个分区的时候，去感应它分区的结束，分区结束后的状态最后汇总到的 cancellationManager，并进一步会汇总到 Job Manager 去更新全局分区的进度，当全局所有的分区都到了末尾的游标时候，会将整个 Flink 作业进行 cancel 关闭掉。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8073402195dd4696a94c2ccb0565b45d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745696.webp" />   
     </p>
 <h4 id="-93-离线---snapshot-维表">■ <strong>9.3 离线 - Snapshot 维表</strong></h4>
 <p>前面讲到整个离线数据，其实数据都在 hive 上，hive 的 HDFS 表数据的整个表字段信息会非常的多，但实际做离线特征的时候，需要的信息其实是很少的，因此需要在 hive 的过程先做离线字段裁剪，将一张 ODS 的表清洗成 DW 的表，DW 的表会最后通过 Flink 运行 Job，内部会有个 reload 的 scheduler，它会定期的去根据数据当前推进的 Watermark 的分区，去拉取在 hive 当中每一个分区对应的表信息。通过去下载某 HDFS 的 hive 目录当中的一些数据，最后会在整个内存当中 reload 成 Rocksdb 的文件，Rocksdb 其实就是最后用来提供维表 KV 查询的组件。</p>
 <p>组件里面会包含多个 Rocksdb 的 build 构建过程，主要是取决于整个数据流动的过程当中的 Eventtime，如果发现 Eventtime 推进已经快到小时分区结束的末尾时候，会通过懒加载的模式去主动 reload，构建下一个小时 Rocksdb 的分区，通过这种方式，来切换整个 Rocksdb 的读取。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/23787f2198dd49ddae28bf0e8024d67f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745464.webp" />   
     </p>
 <h3 id="10-实验流批一体"><strong>10. 实验流批一体</strong></h3>
 <p>在上面三个优化，也就是分区有序增量，类 Kafka 分区 Fetch 消费，以及维表 Snapshot 的基础下，最终是实现了实时特征和离线特征，共用一套 SQL 的方案，打通了特征的流批计算。紧接着来看一下整个实验，完整的流批一体的链路，从图中可以看出最上面的粒度是整个离线的完整的计算过程。第二是整个近线的过程，离线过程其实所用计算的语义都是和近线过程用实时消费的语义是完全一致的，都是用 Flink 来提供 SQL 计算的。</p>
 <p>来看一下近线，其实 Label join 用的是 Kafka 的一条点击流以及展现流，到了整个离线的计算链路，则用的一条 HDFS 点击的目录和 HDFS 展现目录。特征数据处理也是一样的，实时用的是 Kafka 的播放数据，以及 Hbase 的一些稿件数据。对于离线来说，用的是 hive 的稿件数据，以及 hive 的播放数据。除了整个离线和近线的流批打通，还将整个近线产生的实时的数据效果汇总到 OLAP 引擎上，通过 superset 来提供整个实时的指标可视化。其实从图可以看出完整的复杂流批一体的计算链路，当中包含的计算节点是非常的复杂和庞多的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b7b79be97ebd497a935f10481a084f3f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745415.webp" />   
     </p>
 <h3 id="11-实验协作---挑战"><strong>11. 实验协作 - 挑战</strong></h3>
 <p>下阶段挑战更多是在实验协作上，下图是将前面整个链路进行简化后的抽象。从图中可以看出，三个虚线的区域框内，分别是离线的链路加两个实时的链路，三个完整的链路构成作业的流批，实际上就是一个工作流最基本的过程。里面需要去完成工作流完整的抽象，包括了流批事件的驱动机制，以及，对于算法在 AI 领域上更多希望用 Python 来定义完整的 flow，此外还将整个输入，输出以及它的整个计算趋于模板化，这样可以做到方便整个实验的克隆。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/218397d43a854952a30bea39ecf1fe55.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745156.webp" />   
     </p>
 <h3 id="12-引入-aiflow"><strong>12. 引入 AIFlow</strong></h3>
 <p>整个工作流上在下半年更多是和社区合作，引入了 AIFlow 的整套方案。</p>
@@ -504,12 +504,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在节点的边上，相比原生的业界的一些 Flow 方案，他还支持基于事件驱动的整个机制。好处是可以帮助在两个 Flink 作业之间，通过 Flink 当中 watermark 处理数据分区的进度去下发一条事件驱动的消息来拉起下一个离线或者实时的作业。</p>
 <p>此外还支持周边的一些配套服务，包括通知的一些消息模块服务，还有元数据的服务，以及在 AI 领域一些模型中心的服务。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/889ab79aca554cae80572c043a9342d0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745013.webp" />   
     </p>
 <h3 id="13-python-定义-flow"><strong>13. Python 定义 Flow</strong></h3>
 <p>来看一下基于 AIFlow 是如何最终定义成 Python 的工作流。右边的视图是一个线上项目的完整工作流的定义。第一、是整个是 Spark job 的定义，当中通过配置 dependence 来描述整个下游的依赖关系，它会下发一条事件驱动的消息来拉起下面的 Flink 流式作业。流式作业也同样可以通过消息驱动的方式来拉起下面的 Spark 作业。整个语义的定义非常的简单，只需要四个步骤，配置每节点的 confg 的信息，以及定义每节点的 operation 的行为，还有它的 dependency 的依赖，最后去运行整个 flow 的拓扑视图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8060602cbbf84917b43750c8c2f3f454.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745723.webp" />   
     </p>
 <h3 id="14-基于事件驱动流批"><strong>14. 基于事件驱动流批</strong></h3>
 <p>接下来看一下完整的流批调度的驱动机制，下图右侧是完整的三个工作节点的驱动视图。第一个是从 Source 到 SQL 到 Sink。引入的黄色方框是扩展的 supervisor，他可以收集全局的 watermark 进度。当整个流式作业发现 watermark 可以推进到下一个小时的分区的时候，它会下发一条消息，去给到 NotifyService。NotifyService 拿到这条消息之后，它会去下发给到下一个作业，下一个作业主要会在整个 Flink 的 DAG 当中去引入 flow 的 operator，operator 在没有收到上个作业下发了消息之前，它会堵塞整个作业的运行。直到收到消息驱动之后，就代表上游其实上一个小时分区已经完成了，这时下个 flow 节点就可以驱动拉起来运作。同样，下个工作流节点也引入了 GlobalWatermark Collector 的模块来汇总收集它的处理的进度。当上一个小时分区完成之后，它也会下发一条消息到 NotifyService，NotifyService 会将这条消息去驱动调用 AIScheduler 的模块，从而去拉起 spark 离线作业来做 spark 离线的收尾。从里你们可以看出，整个链路其实是支持批到批，批到流以及流到流，以及流到批的四�</p>
@@ -636,6 +636,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -669,10 +673,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1051,6 +1051,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

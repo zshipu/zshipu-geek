@@ -247,7 +247,7 @@ commit;
 </code></pre><p>这样在单体应用中，由于所有数据都是保存在同一个数据库中，通过数据库提供的ACID特性，就可以轻松实现数据的实时一致性。</p>
 <p>但是，在微服务架构中，可能的设计是存在两个服务：储蓄服务（Deposit Service）和理财服务（Finance Service），假设由储蓄服务负责处理客户的转账请求。而如下图所示，这两个服务都分别维护自己的数据，因此储蓄服务无法直接访问理财服务的数据，而只能通过API去修改客户的余额。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d14bd34db228494e963bd194098fff1c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271914115.webp" />   
     </p>
 <p>此时，为了满足订单服务与客户服务之间的实时一致性要求，可以采用分布式事务，比如基于两阶段提交协议(Two-phase commit, 2PC）的实现来做到这一点。（关于2PC，已经有大量的研究成果和成功实践经验，本文将不再做太多阐述，具体可自行参见相关文献和资料）</p>
 <p>根据CAP定理，我们追求实时一致性时，通常需要牺牲掉部分可用性。比如以上场景中，当 Finance Service 由于软硬件故障或网络问题而不可用的时候，系统将无法为用户提供内部转账服务。</p>
@@ -282,7 +282,7 @@ commit;
 </li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8bdd97fb7908492983519bce733cc6ea.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271914794.webp" />   
     </p>
 <p>在这里需要考虑的一个问题，就是转账失败处理。比如以上第2步如果因为“理财账户被冻结无法转入资金”之类的原因失败了，理财服务就应该发布“理财账户转入失败”事件，储蓄服务获取到该事件后，需要对储蓄账户进行回滚，将减少的金额重新增加回去。</p>
 <p>以上的过程与传统的数据管理基于ACID模型不一样的是，它是基于 <strong>BASE模型</strong> 的。</p>
@@ -317,7 +317,7 @@ commit;
 <h3 id="使用本地事务发布事件">使用本地事务发布事件</h3>
 <p>一个实现原子化的方法是 <strong>使用本地事务来更新业务实体和事件列表，由一个独立进程来发布事件</strong>。具体来说，就是在存储业务实体状态的数据库中，使用一个事件表来充当消息队列。应用启动一个（本地）数据库事务，更新业务实体的状态，在事件表中插入一个事件，并提交该事务。一个独立的消息发布线程或进程查询该事件表，将事件发布到消息代理，并标注该事件为已发布。下图展示了这一设计。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c44e1ac64c7447ef90881446af34affd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271914459.webp" />   
     </p>
 <p>储蓄服务更新储蓄账户的余额，然后在事件表中插入“转账到理财账户”的事件。事件发布线程或进程在事件表中查询未发布的事件并发布，然后更新事件表，将该事件标记为已发布。</p>
 <p>这种方法的优点是：</p>
@@ -334,7 +334,7 @@ commit;
 <p>实现原子化的另一种方式是 <strong>由线程或者进程通过挖掘数据库事务或提交日志来发布事件</strong>。应用更新数据库，数据库的事务日志会记录这些变更。事务日志挖掘线程或进程读取这些日志，并把事件发布到消息代理。</p>
 <p>比如一个B2C的电商网站，就可以通过挖掘订单数据的更新日志，来进行事件发布。如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7f101775432744f8b9b0c625f1fb6e7d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271914273.webp" />   
     </p>
 <p>这一方法的范例是开源的 LinkedIn Databus 项目。Databus 挖掘 Oracle 事务日志并发布与之对应的事件，LinkedIn 则使用 Databus 维持各种来源的数据存储与记录系统一致。</p>
 <p>另一个范例则是 AWS DynamoDB 采用的流机制。AWS DynamoDB 是一个可管理的 NoSQL 数据库，其中每个 DynamoDB 流包括 DynamoDB 表在过去 24 小时之内的时序变化，包括创建、更新和删除操作。应用能够读取这些变更，将其作为事件发布。</p>
@@ -360,11 +360,11 @@ commit;
 <p>事件源 <strong>采用一种截然不同的、以事件为中心的方法来保存业务实体——不同于存储实体的当前状态，应用存储的是状态改变的事件序列</strong>。每当业务实体的状态改变，新事件就被附加到事件列表，并且应用可以通过事件回放来重构实体的当前状态。鉴于保存事件是一个单一的操作，因此本质上也是原子化的。</p>
 <p>要了解事件源如何运行，可以以储蓄服务为例。在传统的方法中，每次转账交易都会更新储蓄账户表的记录。而使用事件源的时候，储蓄服务以状态更改事件的方式存储用户的储蓄账户，每个事件都包含足够的数据去重建储蓄账户状态。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/87306be0253f4d8b8ac019173b55f3c2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271914938.webp" />   
     </p>
 <p>事件长期保存在事件仓库（Event Store），使用 API 添加和检索实体的事件。同时，事件仓库起到类似上文提及的消息代理的作用，通过 API 让服务订阅事件，将所有事件传达到所有感兴趣的订阅者。所以，事件仓库可以认为是数据库与消息代理的综合体，是事件源方法的支柱。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9a52d408a72a4dfbbb50794fb8da9d27.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271914465.webp" />   
     </p>
 <p>事件源方法有如下的优点：</p>
 <ul>
@@ -497,6 +497,10 @@ commit;
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -530,10 +534,6 @@ commit;
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -912,6 +912,8 @@ commit;
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

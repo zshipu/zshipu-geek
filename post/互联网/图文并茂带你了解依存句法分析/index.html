@@ -199,38 +199,38 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>知乎: <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.zhihu.com%2Fpeople%2Fgong-jun-min-74">https://www.zhihu.com/people/gong-jun-min-74</a></p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/67202be47e5947129738ce2d462e2c3f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271733127.webp" />   
     </p>
 <p><strong>前言：</strong> 上一期我们讲了成分句法分析，它相当于考虑广义上的嵌套关系的命名实体识别。这一次我们来说一说依存句法分析，它相当于文本结构化任务中，与命名实体识别经常在一起的实体关系抽取任务。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b6afabccdd38404fba233b3167b77122.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271733840.webp" />   
      成分句法分析关心的是，某两个相邻词汇能不能接在一起构成成分（广义的mention）。而依存句法分析关系的是，两个词汇之间的关系（entity relation）。依存解析不关心两个词汇是否一定要相邻。比如 book 和 flight 没有直接相连，但是 flight 是 book 的宾语，book 是 flight 的主语。我们会用一个从 book 指向 flight 的箭头来表示这种依存关系。箭头的起始我们叫作 head。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/49f540b8ab434eb28c5a769029b2a71e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271733547.webp" />   
      词汇和词汇之间的关系一览。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ed61585ca44843c69e022e116ec63542.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271733241.webp" />   
      更具体地说，依存解析做的是把一个句子，变成一个有向图。图中每一个节点是一个词汇，每一条边，是一种关系。除了根节点，每一个节点词汇都只有一个入度的边。但每个词汇都可以指向多个其它词汇。它是一个树状的结构。每一个词汇都有唯一的一条路径回溯到根节点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a1ed19579ea44f6f809928fde1f1b5de.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271733908.webp" />   
      我们要怎样得到这样一棵依存解析树呢？实际上丢给分类器两个词汇和其上下文，它会先通过一个二分类器，用来输出左边到右边的token之间有无依存关系，若有依存关系，则第二个分类器会输出其关系的类别。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8f4f3c2077db41839e2b5e9af2577b55.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271733590.webp" />   
      模型的输入是ROOT 加上 N 个词汇组成的句子。然后取出 (N+1)² 的单词对，一个个丢给分类器做关系分类。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bc210d9e31dd44d48060badebe5bf3b4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271733216.webp" />   
      文献上的具体做法是这样的。它会先把序列丢给一个 BiLSTM，把每个 token 的嵌入抽出来，再两两丢给一个FC层做分类，判断这两个 token，要不要连在一起，如果要连在一起，它们的关系是什么？论文会把抽出token的嵌入乘上一个FC做线性映射，再把两个 token 做类似注意力的操作，会得到一个数值，这个数值表示这两个 token 有多大概率要连在一起。其关系的标签也是类似的做法。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5f72d32b957b4f4b9c6c695ee006fa5f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271733070.webp" />   
      但如果我们把判断有无关系和判断关系是什么分开来处理，会容易出现矛盾的情况。比如 w1和w2之间有w1-&gt;w2的依存关系，而w2和w3又有w3-&gt;w2的依存关系。这样就会出现一个 token 入度是2的不可能情况。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a686160d237844dc83973f8bd3f2f5d1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271733665.webp" />   
      我们可以用类似最大生成树的算法来解。我们目标是从各种可能的候选树中，找出一棵路径置信度最大的树。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e054778f56ad48d698188d7413260590.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271733194.webp" />   
      类似的，我们也可以用基于转移的方式来做依存解析。这部分可以参照上一期的 成分句法分析。模型要根据 Buffer 和 Stack 的内容，来决定要采取哪一个 action。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8ec39c47d067416587191178e2e2693d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271733091.webp" />   
      这种基于转移的方法，最早在14年的时候就有人做过。</p>
 <p>这种基于转移的方法，最知名的是 SyntaxNet。它知名的原因在，它有一个好的动画展示转移生成的过程。16年的时�</p>
 
@@ -358,6 +358,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -391,10 +395,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -773,6 +773,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

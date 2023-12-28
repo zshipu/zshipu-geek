@@ -278,13 +278,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h3 id="kafka-拓扑结构">Kafka 拓扑结构</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3c849c6d2f734ae4b875b05b9fc401a0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281816154.png" />   
     </p>
 <p>如上图所示，一个典型的 Kafka 集群中包含若干 Producer（可以是 web 前端产生的 Page View，或者是服务器日志，系统 CPU、Memory 等），若干 broker（Kafka 支持水平扩展，一般 broker 数量越多，集群吞吐率越高），若干 Consumer Group，以及一个 <a href="https://zshipu.com/t?url=http%3A%2F%2Fzookeeper.apache.org%2F">Zookeeper</a> 集群。Kafka 通过 Zookeeper 管理集群配置，选举 leader，以及在 Consumer Group 发生变化时进行 rebalance。Producer 使用 push 模式将消息发布到 broker，Consumer 使用 pull 模式从 broker 订阅并消费消息。</p>
 <h3 id="topic--partition">Topic &amp; Partition</h3>
 <p>Topic 在逻辑上可以被认为是一个 queue，每条消费都必须指定它的 Topic，可以简单理解为必须指明把这条消息放进哪个 queue 里。为了使得 Kafka 的吞吐率可以线性提高，物理上把 Topic 分成一个或多个 Partition，每个 Partition 在物理上对应一个文件夹，该文件夹下存储这个 Partition 的所有消息和索引文件。若创建 topic1 和 topic2 两个 topic，且分别有 13 个和 19 个分区，则整个集群上会相应会生成共 32 个文件夹（本文所用集群共 8 个节点，此处 topic1 和 topic2 replication-factor 均为 1），如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4dcff9eaab2c4e7ebb98aa8a87691b9d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281816496.png" />   
     </p>
 <p>每个日志文件都是一个 log entrie 序列，每个 log entrie 包含一个 4 字节整型数值（值为 N+5），1 个字节的 &ldquo;magic value&rdquo;，4 个字节的 CRC 校验码，其后跟 N 个字节的消息体。每条消息都有一个当前 Partition 下唯一的 64 字节的 offset，它指明了这条消息的起始位置。磁盘上存储的消息格式如下：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">
@@ -294,11 +294,11 @@ crc ： 4 bytes
 payload ： n bytes
 </code></pre><p>这个 log entries 并非由一个文件构成，而是分成多个 segment，每个 segment 以该 segment 第一条消息的 offset 命名并以“.kafka”为后缀。另外会有一个索引文件，它标明了每个 segment 下包含的 log entry 的 offset 范围，如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8d01f5caa19547188a402afdd4e43592.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281816632.png" />   
     </p>
 <p>因为每条消息都被 append 到该 Partition 中，属于顺序写磁盘，因此效率非常高（经验证，顺序写磁盘效率比随机写内存还要高，这是 Kafka 高吞吐率的一个很重要的保证）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/162af6b66f834274aca6aef01102079a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281816013.png" />   
     </p>
 <p>对于传统的 message queue 而言，一般会删除已经被消费的消息，而 Kafka 集群会保留所有的消息，无论其被消费与否。当然，因为磁盘限制，不可能永久保留所有数据（实际上也没必要），因此 Kafka 提供两种策略删除旧数据。一是基于时间，二是基于 Partition 文件大小。例如可以通过配置 $KAFKA_HOME/config/server.properties，让 Kafka 删除一周前的数据，也可在 Partition 文件超过 1GB 时删除旧数据，配置如下所示。</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">
@@ -347,22 +347,22 @@ public void sendMessage() throws InterruptedException{
 }
 </code></pre><p>则 key 相同的消息会被发送并存储到同一个 partition 里，而且 key 的序号正好和 Partition 序号相同。（Partition 序号从 0 开始，本例中的 key 也从 0 开始）。下图所示是通过 Java 程序调用 Consumer 后打印出的消息列表。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cbc69af8de9442a6bbe7b784a3ccdc73.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281816328.png" />   
     </p>
 <h3 id="consumer-group">Consumer Group</h3>
 <p>（本节所有描述都是基于 Consumer hight level API 而非 low level API）。</p>
 <p>使用 Consumer high level API 时，同一 Topic 的一条消息只能被同一个 Consumer Group 内的一个 Consumer 消费，但多个 Consumer Group 可同时消费这一消息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b4d9e23bf20544c289ceb7bb892e050b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281816990.png" />   
     </p>
 <p>这是 Kafka 用来实现一个 Topic 消息的广播（发给所有的 Consumer）和单播（发给某一个 Consumer）的手段。一个 Topic 可以对应多个 Consumer Group。如果需要实现广播，只要每个 Consumer 有一个独立的 Group 就可以了。要实现单播只要所有的 Consumer 在同一个 Group 里。用 Consumer Group 还可以将 Consumer 进行自由的分组而不需要多次发送消息到不同的 Topic。</p>
 <p>实际上，Kafka 的设计理念之一就是同时提供离线处理和实时处理。根据这一特性，可以使用 Storm 这种实时流处理系统对消息进行实时在线处理，同时使用 Hadoop 这种批处理系统进行离线处理，还可以同时将数据实时备份到另一个数据中心，只需要保证这三个操作所使用的 Consumer 属于不同的 Consumer Group 即可。下图是 Kafka 在 Linkedin 的一种简化部署示意图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5a1d4427e1b74ab49de964d00e16c533.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281816648.png" />   
     </p>
 <p>下面这个例子更清晰地展示了 Kafka Consumer Group 的特性。首先创建一个 Topic (名为 topic1，包含 3 个 Partition)，然后创建一个属于 group1 的 Consumer 实例，并创建三个属于 group2 的 Consumer 实例，最后通过 Producer 向 topic1 发送 key 分别为 1，2，3 的消息。结果发现属于 group1 的 Consumer 收到了所有的这三条消息，同时 group2 中的 3 个 Consumer 分别收到了 key 为 1，2，3 的消息。如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bbb3d0ccc0e0441fa57ba8717e9d5dcb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281816115.png" />   
     </p>
 <h3 id="push-vs-pull">Push vs. Pull</h3>
 <p>作为一个消息系统，Kafka 遵循了传统的方式，选择由 Producer 向 broker push 消息并由 Consumer 从 broker pull 消息。一些 logging-centric system，比如 Facebook 的 <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2Ffacebookarchive%2Fscribe">Scribe</a> 和 Cloudera 的 <a href="https://zshipu.com/t?url=http%3A%2F%2Fflume.apache.org%2F">Flume</a>，采用 push 模式。事实上，push 模式和 pull 模式各有优劣。</p>
@@ -507,6 +507,10 @@ public void sendMessage() throws InterruptedException{
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -540,10 +544,6 @@ public void sendMessage() throws InterruptedException{
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -922,6 +922,8 @@ public void sendMessage() throws InterruptedException{
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

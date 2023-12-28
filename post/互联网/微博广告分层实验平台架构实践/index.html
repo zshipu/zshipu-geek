@@ -244,7 +244,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b0354238eaec4d4bb370074dd5127579.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271911744.webp" />   
     </p>
 <h1 id="流量划分类型">流量划分类型</h1>
 <p>流量的均匀划分是实验具有可对比性的前提。根据策略实验的需求和应用场景，系统提供以下不同均匀强度的流量划分类型：</p>
@@ -265,14 +265,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>对于涉及用户体验层面的实验，比如广告渲染的样式类型等，还会存在这样的需求，进行实验时，需要指定若干个用户命中指定的实验。这时，实验平台辅以白名单的方式，为流量划分类型提供补充。</p>
 <p>具体进行流量划分时，为了实现实验层之间流量划分的正交性，会将流量标识信息和实验层标识一起进行实验流量bucket划分， 实验层标识layer_id称为离散因子。如基于用户标识的流量划分：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3e2962bd3ef54d22b2b4360dded2b198.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271912390.webp" />   
     </p>
 <p>理论上，通过以上几种流量划分类型，可以实现对应均匀强度的流量划分；但是，总会出现一些情况，发现最终划分的流量可能是不均匀的，从而影响到实验的可对比性。</p>
 <p>对此，实验平台提供了一种流量划分的均匀性验证工具。基本思路为： 在广告系统中，用户是通过多维的画像向量（a,b,c,…,n）来进行刻画的，如果流量划分是均匀的，意味着用户的每一个画像向量分量在该流量划分条件下是均匀，更进一步，多个画像向量分量的组合在该流量划分条件下也是均匀的。通过进行用户画像向量单个分量和若干个画像向量分量的组合的均匀性验证，即可来反映该流量的划分的均匀性。</p>
 <h1 id="实验平台架构">实验平台架构</h1>
 <p>实验平台整体架构图如下:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b328a0dd360e43d493f8830a88a5b173.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271912035.webp" />   
     </p>
 <p>实验平台架构主要包括几个重要部分： 法拉第工作台，实验配置管理与决策中心，线上系统策略分发和控制，实验数据实时流和离线批处理，实验效果dashboard展示。下面对其中的关键特性予以介绍。</p>
 <h2 id="法拉第工作台">法拉第工作台</h2>
@@ -284,23 +284,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>实验环境供生产环境请求调用的模块称为法拉第实验CORE。具体地，在广告请求的接入层Router，由Router去请求法拉第CORE。对于线上环境来说，策略实验的细节是透明的。换句话说，线上生产环境实际上是不关心当前是否正在进行着实验，以及正在进行着哪些实验；线上生产环境只关心从实验策略控制中心获取到所有托管于实验平台的策略参数的决策值。</p>
 <p>法拉第实验CORE包括两种实现形式。一种是原生动态库.so形式，这种嵌入到宿主服务内部，可以节约I/O通信消耗；另一种是HTTP API形式，这种提供了跨语言方式的支持。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/81b3252ffbdb45f59306fc6c2600f642.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271912861.webp" />   
     </p>
 <p>在法拉第实验CORE内部，需要对本次请求标识信息和全局的实时实验配置信息，依次对每个托管于实验平台的策略参数进行决策。对于正在进行实验的策略参数，根据实验层中每层选用的实验分流类型和分流配比，确定实验的命中情况，从而确定策略参数取值；对于当前没有进行实验的策略参数，则取其默认策略参数值。 最终，全部的参数都确定其取值，形成k-v对，连同当前流量的实验命中信息情况，反馈给生产环境router模块。</p>
 <h1 id="实验数据实时流和离线批处理">实验数据实时流和离线批处理</h1>
 <p>请求的实验信息会以tag的形式记录在生产环境的请求日志中，形如： layer1_layer2_layer3_&hellip;_layerN。 请求日志会落地到广告数据总线系统，再由广告实时流系统进行消费、数据清洗、实验效果指标计算等工作。由于广告系统是多业务指标系统，包括售卖率，ECPM， CTR， ACPE，负反馈率、财务消耗计算等。广告实时流系统还需要日志的关联工作，比如关联广告互动日志，广告负反馈日志。实时流的计算的结果，会落地到druid系统，方便实验效果数据的快速检索和二度加工。实验效果实时指标数据计算延迟控制在一定的范围内（5分钟）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8be3bd3407934a44a0ffeef42e2f3398.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271912433.webp" />   
     </p>
 <p>由于实时日志可能会存在日志延迟、重复、丢失等情况，实时流系统的计算指标的准确性会难以保证。因此，对于非实时的指标数据，会启动离线批处理计算进行实验指标的校正，特别是对于非当天的历史实验指标数据，离线批处理会进行重新计算，形成最终准确的实验指标数据体系。</p>
 <h1 id="实验效果dashboard展示">实验效果dashboard展示</h1>
 <p>实验效果dashboard展示采用了量化分析的方式，精确衡量实验间的效果对比情况。</p>
 <p>实验间的对比，提供两种对比维度：一个是横向对比，这个进行同一个实验层中所有对比实验和基准实验间的各个指标的对比，以发现同时间区间各个实验的策略的对生产环境的影响；一个是纵向对比，是指定的对比实验和基准实验在时间纵向维度的效果对比，以发现该对比实验是否具体持续的效果提升/下降效果。实验效果跟踪横向对比图表和纵向对比图表展示效果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9004745f7cea4eaf826abfd9ccb44b7b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271912135.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9a637d89de994b5491c3525f6a77caad.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271912867.webp" />   
     </p>
 <p>有时，为了更加详尽地洞察实验效果指标的更多细节，需要对实验指标按某一个维度进行分解，达到更小观测粒度。比如，微博用户在不同的设备平台（PC，安卓平台，IOS平台）不一样的操作习惯和兴趣习惯，可以分平台粒度查看该对比实验在各个设备平台的实验指标变化情况；微博不同场景信息（关系信息流，兴趣信息流，热门搜索流等）的属性存在天然差别，部分策略在分场景流去分析时可能回更有意义；另外，也提供了分广告竞价类型的实验效果跟踪分析。</p>
 <h1 id="技术之外">技术之外</h1>
@@ -438,6 +438,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -471,10 +475,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -853,6 +853,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -206,23 +206,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>● 引入多个视频下发场景的样本数据，实现多场景样本融合；</p>
 <p>在优化排序模型的过程中，我们也调研了DeepFM/DeepCN等深度模型，这些模型无论从离线还是线上指标上，都没有明显优势。在优化Wide&amp;Deep模型的同时，更迫切的需求，是跳出原有的框架，寻找新的收益点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b3f415c38728469e95c602de1daeac24.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281618790.jpeg" />   
     </p>
 <p>引入GBM对submodel和高级特征等信号做集成学习，效果要优于单模型。从计算学习理论上看，Wide&amp;Deep是high-variance模型，容易过拟合(wd模型的训练比评估指标高7%)。GBM通过boosting的方式组合集成多个submodel和高级特征，更好地发挥各自不同的作用和优势互补，同时从整体上有更好的可解释性。</p>
 <p>上面是对信息流短视频排序模型演进的简要介绍；而其中的FM+GBM模型是我们团队比较有开创性的一项工作，下面稍微展开介绍。</p>
 <h2 id="模型"><strong>模型</strong></h2>
 <p>向量分解机（Factorization Machines, FM）是一种应用较为广泛的推荐模型，其发明者Steffen Rendle目前供职于Google。FM是对传统LR模型在处理高阶交互特征问题上的优化和改进：LR通过特征交叉的方式，将组合后的特征作为新特征加入到模型中，模型复杂度为O(N^2)（N为交互特征的数量，下同），记忆性较强而泛化性偏弱；FM通过将特征表征为隐向量，通过隐向量的相似度（內积）来表示特征关联这种方式来巧妙地提升模型的泛化能力；FM模型的复杂度为O(N*k)（k为隐向量维度超参）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7feb8e51caa5485dbc862e3e7de5dd23.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281618070.jpeg" />   
     </p>
 <p>以二阶交互的FM模型为例，其模型定义如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e48fc743c4ef4bbc9314458533c0c73a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281618153.jpeg" />   
     </p>
 <p>FM本质上是一个线性模型，不同项之间以线性组合的方式影响模型的输出。如果要考虑更加复杂的模型组合，计算复杂度将会非常高。尽管学术界也有像张量分解（Tensor Decomposition）这类处理高阶交互特征的模型；但在工业级，考虑到效果与性能的折衷，往往只考虑二阶的交互。但在此基础上，我们可以考虑引入非线性的模型来优化FM模型。</p>
 <p>在非线性模型中，树模型（CART/GBM/Random Forest）的应用非常广泛。我们引入GBM作为组合FM的非线性模型：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5ee992a043894de4af2df3dd02460033.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281618267.jpeg" />   
     </p>
 <h2 id="fmgbm一期纯gbm"><strong>FM+GBM一期（纯GBM）</strong></h2>
 <p>一期主要打通整个实验框架和数据流，并没有引入额外的信号。GBM使用的信号包括：wd/lr模型等sub-model打分、点击率/时长和体感特征，以及一些简单的匹配度特征。整个实验框架比较简单：精排流程新增GBMScorer，实现以下2个功能：</p>
@@ -370,6 +370,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -403,10 +407,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -785,6 +785,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

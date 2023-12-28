@@ -206,7 +206,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>本文将描述一种更复杂的机器学习系统的一般部署模式，这些系统是围绕基于嵌入的模型构建的。要理解为什么这些系统特别难以部署，我们首先要看看基于嵌入的模型是如何工作的。</p>
 <h1 id="基于嵌入的模型">基于嵌入的模型</h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e985b4fe01fe4eae88e65ff3609e206b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281906614.webp" />   
     </p>
 <p>图1，嵌入空间的图</p>
 <p>基于嵌入的模型正在所有机器学习领域中出现。它们最近在NLP领域掀起了一场革命，是大多数现代推荐系统的核心。谷歌使用嵌入来为搜索查询找到最佳结果，而Spotify使用嵌入来生成个性化的音乐推荐。</p>
@@ -218,7 +218,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>这正是这些系统难以部署的原因。每次模型更新时，都需要重新计算所有的嵌入。对于具有数百万条记录的系统，这可能需要很长时间，在此期间，系统的正常操作不能受到影响。即使在较小的系统中，这样的更新也不是即时的，如果管理不当，可能会导致不一致的结果。</p>
 <p>我们将研究两个基于嵌入的系统，搜索引擎和推荐系统，并定义一个适用于这两个系统的通用部署策略。虽然这些系统是相似的，但它们的差异足以为广泛的基于嵌入的系统提供泛化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/87eef035564147558a5e9f04624498d2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281906469.webp" />   
     </p>
 <p>图像2，搜索引擎（左），推荐系统（中间），泛化的嵌入系统（右）</p>
 <h2 id="搜索引擎">搜索引擎</h2>
@@ -244,7 +244,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>准备新模型部署的第一步是使用新模型重新计算系统中所有记录的嵌入，并将它们存储在新的数据存储中。最直接的方法是批量计算，与实际系统分离。重新计算所有嵌入后，新的嵌入生成器和服务器就可以部署到活动系统中。</p>
 <p>一种简单的方法可能是尝试同时部署新的嵌入生成器和服务器。但是，即使它们都可以完全同步地切换到新版本，这在实践中很难实现，这种方法仍然不足以保证一致的结果。来自旧的嵌入生成器的过时的嵌入可能已经在运行中，并且只有在更新之后才能到达嵌入服务器，从而导致相似度搜索不匹配。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cbb2447a490142a79278f7b5499c9989.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281906197.webp" />   
     </p>
 <p>图3，嵌入生成器和服务器的新版本都与旧版本部署在一起，因此应用程序可以轻松的切换</p>
 <p>很明显，为了确保连续性，从单个应用程序调用的角度来看，更新应该是原子性的。当应用程序从生成器获取嵌入时，它应该始终在具有匹配版本的嵌入服务器中执行相似度搜索。为了实现这一点，两个组件的新旧版本至少需要同时部署，在此期间，两个版本之间的切换可以在应用程序调用级别进行。之后，旧版本可以简单地删除。</p>
@@ -253,7 +253,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>现代系统通常比我们最初引入的简单系统更复杂，因为它们处理的数据需要不断更新。新文件需要添加到我们的搜索引擎，或现有的文件可能得到更新。新用户可以订阅我们的推荐系统或更新他们的资料，而新的物品可以定期添加到目录中。</p>
 <p>有些系统可能可以通过批量计算这些更改，并定期用新的数据存储替换旧的数据存储，但是这样做会在系统中出现新的或更新的记录之前增加很大的延迟。随着流更新成为越来越多系统的需求，需要一种流本地部署策略。为了得到这个策略，我们将首先重新引入我们的搜索引擎和推荐系统作为流式系统。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e7ff617f22354193b722d890f80f8ef8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281906896.webp" />   
     </p>
 <p>图4，加载流更新到搜索引擎。</p>
 <p>升级我们的搜索引擎流更新几乎是微不足道的，因为它已经托管了一个在线嵌入计算模型，可以在数据加载期间重用该模型进行流推理。系统中引入了一个新的数据加载器组件，用于编排传入的文档更新。它首先将传入文档嵌入在线模型，并将生成的嵌入写入嵌入数据存储。</p>
@@ -388,6 +388,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -421,10 +425,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -803,6 +803,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

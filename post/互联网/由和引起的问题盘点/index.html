@@ -227,11 +227,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="排查">排查</h1>
 <p>调整JVM参数，打印gc详细日志，其它JVM参数没有变化。在线下环境进行压测，观察到服务刚启动时，下图红框显示了fullgc的原因是 <code>Metadata GC Threshold</code>。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy42YWlxLmNvbS9maWxlLzIwMTkvMTAvZjYyODJlZTcxNGZhNDkwZjlkNmYwZmFkYzI5MDUyMmEtaW1hZ2UucG5n?x-oss-process=image/format,png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272253686.png" />   
     </p>
 <p>因为使用ParallelOld收集器即使加上参数也无法打印survivor区的对象年龄分布，只能显示desired survivor size。所以启用CMS收集器进行压测成功打印了age分布信息</p>
 <p>
-        <img class="mx-auto" alt="" src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy42YWlxLmNvbS9maWxlLzIwMTkvMTAvNDYxNDhmZGQxNjhhNDhhNWEyOWNhZDU2NjAyMTNhNjAtaW1hZ2UucG5n?x-oss-process=image/format,png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272253353.png" />   
     </p>
 <p>登上线上机器查看当前进程里对象占用内存的前20排名</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">
@@ -276,19 +276,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
  17:  59156 2366240 java.util.LinkedHashMap$Entry
 </code></pre><p>dump内存后进行分析，在dominator_tree中可以看到大对象Finalizer的Retained Heap列是指该对象GC之后所能回收到内存的总和，可以看出由Finalizer关联的引用所占的空间最多。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/11/438775b946e5471fb87d3c3bbf7f172f-image.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272253002.png" />   
     </p>
 <p>在histogram视图中可以看到占用内存前几高的对象都是和socket相关的</p>
 <p>
-        <img class="mx-auto" alt="" src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy42YWlxLmNvbS9maWxlLzIwMTkvMTAvOWQ0ZmY4MGY3NWFmNDUzMmI4YjFjYjYxOWJmYmFlNTAtaW1hZ2UucG5n?x-oss-process=image/format,png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272253238.png" />   
     </p>
 <p>查看dump内存中的不可达对象中，org.apache.commons.pool.impl.CursorableLinkedList$Listable对象非常多。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy42YWlxLmNvbS9maWxlLzIwMTkvMTAvODgyN2QzMDNmYzQyNGZlMmE3YWFiZWRhMDAzMjQ2ZWItaW1hZ2UucG5n?x-oss-process=image/format,png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272253190.png" />   
     </p>
 <p>在支配树中查看该对象的引用关系发现Listable中存的value是GenericKeyedObjectPool的内部类ObjectTimestampPair，ObjectTimestampPair中存的value指向的是thrift通信所用的TSocket， TSocket中封装着jdk的java.net.Socket。Socket中使用的SocketImpl的实现是SocksSocketImpl，在SocksSocketImpl的父类AbstractPlainSocketImpl中，重写了finalize()方法，从注释可以看出来，该方法的作用是：为了防止用户忘记关闭资源，当SocksSocketImpl被回收时，finalize被调用执行清理工作，SocksSocketImpl的close()方法体中也是直接调用AbstractPlainSocketImpl的close()。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy42YWlxLmNvbS9maWxlLzIwMTkvMTAvYzMwN2YzZTQ0YzEyNGNmZjliNjgxZDYzYzhjNjYyZWEtaW1hZ2UucG5n?x-oss-process=image/format,png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272253757.png" />   
     </p>
 <h1 id="原因">原因</h1>
 <h2 id="启动时fullgc">启动时fullgc</h2>
@@ -300,7 +300,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Desired survivor size = (survivor_capacity _TargetSurvivorRatio) / 100 _sizeof(a pointer)：survivor_capacity（一个survivor space的大小）乘以TargetSurvivorRatio</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy42YWlxLmNvbS9maWxlLzIwMTkvMTAvM2FjZDVkZDczYjc1NDRhOWE5MDViN2YxYThlZGI3MDEtaW1hZ2UucG5n?x-oss-process=image/format,png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272253346.png" />   
     </p>
 <p>正常默认desired survivor size 是一个survivor space的50%，线上默认没有启用-XX: +UseAdaptiveSizePolicy，参数意味着eden区和survivor区的比例是动态调整的，从gc日志也能观察到某时刻survivor区可能非常小，很容易导致survivor区溢出，survivor之所以动态调整是因为希望系统尽可能的满足系统吞吐量。</p>
 <p>如果所有age的survivor space对象的大小如果超过Desired survivor size，则重新计算threshold，以age和MaxTenuringThreshold的最小值为准，否则以MaxTenuringThreshold为准，即为了满足设定的survivor区的目标存活率，JVM会自动调整MaxTenuringThreshold。比如年龄从1-7的对象总和已经&gt;Desired survivor size，那么TenuringThreshold 可能降低为6，生怕survivor区溢出。那么把survivor区适当调大，TenuringThreshold值就可能到达15，长期存活对象就越有可能在新生代被回收。</p>
@@ -333,19 +333,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>6. 阻塞的业务线程返回 进行处理</p>
 <h3 id="finalizer原理">Finalizer原理</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy42YWlxLmNvbS9maWxlLzIwMTkvMTAvZTBmN2RjMjlkZWIzNGVlNjhmZTA2NjY0YWU3YTkxODktaW1hZ2UucG5n?x-oss-process=image/format,png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272253176.png" />   
     </p>
 <p>因为SocksSocketImpl 对象实现了finalize方法，JVM在java 对象创建过程中识别出其实现了finalize方法，会将其封装成Finalizer对象，Finalizer是一个双向链表，并添加到Finalizer链表中，这样有Finalizer引用存在，SocksSocketImpl 对象即使已经无用也不会被回收。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy42YWlxLmNvbS9maWxlLzIwMTkvMTAvYzY1MmNhM2E3NDJiNDcxZGI1YTIzNzM1ZDRkOWY1NzUtaW1hZ2UucG5n?x-oss-process=image/format,png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272253688.png" />   
     </p>
 <p>Finalizer的祖父类Refrence有一个ReferenceHandler线程，来完成将Finalizer新添加的对象加入到RefrenceQueue中，该线程具体执行时机是在 <code>pending</code> 字段被设置的时候，即会在GC线程进行第一次标记的时候，接着RefrenceQueue在enquery方法中通过 <code>notifyAll</code> 方法唤醒 <code>FinalizerThread</code> 线程执行后续逻辑， <code>FinalizerThread</code> 是在 <code>Finalizer</code> 类的静态代码块中会创建一个 <code>FinalizerThread</code> 类型的守护线程，但是这个线程的优先级比较低，意味着在cpu吃紧的时候可能会抢占不到资源执行。实现如下</p>
 <p>
-        <img class="mx-auto" alt="" src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy42YWlxLmNvbS9maWxlLzIwMTkvMTAvYzc0OWE2Nzg1ZjdhNGQ3ZDlkM2I5NzA1NDFmMWQxZTgtaW1hZ2UucG5n?x-oss-process=image/format,png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272253213.png" />   
     </p>
 <p><code>FinalizerThread</code> 线程干的事情就是执行对象实现的finalize方法，然后将Finalizer对象从Finalizer链表中删除</p>
 <p>
-        <img class="mx-auto" alt="" src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy42YWlxLmNvbS9maWxlLzIwMTkvMTAvMGNkMDJmMzcyNGFlNDg5NjliYTE3MDliMzcwNDg0MjctaW1hZ2UucG5n?x-oss-process=image/format,png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272253669.png" />   
     </p>
 <p>意味着如果在执行finalize方法时，对象没有再次赋给强引用，现在也没有了Finalizer引用，那么在下一次GC时，便会被真正的回收，即实现finalize方法的对象的回收至少需要两次gc，而 <code>FinalizerThread</code> 执行优先级非常低，</p>
 <p><code>SocksSocketImpl</code> 的父类重写了 <code>finalize</code> 方法，这么做主要是为了确保在用户忘记手动关闭 <code>socket</code> 连接的情况下，在该对象被回收时能够自动关闭 <code>socket</code> 来释放一些资源，但是在开发过程中，真的忘记手动调用了 <code>close</code> 方法，那么这些 <code>socket</code> 对象可能会因为 <code>FinalizeThread</code> 线程迟迟没有执行到这些对象的 <code>finalize</code> 方法，而导致一直占用某些资源，造成内存泄露。</p>
@@ -487,6 +487,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -520,10 +524,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -902,6 +902,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

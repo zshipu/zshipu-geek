@@ -209,7 +209,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/974f08ac3001491d8ecdb92b03d2558f.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271917268.jpeg" />   
     </p>
 <h2 id="1背景">1.背景</h2>
 <h3 id="11端上智能">1.1.端上智能</h3>
@@ -219,13 +219,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="12上下滑推荐">1.2.上下滑推荐</h3>
 <p>上下滑推荐，相对于传统的 Feeds 流推荐，不再向用户展示 Feeds 封面列表，每一屏直接展示一个 Feeds 详情页内容，用户不能预知接下去展示的 Feeds(见图一)。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a509f49ef8af4e7bacda21981559c344.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271917229.png" />   
     </p>
 <p>图一: 封面瀑布流与上下滑</p>
 <p>对于上下滑这种推荐形式，很自然的想到，每一屏消费一个视频时，用户都会产生显式/隐式的反馈，推荐系统根据这些实时反馈可以及时修正用户偏好，下一屏即向用户推荐更好的作品。</p>
 <p>遗憾的是，上下滑的推荐形式并不支持手机终端每屏都请求云端重新生成一个推荐结果。客户端每次请求服务端，实际会下发 PageSize(PageSize &raquo; 1)个 Feeds，等用户浏览完下发的 PageSize 个 Feeds 后，才会继续触发服务端推荐系统，重新计算并下发 PageSize 个 Feeds(见图二)。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8f60355d76f24e5a971b219eee96d782.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271917480.png" />   
     </p>
 <p>图二: 上下滑分页请求</p>
 <p>这是因为：</p>
@@ -236,14 +236,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>上下滑推荐这种全新的产品形式，使我们面临一个高频交互的推荐场景，暴露了云计算架构推荐系统的缺陷。我们基于端上智能技术设计并实现了 KIR(Kwai Instant Recommend)框架，使得智能手机终端具备 DNN 推理能力，用户每浏览一个 Feed，就能触发终端对未展示的候选 Feeds 集合进行重排序，实时修正用户偏好，向用户推荐更好的 Feed。</p>
 <p>相对于 EdgeRec[1, 2]的工作，我们面临一个极高的 Baseline，服务端 PageSize 已在客户端流畅滑动与服务端请求压力允许的情况下，调整至一个极小值，使得端上智能即时推荐的潜在收益空间被压缩，对端上智能推荐系统与模型设计提出了更高的要求。另外，上下滑推荐作为一个高频交互的推荐场景，对即时推荐的需求也超过交互行为较稀疏的封面瀑布流推荐模式，端上智能是更适合上下滑推荐场景的技术。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5d48ec45172c48f7ab657eb4237420ff.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271917456.png" />   
     </p>
 <p>图三: KIR 推荐流程</p>
 <p>KIR 上线后，对用户互动指标有非常显著的收益，更是取得了 APP 时长+1%的显著提升。</p>
 <h2 id="2kir-实时排序">2.KIR 实时排序</h2>
 <h3 id="21-系统架构">2.1 系统架构</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0abb19169b764f61a68022a0ee75b039.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271917604.png" />   
     </p>
 <p>图四: KIR 系统架构</p>
 <p>因为端上的计算资源受限，无法存储完整的超大规模参数模型，我们因此将训练的模型参数拆分成了 Dense Network 与 Sparse Feature Embedding 分别部署用于 DNN 计算推理：</p>
@@ -254,7 +254,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="23-算法模型">2.3 算法模型</h3>
 <p>在快手极速版/精选模式等短视频上下滑场景中，因为用户无法预知接下来的 Feed 结果，所以用户对于已展示视频的反馈行为将会帮助我们更好的捕捉用户的实时兴趣变化。因此在 KIR 特征体系中，除了一般意义的用户侧与视频侧的类目特征与统计特征外，用户的实时反馈特征是重要的组成部分；这不仅包括点赞/关注/转发等直接交互行为，对于部分交互较少的用户，KIR 也可以通过完播/短播/长播等特征抽象用户的隐式反馈；此外，由于快手服务端精排模型已经较好的建模用户对于视频的点赞率/关注率/转发率等数十个目标，在终端再次对这些目标建模会带来巨大的计算开销，所以复用这部分服务端预估值作为特征会是一个更好的选择；同时，用户的实时网络环境，视频预加载进度都会直接影响用户浏览体验，因此在 KIR 特征体系中也需要考虑这部分特征；总体而言，KIR 系统的特征体系包括以下几个方面: (1) 用户特征 ，主要包括点赞数等统计特征以及用户侧序列特征等; (2) 视频特征，主要包括类目特征等; (3) 用户实时反馈特征; (4) 视频服务端预估特征; (5) 用户设备特征，主要包括设备网络状况/解码方式等;</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2112eba712f24c088ef5bd7fd30c507a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271917861.jpeg" />   
     </p>
 <p>表一: KIR 特征体系</p>
 <p>受到以 Transformer 结构为代表的用户序列建模在工业届大量落地的启发，KIR 重排序模型在 DeepFM 模型基础上，同样使用 Mult-Head Self-Attention 结构构建高阶特征，探寻最优的下一刷视频；为了显示的引入时序特征，KIR 重排序模型同样加入了时间戳特征以及 Index 特征。基于 KIR 的特征体系，特别是每个视频不仅有 ID 类的类目属性特征，还包括服务端的预估特征，因此用户的实时反馈行为也应该对这两类特征分开建模，对于视频的 ID 类特征，用户的实时反馈体现在用户对于不同 ID 特征的偏好，而对于视频的服务端预估特征而言，用户的实时反馈可以理解为对预估值的一种修正；因此 KIR 模型通过两组独立 Transformer 结构分别抽象用户反馈对于这两部分特征的表征，并</p>
@@ -385,6 +385,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -418,10 +422,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -800,6 +800,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

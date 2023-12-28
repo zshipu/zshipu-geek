@@ -227,7 +227,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="11系统功能"><strong>1.1系统功能</strong></h2>
 <p>Qunar 机票作为 Qunar 的核心业务之一，每天都有成千上万用户在 Qunar 的平台上完成搜索预定生单等操作， Qunar 也一如既往地为用户提供优质的出行体验和保证。就像每架飞机的座位数都是有固定数量的，在机票业务中，有一类特殊的产品是通过库存进行管理的，这里的一个库存就对应飞机上的一个座位，其业务模型大致如下:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/aac0fb9f189e4f658781f056782c45ee.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271648627.webp" />   
     </p>
 <p><strong>上图中，左侧部分是后台供应商能在系统中做的操作：</strong></p>
 <ul>
@@ -264,7 +264,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="12搜索场景问题分分析"><strong>1.2搜索场景问题分分析</strong></h2>
 <p>库存搜索服务为了保证库存的最大曝光，对接非常多的渠道，如下图:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/733299d6190e4926939718b96f383397.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271648228.webp" />   
     </p>
 <p>这些渠道具有两个特点：</p>
 <ul>
@@ -291,7 +291,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="211-产品目录化"><strong>2.1.1 产品目录化</strong></h3>
 <p>产品目录化具体是指我们定义了一个我们当前售卖库存对应的航线航班列表，并通过接口把这套列表提供给我们的接入渠道，这样我们的接入渠道可以根据当前收到的上游请求参数来决定是否请求我们的库存搜索。即，把常规搜索场景下用户要什么的问题转换为库存系统有什么的问题，把原来的的过滤计算消耗转移到渠道层，减轻库存系统的计算压力。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d15f78609dd0405fb8577917991fe2c5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271648861.webp" />   
     </p>
 <p>具体来讲，在产品目录化之前，渠道会把用户的搜索请求转发给库存系统，比如北京-上海，2021-08-20起飞，库存系统收到请求之后搜索自己的库存报价有没有满足该条件的，如果有返回给渠道调用。这样形成的结果是，每个用户的请求渠道都要来查询库存系统有没有对应的报价，而库存系统并不能覆盖所有的用户请求，所以对于库存系统当前并不能覆盖的航线，这样的请求是无用的，可以避免的。产品目录化就是库存系统主动告知渠道当前库存系统拥有的航线和航班数据，比如库存系统提供航线航班目录给渠道查询，返回类似的结果北京-上海/CA1234/2021-08-20/2021-08/22，以这样的格式告知渠道库存的产品目录，这样渠道在接收到用户请求之后，可以根据这份产品目录来进行请求过滤，如果目录并不满足本次用户请求，则无需再请求库存系统，这样就达到了减少无效请求的目的。</p>
 <p>产品目录化带来的收益是很明显的，对于个别航线覆盖度低的渠道，请求 QPS 从 K 级别降至了个位数级别。但即使这样，整体的请求量仍然很大，因为并不是所有渠道都支持产品目录化以及渠道自身过滤的这种模式。探索还需要继续。</p>
@@ -300,7 +300,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>另一方面，对于接入渠道中没有缓存能力的部分，我们在设计 Open API 时专门定义了航线航班报价变动的通知 SPI ，这样对于有缓存管理能力的接入方，可以完善自己的缓存闭环，减少对库存搜索接口的实时请求。</p>
 <p>**
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7e60c9d3687f4c5cb86cb83c8cacc186.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271648427.webp" />   
      **</p>
 <h2 id="22-提升缓存命中率"><strong>2.2 提升缓存命中率</strong></h2>
 <p>缓存命中率是在使用基于缓存的搜索解决方案时非常重要的指标。缓存会带来性能的提升，降低计算资源和 DB 的压力，但如果缓存命中率提不上去仍然有大量请求需要实时搜索，那么上述的优势会打折扣，因此在提升缓存命中率方面，库存搜索也做了方案的探索和落地。</p>
@@ -315,14 +315,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>同时，在库存搜索场景中，库存价格计算依赖的外部因素变化是不可感知的，常规的缓存闭环方案在此场景下是不可行的。</p>
 <p>因此，库存搜索设计了请求重放机制来解决这个问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4c494f1b0b234d9bb805ed0a148737ea.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271648960.webp" />   
     </p>
 <p>如上图所示，对于库存搜索的实时请求，库存搜索系统会将其加入到请求队列中进行管理，通过请求重放能力来按照一定的频率重放这些请求，保持对应的缓存维持一定的热度，这样在分散的真实请求过来时，缓存的实效性就有了保证。同时，对于不可控的外部因素变化，通过调节重放频率可以降低外部变化对库存报价产生影响的延迟。</p>
 <p>但是有一点要注意，不是所有的缓存场景都适合用请求重放来打热缓存，比如对于有查定比要求的场景，重放的请求实际上会虚耗查询资源。</p>
 <h3 id="222-缓存隔离"><strong>2.2.2 缓存隔离</strong></h3>
 <p>缓存隔离是库存系统在提升命中率上的另一个手段。上文提到，多渠道的库存报价有共性计算的部分，这部分具体是指库存成本价，库存可售数这些和渠道特性无关的基础属性。通过将这部分基础属性隔离到单独的缓存，并完善闭环，可以保证涉及到库存基础属性的查询100%命中缓存，间接提升渠道搜索过程中的性能，减少实时查询。同时，将渠道特性相关的其它类型缓存比如市场价格按照缓存更新因素的种类进行缓存隔离，每部分缓存根据自身的闭环特性单独进行闭环管理，将每部分缓存的命中率都提升到最高。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1c20e8c88ed94122960dbe94d58a1380.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271649602.webp" />   
     </p>
 <h2 id="23-提升缓存更新效率"><strong>2.3 提升缓存更新效率</strong></h2>
 <p>在完成上文提到的请求重放的方案之后，摆在库存搜索面前的问题是如何提升重放驱动的缓存，同时降低重放队列的存储资源占用，因为库存搜索对接的渠道非常多，因此请求重放队列几乎覆盖了 C 端全部的用户请求。</p>
@@ -333,7 +333,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>完善闭环</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fd18caa96754485f99b6ac7ef7a9c52b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271649274.webp" />   
     </p>
 <h3 id="231-冷热隔离"><strong>2.3.1 冷热隔离</strong></h3>
 <p>冷热隔离如上图所示，将重放队列中的请求按照当前库存有无报价进行拆分，有报价队列和无报价队列以不同的频率进行重放，同时在资源调度方案，优先处理有报价队列中的重放请求。这样可以实现以较小的资源驱动有效报价缓存保持一定的新鲜度，同时又兼顾无报价缓存不会被穿透。</p>
@@ -344,7 +344,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="24-交换空间"><strong>2.4 交换空间</strong></h2>
 <p>对于请求重放队列的存储空间占用，库存系统参考 JVM 的 copy 垃圾回收算法的设计，对于每个渠道的请求队列都设计了两个 work shard 作为队列交换空间。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8ceca8672bc3435fbd28c7b7baaf6cc9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271649825.webp" />   
     </p>
 <p>在任意时刻，会有一个 work shard 处于工作状态，保存搜索请求。系统定义了几个检查点：</p>
 <ul>
@@ -365,18 +365,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>缓存搜索直接响应</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b175ef4541a44e4e90e059615218948a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271649331.webp" />   
     </p>
 <p>实现方案上我们采用的是 Spring Web MVC On Servlet 技术栈，运行原理简单描述如下:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1889093022534f9d9f6b2aa402cf493a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271649044.webp" />   
     </p>
 <p>通过 async context 进行跨线程的上下文传递，同时分离 tomcat 线程池和工作线程池，tomcat 线程完成接受 request/ 提交 task 的职责后就结束本次请求的处理，可以继续处理新建来的请求。而真正的任务执行交由工作线程池进行。这个特性依赖 Servlet3.0 的异步特性为基础，如果要使用的话需要注意。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d96d309eb04e457fb2eab5aea597233b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271649568.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ba68ae39785e40d782825e7e39f04eb0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271649413.webp" />   
     </p>
 <p>上面代码片段是具体的编码实现：</p>
 <ol>
@@ -512,6 +512,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -545,10 +549,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -927,6 +927,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

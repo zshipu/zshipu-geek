@@ -208,7 +208,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">    Item Embedding=Central Embedding + Residual embedding
 </code></pre><p>因为 Central Embedding 共享，是相同的，那么只要约束残差 Residual Embedding 的数值变动范围能在一个较小的范围内，自然就能保证达成上述目标，以此来泛化模型性能。下图比较形象地展示了这一做法：
 
-        <img class="mx-auto" alt="" src="http://img.6aiq.com/image-a235d1315038421b9db57f72f10f9459.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271942909.webp" />   
     </p>
 <p>由图中可看出，如果采取这种约束方式，与不做约束相比，可以保证相近兴趣 Item Embedding 形成的类簇具备较小的半径，由此增加模型泛化性能。</p>
 <p>但是，我们无法事先获知某个 Item 隶属于哪个用户兴趣，如何获得 Item 与簇中心 Central Embedding 的隶属关系呢？Res-embedding 提出在用户共访 Item 图上的三种具体方法，包括一种 GNN 的方法，这里不展开讲了，感兴趣的同学可以参考原文。</p>
@@ -217,7 +217,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们先设想一个比较完美的特征 Embedding 分配方案，如果它存在，应该是这个样子的：对于高频出现的特征，能够分配给它较长的 Embedding 大小，使其能更充分地编码和表达信息。而对于低频的特征，则希望分配较短的 Embedding，因为对于低频特征，它在训练数据中出现次数少，如果分配了较长的 Embedding，更容易出现过拟合现象，影响模型泛化性能。而对于那些极低频的特征，基本学不了什么知识，反而会带来各种噪音，那么我们可以不分配或者让它们共享一个公有 Embedding 即可。</p>
 <p>上面说的设想，只是一个期望，那么具体怎么做才能达到这点呢？谷歌在 Neural Input Search for Large Scale Recommendation Models（NIS）文中提出用强化学习来实施这一目标。具体而言，不同的 Embedding 分配方案，形成了搜索空间，它使用 ENAS 来在搜索空间中找到最佳的 Embedding 分配方案。细节不表，只说思路，下图展示的例子基本能够说明问题：</p>
 <p>
-        <img class="mx-auto" alt="" src="http://img.6aiq.com/image-1569644976ba4011a856c2e9e13a9c06.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271942012.webp" />   
     </p>
 <p>常规的特征 Embedding，一般是给所有特征一个固定大小的 Embedding Size，而为了能够更灵活地表达不同的 Embedding 分配方案，NIS 把特征 Embedding 二维空间切割成 Block，如图中 (a) 所示，纵坐标是特征维度，比如共有 10 Million 个特征，则划成 1M/2M/2M/2M/3M 几段，而横坐标则是 Embedding Size 维度，最长允许 256 bit，按照 64 bit 为单位，划分成 4 段。这样就形成了 Embedding 的二维 Block 结构，不同的 Block 组成，就构成了不同的 Embedding 分配方案。</p>
 <p>常规的 Embedding 方案，一般 Embedding Size 是个超参，需要手工去尝试，而 NIS 也可以提供最佳 Embedding Size 的搜索，就是图中 (b) 所示，从左上角作为起点，划出各种红色矩形框，不同大小的矩形框就是不同的分配方案。纵坐标里红框外的特征共享同一个 Embedding，等价于没有给它分配，而分配了 Embedding 的所有特征，Embedding Size 是相同大小的。所以对于这种情况，ENAS 的决策点在于：哪些特征值得分配空间，以及最优的 Embedding Size 应该是多大。</p>
@@ -348,6 +348,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -381,10 +385,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -763,6 +763,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

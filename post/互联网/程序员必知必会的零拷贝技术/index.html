@@ -208,7 +208,7 @@ Socket.send(socket, buf, len);
 <p>即使是使用DMA传输的硬件支持，这种方法也效率很低。首先，内核将使用DMA将磁盘中的数据加载到其自己的内核缓冲区中，除非在先前访问同一文件之后，该数据仍被缓存在内核缓冲区中。这样传输不需要太多的CPU工作，CPU只需要进行缓冲区管理和DMA创建和处理。Linux 操作系统会根据 read() 系统调用指定的应用程序地址空间的地址，把这块数据存放到请求这块数据的应用程序的地址空间中去，在接下来的处理过程中，操作系统需要将数据再一次从用户应用程序地址空间的缓冲区拷贝到与网络堆栈相关的内核缓冲区中去，这个过程也是需要占用 CPU 的。数据拷贝操作结束以后，数据会被打包，然后发送到网络接口卡上去。在数据传输的过程中，应用程序可以先返回进而执行其他的操作。之后，在调用 write() 系统调用的时候，用户应用程序缓冲区中的数据内容可以被安全的丢弃或者更改，因为操作系统已经在内核缓冲区中保留了一份数据拷贝，当数据被成功传送到硬件上之后，这份数据拷贝就可以被丢弃。</p>
 <p>所以我们会发现这个过程涉及到了3次上下文切换，和4次数据拷贝的过程:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/12/38c5e8ad65324416ae85bb02cf72fb47-image.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281620551.png" />   
     </p>
 <h2 id="利用mmap">利用mmap()</h2>
 <p>在 Linux 中，减少拷贝次数的一种方法是调用 mmap() 来代替调用 read，比如：</p>
@@ -216,7 +216,7 @@ Socket.send(socket, buf, len);
 write(socket, tmp_buf, len);
 </code></pre><p>首先，应用程序调用了 mmap() 之后，数据会先通过 DMA 拷贝到操作系统内核的缓冲区中去。接着，应用程序跟操作系统共享这个缓冲区，这样，操作系统内核和应用程序存储空间就不需要再进行任何的数据拷贝操作。应用程序调用了 write() 之后，操作系统内核将数据从原来的内核缓冲区中拷贝到与 socket 相关的内核缓冲区中。接下来，数据从内核 socket 缓冲区拷贝到协议引擎中去，这是第三次数据拷贝操作</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/12/a91db13027084677a0926ae1fb69f476-image.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281620706.png" />   
     </p>
 <p>尽管 <code>mmap()</code> 可以减少一次 I/O 拷贝，但由于 <code>mmap()</code> 的实现很复杂，调用 <code>mmap()</code> 将会带来额外的开销，因此在一些情况下，没有使用 <code>mmap()</code> 的必要：</p>
 <ul>
@@ -353,6 +353,10 @@ write(socket, tmp_buf, len);
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -386,10 +390,6 @@ write(socket, tmp_buf, len);
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -768,6 +768,8 @@ write(socket, tmp_buf, len);
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

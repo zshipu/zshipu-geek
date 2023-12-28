@@ -216,7 +216,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>转载自： <a href="https://zshipu.com/t?url=https%3A%2F%2Finfoq.cn%2Farticle%2FCdYJLgPbEF-MqMIE9Cf7">https://infoq.cn/article/CdYJLgPbEF-MqMIE9Cf7</a></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0dfc574ba92f4c35a78405a78013080b.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271636025.jpeg" />   
     </p>
 <blockquote>
 <p>近日，前谷歌开发者、现 Dgraph 创始人 Manish Rai Jain 撰文揭秘了谷歌内部在知识图谱领域的探索和发展。他以一个开发和技术前驱者的视角论述了“为什么谷歌需要一个知识图谱系统”，并详细披露了知识图谱在谷歌的探索尝试的历程。虽然由于种种原因，他当时的知识图谱项目最终被放弃，但整个发展探索历程不失为一个非常棒的知识图谱技术学习材料和项目管理经典案例。AI 前线对这篇文章进行了编译，希望能对大家有所帮助。</p>
@@ -248,7 +248,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="基于搜索索引的图系统">基于搜索索引的图系统</h2>
 <p>为了确定某些实体是否是连接在一起的，以及是如何连接在一起的，我需要一个图系统。知识图谱数据使用了三元组的格式，即每个事实通过三个部分来表示，主语（实体）、谓词（关系）和宾语（另一个实体）。查询必须是 [S P]→[O]、[P O]→[S]，有时候是 [S O]→[P]。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d5b5b833252e4d05acb6529b8dc96588.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271636729.png" />   
     </p>
 <p>我使用了谷歌的搜索索引系统，为每个三元组分配了一个 docid，并构建了三个索引，分别为 S、P 和 O。另外，索引允许附带附件，所以我附上了每个实体的类型信息。</p>
 <blockquote>
@@ -256,7 +256,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>现在，为了确定关系，我会执行一些查询，看看会产生哪些结果。[french] 和 [author] 会产生什么结果吗？选择这些结果，并看看它们如何与 [books] 连接在一起。这样会生成多个机器解释。例如，当你查询 [tom hanks movies] 时，它会生成 [movies directed by tom hanks]、[movies starring tom hanks]、[movies produced by tom hanks] 这样的解释，并自动拒绝像 [movies named tom hanks] 这样的解释。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c5a02569091d406d8ba91dacf8409e0d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271636680.png" />   
     </p>
 <p>对于每一个解释，它将生成一个结果列表——图中的有效实体——并且还将返回实体的类型（存在于附件中）。这个功能非常强大，因为在了解了结果的类型后，就可以进行过滤、排序或进一步扩展。对于电影类型的结果，你可以按照发行年份、电影的长度（短片、长片）、语言、获奖情况等对电影进行排序。</p>
 <p>这个项目看起来很智能，我们（DH 作为这个项目的知识图谱专家）将它叫作 Cerebro，与《X 战警》中出现的设备同名。</p>
@@ -275,7 +275,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>上面的查询是一个单级连接。如果数据库外部的应用程序正在执行这个连接，它将先执行一个查询，然后再执行多个查询（每个结果一个查询），找出每个人都吃些什么，然后挑选出吃寿司的人。</p>
 <p>第二步存在扇出（fan-out）问题。如果第一步有一百万个结果（基于旧金山人口），那么第二步需要将每个结果放入查询中，找出他们的饮食习惯，然后进行过滤。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a4e2c5c8fd5e444b90c145eae8499102.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637807.png" />   
     </p>
 <p>分布式系统工程师通常会通过广播来解决这个问题。他们根据分片函数将结果分成多个批次，然后查询集群中的每一台服务器。他们可以通过这种方式实现连接，但会导致严重的查询延迟。</p>
 <p>在分布式系统中使用广播并不是个好主意。谷歌大牛 Jeff Dean 在他的“Achieving Rapid Response Times in Large Online Services”演讲（视频： <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D1-3Ahy7Fxsc">https://www.youtube.com/watch?v=1-3Ahy7Fxsc</a>，幻灯片： <a href="https://zshipu.com/t?url=https%3A%2F%2Fstatic.googleusercontent.com%2Fmedia%2Fresearch.google.com%2Fen%2F%2Fpubs%2Farchive%2F44875.pdf">https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/44875.pdf</a>）中很好地解释了这个问题。查询的总延迟总是大于最慢组件的延迟。单台机器的一丁点延迟会随着机器数量的增多而戏剧性地增加查询总延迟。</p>
@@ -290,7 +290,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Dgraph 以一种非常独特的方式对图数据进行分片，可以在单台机器上执行连接。回到 SPO 这个问题上，Dgraph 的每个实例都将保存与该实例中的每个谓词相对应的所有主语和宾语。Dgraph 实例将保存多个谓词和完整的谓语。</p>
 <p>这样就可以执行任意深度的连接，同时避免了扇出广播问题。以 [people in SF who eat sushi] 为例，不管集群大小是怎样的，这个查询最多需要两次网络调用。第一次调用会找到所有住在旧金山的人，第二次调用会将这个名单与所有吃寿司的人进行交集操作。然后我们可以添加更多约束或扩展，每个步骤仍然会涉及最多一次网络调用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b92f28b9cb17421aa9c33e8e3f0a7a28.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637496.png" />   
     </p>
 <p>这导致了单台服务器上的谓语会变得非常大，不过可以通过进一步拆分谓语服务器来解决这个问题。但是，在最极端的情况下，即所有数据只对应一个谓语，那么基于整个集群拆分谓语是一种最糟糕的行为。但在其他情况下，基于谓语对数据进行分片的设计可以在实际系统中实现更低的查询延迟。</p>
 <p>分片并不是 Dgraph 的唯一创新。所有的宾语都被分配了一个整型 ID，然后经过排序，保存在倒排列表中，可以与其他倒排列表进行快速的交集操作。这样可以加快连接期间的过滤、查找公共引用等操作。这里还使用了谷歌 Web 服务系统的一些想法。</p>
@@ -316,7 +316,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/32bf51e29020411aa33e9d0cb3b83294.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637316.png" />   
     </p>
 <ul>
 <li>
@@ -468,6 +468,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -501,10 +505,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -883,6 +883,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

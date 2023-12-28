@@ -211,7 +211,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a99ab3dd06fc411992e0f563d2a77785.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281916282.webp" />   
     </p>
 <blockquote>
 <p>分享嘉宾：黄思光 阿里 高级算法工程师</p>
@@ -223,7 +223,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>首先介绍校准的概念，并举例说明在计算广告中为什么需要对预估值进行校准。</p>
 <h3 id="1-预估技术的挑战"><strong>1. 预估技术的挑战</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d83e2cf2be734552b1c329cb2ac08d37.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281916244.webp" />   
     </p>
 <p>用户行为概率预估技术（点击率、转化率、短视频3s曝光率等）是搜索、推荐以及计算广告领域的核心技术能力。随着深度学习技术的发展，预估模型在过去几年中也经历了快速的迭代，不断向更庞大、更精细、更准确的方向演进。但是**预估模型真的变得更准确了吗？**不失一般性，我们以计算广告中的点击率预估模型为例，思考以下几个问题：</p>
 <p><strong>① 用户的真实点击概率是可以被准确观测的吗？</strong></p>
@@ -235,7 +235,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="2-预估值大小准确性在计算广告中的必要性"><strong>2. 预估值大小准确性在计算广告中的必要性</strong></h3>
 <p>在计算广告中，模型预估值大小准确性的优化（预估校准）在出价准确性、稳定性（包括算法出价oCPX/Auto-Bidding等）、竟价公平性，计划冷启动等方面发挥重要作用。以下举两个简单的例子进行简要说明：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d50354be9ef84e9faa394e042cf66811.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281916478.webp" />   
     </p>
 <p><strong>例1：纯CPC竞价的广告模式</strong></p>
 <p>如上图所示，广告竞价排名由平台期望收益eCPM决定，ad3的pCTR为1.0%，排序为3。如果ad3的pCTR被高估30%，则eCPM将从10变为13从而获得展示机会，从而导致ad3的拿量能力变大，但平台的期望收入降低。</p>
@@ -245,11 +245,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="3-校准目标及其相关工作"><strong>3. 校准目标及其相关工作</strong></h3>
 <p><strong>① 校准目标</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/24ed76543d884654b71311c72b6e3589.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281916515.webp" />   
     </p>
 <p><strong>校准技术的目标是：使用户行为的预估值尽可能逼近真实概率值。</strong> 具体形式化表示如下，其中X为基础预估模型的输出空间（如预估点击率），Y为实际用户行为（如点击与否），f(x)为校准函数，f*为最优校准函数。在实际应用中，优化预估值大小准确性的同时，也会保证整体排序水平不会下降。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7ead46ccf0844f07a0b99e049b6808ce.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281916568.webp" />   
     </p>
 <p><strong>② 相关工作</strong></p>
 <p>现有预估模型在预估值上的不确定性，导致在实际应用中缺乏可信度（trustworthiness）和可解释性（interpretability），会导致次优结果甚至错误决策的风险，校准技术最早在气象预报和医疗诊断领域被提出和应用，近几年进一步延伸到自动驾驶和计算广告领域。具体校准方法总的来讲可以分为两大类：</p>
@@ -265,7 +265,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>① Predict click over click (PCOC)</strong></p>
 <p>PCOC指标是校准之后的点击率与后验点击率（近似真实概率）的比值，越接近于1，意味着在绝对值上越准确，大于1为高估，小于1为低估，是一种常用的高低估评价指标。但是PCOC存在一定局限性，举个例子：2万个样本，其中1万个样本的预估概率是0.2，后验概率是0.4，计算出PCOC是0.2/0.4=0.5，是显著低估的，另1万个样本PCOC是0.8/0.6= 1.3，明显是高估的。所以校准效果并不好，但是样本放一起看，校准后概率是（0.2+0.8）/2=0.5，后验概率是（0.4+0.6）/2=0.5，整体PCOC是1.0，表现完全正常。所以**单一PCOC指标不能表征样本各维度下的校准水平。**</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5aa6270660ea4f6faee5089579518430.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281916502.webp" />   
     </p>
 <p><strong>② Calibration-N(Cal-N)</strong></p>
 <p>针对PCOC问题，我们设计了一个新的指标Cal-N，将样本集合按照自定义规则划分出多个簇分别计算PCOC，并计算与标准1的偏差作为校准误差。相比PCOC，Cal-N显然能够更好的表征细粒度的校准水平。</p>
@@ -275,48 +275,48 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>③ Grouped Calibration-N(GC-N)</strong></p>
 <p>在广告领域中，通常会重点关注某一维度下的校准效果（如广告计划维度）。我们进一步提出了GC-N指标，能够在Cal-N基础上自定义各维度权重。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3c389dedf1044410bb6b3442d9c435d6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281916048.webp" />   
     </p>
 <p>以上是对校准背景、概念、相关工作以及评价方法的简单介绍。</p>
 <h2 id="02-校准算法演进"><strong>02 校准算法演进</strong></h2>
 <p>从18年以来我们开始在校准算法上不断创新，实现了对点击率、转化率、收藏加购率、关注率等各类预估指标的校准能力。整个迭代路线以实际业务需求为导向，以轻量级、通用性和灵活性为设计目标。接下来详细介绍我们提出的各类校准方法。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7813b8f645dd481995fd8f6908b157ed.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281916077.webp" />   
     </p>
 <h3 id="1-保序回归平滑校准算法smoothed-isotonic-regressionsir"><strong>1. 保序回归平滑校准算法（Smoothed Isotonic Regression，SIR）</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7ad8238d81e14aabb0cf9f64cb13ad70.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281917014.webp" />   
     </p>
 <p>SIR算法是18年提出的，如上图所示，我们结合了Binning、Isotonic Regression和线性Scaling方法。具体思想为：模型原始打分相近的PV具有近似的真实点击率，PCTR大小区间可作为一个合理的校准维度（分桶）；分桶数据量稀疏时，进一步利用模型本身的排序能力，对各分桶后验点击率与模型预估点击率做保序处理（保序回归）；最后使用单调平滑函数拟合模型原始打分和后验点击率的映射关系（线性Scaling）就得到了校准函数。该算法的优势在于**充分利用了保序和平滑思想缓解了数据稀疏的问题，而且具备轻量级和可解释性特点。**对比各类校准算法效果如下（AB是两个数据集），在实际应用中RPM、CTR以及广告主ROI均有显著提升（详细可见论文：﻿Calibrating user response predictions in online advertising）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/99b6204e0fed49ed8d96603357f1169b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281917079.webp" />   
     </p>
 <h3 id="2-贝叶斯平滑sir校准算法bayes-sir"><strong>2. 贝叶斯平滑SIR校准算法（Bayes-SIR）</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f54b7c3055184f2690629c7d27066924.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281917282.webp" />   
     </p>
 <p>在SIR算法应用中，我们发现广告计划投放初期校准效果明显差于平均水平，并在实际业务中造成以下问题：1）影响新建计划初始阶段的投放表现；2）影响强时效性广告的全生命周期效果；3）小客户在整个投放周期里数据一直稀疏，得不到准确的校准，影响竞价公平性。这是SIR校准算法的冷启动问题，我们采用了Bayes平滑的思想进行优化（贝叶斯平滑方法最早在雅虎的一篇论文里面中提出，用于解决数据稀疏问题下的点击率预估优化）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/79a6375b3ffc485eb36d3b775eca55ea.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281917286.webp" />   
     </p>
 <p>Bayes-SIR的算法思想：如上图所示，首先从丰富的先验数据中估计出每个广告计划的点击率先验分布，然后依据该先验知识和新观测到的少量数据，根据贝叶斯定理计算得到更准确的后验点击率。**这种估计方法能充分利用先验知识，具备置信程度过渡平滑的特点。**将贝叶斯平滑CTR估计过程替换掉SIR算法的朴素CTR统计逻辑即构成了具有冷启动问题优化效果的校准方法。实际上线后，新广告的投放效果得到明显的提升。</p>
 <h3 id="3-bayes-sir实时波动问题优化rtw-bsir"><strong>3. Bayes-SIR实时波动问题优化（RTW-BSIR）</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ed38905c348c4955ac6bc4d6c03135f7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281917373.webp" />   
     </p>
 <p>实际应用中，我们进一步发现Bayes-SIR校准算法整体表现稳定，但是不同时间段内效果却是不断波动的，这会加剧广告竞价环境的波动，并影响广告计划拿量的均匀性和算法出价的稳定性（如上图所示）。</p>
 <p>经分析，这是校准训练数据和应用时数据分布之间存在差异导致的，是一种典型的数据漂移问题。直接思路是将该差异进行消除，实现无偏的校准能力。考虑到时效性影响，数据分布一直在发生变化，如果直接对训练数据进行修正则无法避免后续模型训练链路延迟导致的偏差因素。所以我们借鉴了反事实学习的思想， <strong>通过实时计算应用数据和Bayes-SIR模型的分布偏差，直接修正Bayes-SIR校准函数，这样就实现了对现有校准效果时序波动性的优化算法</strong>（如下图所示）。上线应用后，能够有效保证校准效果的稳定性，尤其在大促活动等环境剧烈波动时，对流量分配效率极其稳定性起到明显的优化作用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6bff3b6fe25846f9a7a2970d74e547d9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281917582.webp" />   
     </p>
 <p>上述内容介绍了SIR算法极其在冷启动和时序波动性方面的优化，该系列算法 <strong>具备轻量级、可解释的特点，在阿里妈妈展示广告业务上得到了大范围的应用，并取得了非常显著的业务收益。</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fbb3a88045354f2faf91a03a025c04a8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281917612.webp" />   
     </p>
 <p>但是这些方法仍旧存在一些缺陷，比如﻿Binning方式单一缺乏灵活性、排序能力上具备天花板而且无法自定义校准目标。针对这些问题我们也提出了新的算法方案，本文不再展开。下文进一步介绍校准算法在后链路指标校准方面的应用扩展。</p>
 <h3 id="4-后链路预估值校准pccem"><strong>4. 后链路预估值校准（PCCEM）</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/65b03c9612e24c56a524492585c30288.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281917502.webp" />   
     </p>
 <p>后链路指标指的是曝光/点击之后的加购、收藏、转化、关注等指标（特点如上图所示）。面向转化或加购等优化目标的算法出价能力不断成为主流的广告投放方式，但是转化和加购的模型预估能力远不如点击率，这使得后链路预估值的校准存在极大的必要性和可优化空间。相比点击率校准，后链路预估值的校准存在新的挑战：数据稀疏性和延迟反馈，以转化为例，用户点击广告后不一定立�</p>
 
@@ -442,6 +442,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -475,10 +479,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -857,6 +857,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

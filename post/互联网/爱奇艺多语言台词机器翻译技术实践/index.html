@@ -233,12 +233,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>经调研，我们发现了one-to-many模型，它极大地减轻了模型的训练和部署维护的成本，可以充分 <strong>利用不同语言之间迁移学习的特点，起到相互促进的作用，从而提高模型效果。</strong></p>
 <p>图1是 <strong>transformer架构</strong>，是目前大多数机器翻译模型优化的主流框架，我们也是以此为基础，在上面进行优化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fe26a10f427d43ba95cef2bf443aedbd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235144.png" />   
     </p>
 <p>图1:transformer模型</p>
 <p>而针对one-to-many模型，我们借鉴近期大家较为熟悉的预训练模型 <strong>BERT</strong>，设计了一个特定的输入形式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5b1de8cd88a24ba894fa2ae5b9f93120.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235335.png" />   
     </p>
 <p>图2</p>
 <p>每个输入的token的表达都是由三种embedding组成，分别是：**token embeddings、segment embeddings、 position embeddings。**我们把语言类型token作为单独的一个域，那它具有不同于内容的segment embeddings。</p>
@@ -252,7 +252,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>因此，我们设计了用 <strong>BERT style</strong> 的方式融合台词上下文的模型， <strong>输入时将上文和下文分别与中心句进行拼接，以特定的分隔符做分隔，而在encoder输出，我们还会对上句和下句进行mask</strong>，因为在解码这个时候，由于上下句在编码时已经被中心句吸收了相关信息，上句和下句已经不起太多作用。并且，如果不进行mask，有可能还会引来一些翻译错位的问题。</p>
 <p>那么我们是如何融合上下文的呢？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0d7af310489b45df920c373747b8a43e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235478.png" />   
     </p>
 <p>图3</p>
 <p>也是在输入端，我们可以看到图3和图2的不同就在于我们除了把语言token和中心句用三种embedding向量融合之外，**还会将上句“你走吧”和下句“再见”放在中心句的前后，**然后以同样的方式，每个token也是三种embedding的相加融合， <strong>把上下文作为辅助信息，帮助中心句进行消歧。</strong></p>
@@ -263,7 +263,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Transformer里面一个比较主要的组件就是 <strong>attention</strong>， <strong>其中base版本包含8个head</strong>。我们为了强化attention， <strong>鼓励不同的head学习不同的特征，从而丰富模型的表征能力。</strong></p>
 <p>下图是这4种attention的示意图。 <strong>我们通过不同的mask策略实现不同的attention，图中黑色的方块代表mask掉的部分。</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/38ca5bbff9ae4a19bfd795d29857f49a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235489.png" />   
     </p>
 <p>图4</p>
 <p><strong>global attention：</strong> 建模任意词之间的依赖关系；</p>
@@ -273,14 +273,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>除此之外我们还借鉴bert，使用 <strong>Masked LM</strong> 任务增强模型对文本的理解能力。</p>
 <p>首先将输入的某一个词进行mask，然后在输出端进行恢复。比如“你走吧”，“我想静静”，“再见”，其中，“走”，“见”，都会被mask，输出的时候再被恢复。这就使得encoder在这种任务中充分地学习到文本的表达，增进它对文本的理解。同时 <strong>将mlm loss乘以一定的权重加到总体的loss上，进行联合训练。</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://mmbiz.qpic.cn/mmbiz_jpg/unymlvueOvuouiaxzpPZ6TSLjhria2DN9l0aibmTMoZBA8VRrbxGdGYSGkBpziak6WGicwkb5Obic9ZCKoD8rVcgibmCw/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235924.webp" />   
     </p>
 <hr>
 <p>图5：MLM模型</p>
 <h3 id="4增强解码能力"><strong>4.增强解码能力</strong></h3>
 <p>为了增强模型解码端的能力，在训练阶段，我们要求解码端在预测每个token的同时， <strong>增加对全局信息的预测，同时增强模型解码端的全局前瞻能力。</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c7d6adb07cbd4d4b9e7ea3c987d8118d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235866.png" />   
     </p>
 <p>图6</p>
 <p>比如这里的G代表let me alone的embedding的平均向量，每个token都会预测这个向量，从而产生GLOBAL loss。</p>
@@ -292,7 +292,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>另外，也有可能翻译成Let me me alone, 重复翻译me, 这就是所谓的过翻译。</p>
 <p>这些都是我们不希望在翻译结果中出现的，而产生这两大问题的一个 <strong>本质原因就在于解码生成的信息和编码的信息不够对等。</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b041fb49d713461a97ddba2d3bd7d4a2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235475.png" />   
     </p>
 <p>图7</p>
 <p>所以我们增加了一个重建的模块，对其进行约束。</p>
@@ -305,14 +305,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>也就是说， <strong>它输出的表达是由它周边的token的意思来产生的。</strong> 比如X1是错的，但X2，X3，X4是对的，在你经过大量的数据训练之后，可以通过X2、X3、X4去生成正确的X1，从而达到一种纠错的能力。</p>
 <p><strong>那要怎么才能让每个token看不到它自己而只能看到周边呢？</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fd5c2794b6d1404da0cf3ed6ae9a1d0c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235731.webp" />   
     </p>
 <p>图8</p>
 <p>其实也很简单，就是使用了一个 <strong>对角线mask的方式。</strong> 这样，每次它就只能看到他其他的token，中间的黑色对角是看不见的，也就看不到它自己。通过这个方式，对深黄色那部分进行这样的特定处理，从而实现一种纠错能力。</p>
 <p>我们可以注意到 <strong>它的Q也只是用到position embedding</strong>，因为如果QKV和Self attention是一样的，再残差连接的话就会把token embedding给加到输出，相当于把你刚刚挖掉的部分又填补上了，会产生信息泄露的问题，这样就训练不出一种纠错的模块。所以Q只是position embedding。</p>
 <p>这个模块大致就是这样，但是它们是怎么融合到机器翻译模型中呢？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/784afc5774004aaf92edd256630e5f6f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235535.webp" />   
     </p>
 <p>图9</p>
 <p>其实，只要直接和我们之前介绍的那些encoder进行 <strong>相加融合</strong>，两个encoder输入都是一样的，输出进行相加融合，融合之后再进入后面的两个decoder的处理，这样就可以对原始encoder的错误进行纠正。比如这里的“静”错输成了“净”，但T-TA的encoder却能输出正确结果，起到了纠错的作用。</p>
@@ -324,13 +324,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>比如 <strong>泰语的代词第一人称就有12种表达，第二人称代词有15种表达，第三人称有5种表达。</strong> 对于第一人称，这12个表达还会随着性别和使用场合的不同而发生变化。</p>
 <p>此外，**对话人身份之间的差异，也会使得这种代词表达有所区别。**这对于台词机器翻译来说，是一个巨大的挑战。所有这些不同场合都需要我们将其区分出来， <strong>而这项工作很难仅仅只通过文本来完成。</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/470e684d91264bb1b7c6da403397ca49.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235601.png" />   
     </p>
 <p>图10：中文-泰语人称代词对应表</p>
 <p>因此，我们做了一个 <strong>融合视频场景信息的代词的语义增强。</strong></p>
 <p>首先我们通过 <strong>人脸识别和声纹识别</strong> 对齐台词和角色，通过这种对齐可以使得 <strong>每一句台词定位到它所处的场景。</strong> 再将 <strong>角色人物属性</strong> 比如性别，年龄，人物关系，身份等 <strong>标注好，使角色的信息更丰富、更加立体。</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/61546412d4054e71817614a925fac62e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235980.png" />   
     </p>
 <p>图11</p>
 <p>左边的模型里面有两个代词，就是“你”和“我”，右边的模块是对“我”和“你”的一些信息的编码。比如“我”就属于男性，年龄是青年，“我”和对话人之间的关系是朋友等等。这样分别对“我”和“你”进行编码，编码后用这些信息做一个 <strong>变换和降维</strong>，分别加到对应的代词上，使得解码的时候， <strong>知道这个代词所处的场景及人物关系，从而使它能够解码出正确的代词翻译。</strong></p>
@@ -341,7 +341,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>（2） <strong>有些成语具有语义独立的特点</strong>，也就是说某个成语的含义和上下文没有那么大的关联。</p>
 <p>针对这两个特点，我们设计了针对成语翻译的模块，使用预训练的BERT， <strong>对中文以及中文释义进行编码，直接替换encoder的成语输入和添加到encoder的输出</strong>，来确保成语真正含义的表达能够在模型中学习得到。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1df4614d6ae44be7a43f85937211f61d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235252.png" />   
     </p>
 <p>图12</p>
 <h3 id="9角色名翻译"><strong>9.角色名翻译</strong></h3>
@@ -349,7 +349,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们首先将 <strong>人名替换成拼音</strong>，因为这时候它的真正的文本已经不重要了，最重要的是它将要翻译的目标语言。</p>
 <p>比如在图13这个例子中，“你认识李飞吗？”，我们首先将李飞中文替换成拼音li fei，对其增加一个特殊的标识，这也就是想告诉模型：这部分是要拷贝过去的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b5ff35b34fd94f398036f73602b134c7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235509.png" />   
     </p>
 <p>图13</p>
 <p>另外，为了增加模型见过的拼音输入表达的数量，我们 **通过训练集挖掘了人名和姓氏的模板将其与伪名字合并成增强的数据，将增强数据和原来的数据串在一起�</p>
@@ -480,6 +480,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -513,10 +517,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -895,6 +895,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

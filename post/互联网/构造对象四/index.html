@@ -207,19 +207,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="调用-indexwriter-的构造函数的流程图">调用 IndexWriter 的构造函数的流程图</h1>
 <p>图 1：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/1-1843f3a7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272102390.png" />   
     </p>
 <h2 id="根据不同的-openmode-执行对应的工作">根据不同的 OpenMode 执行对应的工作</h2>
 <p>  在上一篇文章中，我们介绍了执行 CREATE 模式下的工作，故继续介绍执行 APPEND 模式下的工作。</p>
 <h3 id="执行-append-模式下的工作的流程图">执行 APPEND 模式下的工作的流程图</h3>
 <p>图 2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/2-959bb7a1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272102810.png" />   
     </p>
 <h4 id="standarddirectoryreader-是否为空">StandardDirectoryReader 是否为空？</h4>
 <p>图 3：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/3-35971d1b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272102303.png" />   
     </p>
 <p>  在图 1 的流程点 <code>获取IndexCommit对应的StandardDirectoryReader</code>，如果用户通过 <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2FLuXugang%2FLucene-7.5.0%2Fblob%2Fmaster%2Fsolr-7.5.0%2Flucene%2Fcore%2Fsrc%2Fjava%2Forg%2Fapache%2Flucene%2Findex%2FIndexWriterConfig.java">IndexWriterConfig.setIndexCommit(IndexCommit commit)</a> 设置了 IndexCommit，那么 Lucene 会尝试根据该 IndexCommit 获得一个 <a href="https://zshipu.com/t?url=%255BSegmentReader%25EF%25BC%2588%25E4%25B8%2580%25EF%25BC%2589%255D%28https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F1014%2F99.html%29">StandardDirectoryReader</a>，它描述了 IndexCommit 中包含的索引信息（主要是 SegmentInfos 对象的信息，见 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F1118%2F108.html">构造 IndexWriter 对象（三）</a> 关于 SegmentInfos 对象的介绍）。</p>
 <p>  StandardDirectoryReader 为空的情况有两种：</p>
@@ -231,18 +231,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>  IndexCommit 类其实是一个抽象类，它的类图关系如下所示：</p>
 <p>图 4：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/4-4ac9cfdb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272102109.png" />   
     </p>
 <h5 id="readercommitcommitpoint">ReaderCommit、CommitPoint</h5>
 <p>  ReaderCommit 类跟 CommitPoint 类中包含的内容如下图所示</p>
 <p>图 5：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/5-26d5f2c8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272102657.png" />   
     </p>
 <p>  故如果是 ReaderCommit 对象，那么就可以获得 StandardDirectoryReader 对象，而 ReaderCommit 对象则是通过 StandardDirectoryReader.getIndexCommit()方法获得，由于该方法的实现很简单，故直接给出：</p>
 <p>图 6：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/6-86d9d911.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272102263.png" />   
     </p>
 <p>  图 6 为 <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2FLuXugang%2FLucene-7.5.0%2Fblob%2Fmaster%2Fsolr-7.5.0%2Flucene%2Fcore%2Fsrc%2Fjava%2Forg%2Fapache%2Flucene%2Findex%2FStandardDirectoryReader.java">StandardDirectoryReader</a> 类中的方法，可以看出，StandardDirectoryReader 对象通过调用 getIndexCommit()方法，构造了一个新的 ReaderCommit 对象，并且将自己（this 指针）作为 ReaderCommit 的成员变量之一，即图 5 中红框标注。</p>
 <p>  尽管无法通过 CommitPoint 对象中获得 StandardDirectoryReader 对象，但这里仍然要说下 CommitPoint 对象是什么生成的。</p>
@@ -253,13 +253,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>图 7：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/7-b9446389.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272102599.png" />   
     </p>
 <h5 id="snapshotcommitpoint">SnapshotCommitPoint</h5>
 <p>  SnapshotCommitPoint 实际是采用装饰者模式来实现额外的功能，该类中的成员变量很少，故直接给出：</p>
 <p>图 8：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/8-d2512cd8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272103132.png" />   
     </p>
 <p>  根据图 8 可以看出，它封装了另一个 IndexCommit 对象（见图 7 的红色标注的流程在文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F0909%2F92.html">文档提交之 commit（二）</a> 中的介绍），实际上该对象就是 CommitPoint。</p>
 <p>  至于它实现了哪些额外的功能，在后面的流程中会展开介绍，这里我们只需要知道它同 CommitPoint 一样，无法提供 StandardDirectoryReader 对象。</p>
@@ -267,36 +267,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="配置检查-2">配置检查 2</h4>
 <p>图 9：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/9-ccaffe97.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272103629.png" />   
     </p>
 <p>  我们先介绍下能获得 StandardDirectoryReader 对象的情况，需要对用户的配置信息进行三项检查，如下所示</p>
 <p>图 10：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/10-dc50fbed.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272103447.png" />   
     </p>
 <p>  图 10 中，reader 即 StandardDirectoryReader 对象、commit 即 IndexCommit 对象、这里没什么好介绍的。</p>
 <h4 id="用-standarddirectoryreader-初始化一个新的-segmentinfos-对象">用 StandardDirectoryReader 初始化一个新的 SegmentInfos 对象</h4>
 <p>图 11：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/11-63910f6f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272103062.png" />   
     </p>
 <p>  在文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F1118%2F108.html">构造 IndexWriter 对象（三）</a> 中我们介绍 <code>执行CREATE模式下的工作</code> 时说到，该模式下初始化一个新的 SegmentInfos 对象时，它不包含任何的索引信息，而在 APPEND 模式下，则是用 StandardDirectoryReader 中的索引信息来初始化一个新的 SegmentInfos 对象，即所谓的&quot;追加&quot;。</p>
 <h4 id="获得回滚rollback信息">获得回滚（rollback）信息</h4>
 <p>图 12：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/12-5a3a85bd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272103798.png" />   
     </p>
 <p>  上文中根据 IndexCommit 获得的 StandardDirectoryReader，它包含的 SegmentInfos 在后面的流程中将会作为回滚内容，而在这个流程中，最重要的一步是检查 SegmentInfos 中包含的索引信息对应的索引文件是否还在索引目录中。</p>
 <p><strong>为什么要执行这个检查</strong>：</p>
 <p>  我们首先根据下面两张图来介绍下 SegmentInfos 对象跟 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2Fsuoyinwenjian%2F2019%2F0610%2F65.html">索引文件 segments_N</a>、 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2Fsuoyinwenjian%2F2019%2F0605%2F63.html">索引文件。si</a> 以及其他 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2Fsuoyinwenjian%2F">索引文件</a> 的关系：</p>
 <p>图 14：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/14-7f2c4779.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272103892.png" />   
     </p>
 <p>  图 14 为索引目录中的索引文件，并且存在两个段。</p>
 <p>图 15：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/15-49146d5e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272103595.png" />   
     </p>
 <p>  SegmentInfos 对象是索引文件 segments_N 和索引文件。si 在内存中的表示，图 14 中的提交中包含了两个段，即以_0 跟_1 开头的两个段，所以索引文件 segments_1 中有两个 SegmentCommitInfo 字段，接着根据 SegmentCommitInfo 中的 SegName 字段，该字段的值描述的是该段对应的所有索引文件的前缀值（见文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2Fsuoyinwenjian%2F2019%2F0605%2F63.html">索引文件。si</a> 中的介绍），即_0，那么就可以在索引目录中找到 索引文件_0.si，而在 索引文件_0.si 的 Files 字段（图 15 中红框标注）中存储了其他索引文件的名字，同样地根据这些索引文件的名字在索引目录中读取到所有的索引信息。</p>
 <p>  另外图 15 中 SegmentCommitInfo 中的两个字段 FieldInfosFies、UpdatesFiles 也是存储了索引文件的名字，当一个段中的 DocValues 发生变更时，变更的信息也用索引文件描述，并且索引文件的名字存储在这两个字段里。</p>
@@ -306,7 +306,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="同步-segmentinfos-以及回滚信息中-segmentinfos-中的部分信息">同步 SegmentInfos 以及回滚信息中 SegmentInfos 中的部分信息</h4>
 <p>图 16：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/16-98d2e98e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272103043.png" />   
     </p>
 <p><strong>为什么 StandardDirectoryReader 中可能没有 IndexWriter 对象</strong>：</p>
 <p>  在 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F">近实时搜索 NRT</a> 系列文章中我们说到可以通过下面四种 open()方法获得一个 StandardDirectoryReader，其中：</p>
@@ -450,6 +450,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -483,10 +487,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -865,6 +865,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

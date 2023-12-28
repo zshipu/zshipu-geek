@@ -201,7 +201,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <p>即刻首页的动态广场是一个发现好玩圈子和有趣即友的地方。如何让每一个用户都能在上面看到自己感兴趣的内容，是即刻推荐团队一直以来努力的目标。</p>
 <p>去年我们分享了一篇 <a href="https://zshipu.com/t?url=https%3A%2F%2Fzhuanlan.zhihu.com%2Fp%2F73853438">技术文章</a>，介绍如何在线上服务中使用Spark MLlib，解决了排序模型的线上serving问题。过去这一年，即刻推荐系统完成了从Spark+XGBoost到TF+DNN的技术升级。在排序模型深度化之后，我们开始探索深度学习在召回层上的应用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b9171af5febd46e2ad80ab88163c7952.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271645287.jpeg" />   
     </p>
 <p>推荐系统召回层的目标，就是根据用户画像以及过往的消费历史，从百万级的推荐池里粗筛出当前用户最可能感兴趣的几百条内容，并将结果交由排序模型进一步排序。与排序不同的是，召回层面对的候选集量级通常是巨大的。这就导致在召回时，没法将候选集中的每条内容 <strong>逐个</strong> 与当前用户进行比对计算，挑出用户最可能喜欢的。因此，我们一般会根据不同业务的需求，将候选池中的内容按照某种方式做索引，从而根据某方面的特征挑出用户可能喜欢的一批内容。不同的索引方式，对应着不同的召回策略。多路召回策略并行地工作，总体来看，就是从不同角度去搜集用户可能感兴趣的内容，完成一次召回。不同的业务场景有独特的召回策略，不同的内容类型也有各异的索引方式。</p>
 <p>在这些召回策略中，有一类特殊的，被称为基于向量embedding的召回。作为一种既考虑了精确度又兼顾了覆盖面的召回策略，它被广泛运用于各类业务场景中。向量召回的索引方式，就是基于向量来完成的。在训练好一个embedding模型，得到关于物品和用户的向量后，就可以将物品的向量作为索引的key，用户的向量作为查询的query，通过一些 <a href="https://zshipu.com/t?url=https%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttps%253A%2F%2Fen.wikipedia.org%2Fwiki%2FNearest_neighbor_search">模糊最近邻(ANN)</a> 的算法快速从海量候选池中找到一批最匹配的物品。由于embedding的普适性，几乎任何业务场景和内容类型都可以尝试使用向量召回。</p>
@@ -210,7 +210,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>业界成熟的embedding模型有很多：从最原始的Matrix Factorization，到受word2vec启发的item2vec、node2vec；从基于用户点击序列的YouTubeDNN，到基于图的GCN和GraphSAGE。不同的模型复杂度不同，也有不同的应用场景。</p>
 <p>考虑到即刻动态流推荐对于实时性的要求，我们受到DSSM的启发，选择了一个简单的DNN双塔模型，并通过有监督的方式训练，优化目标是点击率。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2cf1235df97247a9aa72caf376c3680a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271645272.jpeg" />   
     </p>
 <p>双塔模型的两个塔分别接收用户侧的特征和内容侧的特征，输出用户向量和内容向量。对于单个塔内部的结构，我们选用了最简单的多层全连接的结构：第一层是特征embedding层，将原始输入的多个特征通过embedding得到向量表示，并将所有特征向量concat；最后一层是输出的embedding层，得到用户侧和内容侧的向量表示。得到双侧的向量表示后，直接用一个简单的距离函数，计算两个向量的距离，得到最后的输出为[0,1]之间的一个标量，通过交叉熵的方式与用户点击的反馈做loss计算。考虑到线上召回的实时性要求，最后输出的embedding维度设为64。</p>
 <h2 id="模型部署">模型部署</h2>
@@ -358,6 +358,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -391,10 +395,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -773,6 +773,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

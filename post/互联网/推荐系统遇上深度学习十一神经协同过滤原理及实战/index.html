@@ -211,63 +211,63 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>隐性反馈</strong> 行为指的是那些不能明确反应用户喜好</p>
 <p>举例来说：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/51b91147e75847059cceadb24c5a7391.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001226.png" />   
     </p>
 <p>很多应用场景，并没有显性反馈的存在。因为大部分用户是沉默的用户，并不会明确给系统反馈“我对这个物品的偏好值是多少”。因此，推荐系统可以根据大量的隐性反馈来推断用户的偏好值。</p>
 <p>根据已得到的隐性反馈数据，我们将用户-条目交互矩阵Y定义为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/cedef717228c4212bf41aadf1c948ee2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001181.png" />   
     </p>
 <p>但是，Yui为1仅代表二者有交互记录，并不代表用户u真的喜欢项目i，同理，u和i没有交互记录也不能代表u不喜欢i。这对隐性反馈的学习提出了挑战，因为它提供了关于用户偏好的噪声信号。虽然观察到的条目至少反映了用户对项目的兴趣，但是未查看的条目可能只是丢失数据，并且这其中存在自然稀疏的负反馈。</p>
 <p>在隐性反馈上的推荐问题可以表达为估算矩阵 Y中未观察到的条目的分数问题（这个分数被用来评估项目的排名）。形式上它可以被抽象为学习函数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/2aa3b7f53399414282124623b955498d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001932.png" />   
     </p>
 <p>为了处理缺失数据，有两种常见的做法：要么将所有未观察到的条目视作负反馈，要么从没有观察到条目中抽样作为负反馈实例。</p>
 <h2 id="12-矩阵分解及其缺陷">1.2 矩阵分解及其缺陷</h2>
 <p>传统的求解方法是矩阵分解(MF,Matrix Factorization)，为每个user和item找到一个隐向量，问题变为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/50348b965d0c494480b5f8b6a67ca382.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001688.png" />   
     </p>
 <p>这里的 K表示隐式空间（latent space）的维度。正如我们所看到的，MF模型是用户和项目的潜在因素的双向互动，它假设潜在空间的每一维都是相互独立的并且用相同的权重将它们线性结合。因此，MF可视为隐向量（latent factor）的线性模型。</p>
 <p>论文中给出了一个例子来说明这种算法的局限性：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/fca0717f81c345698c48adda7e7e6627.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001619.png" />   
     </p>
 <p>1(a)是user-item交互矩阵，1(b)是用户的隐式空间，论文中强调了两点来理解这张图片：</p>
 <p>1）MF将user和item分布到同样的隐式空间中，那么两个用户之间的相似性也可以用二者在隐式空间中的向量夹角来确定。</p>
 <p>2）使用Jaccard系数来作为真实的用户相似性。</p>
 <p>通过MF计算的相似性与Jaccard系数计算的相似性也可以用来评判MF的性能。我们先来看看Jaccard系数</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/aa2e3cf1af8f49ec953f942a38c16221.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001865.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/8cad4fa06f6f41ac99a4cfbd982d4cd1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272002787.png" />   
     </p>
 <p>上面的示例显示了MF因为使用一个简单的和固定的内积，来估计在低维潜在空间中用户-项目的复杂交互，从而所可能造成的限制。解决该问题的方法之一是使用大量的潜在因子 K (就是隐式空间向量的维度)。然而这可能对模型的泛化能力产生不利的影响（e.g. 数据的过拟合问题），特别是在稀疏的集合上。论文通过使用DNNs从数据中学习交互函数，突破了这个限制。</p>
 <h2 id="13-ncf">1.3 NCF</h2>
 <p>本文先提出了一种通用框架：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/b96b747e5d1d4225ac21df17cf62d42c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272002065.png" />   
     </p>
 <p>针对这个通用框架，论文提出了三种不同的实现，三种实现可以用一张图来说明：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/2799c716977144de84f327ef19981db7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272002241.png" />   
     </p>
 <p><strong>GMF</strong>：</p>
 <p>上图中仅使用GMF layer，就得到了第一种实现方式GMF，GMF被称为广义矩阵分解，输出层的计算公式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/5cb639b113c34a8eaeb6705940a431a8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272002619.png" />   
     </p>
 <p><strong>MLP</strong></p>
 <p>上图中仅使用右侧的MLP Layers，就得到了第二种学习方式，通过多层神经网络来学习user和item的隐向量。这样，输出层的计算公式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/dd261bfb69934453b8a60c36ad92fa8d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272002452.png" />   
     </p>
 <p><strong>NeuMF</strong></p>
 <p>结合GMF和MLP，得到的就是第三种实现方式，上图是该方式的完整实现，输出层的计算公式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/1043a9fb0ab34a04b80988cd5c9acafe.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272002228.png" />   
     </p>
 <h2 id="14-模型实验">1.4 模型实验</h2>
 <p>论文通过三个角度进行了试验：</p>
@@ -276,25 +276,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>RQ3</strong> 更深的隐藏单元是不是有助于对用户项目交互数据的学习？</p>
 <p><strong>使用的数据集</strong>：MovieLens 和 Pinterest 两个数据集</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/f0b81e16bd08473092ccf1ce9c3b7e09.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272002301.png" />   
     </p>
 <p><strong>评估方案</strong>：为了评价项目推荐的性能，论文采用了leave-one-out方法评估，即：对于每个用户，我们将其 <strong>最近的一次交互作为测试集</strong>（数据集一般都有时间戳），并利用余下的培训作为训练集。由于在评估过程中为每个用户排列所有项目花费的时间太多，所以遵循一般的策略，随机抽取100个不与用户进行交互的项目，将测试项目排列在这100个项目中。排名列表的性能由**命中率（HR） <strong>和</strong> 归一化折扣累积增益（NDCG）**来衡量。同时，论文将这两个指标的排名列表截断为10。如此一来，HR直观地衡量测试项目是否存在于前10名列表中，而NDCG通过将较高分数指定为顶级排名来计算命中的位置。本文计算每个测试用户的这两个指标，并求取了平均分。</p>
 <p><strong>Baselines</strong>，论文将NCF方法与下列方法进行了比较：ItemPop，ItemKNN，BPR，eALS。</p>
 <p>以下是三个结果的贴图，关于试验结果的解读，由于篇幅的原因，大家可以查看原论文。</p>
 <p><strong>RQ1试验结果</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/3583602c2ee24fcd877e7a670a42aeea.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272002473.png" />   
     </p>
 <p>简单的结论，即NCF效果好于BaseLine模型，如果不好的话论文也不用写了，哈哈。</p>
 <p><strong>RQ2试验结果</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/cd1dc28cac1441edb93cd5df8ac1109d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272002399.png" />   
     </p>
 <p>Figure 6 表示将模型看作一个二分类任务并使用logloss作为损失函数时的训练效果。</p>
 <p>Figure7 表示采样率对模型性能的影响（横轴是采样率，即负样本与正样本的比例）。</p>
 <p><strong>RQ3试验结果</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/e0c4e54e1f7d430bb0a24ee6741742aa.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272002883.png" />   
     </p>
 <p>上面的表格设置了两个变量，分别是Embedding的长度K和神经网络的层数，使用类似网格搜索的方式展示了在两个数据集上的结果。增加Embedding的长度和神经网络的层数是可以提升训练效果的。</p>
 <h1 id="2ncf实战">2、NCF实战</h1>
@@ -302,7 +302,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>本文仅介绍模型相关细节，数据处理部分就不介绍啦。</p>
 <p>项目结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/7a112a57f48146949c1942cda0c4ea8e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272002182.png" />   
     </p>
 <p><strong>数据输入</strong></p>
 <p>本文使用了一种新的数据处理方式，不过我们的输入就是三个：userid，itemid以及label，对训练集来说，label是0-1值，对测试集来说，是具体的itemid</p>
@@ -525,6 +525,10 @@ with tf.name_scope(&#39;embed&#39;):
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -558,10 +562,6 @@ with tf.name_scope(&#39;embed&#39;):
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -940,6 +940,8 @@ with tf.name_scope(&#39;embed&#39;):
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

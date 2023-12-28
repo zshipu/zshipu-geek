@@ -202,7 +202,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <p>在执行 flush()的过程中，Lucene 会将内存中的索引信息生成索引文件，其生成的时机点如下图红色框标注：</p>
 <p>图 1：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/1-6a59a8d4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272217493.png" />   
     </p>
 <p>  图一中的流程是 flush()阶段的其中一个流程点，完整的 flush()过程可以看系列文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F0716%2F74.html">文档提交之 flush</a>， <code>索引文件的生成</code> 系列文章将会介绍图一中红框标注的每一个流程点，本篇文章先介绍 <code>生成索引文件 .tim、.tip、.doc、.pos、.pay</code> 流程点。</p>
 <h2 id="生成索引文件timtipdocpospay">生成索引文件。tim、.tip、.doc、.pos、.pay</h2>
@@ -210,30 +210,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="生成索引文件timtipdocpospay-的流程图">生成索引文件。tim、.tip、.doc、.pos、.pay 的流程图</h3>
 <p>图 2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/2-ba9f69c5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272217750.png" />   
     </p>
 <h4 id="写入索引文件的顺序">写入索引文件的顺序</h4>
 <p>图 3：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/3-3ad78b1c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272217907.png" />   
     </p>
 <p>  在文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F0222%2F36.html">倒排表</a> 中我们知道，倒排表中的内容按照域进行划分，域之间可能存在相同的 term，但是一个域内 term 是唯一的，故其写入索引文件的顺序如图 3 所示， 域间（between filed）根据域名（field name）的字典序处理，域内（inner field）按照 term 的字典序进行处理。</p>
 <h4 id="生成索引文件docpospay">生成索引文件.doc、.pos、.pay</h4>
 <p>图 4：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/4-60e7195b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272217873.png" />   
     </p>
 <p>  我们先介绍在 <strong>一个域内</strong>，生成索引文件.doc、.pos、.pay 的逻辑。</p>
 <h5 id="生成索引文件docpospay-的流程图">生成索引文件.doc、.pos、.pay 的流程图</h5>
 <p>图 5：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/5-af61e5ec.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272217233.png" />   
     </p>
 <p>  图 5 描述的是同一个域内处理一个 term，生成索引文件.doc、.pos、.pay 的过程。</p>
 <h6 id="执行处理前的初始化的工作">执行处理前的初始化的工作</h6>
 <p>图 6：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/6-a877e4e1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272217257.png" />   
     </p>
 <p>  依次处理当前域中所有的 term，并且是按照 term 的字典序处理。</p>
 <p><strong>为什么要按照 term 的字典序处理</strong>：</p>
@@ -249,37 +249,37 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>图 7：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/7-96b20243.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272217269.png" />   
     </p>
 <p>  图 7 中，如果 <strong>当前开始处理第二个 term</strong>，那么此时 docStartFP（docStart File Pointer 缩写）、posStartFP、payStartFP 如上所示，这几个信息将会被写入到索引文件。tim、.tip 中，本文中我们只需要知道生成的时机点，这些信息的作用将在后面的文章中介绍。</p>
 <h6 id="是否还有文档包含当前-term">是否还有文档包含当前 term？</h6>
 <p>图 8：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/8-7eaec4b5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272217057.png" />   
     </p>
 <p>  按照文档号从小到大，依次处理当前 term 在一篇文档中的信息，这些文档中都包含当前 term。</p>
 <h6 id="记录当前文档号到-docseen">记录当前文档号到 docSeen</h6>
 <p>图 9：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/9-85f1711e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272217152.png" />   
     </p>
 <p>  使用 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2Fgongjulei%2F2019%2F0404%2F45.html">FixedBitSet</a> 对象 docSeen 来记录当前的文档号，docSeen 在生成 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2Fsuoyinwenjian%2F2019%2F0401%2F43.html">索引文件.tim、tip</a>) 时会用到，这里我们只要知道它生成的时间点就行。</p>
 <h6 id="记录-term-所有文档中的词频-totaltermfreq">记录 term 所有文档中的词频 totalTermFreq</h6>
 <p>图 10：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/10-06909248.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272217072.png" />   
     </p>
 <p>  这里说的所有文档指的是包含当前 term 的文档，一篇文档中可能包含多个当前 term，那么每处理一篇包含当前 term 的文档，term 在这篇文档中出现的次数增量到 totalTermFreq，totalTermFreq 中存储了 term 在所有文档中出现的次数，同样增量统计 docFreq，它描述了包含当前 term 的文档数量。</p>
 <p>  totalTermFreq、docFreq 将会被存储到 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2Fsuoyinwenjian%2F2019%2F0401%2F43.html">索引文件.tim、tip</a>) 中，在搜索阶段，totalTermFreq、docFreq 该值用来参与打分计算（见系列文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FSearch%2F2019%2F0820%2F86.html">查询原理</a>）。</p>
 <h6 id="是否生成了-packedblock">是否生成了 PackedBlock?</h6>
 <p>图 11：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/11-11f58885.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218328.png" />   
     </p>
 <p>  每当处理 128 篇包含当前 term 的文档，就需要将 term 在这些文档中的信息，即文档号 docId 跟词频 frequency，使用 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2Fyasuocunchu%2F2019%2F1217%2F118.html">PackeInts</a> 进行压缩存储，生成一个 PackedBlock。</p>
 <p>图 12：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/12-b39e4f2e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218342.png" />   
     </p>
 <p>  图 12 中，红框标注的即 PackedBlock，关于 PackedBlock 的介绍以及几个问题在后面的流程中会介绍，这里先抛出这几个问题：</p>
 <ul>
@@ -289,7 +289,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h6 id="写入到跳表-skiplist-中">写入到跳表 skipList 中</h6>
 <p>图 13：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/13-88304ac5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218817.png" />   
     </p>
 <p>  如果生成了一个 PackedBlock，那么需要生成跳表，使得能在读取阶段能快速跳转到指�</p>
 
@@ -415,6 +415,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -448,10 +452,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -830,6 +830,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

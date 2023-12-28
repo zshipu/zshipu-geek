@@ -205,7 +205,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>虽然现在大家都用字粒度的BERT隐式地进行词法分析，但分词依旧是很多系统中重要的一环，BERT之前的经典浅层模型大都以词向量作为输入。今天就再把分词拿出来聊聊，如果有一天大家做了面试官，不妨把这些细节拿出来问一哈。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-d5e619b3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271834613.png" />   
     </p>
 <p>NLP的底层任务由易到难大致可以分为词法分析、句法分析和语义分析。分词是词法分析（还包括词性标注和命名实体识别）中最基本的任务，可以说既简单又复杂。说简单是因为分词的算法研究已经很成熟了，大部分的准确率都可以达到95%以上，说复杂是因为剩下的5%很难有突破，主要因为三点：</p>
 <ol>
@@ -220,14 +220,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="211-最大匹配分词算法">2.1.1 最大匹配分词算法</h4>
 <p>最大匹配分词寻找最优组合的方式是将匹配到的最长词组合在一起。主要的思路是先将词典构造成一棵Trie树，也称为字典树，如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d736b373b5de430792b48fbfbbced1ec.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271834895.webp" />   
     </p>
 <p>Trie树由词的公共前缀构成节点，降低了存储空间的同时提升查找效率。最大匹配分词将句子与Trie树进行匹配，在匹配到根结点时由下一个字重新开始进行查找。比如正向（从左至右）匹配“他说的确实在理”，得出的结果为“他／说／的确／实在／理”。如果进行反向最大匹配，则为“他／说／的／确实／在理”。</p>
 <p>可见，词典分词虽然可以在O(n)时间对句子进行分词，但是效果很差，在实际情况中基本不使用此种方法。</p>
 <h4 id="212-最短路径分词算法">2.1.2 最短路径分词算法</h4>
 <p>最短路径分词算法首先将一句话中的所有词匹配出来，构成词图（有向无环图DAG），之后寻找从起始点到终点的最短路径作为最佳组合方式，引用《统计自然语言处理》中的图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d81bae1e211e498d84ab20e45ba41a8b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271834432.webp" />   
     </p>
 <p>我们认为图中每个词的权重都是相等的，因此每条边的权重都为1。</p>
 <p>在求解DAG图的最短路径问题时，总是要利用到一种性质：即两点之间的最短路径也包含了路径上其他顶点间的最短路径。比如S-&gt;A-&gt;B-&gt;E为S到E到最短路径，那S-&gt;A-&gt;B一定是S到B到最短路径，否则会存在一点C使得d(S-&gt;C-&gt;B)&lt;d(S-&gt;A-&gt;B)，那S到E的最短路径也会变为S-&gt;C-&gt;B-&gt;E，这就与假设矛盾了。利用上述的最优子结构性质，可以利用贪心算法或动态规划两种求解算法：</p>
@@ -244,7 +244,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>其中 s=w_1w_2&hellip;w_l 为字或单词。我们将上述模型成为二元语言模型(2-gram model)。类似的，如果只对词频进行统计，则为一元语言模型。由于计算量的限制，在实际应用中n一般取3。</p>
 <p>我们将基于词的语言模型所统计出的概率分布应用到词图中，可以得到词的 <strong>概率图</strong>：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c3253cbc7be14e3e8a7992112d152be8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271834872.webp" />   
     </p>
 <p>对该词图用2.1.2中的算法求解最大概率的路径，即可得到分词结果。</p>
 <h4 id="22-基于字的分词">2.2 基于字的分词</h4>
@@ -254,7 +254,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>生成式模型主要有n-gram模型、HMM隐马尔可夫模型、朴素贝叶斯分类等。在分词中应用比较多的是n-gram模型和HMM模型。如果将2.1.3中的节点由词改成字，则可基于字的n-gram模型进行分词，不过这种方法的效果没有基于词的效果要好。</p>
 <p>HMM模型认为在解决序列标注问题时存在两种序列，一种是观测序列，即人们显性观察到的句子，而序列标签是隐状态序列，即观测序列为X，隐状态序列是Y，因果关系为Y-&gt;X。因此要得到标注结果Y，必须对X的概率、Y的概率、P(X|Y)进行计算，即建立P(X,Y)的概率分布模型。例句的隐马尔科夫序列如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7f367813d21444e286b3210c8a64b8f0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271834565.webp" />   
     </p>
 <p>HMM模型是常用的分词模型，基于Python的jieba分词器和基于Java的HanLP分词器都使用了HMM。要注意的是，该模型创建的概率图与上文中的DAG图并不同，因为节点具有观测概率，所以不能再用上文中的算法求解，而应该使用Viterbi算法求解最大概率的路径。</p>
 <h4 id="222-判别式模型分词算法">2.2.2 判别式模型分词算法</h4>
@@ -267,7 +267,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在NLP中，最常用的神经网络为循环神经网络（RNN，Recurrent Neural Network），它在处理变长输入和序列输入问题中有着巨大的优势。LSTM为RNN变种的一种，在一定程度上解决了RNN在训练过程中梯度消失和梯度爆炸的问题。双向（Bidirectional）循环神经网络分别从句子的开头和结尾开始对输入进行处理，将上下文信息进行编码，提升预测效果。</p>
 <p>目前对于序列标注任务，公认效果最好的模型是BiLSTM+CRF。结构如图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/84aa388c6c2d4e1188a7fe137e3f8086.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271834149.webp" />   
     </p>
 <p>利用双向循环神经网络BiLSTM，相比于上述其它模型，可以更好的编码当前字等上下文信息，并在最终增加CRF层，核心是用Viterbi算法进行解码，以得到全局最优解，避免B,S,E这种标记结果的出现。</p>
 <h3 id="分词算法中的数据结构">分词算法中的数据结构</h3>
@@ -275,7 +275,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="31-词典">3.1 词典</h4>
 <p>中文有7000多个常用字，56000多个常用词，要将这些数据加载到内存虽然容易，但进行高并发毫秒级运算是困难的，这就需要设计巧妙的数据结构和存储方式。前文提到的Trie树只可以在O(n)时间完成单模式匹配，识别出“的确”后到达Trie树对也节点，句子指针接着指向“实”，再识别“实在”，而无法识别“确实”这个词。如果要在O(n)时间完成多模式匹配，构建词图，就需要用到Aho-Corasick算法将模式串预处理为有限状态自动机，如模式串是he/she/his/hers，文本为“ushers”。构建的自动机如图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0d0779dc6ac842aea3dcb1e1323e0632.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271834786.webp" />   
     </p>
 <p>这样，在第一次到叶节点5时，下一步的匹配可以直接从节点2开始，一次遍历就可以识别出所有的模式串。</p>
 <p>对于数据结构的存储，一般可以用链表或者数组，两者在查找、插入和删除操作的复杂度上各有千秋。在基于Java的高性能分词器HanLP中，作者使用双数组完成了Trie树和自动机的存储。</p>
@@ -410,6 +410,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -443,10 +447,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -825,6 +825,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

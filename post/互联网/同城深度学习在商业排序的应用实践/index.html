@@ -224,7 +224,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0c8a147fe2454d448e6feb64388bff7e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271708625.webp" />   
     </p>
 <blockquote>
 <p>文章作者：覃然斌、王科 58同城</p>
@@ -235,12 +235,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="01-系统框架"><strong>01 系统框架</strong></h2>
 <p>本文介绍深度学习在58商业排序CTR预估建模中的一些实践经验，主要聚焦于房产场景，从样本数据构建、模型算法迭代和线上推理优化三方面进行阐述。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0b70af221f714d639d1a0fde92dae491.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271708381.webp" />   
     </p>
 <p>商业服务的主要排序场景</p>
 <p>商业排序系统框架如下图所示，分为离线和在线两部分，离线部分包括：离线与实时基础特征计算、特征中心同步与管理、原始样本串联、特征工程、训练样本构建、模型训练与评估、模型分发等环节。在线部分流程包含基于请求数据从特征中心拼接原始样本、特征工程、模型打分、平滑校准、业务规则调整重排及日志记录等环节。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9c02f45ed2f14a0190a4549010d9267b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271708190.png" />   
     </p>
 <p>商业排序系统框架</p>
 <h2 id="02-样本数据"><strong>02 样本数据</strong></h2>
@@ -249,7 +249,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="-基础特征"><strong>① 基础特征</strong></h4>
 <p>基于对用户行为模式及业务场景特性的理解，以房产ctr建模特征为例，考虑相关性、多样性、时效性、权威性等方面，从用户、客户、广告、上下文4个维度上，我们构建了如下基础特征体系[1]：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/938994f79c9040ba9403e1fb7d443593.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271708397.webp" />   
     </p>
 <p>房产基础特征体系</p>
 <p>基础特征构建过程中尽量贴近业务特性及用户场景；如为避免帖子在首次上线的情况下曝光太少，按帖子属性拆解，加入所属小区、商圈、区域、广告主等点击率特征；针对到市场上头部经纪人广告主，加入广告主帖子量、广告主帖子平均价格、广告主管辖小区数等特征。用户第一视觉决定了点击意愿，我们加入了title首词的embedding的表征。用户对看过的房源会有过载性，找房又是一个持续时间较长的行为，同时频控是短时的绝对过滤，我们加入帖子给用户展过的次数及用户点击过的次数，避免同样的帖子对用户持续无效的曝光，增加看到新房源的概率。基础特征工程常规流程使用标准化、归一化、连续分段、稀疏过滤、离散聚类和非线性transform等处理手段，与业界大多公司流程一致，这里不做过多说明。</p>
@@ -264,7 +264,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="03-训练样本"><strong>03 训练样本</strong></h2>
 <p>在得到原始样本的基础上，训练样本构建主要分为清洗、采样两个环节。样本清洗我们提供了用户、曝光、点击三个维度的清洗，在曝光、点击、转化维度进行爬虫过滤、异常过滤、计费反作弊过滤基础上，我们会按ctr/cvr维度进行过滤，按百分位对头部用户进行截断，避免高度活跃用户对loss的影响。同时，相近上下文情况下，用户存在完全相反两种操作，如同一房源用户早上看房的时候点过了，晚上再找房的时候不点了，为了避免模型把样本学偏，这个时候我们会按user_item对其进行过滤掉。我们实践中采取的样本处理流程如图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/db9470fac5ab4218892d382f708f9e0b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271708242.webp" />   
     </p>
 <p>样本处理流程</p>
 <p>通过探索实践我们的框架支持样本采样方法的灵活配置，包括均匀采样、正采样、pv维度、user维度采样组合、非点击采样、曝光采样以及各组合采样等。</p>
@@ -279,7 +279,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>通过样本采样会修改了线上线下数据分布，ctr在迭代过程中线上线下样本存在天然的diff，模型具有贪婪性，出现频率越高，记忆效果越好，导致倾向于把高pv、高点击的结果往上推，但是存在其它点击率很高（曝光5次点击2次）的优质广告由于曝光过少导致一直推不上去；此外我们用的采样数据都是截断给用户的，经过模型作用后有偏的，不断形成负反馈，偏离越来越大，模型效果上线后会逐渐衰减，这种排序系统公平性问题Google 在2019年探索了[3]基于随机化实验的pairwise comparisons来度量推荐公平性，并基于此指标提出了正则化方法以改善模型推荐的公平性。同时，58列表页帖子存在同质化现象，用户的兴趣边界并不明显，可能存在误点，未点击也并不表示用户不感兴趣，点击的随机性就会偏重，但是构造训练样本时label却是0和1的区别。所以针对公平性及随机性，我们在处理样本的时候探索采用了候选采样。但是，只使用有行为的用户样本，模型就只能够学习到活跃用户或者有意向用户的行为习惯，这就导致线下数据与线上数据分布有偏差，所以需要根据各自业务场景下线上的AB-test效果来决定最终采用什么样的采样方式。采样后线上模型打分会产生偏移，ctr上涨但是cpm却下降，我们会通过插值法对其进行校准，带来cpm明显提升。最后，测试集的选取，尝试了N窗口训练，N+1测试，以及也参考Google做法[2]选择用户最后一次行为作为测试，避免穿越问题离线虚高，后者选取策略更优。</p>
 <p>最终，我们将采样算子集成到pipline框架中，样本生成框架提供了从原始特征产出到最终训练样本生成的一键配置化方案，包括workflow管理、pipline管理、多源IO、输入解析、样本过滤、样本各维度原始特征串联、特征处理、采样、特征选择等各环节，配置实例如图4所示。大幅降低多条业务线样本生成的迭代成本。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/48c174898d524572a0a7ab76cab556d1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271708211.webp" />   
     </p>
 <p>一键配置化样本生成框架</p>
 <h3 id="小结"><strong>小结：</strong></h3>
@@ -288,7 +288,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>2016年6月，Google提出了后续在工业界影响巨大的Wide&amp;Deep[4]模型来预估点击率并取得了成功，2017年开始我们也逐步从基于ftrl 的online learning切入到深度学习的探索。根据58不同业务特点我们探索并差异化落地了一系列深度学习算法，首先探索并迭代了基于大规模ID特征的Wide&amp;Deep，沿着Wide&amp;Deep特征工程化的思路，历经Deep&amp;Cross[5]，FNN[6]，DeepFM[7]，NFM[8]以及多任务的ESMM[9]模型等，但是从特征工程化角度尝试尽可能多模型后，单模型结构对业务指标提升逐渐遇到天花板，更需要通过模型直接从数据中挖掘到潜在的内因并探索结构上的改进，如引入attention和序列模型。围绕数据的挖掘我们落地了基于序列数据引入attention的DIN[10]，探索了兴趣演化的DIEN[11]和长序列MIMN[12]等。下面对我们模型选型的演化路径及实践的一些经验进行简要介绍。</p>
 <h3 id="1-widedeep"><strong>1. Wide&amp;Deep</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/685a5401566d459981d471e5243e8cb1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271708119.webp" />   
     </p>
 <p>wide&amp;deep网路结构</p>
 <p>Wide&amp;deep网络结构如图5所示，它由浅层模型wide部分和深层模型deep部分进行联合训练构成，让模型同时具有了记忆与泛化的能力。记忆能力就是模型学习并利用历史样本中特征的交叉出现频率的能力。如回龙观与西二旗共现频率很高，用户点击了回龙观的房子就赋予相应西二旗房子更大的权重，这种复现是强特征，其权重会在模型训练过程中会调大，实现对此特征的直接记忆。而对于NN来说，特征会经过多层交叉，对这个特征的记忆就会弱化了，这时候就需要deep层通过神经网络深度发掘数据中的潜在模式，平滑推荐结果。</p>
@@ -298,13 +298,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="2-deepfm"><strong>2. DeepFM</strong></h3>
 <p>在点击率预估中，用户意图和商品的匹配程度是最为核心的问题，将item和user根据业务知识进行组合是常见的处理方式。例如，候选帖对用户在价格偏好、厅室、商圈偏好组合是否满足，这种包含两个或多个维度信息交叉的特征是记忆关键。DeepFM使用FM对Wide部分作了替换，其表达式如公式(1)所示，通过自动组合二阶特征避免人工组合特征的费时费力与覆盖不足问题，使得模型捕获到更多特征之间的二阶影响。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a7b8fa2fdd184161915c585645ab9e75.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271708743.webp" />   
     </p>
 <p>DeepFM仍然保留了大部分Wide&amp;Deep的调参动作。相对FM二阶交叉存在的模型爆炸问题，对三阶扩展无能为力。NFM利用神经网络替代FM二阶隐向量内积部分。NFM也是Wide&amp;Deep的改进，对Deep部分加入特征交叉池化，加强了特征交叉。随着模型算法迭代提升空间逐步收窄，线上AB-test几乎没有增长，还增加了推理耗时。在这种情况下，更需要思考如何能够让模型围绕原始数据挖掘，从数据中获取影响优化目标的潜在因子，例如通过attention根据当前候选帖子动态表征用户。在学术界浙大通过在特征交叉与池化层之间引入注意力网络，提出了含有注意力机制的FM模型AFM[13]。工业界阿里版本基于业务观察理解，通过候选帖子与用户历史反馈生成注意力权重，提出了DIN模型，其根据具体业务场景和数据特点为出发点，是我们在结合自身业务分析后选择探索并落地DIN模型的原因。</p>
 <h3 id="3-din--dien"><strong>3. DIN &amp; DIEN</strong></h3>
 <p>用户的交互历史能够高效的刻画用户的兴趣偏好，在3.1特征工程中我们提到根据airbnb做embedding思路生成高阶特征也是从用户行为空间获取帖子的表征，但它对用户历史反馈的帖子没有区分重要程度，也没有根据候选场景动态进行用户表征。租房场景中，用户的交互序列有效的反映了用户理想的房源，帖子序列间接的反映了用户偏好房源中的共性。在不同的候选场景下，用户对小区、商圈、区域、厅室、价格等反映出的兴趣度是不一样的，我们需要用候选帖子去用户交互历史捕获其兴趣权重，即在不同场景下用户的多元化意向，增强点击率预估的准确性；DIN模型网络结构如图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3ed8b1f0f2dd4ae487dd588cc57a50ad.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271708207.webp" />   
     </p>
 <p>DIN网路结构</p>
 <p>模型通过attention机制来对用户历史反馈序列数据进行建模，不同的交叉计算出预估时请求的候选商品与用户交互历史中节点的匹配程度，然后通过加权求和来得出候选商品与用户历史兴趣的匹配程度。数据方面，我们通过Flink根据用户行为构建了房源，小区，商圈，区域和价格等sequence，用户序列行为的采集可以做到秒级延迟。特征处理过程中不使用原始值而对序列元素中的连续值进行分段能取得更好的效果。根据统计的用户点击次数分布和线上推理性能考虑，序列长度选择最近邻20个条记录，长度不足20，则使用缺失值进行填充。</p>
@@ -313,7 +313,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="4-multi-task"><strong>4. Multi-Task</strong></h3>
 <p>广告预估场景中存在多个预估任务，比如ctr/cvr。既考虑到多个任务之间的联系和差别，我们利用Multi-TaskLearning的思想，同时预估点击率、转化率。原有cvr模型面临正负样本不均衡导致难以建模的问题，大量的负样本占据了模型中的多数参数，而对少量的正样本学习欠缺。解决正负样本不足通常使用样本选择来降低正负样本不均衡问题，通常有正样本正采样和负样本负采样，但是采样后不仅破坏了原有的数据分布，且负采样会带来信息的缺失。因此，传统的CVR模型都基于点击数据进行建模，虽然改变了原有的分布，缺失了部分信息，但是大大的降低了样本的不平衡性。然而基于点击进行CVR的建模往往也带来了一些问题，例如样本的选择偏差和训练样本的高度稀疏。偏差由于训练数据和测试数据分布不同，导致预测时的泛化性能降低；训练集只是训练空间中的少量部分，导致训练数据稀疏，模型难以拟合。我们选择了多种行为路径的联合建模-ESMM[11]来处理我们的业务场景，其网络结构如图7所示，ESMM模型使用两个辅助任务来对CVR问题进行建模，分别为CTR与CTCVR。由于CTR和CTCVR的加入，ESMM模型可以使用整个样本空间进行建模，因此后面的CVR问题也由整个样本空间得来。CTR、CTCVR模型两个部分共用的Embedding，使得CVR的信息更加丰富，更能够对真实的ID进行刻画。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ce85b8daf02e47f1a50ea5e67b857e6a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271708824.webp" />   
     </p>
 <p>ESMM网络</p>
 <p>这部分线上AB-test业务数据没有取得预期的增长，还待进一步分析调优；但是从工程方面来看，一个网络同时返回ctr和cvr，极大降低资源消耗，是很有意义的工作。</p>
@@ -323,13 +323,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>任何算法的落地都需要强大的系统工程能力去支持和实现，广告系统中用户请求曝光要求极高的时效性，我们场景对精排环节要求平响&lt;15ms，TP999&lt;50ms，加上反序列化解析及网络耗时，服务内部耗时约束时间实际更短。随着深度学习的落地、特征数增长、特征处理及网络结构复杂度的增加，我们线上性能受到了较大的挑战。算法工程师的目标是在公司给定资源约束下，以线上落地为目标，寻找并实现最优的解决方案，所以我们需要计算我们迭代的ROI，以较小的成本获取较大的收益。GPU主要应用在计算密集程度高、实际业务场景中QPS较低的语音及图像上面，在广告排序这种高并发请求、数据高度稀疏的场景下，GPU增加不必要的成本、复杂性和内存限制（CPU预处理-&gt;CPU-GPU传输-&gt;GPU计算），没有体现深度学习的性能优势，所以我们线上推理都是基于CPU进行的。下面说一下我们在基于CPU的深度学习系统工程中一些实践经验。</p>
 <p>58商业排序系统框架整体如图2所示，其中线上精排pipline如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fffbe0f708ee449891dcd725e247e73a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271708586.webp" />   
     </p>
 <p>精排处理流程</p>
 <p>线上请求过来之后，首先构造原始样本数据，根据PV请求信息拼接特征中心(请求redis或DMP)构建各维度的特征抽取上下文，对生成的上下文数据使用我们配置的各类型算子对原始样本进行特征抽取，然后对得到的样本数据进行协议转换，调用模型计算进行打分，然后进行结果调整（对打分进行平滑校准、根据业务及规则进行重排等），最后构造返回结果。</p>
 <p>针对深度学习推理服务优化我们从模型算法层、业务应用层、系统计算层三个方面开展，虽然模型算法优化也很有效，但是不同的参数就能导致性能观测大幅波动，如embedding size 大小会大幅影响模型大小、训练速度和推理速度，一个hashbucketsize参数也会对线上推理造成很大的影响，这就导致针对算法层的优化不具有通用性。在算法层针对性的调参优化后，我们主要从业务应用层和系统计算层加速提升服务性能。我们的优化点如图9所示，下面从应用层与系统层展开说明。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2f37443c8d964781895b4f3cc4899bb3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271708016.webp" />   
     </p>
 <p>线上服务优化</p>
 <h3 id="1-应用层"><strong>1. 应用层</strong></h3>
@@ -338,12 +338,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="-统一特征预处理"><strong>② 统一特征预处理</strong></h4>
 <p>Tensorflow提供了很多方便好用的特征处理接口，如 tf.feature_column直接输入原始数据，在建模时给予我们极大的特征工程便利性。Feature column是原始数据到模型可接受数据的连接桥梁，将原始的数据转化为模型可以接受的dense tensor，如图10所示，包含了连续值分段，离散值映射等功能将原始数据转换为0~N的连续整型数据，然后再通过indicator或embedding转换为模型可接受的dense tensor。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0967ebe82e664b76b3a85a7ccdd0ac4a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271708594.webp" />   
     </p>
 <p>feature column 特征工程接口[图来着tensor官网]</p>
 <p>Tensor训练时耗时如图11，其中红框为特征转换，蓝框为前向计算，绿框为梯度更新。这部分线上线下一致，统计后数据表明特征转换耗时约占整个从输入到预估耗时将近20%。将特征转化作为模型计算的一部分，极大的影响了训练和推理时的性能。因此，我们将模型计算中的特征转化统一拆分到特征处理框架中。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cf34e80e6a0e491087f8868264779119.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271708230.webp" />   
     </p>
 <p>深度学习模型计算耗时统计</p>
 <p>在深度学习算法上线之初，我们沿用的是已有的特征处理框架，该框架主要面向lr/xgb模型进行设计，其中：缺失值用-1表示，特征值返回为整型。Featurecolumn使用vocabulary或hash_bucket将原始特征值转换为0N的连续整型数，同时hash_bucket过程会将原始输入转换为字符串类型后再进行hash，然后取模得到0N的连续整型数据，包含了额外处理。原有特征抽取框架返回了默认值-1，由于缺失值为-1和特征值的不连续导致即使有限的整型数据也需要使用vocabulary进行重新映射；特征处理框架中字符串数据hash为整型后的vocabulary映射；特征处理框架中字符串hash为整型后，featurecolumn转化为字符串后再hash等过程，这些处理极大影响模型训练与推理性能。此外，放在计算密集的模型计算去进行特征处理，资源无法平滑扩展，每个epoch都会重复处理，也不利于调参。针对这些问题，我们优化统一特征处理lib，解放计算性能，缺失值统一由0替换；支持特征值偏移操作；类别特征转换支持vocabulary与hash_bucket映射；连续数据通过指定分段方式输出0~N的分段索引值。分离后将特征工程交由专业的大数据框架进行处理，训练样本直接通过spark生成训练需要的tfrecords格式，通过spark的并行性，大幅加快了训练样本生成，大大降低了训练耗时。同时，去除了feature_column层的依赖，线上特征处理资源也能平滑扩展，模型推理也得到较大提升。</p>
@@ -541,6 +541,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -574,10 +578,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -956,6 +956,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

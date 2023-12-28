@@ -217,7 +217,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="架构总览">架构总览</h2>
 <p>首先从总体上预览一下paper提出的EBR系统的架构 (Embedding-based Retrieval System):</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-333f0bfb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281827454.png" />   
     </p>
 <p>EBR系统架构图示意图</p>
 <ul>
@@ -261,19 +261,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>最常用的就是k-means聚类，通过聚类后的 <strong>聚类中心向量</strong> 来近似 <strong>量化</strong> 原始的向量。 <strong>聚类中心的个数</strong> 即为 <strong>codebook大小</strong>。因为量化的存在， <strong>任意两个向量之间的距离</strong> 可以通过对应的 <strong>量化向量的距离</strong> 进行近似，也就是聚类中心向量的距离。因为聚类中心的个数 <strong>小了</strong> 很多，故计算距离的复杂度也下降了很多。（显然，这种方式太粗糙了，误差很大。除非聚类数非常大，极端情况下，聚类数等于样本数时，每个样本一个聚类簇，此时无误差，但是没有起到减少计算复杂度的目的）</p>
 <p><strong>聚类量化的结果：产出聚类中心向量的过程对应train的过程的一部分。量化后，每个向量都可以用聚类簇中心下标ID</strong> 来 <strong>标识</strong>，根据ID可以获取聚类簇的中心向量。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-ab4a62d2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281827478.png" />   
     </p>
 <p>聚类量化过程示意图如上图所示，N个向量，通过聚类量化产生多个聚类中心，每个向量属于某个聚类簇中，那么就用该聚类簇对应的中心向量来量化该向量，可以用聚类簇中心对应的下标ID来表示，比如：C1量化vec1。</p>
 <p>Faiss中对应的实现是 <strong>IndexIVFFlat。</strong></p>
 <h4 id="乘积量化">乘积量化</h4>
 <p><strong>动机：即：PQ量化，很多时候我们向量不同部分之间的分布不同</strong> 的，比如下图(3段向量)，因此可以考虑对 <strong>向量分段</strong>，并分别进行 <strong>分块量化</strong>。这个只是直觉原因，本质原因下文讲。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-0366b7e2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281827197.png" />   
     </p>
 <p><strong>乘积量化定义</strong>：将向量分成m个不同的部分，对每个部分进行向量量化,假设平均划分，则每个部分的维度大小为：D^{\star}=D/m；一个向量，可以划分为m组向量，第i组向量形如：[x_{i\_1},x_{i\_2},…,x_{i\_D^{\star}}]，每组的codebook为C_i，对应的量化器记为q_i, (\forall q_i(x_{i^{\star}}) \in \mathcal{C_i})。则最终的全局codebook就是\mathcal{C} = \mathcal{C_1} * \mathcal{C_2} &hellip; * \mathcal{C_m} ，乘积量化的名称也来源于此。</p>
 <p>分块量化也可以采取聚类量化来实现，则 <strong>分块聚类中心的个数</strong> 即为 <strong>分块codebook</strong> 的大小。相当于在这个方法下，对每个向量，有【 <strong>m个分块向量】来量化它，即：【m个分块聚类中心向量】</strong>。 <strong>示意图如下：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-581ca021.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281827464.png" />   
     </p>
 <p>PQ量化过程示意图</p>
 <p>如上图所示，将原始向量等分为m组分块向量，每组都进行聚类量化，那么每个向量就有m个分块聚类中心向量来表示，比如vec1用C_{1-1}, &hellip;,C_{m-2}, &hellip;, 共m个向量来量化。</p>
@@ -307,7 +307,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="倒排索引">倒排索引</h3>
 <h4 id="索引结构">索引结构</h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-75bdeac3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281827253.png" />   
     </p>
 <p><strong>建立从粗粒度聚类中心id 到 doc的映射关系，其中doc的信息包括：向量id</strong>， <strong>向量的残差量化code。每个doc通过粗糙聚类中心id和残差量化code就能知道原始向量如何映射到量化向量。</strong></p>
 <p>整个倒排索引不需要存储原始向量本身，索引结构存储的内容：</p>
@@ -321,7 +321,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="索引构建过程">索引构建过程</h4>
 <p>搜索场景中，y可以理解为doc。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-f4f4a76c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281827927.png" />   
     </p>
 <ul>
 <li>通过粗糙量化器 q_c将向量 yy 映射到q_c(y)，即粗糙量化。这样就知道挂到哪个链表上了。</li>
@@ -332,7 +332,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="搜索过程">搜索过程</h4>
 <p>搜索场景中，x可以理解为查询向量。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-b9436aee.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281827809.png" />   
     </p>
 <ul>
 <li>通过粗糙量化器来量化 <strong>查询向量x</strong>，即：找到离x最近的w个粗糙聚类簇。实际上是用于 <strong>限定搜索的范围</strong>，只搜索w个粗糙聚类簇ID索引下的向量。w是个超参数，即nprobes，量化的结果 <strong>对应term 1。</strong></li>
@@ -357,7 +357,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>query侧</strong>：定义 <strong>Term-level</strong> 的布尔表达式来表示query。举例：下述query主要返回doc的文本中有john和smithe字眼，并住在seattle和menlo_park的用户。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-94d43f5d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281827717.png" />   
     </p>
 <h3 id="向量检索">向量检索</h3>
 <p>为了支持embedding，需要扩展 <strong>doc和query的表示</strong></p>
@@ -517,6 +517,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -550,10 +554,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -932,6 +932,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

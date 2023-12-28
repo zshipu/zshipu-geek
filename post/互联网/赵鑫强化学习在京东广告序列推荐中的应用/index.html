@@ -192,7 +192,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a6ad2917d13c4de7bf6a9f93c9cfd22f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850930.png" />   
     </p>
 <blockquote>
 <p>分享嘉宾：赵鑫博士 京东 算法工程师</p>
@@ -209,30 +209,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h1 id="01-推荐广告排序现状与技术选型"><strong>01 推荐广告排序现状与技术选型</strong></h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1c688a9b5fec4fcfbca8d62af92c4b7a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850823.png" />   
     </p>
 <p>为了提高变现效率，我们的技术演进路线是从最初的对单物料的排序优化，到请求级别进行序列的整体优化，最后是会话级别的广告拍卖机制优化。其中请求级别的序列整体优化，经历了从前向贪心搜索到序列生成和评估的演进过程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f4cfea2580b04084832ad14909ff867a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850728.png" />   
     </p>
 <p>对序列进行优化，就是要对候选集的排列空间进行优化。理想的状态下是对候选集做全排列，用全局的序列评估模型，把所有的排列方式都评估出一个打分，选出全局最优序列。但这种方式难以实现，因为序列的组合空间是爆炸的，线上耗时高导致框架无法落地，所以考虑如下两种思路。</p>
 <p>第一种是做序列的前向贪心搜索，不考虑序列的整体优化，每一次只是根据上一个item选择了什么，把它作为上文信息，然后贪心的逐个选取当前位置最有价值的一个物料进行排序。可以利用类似beam search的贪心搜索。这种前向贪心建模方式的缺点在于，决策过程和请求模型的过程是分开的，每做一次决策，就需要请求一次模型，线上就会反复的进行模型的调用，时间开销大。</p>
 <p>第二种优化的思路，是对整个候选集的全排列做筛选，筛选出一些很有可能成为最终比较优的候选序列集合。候选序列集合做一个序列的全局评估，选出一个近似最优的序列。第一步，如何筛选？可以使用启发式的人工规则，或者基于业务逻辑的启发式生成方法，获取候选序列集合。进一步可以做一个模型化的序列生成。优势在于，序列的全局评估模型可以看到上下文信息，对CTR的预估更准确。可以先生成序列，再对所有序列一次性预估，控制线上耗时。如下图表，对上面优化方案的耗时进行了对比。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c1cd3e7c578842fd9a520d4d4d102114.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850648.png" />   
     </p>
 <p>第一种是用上文作为context或者和会话里面的其他序列的上文都作为context，逐个的贪心来选取，这样模型的耗时是序列长度L乘以候选集的大小N。第二种用context DNN + beam search的方法,保存贪心搜索过程中的top 部分，因为探索了额外的分支，所以耗时变成W倍，如果W选择足够大，可以接近理想的优化能力。第三种是把所有的排列都枚举，然后加上一个序列评估，这是理想的方式，但复杂度极高。第四种是序列生成加上评估选优，近似全局搜索，只进行一次模型调用，优化能力比较强，兼顾了线上性能和优化能力。</p>
 <h1 id="02-context-aware-ctr重预估"><strong>02 Context-aware CTR重预估</strong></h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d52258cfc9464a3587556d608b559b8c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850418.png" />   
     </p>
 <p>Context-aware预估，第一步就是贪心的前向搜索，如图，每放一个sku，就把它当成上文，再重新预估一次，再选第二个、第三个sku。这样训练Context-aware CTR模型，也是一个只有上文信息的模型，跟普通CTR模型没有太大差别。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/617a582b66c84feebfcbd4815df0eda0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850424.png" />   
     </p>
 <h1 id="03-基于强化学习的序列优化"><strong>03 基于强化学习的序列优化</strong></h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/48dc6ea0b07b422c8464ae60d831ce65.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850465.png" />   
     </p>
 <p>第二个思路，是序列生成加序列选优的集成框架。有两个问题需要解决：</p>
 <ul>
@@ -242,12 +242,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>因此设计了两步上线流程。先解决相对比较简单的序列评估问题。Ranking base的序列和打乱顺序的序列是有差别的。但基于Ranking方式生成的样本训练对的模型虽然是有偏的，我们也认为是可以接受的。先用Ranking Base方法生成的样本去徐莲序列评估模型，然后在线上使用这个模型对样本做小流量序列选优，配合随机的策略和启发式序列生成策略，这样线上的一部分流量生成一些打乱顺序的样本，这样的小流量的样本落盘下来，再去retrain序列评估模型。迭代一段时间之后，就把随机策略叠加启发式策略，跟序列评估模型配合上线。</p>
 <p>第二步是解决如何让Actor自学习的问题，目标是让生成模型倾向于生成出一些更好的序列被评估模型选出来。序列生成模型要做的是模拟评估模型选取的序列的样子。第二阶段主要是上线了序列生成模型和蒙特卡洛采样序列生成算法。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2f1195860c77403cb0a5b6da838dafe2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281851144.png" />   
     </p>
 <p>序列生成和评估模型结构设计如上图右半部分，底层是特征抽取，往上是PointDNN结构，Point DNN是对每一个item单独抽取特征，把这些稀疏的embedding转化为dense feature，得到绿色的item的特征向量，然后在序列评估模型里，把序列对应的向量抽取出来组成一个序列，上面进行序列的attention操作，将最相关的特征高亮出来。最后，输出预估序列里每一个item的预估点击率，item的预估点击率会和它的出价、多样性等业务指标融合成一个最终的得分。</p>
 <p>序列生成模型建模过程如下。首先把整个候选集的集合作为生成模型的输入，把所有候选集中item的特征做max pooling处理后的特征向量作为候选集合的特征向量，去和每一个item的特征向量拼接起来，得到一个新的特征。新的特征去经过几层DNN，最后得到一个表。如图举例，假设一共有五个item，序列长度是四。如上图左上的表格，按行来看表示的是每一个item出现在当前这个位置的概率，按列来看表示的是item出现在不同位置的概率。模型训练使用2D softmax的交叉熵loss。如果一个item在候选集里被选中了，并且是出现在第一个位置，它的第一个位置的label就是1。如图，SKU1在第一个位置label是1，SKU2在第三个位置label是1。训练完成的模型在线上预测过程中预测采样频率，用一个受控的temperature参数来控制这个采样频率。按照这个表去生成序列，逐个位置去采样多次生成多个序列。举例来说，生成第一个位置需要的SKU，类似扔一个骰子，如果小于0.9，SKU1被选中，如果是0.9到1，SKU2被选中。第二个位置去除第一个位置已经出现过的SKU，进行重新归一化，再采样一次，这样可以生成多个候选序列。再把这些候选序列与启发式的或者随机生成的序列融合起来，变成一个序列的候选集，统一交给序列的评估模型去评估，选出一个最好的序列。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6a9835352f4348c684ad5c0dbcc9ebed.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281851890.png" />   
     </p>
 <p>强化学习解决的是在策略空间做探索以得到新的更好的策略的问题。序列生成和序列评估是互相迭代的，因为如果序列生成不是一个好的模型，序列评估就只能在一个差的候选序列集合里面选择。如果切换其他的模式上进行探索，序列评估模型可能会在新的模式下不准，有可能把错误的东西推给用户。序列评估模型在探索模式下变好了，序列生成模型就会学习到新的生成策略，会在一个序列评估模型不准的地方去学习，直到序列评估模型模型变准为止。所以这是一个交互迭代的过程。模型上线过程有三个指标用来监控：</p>
 <ul>
@@ -258,7 +258,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>线上监控可以看到，按天来观察，这些指标都在上涨，可以让生成和评估模型变得越来越准。这个算法有两个生效位置，一是推荐广告内部的重排，二是广告和自然推荐的混排。</p>
 <h1 id="04-会话级别广告拍卖机制优化"><strong>04 会话级别广告拍卖机制优化</strong></h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8b98ed8674a046cfbcb0b0b9a0b281b6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281851621.png" />   
     </p>
 <p>基于序列推荐和评估选优的机制，可以解决通用推荐问题，但是在广告业务里有一定的问题。受广告竞价机制的限制，我们只能让广告先计费，然后再重排。广告主允许平台收此费用，应该是让sku展现在当前这个位置需要花的钱，确定了费用之后又改变位置不太合理。计费机制既不满足广义二价计费，又不激励相容。而且，序列生成加评估选优的机制，只能量化请求内的若干个SKU排列的价值，没有办法量化会话内部的长期价值，所以我们需要实现会话级别的广告拍卖机制，优化此问题。</p>
 <p>拍卖机制有几个设计原则：</p>
@@ -275,7 +275,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>解决第一个难点，这里的方案把actor做成更大的模型，使用CV领域的模型mixer MLP，它很适合集合建模。第二个难点的解决方案是，把业务reward以某种方式融合到loss function里。分位次的序列采样和分位次的广告拍卖，有非常大的共同之处。分位次序列采样是对每一个位次有一个采样概率，分位次的广告拍卖，是对每个位次给出每一个竞争商品的数值得分。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d9f39eb25c4f4b82abbeedd81bb8a718.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281851945.png" />   
     </p>
 <p>这里类似序列生成模型的结构，只是它的backbone网络变成更大更复杂的mixer MLP，模型的输出是一个像右边蓝色的表格，对于每一个SKU在每一个位置有一个得分，模型训练的reward融合了当前广告收入，远期广告收入，推荐的多样性，以及所有要考虑的业务指标。广告拍卖是一个二价计费过程，但是二价计费过程并不是每一个SKU都只有一个得分，并根据此打分做排序。举例说明，第一个位置应该胜出哪一个SKU。如图，第一个位置应该胜出得分等于9的SKU1，它计费应该是Sku1的bid <em>2÷9，因为第二名的SKU的得分是2。第二个位置的拍卖不取决于第一行，而是第二行，应该胜出SKU3，它的计费是SKU3的bid</em> 1.2÷6。</p>
 <p>每一个位置只根据模型在这个位置的打分来做排序和计费。因为每个sku在每一个位置的得分是不同的，所以可以解决分位次拍卖的问题。此外，Mixer MLP适合集合建模的原因是，它可以对每一个item都有一个特征抽取，在每一个block中对每一个item的dense feature做特征交互，因此它既能把集合的共有的特征建模到item当中去，又能保持每一个item的独立性，让每一个item能够计算出自己的得分。模型训练过程与序列生成模型基本一致，用一个2D的softmax的loss function来训练，只是把点击，广告收入等一系列业务指标融合进来，变成一个reward base的softmax。</p>
@@ -418,6 +418,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -451,10 +455,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -833,6 +833,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

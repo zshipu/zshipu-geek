@@ -215,10 +215,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>推荐系统几乎已经深入到人们生活的方方面面，其背后的算法也在不断地迭代更新。FM 和 FFM 模型是最近几年提出的模型，拥有在数据量较大并且特征稀疏的情况下，仍然能够得到优秀的性能和效果的特性。</p>
 <p>新浪微博 AI Lab 资深算法专家张俊林，在 2018 年全球人工智能与机器学习大会 AICon 的演讲中，着重探讨了几种排序模型的发展及原理。AI 前线将本场演讲内容进行了整理，希望能够对读者有所帮助。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ccfc10dc6ed042fc9f7e9e4437898608.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271556709.jpeg" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e6277b1bba364343a4e4d496ba1aea03.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271556206.png" />   
     </p>
 <p>今天我们主要介绍一下，FFM 和它的深度学习模型版本。今天我要跟大家分享的一个大的提纲。</p>
 <p>首先，我会给大家介绍一下大规模推荐系统的整个流程框架和其中一些比较核心的技术点是什么。</p>
@@ -231,12 +231,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>推荐系统大家实际都非常熟悉了，因为大家现在都用手机 App，我觉得只要是上网的话，70% 的时间你一定会受到推荐系统的影响，只不过你可能没有意识到它的存在。</p>
 <p>举几个典型的例子：网易云音乐的音乐推荐，我个人觉得网易音乐的推荐做得是相当不错的；此外还有豆瓣的电影推荐、阿里商品推荐等等，我这里只列了几个比较典型的，主要是大家可能平常比较关注的一些场景。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dfd1c7d88e01436f9efa76ed0fc6d02c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271556050.png" />   
     </p>
 <h3 id="以微博为例常见推荐系统场景">以微博为例：常见推荐系统场景</h3>
 <p>因为我来自于微博，所以我简单地介绍一下，在微博有哪些场景是应用推荐、CTR 以及排序任务的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7db8aac366084dc28b33fd54a8620f78.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271556790.png" />   
     </p>
 <p>典型的有三个场景。你如果刷微博就会看到，第一个就是关系流 Feed 排序。从 2013 年开始我就在微博工作，当时的版本是按时间排序，但后来因为国外的 Facebook、Twitter 都陆续上了机器学习的 ranking 机制，所以说现在微博的关系流实际是加了机器学习排序的。可是时间因素在其中还是起着很关键的作用，这种场景对于机器学习模型虽然有使用，但是有限制，限制就是排序对时间权重还是比较高。</p>
 <p>另外一个是热门流。这个是比较典型的、完全个性化的一个流，因为它给用户的推荐是不需要用户关注的，只要认为通过用户过去的点击行为，判断其可能对什么感兴趣，就会给用户推荐，这是一个完全个性化的信息流。</p>
@@ -247,7 +247,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>尽管我说是以微博为例，但是我可以肯定的说，目前工业界 90% 的推荐系统就是这个结构，只不过可能在有些具体算法和实施方式上有些区别，但是架子大都一个架子。</p>
 <p>我简单捋一下这个过程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d4487db6df63445dbbb20b68a40408d3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271556176.png" />   
     </p>
 <p>首先它分为两大部分，最上面那部分是在线推荐部分，底下这两行是离线部分。</p>
 <p>先说在线部分。我们习惯把微博叫做物料库，实际就是 item，物料库的规模会比较大，一般会先走个召回，为什么要走召回？做过推荐的人都很清楚：要给微博的用户认可一个人在热门流推出任何一个个性化的序列，假设一天新发的微博条数以亿计算，再加上历史的条数，任何一个人登上微博去刷热门流，都需要算几亿条给这一个人，如果不部署召回，直接部署模型，这个计算量是很巨大的，速度根本提升不起来。</p>
@@ -259,7 +259,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>现在我们来细致地看一下在线部分。</p>
 <p>我刚才说了三个过程：召回、粗排、精排，但是最常见的还是两个阶段的，就这张图展示的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5e22e151ee4e42c891280775900ad147.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271557240.png" />   
     </p>
 <p>第一阶段，召回，第二阶段，排序。我再重复一下：召回是用来做什么的，它的特点是什么，ranking 在干什么，我觉得搞推荐系统，先要把这些事搞明白。</p>
 <h4 id="召回阶段">召回阶段</h4>
@@ -269,7 +269,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="排序模型工业界算法的演进路线">排序模型：工业界算法的演进路线</h3>
 <p>CTR 模型、推荐模型发展的历史很久了，举个例子，百度搜索部署广告系统，同时也部署了 CTR 的预估系统，到目前为止应该有十几到二十年的经验了。那么我们要归纳一下，公司做推荐的话，模型是按照一个什么样的轨迹发展的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/39fac6c862fe44e3a21f19c11692f6fb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271557858.png" />   
     </p>
 <p>举个例子，什么叫规则？这个规则可能和你想的规则不太一样，比如说给用户推荐最热门的内容，这是一种规则，此外还可以添加很多其他的规则。规则的好处是什么？特别简单，如果想通过一个规则去做推荐，三天就能上线，效果也不会特别差，训练速度快，而且还可能不需要有监督地去训练。但是如果后来的规则越来越多的话，问题就出现了，它们会相互冲突，系统的综合效果，很难往上提升，因为对于系统来说，很难有个明确的优化目标，这是问题所在。</p>
 <p>除了规则以外，业内一般会用 LR，也就是逻辑回归。LR 之后，一般就是 LR 加 GBDT。所有的 CTR 模型，它的核心就是特征组合，是怎么解决特征组合的问题，它的发展路径就按照这个方向发展。</p>
@@ -277,7 +277,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>再往后发展就是 FM。FM 跟 LGBDT 区别又是什么？它可以 <strong>全自动化</strong> 地做特征组合。目前行业都在讲用 DNN 深度学习来做同样的事，那么从特征组合的角度讲，又有什么新的特点呢？很简单，我们用 FM 的时候，因为一般计算量的问题，只做二级特征组合，那么什么叫二级特征组合？很好理解，举个例子，比如两个特征，一个特征是性别，假设“性别 = 女”，另外一个特征是时间，假设“时间 = 双十一”，这两个特征如果组合到一起，你会发现是一个非常强的指示，是用户会不会买东西的一个特征，这就叫二阶组合特征，因为有两个特征进行组合。</p>
 <p>那么 DNN 相对 FM 有什么好处？它可以捕获三阶特征、四阶特征、五阶特征；它也包含信息，FM 一般来说很难捕获高阶的特征，DNN 典型的特点是可以捕获更高阶的特征。按照这个路线往后捋，你要把握核心的一点是：特征组合自动化，包括更高阶的特征怎么融合进去，这是 CTR 模型进化的总体方向。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c41e5dd8b70140819831f5dc1514d298.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271557186.png" />   
     </p>
 <p>我再把后面要讲的内容捋一捋：</p>
 <ul>
@@ -299,27 +299,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h2 id="线性排序模型从-lr-到-ffm-模型">线性排序模型：从 LR 到 FFM 模型</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/09876ab09cda431a8dadf9ddb9e84b3c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271557068.png" />   
     </p>
 <p>我先介绍一下线性模型。大家可能都有些机器学习的基础，这应该是有监督模型中最简单的一个。</p>
 <p>所谓线性模型，比如说要做 CTR，很好理解，看这个公式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ce8e7a47cd804ab8a1dfa3ec58e916aa.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271557191.png" />   
     </p>
 <p>xi 就是某个特征值，意思要给每个特征给个权重；wi 给它个权重，最终的预测值就是所有的特征值乘以这个权重，加起来求和，这就是线性。</p>
 <p>一般我们做 LR，会套一个 sigma 的函数，也就是上图中黄色的曲线，因为线性模型取值范围已经不可控，可以无限大，所以没法用。通过 S 形函数把它压到 0 和 1 之间，我就可以判断，是正面的结果还是负面的结果，LR 就是这样的过程。</p>
 <p>那么线性模型有什么优点和缺点呢？因为它简单，所以好理解，上线快，速度快，这是它典型的优点。尽管我们到了深度学习时代了，但事实上，很多公司还在用 LR，因为它确实很好用。但它也有问题，我刚才讲了一句话：所有的 CTR 模型，核心是特征组合，但是上图的公式里看不到任何特征组合的迹象：单个特征配置权重，特征间的关系没有被发现，这就是 LR 最大的一个缺点。线性模型有这个问题，它不能够捕获特征组合，所以要改造一下这个公式，把特征组合揉进来。</p>
 <p>特征组合要怎么组合？任意两个特征的组合，可以把一个特征组合当作一个新特征，但既然它是新特征，它也要学个权重，下图公式中标红的 <strong>wi,j</strong> 就是这个特征组合的权重。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4c307b4aa17242058283eb3b3102186d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271557530.png" />   
     </p>
 <p>我们把特征组合显式的，简单的揉进了这个公式，所以它的好处是：现在能够捕获两两特征组合。那么它也有问题吗？刚才我们改进的模型本质是 SVM，所以应该再改一改，它的问题是特征组合的泛化能力弱，于是我们进一步进行了修改。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a0422236e3f9427fb1c625a8c4c94471.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271557379.png" />   
     </p>
 <p>前面还是一样，就是 LR 模型，后面的也是任意两个特征组合，和刚才公式唯一的区别在： <strong>原先的 wi,j，换成了 vi 和 vj 的点积</strong>。vi 和 vj 又是什么含义呢？vi 的意思：对于 xi 这个特征来说它会学到一个 embedding 向量，特征组合权重是通过各自的 embedding 的内积呈现的，因为它内积完就是个数值，可以代表它的权重，这就是 FM 模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6435356457c8420e83ced254fcdbbb2f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271557726.png" />   
     </p>
 <p>SVM 泛化能力弱，FM 的泛化能力强。如果要使用 SVM 的算法，因为 wi,j 没有见过新的组合，要是在应用场景里面碰见 xi,xj 组合，这个 wi,j 一定是 0，意思处理不了这个组合，这叫泛化能力弱。</p>
 <p>但是换成 FM 模型就可以解决这个问题。在训练集里面没有见过 xi,xj 的组合，没有关系，xi 要学一个 embedding，不需要依赖 xj 的存在，它自己可以学出 embedding 来。在现实场景中遇见了这个特征组合，用那两个点积不会是 0，这就代表有效地赋予它权重，同时也说明了为什么 FM 泛化能力更强。</p>
@@ -327,28 +327,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>首先， FFM 模型的特性是什么？</p>
 <p>举例来说，有三个特征 fields，这是一个在线投广告的应用场景，比如说我要往 ESPN 这个网站投广告，第一个特征 Publisher 是一个网站，第二个特征是这个广告主（Advertisor）是谁？本例中假设是 Nike；第三个特征，阅读者（Gender）是谁？阅读者的性别是男性（male）；那么他会不会点击？这个案例中是会点击；那么我们在这个例子上再想，FFM 在做什么事？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/01a6da5f54ef432cbc355b0f8100e87e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271557781.png" />   
     </p>
 <p>首先这个公式做了任意两个特征组合，它的特性是要把任意一个特征学成 embedding，这就是刚才讲的 FM 的做法，那么 FFM 是怎么做的呢？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/220de0fc1afc4ff3bd6272d6a3a507a9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271558233.png" />   
     </p>
 <p>FFM 是 FM 的一个特例，它更细致地刻画了这个特征。首先它做了任意两个特征组合，但是区别在于，怎么刻划这个特征？FM 只有一个向量，但 FFM 现在有两个向量，也就意味着同一个特征，要和不同的 fields 进行组合的时候，会用不同的 embedding 去组合，它的参数量更多。对于一个特征来说，原先是一个 vector，现在会拓成 F 个 vector，F 是特征 fields 的个数，只要有跟它任意组合，就有一个 vector 来代表，这就是 FFM 的基本思想。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/eded705c152a408f97e15816603b2e1e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271558916.png" />   
     </p>
 <p>对于 FFM 的某个特征来说，会构造 F 个 vector，来和任意其他的 fields 组合的时候，各自用各自的。它有什么特点呢？首先，FFM 相对 FM 来说，参数量扩大了 F 倍，效果比 FM 好，但是要真的想把它用到现实场景中是有问题的，而问题同样在于参数量太大。参数量太大导致做起来特别耗内存，特别慢，所以目标是把参数量降下来，并且效果又能达到 FFM 的效果。于是我们改了一个新模型出来，叫双线性 FFM 模型。</p>
 <h2 id="ffm-模型改进版双线性-ffmbilinear-ffm模型">FFM 模型改进版：双线性 FFM（Bilinear-FFM）模型</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b7b0a8e2f815489dbf5ea415e860b759.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271558527.png" />   
     </p>
 <p>下面我们介绍一下双线性 FFM 怎么做的。这个图基本就显示原理了：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7d9724e41b5f4f3c8f9219cba9447739.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271558536.png" />   
     </p>
 <p>因为每个特征现在有 F 个 vector 来表示它的参数空间，因为 F 个 vector 是跟随每个特征增长的，由于特征数是非常大的，所以它的参数量很大。能不能把跟特征走的抽出来，大家一起用这个参数，如果你一起用的话，能够共享这个参数，你就能把参数量降下来，这就是我们讲的双线性 FFM 的核心思想。vi,vj 还是跟 FM 一样，还是用一个 vector 来表达，但是把两个交互的复杂特性放在大家共享参数里面去学，这就是双线性 FFM 的核心思想。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4b5ea5ed8c4b42349391afbbb9bf58cd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271558093.png" />   
     </p>
 <p>我刚才讲了一个简单的思路，理论上里面还有些变化点，比如这个 W 怎么设计？这是有些学问在里面的。</p>
 <p>类型 1，不论有多少个特征，都用同一个 W，这是参数量最小的一种形式。它的参数量是 K×K，K 就是这个 embedding 的 Size。</p>
@@ -357,38 +357,38 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们看一下结果。</p>
 <p>暂时不说刚才几个改进模型，先说几个基础模型：LR、FM、FFM。这是我们在 Criteo 和 Avazu 两个数据集上做的实验，这两个数据集是工业级，大约在四千到四千五百万的 CTR。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6a38b153c29945d590c70266ea04369e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271558344.png" />   
     </p>
 <p>先说 LR 和 FM，可以从数据里面看出来，FM 是显著优于 LR 的，这两个数据都是这样。首先要确认一点，不要期望太高。提了五个点、十个点，在 CTR 里是见不到这种现象的，在 CTR 能升一个点就是非常显著的一个增加。FM 跟 FFM 比，AUC 从 0.7923 到 0.8001，也是显著提升的，这是这三个模型的特性。</p>
 <p>至于这三个类型中哪个效果好？双线性 FFM 达到了 0.7995，Fields 组合效果是最好的，接近于 FFM，但稍微低一点。还有个变化点，可以加入 Layer Norm，同样加到了那三个模型里面去，最好的效果也达到了 0.8035，超过 FFM，而且效果比较显著。</p>
 <p>所以我们可以下结论：双线性效果是可以达到 FFM 相当，或者说超过性能的，Layer Norm 有提升作用。我们现在正在大规模工程化这个模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f18d3f7fe8344fe889bdb0775d67f213.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271558368.png" />   
     </p>
 <p>估算一下改进的模型它的参数量跟 FFM 比是什么情况？如果说我们用 Criteo 这个 4500 万的数据集，它有 230 万个特征，39 个 Fields，假设 embedding size 是 10，如果用 FFM 就会有 8.97 亿的参数量，而用双线性 FFM，FM 部分是大概 2300 万的参数，刚才三个改进模型中，类型一 100 个参数，类型二 3900 个参数，类型三 15 万参数，与 FFM 相比，参数差了 38 倍，但性能两者是相当的，这就是这个模型的价值所在。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fb287058f62b4809968d97d54ab07b43.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271559126.png" />   
     </p>
 <p>总结一下双线性 FFM 模型：它的性能接近于 FFM，但是参数量是 FFM 模型的 2.6%，这是它的优点所在。</p>
 <h2 id="深度排序模型从-widedeep-到-xdeepfm-模型">深度排序模型：从 Wide&amp;Deep 到 XDeepFM 模型</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b783a03952b94335863dedc30a79bd56.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271559034.png" />   
     </p>
 <p>下面我介绍一下深度模型，首先介绍一下它的发展历程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/76750da993954fc09003437608987cbd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271559425.png" />   
     </p>
 <p>所有的深度学习，做 CTR 的模型时都会有 DNN 的部分，没有例外。什么含义呢？特征输进去，然后把它转换成 embedding，上面套两个隐层进行预测，这是所有模型公有的一部分。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3375beb8a5d44d8295c7b5f53671f15d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271559588.png" />   
     </p>
 <p>我把现在这个深度 CTR 模型会分成了两大类。从结构来说，第一类我把它叫并行结构，它有另外一个结构，我管它叫 FM Function，它捕捉特征的两两组合，两者关系看上去是个并行的，叫并行结构。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/911187c7f2544a4eb5aa0eccc1c23600.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271559050.png" />   
     </p>
 <p>除了并行还能怎么修改这个结构？可以把它搞成串行的，前面一样到 embedding 特征，然后做二阶特征组合捕获，上面套两个隐层做多阶特征捕获，这是串行结构。典型的有一类模型：PNN、NFM、AFM 都属于这种结构。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/80679566bc3f4065bad28d93c595f13b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271559157.png" />   
     </p>
 <p>如果再归纳一下，你会发现深度排序模型，现在有朝两个研究路线在走。所有的模型在干什么？捕获特征组合是它的核心，这两条演进路线怎么走的呢？</p>
 <p>第一条路线，新型的 FM Function，就是怎么能够设计一个新的结构，FM Function 更有效地捕获二阶特征组合，比如说典型的 Wide&amp;Deep，DeepFM，NeuralFFM 就是用来做这个的。</p>
@@ -396,71 +396,71 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>针对这两条演进路线，我会各自介绍两到三个代表系统。</p>
 <p>第一个代表系统：Wide&amp;Deep，这个系统我相信大家都听说过。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6de7286b716247bfa5bfd12642def3b3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271559397.png" />   
     </p>
 <p>Wide&amp;Deep 的结构是什么呢？实际上就是我画的并行结构，右边就是 DNN 部分，左边的 FM Function 用的是线性回归。我个人认为，Wide&amp;Deep 是相对原始的模型，LR 有的问题它也有，特征组合需要人去设计，Wide&amp;Deep 也有这样的问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/09d54d59eb674cc9b7b74b9b81d90fd1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271559513.png" />   
     </p>
 <p>我们可以改进一下。DeepFM 相对做出什么改进呢？把 LR 换成 FM，不就能自动做特征组合了，这就是 DeepFM。如果想部署深度模型，我建议可以考虑这个模型，这是目前效果最好的模型之一。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6a15fd7e26734e039ef0fbcc70cd784e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271559505.png" />   
     </p>
 <p>第二条路线的两个代表是这样的：Deep&amp;Cross 用来做什么？显式地做高阶特征组合。就是说设计几层神经网络结构，每一层代表其不同阶的组合，最下面是二阶组合，再套一层，三阶组合，四阶组合，一层一层往上套，这就叫显式地捕获高阶特征组合，Deep&amp;Cross 是最开始做这个的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ecdd4bc8fb2d43f98c499882e72663d8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271559601.png" />   
     </p>
 <p>xDeepFM 是微软 2018 年发的一篇新论文，它是用来把二阶、三阶、四阶组合一层一层做出来，但无非它用的是类 CNN 的方式来做这个事的。这是第二个路线的两个代表。</p>
 <p>接着来讲一下，我对深度 CTR 模型的个人看法。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/018f12ce37904461b736b21cd715356b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271559747.png" />   
     </p>
 <p>首先可以看到，现在所有的模型结构趋同，要么并行，要么串行，没有例外；第二，输入问题基本解决了，都是 onehot 和 embedding。核心所在是二阶特征组合怎么设计网络？所有的方法，或者大多数方法变化在这。另外就是多层，显式地做二、三、四阶，这是目前的一个趋势。</p>
 <h2 id="deepffm-模型">DeepFFM 模型</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/538f152b5d6d4b3d981ecc1fcc6b76fe.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271600484.png" />   
     </p>
 <p>最后介绍一个改进版本 DeepFFM。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5233f00784854bc38e162b03cca9672e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271600386.png" />   
     </p>
 <p>首先我抛给大家一个问题：刚才我们讲了，FFM 模型有它的对应版本，是 DeepFM 模型，那么问题来了：能不能设计一个 DeepFFM 模型神经网络版的？答案肯定是可以的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7eff595d7efd4c26932f4a773a9e7480.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271600557.png" />   
     </p>
 <p>我先给出一个前导模型：NeuralFFM，这是 2017 年南京大学杨毅等人提的，他们在参加一个比赛中提出了这个模型，这个模型效果比较好，是单模型的第三名。我们对这个模型做了一个改进，把它叫做 DeepFFM。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/777c951e206841309309844d3c7475af.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271600998.png" />   
     </p>
 <p>先说一下 NeuralFFM 模型怎么做的，这是我刚才抛给大家问题的解答。</p>
 <p>要做一个神经网络版的 FFM 模型该怎么做？先把它想成 DeepFM，再想怎么改成 FFM。如果是 DeepFM，一个特征、一个 vector，然后在上面做两两特征组合，这就是 DeepFM 的思路。FFM 区别在哪里？一个特征现在不是一个 vector，是 F 个 vector，在两两做特征组合的时候，需要做特征交叉，这不就是深度的 FFM 模型吗？很简单，NeuralFFM 就是这个思想。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d5215cf02bf943d5b0c01ae17bcc9e7c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271600418.png" />   
     </p>
 <p>但是这里有个变化点。两个特征进行组合的时候，可以用内积做，也可以用哈达马积做，这是有区别的。什么是内积呢？就是两个向量，每个位置对应的相乘求和，表示一个数值；哈达马积怎么做的呢？它比内积少做了一步，把对应的位置相乘，乘完之后不进行求和。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d45a2c1f34d240b8a6b9428da7c619ac.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271600072.png" />   
     </p>
 <p>我们这个 DeepFFM 是怎么改进的呢？在特征交互层，也就是两两特征在这组合，我们加了一个 Attention，也就是一个注意力模型进去。我认识两两特征组合，但是有的组合特征比较重要，有的没那么重要，怎么体现这个思想？给每个特征组加个权重就可以。怎么给权重？加个 Attention 就可以了。这就是我们 DeepFFM 的核心思想。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3508c8f7010c4484b8336c84a3d2132e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271600924.png" />   
     </p>
 <p>至于什么是 Attention，不懂的人可以自己去查。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/476aff746fc1424ea03169c6f6e096f3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271600522.png" />   
     </p>
 <p>再回头讲，我们是怎么改进的。在特征交互层，我们先给出个内积版，这是一个特征组合，组合完是一个值，我给每个两两特征组合的值都加个权重 a1-an，加完权重之后，再把权重乘到值里，再加上 Layer Norm，往上面引层去走，这是第一个改进版本。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/627f3f2ca7f94fd9886a0d5d1545af86.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271600494.png" />   
     </p>
 <p>有没有新的改进版本？肯定有，不仅有内积，还有哈达马积。哈达马积是说两个特征组合完之后是个向量，这是一个特征组合，里面有若干个神经元，但它整体代表一个特征组合。我给组合完的 vector 整体加个权重 a1-an，每个都加权重，一样再乘回来，上面再套 LN，这就是哈达马积版本。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/190a90a0887c41cfa8327735bb796d84.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271600996.png" />   
     </p>
 <p>那么，能不能继续改进？我刚才是把它当作一个整体求 Attention，还可以把每一位拆开，每个位都加 Attention，每个位上面套层 LN，这就是第三个版本。</p>
 <p>来看一看实验结果。先看刚才讲的几个深度典型模型代表是什么效果？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/46541d4ce52e4f4288741cdb44a38dba.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271601902.png" />   
     </p>
 <p>DeepFM，我们实际测过，想做高是不容易的；xDeepFM 是 3 个技术模型中最好的，所以新模型想比原模型高很多是很难的；NeuralFM 和 DeepFM 在这个数据集上并没有很大提高，比原来稍有提升一点，但是在 Avazu 上是有明显提升的；DeepFFM 什么效果呢？下面标红这三个，尤其是第二个模型做到 0.8091，也就是说在所有的模型里面效果最好的，在 Avazu 来说也是效果最好的。</p>
 <h2 id="总-结">总 结</h2>
@@ -595,6 +595,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -628,10 +632,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1010,6 +1010,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

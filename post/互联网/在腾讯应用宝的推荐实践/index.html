@@ -210,40 +210,40 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>word2vec 模型的问世，极大的促进了 Embedding 技术的发展。下面我们先从 word2vec 模型切入，简单介绍一下 embedding 的推导过程。以业界最广泛使用的 Skip-gram+negative sampling 为例。</p>
 <p>损失函数如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7132a9607ea4465882705b3a9ca08a74.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746088.webp" />   
      其中 a 表示当前中心词，c 表示序列上下文词，Dp 为 window_size 中的词集合，Dn 为全局随机采样的负样本集合。损失函数中左半部分为正样本的损失函数项，右半部分为负样本的损失函数项。</p>
 <p><strong>为什么正样本和负样本能够通过加法的方式组合起来构成损失函数呢？</strong> 首先，原始的 skip-gram 模型的损失函数（1）如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d6b72c21a81747e49d4f7f0081bf28e5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746585.webp" />   
      其中 w 为中心词，c 为 w 的上下文单词，D 为训练集中 w 和 c 的 pair 对，θ 为需要学习的参数；我们可以把这个优化问题转化为一个分类问题，利用 softmax 函数展开后：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/02e36a0e56e54e4fabb1df6c3285e5a0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746051.webp" />   
      我们得到如下格式的函数（2）：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3c15c2123d6b491c83f79c2d712b74b3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746587.webp" />   
      其中 vc 和 vw 分别为中心词和上下文词的 embedding，C 为训练集中所有上下文单词的集合。接着我们可以对损失函数（1）进行 log 变换得到（3）：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4aec2ee3ef334adaad690938ee1cf196.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746152.webp" />   
      由于需要对所有的上下文单词集合进行计算，公式(3)的计算复杂度非常高，所以 Negative sampling 的训练方式应运而生。Negative sampling 的思想本质上是一个 <strong>二分类</strong> 的问题，即预测(w, c)pair 是否存在训练集中。我们用公式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/46c6e72cf7f14ce8864510dbdb192694.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746706.webp" />   
      表示(w, c) 存在训练集的概率，相应的：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d76f938d315d4ba2ab66bc0f49aa7401.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746119.webp" />   
      表示(w, c)不存在训练集中的概率。此时的我们的损失函数（4）如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9acb513a281c42f38e7edd9f2de50db2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746508.webp" />   
      即我们把实际出现过的(w, c) pair 对当成了正样本，损失函数的目标就是希望能学习到参数 θ 来最大化(w, c)作为正样本的概率，通过对：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/81081ad60d3440d183350679fde8b110.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746981.webp" />   
      进行 sigmoid 函数和 log 转换，我们得到了上式右半部分的公式，如此便得到了我们正样本的损失函数表达。但是并不是所有(w,c)pair 对都来自训练集合，因此需要构造一些负样本来修正损失函数拟合正样本的概率表达，最终 SGNE 的损失函数如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/17ed87c9e7b54f12a5e004400f4ac7bd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746514.webp" />   
      其中 D‘即为全局随机采样的负样本。</p>
 <h3 id="2应用宝相关推荐场景介绍">2.应用宝相关推荐场景介绍</h3>
 <p>接下来我们来介绍一下 Embedding 技术在应用宝相关推荐场景中的应用实践。首先，简单介绍一下应用宝相关推荐场景的概况。应用宝相关推荐场景主要包括详情页、OMA（one more app）以及下载管理和应用更新。推荐的方式主要是根据上文 APP（详情页当前 APP、OMA 正在下载的 APP）召回相关 APP 进行推荐。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/03e41135adbc41cd8240f93f105acf16.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746134.png" />   
      图1 详情页相关推荐场景 图2 OMA相关推荐场景</p>
 <h3 id="3传统-word2vec-的不足">3.传统 word2vec 的不足</h3>
 <p>传统的 word2vec，在实际应用中存在一些不足：</p>
@@ -262,61 +262,61 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="41-长周期用户序列优化">4.1 长周期用户序列优化</h4>
 <p>线上 Base 流量的解决方案是通过拉长数据周期，扩充训练样本，选取过去 180 天的用户的下载行为序列作为训练数据。这种方法存在一个问题，下载序列的周期跨度过长，APP 下载行为间隔大，APP 的下载之间几乎没有相关性，同时在短期的下载序列中，是有一定的相关性的。以下图的下载序列为例子，上半部分为 10 月 25 号的下载行为，几乎都是交友类的 APP，而下半部分为 11 月 07 号的下载行为，几乎都是购物类 APP，两者并没有相关性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9f39b13635404d329fbb59a37458848d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746978.webp" />   
      图3 用户行为序列示意图因此我们以天为 session 粒度，重新构建用户的下载行为序列。在序列长度的设定上，过短的序列，无法有效表达行为之间的相关性，不利于模型学习 APP 的 embedding 表达。在我们相关推荐场景中，设定的阈值为 5。模型训练方式采用传统的 Skip-gram+negative sampling 的方式训练。通过拉长数据周期的方式扩充训练样本，使得我们的训练样本数据增长了 5 倍。</p>
 <h4 id="42-引入图随机游走模型">4.2 引入图随机游走模型</h4>
 <p>在上一步的迭代中，虽然我们通过拉长数据周期的方式扩充训练样本，但是由于用户行为的稀疏性，天级别 session 粒度的下载序列样本非常少，仅占 5%，因此并不能很好的解决长尾 APP 学习困难的问题。</p>
 <p>因此借鉴图游走算法的思想，我们利用用户的 APP 下载序列，构造用户的下载行为图，并在图中做随机游走，生成新的行为序列。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/76b10ed8b88b4cb487b4d0f4d134c41a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746870.webp" />   
      图4 随机游走示意图如上图所示，我们有三个原始的用户行为序列 u1/u2/u3，其中 a 表示行为 APP。首先我们把序列中各个 APP 抽取出来构造图节点，序列的先后行为发生关系构造节点之间的有向边来构造 APP 的行为转换图（如图 4-(b)图所示），接着我们在图中进行随机游走，生成长度为 m 的新的行为序列作为我们的训练数据。</p>
 <p>其中随机游走的概率公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1a3fb54c307a4628adc1cdfb23206fe3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746575.webp" />   
      其中邻接矩阵以图 4-(a)图三个原始行为序列为例，邻接矩阵如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f179afb2f2f949bcbc4f1207a1be2961.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746000.webp" />   
      图5 用户行为序列邻接矩阵图下图为 randomwalk 后 app 的样本分布图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5d1f57c6e90f44e790016e6347a532e0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747536.webp" />   
      图7 APP样本分布图
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b036f1afe6d740448b4e2ab453d80c30.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747205.webp" />   
      图8 APP样本分布占比变化图从图 7 可以发现 randomwalk 能有效缓解长尾 APP 训练样本不足的问题，randomWalk 前后对比，APP 的样本分布相比更加均匀；图 8 展示样本数为 110 的 APP 占比从 35%下降到 1.47%，同时 APP 样本数在 10010000 的占比从 35%左右提升到了 75%以上，低频长尾 APP 的样本得到增强。</p>
 <p>在这一步优化中我们通过构造用户的 APP 下载行为序列图，并通过随机游走的方式生成新的用户行为，极大的提高了长尾 APP 的训练样本量，解决长尾 APP 学习不充分的问题。但是这里 APP 下载行为序列图的在随机游走的过程中并没有体现上文 APP 对下载行为的影响。</p>
 <h4 id="43-图游走约束采样">4.3 图游走+约束采样</h4>
 <p>在应用宝的相关推荐场景中，以详情页、OMA 场景为例：进入详情页有一个前置行为，即用户首先需要 <strong>点击上文 APP</strong>，才有可能进入到详情页。OMA 场景则需要用户点 <strong>击下载上文 APP</strong>，才会出现相关推荐卡片。</p>
 <p>比如我们在首页中展示的 APP feeds 如下图，以第一个 APP “七猫免费小说”为例，当我们点击七猫免费小说后，我们会进入详情页，当我们点击下载按钮，会弹出 OMA（one more app）卡片。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a309624e823f47be8c6e6eb59da7316a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747752.webp" />   
      图9 详情页、OMA相关推荐逻辑示意图这里都表达了用户的对上文也是感兴趣的，但是上文的信息在传统的 word2vec 或随机游走算法中并没有考虑。因此在这里我们通过对 randomWalk 的 <strong>引入上文 APP 的约束</strong>，只有出现过同上文的 APP 会被采样，从训练样本的层面引入上文 APP 的信息。首先我们在随机游走概率公式中加入同上文的约束：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d7e793dde7524bb590c47db627e688a5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747459.webp" />   
      其中下面两个变量分别表示节点 i 和 j 的上文集合：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/06c509faa59b41179488e0e5871f1a5d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747010.webp" />   
     
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a9e7158dd62d42199d99074f9259a8e1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747565.webp" />   
      游走过程的示意图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7ec7570a9e604426b9dadf5bbacc8d87.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747155.webp" />   
      图10 引入上文约束的随机游走示意图从图 9-（b）中可以看到，下半部分我们引入了各个 APP 的上文 APP 信息，并且在（c）中，如 a4-&gt;a2-&gt;a1-&gt;a3-&gt;&hellip;-&gt;am 将不会出现在训练数据中，因为 a1 和 a3 没有共同的上文；a5-&gt;a6-&gt;a1-&gt;a3-&gt;&hellip;-&gt;am 也不会出现，因为 a1 和 a6 没有共同的上文。</p>
 <p>通过引入上文约束的随机游走方式生成的样本，初步地表达了上文信息对于下载行为序列的影响；后续我们将尝试更多的图算法如 GraphSage 在我们场景应用实践。</p>
 <p>比如我们对比可爱女生闹钟（长尾 APP）的召回推荐结果，相比传统的 i2v，i2v+randomWalk 的方式召回结果更加相似。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0b5bf5755abe4683a87f34cacdf55a4a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747940.webp" />   
      图11 i2v召回与i2v+randomWalk 长尾APP召回Case对比图### 5.模型优化</p>
 <p>上一 part 的优化中，我们主要是从样本层面对长尾 APP 的稀疏性以及上文的约束性进行优化，接下来我们从模型层面来优化模型的相关性。传统的 word2vec 模型的损失函数中只有 windonw_size 中的正样本以及全局随机采样的负样本，借鉴 air-bnb embedding 的思想，我们在损失函数中引入上文 APP 作为序列的全局 context，引入同类目随机采样负样本</p>
 <p>在 air-bnb 的 paper <em>Real-time Personalization using Embeddings for Search Ranking at Airbnb</em> 中，通过引入 booked-listing 作为序列的全局 context，相当于对于这一条用户行为序列，把 booked-listing 作为正样本引入到损失函数中。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/643793815790476ebb105998306f91cf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747564.webp" />   
      图12 AirBnb embedding序列图</p>
 <h4 id="51-正样本-loss-优化">5.1 正样本 Loss 优化</h4>
 <p>借鉴 airbnb-embeding 的思想，在相关推荐场景中，用户下载相关 APP 首先是基于对上文 APP 感兴趣才会进入详情页或展示 OMA 相关 APP，因此把上文 APP 信息引入到模型中一起学习是 make sense。</p>
 <p>如下图是传统的 SGNE 的损失函数， <strong>正样本</strong> 为 windown_size 内的 app， <strong>负样本</strong> 为全局随机采样的 APP。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cf0ba186a2da4c6db675fcae2c54d60b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747060.webp" />   
      图13 word2vec损失函数及序列示意图接下来我们通过引入上文 APP 作为序列正样本项，在学习序列的相关性的同时，也学习序列与上文 APP 的相关性，我们希望最终学习到的 embed</p>
 
         </div>
@@ -447,6 +447,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -480,10 +484,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -862,6 +862,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

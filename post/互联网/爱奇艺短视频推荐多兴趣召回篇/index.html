@@ -206,7 +206,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0115745198444b0cb1e1319d8ab48ac5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272239292.webp" />   
     </p>
 <blockquote>
 <p>文章作者：随刻基础推荐团队</p>
@@ -214,7 +214,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p><strong>导读</strong>：推荐系统的本质是信息过滤，多个信息漏斗将用户最感兴趣的内容逐步呈现在用户面前，如图1所示（《 <a href="https://zshipu.com/t?url=http%3A%2F%2Fmp.weixin.qq.com%2Fs%3F__biz%3DMzU1NTMyOTI4Mw%3D%3D%26mid%3D2247533568%26idx%3D1%26sn%3D2b8c694ff43bb451ff1e70b49a7bd97b%26chksm%3Dfbd7f66ccca07f7a29d0eb0389cd4231707d6588219af0fff94b22e43d8106161172aff9f16c%26scene%3D21%23wechat_redirect">爱奇艺短视频推荐：粗排篇</a>》）。召回阶段作为首个漏斗从多个维度将海量视频中用户可能感兴趣的内容滤出交给后续排序技术处理，它直接决定着后续推荐结果的效果上限。本文主要介绍爱奇艺随刻推荐团队多兴趣召回技术的发展历程。相比于其他召回技术，多兴趣召回技术能够同时挖掘出用户的多个潜在兴趣，在个性化推荐系统中突破传统的“千人千面”而达到“千人万面”效果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9a91978aafc24e72bc38549c7f47b7c8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240179.png" />   
     </p>
 <p>图1 视频推荐系统主要流程[1]</p>
 <h2 id="01-技术背景如何召回好苗子打破信息茧房"><strong>01 技术背景：如何召回“好苗子”，打破信息茧房</strong></h2>
@@ -222,7 +222,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>优秀的国家队教练固然业务水平精湛，但若没有天赋迥异的好苗子，也难以培养出世界级冠军选手；排序技术固然能够通过大量特征和精巧网络将效果提升，但若召回的所有视频本身质量不佳，那排序技术效果的上限将会提前锁死。因此，国家队教练需要多个省市的运动人才作为选拔来源，排序技术需要多个召回源作为待排序内容。</p>
 <p>谈到召回技术，熟悉推荐的同学将举出诸多策略与算法，例如策略包括考虑内容关联的频繁项集挖掘Apriori等、考虑用户与内容相关性的召回itemCF等、基于协同过滤的召回SVD等；算法包括将内容变为embedding后再进行近邻检索的item2vec和node2vec、应用内容理解的CDML召回以及近年来兴起的GNN召回等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/962fbedc41f84ebfa07a7598b9fc918c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240039.png" />   
     </p>
 <p>图2 多兴趣召回主要流程[2]</p>
 <p>如图2所示，多兴趣召回技术类似其他召回技术都依赖着用户过往的历史行为，但不同点在于多兴趣召回技术可以学习到用户的多个兴趣表示，将个性化推荐的“千人千面”升级为“千人万面”，每一个兴趣表示都能根据最近邻搜索得到相应的视频成为召回源。一方面，多兴趣召回技术符合多数用户拥有不同志趣和爱好的现实情况，能够让推荐结果精准且丰富，能够防止内容同质化带来观感疲劳；另一方面，除了挖掘用户的已有兴趣，多兴趣召回技术不断挖掘出用户自己从未发现的潜在新兴趣，防止传统推荐算法造成的“信息茧房”现象，让爱奇艺线上海量的文化资源呈现给用户。</p>
@@ -231,24 +231,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>聚类多兴趣召回的主要优点在于不用训练复杂的神经网络，只需利用线上其他深度学习的embedding即可形成多个兴趣向量（例如较为成熟的node2vec，item2vec等video embedding空间），时间和空间代价都较小。主要理论依据为KDD2020提出的兴趣聚类方法PinnerSage[3]。（是不是和PinSage名字很像，但它与图神经网络没有太大关系）。</p>
 <p>PinnerSage聚类多兴趣召回是传统ii召回基础上结合聚类方法的新型策略。传统的ii召回中往往有两种做法：1，选择用户短期历史行为的每个视频，进行多次ANN查找选出近邻视频，这样的做法不仅时间成本高而且推出视频同质化严重。2，将用户短期历史行为的所有视频embedding进行pooling形成代表用户的user embedding，再进行ANN近邻查找，这样的方式能一定程度的融合信息减少时间空间代价，但很容易造成信息损失， pooling出的embedding如图3所示很可能差了十万八千里。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8f2d4be8e7d04c63a833bf0fe8b48486.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240308.png" />   
     </p>
 <p>图3</p>
 <p>PinnerSage则取两者之长，对用户历史行为中的视频进行聚类分组，pooling形成多个兴趣向量。聚类既避免了多次ANN带来的压力，也能一定程度上避免信息损失。PinnerSage 聚类多兴趣召回分为两步走：</p>
 <p><strong>a. 聚类过程。</strong> 如图4所示，对用户观看过的所有视频进行聚类操作，Pinnersage聚类采用了hierarchical clustering聚类方法，并不需要像K-Means设置初始类别数，而是首先将每一个视频均看作一类，接下来每两类开始合并，若合并后组内variance增加最少则可以将两类合并为一类，直到variance超过阈值即停止。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d5a62bfc36be4e8099efe15e2d2a9782.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240655.png" />   
     </p>
 <p>图4</p>
 <p><strong>b. 取出embedding过程。</strong> PinnerSage依然不对类内视频embedding 取平均，而是选择类内的一个视频embedding作为类（兴趣簇）的代表，该视频embedding需满足与类内所有视频embedding距离之和最小。再利用这些代表用户兴趣的embedding们进行ANN即可。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/754288feecd9488089bc77bb85d090ef.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240690.png" />   
     </p>
 <p>聚类多兴趣召回通过简单的策略便形成了用户多个兴趣，时间代价较少。但由于依赖其他算法形成的embedding空间，学习到的多个兴趣embedding很容易有偏，推出内容趋于高热难以满足个性化。因此，团队继续向深度学习领域的多兴趣网络进发。</p>
 <h2 id="03-moe多兴趣召回"><strong>03 MOE多兴趣召回</strong></h2>
 <p>双塔模型是业界比较主流的召回模型，但是双塔模型在实际场景中效果有限。因此团队将双塔中的用户侧的塔结构进行修改，引入类似于MOE[4]的结构，提取多个向量表示用户潜在的兴趣，从而获得了极大提升。其中MOE是多目标学习中使用广泛的经典结构，根据数据进行分离训练多个专家模型，我们最终将多个专家模型的输出作为用户兴趣向量，通过与视频侧提取的向量分别计算内积得到最相似的一个用户向量参与损失的计算。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c4ee995ac72647c8b3af920c8d0b68c8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240909.png" />   
     </p>
 <p>图5</p>
 <p>MOE多塔结构如图5所示，左边为用户侧MOE多塔部分，右边为视频侧单塔部分。模型的实现细节包括：</p>
@@ -262,7 +262,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="41-单激活多兴趣召回初版"><strong>4.1 单激活多兴趣召回初版</strong></h3>
 <p>基于MIND等网络的启发，团队进行了单激活多兴趣网络的初版探索，网络结构如图5所示。在MIND网络中，采用了胶囊网络来抓取用户的兴趣，胶囊网络可以很好的同时捕捉观看的序列顺序信息和视频间的相关性，但由于结构较为复杂计算开销较大，且观看顺序仅单个维度即可表示不需要网络对位置信息太过敏感，因此团队选择transformer结构进行代替以保证训练速度。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a4526d2cd71f4cf5b4d3ad897c55dfc0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240086.png" />   
     </p>
 <p>图6</p>
 <p>大致流程为：</p>
@@ -273,20 +273,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="42-disagreement-regularzation多兴趣召回"><strong>4.2 disagreement-regularzation多兴趣召回</strong></h3>
 <p>4.2中兴趣向量间无任何约束，因此容易出现兴趣向量过于相似的问题，因此在损失函数上需要施加正则项。鉴于初版多兴趣召回主要部分为transformer，团队在不改变网络结构的情况下使用三种正则函数进行探索[4]。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9d96d967bcaf4c65836e4fba17c0b835.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240410.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/04ae8fc430064027a30febfac061ff31.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240232.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f7f7a07666fe47308ae3487ddbd12a4d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240546.png" />   
     </p>
 <p>图7</p>
 <p>如图7所示，分别对学习到的视频embedding(公式1)，Attention(公式2)，兴趣向量（公式3）进行正则化约束。在实际生产环境中发现，直接对兴趣向量进行正则化约束能达到最优效果。</p>
 <h3 id="43-容量动态化多兴趣召回"><strong>4.3 容量动态化多兴趣召回</strong></h3>
 <p>不同用户往往呈现不同的兴趣发散性，因此兴趣向量数应该是一个弹性指标而非超参数，在4.1与4.2的基础上，如图8所示在网络结构中引入兴趣激活记录表。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d637c464dd6c43389d5914862f247894.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240643.png" />   
     </p>
 <p>图8</p>
 <p>训练过程中每当用户有任何兴趣向量被激活时，记录表均会记录这次激活。推理阶段，回溯激活表情况，将用户未激活或激活较少的兴趣向量剔除，以达到兴趣数动态化的目的，从而匹配不同用户兴趣发散性存在差异的现实情况。</p>
@@ -416,6 +416,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -449,10 +453,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -831,6 +831,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

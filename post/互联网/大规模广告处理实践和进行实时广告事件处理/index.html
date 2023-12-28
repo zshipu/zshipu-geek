@@ -215,7 +215,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5e7f0ded0a1c4284b45754e6ddeffa9b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271808993.webp" />   
     </p>
 <p>优步最近推出了一项新功能：UberEats 上的广告。这种新能力带来了 Uber 需要解决的新挑战，例如广告拍卖、竞标、归因、报告等系统。本文重点介绍我们如何利用开源技术构建 Uber 的第一个“近实时”恰好一次事件处理系统。我们将深入了解我们如何实现一次性处理以及事件处理作业的内部工作原理的细节。</p>
 <p>对于每个投放的广告，每个用户都有相应的事件（展示次数、点击次数）。广告事件处理系广告系统）。</p>
@@ -265,7 +265,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="高层架构"><strong>高层架构</strong></h2>
 <p>现在我们知道了系统的构建块，让我们深入研究高级架构。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6519db06ab514753b50bedecf9298ac2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271809872.webp" />   
     </p>
 <p>如上图，系统由 3 个 Flink 作业组成，它们摄取和下沉到 Kafka 主题，以及读取和写入依赖服务。它部署在我们称为区域 A 和区域 B 的 2 个区域中，以在区域出现故障时提高弹性。在 Kafka/Flink 方面，我们启用了仅一次语义来保证只有事务提交的消息才会被读取。在深入研究每个 Flink 工作之前，让我们进站谈谈这个系统是如何实现精确一次语义的。</p>
 <h2 id="恰好一次"><strong>恰好一次</strong></h2>
@@ -280,7 +280,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>现在我们将深入研究每个 Flink 工作以探索细微差别：</p>
 <h2 id="聚合作业">聚合作业</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8a45d0f07a724f3da28ecc025ebf4d09.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271809568.webp" />   
     </p>
 <p>作业聚合了很多繁重的工作，因此我们将其详细描述为4个组件：数据清理、订单持久性、聚合和记录UUID生成。</p>
 <h3 id="数据清理">数据清理</h3>
@@ -293,12 +293,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>最后一块是将聚合结果转化为只包含我们需要的信息的形式。作为此转换的一部分，我们生成一个记录 UUID，用作幂等性和重复数据删除键。鉴于在 Flink/Kafka 上启用了一次性语义，我们可以确信，一旦将消息插入到目标 Kafka 主题并提交，那么记录 UUID 可用于 Hive 中的重复数据删除和 Pinot 中的 upsert。</p>
 <h2 id="归因工作">归因工作</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2130dcaf7ec6419481878135df708375.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271809197.webp" />   
     </p>
 <p>归因工作更直接。它从 Kafka 主题中获取订单数据，该主题包含 UberEats 的所有订单数据并过滤掉无效订单事件。然后它会访问由聚合作业填充的 Docstore 表，并查询匹配的广告事件，如果匹配，则我们需要进行归因！然后我们调用一个外部服务，该服务提供有关用于丰富事件的订单的更多详细信息。然后为 Pinot 和 Hive 的幂等性生成唯一且确定性的记录 UUID。最后，我们将数据下沉到 Attributed Orders Kafka 主题，以供联合和加载作业使用。</p>
 <h2 id="联合和加载作业">联合和加载作业</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/22f3598ffbde444ba87cd2281e5031e0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271809891.webp" />   
     </p>
 <p>最后一个作业负责将区域 A 和区域 B 中聚合作业输出的事件联合起来，然后将数据下沉到输出主题，该主题将数据分散到 Pinot 和 Hive 中以供最终用户查询。我们必须在区域之间联合事件，因为我们的 Pinot 部署是主动-主动的（它不会在两个区域之间复制），因此我们使用此作业来确保两个区域具有相同的数据。为了保持恰好一次语义，我们利用 Pinot 中的 upsert 功能。</p>
 <p>现在我们已经了解了高级架构、我们如何实现精确一次以及每个单独的 Flink 作业的细节，我们可以看到我们如何满足我们的所有要求：</p>
@@ -450,6 +450,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -483,10 +487,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -865,6 +865,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

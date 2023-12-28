@@ -206,18 +206,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>本文来源：RecLismCat <a href="https://zshipu.com/t?url=https%3A%2F%2Fzhuanlan.zhihu.com%2Fp%2F96124874">https://zhuanlan.zhihu.com/p/96124874</a></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8dd49d4945584ade803414d530726055.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281815120.jpeg" />   
     </p>
 <h2 id="3-tree-enhanced-embedding-method">3 TREE-ENHANCED EMBEDDING METHOD</h2>
 <p>首先提出 TEM，它结合 MF 用于稀疏数据建模和 GBDTs 用于交叉特征学习的优点。还讨论了可解释性，分析了其复杂性。</p>
 <h2 id="31-predictive-model">3.1 Predictive Model</h2>
 <p>给定一个 user u ，一个 item i，和他们的特征向量</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/40fa1c788aa84e84a2846e05b88d6aa9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281815198.png" />   
     </p>
 <p>将它们作为输入，TEM 预测 user-Item 偏好：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/16b69c4e329a4ad19d64debe19086bca.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281815980.webp" />   
     </p>
 <p>其中，前两项是与 FM 相似的特征偏差，第三项是 TEM 的核心部分。参数Θ用于建模交叉特征影响。</p>
 <h3 id="311-constructing-cross-features">3.1.1 Constructing Cross Features</h3>
@@ -225,22 +225,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>为了避免这种劳动密集型的特性工程，我们利用 GBDT(在 2.2 节中简要介绍)来自动识别有用的交叉特性。虽然 GBDT 并不是专门为提取交叉特征而设计的，但是考虑到一个叶节点代表一个交叉特征，并且树是通过优化对历史交互作用的预测来构建的，因此认为叶节点是有用的交叉特征是合理的。</p>
 <p>形式上，我们定义 GBDT 为一系列决策树 Q={Q1,Q2,&hellip;,Qs}，其中，每一棵树将一个特征向量 x 映射到一个叶子节点上（有权重）。我们使用 Ls 定义第 s 棵树的叶子节点的数量。与原始的将激活的叶节点的权值累加作为预测的 GBDT 不同，我们将激活的叶节点作为交叉特征，并将其输入神经注意模型中进行更有效的学习。我们将交叉特征表示为一个多热向量 q，它是多个单热向量(其中一个单热向量编码树的激活叶节点)的串联：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/13bb320df66b4e13b15e35c4b46695dd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281815681.webp" />   
     </p>
 <p>这里 q 是一个稀疏向量，其中值为 1 的元素表示激活的叶节点，q 中的非零元素数量为 S。</p>
 <p>设 q 的大小为</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/09e49b3785164f6997cc09da3853d8ad.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281815661.png" />   
     </p>
 <ul>
 <li>。例如，在图一中，有两个子树 Q1（有五个叶子节点）和 Q2（有三个叶子节点）。如果 x 分别以 Q1 和 Q2 的第二和第三叶节点结束，那么得到的多热向量 q 应该是[0,1,0,0,0,0,0,1]。令图 1 中的特征变量(x0</li>
 <li>x5)和值(a0 ~ a5)的语义被列在表 1 中，那么 q 表示从 x 中提取的两个交叉特征。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f7ccef9eb9294418a0bc0a409490a3b6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281815364.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9555e3a960d64228ae4d68c70807ca7a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281815218.webp" />   
     </p>
 <h3 id="312-prediction-with-cross-features">3.1.2 Prediction with Cross Features</h3>
 <p>利用显式交叉特征，我们利用稀疏线性方法学习各交叉特征的重要性，选择最上面的交叉特征作为预测的解释。Facebook[22]之前的工作已经证明了这种解决方案的有效性，它将 GBDT 的叶节点输入到逻辑回归(logistic regression, LR)模型中。我们把这个解称为 GBDT+LR。虽然 GBDT+LR 能够学习交叉特征的重要性，但它为所有用户- 项目对的预测分配了相同的交叉特征权重，这限制了建模的保真度。在实际应用中，具有相似人口统计特征的用户通常会选择相似的项目，但是它们是由不同的意图或原因驱动的。</p>
@@ -248,31 +248,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>神经推荐模型如 Wide&amp;Deep 和 NFM 的最新进展可以允许交叉特征的重要性变得个性化。这是通过将 user ID、item ID 和交叉特征一起嵌入到共享的嵌入空间中，然后对嵌入向量执行非线性转换(例如，通过完全连接的层)来实现的。非线性隐含层强大的表示能力使得 user ID、item ID 和交叉特征之间的复杂交互能够被捕获。因此，当使用不同的用户- 项目对进行预测时，交叉特性的影响是不同的。然而，由于难以解释的非线性隐含层，这些方法无法解释交叉特征的个性化权重。因此，为了便于解释，我们必须放弃使用完全连接的隐藏层，尽管它们在现有方法中有助于模型的性能。</p>
 <p>为了开发一种既有效又可解释的方法，我们介绍了 TEM 中的嵌入和注意力的两个基本成分。具体来说，我们首先将每个交叉特征与一个嵌入向量相关联，这样就可以捕获交叉特征之间的相关性。然后，我们设计了一种注意力机制，明确地对交叉特征上的个性化权重进行建模。最后，将用户 ID、项目 ID 和交叉特征的嵌入集成在一起进行最终预测。虽然 TEM 是一种浅层模型，没有完全连通的隐层，但利用嵌入和注意使其具有很强的表示能力和有效性。接下来，我们将阐述 TEM 的两个关键组成部分。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ad54aaf8ca8049bca705e9aefe096a27.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281815436.webp" />   
     </p>
 <p><strong>嵌入</strong></p>
 <p>给定由 GBDT 生成的交叉特征 q，我们将每一个交叉特征 j 投影都嵌入项链</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a8666f70bd6848d186cebded3e7aa6a3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281815392.png" />   
     </p>
 <p>，其中 k 是嵌入尺寸。在这个操作之后，我们获得了一个嵌入向量集合</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3fa8a656fb644b72a18399c937dd78a4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281816043.png" />   
     </p>
 <p>。由于 q 是一个只有少量非零元素的稀疏向量，我们只需要在预测中包含非零特征的嵌入，也就是说</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ae798a40abfd459c869b5464fc0d9d40.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281816845.png" />   
     </p>
 <p>，其中，</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/361ac1ed3f5b4f8b828653cb6b2b53c0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281816209.png" />   
     </p>
 <p>。我们使用 Pu 和 qi 来定义用户嵌入和物品嵌入。</p>
 <p>与 LR 使用标量对特征进行加权相比，将交叉特征嵌入到向量空间有两个优点。首先，使用嵌入学习可以捕获特性之间的相关性，例如，经常同时出现的特性可能产生类似的嵌入，这可以缓解数据稀疏性问题。其次，它提供了一种将 GBDT 的输出与基于嵌入式的协同过滤无缝集成的方法，这比模型预测的后期融合更灵活(例如，在[49]中使用 FM 来增强 GBDT)。</p>
 <p><strong>注意力</strong></p>
 <p>受之前工作的启发[9,46]，我们通过为每个交叉特征的嵌入分配一个关注的权重，明确地捕获了交叉特征在预测中的不同重要性。在这里，我们考虑两种方法来聚合交叉特征的嵌入，平均池化和最大池化，以获得一个统一的表示 e(u, i,V)的交叉特征：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cabe5e47ab0542479a7d78fe4e408c28.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281816920.webp" />   
     </p>
 
         </div>
@@ -403,6 +403,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -436,10 +440,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -818,6 +818,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

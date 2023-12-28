@@ -211,24 +211,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>词表与统计（n元语言模型）结合的分词方法</strong></p>
 <p>歧义切分是源于带切分文本有多种切分方式，比如“这话说的确实在理”，这里的“的确”、“确实”、“实在”、“在理”均能成词。那么如何来确定切出哪些词呢？有人可能会想到使用词频信息，即哪个词在真实语料库中出现频率更高，或者说出现概率_P(W)  <em>更大，那它更应被切分出来。比如我们可以计算_P(的)</em>、_P(的确) <em>来确定是切出“的”还是“的确”，但这种方式割裂了上下文的联系。那么，更进一步我们可以计算_P(的|这 话 说)</em>，_P(的确|这 话 说)_分别表示在出现分词序列“这 话 说”的条件下，接下来出现“的”和“的确”的概率，按照这种考虑了上下文的转移概率来确定切词的方式显然更准确。再进一步思考，考虑整个句子所有可能的切分，其实我们是想从所有可能的切分方式中找出成句概率最大的一种切分。假设待切分文本T可以有n种切分方法，比方说三种:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4bce5b23a83f49568253821bf9eb1e1c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271441867.webp" />   
     </p>
 <p>其中带下标的A、B、C均为中文词，最好的切分方法应该要保证分词序列出现概率最大，即若第一种切分方式最优，则应满足</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/239c829579e04f098a85e8f85b319efb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271441805.webp" />   
     </p>
 <p>且</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/149b784dd6d2438eacf46d7e25fc3cc9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271442142.webp" />   
     </p>
 <p>计算切分序列的出现概率则要用到基于词的语言模型，一般我们常用到二元语言模型，公式表示如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2f83a322280341718da467130928605a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271442087.webp" />   
     </p>
 <p>其中，表示句首符，表示句尾符，式中条件概率可通过统计语料库中的词频和共现频率来计算。</p>
 <p>词表加二元语言模型的分词法的基本思想完整表述如下：首先根据词表，对带切分文本进行匹配，找出所有可能的词（即全切分），这样就不会遗漏可能的正确切分方式。然后将它们和所有的单字作为节点，按下图所示方式构建切分有向无环图。图中节点表示可能的候选词，边表示路径，边的前后候选词间的二元转移概率表示边权重。最后利用相关的搜索算法（比如维特比算法）找出权重最大的路径，该路径对应的切分就是概率最大的切分方式。这种加入统计知识的方法已经可以比较好的解决歧义切分问题，再配合独立的未登录词识别模块，整个分词系统也算基本完善。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/259e540c904a43be81022bf1966cea20.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271442776.webp" />   
     </p>
 <p>58搜索早期使用的分词系统就是基于此方法，它主要得解决两个问题：初始语言模型的训练以及未登录词识别模块的构建。n元语言模型本身就是一个大的方向，往深了做，在很多点上下功夫都能提升效果（解决歧义切分问题），比如词表扩展、词表匹配算法、专有名词识别、词类标注的使用等。但前面也提到过未登录词识别才是影响分词精度的最重要因素，因此在语言模型的优化上并未花费过多精力。我们仅采用的是基于词表的逆向最大匹配算法对原始的语料库进行切分，然后统计词频和词间转移概率得到语言模型。未登录词识别模块我们主要通过基于大规模语料的新词发现和人工审核的方式来挖掘新词并加入到词表中。其中新词发现则是利用词频、词的内部凝固度（通过互信息计算）和左右自由度（通过左右信息熵计算）来挖掘。综合这些，分词效果基本能达到工业可用的程度。</p>
 <p><strong>字序列标注法&ndash;CRF模型</strong></p>
@@ -238,25 +238,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>**分词结果：**这 话 说 的 确实 在理</p>
 <p>这种将分词结果表示成字标注的形式后，分词问题也就变成了序列标注问题。与词典方法相比，虽然看问题的角度和使用的方法变了，但目标是类似的，前者是要找到概率最大的词序列（由语言模型计算），后者是要找到概率最大的字标记序列，其数学形式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/80084a10a09d4ac6a8e25c4cc47adf78.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271442384.webp" />   
     </p>
 <p>其中_X _表示待切分文本，_GEN(X)_所有可能的标记序列，_Y _表示一种可能的标注（比如BMEBE）。</p>
 <p>目前使用较多的序列标注方法有隐马尔科夫模型（HMM）和条件随机场（CRF），HMM相比CRF模型要小的多，因此模型训练和预测都要快的多。相对的CRF模型更大，在标注时更多的考虑了当前位置的前后观测序列（字序列）的特征，简单的说就是更好的利用了上下文信息，因此它的功能更强大。目前，58搜索使用的分词系统，其核心就是CRF模型。</p>
 <p>条件随机场是给定条件下的马尔科夫随机场的意思，它是一种概率图模型（节点表示随机变量，边相连表示变量间有概率依赖关系）。从名字能想到，这个图中的节点集合应被划分为两组随机变量（一个是条件，另一个是随机场），比如_X_（可代入待切分的字序列）和_Y_（字序列对应的标记序列），如果在给定X的条件下，_Y _满足马尔科夫随机场，则称之为条件随机场。那么_Y _如何才算满足马尔科夫随机场呢？需要满足两个条件，一是马尔科夫性质，后一时刻变量取值(打标记）的概率分布仅与前一时刻的变量取值相关。另一个是随机场，要给每一个位置按照某种分布随机赋予相空间（B、M、E、S）的一个值，其全体称之为随机场。序列标注场景下要使用的是线性链条件随机场，即_X、Y _均为线性链表示的随机变量序列，可表示为下图，</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/26bdcec5ad2d42738f9d419434cb3ca4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271442291.webp" />   
     </p>
 <p>其中_X _为字序列，也称为输入观测序列，_Y _为标记序列，也称为输出标记序列或状态序列。满足这种条件的概率图的联合概率有如下形式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a1951b479cb74b9284c88e44f7e57fce.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271442623.webp" />   
     </p>
 <p>式中，_x、y_分别为随机变量_X、Y_的取值，_Z(x)_为归一化因子， <em>f_为特征函数，为相应的特征的权值。特征函数取值一般为0或1，特征出现为1，否则为_0</em>。以“这话说的确实在理”为例，若标记序列为“SSSSBEBE”,上下文窗口选择3的话，考虑i=5 时（即“确”字的位置）出现的特征：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e10494414c704f51b320e3052c51d046.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271442206.webp" />   
     </p>
 <p>上式列举的特征中前6个特征是定义在节点（_Y _序列）上的特征，称之为状态特征。第7个特征是定义在边上的特征，称之为转移特征，依赖当前位置和前一个位置。CRF模型的特征一般是通过配置的特征模板来提取，可以看出这些特征比较规整，也容易理解。CRF模型训练就是求解所有出现过的特征的权值的过程，有了特征权值，就能方便的计算各节点取值的概率分布，即被标记为B、M、E、S的概率，最后考虑边上的转移权值，我们只要找出概率最大的标记序列。如下图所示，每个节点和边上都有权值，最优的标记序列就对应全连接图中的权值最大的路径，一般采用维特比算法来搜索最优路径。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/63ce5c787ce54db99a4e7c5cc3842944.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271442205.webp" />   
     </p>
 <p>从以上的介绍中可以看出CRF模型可以比较充分的利用上下文信息来对文本进行切分，因此它能高效的解决歧义切分和未登录词的识别问题，而且分词准确率可以达到95%以上。但同时它也有其不足，比如分词不一致。下面的篇幅会介绍58搜索在CRF分词方法上的一些实践经验。</p>
 <p><strong>58搜索CRF分词实践</strong></p>
@@ -264,7 +264,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>**</p>
 <p>本部分主要针对CRF模型的不足以及58搜索场景对分词的更多诉求来讨论下我们实践过程中的几点模型之外的工作。目前58搜索所使用的基于CRF模型的分词系统如下图所示。图中模型之外的模块主要是针对性解决CRF模型的不足以及58搜索场景对分词的更多诉求。下面会展开讨论。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/581226a8946b4170a750a34448445718.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271442381.webp" />   
     </p>
 <p><strong>分词不一致问题</strong></p>
 <p>分词不一致是指在不同的上下文中，对相同的文本段，模型切分出了不同的结果。比如文档标题是“男装店母婴店装潢装修”，模型分词为“男装 店 母婴 店 装潢 装修”，用户查询词为“男装店装修”，模型分词为“男装店 装修”。这样在查询时，该目标贴不能被召回。分词不一致主要由两个原因引起，一个是分词语料标注时会出现不一致。在人工标注时，不同的人对同一个句子可能有不同的切分方式，就算是同一个人在不同时刻对同一个句子也可能会有不同的想法。因此，一个相对明确的分词规范是必要的，然后还需要对标注完的分词语料做一致性校验，比如“男装店”在分词语料中是否同时存在“男装店”和“男装 店”，将校验的结果反馈给标注人员check进行修正，重复此过程即可缓解分词模型的不一致切分问题。不一致的另一个原因是模型的固有缺陷，当上下文变化时，整个最优路径的搜索过程就发生了改变，局部文本的标记不一致难以避免。针对这个问题，我们通过配置特征词典和规则匹配来识别文本中成词特征非常明显的词，比如标点符号、成语、领域专有词汇以及url、email、电话号码、日期等，从该处将文本切开，得到短文本列表，然后分别对各短文本使用模型切词。这样可以在一定程度上削弱上下文不一致的概率，缓解不一致切分问题。当然这也会减弱切分过程对上下文信息的利用效率，对切分的精度会有影响。这个过程需要有严格的评测和权衡。尤其在搜索场景，我认为，对分词一致性的要求，也是不逊于对精度的要求。</p>
@@ -403,6 +403,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -436,10 +440,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -818,6 +818,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -192,7 +192,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/62a2e018d0084ffdae26496906fd374a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272244160.png" />   
     </p>
 <blockquote>
 <p>分享嘉宾：王冬月 京东 机构负责人</p>
@@ -211,7 +211,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="01-业务场景"><strong>01 业务&amp;场景</strong></h1>
 <p>首先和大家分享下京东推荐中的排序链路以及主要挑战。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1e95652bcbcd4f3a9331e68e1d536105.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272244791.png" />   
     </p>
 <p>召回主要是包括主流的i2i和u2i召回，它的排序是数十亿到万的量级；粗排采用双塔模型，主要兼顾精准性和系统延时，排序量是从万到千的量级；在精排阶段，我们会使用更复杂的特征和模型结构，保证结果的精准性，它的排序量级是从千到百；重排模块则更多从整个序列的角度考虑问题，同时兼顾多样性、新颖性，量级是从百到十。</p>
 <p>精排模块的挑战主要有三个：</p>
@@ -223,27 +223,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们采用了多目标学习、用户行为序列建模和多模态特征等业界主流方法来优化这三个问题，并针对电商推荐的特性进行了一定改进和创新。</p>
 <h1 id="02-多目标优化"><strong>02 多目标优化</strong></h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b86798c1213744d7b530e9ffaeb666ce.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272244850.png" />   
     </p>
 <p>推荐是一个多目标优化问题，实际上在线上我们有大约七到八个目标需要优化。为了简化呈现，这里就以点击和转化为例。上图右侧是传统的多目标优化模型。最底层是模型的输入特征，中间是多目标模型，之后连接了一个combination层将不同的目标预测值结合到一起，最后使用其进行排序。</p>
 <p>推荐领域多目标学习的主要问题有：知识冲突，效果较好的MMoE/PLE等模型，主要通过更灵活的参数共享机制，为不同学习目标提供可选的稀疏结构来缓解知识冲突；融合参数的优化，融合参数主要是用来组合不同目标的输出用于排序，常用做法是通过离线grid search或者在线自动调参来搜索一组固定参数。</p>
 <p>在多目标融合排序上，我们认为固定参数有一定的问题。用户在不同场景有不同的诉求，如有明确的购物意图或者仅仅是闲逛，固定的融合参数就无法使模型整体效果达到最优。因此我们提出了一个个性化多目标融合的方法，可以根据用户状态自动输出不同目标的融合权重。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2f4e06af836348538c55c9a94acf622a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272244750.png" />   
     </p>
 <p>上图右侧是我们整体的模型架构，主网络是一个传统的MMoE结构；我们额外加入了一个融合网络，通过一个Gate结构学习如何组合不同目标。融合网络的输入是与主网络相同的底层特征，输出的是多目标融合参数向量，其最终会与主网络不同目标的预测值进行点积，作为最终的排序值。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e6e5c905728042a0a1e82b7c8b29387e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272244428.png" />   
     </p>
 <p>融合网络的损失函数与主网络类似，主网络主要通过优化不同学习目标的参数来优化整体损失函数，而融合网络主要学习如何组合不同目标来使得模型在整体损失方向上达到最优。在模型训练上，我们采用了交替训练的方法。每10个batch训练一次融合网络，而每个batch都会去训练主网络。除此之外，我们还采用了梯度阻断的技术，融合网络的梯度不反传回底层的用户行为序列建模和embedding layer，从而保证主网络的训练不受融合网络训练的影响。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/121a2f3d05d243f28a13929e6f5ba5c4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272244039.png" />   
     </p>
 <p>通过加入融合网络的方法，我们希望模型在用户有明确的购物欲望的时候，模型可以给转化的输出更多的权重，而当用户没有明确的购物欲望的时候，模型可以给点击更大的权重。为了验证这个问题，我们进行了多组实验。</p>
 <p>首先通过分析融合网络的均值和标准差，我们发现模型端到端学习出的权重值与我们离线通过参数搜索得到的最优值比较接近，结果较为合理；此外融合网络的输出具有样本级别差异，到达了个性化效果。然后我们对比了闲逛和购买场景的输出差异，在点击session下，点击融合权重平均是0.92，订单session中对应的权重下降为0.89；而在订单session中，订单的融合权重对比点击session会有比较大的提升。最终线上的效果也证明了模型可以精准识别用户属于偏买还是偏逛的类型，转化率有了大幅提升。除了首页之外，我们还将该方法应用到直播和购物车等不同排序模型上，其转化率都得到了明显提升，证明了方法的有效性和通用性。</p>
 <h1 id="03-用户行为序列建模"><strong>03 用户行为序列建模</strong></h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/401ad13a461b4bae8d52b0b2130c0ce5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272244456.png" />   
     </p>
 <p>接下来介绍用户行为序列建模的工作。整个用户行为序列建模的目的是想从用户的原始行为序列中学习用户的偏好，这是个性化推荐中最重要的一个技术分支。它的整体技术框架如上图所示，模型的输入是用户原始点击或者下单行为的序列，之后通过一个User Interest 模型来输出表征用户偏好的稠密向量。User Interest模型可以是pooling-based也可以是model-based，一般与排序任务一起端到端训练。</p>
 <p>用户行为序列建模的挑战主要由以下几点：</p>
@@ -254,49 +254,49 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>模型应用在线上服务时存在比较明显的性能问题，我们需要优化预测的时延。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/69dc948327bb4aeca7c2bc7f30a172e4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272244218.png" />   
     </p>
 <p>用户行为序列建模在最近几年发展较快。第一个主要工作就是YoutubeDNN的Pooling Basded的方法，主要问题是信息丢失严重，兴趣表征与待排商品也没有任何相关性。为了解决这些问题，基于attention的模型（如DIN）被提出，它可以从用户行为序列中挑选出与待排商品比较相关的行为特征，主要问题是无法建模衰变性或者演变性，不同时间或者次序的行为表征的兴趣没有差异性。之后基于RNN-based的模型解决了这一问题，但是这类模型受顺序推理的限制，无法建模较长的序列。在工业界RNN-based的序列模型通常只能对大约50个行为进行建模。目前业界应用最广泛的是基于Transformer的方法，它对用户行为序列的表征能力更强，且在一定程度上可以无视序列的长度。此外，虽然模型结构比RNN更复杂，但是由于模型自身已于并行的特点，它在工程上更好被优化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/38e5910b881446338426ffb704d793aa.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272244155.png" />   
     </p>
 <p>我们的行为序列建模模块主要以Transformer为基础，并针对电商领域用户行为的特性进行了相应优化。整体框架如上图右侧所示，采用一个encoder-decoder的结构来对用户兴趣进行表征和提取。用户的偏好是多样性的，如何建模不同时期的偏好以及相应的演变是一个非常有挑战的工作。原始NLP Transformer采用position encoding来补偿模型所丢失的位置信息。借鉴这一想法，我们在相同位置进行了时序编码，除了位置信息（position encoding），还增加了时间差（recency encoding）的编码信息，并通过直接相加来融合。Position和recency embedding与排序模型一起，端到端学习用户行为次序和时间对兴趣强弱的影响。</p>
 <p>模型中encoder模块主要负责对用户偏好进行表达，与原始Transformer类似，采用一个两层的self-attention + ffn的网络结构。相同的商品在不同的用户行为序列中代表的兴趣有所不同，我们需要借助用户历史中其他行为来表征每个行为背后的精准意图。与原始Transformer不同的是，我们借鉴特征交叉的思想，同时保留了一阶和二阶兴趣表征向量。在decoder端，我们使用multi-head target attention，从encoder输出的一阶和二阶向量中提取出与待排商品相关的一阶和二阶偏好。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8ffa05f1b58c4969bb9dc165d82848e0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272244994.png" />   
     </p>
 <p>在工程上，由于模型计算复杂性的大幅提升，线上延时增加了约40毫秒，无法满足上线要求。为了解决这个问题，我们通过合并计算和并行推理来优化线上延时。在离线训练时每个batch的样本属于不同的用户，那么我们需要对batch中每个的行为序列进行独立的encoder推理，其时间复杂度是立方级的；但是在线上推理时，同一用户一次请求，一个batch内的encoder推理结果相同，那么我们只要计算一次即可，时间复杂度就可以降低为平方级。此外，通过调整计算图的执行顺序使得多个图可以同时去推理。最终从线上效果来看，tp99累计可以下降至33毫秒，使得模型满足全量上线要求。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/62e1bb1ecd494ce0a42be2fd1453cae3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272244656.png" />   
     </p>
 <p>最后，我们对模型进行了离线分析，希望研究时序编码是否在端到端学习中学习到足够的信息。从业务上来讲，我们认为用户越近期的行为对当前的用户偏好影响越大。从上图右侧的结果展示了模型的多个head学习的信息。我们可以看到行为次序越靠后，纵坐标表示的attention值会有某种比较明显的倾向性，表明模型确实学习到了兴趣的演变特性。模型上线后，推荐结果的精准性、丰富性和新颖性均得到大幅提升。在首页feed流，人均点击提升了3.5%，这也是我们使用深度模型后单次优化得到的最大提升。</p>
 <h1 id="04-精细行为建模"><strong>04 精细行为建模</strong></h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/83504a0e8e6740bcb19f888313989bb8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272244558.png" />   
     </p>
 <p>现在介绍一下我们在精细行为建模方向的工作。用户的行为中往往包含较多的噪声，包括一些误点击操作，需要从充满噪声的序列中识别用户的真实意图，因此我们提出了基于精细行为的兴趣建模来优化这一问题。</p>
 <p>精细行为是用户点击后在商品详情页的统计量和子行为信息，包括停留时长、操作次数、查看主图、浏览评论等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d1053f8366524d09867f1b1bc17b236a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272244339.png" />   
     </p>
 <p>整体方案以前面提到的改进的Transformer为基础，通过精细行为来建模用户点击后的真正意图和兴趣强弱。如上图所示，我们通过一个MLP将精细行为映射到一个定长的向量上，之后在通过bitwise-add的方式与时空编码信息结合。停留时长和操作数等统计信息会进行离散化，并通过端到端学习。查看主图、浏览评论等精细行为直接学习ID表征，并通过sum-pooling聚合。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/62e87fd86ad14b23b89bbe306c140655.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272244268.png" />   
     </p>
 <p>最后我们分析了精细统计属性对兴趣提取的影响，与之前的模型结论类似，我们也能观察到停留时长和attention之间存在某种趋势，停留越久attention值就越大。最终效果，在首页feeds流，人均点击提升2%，转化也提升了1.7%。</p>
 <h1 id="05-多模态特征"><strong>05 多模态特征</strong></h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ce27e071e08544fe9aea4b7c9bf8f068.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272244503.png" />   
     </p>
 <p>最后介绍一下我们在多模态方面的工作。影响用户点击决策的因素除了商品基本属性，还受商品的主图和标题的影响。此外，推荐系统存在冷启动问题，比如一些新品是缺乏用户反馈的，它们的特征embedding处于欠拟合状态。为了解决这个问题，我们引入了多模态特征。多模态特征可以带来一定的信息增益，商品的主图和标题中非结构化的视觉和语义信息可以比较好地表征商品的状态。另外，多模态特征对缓解冷启动问题效果较好，因为这一类特征不需要用户的反馈，它的特征覆盖率在我们的业务场景下较高。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e5a59f27e2e54479b51c557465d33171.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272244462.png" />   
     </p>
 <p>模型整体框架是通过预训练模型+微调分别得到图像和文本向量，并基于Transformer进行视觉和语义偏好的建模。目前图像多模态模型已经在京东推荐中全量上线，而文本模型还在实验中，所以这里主要介绍一下我们在图像方面的工作。</p>
 <p>由于预训练模型采用的是resnet101，它的训练数据分布和电商领域的图片分布有较大的差异，所以我们使用了电商主图的产品词分类数据对模型进行微调，使得模型能够学习到电商商品的特征。最终，我们把商品主图输入至图像模型，将最后一层64维向量作为图像embedding，应用于排序模型。</p>
 <p>在进行多模态的偏好建模过程中，有两个主要问题需要解决。首先，图像embedding和其他端到端训练的embedding来自于不同模型，这使得它们处于不同的特征空间。为了对齐向量空间，我们加入了一个transfer layer，采用了一个multi-gate multi-expert的结构，以商品的品类作为gate的输入，选取不同的映射expert，将图像特征与其他端到端的特征进行对齐。最终，我们会将转变后的图像embedding和sku embedding拼接到一起，并通过上文提到的Transformer进行统一编码。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/320147d7ce6c492b93a907fde6672358.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272244369.png" />   
     </p>
 <p>最后我们对图像预训练向量的质量进行了分析，具体做法是筛选一部分商品，观察他们向量的相似度。通过上图可以看到，感官上相近商品的相似度比较高，而当色差较大时相似度也会有相应的降低。如果是差异较大的商品，图像相似度也比较小。在线上效果方面，我们将该方法应用到了首页feeds和首页核心频道，效果比较显著，人均点击分别提升2.6%和5%。</p>
 <h1 id="06-精彩问答"><strong>06 精彩问答</strong></h1>
@@ -433,6 +433,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -466,10 +470,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -848,6 +848,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

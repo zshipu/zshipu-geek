@@ -204,7 +204,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/287621099adc4b97ab203fb8b2ec142b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271759305.webp" />   
     </p>
 <blockquote>
 <p>嘉宾：曾道建 湖南师范大学 助理教授</p>
@@ -214,107 +214,107 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>导读：</strong> 实体关系抽取是知识图谱构建过程中的一个重要环节，同时也是信息抽取中的一个主要任务。近年来，该课题受到了学术界与工业界研究者们的广泛关注，其主要包含多个子任务，如关系分类、远程监督关系抽取等。今天的分享主要为实体关系联合抽取与文档级关系抽取，可将它们归结为复杂语境下的实体关系抽取。</p>
 <h2 id="01-实体关系抽取任务介绍"><strong>01 实体关系抽取任务介绍</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4aad351308b8438e917dda52d9eeec1f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271759042.webp" />   
     </p>
 <p>一般情况下，我们将关系定义为两个或多个实体间的某种联系，而实体关系抽取旨在自动发现实体间存在的某种语义关系。在上图中，我们可以判别出“乔布斯（人）”和“苹果（公司）”之间有一种创始人关系。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6016896c20ba4d28af251ab85d62f076.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271759853.webp" />   
     </p>
 <p>传统的实体关系抽取我们称之为简单语境，其主要针对一个句子中的两个实体之间的语义关系特征，在这种语境下会忽略其他实体或者关系的影响。而复杂语境通常包括两种，如上图中所列出的：（1）同一个句子中多个三元组之间相互影响；如上图（左），Donald J. Trump和Queens之间有Born_in关系，Queens和New York City之间有Located_in关系，那么也可以推断出Donald J. Trump和New York City之间有Located_in关系；（2）大量的实体间关系是通过多个句子表达的，其主要涉及多个实体间的跨句关系抽取。上图（右）为从清华大学刘知远老师团队发布的DocRED数据集上所获得的截图，在发布该数据集时有进行简单的统计，统计结果表明：在维基百科数据集人工标注的结果中，至少有40%实体关系相关的事实只能从多个句子中进行联合抽取。</p>
 <h2 id="02-实体关系联合抽取"><strong>02 实体关系联合抽取</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bec21ce291d841c58250a8fecc54e59c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800711.webp" />   
     </p>
 <p>对于实体关系联合抽取任务，目前有较多的框架/方法类别，如基于序列标注的方法，基于表填充的方法，序列到序列的方法，多任务学习的方法等，以下我们将就三类方法进行展开介绍。</p>
 <h3 id="1-基于序列标注的方法"><strong>1. 基于序列标注的方法</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/62880cec2c5b4d0daaee8ea78ec24f68.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800516.webp" />   
     </p>
 <p>对于序列标注的方法，不得不提2017年在ACL上发表的一篇文章《Joint Extraction of Entities and Relations Based on Novel Tagging Scheme》，（当时这篇文章也获得了Outstanding paper）。在上述NovelTagging方法中，作者提出了一种新的关系标注模式（Relation tagging schema），对于每种关系，将其与（Begin, Inside，End，Single）以及头实体和尾实体的序号（1,2）组会起来进行关系抽取，并根据最后的标注结果进行解码，进而得到关系三元组。再者，该方法额外考虑了一个Other标签，主要表示不属于任何一种关系。如果总共有|R|种关系，那么一共就有2 <em>4</em> |R|+1个标签。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5fbf8e91cca34421b6e4d9beeb6d95c1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800408.webp" />   
     </p>
 <p>在上述方法中，作者也尝试了一系列经典的序列标注框架，如LSTM+CRF，其中CRF善于捕捉近距离的标签依赖，而LSTM可以捕捉长距离的标签依赖。在此基础上，由于LSTM可以堆叠之前所有时刻的隐状态，所以我们在Encoding-Decoding框架的Decoding层同样采用LSTM结构，如上图（左）；再者，考虑到other标签也占据较大的比例，所以作者加入损失因子（即Bias weight）以对other标签的重要程度进行设置。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b77becb865c3483bbd0d5ba22c35cac2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800194.webp" />   
     </p>
 <p>在实验中，作者选择NYT数据集，并将其看作是监督数据（即已标注的数据），通过在24种关系上进行尝试，实验结果表明：该方法的F1值并不是特别高，但是验证了该方法在处理关系抽取问题上的可行性，同时也为基于该方法的改进模型留下了空间。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8f43cb696f5f406d8c4a1e1209cb5239.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800913.webp" />   
     </p>
 <p>在做实体关系抽取任务时，我们可以将关系三元组划分为Normal、EPO和SEO三种类型（也被称为关系重叠三元组）。EPO（Entity pair overlap）指的是两个实体之间存在不止一种关系类型；SEO（Single entity overlap）指的是一个实体同时参与了两个关系三元组。NovelTagging模型能够较好地处理Normal三元组，然而却无法有效适应EPO和SEO的三元组情况。这是因为基于序列标注的方法只能为每个文本单词打上一个标签（即N输入N输出），所以这类模型不能同时处理EPO和SEO三元组。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f1666e1570374d74b882ea03b04f51c2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800706.webp" />   
     </p>
 <p>基于NovelTagging模型，Wei等人设计了一种名为Hierarchical Binary Tagging的模型，将关系三元组的抽取任务建模为三个级别的问题，从而能够更好解决三元组重叠问题。该方法不再将关系抽取的过程看作是对实体对离散标签的预测过程，而是将其看作是两个实体的映射过程。</p>
 <h3 id="2-基于表填充的方法"><strong>2. 基于表填充的方法</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/14dc3e4ef257437fb259ffec01035757.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800537.webp" />   
     </p>
 <p>第二类实体关系联合抽取的方法是基于表填充的方法，该类方法最早于2014年提出（请见EMNLP’2014上的《Modeling Joint Entity and Relation Extraction with Table Representation》）。在上图中，对角线元素用于填充实体标签（即通过命名实体识别后的结果），下三角元素用于填充关系（可被视为一个softmax的分类）。我们发现该方法存在一个明显的问题，即表格中每个单元格只能有一个标签，不能抽取EPO三元组。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a3e16161faf24f3382b75899dca2c2a1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800329.webp" />   
     </p>
 <p>基于表填充工作的一项较好的改进为多头选择工作（请见《Joint recognition and relation extraction as a multi-head selection problem》）。如上图所示，这个模型的框架看上去好像和表格填充没有太大的关系，实际上，这是一种多任务的框架。具体而言，该模型首先在BiLSTM的基础上使用CRF进行序列标注，找到实体。然后，将句子中的词进行排列组合；最后结合LSTM学习到的特征，标签的特征，将它们送到sigmoid分类器中，进而判断实体之间的关系。之所以将这项工作归结为表填充的类别，是因为该模型在进行两两词的组合过程中，就像表格中将一个词作为横纵坐标上的索引，进而填充该索引位置中的类别标签这一情形一样。值得一提的，为了使该模型能够支持上述提到的EPO和SEO情况，在进行关系分类（即表格填充）时，使用的是Sigmoid函数，允许两个词之间的多关系标签存在，因此可以解决关系重叠的问题。</p>
 <h3 id="3-序列到序列的方法"><strong>3. 序列到序列的方法</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b39d6710158644d5a5278cebe85dd25d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800252.webp" />   
     </p>
 <p>然后介绍我们的工作CopyRE，在该工作中，我们将关系三元组的抽取问题看成是序列到序列的生成问题，即根据输入的句子，借助于机器翻译的想法，将三元组看成是一个翻译的序列。在使用Encoder-Decoder框架时，在输出结果中可能会有部分实体不在输入的句子中，这是因为我们是立足于整个语料库来构建的词表，并将其作为Decoder的预测对象。因此，我们借助于拷贝机制，直接从源句中找到实体对象。与NovelTagging模型相比，我们的模型取得了性能的提升。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/44dae60a5e7049d68ce43fb49b32bf37.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800118.webp" />   
     </p>
 <p>在CopyRE模型中，我们发现在进行拷贝时，主要是在控制实体的最后一个词（token），当头实体和尾实体是由多个token构成时，得到的关系三元组结果是不完整的。为了解决上述问题，我们提出了CopyMTL模型，该模型通过序列标注方法（Sequence-Labelling）来识别由多个词构成的实体，并增加非线性变换，改进了拷贝函数的计算方式，进而解决了实体拷贝不全的问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9cb3f2c650a44819a9b888b95b289763.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800963.webp" />   
     </p>
 <p>上述也是我们自己的工作，该工作的出发点在于：（1）在序列到序列的标注方法（Seq2seq）中，一个固有的问题是：由自回归解码而导致的标记偏置问题，即在解码第一实体时，依赖于start标记；解码第二个实体时，依赖于第一个实体是什么，以此类推。如果解码过程中的某一步出现了错误，就会导致后续的解码过程不准确；因为在训练时，我们有正确的标签（ground truth），而测试时就没有了正确标签的指导，生成的标签不可避免的会出现一定的错误。因此，标记偏置是一类比较严重的问题；（2）模型强制学习训练数据中三元组的先后顺序。如上图，例如，当模型在抽取得到“graduate_from”关系后，发现其与另外一种关系共现，进而就会再抽取这种关系，而将“graduate_from”关系遗忘。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/17b39eddb63b4e20987b46e43286e9c0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800862.webp" />   
     </p>
 <p>为解决上述两方面的问题：我们提出了Seq2UMTree模型。该模型的逻辑框架如上图所示，其建模动机在于:（1）我们考虑是否能通过缩短解码长度来解决标记偏置问题；（2）我们在解码时，不考虑三元组之间的关系，而是采用树状结构的解码方式。在树状结构的第一层中，我们先预测有哪几种类型的关系；在第二层中，找到头实体开始（start）与结束（end）的位置；在第三层中，再找到尾实体开始（start）与结束（end）的位置。该方法取得了比较好的性能效果。在这个工作中，无论句子中有多少个三元组，我们的解码器最多只有三层（即最多可为3个时间步长（time step）进行解码），这样可以避免：如果解码的time step越多，标记偏置的问题可能会越严重。</p>
 <h2 id="03-文档级关系抽取"><strong>03 文档级关系抽取</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/45f7ccfc6f204d01a750ef9495a6d86f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800734.webp" />   
     </p>
 <p>下面给大家介绍本报告中第二个系列的工作，即文档级关系抽取。上图为DocRED数据集中的一个例子。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/862e75bc2b7f4866a70ba805327bd4d0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800825.webp" />   
     </p>
 <p>文档级关系抽取的关键在于：（1）如何有效的建模实体的多粒度信息，其主要包括2点：（a）如上图中，同一个实体可能在多个句子中出现（即实体在多个句子中的提及）；（b）在文本写作中，自然出现的实体指代问题；（2）如何建模文档内的复杂语义信息，其主要涉及多个方面的推理，如逻辑推理、指代推理和常识知识推理等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b7b31974cece465f930a29d9c960d52b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800561.webp" />   
     </p>
 <p>早期的文档级关系抽取主要是基于句子级别的抽取，再进行聚合操作。这里，我主要介绍基于图神经网络来完成上述任务的若干工作，第一个工作发表在ACL 2019上（请见《Inter-sentence Relation Extraction with Document-level Graph Convolutional Neural Network》），作者提出的模型被称为GCNN，主要的建模过程包括：</p>
 <p>① 使用图神经网络来建模文档：在构建文档时，将输入文档中的每个词作为图中的一个节点，通过不同类型的边对整个文档的结构进行表示。如上图所示，作者用句法依赖标签建立句子中单词之间的远距离依赖；用指代消解工具将具有指代关系的词进行连接；将句子中相邻的两个词也连接起来；将句子中当前词的前后节点连接起来；最后将词本身进行连接。连接完成后，便构建出了一个图结构。</p>
 <p>② 在下一步中，基于构建好的文档图，使用GCNN来学习节点之间的信息交互/传递，计算得到每个节点的表示。这样，不同句子中的不同提及都会得到表示。</p>
 <p>③ 最后，通过多示例学习的方式聚合目标实体的所有提及并进行关系分类。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/497767cd2a8342d392c80a2c825b1c72.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800438.webp" />   
     </p>
 <p>实验在CDR和CHR数据集上完成，并取得了较好的效果。特别要指出的是消融实验的结果，如上表所示。实验结果表明：大部分构建的边对模型效果能起到提升的作用，而指代的边并不影响句子内抽取，对于跨句子间的抽取确能起到重要的作用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cbe21cd0cedf413784444b51e44037ff.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800230.webp" />   
     </p>
 <p>第二个工作也是同一批作者完成的，所提出的模型叫做EOG（请见EMNLP’2019《Connecting the dots: Document-level neural relation extraction with edge-oriented graphs》）。现有的方法主要使用基于图的模型，以实体作为节点，根据两个目标节点来确定实体间的关系。然而，关系是两个节点之间的核心，实体关系可以通过节点间路径形成的唯一的边表示来更好地表达。EoG通过在不同类型的节点之间建立不同类型的边来决定信息流入节点的多少，如此可以更好地拟合文档之间异构的交互关系。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/628fde113d464214b275383341320a02.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800025.webp" />   
     </p>
 <p>在EOG中，作者主要采用启发式的方法来构建图结构，图中的节点有实体提及、实体和句子，边主要包括：提及到提及（mention-mention, MM）、提及到实体（mention-entity, ME）、提及到句子（mention-sentence，MS）、实体到句子（entity-sentence，ES）和句子到句子（sentence-sentence，SS）之间的关系。构建好图之后，下一步就是推理处理。与使用GCN来进行推理不同，这里主要是训练连接两个实体之间的路径，多次迭代加权该路径上的信息，如上图（右）所示，从而将路径上的信息进行传递，起到推理的效果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/10c4385202b24b758fece1f53e60b013.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800929.webp" />   
     </p>
 <p>从实验效果上来看，与对比方法相比，EoG模型取得了最好的效果。值得一提的是，EoG(full)表示的是一种全连接的图，EoG(NoInf)表示不采用在图中游走的策略，EoG(Sent)表示以句子级别来构建的图。实验结果表明，在构建文档级别的图结构时，跨句推理非常关键。另外，图的结构也非常重要，构建全连接图的方法与使用启发式的规则、有目的地构建图的方法（即EoG方法）的差距也很大。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b75174b2562647648e06247abdb23957.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800672.webp" />   
     </p>
 <p>基于上述工作，我们发现图的结构非常重要。这里介绍ACL 2020年的一项工作，即LSR模型（请见《Reasoning with latent structure refinement for document-level relation extraction》），这个工作的动机主要是：图的结构是否也可以从大量文本中进行学习？作者据此提出：将图结构视为一个潜在的变量，并且以端到端的方式对其进行归纳推理。即在初始建图时，可以采用随机初始化或其它方式来完成；后续每一步迭代都将该图进行修正，进而得到最终的结果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/983ac520788a488ea92b0e50980faf25.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800545.webp" />   
     </p>
 <p>从实验效果来看，通过与GCNN、GAT、AGGCN等方法进行对比，在LSR模型中，通过自动学习图结构的方式也取得了非常好的效果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/00a326e36f6642ec927128953a9a6766.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271800355.webp" />   
     </p>
 <p>我认为，在文档级关系抽取中一项有意思的工作来源于北京大学（请见EMNLP’ 2020《Double Graph Based Reasoning for Document-level Relation Extraction》），被称为Double Graph。我们一直在讲，文档级关系抽取中最重要的包括：如何对文档进行建模以及如何进行关系推理。在Double Graph中，作者将以上两个部分分隔开，第一个部分是在提及级别的图（mention-level graph）上进行GCN或随机游走，进而完成图中的信息传递与推</p>
 
@@ -440,6 +440,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -473,10 +477,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -855,6 +855,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

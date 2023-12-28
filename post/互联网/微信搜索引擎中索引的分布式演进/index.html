@@ -222,7 +222,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>相比商业系统，ES更注重易用性，采用了对等架构，每个数据节点既处理写入请求，又处理检索请求。所以ES更适用于对搜索性能并不敏感的业务，在最经典ELK中，ES就用于日志搜索分析。在成熟的商业系统中，对检索性能稳定性要求比较苛刻，数据写入时需要尽可能少的影响搜索性能，所以更多情况下会将资源消耗比较大的建索引部分拆分到离线来做。</p>
 <p>笔者所在的微信搜一搜中，搜索引擎也分为在线离线两部分，离线用于创建索引，在线用于检索。事实上，包括百度在内的大多数企业级搜索系统都采用了这类分离的架构。下图为项目初期的搜一搜索引管理架构：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/aef3a8ef242849de9b6653ca928b85ef.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271908508.png" />   
     </p>
 <p>如上图所示，文档在写入Indexer后，由Indexer离线创建并管理索引。Searcher从Indexer拉取已建完索引，提供在线检索服务，Searcher模块中不同节点的索引数据完全一致，互为镜像。Indexer同步承担了索引管理功能，为无法扩容的单点。对于千万级文档中小业务来说，如果对数据流可靠性要求不苛刻，这里尚能运行良好。但随着文档量越来越大，Indexer 和 searcher在性能、可扩展性和容错等方面的问题凸显，这种简单架构已经无法满足需求，亟需引入分布式管理。</p>
 <h2 id="三数据分片"><strong>三、数据分片</strong></h2>
@@ -236,7 +236,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>固定分片的方式相比是最为常用的，但如上所述，在系统初始搭建时，需要选择远大于节点数的分片数，为后续扩容预留空间。在ES中，每个分片都是一个依赖Lucene的独立引擎，负责数据的存储和检索。这限制了其在初始搭建时的分片数选择，因为过多的分片数会使得请求量放大，从而导致性能的急剧下降。针对该问题，存储系统Ceph有个很好的解决方案：其分片为逻辑概念，每台数据节点都可以承载多个逻辑分片，所以可以在初始阶段就选择较大的分片数。相比ES，Ceph可以这么做的主要秘诀是：存储系统的数据分片并不需要一个独立的引擎做支撑。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2c36c7090a094eae9681c64b49f84cb9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271908983.png" />   
     </p>
 <p>在微信搜一搜中，数据写入与在线检索分离，写入更类似Ceph，可以按逻辑分区进行划分。这就允许我们在系统初始就选定一个较大的分区数，解决分片数难以确定问题。上图展示了分片与节点的映射关系，当文档写入时，通过hash取余的方式，打散到各分片中。新扩容节点3时，分片5从原来所属的节点2迁移至节点3，通过分片迁移使得其在节点中的分布依旧均衡。</p>
 <h2 id="四分布式系统设计中的考量"><strong>四、分布式系统设计中的考量</strong></h2>
@@ -253,14 +253,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在检索时，用户请求需发送给全部的分片，分别进行召回，召回的结果在合并后返回。为了提升在线吞吐，每个分片需要增加多个副本，所有副本均提供检索服务。在分片和副本的管理中，一个常见的做法是将不同主分片和副分片均匀且分散的分到不同节点，通过多机并发提升在线性能，在ES、Ceph、Redis等系统中，均采用该方式。但在商业场景下，用户请求量变化波动会非常大，比如表情搜索在节假日的请求量往往会上涨好几倍。在上述分片划分方式下，这种请求量大幅波动的场景会导致一个问题：当请求量突然上涨时，需要同比增加副分片数，但这时扩容节点后，如果还需要做到主副分片均匀且分散的分布的话，就需要迁移相应分片到新节点，而迁移本身对资源消耗比较大，又会影响到在线性能。</p>
 <p>应对上述的请求大幅波动，微信内普遍采用了Svrkit框架。Svrkit框架是一种非常经典的微服务架构，系统按模块来划分，每个模块都是一个服务。同一模块会在多个节点部署进程，不同节点互为镜像。请求量上涨时，迅速扩容节点，通过部署更多镜像来应对。如果节点异常导致请求失败，上游通过换机重试来避免最终失败，从而保证可用性。但对Searcher来说，索引量比较大时，单个镜像中不能装载全部索引，这就需要将索引拆分到不同节点。在Svrkit中提供了一种byset模式，允许同一模块划分多个分组（Set），各自加载一部分索引。每个分组都有各自的多个镜像提供服务，上游在下发请求时，需要从所有分组进行召回，合并返回。如果遇到上述的请求量上涨时，每个分组各自扩容镜像即可。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bae5c354d0304b6aaf071b94021891fa.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271908644.png" />   
     </p>
 <p>如图所示，在线检索的Searcher模块，采用了byset模式，划分成多个分组。上述分片到节点的映射，也相应的变成了分片到分组的映射，映射的管理由Leader来负责。当文档量上涨时，通过扩容分组来容纳；请求量上涨时，各组分别扩容，增加节点数来应对。得益于离线建索引的架构，新扩容的节点只需要从离线拉取数据，整个过程不影响现有服务。在扩缩分组时，部分分片要迁移到新分组中，这时需要注意的是只有在新分组上线提供服务后，才能下线旧分组中的已迁移分片。</p>
 <p>在ES中，主分片会均匀分散到各节点，这时Leader还需要同时管理请求路由。而在byset中，路由按分组划分，整个检索过程中，Leader并不参与，是什么原因使得这里可以做到如此简洁呢？天下没有免费的午餐，这里的简化也不例外。ES中，如果有Searcher的节点数据无法同步时，会通过Leader从路由中剔除该节点，所以不会造成数据缺失。但在Svrkit的byset路由中，Leader并未参与，如果有Searcher节点的数据异常，则无法通过路由的方式及时剔除异常节点。这类数据缺失的代价可谓不菲，能否有其他方式减少该问题的发生呢？如果异常节点与Leader之间的通信正常，Leader可以通知该异常Searcher拒绝服务，由上游重试到其他节点来保证正确召回。但如果网络异常导致通信失败，Searcher无法知道自己数据不完整时，这里就会出现上述数据缺失问题了。所以这里的简化其实隐含的一个假设：如果Leader与某Searcher通信中断，则客户端也无法访问该Searcher节点。在同一数据中心的局域网内，通过交换机堆叠等措施，可以做到全链路无网络单点设备，减少这种网络分区风险。这种场景下，该假设不成立的概率其实非常低，远小于人工操作失误和软件bug带来的问题。其实Svrkit框架下的byset路由模块都隐含了该假设，最常用的KV系统就依赖byset路由，其稳定性已经过了实践检验，所以当前场景下做出该假设是可行的。</p>
 <h3 id="3-文档写入"><strong>3. 文档写入</strong></h3>
 <p>文档写入后，首先需要存储，就涉及用共享存储（shared disk）架构，还是无共享架构（shared nothing）的问题。这个决定不难做出，在微信中已经有自研的WFS（类似HDFS）、WBT（类似Hbase）和WQ（类似Kafka）已被广泛使用。显然，用共享存储能极大简化工作，实际上在商业搜索中，几乎都依赖了其他存储组件。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b4b7edbdf99141619e188085adaecdaa.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271908398.png" />   
     </p>
 <p>由于分片数固定，哈希方式已约定，所以文档在写入时，可以提前计算出其所在的分片，按分片写入依赖WBT和WQ的数据平台。在建索引时，Processor模块从数据平台扫描文档，在预处理完成后返回给Indexer，Indexer负责索引建立，并落地到WFS。</p>
 <h3 id="4-节点管理"><strong>4. 节点管理</strong></h3>
@@ -272,7 +272,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>Leader如果需要感知工作节点的当前状态，一个常见的做法就是通过心跳。工作节点定期通过心跳给Leader上报自身的情况，Leader将工作节点所需的分片映射、索引任务等信息带回给工作节点。如果结合路由配置和心跳，这里是否能解决上面的问题呢？针对问题1，心跳可以携带节点信息，包括启动、异常等状态供Leader决策。针对问题2，即使节点不在路由中，Leader也可以在心跳中将加载索引任务带回给Searcher节点，新节点完成数据加载后，提供在线服务。所以，这里结合路由配置和心跳的方式是可行的。不过心跳也有失效的可能，利用心跳来检测节点状态本身并不完全可靠。比如在工作节点的心跳处理线程有死锁、挂死、CPU繁忙等异常时，可能会有误检；在异常网络时，比如大包比小包更易丢失的场景下，会导致漏检，利用心跳的方式来收集信息，也就意味着需要能容忍上述各类异常。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/97bd5857bcff4c0d9f4b97823d0eea77.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271908191.png" />   
     </p>
 <p>上图展示了Leader利用路由和心跳来收集Searcher和Indexer中各进程状态的过程。通过心跳，Leader能感知各进程当前状态，并利用路由配置来判断是否为新扩容节点等信息。Leader在心跳包的回执中，同步给Indexer下发创建索引任务，给Searcher下发相应的加载索引任务。感知节点状态还允许Leader及时处理节点故障，比如在Indexer故障时，Leader会通过心跳超时检测到，这时需回收给其分配的索引任务，换Indexer重做。</p>
 <h3 id="5-事务一致性和数据复制"><strong>5. 事务、一致性和数据复制</strong></h3>
@@ -282,7 +282,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="6-搜索引擎系统架构"><strong>6. 搜索引擎系统架构</strong></h3>
 <p>通过对上述问题的权衡，搜一搜的分布式架构演变为如下模样：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/af105f91353041bfb57c9ebfbdaff19d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271908968.png" />   
     </p>
 <p>Leader依赖Chubby选举，为整个搜索引擎的大脑，负责管理分片映射、节点状态及路由。Searcher模块提供了在线的召回服务，用户在发起搜索时，通过broker将请求下发至Searcher的全部分组，对结果Merge后返回。整个搜索过程Leader并不参与，实现控制流和搜索数据流的分离。Leader通过心跳与Searcher中各节点进行交互，收集各个节点状态，通知各节点加载相应索引数据，并利用路由配置识别非集群节点和正在扩容中的节点。</p>
 <p>文档数据写入时，先通过hash取余的方式确定所属分片，按分片写入数据平台中的WBT（类似HBase）和WQ（类似Kafka）。这里所选的分片数，一般远大于Searcher的分组数，确保在扩容分组时依旧能均匀分布。索引的创建、上线和退场的管理由Leader负责，Indexer依据Leader的指示，从Processor拉取文档，创建索引，落地到wfs。由于搜索业务对一致性的要求比较宽松，Searcher中同分组的不同节点之间，并不进行索引同步，各节点各自从WFS拉取对应分组的索引进行加载。</p>
@@ -290,14 +290,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在大数据处理中，常见的架构有两种：Lambda和Kappa；在Lambda架构中，数据处理分为两部分：批处理和流式处理。而在Kappa架构中，只有流式处理，避免了在实时数据处理系统上再“粘”一个离线数据处理系统。这两种架构其实各有优缺点，Lamda架构更稳定，但需要维护两套系统，批处理和实时处理要保证一致比较困难。Kappa架构更易维护，但其数据边界不明确，需要复杂的异常处理，有数据丢失风险。</p>
 <p>在搜一搜场景中，我们对文档的可靠性要求比较苛刻，尤其是账号系统（公众号等），数据丢失很容易引发相应产商的投诉。另外，部分特征需要批量计算产出，这就有定期批量更新的需求，所以这里自然选用了Lamda架构。当新数据进来时，经由实时流进入搜索系统；当特征定期更新时，则需等待批量索引重建才能更新到线上。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4d1516b999b24eb4bea142d45d360004.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271908765.png" />   
     </p>
 <p>上图为剔除处理逻辑后的数据流示意图，文档通过WQ（类似Kafka）接入后，分别进入用于批量处理的WBT（类似HBase）和用于实时流的WQ。批量计算出的特征，直接写入WBT，通过定期全量重建索引的方式上线；新增、删除或更新的文档，流经实时流WQ，直接进入搜索系统。由于文档异步接入且索引在离线建立，所以准确的讲这里应该叫近实时流。在ES中，作为存储系统，读写操作是实时的，但其提供的搜索服务也需要提前建索引，也属于近实时的。</p>
 <h3 id="1-全量索引更新"><strong>1. 全量索引更新</strong></h3>
 <p>全量索引重建为定期任务，indexer从WBT扫描全部文档重建索引，通过WFS推送至Searcher。由于Searcher提前划分了分组，所以Indexer也需要按分组建索引，每次扫描时，只扫描对应分组的分片即可。对Searcher中的每个节点来说，每次召回相当于在索引中查找TopK的过程，如果每个节点只有一个索引，其检索资源利用率是最高的，实际上多数商业搜索中也是这么做的。但是，这也带来一个问题：在索引更新时需要预留一倍的资源进行热替换。为了避免这种资源浪费，一种常用的方式是在对节点进行索引更新时，先停止服务，索引更新完成后重新上线该节点。如果业务数据足够大，近实时流和全量索引属于不同的Searcher模块，再加上仔细选择上线时机的话，停服对在线的影响其实可控，是较好的选择。</p>
 <p>在微信搜一搜场景中，引擎需要支持几十上百业务，尤其是对文档数较少的账号系统来说，同时维护两个Searcher模块的运维成本比较高，所以依旧选择了不停服的方案。但不停服的时候，如何避免索引替换时新旧两份数据带来的资源占用呢？针对该问题，一个很自然的解决方案是对节点内的索引数据进行切分，即Searcher节点内的索引切分为多个库，每个库依次替换，这样只需多预留一个库的资源即可。为了与实时流区分，这里姑且称作全量库。这里的一个难点是全量库替换时，要求新库能覆盖旧库的全部数据，以保证数据完整性。如果新旧库包含相同的分片，则可解决该问题，所以分片到分组的映射，又演化为分片到全量库的映射。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/191aa781539d4b64ae71942848be1321.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271908542.png" />   
     </p>
 <p>如上图，分片会映射到不同全量库中，新扩容分组时，全量库的个数也相应增加。全量索引重建的请求由运维人员或定时器发起，作为控制操作发送给Leader。Leader负责生成管理全量库的建库、加载、退场等任务，Indexer收到建库任务后，拉取对应的分片数据，建库完成后在WFS保存。Leader收到Indexer的建库任务完成后，通知Searcher中对应分组的节点进行库数据加载及下线对应的旧库。</p>
 <p>索引的每次全量重建完都会形成一轮完整的索引，这类似于存储系统中的快照。不过这里并不“快”，建库过程中的拉取数据并不是一个瞬时操作，所以在判断其覆盖的近实时流范围时，只能按起始拉取时间来判断。已完成的索引数据，会在WFS中保存多个轮次，这为索引回滚提供了条件。如果当前轮次的数据异常，Leader支持运维人员选择一轮已上过线的索引，进行快速回滚，来消除错误数据带来的影响。</p>
@@ -310,7 +310,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>然而，这里还有一个问题没有解决：LSM主要是为单节点准备的，但Indexer为无状态模块，不同的合并任务可能属于不同节点，这里还能适用么？其实Indexer建完索引后，会在WFS中持久化，这里只是将本地的IO变换成WFS的IO操作。由于没有读操作，多节点分布并无不妥，建库任务由Leader统一管理，也免除了多机之间同步的烦恼。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/453a4a06137b45c9abfd98ddbe4d6c98.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271908361.png" />   
     </p>
 <p>上图为某分组中近实时流库的快照示意图，其中下面的Refresh库相当于LSM内存中累积的数据，Level库类似LSM中落地后的文件。新增数据，首先会进入Refresh库，只有Refresh库的数据到达一定阈值，才会转换成Level_0的库。如果数据写入速度较低，Refresh库在时间阈值（5秒）到期后也会落地上线，以便新数据能被及时检索到；上图中“库 9^1” 为已上线（绿色表示）的Refresh库，新的数据会进入“库 9^2”，”库 9^2”可以完全覆盖“库 9^1”的数据，如果“库 9^2”中的数据达到阈值后，会转换为Level_0的“库9”。</p>
 <p>在Level库中，由低向高合并，高Level的库一旦上线（绿色表示），则会同步下线掉其已覆盖的低Level库（灰色表示）。如果忽略删除操作带来的波动，这里每个Level中，不同的库中文档数几乎一致，其大小也接近，所以不存在按大小还是按Level合并策略的选择。整个近实时流是按照时间顺序排列的，当全量索引重建完成并上线后，会同步下线其覆盖的近实时流库（红色表示）。图中黄色部分，表示正在建索引中的库，比如近实时流“库7|8”，正在对“库7”和“库8”进行合并重建。</p>
@@ -442,6 +442,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -475,10 +479,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -857,6 +857,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

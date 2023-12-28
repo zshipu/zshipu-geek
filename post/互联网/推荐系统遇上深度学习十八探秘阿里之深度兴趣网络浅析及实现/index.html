@@ -214,7 +214,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>这两种特性是密不可分的。</p>
 <p>举个简单的例子，观察下面的表格：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/5997513d08c249ca9d54d7f33677da49.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272004155.png" />   
     </p>
 <p><strong>Diversity</strong> 体现在年轻的母亲的历史记录中体现的兴趣十分广泛，涵盖羊毛衫、手提袋、耳环、童装、运动装等等。而爱好游泳的人同样兴趣广泛，历史记录涉及浴装、旅游手册、踏水板、马铃薯、冰激凌、坚果等等。</p>
 <p><strong>Local activation</strong> 体现在，当我们给爱好游泳的人推荐goggle(护目镜)时，跟他之前是否购买过薯片、书籍、冰激凌的关系就不大了，而跟他游泳相关的历史记录如游泳帽的关系就比较密切。</p>
@@ -223,7 +223,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>整体框架</strong></p>
 <p>我们先来看一下推荐系统的整体框架：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/2bb8f15a966b4d69ab0f6c8d31185df2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272004018.png" />   
     </p>
 <p>1.检查用户历史行为数据</p>
 <p>2.使用matching module产生候选ads。</p>
@@ -232,33 +232,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>特征设计</strong></p>
 <p>本文将所涉及到的特征分为四个部分： <strong>用户特征、用户行为特征、广告特征、上下文特征</strong>，具体如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/e72426d1abf74ca09988152fd5e08a10.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272004667.png" />   
     </p>
 <p>的非0值个数是不一样的，常见的做法就是将id转换成embedding之后，加一层pooling层，比如average-pooling，sum-pooling，max-pooling。DIN中使用的是weighted-sum，其实就是加权的sum-pooling，权重经过一个activation unit计算得到。这里我们后面还会再介绍到。</p>
 <p><strong>BaseModel</strong></p>
 <p>在介绍DIN之前，我们先来看一下一个基准模型，结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/216df3d5d3f740edb377ed4732c0c355.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272004928.png" />   
     </p>
 <p>这里element-wise的意思其实就是元素级别的加减，同时，可不要忽略广播的存在哟。一个元素和一个向量相乘，也可以看作element-wise的，因为这个元素会广播成和向量一样的长度嘛，嘻嘻。</p>
 <p>可以看到，Base Model首先吧one-hot或multi-hot特征转换为特定长度的embedding，作为模型的输入，然后经过一个DNN的part，得到最终的预估值。特别地，针对multi-hot的特征，做了一次element-wise+的操作，这里其实就是sum-pooling，这样，不管特征中有多少个非0值，经过转换之后的长度都是一样的！</p>
 <p><strong>Deep Interest Network</strong></p>
 <p>Base Model有一个很大的问题，它对用户的历史行为是同等对待的，没有做任何处理，这显然是不合理的。一个很显然的例子，离现在越近的行为，越能反映你当前的兴趣。因此，对用户历史行为基于Attention机制进行一个加权，阿里提出了深度兴趣网络（Deep Interest Network)，先来看一下模型结构：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/1e6665c73e7f4f89929c5d7c09b8cd16.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272004603.png" />   
     </p>
 <p>Attention机制简单的理解就是，针对不同的广告，用户历史行为与该广告的权重是不同的。假设用户有ABC三个历史行为，对于广告D，那么ABC的权重可能是0.8、0.1、0.1；对于广告E，那么ABC的权重可能是0.3、0.6、0.1。这里的权重，就是Attention机制即上图中的Activation Unit所需要学习的。</p>
 <p>为什么要引入这一个机制呢？难道仅仅是通过观察历史数据拍脑袋决定的么？当然不是，如果不用Local activation的话，将会出现下面的情况：假设用户的兴趣的Embedding是Vu，候选广告的Embedding是Va，用户兴趣和候选的广告的相关性可以写作F(U,A) = Va * Vu。如果没有Local activation机制的话，那么同一个用户对于不同的广告，Vu都是相同的。举例来说，如果有两个广告A和B，用户兴趣和A，B的相似性都很高，那么在Va和Vb连线上的广告都会有很高的相似性。这样的限制使得模型非常难学习到有效的用户和广告的embedidng表示。</p>
 <p>在加入Activation Unit之后，用户的兴趣表示计算如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/bb4b25c396cc4c79bbae1bbab7feaba3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272004858.png" />   
     </p>
 <p>其中，Vi表示behavior id i的嵌入向量，比如good_id,shop_id等。Vu是所有behavior ids的加权和，表示的是用户兴趣；Va是候选广告的嵌入向量；wi是候选广告影响着每个behavior id的权重，也就是Local Activation。wi通过Activation Unit计算得出，这一块用函数去拟合，表示为g(Vi,Va)。</p>
 <h1 id="3模型细节">3、模型细节</h1>
 <h2 id="31-评价指标gauc">3.1 评价指标GAUC</h2>
 <p>模型使用的评价指标是GAUC，我们先来看一下GAUC的计算公式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/7e01580337a14f09872421cab6acdb93.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272004708.png" />   
     </p>
 <p>我们首先要肯定的是，AUC是要分用户看的，我们的模型的预测结果，只要能够保证对每个用户来说，他想要的结果排在前面就好了。</p>
 <p>假设有两个用户A和B，每个用户都有10个商品，10个商品中有5个是正样本，我们分别用TA，TB，FA，FB来表示两个用户的正样本和负样本。也就是说，20个商品中有10个是正样本。假设模型预测的结果大小排序依次为TA，FA，TB，FB。如果把两个用户的结果混起来看，AUC并不是很高，因为有5个正样本排在了后面，但是分开看的话，每个用户的正样本都排在了负样本之前，AUC应该是1。显然，分开看更容易体现模型的效果，这样消除了用户本身的差异。</p>
@@ -267,22 +267,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>从Relu到PRelu</strong></p>
 <p>Relu激活函数形式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/c5bd3b4f6cee4591b721c1b48a1a996e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272004574.png" />   
     </p>
 <p>Relu激活函数在值大于0时原样输出，小于0时输出为0。这样的话导致了许多网络节点的更新缓慢。因此又了PRelu，也叫Leaky Relu，形式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/2e79571f86414cc997f444336b4cc5a5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272004910.png" />   
     </p>
 <p>这样，及时值小于0，网络的参数也得以更新，加快了收敛速度。</p>
 <p><strong>从PReLU到Dice</strong></p>
 <p>尽管对Relu进行了修正得到了PRelu，但是仍然有一个问题，即我们认为分割点都是0，但实际上，分割点应该由数据决定，因此文中提出了Dice激活函数</p>
 <p>Dice激活函数的全称是Data Dependent Activation Function，形式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/0f324f2a9a34410ca9ce32fda8e49dbc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272004936.png" />   
     </p>
 <p>其中，期望和方差的计算如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/7c3d8f96d49449698e69b5ec6165fca7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272004863.png" />   
     </p>
 <p>可也看到，每一个yi对应了一个概率值pi。pi的计算主要分为两步：将yi进行标准化和进行sigmoid变换。</p>
 <h2 id="33-自适应正则-adaptive-regularization">3.3 自适应正则 Adaptive Regularization</h2>
@@ -294,20 +294,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>3.对于出现频率低的，给予较大的正则化强度。</p>
 <p>计算公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/612f59ed99f7464aa201c6c32bab92cf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272004675.png" />   
     </p>
 <h1 id="4效果展示">4、效果展示</h1>
 <p>下图是对Local Activation效果的一个展示，可以看到，对于候选的广告是一件衣服的时候，用户历史行为中跟衣服相关的权重较高，而非衣服的部分，权重较低。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/b437e4aeb2f44905a021c7829564e39d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272004611.png" />   
     </p>
 <p>下图是对使用不同正则项的结果进行的展示，可以发现，使用自适应正则的情况下，模型的验证集误差和验证集GAUC均是最好的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/ede65b1e69644527828cbd05b47469d3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272004473.png" />   
     </p>
 <p>下图对比了Base Model和DIN的实验结果，可以看到，DIN模型在加入Dice激活函数以及自适应正则之后，模型的效果有了一定的提升：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/22d1191b4987410dba140e1d0caec67e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272004949.png" />   
     </p>
 <h1 id="5实战din">5、实战DIN</h1>
 <p>本文的github地址为： <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2Fprincewen%2Ftensorflow_practice%2Ftree%2Fmaster%2Frecommendation%2FBasic-DIN-Demo">https://github.com/princewen/tensorflow_practice/tree/master/recommendation/Basic-DIN-Demo</a></p>
@@ -316,7 +316,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>数据准备</strong></p>
 <p>按照下面的方法下载数据：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/bdb1844b9b6d49f689f1277e5cd14528.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272004434.png" />   
     </p>
 <p><strong>Dice激活函数</strong></p>
 <p>这里实现的Dice激活函数没有根据上一步的均值方差来计算这一步的均值方差，而是直接计算了这个batch的均值方差。我们可以根据计算出的均值方差对x进行标准化(代码中被注释掉了)，也可以直接调用batch_normalization来对输入进行标准化。</p>
@@ -521,6 +521,10 @@ def dice(_x,axis=-1,epsilon=0.0000001,name=&#39;&#39;):
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -554,10 +558,6 @@ def dice(_x,axis=-1,epsilon=0.0000001,name=&#39;&#39;):
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -936,6 +936,8 @@ def dice(_x,axis=-1,epsilon=0.0000001,name=&#39;&#39;):
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

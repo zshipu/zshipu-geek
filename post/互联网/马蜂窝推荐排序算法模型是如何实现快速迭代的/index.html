@@ -211,7 +211,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <h1 id="part1-马蜂窝推荐系统架构">Part.1 马蜂窝推荐系统架构</h1>
 <p>马蜂窝推荐系统主要由召回（Match）、排序（Rank）、重排序（Rerank）几个部分组成，整体架构图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/591cda8174a34203a1292e01c556131f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281958882.webp" />   
     </p>
 <p>在召回阶段，系统会从海量的内容库筛选出符合用户偏好的候选集（百级、千级）；排序阶段在此基础上，基于特定的优化目标（如点击率）对候选集内容进行更加精准的计算和选择，为每一条内容进行精确打分，进而从候选集的成百上千条内容中选出用户最感兴趣的少量高质量内容。</p>
 <p>本文我们将重点介绍马蜂窝推荐系统中的核心之一——排序算法平台，它的整体架构如何；为了给用户呈现更加精准的推荐结果，在支撑模型快速、高效迭代的过程中，排序算法平台发挥了哪些作用及经历的实践。</p>
@@ -219,7 +219,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="21-整体架构">2.1 整体架构</h2>
 <p>目前，马蜂窝排序算法线上模型排序平台主要由 <strong>通用数据处理模块、可替换模型生产模块、监控与分析模块</strong> 三部分组成，各模块结构及平台整体工作流程如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e695d38bf7354a709c2b0665437fb984.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281958113.webp" />   
     </p>
 <h3 id="211-模块功能"><strong>2.1.1 模块功能</strong></h3>
 <h4 id="1-通用数据处理模块"><strong>(1) 通用数据处理模块</strong></h4>
@@ -265,7 +265,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="22-排序算法平台-v1">2.2 排序算法平台 V1</h2>
 <p>在排序算法平台 V1 阶段，通过简单的 JSON 文件配置，平台就能够实现特征的选择、训练集的选择、分场景 XGBoost 模型的训练、XGBoost 模型离线 AUC 的评估、生成线上配置文件自动同步上线等功能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/40286c4913e445d9a8943f4e8eb8c96c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281958197.webp" />   
     </p>
 <p>但在使用过程中，我们仍然发现了一些存在的问题：</p>
 <ul>
@@ -279,7 +279,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="23-排序算法平台-v2">2.3 排序算法平台 V2</h2>
 <p>针对上面存在的这些问题，我们在排序算法平台的监控分析模块增加了 <strong>数据验证、模型解释</strong> 的功能，帮助我们对模型的持续迭代优化提供更加科学、精准的依据。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d7134fb4cb7a49689b8bfd8366d8fc33.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281958260.webp" />   
     </p>
 <h3 id="231-数据验证dataverification"><strong>2.3.1 数据验证（DataVerification）</strong></h3>
 <p>在算法平台 V1 阶段，当模型离线效果（AUC）表现很好，而线上效果不符合预期时，我们很难排查定位问题，影响模型迭代。</p>
@@ -294,58 +294,58 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>目前，我们线上模型排序使用的是 XGBoost 模型。但在 XGBoost 模型中，传统的基于特征重要性的模型解释方法，只能从整体上对每个特征给出一个重要性的衡量，不支持对模型的局部输出解释，或者说单样本模型输出解释。在这样的背景下，我们的模型解释模块使用了新的模型解释方法 Shap 和 Lime，不仅支持特征的重要性，也支持模型的局部解释，使我们可以了解到在单个样本中，某个特征的某个取值对模型的输出可以起到何种程度的正向或负向作用。</p>
 <p>下面通过一个从实际场景中简化的示例来介绍模型解释的核心功能。首先介绍一下几个特征的含义：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/546119a3819440d08c18e5ef53bdf611.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281958238.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/263f9ac8e5f94a0ca4ea642f2ab502b4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281958128.webp" />   
     </p>
 <p>我们的模型解释会对单个样本给出以下的分析：</p>
 <ul>
 <li></li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dfd51df2c3f24d8b88c997ad61c67584.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281958132.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fc98cd131edc472aa78a3a500fdbc9e4.webp" />   
-    </p>
-<ul>
-<li></li>
-</ul>
-<p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e92dcced97404d2e8ba1ec6f17d425cc.webp" />   
-    </p>
-<p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/772731da4a08421a9cc28289fd9cc2f9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281958966.webp" />   
     </p>
 <ul>
 <li></li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6c05c78170c34b6db6c563de8404895c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281958875.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d34b7beffbf14d29b143c4414fcea306.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281959804.webp" />   
+    </p>
+<ul>
+<li></li>
+</ul>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281959163.webp" />   
+    </p>
+<p>
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281959078.webp" />   
     </p>
 <p>如图所示，模型对单个样本,
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/16fc9716153f4275859065b4273be365.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281959398.webp" />   
      ,
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0b738ca59a21443d8ce2b8212531a86c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281959745.webp" />   
      的预测值为 0.094930, 0.073473, 0.066176。针对单个样本的预测，各个特征值起到多大的正负向作用可以从图中的特征条形带的长度看出，红色代表正向作用，蓝色代表负向作用。这个值是由下表中的 shap_value 值决定的：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/621071502b2244298c0846ec53b2456e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281959585.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3024c98186a24c6eaeaf3fc79dd671ab.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281959499.webp" />   
     </p>
 <p>其中， <code>logit_output_value = 1.0 / (1 + np.exp(-margin_output_value)),logit_base_value = 1.0 / (1 + np.exp(-margin_base_value))</code>，output_value 是 XGBoost 模型输出值；base_value 是模型期望输出；近似等于整个训练集中模型预测值的均值；shap_value 是对该特征对预测结果起到的正负向作用的一个衡量。</p>
 <p>模型预测值logit_output_value，0.094930&gt;0.073473&gt;0.066176，所以排序结果为 <em>I1</em>_&gt;__ &gt; I__2__&gt; <em>I__3，U__0</em>-__I1 _的预测值为0.094930，特征 doubleFlow_article_ctr_7_v1= _I1 _ctr 起到了 0.062029 的正向作用，使得预测值相较于基值，有增加的趋势。同理，ui_cosine_70=0.894006，起到了 0.188769 的正向作用。</p>
 <p>直观上我们可以看出，内容 7 天点击率以及用户-内容相似度越高，模型预测值越高，这也是符合预期的。实际场景中，我们会有更多的特征。</p>
 <p>Shap 模型解释最核心的功能是支持局部单样本分析，当然它也支持全局的分析，如特征重要性，特征正负向作用，特征交互等。下图是对特征 doubleFlow_article_ctr_7_v1 的分析，可以看出，内容 7 天点击率小于阈值对模型的预测起负向作用，大于阈值对模型的预测起正向作用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7e63114398ab4a5f851442057fbd5cb6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281959292.webp" />   
     </p>
 <h1 id="part3-近期规划">Part.3 近期规划</h1>
 <p>近期，排序算法平台将继续提升训练模型的线上应用效果，并把特征的实时作为工作重点，快速反映线上的变化。</p>
@@ -483,6 +483,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -516,10 +520,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -898,6 +898,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -230,7 +230,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-9e9c7f7574044c27a0b24530e359f39a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271711732.jpeg" />   
     </p>
 <p>当我们人都需要费力地去分辨、定义实体时，会带来两个问题。一是工业界对NER 标注数据紧缺。因为数据标注就很困难，需要专家好好定义标准规范。而这个标准是基于人类共有知识的。它还不是一成不变的，你标注完了就能一劳永逸。而是隔几个月热点实体词就要大换一次血。过去标注好了一些实体，因为未来人们谈论它的语境都变了，可能不再适用。二是超越人类专家水平的 NER 系统难以实现。当前的 SOTA 模型大都是建立在有监督模型的基础之上。通常我们会把它看作是一个序列标注问题，可以用 HMM 和 CRF 等机器学习算法，或用 BiLSTM / CNN / BERT + CRF 的深度学习范式来学习解码。这些机器学习算法在封闭式的数据集可以表现得很好，但依然满足不了工业界开放式的业务场景需求。</p>
 <hr>
@@ -345,7 +345,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>通常我们会用二元语法最短路径分词的方法去判断哪种分法路径最短。具体做法是记录所有二元字转移的概率，把文本序列构建成一个词图，然后用最短路径算法找出代价最小的路径。虽然这个例子它能够通过，但这个方案无法考虑复杂的语境。拿我们人的常识来说，识别的人名实体应该为 「卢宇正」，体现在「又」这个字。「又」和「正在」是有一点点冲突的。前者是描述再次看到的状态，而后者体现是当下时刻的进行时。所以第二种分法更符合常识。我们再来看另一个例子：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ab0881e68e794eeb81b50b771fd27370.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271711571.jpeg" />   
      a) 马云指着天发誓说，我不喜欢钱。b) 远方有一朵马云仿佛奔腾在宽阔的江面上。并不是所有的马云都是马云。</p>
 <p>字典匹配会把字典中的词都召回，所以会出现把第二个句子判断成人名的错误。而深度学习模型考虑了上下文语境。人可以“指着”，所以第一句是人名。云才是“一朵”，所以不是人名。当然之前说的基于角色标注的层叠隐马尔科夫模型也可以做到。但复杂一点的语境，深度学习模型能做得更好。在类如搜索推荐的下游任务中我们还需要对实体的指代做进一步的细分。这部分是实体链接任务，日后可以再展开。</p>
 <hr>
@@ -359,7 +359,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>论文1： <a href="https://zshipu.com/t?url=https%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttps%253A%2F%2Farxiv.org%2Fpdf%2F1805.02023.pdf">Chinese NER Using Lattice LSTM</a></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-e4158c25f51b427c9e173a1db630cc56.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271711328.jpeg" />   
      模型的输入有很多种，按字分输入字嵌入，按词分输入词嵌入。灵活一点，可以集二者之长，把前后两个字的 bigram 嵌入，或者是分词后的词嵌入，与字嵌入拼接起来。也可以用 CNN 或 LSTM 这些模型来聚合字嵌入。比如你好这个词，可以这么表示。we 为词嵌入，ce 为字嵌入。</p>
 <blockquote>
 <p>你 好</p>
@@ -371,11 +371,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>ce(你) ce(好)</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-d2541b29c0ac4b1ea43818c36412ea67.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271711474.jpeg" />   
      Lattice LSTM 主干部分用的依然是 LSTM，不同在它每个 Cell 处理信息的方式。中间红色的 Cell 储存的是句子中潜在词汇的信息。在 LSTM 中，输入门决定当前输入有多少加入 Cell，遗忘门决定 Cell 要保留多少信息；输出门决定更新后的 Cell 有多少可以输出。&ldquo;桥&quot;字以它为结尾的词有 &ldquo;长江大桥&rdquo;，&ldquo;大桥&rdquo;，&ldquo;桥&rdquo;。当前字符上的 Cell 除了 &ldquo;桥&rdquo; 以外，还需要考虑这些词的信息。图中两个绿色箭头便是这两个词的信息。其中红色的 Cell 互相独立，且没有输出门。原论文引入了一个额外门控来学得 <strong>当前字符 Cell 和 当前词汇 Cell 中的信息。该信息通过对</strong> 当前字符 Cell 各种输入的归一化权重， <strong>加权求和获得。这类似于 Attention 机制自动给词赋予权重。</strong></p>
 <p>论文2： <a href="https://zshipu.com/t?url=https%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttps%253A%2F%2Fpdfs.semanticscholar.org%2F1698%2Fd96c6fffee9ec969e07a58bab62cb4836614.pdf%253F_ga%253D2.248304071.1518379570.1587794991-867381192.1586701692">CNN-Based Chinese NER with Lexicon Rethinking</a></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-56174da41ac540d6973a33b793e97072.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271711944.jpeg" />   
      Lattice 成功在两个点，一是为每个字符保存所有可能匹配的单词，自动选择与 NER 任务匹配的词来避免错误传播；二是引入训练好的词嵌入来提升性能。Lattice 缺陷也有两点：一是它的计算效率低下。句子的输入形式从一个链式序列转换为一个图，增大了句子建模的计算成本，还不支持并行化。二是存在字在词表中冲突问题。&ldquo;长&rdquo; 可能属于市长一词，也可能属于&quot;长隆&quot;一词，而对&quot;长&quot;所属的词判断不同，会导致字符&quot;长&quot;的预测标签不同。</p>
 <p>为此论文提出一种有 Rethinking 机制的 CNN (LR-CNN)，它从两个方面来解决以上问题。</p>
 <ul>
@@ -384,31 +384,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>我们如何把词表信息加入到 CNN 中？输入的句子是一串字嵌入 {c1, c2, &hellip;, cn}，我们找出词表中，所有能在句子中找到的词。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0900a5ee45194cd0b9823bbfd6831d32.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271711704.png" />   
      l 表示词的字符长度，m表示在句子字符的下标。比如
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-66217fd7fa76473a94a0010f76d04684.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271711223.svg&#43;xml" />   
       = 马桶，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-7dd4f5cee4c44ca8b098aa27fcd2967a.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271711712.svg&#43;xml" />   
       =马桶里。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-9855961813a44142868ab7c1c68ad46f.deploy" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271711075.jpeg" />   
     输入序列会被一个窗口为 2 的 CNN 编码 Bigram 特征，层层叠加起来就可以得到 l-gram 的特征。每个字都会对应一个在词表中的集合
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-6f0b0574daf14d05997af94a9ccf92d3.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271711653.svg&#43;xml" />   
       ，而层层叠加起来的CNN也可以为每个字编码出一个l-gram的特征嵌入
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b078c2df2c6c4b95b5d3ce7631343c63.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271711194.svg&#43;xml" />   
       。为了能让词表特征更高效地融入，论文用了一个可并行计算的 Vector-based Attention，计算方式如下。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-6abb792f8bb64cf1be4f6231dac66a9c.deploy" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271712648.jpeg" />   
     
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-c7a35a707f6f44788f7baf03c7d1fc18.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271712523.jpeg" />   
      CNN 的分层会让底层的字信息无法影响到高层的词。比如&quot;广州市&quot;和&quot;长隆&quot;中，&ldquo;市长&quot;一词会误导模型对字符&quot;市&quot;产生错误预测。因此需要高层特征&quot;广州市&quot;来减少&quot;市长&quot;一词在输出特征中的权重。论文在每一层 CNN 上添加了一个 feedback layer 来调整词表的权值，计算方式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-d84b125a67f7434da13fdc2b260ea6c9.deploy" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271712283.jpeg" />   
     实验结果与 Lattice-LSTM 对比，LR-CNN 在定长句子下都取得了优于 Lattice-LSTM 的效果。但 LR-CNN 会更有处理短句的优势。随着句子长度增加，Lattice-LSTM 会因为要储存的词汇信息过多速度明显变慢，而 LR-CNN 的速度降幅较为稳定。在消融实验中发现，词表信息和Rethinking机制都能显著提升模型表现。即便没有词表信息，Rethinking机制也能提升模型表现。</p>
 <p>论文3： <a href="https://zshipu.com/t?url=https%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttps%253A%2F%2Farxiv.org%2Fpdf%2F1908.05969.pdf">Simplify the Usage of Lexicon in Chinese NER</a></p>
 <p>论文提出了一种更简单的对输入进行编码的方式来实现把词表信息融入模型。首先，我们定义四个集合。</p>
@@ -441,16 +441,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>论文的想法是，把每个字符的四个词集压缩成一个固定维向量。为了尽可能多地保留信息，选择将四个单词集的表示连接成一个整体，并添加到字符表示中。具体的说，我们会做如下计算来构造融合后的嵌入。对每个单词的权重进行平滑处理，以增加非频繁单词的权重。其中 z(W)  为单词的频数。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-d10819d34d70452597f436672cf87044.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271712009.jpeg" />   
     
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-02f85ba410a546789bc7cf41b7539e44.deploy" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271712822.jpeg" />   
     在计算效率上，明显好过其它方法：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-2f2a07c83b9a4d4ba7ab34be304a6c87.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271712427.jpeg" />   
      在MSRA，Weibo，和Resume 数据集的表现上，也是 SOTA。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-baa98c20e6964988975e3ba192cc85e8.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271712267.jpeg" />   
     </p>
 <h2 id="难点五标注数据缺失">难点五：标注数据缺失</h2>
 <p>监督学习固然好，但业务标注数据缺乏情况下，难展现其优势。于是一切又回到了起点。业界常用的做法是用预训练语言模型在业务数据上预训练，再结合少量的人工标注去做微调。在部分类别的实体上效果表现很好，但其他一些实体上却没有改善词典和用人工规则带来的提升那么显著。就简单的名人识别，模型能容易地识别出人名，但进一步明星，歌星和历史人物上细粒度上的区分，就需要词典来做。这是因为细粒度的标注数据有限。</p>
@@ -513,10 +513,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在以上例子中，Tie or Break 模式能保证 Tie 所在的位置一定是正确的，即在领域核心词典中“银行”的&quot;行&quot;字，一定是和前面的&quot;银&quot;字是合起来的。而剩下未知的 Break，模型会自动学到是否要 Tie。对于 Unknown 的词，它不会作为监督信息计算损失更新模型的权重。模型只会从正确标签中确定的信息计算损失，来从领域词典中学到必要的标注规则。再把这些规则泛化到周边未知边界和类别的词。</p>
 <p>在 AutoNER 中，实体边界的远程监督信息和实体类别的远程监督信息是分开来计算的。这是为了能充分利用非领域词典——高质量短语词表中的词的边界信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-71a6d3bc464b43599052c3043308365c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271712538.jpeg" />   
      在原论文中，ceramic unibody 是在领域词典中，只有一个类别的词。所以它们组成的实体的类别是可以 100% 确定的。可是实际中领域词典往往不会很全，提供的监督信息是有限的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-97f70fe035a64155bb314f87cf0ac7ab.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271712609.jpeg" />   
      像 8GB RAM 是一个在高质量短语词表中的短语。我们虽然不知道它的类别，但它可以给我们提供词的边界信息。它们边界的标签被标记为 Unknow，且不参与 span prediction 的损失计算。这样做的好处是�</p>
 
         </div>
@@ -643,6 +643,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -676,10 +680,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1058,6 +1058,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -207,23 +207,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="一flink-稳定性持续优化"><strong>一、Flink 稳定性持续优化</strong></h2>
 <p>第一部分是 Flink 稳定性的持续优化。该部分包括两个方面，第一个方面，主要介绍快手在 Flink Kafka Connector 方面做的一些高可用，是基于内部的双机房读或双机房写和一些容错的策略。第二部分关于 Flink 任务的故障恢复。我们在加速故障恢复方面做了一些优化工作。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/70fc7b8236bd487d8d01bdd17c9eb7f6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271917989.webp" />   
     </p>
 <p>首先，介绍 Source 方面的高可用。在公司内部比较重要的数据写 Kafka 时，Kafka 层面为保障高可用一般都会创建双集群的 topic。双集群的 topic 共同承担全部流量，如果单集群发生故障，上游自动分流。Kafka 层面通过这种方式做到双集群的高可用。但是 Flink 任务在消费双集群 topic 时，本身是不能做到高可用的。Flink 任务通过两个 Source union 方式消费，Source 分别感知上游 topic 故障，单集群故障需手动将故障 Source 摘除。这种方式的缺点是故障时需要人工的干预，必须手动去修改代码的逻辑，程序内部本身是不能做到高可用的。这是做双机房读的背景。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6276f6da5e5944df844587ced587f20e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271917757.webp" />   
     </p>
 <p>为了解决上述问题，我们封装了一个 Kafka 的 Cluster Source，它在 API 上支持读取双集群的 topic。同时做到，可以容忍单集群故障，集群故障恢复时也可以自动将故障集群重新加入。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d406353a75874ad4be1287cc3a45429d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271917467.png" />   
     </p>
 <p>接下来是关于 Sink 方面的高可用。Flink 写双集群 Kafka topic，会定义不同集群 Sink，逻辑内控制拆流。这种方式灵活性差，且不能容忍单机房故障。如果单集群发生故障，仍需要手动摘除对应的 Sink。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/73d0934900db4ab19f6db6f8004e3b25.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271917436.webp" />   
     </p>
 <p>同样，针对 sink 我们也定制了一个 Cluster Sink，它 API 上支持写双集群 topic。具体写的策略，可以支持轮询和主从写的方式。如果单集群发生故障，逻辑内会自动将流量切到正常集群 topic。如果单集群故障恢复之后，也能感知到集群的恢复，可以自动的再把相应集群恢复回来。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/814eb1f420704f4486a43e8508c6244a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271917579.webp" />   
     </p>
 <p>另外，基于 Kafka 的 connector，我们也做了一些容错的策略，这里提到三点。</p>
 <ul>
@@ -232,7 +232,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>第三点是 Kafka broker 列表动态获取。该问题背景是， 生产环境中 Kafka broker 机器可能会故障下线，一旦请求到下线机器，会发生获取 metadata 超时，任务频繁失败。我们优化后，Source task 启动，可以获取集群信息，动态重新获取 Kafka brokerlist，避免频繁重启。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6b39ef4529574ec4bff919b29c581a90.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271917344.png" />   
     </p>
 <p>第二部分是 Flink 任务的故障恢复优化，分为两个过程。一个是故障发现，另外一个是故障恢复。实际的生产环境中，一些不稳定的因素会导致故障恢复的时间特别的长，用户的感知会比较差。同时，内部也有一些比较高优的任务，它对稳定性的要求比较高。我们希望做一些事情，把整个故障恢复的时间尽可能缩短。我们定了一个优化目标，20 秒内做到一个自动的恢复。</p>
 <p>在故障发现阶段的优化包括三点：</p>
@@ -248,21 +248,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>第三，针对适合任务开启 Region Failover。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/82d51d355a7c4ca883644f8c266efe2f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271917670.png" />   
     </p>
 <h2 id="二flink-任务启动优化"><strong>二、Flink 任务启动优化</strong></h2>
 <p>第二部分是任务启动优化，Flink 任务启动的时候，一般会涉及到比较多的角色，还有多个实例。如下图所示，它的启动在客户端包括，初始化 Client，构建 jobGraph，上传 Flink lib、job jar，申请 AM。在 Job Master，AM 启动后、初始化，构建 ExectutionGraph，申请、启动 Container，Job Task 调度。在 Task Manager 端， 容器申请到之后，启动下载 jar 包资源，再去初始化 Task Manager 服务，然后收到 task 后才会去做部署。我们发现，线上启动一个任务的时候，基本上在分钟级别，耗时比较长。如果有一些任务需要升级，比如说，改了一些简单的逻辑，需要将原来的任务停掉，然后再去重新启动一个新的任务，这种场景可能就会更慢。因此，我在任务启动的时候做一些优化，尽可能缩短任务启动的时间，业务的断流时间也进一步缩短。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://mmbiz.qpic.cn/mmbiz_png/8AsYBicEePu4esJJ3wqrXUq6gMzJ0sQFp5OicHUoBTgRic1lFVhSjuibZ1XibCiafPib2PkUkmodn1GGficHLjfjV71gcQ/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271917837.webp" />   
     </p>
 <p>在 Flink 新任务启动优化方面，我们发现 IO 交互会比较耗时。在客户端的 IO 包括，Flink 引擎 lib 包上传 HDFS，用户上传 jar 包上传 HDFS。在 JobMaster 包括， Container 下载启动资源，TaskManager conf 上传 HDFS。在 TaskManager 包括， Container 下载启动资源，Conf 文件下载。</p>
 <p>因此，想尽量的减少这样的一些 lO 的操作。针对 Flink 引擎 lib 包，设置 Public 权限，App 之间共享。对于用户 jar 包，提供工具，提前预发布到集群机器。对于 Conf 文件，通过环境变量传递。针对 JobMaster 启动 TM 频繁文件判断，增加 cache 缓存。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/61ff1131d5f14bce81a936c1bad51872.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271917712.png" />   
     </p>
 <p>以上是针对一个新任务启动场景，下面介绍任务升级的场景。以前是同步升级，比如说，任务 A 在运行着，然后我要把任务 A 停掉，再去启动新的任务 B。如下图所示，不可用时间包括停任务 A 和启动新任务 B。是否可以不用等任务 A 完全停掉之后，再启动任务 B。针对这个想法我们做了一个异步升级的策略。新任务提前启动，初始化到 JobMaster 阶段。旧任务停掉后，完成新任务后续启动工作，这样新旧任务无缝切换。通过内部提交平台将该步骤串联起来，目标是异步升级在 20s 以内完成。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f7d00d506aec4c58b14aad6e50f84c18.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271917908.png" />   
     </p>
 <h2 id="三flink-sql-实践与优化"><strong>三、Flink SQL 实践与优化</strong></h2>
 <p>第三部分会介绍一下我们在使用 Flink SQL 的一些实践和优化。首先介绍一下 Flink SQL 在快手的现状。目前，我们内部 Flink SQL 的任务占比在 30% 左右。Flink SQL 的任务个数是 360 多个。然后它的峰值处理的条目数还是比较高的，大约是 4亿每秒。在我们内部的一些重要活动的实时大屏的场景下，目前 Flink SQL 也作为一条链路，参与了相关指标的计算。</p>
@@ -391,6 +391,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -424,10 +428,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -806,6 +806,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

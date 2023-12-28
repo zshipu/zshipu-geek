@@ -232,46 +232,46 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="21-basic-memory-network">2.1 Basic Memory Network</h2>
 <p>基本的Memory Network由Facebook在2014年的“Memory Networks”一文中提出。该模型主要由一个记忆数组m和I，G，O，R四个模块。结构图如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/547464dc05ca49ed932766a1f6e1284a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957443.png" />   
     </p>
 <p>简单来说，就是输入的文本经过Input模块编码成向量，然后将其作为Generalization模块的输入，该模块根据输入的向量对memory进行读写操作，即对记忆进行更新。然后Output模块会根据Question（也会进过Input模块进行编码）对memory的内容进行权重处理，将记忆按照与Question的相关程度进行组合得到输出向量，最终Response模块根据输出向量编码生成一个自然语言的答案出来。各模块作用如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/3457529e20fb4bc29f59fc581c75eddc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957569.png" />   
     </p>
 <p>有关记忆网络的详细原理，参考文章： <a href="https://zshipu.com/t?url=https%3A%2F%2Fzhuanlan.zhihu.com%2Fp%2F29590286">https://zhuanlan.zhihu.com/p/29590286</a> 或者原论文： <a href="https://zshipu.com/t?url=https%3A%2F%2Farxiv.org%2Fpdf%2F1410.3916.pdf">https://arxiv.org/pdf/1410.3916.pdf</a>。</p>
 <h2 id="22-end-to-end-memory-network">2.2 End to End Memory Network</h2>
 <p>End to End Memory Network是Memory Network的一个改进版本，可以进行端对端的学习。原文中介绍的网络模型应用于QA任务。单层网络的结构如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/51dccdbdd28e4b86b3849d3c984ef5e2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957510.png" />   
     </p>
 <p>模型主要的参数包括A,B,C,W四个矩阵，其中A,B,C三个矩阵就是embedding矩阵，主要是将输入文本和Question编码成词向量，W是最终的输出矩阵。从上图可以看出，对于输入的句子s分别会使用A和C进行编码得到Input和Output的记忆模块，Input用来跟Question编码得到的向量相乘得到每句话跟q的相关性，Output则与该相关性进行加权求和得到输出向量。然后再加上q并传入最终的输出层。</p>
 <p>进一步，我们可以使用多层的结构：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/67d1d943625244ed811051c8f54d7161.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957555.png" />   
     </p>
 <p>有关End2End Memory Network的详细原理，可以参考文章： <a href="https://zshipu.com/t?url=https%3A%2F%2Fzhuanlan.zhihu.com%2Fp%2F29679742">https://zhuanlan.zhihu.com/p/29679742</a> 和原论文： <a href="https://zshipu.com/t?url=http%3A%2F%2F10.3.200.202%2Fcache%2F11%2F03%2Fpapers.nips.cc%2F82b8c2ad3e5cde7cad659be2d37c251e%2F5846-end-to-end-memory-networks.pdf">http://10.3.200.202/cache/11/03/papers.nips.cc/82b8c2ad3e5cde7cad659be2d37c251e/5846-end-to-end-memory-networks.pdf</a>。</p>
 <p>当然，也可以动手实现一个网络结构，参考代码： <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2Fprincewen%2Ftensorflow_practice%2Ftree%2Fmaster%2Fnlp%2FBasic-EEMN-Demo">https://github.com/princewen/tensorflow_practice/tree/master/nlp/Basic-EEMN-Demo</a></p>
 <h1 id="3协同记忆网络原理">3、协同记忆网络原理</h1>
 <p>我们的协同记忆网络CMN其实借鉴了End2End Memory Network的思路，我们先来看一下完整的网络结构，随后一步步进行介绍：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/d08c15fffb08419595a2c9b5efc8b70e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957476.png" />   
     </p>
 <p>这里明确一点，我们的任务是预测用户u对于物品i的评分。</p>
 <h3 id="31-user-embedding">3.1 User Embedding</h3>
 <p>首先，我们会有 <strong>两组用户的Memory(其实就是Embedding)，分别是M和C，M用于计算用户之间关于某件物品i的相关性，C用于最终的输出向量。我们还有一组物品的Memory(其实就是Embedding)，我们称作E。</strong></p>
 <p>对于预测用户u对于物品i的评分。我们首先会得到历史上所有跟物品i有反馈的用户集合，我们称作N(i)。接下来，我们要计算目标用户u和N(i)中每个用户的相关性，基于下面的公式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/7a0a4d5a886d45fba8e5d557927ba97b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957714.png" />   
     </p>
 <p>其中，mu,mv分别是用户u和用户v在M中的相关记忆。ei代表物品i在E中的相关记忆。</p>
 <h3 id="32-neighborhood-attention">3.2 Neighborhood Attention</h3>
 <p>对于上一步计算出的相关性，我们需要通过一个softmax操作转换为和为1的权重向量：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/55bc26823651478a89ff318704ff6c37.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957334.webp" />   
     </p>
 <p>同时，根据得到的权重向量，我们根据下面的式子得到输出向量：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/c1f5c2db4d694fd5b8f3d577d50fadfc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271958924.png" />   
     </p>
 <p>其中，cv代表用户v在C中的相关记忆</p>
 
@@ -403,6 +403,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -436,10 +440,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -818,6 +818,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

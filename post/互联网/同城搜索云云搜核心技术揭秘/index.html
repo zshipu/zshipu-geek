@@ -198,7 +198,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/629b6cf9707b4b42864d3daf9fcc6cbc.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271704203.jpeg" />   
     </p>
 <blockquote>
 <p>来源： 58技术</p>
@@ -217,17 +217,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>58云搜是58搜索团队基于k8s（即kubernetes，下同）和docker技术，以及内部的搜索引擎实现的全自助化的搜索服务平台，为各业务开发者提供实时索引、动态摘要、自定义排序、运营监控、运维托管等全套解决方案。使用方仅需通过界面配置索引结构、api上传源数据两个步骤，即可在数分钟内构建完成一个自有的搜索服务。</p>
 <p>2017年上线至今，已经接入了两百多个搜索业务，实现了为业务快速创建搜索服务。使用方如果需要创建一个搜索服务，只需要登录云搜的管理系统，填写目标流量和索引字段等信息，云搜系统收到请求后，即自动拉取相应镜像进行远程部署，随后一个搜索实例即可上线使用。</p>
 <p>
-        <img class="mx-auto" alt="" src="http://img.6aiq.com/image-d85edff1ccc642c097d866ead81efa2e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271704668.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="http://img.6aiq.com/image-67d50066d44846a6a8c62d9919a32d58.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271704755.png" />   
     </p>
 <h2 id="云搜整体架构"><strong>云搜整体架构</strong></h2>
 <p>下面是云搜的整体系统架构。首先，云搜采用k8s实现资源管理和自动调度，k8s是整个系统的大脑。云搜所有的服务都是运行在容器中，通过容器的方式自动调度和维护，k8s自身也是运行在容器之中。</p>
 <p>图中红色方框部分即k8s和云搜管理中心，它控制索引创建和管理各服务模块。其次，对外提供统一的接入api，和系统自助管理功能，屏蔽了内部一个个独立的索引实现，方便用户使用。</p>
 <p>第三，在离线索引过程，引入hdfs和分布式消息队列等外部通用的基础服务，存储源数据和实现索引流程，简化了系统设计，同时也保证了源数据的可靠性，相当于源数据做了离线备份。</p>
 <p>
-        <img class="mx-auto" alt="" src="http://img.6aiq.com/image-0ce27405b71a49e388786fb2c7772712.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271704915.png" />   
     </p>
 <p><strong>k8s是整个系统的核心，所以保证k8s master系统的高可用非常重要。</strong></p>
 <p>云搜的k8s master是3副本冗余，k8s master所有的信息都是存储在etcd集群中，关于etcd部分不单独介绍。</p>
@@ -235,20 +235,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们使用了haproxy和keepalived两个开源组件，以及虚ip技术来做load balance，实现master节点的负载均衡和高可用。</p>
 <p>haproxy是一个高可靠性代理软件，使用它实现对api server的负载均衡和流量转发，所有访问api server的请求，都会经过haproxy进行代理转发。keepalived 是一个高可用的路由软件，用它来对haproxy做健康检查和故障切换。集群中的所有node节点通过vip访问haproxy，keepalived负责抢占vip，两个keepalived互为主备，正常情况都会抢占vip成功，两个haproxy都会均匀的获得流量。当一个haproxy节点故障时，keepalived检测到haproxy故障，自动漂移vip，这样故障haproxy上即没有了流量，实现自动故障切换。</p>
 <p>
-        <img class="mx-auto" alt="" src="http://img.6aiq.com/image-ec6647510bc240cea56479e8ab1a045c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271704253.png" />   
     </p>
 <p>随着云搜规模的增长，我们发现开源的网络组件flannel有一个bug，只能支持100台物理机，无法进行再扩容。同时我们也考虑到k8s master出现故障，整个云搜将出现不可用。</p>
 <p>由于当时集群联邦的模式还不可用，我们构建了完全独立的多k8s集群来提升系统的可用性。多集群的模式，我们的架构主要的升级点是把原来的api层拆分为两层，顶层api根据业务id把真正的流量转发到各个集群，实现了多集群的升级过程对业务无感知。构建多集群的另外一个好处就是，我们能够通过迁移一个集群的服务到另外一个集群实现滚动升级，这对快速更新的k8s非常重要。</p>
 <p><strong>截止目前我们已经进行了2轮的迁移服务，滚动升级k8s或linux 内核。</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="http://img.6aiq.com/image-f9ea8ae4e64e4e538a6c22de5979ee6a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271704800.png" />   
     </p>
 <h2 id="自动索引流程和故障恢复"><strong>自动索引流程和故障恢复</strong></h2>
 <p>我们简单介绍下一般的检索系统是什么样，有了这个基础然后再详细介绍，在环境下怎么构建搜索系统。</p>
 <p>一般来说， <strong>搜索系统都包含两部分，离线倒排索引构建和在线检索服务</strong>。</p>
 <p>在离线阶段批量的获取所有的文档，通过索引程序生成倒排索引文件，然后把倒排索引文件推送给在线检索程序去加载，检索程序加载倒排文件后对外提供检索服务。离线构建的倒排索引是静态的不能被改变的，但在很多的应用场景中，文档会有实时的更新或者新增，所以会启动一个实时的索引流程，在检索服务内部实时构建小的倒排索引，即增量索引，全量索引和增量索引合在一起，实现了索引的完整性。</p>
 <p>
-        <img class="mx-auto" alt="" src="http://img.6aiq.com/image-00b9ae7dcdea4e54881785c59a3d7b91.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271704724.png" />   
     </p>
 <p>有了前面的基础，我们现在来介绍下，如何利用k8s和容器技术，自动化的创建检索服务，让复杂的检索系统通过k8s实现自动运维。搜索是有状态的服务，它有如下3个特征：（1）服务存储持久化数据，（2）数据有分片，不同分片包含不同数据，（3）数据在持续更新。</p>
 <p>所以我们核心问题就是，实现检索服务的容器化部署，同时保证容器中检索服务中的数据的正确性和完整性，从而实现服务的可用性。我们的实现方案是利用k8s一个pod内部可包含多个容器的特性，多容器分工合作实现自动构建检索服务。</p>
@@ -257,26 +257,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>3个容器配合实现了检索服务的自动构建，有状态的服务转换成了无状态的实现，整个实现过程对原来索引、检索模块和k8s无侵入、无感知。</p>
 <p>扩容过程类似，当需要扩容时，只需在k8s中增加副本数，k8s自动生成新的检索pod，扩容出来的检索pod也是没有数据，这是由初始化容器从其他分片同步过来相应的倒排数据（这样效率更高），然后启动检索服务容器和数据更新容器，实现了扩容副本和原副本的数据最终一致。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/abeac6c7af524b16bcb6469916c20586.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271704259.png" />   
     </p>
 <p><strong>再来看下云搜如何实现自动故障恢复。</strong></p>
 <p>如果一个物理机出现了故障，该机器上的服务都不可用了。系统的liveness探针发现该pod不再存活，这个应用可用的pod数目和系统设定的数目差了一个，于是就在其他物理机上启动了新的pod。</p>
 <p>新的pod启动后里面的索引数据还不完整，不能对外提供服务，pod内部独立的容器会从其他正常节点和消息队列同步数据，数据同步完成后，k8s通过readiness 探针发现pod准备就绪，于是将新启动pod加入到服务中，完成故障恢复。可以看到，扩容过程本质上和故障自动恢复一样。</p>
 <p>从自动部署和故障恢复，我们就可以看到利用k8s实现自动运维的优势和便利性。</p>
 <p>
-        <img class="mx-auto" alt="" src="http://img.6aiq.com/image-e96588bf711f41a68334c2141004ad1d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271704603.png" />   
     </p>
 <p><strong>服务质量和资源利用优化</strong></p>
 <p>前面也提到了，检索系统包含离线全量倒排索引构建和在线检索服务两个过程。实际线上出现离线全量建索引过程占用资源高，影响在线查询服务的情况。究其原因是调度器非搜索专用，并不知道是在线还是离线。</p>
 <p>为了保证在线服务的质量，我们将在线pod和离线pod进行隔离，不让两种类型的pod调度到同一个node上。</p>
 <p><strong>解决方案</strong>，给node节点分别打上在线和离线的标签，pod也打上标签，利用pod和pod之间的亲和力机制，离线pod调度到离线机器，在线pod调度到在线机器上。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ed9d92cd23384c8ca32905908c55bbf9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271704951.png" />   
     </p>
 <p>有时，我们会收到个别机器资源利用率过高的报警，追查之后发现是高流量pod堆积在一台节点，造成资源利用率不均。这是因为scheduler不了解实时流量，不保证大量pod不堆积 。</p>
 <p>这里的解决方案，使用了pod之间的反亲和力机制，给部分流量比较大的业务打上标签，让大流量pod调度到不同机器上。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1f7e1d0d3b724e17ae91d92312608f07.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271704300.png" />   
     </p>
 <p>前面介绍的两种优化的机制，有时候还不能满足我们的需求。</p>
 <p>实际线上的情况，仍然会出现会调度到高负载机器上，有的机器负载比较低但是却没有调度过去，造成资源利用不均衡。其原因是调度器是根据已分配出去的资源，来决定新的调度。</p>
@@ -408,6 +408,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -441,10 +445,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -823,6 +823,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

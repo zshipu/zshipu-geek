@@ -202,25 +202,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="架构10">架构1.0</h1>
 <p>时间回到 2015 年，彼时运行在生产环境的有赞搜索系统是一个由几台高配虚拟机组成的 Elasticsearch 集群，主要运行商品和粉丝索引，数据通过 Canal 从 DB 同步到 Elasticsearch，大致架构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://tech.youzan.com/content/images/2018/08/arch1-0.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272037286.jpeg" />   
     </p>
 <p>通过这种方式，在业务量较小时，可以低成本的快速为不同业务索引创建同步应用，适合业务快速发展时期，但相对的每个同步程序都是单体应用，不仅与业务库地址耦合，需要适应业务库快速的变化，如迁库、分库分表等，而且多个 canal 同时订阅同一个库，也会造成数据库性能的下降。 另外 Elasticsearch 集群也没有做物理隔离，有一次促销活动就因为粉丝数据量过于庞大导致 Elasticsearch 进程 heap 内存耗尽而 OOM，使得集群内全部索引都无法正常工作，这给我上了深深的一课。</p>
 <h1 id="架构-20">架构 2.0</h1>
 <p>我们在解决以上问题的过程中，也自然的沉淀出了有赞搜索的 2.0 版架构，大致架构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fc04c51d5ee14f2ba939903561fe9db3.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272037161.jpeg" />   
     </p>
 <p>首先数据总线将数据变更消息同步到 mq，同步应用通过消费 mq 消息来同步业务库数据，借数据总线实现与业务库的解耦，引入数据总线也可以避免多个 canal 监听消费同一张表 binlog 的虚耗。</p>
 <h1 id="高级搜索advanced-search">高级搜索（Advanced Search）</h1>
 <p>随着业务发展，我们也逐渐出现了一些比较中心化的流量入口，比如分销、精选等，这时普通的 bool 查询并不能满足我们对搜索结果的细粒率排序控制需求，将复杂的 function_score 之类专业性较强的高级查询编写和优化工作交给业务开发负责显然是个不可取的选项，这里我们考虑的是通过一个高级查询中间件拦截业务查询请求，在解析出必要的条件后重新组装为高级查询交给引擎执行，大致架构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a5ce22961ea94848bb090a7004be2309.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272037024.jpeg" />   
     </p>
 <p>这里另外做的一点优化是加入了搜索结果缓存，常规的文本检索查询 match 每次执行都需要实时计算，在实际的应用场景中这并不是必须的，用户在一定时间段内（比如 15 或 30 分钟）通过同样的请求访问到同样的搜索结果是完全可以接受的，在中间件做一次结果缓存可以避免重复查询反复执行的虚耗，同时提升中间件响应速度，对高级搜索比较感兴趣的同学可以阅读另外一篇文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Ftech.youzan.com%2Fsearch-engine1%2F">《有赞搜索引擎实践（工程篇）》</a>，这里不再细述。</p>
 <h1 id="大数据集成">大数据集成</h1>
 <p>搜索应用和大数据密不可分，除了通过日志分析来挖掘用户行为的更多价值之外，离线计算排序综合得分也是优化搜索应用体验不可缺少的一环，在 2.0 阶段我们通过开源的 es-hadoop 组件搭建 hive 与 Elasticsearch 之间的交互通道，大致架构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://tech.youzan.com/content/images/2018/08/es-hadoop.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272037837.jpeg" />   
     </p>
 <p>通过 flume 收集搜索日志存储到 hdfs 供后续分析，也可以在通过 hive 分析后导出作为搜索提示词，当然大数据为搜索业务提供的远不止于此，这里只是简单列举了几项功能。</p>
 <h1 id="问题">问题</h1>
@@ -231,7 +231,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>3. 提供管理平台简化索引变更和集群管理</p>
 <p>这样的演变让有赞搜索系统逐渐的平台化，已经初具了一个搜索平台的架构：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/90fc872b7c7d42cd988bcea41b9e3539.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272037658.jpeg" />   
     </p>
 <h1 id="proxy">Proxy</h1>
 <p>作为对外服务的出入口，proxy 除了通过 ESLoader 提供兼容不同版本 Elasticsearch 调用的标准化接口之外，也内嵌了请求校验、缓存、模板查询等功能模块。 请求校验主要是对用户的写入、查询请求进行预处理，如果发现字段不符、类型错误、查询语法错误、疑似慢查询等操作后以 fast fail 的方式拒绝请求或者以较低的流控水平执行，避免无效或低效能操作对整个 Elasticsearch 集群的影响。 缓存和 ESLoader 主要是将原先高级搜索中的通用功能集成进来，使得高级搜索可以专注于搜索自身的查询分析和重写排序功能，更加内聚。我们在缓存上做了一点小小的优化，由于查询结果缓存通常来说带有源文档内容会比较大，为了避免流量高峰频繁访问导致 codis 集群网络拥堵，我们在 proxy 上实现了一个简单的 <a href="https://zshipu.com/t?url=https%3A%2F%2Fmp.weixin.qq.com%2Fs%2F5eaW0OtRCeO2AkbkQPFykW">本地缓存</a> ，在流量高峰时自动降级。</p>
@@ -239,7 +239,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="管理平台">管理平台</h1>
 <p>为了降低日常的索引增删、字段修改、配置同步上的维护成本，我们基于 Django 实现了最初版本的搜索管理平台，主要提供一套索引变更的审批流以及向不同集群同步索引配置的功能，以可视化的方式实现索引元数据的管理，减少我们在平台日常维护上的时间成本。 由于开源 head 插件在效果展示上的不友好，以及暴露了部分粗暴功能：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/842053f35f4b4bf0b7fd4ce6eeaeecd4.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272037623.jpeg" />   
     </p>
 <p>如图，可以通过点按字段使得索引按指定字段排序展示结果，�</p>
 
@@ -371,6 +371,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -404,10 +408,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -786,6 +786,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

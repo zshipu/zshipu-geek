@@ -215,7 +215,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>▌业务和系统</strong></p>
 <p>1. <strong>短视频业务背景、系统结构</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/98af58ca314e4238b44bdf0920e8c991.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280920684.webp" />   
     </p>
 <p>我们的业务主要是做视频推荐，嵌入到 UC 浏览器中做国内信息流：</p>
 <ul>
@@ -235,7 +235,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>右图是视频推荐的界面，其背后的视频推荐系统分为三个结构，第一个是召回模块，第二个是粗排的模型，第三个是精排的模型。从召回 -&gt; 粗排 -&gt; 精排，Item 的数目从多到少，推荐的准确性从低到高。</p>
 <p>2. <strong>技术演进史</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e2760abae81b46b0bcbbbc4f7e113f7b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280920551.webp" />   
     </p>
 <p>我们在视频推荐上，尝试过多个推荐方案：</p>
 <ul>
@@ -252,7 +252,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>这里主要介绍的工作是：从多目标的角度优化 Loss Function。与粗排和精排使用的 WnD 对比，线上收益增幅相当，增量超过。</p>
 <p>3. <strong>多目标在视频推荐模型中的应用</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fb465c41491742278971c6ad588c333f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280920581.webp" />   
     </p>
 <p>常规的多目标是共享隐层的 soft 多目标模型，我们使用的是基于正样本加权的模型。</p>
 <p>共享隐层多目标模型的缺点：</p>
@@ -270,7 +270,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>信号正向传播</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5929add5f25548499434da6590d94352.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280921404.webp" />   
     </p>
 <p>首先是 WnD 模型的一个小的优化，我们知道 WnD 分为 LR 侧和 DNN 侧，LR 侧使用的优化器是 FTRL，它的优化速度非常快，在数千万 DAU 的场景下，只需采用一次流式训练，在这样的场景下 DNN 对样本的训练很难迭代多次，这时 WnD 模型更倾向于使用 LR 侧的 logit。基于这样的原因，我们想能不能增加 DNN 侧的 logit，提高系统的准确度，大体就是这样的 motivation。</p>
 <p>具体实施的时候，见图中红框部分，d 指 DNN，w 指 LR，zdL 指 DNN 最后一个隐层的输入，zw 指 LR 最后一个隐层的输入，我们在 DNN 侧乘以了一个系数 m，这就是大体的一个优化方向：</p>
@@ -282,16 +282,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>梯度反向传播、Adagrad 优化器</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b5e638d482704a9f92e2b99c505579eb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280921034.webp" />   
     </p>
 <p>这是一个反向传播公式的推导，上面讲过增加 DNN 侧的 logit 会增加 Loss，图中标红的表示 Loss 会增大，同时，m 可以提出来作用到 Adagrad 优化器时：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6fb5996937af4ee080db365aff11c38b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280921885.webp" />   
     </p>
 <p>也是相应增加的。</p>
 <p>2. <strong>基于时长加权的多目标融合的 WnD 模型优化</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/71ecd0a64a224dc694e03b44b7344bc7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280921563.webp" />   
     </p>
 <p>这部分的 motivation 是我们在做模型训练时，做的还是二分类的一个分类模型，这时点击观看的时长没有用到。因此，我们利用用户观看时长，来提升推荐效果。</p>
 <p>这里设计了一个 weigh 计算方式：对于某个视频用 u_play_len 这个视频的历史观看总时长 / avg_item_history_view_len 这个视频历史的平均观看时长，用 max 做了一个规范化，求得 weigh，且 weigh＞1。图中统计了右边视频随着时长增加，用户观看数量的一个变化情况。有了 weigh 我们可以对 WnD loss function reweight：</p>
@@ -299,22 +299,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>② 如果某用户观看 Item 时长高于历史平均时长，权重为 1.x，那么此类视频加权充分训练，会被 Ranking 比较高的分数，增加时长收益。</p>
 <p>3. <strong>基于 Graph Embedding 多目标融合的 WnD 模型优化</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/afd01c0ccafa4577813725272f96f046.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280921429.webp" />   
     </p>
 <p>基于 Graph Embedding 多目标融合的方案中，多目标包括：提升点击、提升时长、提升点击率、提升点击渗透。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5ace4aa1a4474105998fe27b245ccefe.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280921158.webp" />   
     </p>
 <p>首先如何取到一个 Item Embedding？我们采用的是 Deep Walk 算法，在拓扑网络中，通过随机游走和 w2v 算法，学习网络中顶点的低维向量表示，向量中蕴含着顶点之间的相关性等其他特征。真正训练的时候采用的是 CBOW 训练策略，其 Loss Function 如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/37b75ef3680145e78fd11075d65c4ef3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280921979.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/efec80faa3eb423e86828ef1b4ceaaa7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281551621.webp" />   
     </p>
 <p>我们的方案是，从用户日志中挖掘出每个 User 的点击序列，根据点击序列建立无向图，然后在每个节点随机游走形成句子，最后经过 w2v 的训练策略，得到每个 Item 的 Embedding 表示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/61ca8927b65f4c6fa773e54154969ea9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280921697.webp" />   
     </p>
 <p>具体方案：</p>
 <p>① 根据用户浏览历史，生成每个用户的点击序列；</p>
@@ -322,39 +322,39 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>③ 随机游走，随机选择图中的某个顶点，随机的进行游走，形成句子；</p>
 <p>④ 利用 w2v 中的 CBOW 策略，进行训练。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4718def9d72c4477829ee63d3199ce21.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280922529.webp" />   
     </p>
 <p>有了 Item Embedding 之后，做 Loss Function 的 reweight，reweight 时加入了位置、时长、连续性 ( 通过 Graph Embedding 计算得出 ) 等信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/20f03bf1cd40400b9679cab456572bd2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280922557.webp" />   
     </p>
 <p>Loss Function reweight 方式是在正样本前面乘一个系数 di,j，然后负样本保持不变，如果拿掉系数，是一个标准的交叉熵公式，di,j 考虑了观看时长、观看连续性、Item 的位置等综合信息来得到的，它们之间用的是 α、β、γ 线性加权得到的：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8930a05952944364bc0233306464e291.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280922525.webp" />   
     </p>
 <p>f（play_len）是关于时长的函数，由播放时长的分布估计得出：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8b77df5e8cf24f92ad65d167d0eb8263.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280922533.webp" />   
     </p>
 <p>左下角为用户播放数的累加，它的上面是观看到某一时长 n 的用户播放数的累加，右边侧延续了时长加权公式的模板。</p>
 <p>4. <strong>连续性</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9110ff832bdb47be984581e7cf1b00f6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280922758.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/810dfd32f12f4c668cfe61b5fbbf48ff.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280922633.webp" />   
     </p>
 <p>接下来讲一个连续性的实际案例：</p>
 <p>①②③④⑤⑥⑦⑧这是用户的点击顺序，对应的分数是基于连续性 w2v 算法计算出来的分数，我们认为分数较高的视频很容易带领用户继续看下去，把它称作一个连续性的信息，我们对此类信息进行加权，希望能够带动用户整体的消费。</p>
 <p>**▌** <strong>基于 WnD 的 Boosting 算法</strong></p>
 <p>1. <strong>模型</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b247b71a5ac14ed6b8dab96d5ff77231.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280922834.webp" />   
     </p>
 <p>由于 Wide&amp;Deep 建模方案是一个二分类，理论上只有一个分类超平面，很容造成样本错分。我们理想的方案是，虽然是二分类，但是我们可以有多个决策超平面，所以我们用了 Boosting 算法，综合5个 Wide&amp;Deep，进行二分类。其应用场景是训练的实时流，每次训练都是一个 Batch ( 相当于在线训练 )，中间融合了5个 Wide&amp;Deep 模型 ( 5个模型的特征是不变的，共享 Embedding 隐层，采用的是并行计算 )，最终生成一个强分类器。</p>
 <p><strong>Adaboost：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/764d44c2d22f4bec97b390f09e181c11.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280922536.webp" />   
     </p>
 <p>这是 Adaboost 算法的标准模式：</p>
 <p>① 初始化训练数据的权值分布</p>
@@ -365,37 +365,37 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>⑥ 最终综合每个子模型的权重和预测值，得到一个强分类器</p>
 <p>2. <strong>算法</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://mmbiz.qpic.cn/mmbiz_png/zHbzQPKIBPjQqMcyzqfBHvkZQJJ0Hcsb9s09ZIjg7ydn22UhkC6MNo8QvQpYQaBU3icvC48jODNmZ9KKrYt6kIg/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280922976.webp" />   
     </p>
 <p>具体的算法有几个不同点：</p>
 <p>第一个是误差项的计算方式，原先标准 Adaboost 算法误差项计算用的是加权指标函数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://mmbiz.qpic.cn/mmbiz_png/zHbzQPKIBPjQqMcyzqfBHvkZQJJ0HcsbgqxEgyibIJLUnEibvKsxLJOYyiciaqnBvjTfEdUW6rAAUYKO06UeuDIK0Q/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280922765.webp" />   
     </p>
 <p>我们的方案采用的是 AUC 加权的误差项：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2be07bd0db6a4730b1267fd82affbfe8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280923357.webp" />   
     </p>
 <p>每个子模型的权重，由于是在线训练，所以采用的是迭代的方式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8ee1f2ce3b4c45218f6d7d3ac72b4cf0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280923955.webp" />   
     </p>
 <p>每次用上一个 Batch 1/2 权重加上此次误差项的计算。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7e205a08712f4de1be84cc21fa6419b2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280923722.webp" />   
     </p>
 <p>第二个是样本权重的更新，样本权重更新时只对正样本进行更新，而标准的 Adaboost 是对正负样本都进行更新的：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a1f93301d2fb4e9bbe6f6d8a63651d99.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280923802.webp" />   
     </p>
 <p>di,j+ 指的是这个样本上一个子模型的权重，εi 是误差项。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bb4b682a99314388a6a4a8799b6838c6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280923424.webp" />   
     </p>
 <p>这是样本的更新方式。</p>
 <p>最终强分类器的预测和 Adaboost 标准模型差不多：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d528925509a24421aafaf48688c96fc6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280923147.webp" />   
     </p>
 <p>也是线性加权然后除以总的权重。</p>
 <p>实际应用中 Adaboost.Rank 的 WnD 子模型有5个，每个 WnD 都有相同的网络结构且它们共享 Embedding 层，Adaboost.Rec 模型的磁盘大�</p>
@@ -528,6 +528,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -561,10 +565,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -943,6 +943,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

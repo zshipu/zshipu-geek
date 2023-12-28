@@ -213,7 +213,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p><a href="https://zshipu.com/t?url=http%3A%2F%2Fkubicode.me%2Fimg%2FSession-Based-Recommendation%2Fgru4rec_arch.png">
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3ce49f5848c64719a4663ebe639e739c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155751.png" />   
      </a></p>
 <ol>
 <li>这边第一步的输入是用户的行为序列: [x_1,x_2,x_3,..,x_N]</li>
@@ -232,7 +232,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>使用 <code>Mini-Batch</code> 来进行训练:</p>
 <p><a href="https://zshipu.com/t?url=http%3A%2F%2Fkubicode.me%2Fimg%2FSession-Based-Recommendation%2Fgru4rec_minibatch.png">
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/66892e2556e6467e991d3b80b0332b64.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155151.png" />   
      </a></p>
 <p>因为用户行为的Session有长有短，并且他的差异性很大，传统的滑窗方式来构建训练数据并不适用，他这里用的策略是将不同的 <code>Session</code> 给拼接了起来，在同一个序列中如果遇到下一次Session时，会将GRU中的向量参数给重新初始化掉，因为这边GRU是对Step进行预测，所以在序列中间直接初始化掉问题也不大，这样还可以提升数据的利用率，会比简单 <code>PADDING</code> 的方式更加的合适。</p>
 </li>
@@ -243,27 +243,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p><a href="https://zshipu.com/t?url=http%3A%2F%2Fkubicode.me%2Fimg%2FSession-Based-Recommendation%2Fgru4rec_sampling.png">
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7e381d0fad174cf5b242e803e635bc91.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155371.png" />   
      </a></p>
 <p>因此这个模型现在已经转为对正负样本的一个 <code>0-1</code> 分类的问题,而且推荐里面，并不存在绝对的正负样本，用户也可能会对多个item存在偏好，所以这边比较合适 <code>Loss Function</code> 就是用 <code>Pair-Wise</code> 的模式了(只需要 正样本的score大于负样本即可):</p>
 <ol>
 <li><code>BPR(Bayesian Personalized Ranking)</code>:这是一种基于矩阵分解的损失函数，他的式子是:</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2018/11/9c6911dea21b4e58b15d9fef5e419c04.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155684.png" />   
     </p>
 <p>N_s是样本量的大小，\hat{r}_{s,i}表示正样本的分数，\hat{r}_{s,j}表示负样本的分数。</p>
 <ol>
 <li><code>TOP1</code>:这是种基于正则化方式的损失函数</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2018/11/519c1186e4114386becb8aeea2972b66.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155458.png" />   
     </p>
 <p>这种方式可以将\hat{r}_{s,i}的分数计算的更高，但是他同是也会是负样本，所以这边加了二范数来压制\hat{r}作为负样本时的分数</p>
 <p><code>GRU4REC</code> 的实验结果也是蛮简单的,Baseline的实验不在这个表中，数据后面跟着的涨幅就是和Baseline的对比:</p>
 <p><a href="https://zshipu.com/t?url=http%3A%2F%2Fkubicode.me%2Fimg%2FSession-Based-Recommendation%2Fgru4rec_exp.png">
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/686e2dbc53d447409b1aae0c69af3384.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155411.png" />   
      </a></p>
 <p>这边显示的也是 <code>BPR</code> 和 <code>TOP1</code> 这两种LOSS的效果会明显好于传统的交叉熵.</p>
 <p><code>GRU4REC</code> 是较早的将序列行为和GRU进行结合，其中 <code>LOSS</code> 这块的构建还是非常值得借鉴的。</p>
@@ -284,31 +284,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>所以在 <code>GRU4REC-Sampling</code> 中又进行了额外的采样:同样是在 <code>Mini-Batch</code> 中进行采样，采样时根据这个公式supp_i^\alpha，而这边的a是一个 <code>0~1</code> 的值，如果a=0表示均匀采样，那么a=1为完全的热门采样。</p>
 <p>另外 <code>GRU4REC</code> 中的 <code>BPR</code> 和 <code>TOP1</code> 会存在梯度的消失问题，因此作者设计了一种新的损失函数希望来最大化正样本的分数:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2018/11/8734ff1ae76f48f7b4984ccf625bf280.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155592.png" />   
     </p>
 <p>从这儿可以看出，新的损失函数是对 <code>Max-Score</code> 的负样本做pair，但是这种是不可求导了，所以作者用了一种近似的方式来实现,刚刚对 <code>Max-Score</code> 做负样本的方式可以转为 <code>Score</code> 越大，则 <code>Loss</code> 中的权重也越大，而这个权重可以用归一化的 <code>softmax</code> 来表示:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2018/11/186a1a67ab914409a428abea42684b0a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155765.png" />   
     </p>
 <p>有了每个样本的权重表示之后，原先的 <code>Loss Function</code> 可以更改为:</p>
 <ol>
 <li>
 <p><code>TOP1-MAX</code>:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2018/11/1fba33e970cb49fea9d7c318ef99f66f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155606.png" />   
     </p>
 </li>
 <li>
 <p><code>PR-max</code>:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2018/11/fddc4524b6fe45a385017efed331d55f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155362.png" />   
     </p>
 </li>
 </ol>
 <p>对比一下 <code>GRU4REC</code> 中的 <code>Loss Function</code>，其实就是额外增加了一个s_j的权重值。</p>
 <p><a href="https://zshipu.com/t?url=http%3A%2F%2Fkubicode.me%2Fimg%2FSession-Based-Recommendation%2Fgru4rec_sampling_exp.png">
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0476ab7f9c3748b8b6c4ce58968f6718.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155803.png" />   
      </a></p>
 <p>看下实验对比，额外的 <code>Sampling</code> 和新的 <code>Loss Function</code> 都还是有极大的提升的,惊呆。</p>
 <blockquote>
@@ -319,13 +319,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>另外作者认为在用户行为序列中，每个item的停留时间是非常重要的一个特征，而之前的 <code>GRU4REC</code> 算法只是用于简单的交互行为来构建样本，所以 <code>GRU4REC-DWell</code> 主要是很巧妙将用户在序列item上的停留时间和GRU4REC <code>结合了起来:</code></p>
 <p><a href="https://zshipu.com/t?url=http%3A%2F%2Fkubicode.me%2Fimg%2FSession-Based-Recommendation%2Fgru4rec_dwell.png">
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6af7c729b32142bca403579799fe563e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155958.png" />   
      </a></p>
 <p>这里主要的Idea就是在原始的用户行为中，作者根据item上面的停留时间根据阈值进行切片，如果停留时间长的可能会有很多个切片，每个切片都作为一个新的行为项:</p>
 <p>给定一个行为序列的集合X=\{x_1,x_2,…,x_n\},每一个x_i对应的停留时间为dt_i，其中t为切片的阀值，则x_i可以分割的切片为d_t/t + 1。 也就是如上图所示，i_2,1就由于停留时间较久，所以分割成了三个切片。然后其他的就如原始的 <code>GRU4REC</code> 一样了，但是作者在做对比实验室加入了 <code>GRU4REC-SAMPLING</code> 进行了一起对比：</p>
 <p><a href="https://zshipu.com/t?url=http%3A%2F%2Fkubicode.me%2Fimg%2FSession-Based-Recommendation%2Fgru4rec_dwell_exp.png">
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fdf91e1d213c4093a7df6fa16538d9da.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155225.png" />   
      </a></p>
 <p>实验中显示，停留时间信息的加入对于模型的作用是非常巨大的。</p>
 <h2 id="hrnn">HRNN</h2>
@@ -338,7 +338,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>所以这边 <code>HRNN</code> 的整个层次结构如图所示:</p>
 <p><a href="https://zshipu.com/t?url=http%3A%2F%2Fkubicode.me%2Fimg%2FSession-Based-Recommendation%2Fhrnn_arch.png">
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/89289944a8804ca79cd74db9a5bce711.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155601.png" />   
      </a></p>
 <ul>
 <li>上面一层代表 <code>Session-Level</code> 的RNN，输入的是item，会对 <code>next basket</code> 进行预测，同时输出 <code>final state</code></li>
@@ -346,7 +346,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p><a href="https://zshipu.com/t?url=http%3A%2F%2Fkubicode.me%2Fimg%2FSession-Based-Recommendation%2Fhrnn_exp.png">
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c4cdfc6e167244afab4869419290463c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272155902.png" />   
      </a></p>
 <p>主要对比的是原生的 <code>GRU4REC</code>，性能大约有10%左右的提升，但是用的数据和 <code>GRU4REC-Sampling</code> 以及 <code>GRU4REC-DWell</code> 的不一样，感觉没有他们的提升多，并且在现实过程中，对于 <code>Session</code> 的划分也是需要很多的 <code>trick</code> 啊。</p>
 <h2 id="总结">总结</h2>
@@ -484,6 +484,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -517,10 +521,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -899,6 +899,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

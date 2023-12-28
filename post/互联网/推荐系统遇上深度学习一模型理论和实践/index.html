@@ -200,12 +200,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="2one-hot编码带来的问题">2、one-hot编码带来的问题</h1>
 <p>FM(Factorization Machine)主要是为了解决数据稀疏的情况下，特征怎样组合的问题。已一个广告分类的问题为例，根据用户与广告位的一些特征，来预测用户是否会点击广告。数据如下：(本例来自美团技术团队分享的paper)</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e63c57f911274d43995701516250e6e0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953317.png" />   
     </p>
 <p>clicked是分类值，表明用户有没有点击该广告。1表示点击，0表示未点击。而country,day,ad_type则是对应的特征。对于这种categorical特征，一般都是进行one-hot编码处理。</p>
 <p>将上面的数据进行one-hot编码以后，就变成了下面这样 ：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c5b5c9194e364cbc86448c709d48d8f3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953997.png" />   
     </p>
 <p>因为是categorical特征，所以经过one-hot编码以后，不可避免的样本的数据就变得很稀疏。举个非常简单的例子，假设淘宝或者京东上的item为100万，如果对item这个维度进行one-hot编码，光这一个维度数据的稀疏度就是百万分之一。由此可见，数据的稀疏性，是我们在实际应用场景中面临的一个非常常见的挑战与问题。</p>
 <p>one-hot编码带来的另一个问题是特征空间变大。同样以上面淘宝上的item为例，将item进行one-hot编码以后，样本空间有一个categorical变为了百万维的数值特征，特征空间一下子暴增一百万。所以大厂动不动上亿维度，就是这么来的。</p>
@@ -213,11 +213,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>普通的线性模型，我们都是将各个特征独立考虑的，并没有考虑到特征与特征之间的相互关系。但实际上，大量的特征之间是有关联的。最简单的以电商为例，一般女性用户看化妆品服装之类的广告比较多，而男性更青睐各种球类装备。那很明显，女性这个特征与化妆品类服装类商品有很大的关联性，男性这个特征与球类装备的关联性更为密切。如果我们能将这些有关联的特征找出来，显然是很有意义的。</p>
 <p>一般的线性模型为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5a480ff0e94f432dac63cee4ca04f60d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953597.png" />   
     </p>
 <p>从上面的式子很容易看出，一般的线性模型压根没有考虑特征间的关联。为了表述特征间的相关性，我们采用多项式模型。在多项式模型中，特征xi与xj的组合用xixj表示。为了简单起见，我们讨论二阶多项式模型。具体的模型表达式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c0bff52a903e409e96524198404470a5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953136.png" />   
     </p>
 <p>上式中，n表示样本的特征数量,xi表示第i个特征。</p>
 <p>与线性模型相比，FM的模型就多了后面特征组合的部分。</p>
@@ -225,27 +225,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>从上面的式子可以很容易看出，组合部分的特征相关参数共有n(n−1)/2个。但是如第二部分所分析，在数据很稀疏的情况下，满足xi,xj都不为0的情况非常少，这样将导致ωij无法通过训练得出。</p>
 <p>为了求出ωij，我们对每一个特征分量xi引入辅助向量Vi=(vi1,vi2,⋯,vik)。然后，利用vivj^T对ωij进行求解。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dfa9d37afd1940faa5fb059281c774a2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953722.png" />   
     </p>
 <p>那么ωij组成的矩阵可以表示为:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/22e6c0485f3d40f08e352d4d315396f8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953332.png" />   
     </p>
 <p>那么，如何求解vi和vj呢？主要采用了公式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f50a7f411dc44ce58a41b48b4189586b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953907.png" />   
     </p>
 <p>具体过程如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c195dc0045154f10a02fb52aefb8e0aa.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953462.png" />   
     </p>
 <p>上面的式子中有同学曾经问我第一步是怎么推导的，其实也不难，看下面的手写过程(大伙可不要嫌弃字丑哟)</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3197606e74dd41b2995ceb6662a6c92a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953996.jpeg" />   
     </p>
 <p>经过这样的分解之后，我们就可以通过随机梯度下降SGD进行求解：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2c3327d9ab714ae59f682c93f7415964.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953966.png" />   
     </p>
 <h1 id="5tensorflow代码详解">5、tensorflow代码详解</h1>
 <p>代码参考地址： <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2Fbabakx%2Ffm_tensorflow%2Fblob%2Fmaster%2Ffm_tensorflow.ipynb">https://github.com/babakx/fm_tensorflow/blob/master/fm_tensorflow.ipynb</a></p>
@@ -254,12 +254,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2Fprincewen%2Ftensorflow_practice%2Ftree%2Fmaster%2Frecommendation-FM-demo">https://github.com/princewen/tensorflow_practice/tree/master/recommendation-FM-demo</a>。</p>
 <p>本文使用的数据是MovieLens100k Datase，数据包括四列，分别是用户ID，电影ID，打分，时间。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5dedc66ed69544c690545bf3fc15e128.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953741.jpeg" />   
     </p>
 <p><strong>输入变换</strong></p>
 <p>要使用FM模型，我们首先要将数据处理成一个矩阵，矩阵的大小是用户数 * 电影数。如何根据现有的数据进行处理呢？使用的是scipy.sparse中的csr.csr_matrix，理解这个函数真的费了不少功夫呢，不过还是在下面博客( <a href="https://zshipu.com/t?url=https%3A%2F%2Fblog.csdn.net%2Fu012871493%2Farticle%2Fdetails%2F51593451">https://blog.csdn.net/u012871493/article/details/51593451</a>)的帮助下理解了函数的原理。盗用博客中的一张图来帮助大家理解这个函数的输入：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7e6a5b8d8de947f1bac61228bd51208c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953494.jpeg" />   
     </p>
 <p>函数形式如下：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">csr_matrix((data, indices, indptr)
@@ -311,7 +311,7 @@ x_train = x_train.todense()
 x_test = x_test.todense()
 </code></pre><p>如果不做处理，函数返回的矩阵是按如下的格式保存的：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/67287bbeeac146c5be5417f72337ed51.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953230.jpeg" />   
     </p>
 <p>使用todense变换后，变成如下样式：</p>
 <p>![](<a href="https://img.6aiq.com/e/56b04f0">https://img.6aiq.com/e/56b04f0</a></p>
@@ -444,6 +444,10 @@ x_test = x_test.todense()
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -477,10 +481,6 @@ x_test = x_test.todense()
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -859,6 +859,8 @@ x_test = x_test.todense()
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

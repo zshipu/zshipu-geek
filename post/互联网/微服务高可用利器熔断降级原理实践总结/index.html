@@ -214,7 +214,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy42YWlxLmNvbS9maWxlLzIwMTkvMTEvZGFkY2EwYWZlMDdhNGM1YjhkY2VjZGU1ZDY2OTFiN2MtaW1hZ2UucG5n?x-oss-process=image/format,png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271914814.png" />   
     </p>
 <h1 id="前言">前言</h1>
 <p>最近在工作中参与组内服务稳定性建设，梳理我们目前服务现状并接入公司自研稳定性保障平台。对公司内自研组件以及业界流行的Hystrix做了学习，Netflix Hystrix 里面大量RxJava响应式实现，实在看着有点绕。所以在这里梳理一些实践以及Hystrix知识点。</p>
@@ -224,11 +224,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>例如:一个依赖30个服务的系统，每个服务99.99%可用，99.99%的30次方 ≈ 99.7% ，0.3% 意味着1亿次请求会有 3,000,00次失败 ，换算成时间大约每月有2个小时服务不稳定，随着服务依赖数量的变多，服务总体可用性会变得更差。</p>
 <p>假设我们当前服务的外部依赖中，有一个服务出现了故障，可能是网络抖动出现了超时，亦或服务挂掉导致请求超时，短时间内看起来像下图这样：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy42YWlxLmNvbS9maWxlLzIwMTkvMTEvNzQzMGJhNDdiM2U2NDljNGEyN2ZjYWNkMTIxMDM0NTMtaW1hZ2UucG5n?x-oss-process=image/format,png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271914340.png" />   
     </p>
 <p>慢慢的大量业务线程都会阻塞在对故障服务的调用上，请求排队，服务响应缓慢，系统资源渐渐消耗，最终导致服务崩溃，更可怕的是这种影响会持续的向上传递，进而导致服务雪崩。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy42YWlxLmNvbS9maWxlLzIwMTkvMTEvNTQxMzM0MTA3NWJhNDg0NjkzMzM1MDM5NWVjNTU4MWQtaW1hZ2UucG5n?x-oss-process=image/format,png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271914759.png" />   
     </p>
 <h1 id="如何去做">如何去做</h1>
 <ul>
@@ -245,7 +245,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>可用性指标</strong></p>
 <p>业界高可用的标准是按照系统宕机时间来衡量的：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy42YWlxLmNvbS9maWxlLzIwMTkvMTEvMmZiNDE1NDk1NDkxNDU2MzljNzEzZWY0MWI3OTU5ZTYtaW1hZ2UucG5n?x-oss-process=image/format,png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271914273.png" />   
     </p>
 <p>首先去梳理各个业务链路的服务依赖关系以及依赖的调用量，识别出哪些服务是强依赖，哪些是弱依赖。</p>
 <p><strong>强弱依赖业界定义</strong></p>
@@ -263,7 +263,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>以业界比较流行的熔断降级组件Hystix为例，来学习其基本的工作原理</p>
 <h2 id="hystix工作流程图">Hystix工作流程图</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy42YWlxLmNvbS9maWxlLzIwMTkvMTEvMzU1OGUyN2EzN2EyNGQ5MmE4NTMwZGYzZWViNTI3MTMtaW1hZ2UucG5n?x-oss-process=image/format,png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271914422.png" />   
     </p>
 <p>​ 下面将更详细的解析每一个步骤都发生哪些动作：</p>
 <ul>
@@ -328,13 +328,13 @@ Observable&lt;K&gt; ocValue = command.toObservable();    //cold observable
 <p>3.提供接近实时的监控和警报，从而能够快速发现故障和修复。监控信息包括请求成功，失败（客户端抛出的异常），超时和线程拒绝。如果访问依赖服务的错误百分比超过阈值,断路器会跳闸，此时服务会在一段时间内停止对特定服务的所有请求</p>
 <p>4.将所有请求依赖服务封装到HystrixCommand或HystrixObservableCommand对象中，然后这些请求在一个独立的线程中执行。使用隔离技术来限制任何一个依赖的失败对系统的影响。每个依赖服务维护一个小的线程池（或信号量），当线程池满或信号量满，会立即拒绝服务而不会排队等待</p>
 <p>
-        <img class="mx-auto" alt="" src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy42YWlxLmNvbS9maWxlLzIwMTkvMTEvMzhkNzY0Zjg0MTZlNDMyMDkyMTE5MzU1MWRiZWNlYWMtaW1hZ2UucG5n?x-oss-process=image/format,png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271914851.png" />   
     </p>
 <h2 id="hystrix特性">Hystrix特性</h2>
 <h3 id="断路器">断路器</h3>
 <p>下面的图展示了 <code>HystrixCommand</code> 和 <code>HystrixObservableCommand</code> 如何与 <code>HystrixCircuitBroker</code> 进行交互。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy42YWlxLmNvbS9maWxlLzIwMTkvMTEvNzIzN2VlZDRjMGUxNDdlMjliOGViZDdjZTE2MTBhY2QtaW1hZ2UucG5n?x-oss-process=image/format,png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271914355.png" />   
     </p>
 <p>回路器打开和关闭有如下几种情况：</p>
 <ul>
@@ -346,17 +346,17 @@ Observable&lt;K&gt; ocValue = command.toObservable();    //cold observable
 </ul>
 <p>下图是熔断自动回复流程图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy42YWlxLmNvbS9maWxlLzIwMTkvMTEvNGVkNzY3ZGQzNjhiNGIzNWIxNzk3NzlkYjM5MGEzMzEtaW1hZ2UucG5n?x-oss-process=image/format,png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271914894.png" />   
     </p>
 <p>当出现问题时，Hystrix会检查一个肯定时长（图中为10s）的一个时间窗（window），在这个时间窗内能否有足够多的请求，假如有足够多的请求，能否错误率已经达到阈值，假如达到则启动断路器熔断机制，这时再有请求过来就会直接到fallback路径。在断路器打开之后，会有一个 <code>sleep window</code>（图中为5s），每经过一个 <code>sleep window</code>，当有请求过来的时候，断路器会放掉一个请求给remote 服务，让它去试探下游服务能否已经恢复，假如成功，断路器会恢复到正常状态，让后续请求重新请求到remote 服务，否则，保持熔断状态。 <code>sleep window</code> 实现机制类似于校招常考的那个窗口滑动求最值的问题！</p>
 <h2 id="fallback">fallback</h2>
 <h2 id="资源隔离">资源隔离</h2>
 <p>Hystrix采用舱壁模式来隔离相互之间的依赖关系，并限制对其中任何一个的并发访问。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy42YWlxLmNvbS9maWxlLzIwMTkvMTEvNWU0MmZmM2Q2OGY0NDc2YTg4ZWYyMDFjZjk4Mjg0YTYtaW1hZ2UucG5n?x-oss-process=image/format,png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271914184.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy42YWlxLmNvbS9maWxlLzIwMTkvMTEvMzM5MmY0NGYyOTYzNDVjOWFlMTE5N2QxZjkyNGVmMDktaW1hZ2UucG5n?x-oss-process=image/format,png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271914474.png" />   
     </p>
 <ul>
 <li>
@@ -381,7 +381,7 @@ Observable&lt;K&gt; ocValue = command.toObservable();    //cold observable
 </ul>
 <p><strong>信号量</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy42YWlxLmNvbS9maWxlLzIwMTkvMTEvNzcyZjc5ZjVhYzk0NDc4Y2FhODRkMjNmNDMwZDM5YjEtaW1hZ2UucG5n?x-oss-process=image/format,png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271914783.png" />   
     </p>
 <p>类型优点不足适用线程支持排队和超时、支持异步调用线程调用和切换产生额外开销不受信客户(比如第三方服务稳定性是无法推测的)信号量轻量且无额外开销不支持任务排队和超时，不支持异步受信客户、高频高速调用服务（网关、cache）</p>
 <h2 id="参数配置项">参数配置项</h2>
@@ -698,6 +698,10 @@ public class DemoCircuitBreakerAnnotation {
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -731,10 +735,6 @@ public class DemoCircuitBreakerAnnotation {
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1113,6 +1113,8 @@ public class DemoCircuitBreakerAnnotation {
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

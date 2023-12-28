@@ -228,11 +228,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="1-io-指标完善"><strong>1. IO 指标完善</strong></h2>
 <p>IO 问题是导致以上问题经常出现的原因之一，包含消息读取效率、维表 JOIN 效率、SINK 效率等等，第三方存储的性能以及稳定性，直接影响实时任务的稳定性，为了快速定位相关问题，我们添加了很多 IO 相关 Metric 指标。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2e20488a2275415cb5f4df776ff26290.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855337.webp" />   
     </p>
 <h4 id="-11-kafka-消费侧的一些性能指标"><strong>■ 1.1 Kafka 消费侧的一些性能指标</strong></h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/aaed77d5145d4f08bf770f1a52d203fe.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855144.webp" />   
     </p>
 <h4 id="-12-读取反序列化指标"><strong>■ 1.2 读取反序列化指标</strong></h4>
 <p>包含：</p>
@@ -277,26 +277,26 @@ GROUP BY from_unixtime(`timestamp`, &#39;yyyy-MM-dd&#39;),
          os, sceneid, parent_exp, `exp`, exp_type, userid
 </code></pre><p>这是一个实时全聚合任务，在原始的 FLINK 中这段 SQL 执行的 DAG 大概是这样的：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/44f43f7f54574ddd99b354b17f099a78.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855844.webp" />   
     </p>
 <p>假如我们读取的流表 ods_rtrs_ab_log 有 5 个分区，我们的 SQL 任务有七个并发，因为受到 Kafka 分区数的影响，加上 FLINK 本身作业链的优化，我们的消息的读取、维表 JOIN、MINI BATCH 的操作全部受到了 Kafka 分区的影响，无法扩展，特别是对于维表 JOIN 这种 IO 操作来说，任务的并发度严重影响了整体程序的性能，这个时候我只能通过扩容 Kafka 的分区数来提升性能。</p>
 <p>但是这种操作非常重，而且很有可能会影响其它读取这张流表的任务；为了解决这个问题，我们对 Kafka 的 Connector 做了一些改造，支持通过配置多添加一步 Shuffle 操作，比如在上面的配置当中我们添加了配置：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">&#39;connector.rebalance.keys&#39; = &#39;sceneid,parent_exp,userid&#39;
 </code></pre><p>消息会在读取以后按照 sceneid,parent_exp,userid 等字段进行 hash 分片，这样大大提高了整体程序的性能扩展性，而且通过指定字段的 keyBy 操作，可以大大提高维表 JOIN 缓存的命中率，提高 MINI BATCH 的性能和效率。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f38f2a20b3d9401ca89a1715258fa461.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855592.webp" />   
     </p>
 <p>除了以上配置以外，我们还支持添加随机的 Rebalance 操作、Rescale 操作以及解析行为的拆解，来进一步提升整体程序性能的扩展，这里需要注意的是额外 Shuffle 操作，会带来更多线程和网络开销，在配置这些操作的同时需要同时关注机器的负载情况，添加额外的 Shuffle 操作虽然能提升程序的扩展性，但是由于额外网络和线程开销，如果机器本身性能不行的话，很有可能会适得其反，在相同的资源情况下性能变得更差，这点需要根据自己程序以及环境情况进行配置。</p>
 <h2 id="3-kafka-使用优化"><strong>3. Kafka 使用优化</strong></h2>
 <p>随着流量的飞速增长 Kafka 的稳定性也是我们面临的主要难题，包括 Kafka 的机柜带宽问题、跨机房带宽问题、Kafka 扩缩容的抖动问题、还有 Kafka 本身配置问题等等，基本上大家能遇到的问题我们都遇到了，为了解决以上问题我们做了以下工作：</p>
 <h4 id="-31-开发镜像服务解决带宽问题保障高优先级任务"><strong>■ 3.1 开发镜像服务，解决带宽问题，保障高优先级任务</strong></h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d07dc23bc1654d1abbefd6d81ec491c7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855479.webp" />   
     </p>
 <p>我们通过 FLINK 自己开发了一套镜像服务，在不同的机房模块间分别部署了一套 Kafka 集群，通过镜像服务同步两套 Kafak 集群的数据，主 Kafka 提供给比较重要 P0 级别的实时任务，其它不是特别重要的任务读取镜像集群的数据。</p>
 <p>我们通过 Yarn Label 技术，通过不同队列的选择来控制任务所在的机房，来减少跨机房带宽的消耗，为了方便用户切换不同的 Kafka 集群，我们在 Flink 流表侧也做了一些改造，支持一张流表同时挂载多个 Kafka 集群，只要通过简单的配置就可以随意切换 Kafka 集群，经过一轮任务整理和切换，Kafka 带宽使用情况有了大大的改善：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dbcd7c08ccfb4122828f3e7ff4a85bb4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855192.webp" />   
     </p>
 <h4 id="-32-kafka-监控完善"><strong>■ 3.2 Kafka 监控完善</strong></h4>
 <p>在日常的工作中，我们发现很多开发对 Kafka 本身并不太了解，运维由于经验的不足在初期对整体 Kafka 的管控也不是那么的严格，导致在使用上有很多问题。所以我们整合了音乐内部的 Kafka 监控服务的数据，结合我们平台的任务血缘，开发了自己的一套 Kafka 监控服务。</p>
@@ -317,7 +317,7 @@ GROUP BY from_unixtime(`timestamp`, &#39;yyyy-MM-dd&#39;),
 </ul>
 <p>在离线场景下我们很有很多手段来解决以上问题，减少不必要的 IO，如数据的分桶、存储有序的数据利用 Parquet 的下推查询的能力、做分区表等手段都可以解决以上问题。但是实时表的 Case 下在现有的公开的方案中好像并没有什么好的方法；所以为了解决以上问题，我们开发了流表的分区方案，整体和 HIVE 表的分区实现思想差不多：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0db9659e2aa94b5a92f744b176a9a31d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855000.webp" />   
     </p>
 <p>我们使用 Flink Table Souce 提供的 SupportsFilterPushDown 的接口实现了一套自己的实时流表分区方案，一个分区对应一个 topic，通过用户的查询条件下推过滤掉没有必要的分区，从而减少没有必要的数据的读取；目前已经上线了第一版，初步拆分了云音乐曝光日志，顺便还尝试使用AVRO的数据格式代替以前的 JSON 格式，实践下来优化效果明显：</p>
 <ul>
@@ -325,7 +325,7 @@ GROUP BY from_unixtime(`timestamp`, &#39;yyyy-MM-dd&#39;),
 <li>使用分区流表，我们初步迁移了了 4 个曝光日志的消费任务，已经节省了 7 台物理机，平均节省计算和带宽资源 75% 以上。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d1cd9a0bc3084c3d979feff2ebf274b7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855700.webp" />   
     </p>
 <p>虽然这些都是比较极端的 Case，但是从这些例子我们可以预计分区流表技术全面铺开以后，使用得到的话，绝对是一个能带来质变的优化。</p>
 <h1 id="二批流一体"><strong>二、批流一体</strong></h1>
@@ -360,7 +360,7 @@ GROUP BY from_unixtime(`timestamp`, &#39;yyyy-MM-dd&#39;),
 <li>统一元数据管理：在 FlinkSQL 侧我们继承元数据中心服务，提供 catalog.db.table 这样的数据读取和写入方式，为了统一元数据，同样我们对 SparkSQL 做了二次的封装，同样和元数据中心做了集成，实现了以 catalog.db.table 这样形式的异构数据源之间的读取和写入。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b5208dc1f8ec43819ef94362eb28b57e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855351.webp" />   
     </p>
 <p>场景化的配置式的批流一体的统一实现，对于一些简单业务逻辑的场景，我们后续会开发场景化的批流一体的实现。如批流一体的索引任务、批流一体的 ETL 清洗平台等等，这块由于资源问题，目前还在规划中。</p>
 <p>批流一体 SQL 统一的在目前的技术下，还有一个比较大的前提是本身日志的复杂程度，这个涉及到本身日志埋点规范性和完整性，实时计算不像离线，可以将大量归因逻辑， 关联逻辑放在数据侧进行处理，抛开合理性和成本问题，很多工作在离线场景下是可以做的。</p>
@@ -369,18 +369,18 @@ GROUP BY from_unixtime(`timestamp`, &#39;yyyy-MM-dd&#39;),
 <p>目前业界主要有两类方案：</p>
 <p>第一种是建设批流映射层的方案，目前阿里公开的方案的就是这种方案，比较适合已经有了实时数仓和离线数仓的老产品，在不改动原有数仓的情况下，构建统一映射层视图，通过视图的方式提供一体化的使用体验，整体的原理参考下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/017cb37b884742f9aa4ffaa137cb08e6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855054.webp" />   
     </p>
 <p>第二种方案是构建一种新的元数据系统，一套 schema 下同时挂载多种存储，如 HDFS、Kafka 等，在写入数据时同时写入，在读取场景下时，根据读取方式的不同，选择相应的合适的存储，目前网易数帆有数产品团队开发的 Arctic 采用的就是这种方案：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b6859c8442764b5e8f9719d1f48e82be.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855916.webp" />   
     </p>
 <p>整体思路是封装 icberg 和 Kafka 以及 Hbase 等多种存储，在不同场景下使用不同的存储，另外 arctic 还在 iceberg 的基础上做了很多二次开发，来解决 DWS 数据的更新问题，提供类似 Hudi 的 CopyOnWrite 以及 MergeOnRead 等功能，用来解决 Flink 本身用来做全聚合的稳定性问题。目前云音乐已经在一些新的业务场景做了试用，已经上线了几十张的的批流一体表，大家如果想进一步了解 arctic 可以找网易数帆有数实时计算团队了解，在此不过多描述。</p>
 <h2 id="3-实时的报表数据"><strong>3. 实时的报表数据</strong></h2>
 <p>提供实时的报表数据主要依赖 OLAP 引擎和存储，存储侧需要有需要有在提供实时的数据更新能力的同时，还需要有提供秒级别数据的查询能力，很多时候没有办法把将结果直接写到到存储中。因为数据报表本身很多灵活性的查询，如果直接将结果写到存储中， 就需要类似 Kylin 那种实时的 Cube 能力，这对开发以及 Flink 本身计算的压力太大，本身也会带来很多资源的和存储的浪费，稳定性问题以及开发工作量的问题也会很多，数据的二次分析能力也会很局限；</p>
 <p>所以在这一层我们需要 OLAP 引擎提供至少百亿级别的数据的秒级延迟的查询的能力，目前我们主要的方案采用的存储有 Kudu 和 Clickhouse 两种，以我们老版本的 ABTest 为例，我们采用的方案如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a7a56ce1992a4758af1a895a71c2b27e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855893.webp" />   
     </p>
 <p>对于实时的最新的小时维度以及天维度的结果我们通过 Impala 及时读取 Kudu 数据关联出最新的结果；对于历史的一天以前天维度数据或者两个小时以前小时维度的数据我们采用 Spark 预计算好存储在结果表当中，两份数据 UNION 在一起提供给用户，保障数据结果的时效性，以及�</p>
 
@@ -510,6 +510,10 @@ GROUP BY from_unixtime(`timestamp`, &#39;yyyy-MM-dd&#39;),
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -543,10 +547,6 @@ GROUP BY from_unixtime(`timestamp`, &#39;yyyy-MM-dd&#39;),
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -925,6 +925,8 @@ GROUP BY from_unixtime(`timestamp`, &#39;yyyy-MM-dd&#39;),
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

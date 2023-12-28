@@ -206,7 +206,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>基础概念</strong></p>
 <p>**
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1e51998a31e847669c74c8179f0adfb3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272304135.webp" />   
      **</p>
 <p>如下几个概念，Lucene的Document中给出了明确的定义，在这里先强调一下：</p>
 <p>1. Document(文档)由Field(字段)构成。</p>
@@ -215,7 +215,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在每一个Segment范畴内，每一个Document都被分配了一个唯一的数字ID，称之为DocID，同时根据每个Field的名字定一个唯一的FieldNaming，对于索引字段进到Postings之前也会被分配一个唯一的TermID。Field除了FieldNaming之外也有一个FieldNumber，与DocID和TermID一样都是一个自增的数值。</p>
 <p><strong>整体流程</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3900a084ecd3402abb5e25f77f03f2b5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272304728.webp" />   
     </p>
 <p>一个Document写到Lucene中，大致涉及如下六大处理过程：</p>
 <p>1. 处理需要存储的Fields</p>
@@ -229,7 +229,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>Field存储</strong></p>
 <p>Field数据的存储与否，是可选的。Lucene关于Field存储的文件格式，与MySQL的frm文件格式类似。关于Field的处理，主要是由 <code>StoredFieldsConsumer</code> 完成。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/17b9b29a0531474185c66c63b3d93629.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272304391.webp" />   
     </p>
 <p><em>Lucene为了保证写入的性能，文档一旦提交后便不可改写，这点跟MySQL的</em>_ <code>frm文件</code> 是不一样的。字段存储是唯一一个按文档存储的文件，此外都是打破文档的边界按字段存储的。_</p>
 <p>另外，因为Lucene作为搜索引擎，它读取文档的操作往往是以随机访问的方式。为此Lucene将文档数据写到.fdt文件的同时，还需要为DocID对应的文档所在.tdt文件上位置构建索引，并将索引存储到.fdx文件中，以提供快速随机访问的能力。</p>
@@ -240,7 +240,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>正向索引</strong></p>
 <p><strong>正向索引</strong> 记录了DocId到FieldValue的映射关系，提供了通过DocID就能直接获取字段值的能力。 <code>DocValuesWriter</code> 将DocIdSet与FieldValue分别存储在类似数组的结构中，他们的存储顺序的是一致的。然后，DocValuesConsumer将FieldValues和DocIdSet一并写到.dvd文件中。每个需要存储DocValues的Field都有一对这样的结构，且DocValues是按字段连续存储在.dvd文件中。每个Field的DocIdSet和FieldValues在dvd文件中的索引信息(起始位置)，被存储在.dvm文件中。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/93388d57de6441ea95e09a19793b92b1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272304051.webp" />   
     </p>
 <p>这实现上是一种 <strong>列式存储</strong> 的结构。这种列式存储结构，给Lucene带来很多二次计算的可能，比如Hive On Solr/ElasticSearch，Solr的高级特性Streaming Expression等。Streaming Expression是Solr提供基于Lucene索引实现的计算框架，以及在Streaming Expression上实现SQL的能力。</p>
 <p>_存储DocID的内存是用DocsWithFieldSet（底层实际上是BitSet），在磁盘上的组织则要复杂一些。在Lucene7.0之后，Lucene针对BitSet的稠稀性，采用不同的存储方式：当BitSet比较稀疏时，直接存储DocID；当BitSet稠密时，则直接存储BitSet的Bits数据。根据数据的分布情况不同，采用适当的结构不仅可以提高空间的利用率，还能提高遍历的效率。唯一的缺点估计就是实现起来比较复杂。_ <em>当前版本DocValues还不支持分词。</em></p>
@@ -253,16 +253,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h5 id="postings"><strong>Postings</strong></h5>
 <p>Posting是大家所熟悉的结构：左边是Terms列表，记录Field中出现的所有的Terms，也是叫TermsDictionary；右边是Postings，记录Term所对应的所出现哪些文档的文档号，出现次数，位置信息等。示意图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c12cb1529f3b4797af6766386a28519b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272305298.webp" />   
     </p>
 <p>在构建Posting过程中需要考虑如何收集Terms的位置信息和统计信息，还要考虑在大规模的数据量级下如何去重和排序。这些都是实现倒排索引需要考虑的关键问题，一些不合理的细节所导致的额外性能开销，就会直接影响全局索引性能。</p>
 <p><strong>现在我们来看一下Lucene构建Posting的过程：</strong> 在实时索引时，Postings先在内存中临时构建。Field被分词后变成一系列Terms的集合，而后遍历这个Terms的集合，为每个Term分配一个ID，叫TermID。Lucene用一个类HashMap的数据结构来存储Term与TermID的映射关系，同时实现去重的目的。分配完TermID之后，后续就可以使用TermID来表示Term。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ad8fe3d0943e4ee0a6c36d122709fe16.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272305202.webp" />   
     </p>
 <p>在Postings构建过程中，会在PostingsArrays存储上个文档的DocID和TermFreq，还有Term上次出现的位置和位移信息。PostingsArrays由几个int[]组成，其下标即为TermID(TermID是连续分配的整型数，所以PostingsArrays是紧凑的)，对应的值便是记录TermID上一次出现的相关信息。就是说，Lucene用多个int[]存储Term的各种信息，一个int[]存放TermID的一种信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/378776139d524cf288c2b363d027f706.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272305778.webp" />   
     </p>
 <p><em>Lucene为了能够直接使用基本数据类型（基本类型有两大好处：减少内存开销和提升性能），所以才有了PostingsArrays结构。为了便于理解，PostingsArrays可以表示为Postings[]，每个Postings对象含有docFreq,intStart,lastPos等属性。</em></p>
 <p>_</p>
@@ -273,7 +273,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>_</p>
 <p>_</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/07fc819f88664ba4bb506637881aa671.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272305514.webp" />   
     </p>
 <p>为什么不能直接写磁盘？ 这是因为在构建过程中无法知道Postings有多长，不能确定要预留多少空间；另外构建过程中Term是随机出现的而非有序的；最后是Term难以再排序，只能按TermID的顺序处理。</p>
 <p>为什么需要postingsArrays？ 因为写到byte[]的只是增量，那么就需要找到上次的Term出现情况才能计算。如果总是在byte[]上查找则显得过重，因为Postings存储在byte[]时，它的结构是一个单向链表。有了PostingsArrays中记录的上条信息，则便于计算增量。</p>
@@ -292,7 +292,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>__</p>
 <p>这些信息也是TermVectors需要记录的。显然这些信息实际上与是否在文档内并无影响，所以TermVectors记录信息实际上Postings并无太大差别。只不过对于TermVectors是已经知道DocID的，所以并不会在所有Term上记录DocID。当然，Freq、Position和Offset也不会记录在其它Documnet出现的情况了。 此外还有一点需要注意的，TermVectors把Term所有信息都记录在同一个文件上（.tvd），这与Postings的记录方式是一样的。Postings将它们拆分成三个文件分别存储DocID和TermFreq、Position和Offset、Payload。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/68a0d66efdb347959827d8318d64e462.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272305439.webp" />   
     </p>
 <p>Lucene在存储TermVectors的时候，默认将4096个文档打包成一个chunk来存储。在一个chuck的结构如上图，这里想强调的是，TermFreq/Position/Offset/Payload的存储格式基本一样，这里以TermFreq为例。</p>
 <p>假设有个 <code>Term=&quot;Solr&quot;</code> 出�</p>
@@ -423,6 +423,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -456,10 +460,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -838,6 +838,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

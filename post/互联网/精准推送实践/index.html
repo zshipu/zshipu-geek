@@ -215,15 +215,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>用户集服务提供以下功能：</p>
 <p>1、支持根据用户画像维度进行与、或、非等逻辑筛选用户集，用于在15分钟内的推送任务；</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e34a4dc10c86413c9065cfae146d709c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281637920.webp" />   
     </p>
 <p>2、支持筛选过程中实时提示当前人群的预估人数；</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/444b31edcd1f4a0cbe7b6bca747b63e8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281637763.webp" />   
     </p>
 <p>3、支持对全量人群或筛选人群的进行画像维度统计和可视化数据展示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9c4288dc413e424bb952f7bed4c90d91.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281637846.webp" />   
     </p>
 <p><strong>架构原型</strong></p>
 <p>用户集服务基于用户画像数据作为数据源，其中用户画像的设计本文不再赘述，可参考 <a href="https://zshipu.com/t?url=https%3A%2F%2Fmp.weixin.qq.com%2Fs%3F__biz%3DMzI1NDc5MzIxMw%3D%3D%26mid%3D2247483835%26idx%3D1%26sn%3Ddacec3a7696b6e8dce08dd12a051109b%26chksm%3Dea3e8529dd490c3f35b758002479661e1f8350f4689beb5bc9014e60465ee349040720be9646%26mpshare%3D1%26scene%3D21%26srcid%3D0121e954VbarEXpZkJZnD0oc%23wechat_redirect">《58用户画像实践》</a>，目前已支持 <strong>亿级</strong> 用户的 <strong>2000</strong> 多个画像标签维度的用户集筛选。</p>
@@ -232,24 +232,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>2、人群分析服务优先级较低，耗时较大，提供异步调用服务；</p>
 <p>3、人数预估服务提供人群筛选过程中实时显示预估人数的服务，区别于人群筛选服务和人群分析服务，为保证实时响应，采用了样本用户集预估计算而非全量用户集。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2b517c726ddc45f19e86aeb7bb22a49e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281637642.webp" />   
     </p>
 <p>用户集服务底层存储前身基于MongoDB，后因计算效率等原因采用新的存储结构Bitmap取代了MongoDB。Bitmap采用全内存存储，存储和运算逻辑由C/C++代码实现。原理是将所有标签展开为具体项，每个用户所拥有的每个构成一个比特位，所有用户的构成一个超长数组，所有标签构成了数组list，包含了每一个用户该标签的拥有情况（有就是1，没有则是0），这样所有用户及其标签构成了一张巨大的二维稀疏矩阵；用户筛选过程就是对矩阵的扫描、‘与或非’操作，最终得到满足条件的结果用户。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/435c933d8f1949dca81a620b1ab3ac48.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281637431.webp" />   
     </p>
 <p>为保证系统的可用性，将底层存储横向扩展为多实例部署和前置负载均衡，解决单点故障问题。同时由数据的更新是离线过程，耗时较长，使用单实例双副本（active-stanby）的方式提供更新时业务的一致性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/41f8f028ad224eac9c36205568372e8d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281637250.webp" />   
     </p>
 <p><strong>架构演进</strong></p>
 <p>随着用户数量和画像标签增长，原生的Bitmap存储容量也呈线性增长，在保证响应速度的前提下，我们考虑针对Bitmap存储的数据结构进行优化，经过几种方案的对比，我们最终采用了开源的RoaringBitmap实现Bitmap的存储和运算。其原理可简单描述为：使用Array和Bitmap两种容器来存储Bitmap的数据。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/79c6fe57936e41ce84597fc1de14dd7e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281637204.webp" />   
     </p>
 <p>可证明：4K以内的数据量采用Array容器的存储空间优于Bitmap。对比我们较为稀疏的业务场景，可将内存大量压缩，同时也可保证逻辑运算的高效。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fd99d1eb82e04514aa21fd7bad0c91d8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281637970.webp" />   
     </p>
 <h2 id="heading">**</h2>
 <p>**</p>
@@ -297,11 +297,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/99a2f32d23c24b61b87f108a74138205.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281637762.webp" />   
     </p>
 <p>根据众多维度的数据表征的情况，对目标数据进行深度数据挖掘，获取精准推送用户明细。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ab23e058e3c241a5929db24e3f15de76.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281637948.webp" />   
     </p>
 <p>由于需要考虑专家经验系统以外相关的数据表征，因此实际上用到的数据可能多至数千维，数据源融合自多个业务线及多个子公司，用户表征各不相同、数据稀疏、倾斜度高。</p>
 <p>为了确保模型的可靠和稳定，在进行特征工程之前，需要初步筛选出较高信息量的数据维度，同时获取带有标注的用户集合。然后分别使用数理统计方法对特征变量进行进一步的增减，例如各种相关性计算，显著性检验等。随后，在剩余的特征中利用画像的基础模型对特征进行补足，例如图中的年龄、性别、收入等信息都与用户的租房偏好、应聘偏好直接相关。随后通过数据的预处理，使用可用特征，根据业务逻辑及多维周期维度构造衍生变脸，然后利用特征工程对数据进行进入模型前的最后处理，例如行为特征与文本特征融合后的处理，连续变量在某一个特定区间段内的离散化等，最后模型进入分类器判别目标用户。</p>
@@ -439,6 +439,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -472,10 +476,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -854,6 +854,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

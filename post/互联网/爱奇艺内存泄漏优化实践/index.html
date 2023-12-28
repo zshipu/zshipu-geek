@@ -209,37 +209,37 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="02-模型特征-raw-serving-tensor输入">02 <strong>模型特征 Raw Serving Tensor输入</strong></h1>
 <p>先来介绍一下 TF 模型 <strong>SavedModel</strong> 特征输入的两种方式。 <strong>一种是模型输入只有一个</strong> ，该输入的 placeholder 是一个 String，String 的内容是tf.Examples； <strong>另一种是模型输入有多个</strong> ，每个输入placeholder 分别对应特征的Tensor。以tf.estimator的API为例子，两者的API分别为 <code>tf.estimator.export.build_parsing_serving_input_receiver_fn</code> 和 <code>tf.estimator.export.build_raw_serving_input_receiver_fn</code>。使用saved_model_cli命令可以明显看到这两种模型输入的不同：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/86251643de144e05a08f7ff50b0c2690.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235410.webp" />   
     </p>
 <p>这两种方式在客户端和TF Serving 服务端的处理都有些不同，如下图所示，使用TF Examples的输入方式需要在客户端先序列化成 String，然后在TF Serving 服务端的模型里使用 parse example op 将 String 反序列化成输入特征的 Tensor，再执行模型的前向计算。而使用Raw Serving Tensor 就少了这两部分的操作。TF Examples的序列化和反序列化操作会给端到端的推理服务性能带来一定的损耗，因此我们的CTR 类业务基本都在使用第二种模型输入的方式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/646f9bf479ff4d0da6e875cdd06f549d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235773.webp" />   
     </p>
 <p>介绍完模型输入的背景，下面看一下问题的现象是什么。有一天，业务在上线的时候发现 TF Serving容器监控中的内存突然开始不断增加，并且丝毫没有要停止的迹象。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8b35649338be42cfbdb33cb90061a91e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235091.webp" />   
     </p>
 <p>我们迅速通过离线复现了问题，并用 gperftools 做了内存的 profiling，下图是从profiling 的 PDF 文件中截取部分出来</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9532800fff21491c8566300efbf9c25b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235781.webp" />   
     </p>
 <p>可以看到</p>
 <p>DirectSession::GetOrCreateExecutors 这个函数通过hash table的 emplace创建了大量的 String 导致内存不断的增加。通过查看TF的源代码可以发现DirectSession 这个类里面有一个成员变量 executors_ 是一个unordered_map，里面保存了模型输入的 signature 到ExecutorsAndKeys 的映射。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/eb4e753e82e94e96bfa8cc7182e98848.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235605.webp" />   
     </p>
 <p>DirectSession::GetOrCreateExecutors函数里面的逻辑如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/05493435005046649e5dc49b8813c335.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235500.webp" />   
     </p>
 <p>根据上面的逻辑，如果input的数量有10个，那么特征输入的组合就有 <strong>10!= 3,628,800</strong> 种，如果一个key 有100 Byte，那就需要约 <strong>350MB 内存</strong> ，如果超过 10 个就需要 <strong>3G 以上的内存</strong> 了，这就是内存泄漏的原因。</p>
 <p>不过内存泄漏的源头应该是发送给 <strong>TF Serving的 PredictRequest</strong> 里面 <strong>inputs</strong> 特征顺序不断在变化，从而导致DirectSession::GetOrCreateExecutors函数一直查找不到匹配的输入，然后创建新的字符串插入到executors_ 中。而发送给 TF Serving的 PredictRequest 是通过 protobuf 定义生成的，inputs 是一个 string 到 TensorProto的 map。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/36108ca16ac94c72a82ea06ef821ea77.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235316.webp" />   
     </p>
 <p>再进一步查看 Protocol Buffers 关于 map 的文档定义，里面明确说明了map 迭代的顺序是没有定义的，代码不能依赖于map里面的 item 是某种特定的顺序。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/159d98284d714437908195833a2a7fef.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235244.webp" />   
     </p>
 <p>回过头看最开始介绍的两种模型输入，使用 <strong>tf.Examples</strong> 方式的模型输入只会有一个，不会出现这个问题。我们的模型使用的是多个Raw Tensor 输入，input 特征至少有 10 个以上，因此才会出现这个问题。</p>
 <p>找到了内存泄漏的原因，但是为什么会突然出现内存不断上涨呢，业务之前线上跑了很久从未出现过。业务反馈，发送请求的客户端修改了构造请求的逻辑，之前代码里面的顺序是固定的，现在的顺序不是固定的。虽然Protocol Buffers 的定义里面说 map 的迭代顺序是没有定义的，但是实现上如果插入的顺序一样，那么迭代的顺序估计是固定的，但是我们还是不能依赖这种未定义的实现。这样就把整个问题的来龙去脉弄清楚了。</p>
@@ -250,15 +250,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="03服务突增高并发请求"><strong>03服务突增高并发请求</strong></h1>
 <p>业务反馈在流量的高峰期 TF Serving 容器持续出现OOM的情况，在平台监控上可以看到OOM的事件次数。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a2449ca33c3241748e1170da9a2f9d6a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235563.webp" />   
     </p>
 <p>在日志里也可以看到容器的TF Serving进程被 Kill 掉的现象。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/052eda50e5ea4754bac1024e3dc87b8a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235338.webp" />   
     </p>
 <p>通过平台监控，我们还发现了一个奇怪的现象，TF Serving 容器里面的进程（或线程）数量突然不断增加，在进程（或线程）数量增加到一定程度后，容器就被OOM kill了。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c320e3b47c6d464faf97a4261cf33fce.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235354.webp" />   
     </p>
 <p>这个现象很让人困惑， <strong>到底是什么进程（或线程）突然增加了？</strong> 我们之前分析过TFServing的线程模型，主要的工作线程是由模型的 Intra 和 Inter OP 配置来控制的，不</p>
 
@@ -386,6 +386,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -419,10 +423,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -801,6 +801,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

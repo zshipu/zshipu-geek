@@ -218,12 +218,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>2021 年，字节跳动旗下产品总 MAU 已超过 19 亿。在以抖音、今日头条、西瓜视频等为代表的产品业务背景下，强大的推荐系统显得尤为重要。Flink 提供了非常强大的 SQL 模块和有状态计算模块。目前在字节推荐场景，实时简单计数特征、窗口计数特征、序列特征已经完全迁移到 Flink SQL 方案上。结合 Flink SQL 和 Flink 有状态计算能力，我们正在构建下一代通用的基础特征计算统一架构，期望可以高效支持常用有状态、无状态基础特征的生产。</p>
 <h1 id="一业务场景"><strong>一、业务场景</strong></h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/377ee3d19a38417db163c777e627a62c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855731.webp" />   
     </p>
 <p>对于今日头条、抖音、西瓜视频等字节跳动旗下产品，基于 Feed 流和短时效的推荐是核心业务场景。而推荐系统最基础的燃料是特征，高效生产基础特征对业务推荐系统的迭代至关重要。</p>
 <h2 id="1-主要业务场景"><strong>1. 主要业务场景</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/964ed5c7aa7d48a182fcbc19384e47e3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855524.webp" />   
     </p>
 <ul>
 <li>抖音、火山短视频等为代表的短视频应用推荐场景，例如 Feed 流推荐、关注、社交、同城等各个场景，整体在国内大概有 6 亿 + 规模 DAU；</li>
@@ -231,12 +231,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h2 id="2-业务痛点和挑战"><strong>2. 业务痛点和挑战</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/067f957276a842bf9fba637cdddb49e8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855367.webp" />   
     </p>
 <p>目前字节跳动推荐场景基础特征的生产现状是“百花齐放”。离线特征计算的基本模式都是通过消费 Kafka、BMQ、Hive、HDFS、Abase、RPC 等数据源，基于 Spark、Flink 计算引擎实现特征的计算，而后把特征的结果写入在线、离线存储。各种不同类型的基础特征计算散落在不同的服务中，缺乏业务抽象，带来了较大的运维成本和稳定性问题。</p>
 <p>而更重要的是，缺乏统一的基础特征生产平台，使业务特征开发迭代速度和维护存在诸多不便。如业务方需自行维护大量离线任务、特征生产链路缺乏监控、无法满足不断发展的业务需求等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/89c1f2197d4d4acdb4c0444347525a3b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855187.webp" />   
     </p>
 <p>在字节的业务规模下，构建统一的实时特征生产系统面临着较大挑战，主要来自四个方面：</p>
 <ul>
@@ -248,7 +248,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="3-迭代演进过程"><strong>3. 迭代演进过程</strong></h2>
 <p>在字节业务爆发式增长的过程中，为了满足各式各样的业务特征的需求，推荐场景衍生出了众多特征服务。这些服务在特定的业务场景和历史条件下较好支持了业务快速发展，大体的历程如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3b908190e897420eab49b4ac69a6d681.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855111.webp" />   
     </p>
 <p>在这其中 2020 年初是一个重要节点，我们开始在特征生产中引入 Flink SQL、Flink State 技术体系，逐步在计数特征系统、模型训练的样本拼接、窗口特征等场景进行落地，探索出新一代特征生产方案的思路。</p>
 <h1 id="二新一代系统架构"><strong>二、新一代系统架构</strong></h1>
@@ -259,31 +259,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>除窗口特征外，这套机制同样适用于其他类型的有状态特征（如序列类型的特征）。</p>
 <h2 id="1-实时特征分类体系"><strong>1. 实时特征分类体系</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7ea7765c2cf74a3dad80436fd41a1738.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855902.webp" />   
     </p>
 <h2 id="2-整体架构"><strong>2. 整体架构</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0d653254a5304340b36ffe226fd1f386.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855869.webp" />   
     </p>
 <p>带有窗口的特征，例如抖音视频最近 1h 的点赞量（滑动窗口）、直播间用户最近一个 session 的看播时长（session 窗口）等；</p>
 <h4 id="-21-数据源层"><strong>■ 2.1 数据源层</strong></h4>
 <p>在新的一体化特征架构中，我们统一把各种类型数据源抽象为 Schema Table，这是因为底层依赖的 Flink SQL 计算引擎层对数据源提供了非常友好的 Table Format 抽象。在推荐场景，依赖的数据源非常多样，每个特征上游依赖一个或者多个数据源。数据源可以是 Kafka、RMQ、KV 存储、RPC 服务。对于多个数据源，支持数据源流式、批式拼接，拼接类型包括 Window Join 和基于 key 粒度的 Window Union Join，维表 Join 支持 Abase、RPC、HIVE 等。具体每种类型的拼接逻辑如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a359fa6bfd8449f0beaac735fe57075a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855972.webp" />   
     </p>
 <p>三种类型的 Join 和 Union 可以组合使用，实现复杂的多数据流拼接。例如 (A union B) Window Join (C Lookup Join D)。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/79742fb905bf431faaf3d20376dc257b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855905.webp" />   
     </p>
 <p>另外，Flink SQL 支持复杂字段的计算能力，也就是业务方可以基于数据源定义的 TableSchema 基础字段实现扩展字段的计算。业务计算逻辑本质是一个 UDF，我们会提供 UDF API 接口给业务方，然后上传 JAR 到特征后台加载。另外对于比较简单的计算逻辑，后台也支持通过提交简单的 Python 代码实现多语言计算。</p>
 <h4 id="-22-业务-dsl"><strong>■ 2.2 业务 DSL</strong></h4>
 <p>从业务视角提供高度抽象的特征生产 DSL 语言，屏蔽底层计算、存储引擎细节，让业务方聚焦于业务特征定义。业务 DSL 层提供：数据来源、数据格式、数据抽取逻辑、数据生成特征类型、数据输出方式等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b5f27366f8ce4692ba69c4b66966bd67.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271855780.webp" />   
     </p>
 <h4 id="-23-状态存储层"><strong>■ 2.3 状态存储层</strong></h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/31f63c88c3a14e5399e7616c8f1469da.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271856656.webp" />   
     </p>
 <p>如上文所述，新的特征一体化方案解决的主要痛点是：如何应对各种类型（一般是滑动窗口）有状态特征的计算问题。对于这类特征，在离线计算层架构里会有一个状态存储层，把抽取层提取的 RawFeature 按照切片 Slot 存储起来 (切片可以是时间切片、也可以是 Session 切片等)。切片类型在内部是一个接口类型，在架构上可以根据业务需求自行扩展。状态里面其实存储的不是原始 RawFeature（存储原始的行为数据太浪费存储空间），而是转化为 FeaturePayload 的一种 POJO 结构，这个结构里面支持了常见的各种数据结构类型：</p>
 <ul>
@@ -352,7 +352,7 @@ public interface FeatureStateApi extends Serializable {
 }
 </code></pre><p>另外通过触发机制来触发特征计算层的执行，目前支持的触发机制主要有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d0acf3988f7845c1a0e7ca3642072288.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271856260.webp" />   
     </p>
 <h2 id="3-业务落地"><strong>3. 业务落地</strong></h2>
 <p>目前在字节推荐场景，新一代特征架构已经在抖音直播、电商、推送、抖音推荐等场景陆续上线了一些实时特征。主要是有状态类型的特征，带有窗口的一维统计类型、二维倒排拉链类型、二维 TOPK 类型、实时 CTR/CVR Rate 类型特征、序列类型特征等。</p>
@@ -520,6 +520,10 @@ public interface FeatureStateApi extends Serializable {
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -553,10 +557,6 @@ public interface FeatureStateApi extends Serializable {
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -935,6 +935,8 @@ public interface FeatureStateApi extends Serializable {
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

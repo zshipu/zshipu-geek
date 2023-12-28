@@ -231,7 +231,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>也就是说，我先预训练好一个语言模型，这个语言模型能够对当前的输入进行向量表示，同时，这个向量表示是根据整个 query 的不同而改变的。比如 bank 在 query1 中表示的是银行，在 query2 中表示的是岸边，那么 query1 和 query2 输入到这个语言模型中时，该模型根据 query 中的内容，也就是 bank 的上下文，来决定当前的 bank 的向量表示。下面是这个语言模型的结构，我们来看一下这个语言模型是怎么训练得到的。</p>
 <p>ELMo 模型：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ccdde7bbb060428aa505031bc4a1f2b7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281843677.png" />   
     </p>
 <p>这个语言模型的输入是最下面一层的(E_1,E_2,&hellip;,E_N)，代表一句话中 N 个词的初始词向量，这个初始词向量是利用字符卷积（char-cnn）得到的，这一点在图中没有体现。</p>
 <p>和大多数的语言模型一样，该语言模型训练过程中的输出是最上面一层的(T_1,T_2,&hellip;,T_N)，其中，T_i是一个 m 维向量，m 为词表大小，所以T_i代表每个词的出现概率。</p>
@@ -258,7 +258,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="21-transformer-的核心原理">2.1 Transformer 的核心原理</h3>
 <p>Transformer 模型：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5052be84e87041678681bd774fc3e721.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281843271.webp" />   
     </p>
 <h4 id="211-整体框架">2.1.1 整体框架</h4>
 <p>Transformer 和常见的 seq2seq 的模型类似，主要由 encoder 和 decoder 组成。上图的左半边用 Nx 框起来的，代表一层 encoder，右半边用 Nx 框起来的代表一层 decoder，论文中取 Nx=6，也就是 encoder 和 decoder 都是由 6 个 layer 组成的。</p>
@@ -273,7 +273,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>了解 attention 机制的同学应该明白，所谓的 attention 就是为了得到一个权重信息，用来给当前 query 的每个词分配不同的权重。举个栗子，比如我们要做一个机器翻译的任务，输入”你好老师“，分词后为两个 token”你好“，”老师“，对应译文是”hello teacher“，attention 机制就是在预测”hello“的时候，利用E^K_{hello} \cdot E^Q_{你好}和E^K_{hello} \cdot E^Q_{老师}得到两个权重e_1和 e_2，然后用e_1 * E^V_{你好} + e_2 * E^V_{老师}作为当前时刻的特征向量z_1，利用该特征向量去预测”hello“。同理可得z_2，利用z_2去预测”teacher“，这里的E^K, E^Q, E^V分别代表乘以权重矩阵W^K, W^Q, W^V得到的向量。由于”hello“和”老师“在语义上是对应的，所以e_1应该大于e_2，这样在预测”hello“的时候，注意力就更多的集中在”你好“这个 token 上，同时还考虑了上下文。当然，这里得到权重e_1和 e_2的方式有很多种，这里只提到常用的点乘。矩阵形式的操作如下图所示，其中 X 代表输入序列的 embedding，这里简化为 4 维，实际维度是 512，W^Q的维度简化为 3，实际维度是 64，最终的输出 Z 由z_1, z_2组成。</p>
 <p>attention 过程演示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ce833b0ecbd145738684fca85ef21861.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281843196.png" />   
     </p>
 <p>那么什么是 self-attention？看名字就知道，就是自己和自己进行点乘，以获得当前位置的权重。也就是说上图中的W^Q=W^K，这就是 self-attention。为啥要有 self-attention 呢？因为 encoder 只有这一个输入啊，只能自己和自己玩喽~</p>
 <p>那么什么又是 Multi-Head Attention 呢？看名字也知道，其实就是多个 attention 结果的拼接。还是上面那个例子，相当于有了多个权重矩阵，即存在W^K_1, W^Q_1, W^V_1, W^K_2, W^Q_2,W^V_2 &hellip;.，论文中存在 8 个 head，这样就得到 8 个输出z_1, z_2,&hellip;.,z_8，维度都是 2*3，然后按行拼接z_i，维度变成 2 * 24，再乘以一个额外的权重矩阵W^Q，维度为 24 * 4，得到Z，维度为 2 * 4。所以 Multi-Head Attention 的输入 X 和最终的输出 Z 的维度大小是一致的。</p>
@@ -313,7 +313,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>GPT 模型：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-9425458bf6444b9eab91cc8edfcb6f3b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281843291.png" />   
     </p>
 <p>对于第一阶段，首先，输入向量是词向量和位置向量的组合，然后特征提取层使用 Transformer 的 decoder 变体进行特征提取，然后根据输出的特征向量进行语言模型的训练。搬出论文中的公式：</p>
 <p>h_0=UW_e+W_p</p>
@@ -330,13 +330,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>不同的任务有着不用的输入构造方式，但大同小异，如下图所示。</p>
 <p>GPT 的下游任务改造：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-8388b12eb6a54cb1ba61124139ceb6c9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281843891.png" />   
     </p>
 <h3 id="32-gpt-中的-transformer">3.2 GPT 中的 Transformer</h3>
 <p>前面说到，GPT 中的 Transformer 是正规 Transformer 模型的 decoder 部分的变体，也就是说 GPT 的 Transformer 部分是由 Masked Multi-Head Attention+Add&amp;Norm+Feed Forward+Add&amp;Norm 构成的。同时，论文中采用 Nx=12 层的 Transformer 结构。</p>
 <p>GPT 的 Transformer 变体：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-beaa91c422d94be8a836ed437e32c839.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281843078.webp" />   
     </p>
 <p>有前面的介绍可以知道，Masked Multi-Head Attention 是只利用上文进行当前位置的预测，所以 GPT 被认为是单向语言模型。</p>
 <p>另外，在 Transformer 输入的构造中，GPT 的 Position Encoding 不再使用正弦位置编码，而是有一个类似于词向量表的位置向量表，该表可在训练过程中进行更新。</p>
@@ -345,7 +345,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="41-bert-核心原理">4.1 BERT 核心原理</h3>
 <p>BERT 模型：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-10c56f48b2094f86b115759a793f7d7d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281843867.png" />   
     </p>
 <p>BERT 和 GPT 在结构上更是极为相似，其主要区别是：</p>
 <ul>
@@ -356,7 +356,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>由于 BERT 添加了句子关系预测任务，所以 BERT 的模型输入构建上有一点改变，添加了一个 segement embedding，用来表示当前 token 属于哪一个句子，如下图所示：</p>
 <p>BERT 输入构造：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-2c914d50c92f4e58b2983e647cecfb6f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281843996.png" />   
     </p>
 <p>Token Embeddings 是词向量，第一个单词是 CLS 标志，一般都会拿该位置的输出进行分类任务的微调。</p>
 <p>Segment Embeddings 用来区别两种句子，因为预训练不光做语言模型的训练，还要做以两个句子为输入的分类任务。</p>
@@ -494,6 +494,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -527,10 +531,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -909,6 +909,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

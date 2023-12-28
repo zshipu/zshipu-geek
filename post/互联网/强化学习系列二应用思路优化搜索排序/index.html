@@ -202,7 +202,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>一、Introduction</strong></p>
 <p>这篇文章解决的问题是提高搜索多样性，搜索多样性是指搜索结果覆盖更多的主题，问题可定义成从候选集合中选出一个最小的子集来尽可能覆盖更多的主题。传统的解决方法是贪心选择，每次从候选集合里选出一个marginal relevance的文档。贪心选择的问题在于每次选择局部最优的文档会导致最终生成的文档列表很难是全局最优的，因为每个位置选择的文档会影响后续文档的选择。如果想得到全局最优的文档列表，如果候选文档的数目为N，暴力搜索的时间复杂度为N的阶乘，显然在实际的应用中不现实。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/abb189bf74eb461da96eb55402b3a105.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271903208.jpeg" />   
     </p>
 <p>模型的整体框架</p>
 <p>文章则借鉴了AlphaGo和AlphaGo Zero的思路，结合强化学习和蒙特卡洛搜索进行多样性排序，整体框架如上图。训练过程中，在每个时间步(对应每个排序的位置)，基于用户query和已产生的文档列表，使用RNN得到当前状态，然后基于当前状态得到指导文档选择的策略函数(raw policy)以及评估当前列表的值函数。为了缓解次优解的问题，模型使用MCTS进行搜索，输出一个更优的策略(search policy)。模型的损失函数由两部分构成，一个是预测价值和文档排序指标的均方误差，另一个是raw policy和search policy的交叉熵。后面讲详细介绍整个训练过程和预测过程。</p>
@@ -213,7 +213,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>文档列表生成过程中每个位置的文档选择可以看做一个时间步，整体是一个序列决策的过程，适合用MDP来建模。下面介绍下相关的状态、动作、转换、值函数和策略函数的定义。</p>
 <p><strong>状态</strong>：每个时间步的状态可看做三元组， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d66855c6f1664d3194ceea500e5cf15f.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271903823.svg&#43;xml" />   
     
 ，q是用户查询， 
 
@@ -221,167 +221,167 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
 是t时间之前已经产生的文档列表，而 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3787955b8455437dbee43e792cb8128f.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271903919.svg&#43;xml" />   
     
 是候选文档。</p>
 <p><strong>动作</strong>： 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9d44e67b240248bfa2c2117d645f6a67.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271903371.svg&#43;xml" />   
     
 中的动作对应可选择的候选文档。时间步t时选择的动作 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d3afb252a8bf41b3b8a14eca123b4e79.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271903897.svg&#43;xml" />   
     
 选择了标号为 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f5690106a9b44e1dba4aced3d1ab33e6.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271903501.svg&#43;xml" />   
      的文档 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8452a29831d047d7a247c83888e31bc3.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271903052.svg&#43;xml" />   
     
 。</p>
 <p>**状态转换：**状态转换很显然，设
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/31f9906268a149b283e96125c29e862a.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271903564.svg&#43;xml" />   
     
 表示将 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0b41da62296e49edb19f06af6f6fd93e.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904088.svg&#43;xml" />   
     
 加入到 
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=Z_t" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904030.svg&#43;xml" />   
     
 中，而 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/40641cff296c45528b402555754fbf9f.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904517.svg&#43;xml" />   
     
 表示将 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ad3295996c27429a80c972484b52a9b7.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904134.svg&#43;xml" />   
     
 从 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b834ffa5cba9452483685f5026b65938.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904661.svg&#43;xml" />   
     
 中删除，定义为 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/57eda8d32b6f453ab145cc6864162496.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904304.svg&#43;xml" />   
     
 。</p>
 <p><strong>值函数</strong>：根据输入状态估计文档排序列表的质量，通过近似一个预先设定的指标来学习。不同时间步的状态可以一个输入给LSTM模型，值函数以LSTM输出作为输入并经过一个非线性层，即为 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/508861b9ed494fcb84c8109d0a07ca0a.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904045.svg&#43;xml" />   
     
 ，其中 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5a4dbdb5da04408fb58b6396449e051f.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904594.svg&#43;xml" />   
     
 。</p>
 <p><strong>策略函数</strong>：策略函数也是以状态作为输入，输出则是动作上的概率分布。形式化如下，其中 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1b4a5756e510481bb3fadd34ad7e8362.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904126.svg&#43;xml" />   
     
 是待学习参数。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a53cd7fe42744f218e8c547d045ec515.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904665.svg&#43;xml" />   
     
 ， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/379ba5451da64592ab395fc1a598c88e.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904266.svg&#43;xml" />   
     </p>
 <ul>
 <li><strong>基于MCTS的更优策略</strong></li>
 </ul>
 <p>通过p(s)贪心地选择文档的方式仅基于历史信息去做决策，并未考虑动作 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0fff74e7f68d4cf9ab4b08b48887dc51.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904836.svg&#43;xml" />   
     
 对后续决策的影响，会导致次优解。因此如下图，文章提出了利用MCTS在排序空间进行lookahead搜索。在每个排序位置，利用当前的策略函数p和值函数V进行MCTS搜索，返回一个更优的搜索策略 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4bee225412c8425b871de0ccb716b0d7.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904373.svg&#43;xml" />   
     
 。蒙特卡洛树中节点表示状态，边表示状态转换，每条边保存三个属性，分别是动作值函数Q(s,a)、访问次数N(s,a)和先验概率p(s,a)。整体最多迭代K次，每次迭代中会在第四步Back-propagation时更新Q和N两个变量，迭代结束之后输出更优策略。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/19a5f7750de7459e9b920b74e1be5f80.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904861.jpeg" />   
     </p>
 <p>MCTS搜索过程-四个步骤</p>
 <p><strong>Selection</strong></p>
 <p>从根节点 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/03c6cd6e047f443fbe46d179f1ec489d.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904578.svg&#43;xml" />   
     
 开始，在每个时间步t迭代选择使下式最大的动作 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2f9359b3e3904379944f49fe5aac6e7f.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904184.svg&#43;xml" />   
     
 。其中，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c40cf102151e49ed999034f0db670634.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904674.svg&#43;xml" />   
     
 控制exploitation，倾向于选择价值更高的边；而 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0dd0e14e5a584b319433e46705a8853d.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904313.svg&#43;xml" />   
     
 控制exploration，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b439dbe4760f415392d9dd68398105a6.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904854.svg&#43;xml" />   
     
 正比于先验概率，但随着访问次数衰减，倾向于选择探索次数少的边。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d9917c8e20db411fb3fa632ae398990a.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904407.svg&#43;xml" />   
     </p>
 <p>其中， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/223ade75ec334ac0b5126cf0f4a82256.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904023.svg&#43;xml" />   
     
 。</p>
 <p><strong>Evaluation and Expansion</strong></p>
 <p>上一步一直迭代到一个叶子节点 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6d0580fc5c5e428f933bfcd33baa7778.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904601.svg&#43;xml" />   
     
 ，如果节点是一个episode的结尾则使用预设的评价指标评估，其他情况使用值函数 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/58eb3ae0dda347b8882b65ed34380395.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904800.svg&#43;xml" />   
     
 评估。这和AlphaGo Zero处理是一样的，而AlphaGo中价值评估是通过快速走子模拟实现的。接着叶子节点 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/55ea7ef9f25d4fa8bfaed989d3c57d3f.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904374.svg&#43;xml" />   
     
 有可能会拓展，拓展出的新边 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/305301c6896e4619bd5bd0af67cd3e1b.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904860.svg&#43;xml" />   
     
 会初始化 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2e99044cf3564201ad963f9de4098286.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904414.svg&#43;xml" />   
     
 、 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c6b53a68b28c47219b72f4e08803eaee.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904899.svg&#43;xml" />   
     
 和 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7fe1110f97594733a7c2dfb37bee6b58.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904413.svg&#43;xml" />   
     
 这三个属性。</p>
 <p><strong>Back-propagation and Update</strong></p>
 <p>利用 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4bb29de433f14614885931377e6f13bd.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904929.svg&#43;xml" />   
     
 沿着Selection经过的路径反向一路更新。针对路径上的每条边e(s,a)， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f9931663ed58490bb1e8a3607f49fc97.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904365.svg&#43;xml" />   
     
 不变化， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a0c07c1afa0242a4b63b00da8ddba8fd.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904928.svg&#43;xml" />   
     
 加一， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bdc73bcdbe27463da57ef56bacaf31ce.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271904426.svg&#43;xml" />   
     
 做累积平均的更新：</p>
 <p>![](<a href="https://www.zhihu.com/equation?tex=Q%28s%2Ca%29%5Cleftarrow%25">https://www.zhihu.com/equation?tex=Q%28s%2Ca%29%5Cleftarrow%</a></p>
@@ -514,6 +514,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -547,10 +551,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -929,6 +929,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

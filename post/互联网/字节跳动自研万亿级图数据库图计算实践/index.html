@@ -253,7 +253,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>这三种数据关联在一起，形成图状（Graph）结构数据。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0172d42709a842b09b246277fbea3d4a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819934.jpeg" />   
     </p>
 <p>为了满足 social graph 的在线增删改查场景，字节跳动自研了分布式图存储系统——ByteGraph。针对上述图状结构数据，ByteGraph 支持有向属性图数据模型，支持 Gremlin 查询语言，支持灵活丰富的写入和查询接口，读写吞吐可扩展到千万 QPS，延迟毫秒级。目前，ByteGraph 支持了头条、抖音、 TikTok、西瓜、火山等几乎字节跳动全部产品线，遍布全球机房。在这篇文章中，将从适用场景、内部架构、关键问题分析几个方面作深入介绍。</p>
 <p>ByteGraph 主要用于在线 OLTP 场景，而在离线场景下，图数据的分析和计算需求也逐渐显现。2019 年年初，Gartner 数据与分析峰会上将图列为 2019 年十大数据和分析趋势之一，预计全球图分析应用将以每年 100% 的速度迅猛增长，2020 年将达到 80 亿美元。因此，我们团队同时也开启了在离线图计算场景的支持和实践。</p>
@@ -332,7 +332,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>下面这张图展示了 ByteGraph 的内部架构，其中 bg 是 ByteGraph 的缩写。</p>
 <p>就像 MySQL 通常可以分为 SQL 层和引擎层两层一样，ByteGraph 自上而下分为查询层 (bgdb)、存储/事务引擎层（bgkv）、磁盘存储层三层，每层都是由多个进程实例组成。其中 bgdb 层与 bgkv 层混合部署，磁盘存储层独立部署，我们详细介绍每一层的关键设计。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f5b9d86edeb84985b68b5183df360f28.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819784.png" />   
     </p>
 <h3 id="查询层bgdb">查询层(bgdb)</h3>
 <p>bgdb 层和 MySQL 的 SQL 层一样，主要工作是做读写请求的解析和处理；其中，所谓“处理”可以分为以下三个步骤：</p>
@@ -349,7 +349,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>bgdb 层没有状态，可以水平扩容，用 Go 语言开发。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3e1f3004be0d4f2f806848355b138e4f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819621.png" />   
     </p>
 <h3 id="存储事务引擎层bgkv">存储/事务引擎层（bgkv)</h3>
 <p>bgkv 层是由多个进程实例组成，每个实例管理整个集群数据的一个子集（shard / partition)。</p>
@@ -401,7 +401,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>如果一个大 V 疯狂涨粉，则存储粉丝的 value 就会越来越大，解决这个问题的思路也很朴素：拆成多个 KV 对。</p>
 <p>但如何拆呢？ByteGraph 的方式就是把所有出度和终点拆成多个 KV 对，所有 KV 对形成一棵逻辑上的分布式 B-Tree，之所以说“逻辑上的”，是因为树中的节点关系是靠 KV 中 key 来指向的，并非内存指针；B-Tree 是分布式的，是指构成这棵树的各级节点是分布在集群多个实例上的，并不是单机索引关系。具体关系如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/48b658e51ea445dd8e437cf1e7dc3f02.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819421.png" />   
     </p>
 <p>其中，整棵 B-Tree 由多组 KV 对组成，按照关系可以分为三种数据：</p>
 <ul>
@@ -461,7 +461,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ac953157ce4244f5a6ab32ebb76d9d78.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819207.jpeg" />   
     </p>
 <p>对于某个独立数据源来说，一般热点写的请求比热点读会少很多，一般不会超过 10K QPS，目前 ByteGraph 线上还没有出现过热点写问题问题。</p>
 <h3 id="图的索引">图的索引</h3>
@@ -497,7 +497,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="图计算简介">图计算简介</h3>
 <p>图数据库重点面对 OLTP 场景，以事务为核心，强调增删查改并重，并且一个查询往往只是涉及到图中的少量数据；而图计算与之不同，是解决大规模图数据处理的方法，面对 OLAP 场景，是对整个图做分析计算，下图（引用自 VLDB 2019 keynote 《Graph Processing: A Panaromic View and Some Open Problems》）描述了图计算和图数据库的一些领域区分。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fdf75ccb3ee14256b5e70848bffafa6f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819074.png" />   
     </p>
 <p>举个图计算的简单例子，在我们比较熟悉的 Google 的搜索场景中，需要基于网页链接关系计算每个网页的 PageRank 值，用来对网页进行排序。网页链接关系其实就是一张图，而基于网页链接关系的 PageRank 计算，其实就是在这张图上运行图算法，也就是图计算。</p>
 <p>对于小规模的图，我们可以用单机来进行计算。但随着数据量的增大，一般需要引入分布式的计算系统来解决，并且要能够高效地运行各种类型的图算法。</p>
@@ -512,7 +512,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>按照分布架构，图计算可以分为单机或分布式、全内存或使用外存几种，常见的各种图计算系统如下图所示。单机架构的优势在于无需考虑分布式的通信开销，但通常难以快速处理大规模的图数据；分布式则通过通信或分布式共享内存将可处理的数据规模扩大，但通常也会引入巨大的额外开销。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/93443f410c7e4953af4280ac7c48d774.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819152.png" />   
     </p>
 <ul>
 <li><strong>计算模型</strong></li>
@@ -528,7 +528,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>对于单机无法处理的超级大图，则需要将图数据划分成几个子图，采用分布式计算方式，因此，会涉及到图划分的问题，即如何将一整张图切割成子图，并分配给不同的机器进行分布式地计算。常见的图划分方式有 <strong>切边法（Edge-Cut）和切点法（Vertex-Cut）</strong>，其示意图如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a16a1289f4de4507bd2d8c53d563fecf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819032.webp" />   
     </p>
 <p>切边法顾名思义，会从一条边中间切开，两边的节点会分布在不同的图分区，每个节点全局只会出现一次，但切边法可能会导致一条边在全局出现两次。如上左图所示，节点 A 与节点 B 之间有一条边，切边法会在 A 和 B 中间切开，A 属于图分区 1，B 属于图分区 2。</p>
 <p>切点法则是将一个节点切开，该节点上不同的边会分布在不同的图分区，每条边全局只会出现一次，但切点法会导致一个节点在全局出现多次。如上图右图所示，节点 A 被切分为 3 份，其中边 AB 属于分区 2，边 AD 属于图分区 3。</p>
@@ -542,18 +542,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>异步计算则是每个节点不等待其他节点的迭代进度，在自己计算完一轮迭代后直接开启下一轮迭代，所以就会导致很多节点还没有完全拿到上一轮的结果就开始了下一轮计算。</p>
 <p>半同步计算是两者的综合，其思想是允许一定的不同步，但当计算最快的节点与计算最慢的节点相差一定迭代轮数时，最快的节点会进行等待。同步计算和异步计算的示意图如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ff26b951b20d464dbb7259d801095b4a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819615.webp" />   
     </p>
 <p>同步计算和异步计算各有优劣，其对比如下表所示，半同步是两者折中。多数图计算系统都采用了同步计算模型，虽然计算效率比异步计算弱一些，但它具有易于理解、计算稳定、结果准确、可解释性强等多个重要的优点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a456d33cba9544308b7e9f3f245bec76.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819279.webp" />   
     </p>
 <ul>
 <li><strong>通信模型</strong></li>
 </ul>
 <p>为了实现拓展性，图计算采用了不同的通信模型，大致可分为 <strong>分布式共享内存</strong>、 <strong>Push</strong> 以及 <strong>Pull</strong>。分布式共享内存将数据存储在共享内存中，通过直接操作共享内存完成信息交互；Push 模型是沿着出边方向主动推送消息；Pull 则是沿着入边方向主动收消息。三者优劣对比如下表格所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dcb95ef763fc40c0b6f65fd63f15325e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819990.webp" />   
     </p>
 <h2 id="32-技术选型">3.2 技术选型</h2>
 <p>由于字节跳动要处理的是世界级的超大规模图，同时还对计算任务运行时长有要求，因此主要考虑高性能、可拓展性强的图计算系统。工业界使用比较多的系统主要有以下几类：</p>
@@ -591,7 +591,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>Gemini 的一个重要创新就是提出了基于 Chunk 的图分区方法。这种图分区方法需要将点 id 从 0 开始连续递增编码，但输入的图数据中，点 id 是随机生成的，因此需要对点 id 进行一次映射，保证其连续递增。具体实现方法是，在计算任务开始之前将原始的业务 id 转换为从零开始的递增 id，计算结束后再将 id 映射回去，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cab28d30d56b4e1b96707691c4346e85.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819671.png" />   
     </p>
 <p>在开源实现中，是假设图中点的数量不可超过 40 亿，40 亿的 id 数据是可以存储在单机内存中，因此采用比较简单的实现方式：分布式计算集群中的每台机器冗余存储了所有点 id 的映射关系。然而，当点的数量从 40 亿到千亿级别，每台机器仅 id 映射表就需要数百 GB 的内存，单机存储方案就变得不再可行，因此需要将映射表分成 shard 分布式地存储，具体实现方式如下：</p>
 <p>我们通过哈希将原始业务点 id 打散在不同的机器，并行地分配全局从 0 开始连续递增的 id。生成 id 映射关系后，每台机器都会存有 id 映射表的一部分。随后再将边数据分别按起点和终点哈希，发送到对应的机器进行编码，最终得到的数据即为可用于计算的数据。当计算运行结束后，需要数据需要映射回业务 id，其过程和上述也是类似的。</p>
@@ -745,6 +745,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -778,10 +782,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1160,6 +1160,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

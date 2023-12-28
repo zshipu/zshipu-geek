@@ -201,7 +201,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <p>阿里近几年公开的推荐领域算法有许多，既有传统领域的探索如MLR算法，还有深度学习领域的探索如entire-space multi-task model，Deep Interest Network等，同时跟清华大学合作展开了强化学习领域的探索，提出了MARDPG算法。</p>
 <p>上一篇，我们介绍了深度兴趣网络(Deep Interest Network)，充分利用用户历史行为数据中的 <strong>Diversity</strong> 和 <strong>Local Activation</strong> 特性进行建模。再来回顾一下DIN的网络结构：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/ea3e564c6807457f85b6c7a5a91b399b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003588.png" />   
     </p>
 <p>这一篇，我们将焦点转向CVR的预估，来看一下阿里提出的完整空间多任务模型ESSM是如何处理CVR预估中存在的样本选择偏差(sample selection bias)和数据稀疏(data sparsity)问题的。</p>
 <p>论文地址： <a href="https://zshipu.com/t?url=https%3A%2F%2Farxiv.org%2Fabs%2F1804.07931">https://arxiv.org/abs/1804.07931</a></p>
@@ -219,28 +219,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>以电子商务平台为例，用户的购买行为一般遵循以下的顺序决策模式：impression-click-conversion，即用户先观察到系统推荐的产品，然后会对自己感兴趣的商品进行点击，进而产生购买行为。从点击到购买的转化我们称为post-click Conversion rate(以下简称CVR)，CVR的预估在信息检索、推荐系统、在线广告投放等工业级应用中是至关重要的。</p>
 <p>不过传统的CVR预估问题存在着两个主要的问题： <strong>样本选择偏差</strong> 和 <strong>稀疏数据</strong>。我们来看下面的图，我们把给用户曝光过的产品看作是整个样本空间X的话，用户点击过的产品仅是中间灰色的部分，我们定义为Xc，而用户购买过的产品仅是图中黑色的部分。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/8d7b859157d146cb921b04d99a227935.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003120.png" />   
     </p>
 <p><strong>样本选择偏差(sample selection bias,SSB)</strong>：传统的推荐系统仅用Xc中的样本来训练CVR预估模型，但训练好的模型是在整个样本空间X去做推断的。由于点击事件相对于曝光事件来说要少很多，因此只是样本空间X的一个很小的子集，从Xc上提取的特征相对于从X中提取的特征而言是有偏的，甚至是很不相同。从而，按这种方法构建的训练样本集相当于是从一个与真实分布不一致的分布中采样得到的，这一定程度上违背了机器学习中独立同分布的假设。这种训练样本从整体样本空间的一个较小子集中提取，而训练得到的模型却需要对整个样本空间中的样本做推断预测的现象称之为样本选择偏差。样本选择偏差会伤害学到的模型的泛化性能。</p>
 <p><strong>数据稀疏(data sparsity,DS)</strong>:推荐系统展现给用户的商品数量要远远大于被用户点击的商品数量，同时有点击行为的用户也仅仅只占所有用户的一小部分，因此有点击行为的样本空间Xc相对于整个样本空间X来说是很小的，通常来讲，量级要少1~3个数量级。如下表所示，在淘宝公开的训练数据集上，Xc只占整个样本空间X的4%。这就是所谓的训练数据稀疏的问题，高度稀疏的训练数据使得模型的学习变得相当困难。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/8d71bb8ed88a498192e5a76a67d36f0c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003389.png" />   
     </p>
 <p>为了解决上面的两个问题，阿里提出了完整空间多任务模型ESSM。下一章，我们将会来学习一下阿里是如何设计整个网络的。</p>
 <h1 id="2essm模型">2、ESSM模型</h1>
 <h2 id="21-模型结构">2.1 模型结构</h2>
 <p>阿里妈妈的算法同学提出的ESMM模型借鉴了多任务学习的思路，引入了两个辅助的学习任务，分别用来拟合pCTR和pCTCVR，从而同时消除了上文提到的两个挑战。ESMM模型能够充分利用用户行为的顺序性模式，其模型架构下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/2bcb2a5b3a3e40dea9dc094801cd7522.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003332.png" />   
     </p>
 <p>可以看到，ESSM模型由两个子网络组成，左边的子网络用来拟合pCVR，右边的子网络用来拟合pCTR，同时，两个子网络的输出相乘之后可以得到pCTCVR。因此，该网络结构共有三个子任务，分别用于输出pCTR、pCVR和pCTCVR。</p>
 <p>假设我们用x表示feature(即impression),y表示点击，z表示转化，那么根据pCTCVR = pCTR * pCVR，可以得到：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/0a3f1b010ec64dac88dbf369899f4ca6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003722.png" />   
     </p>
 <p>将乘法转化为除法，我们可以得到pCVR的计算：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/c1d19984f25243bab97d4f75334a0643.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003449.png" />   
     </p>
 <h2 id="22-模型特点">2.2 模型特点</h2>
 <p>ESSM模型共有以下两个主要的特点：</p>
@@ -249,7 +249,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们可以将有点击行为的曝光事件作为正样本，没有点击行为的曝光事件作为负样本，来做CTR预估的任务。将同时有点击行为和购买行为的曝光事件作为正样本，其他作为负样本来训练CTCVR的预估部分。</p>
 <p>模型具体是怎么做的呢？可以看到，用来训练两个任务的输入x其实是相同的，但是label是不同的。CTR任务预估的是点击y，CTCVR预估的是转化z。因此，我们将(x,y)输入到CTR任务中，得到CTR的预估值，将(x,z)输入到CVR任务中，得到CVR的预估值，CTR和CVR的预估值相乘，便得到了CTCVR的预估值。因此，模型的损失函数可以定义为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/c1948bf24de64ca0b889c2f140cd7cf6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003222.png" />   
     </p>
 <p>其中，θctr和θcvr分别是CTR网络和CVR网络的参数，l(⋅)是交叉熵损失函数。</p>
 <p>共享特征表示</p>
@@ -258,12 +258,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>3.1 对比模型介绍</p>
 <p>为了验证ESSM的效果，阿里团队与如下的算法进行了对比：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/6db891736a5f4490853b1816c42527d8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003055.png" />   
     </p>
 <h2 id="32-公开数据集实验">3.2 公开数据集实验</h2>
 <p>下图展示了在公开实验数据集上模型的对比效果：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/660d74f365e34d4ba6fa9016ff1973a8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003343.png" />   
     </p>
 <p>可以看到，ESSM模型相比于其他的模型，实验效果显著提升。</p>
 <h2 id="33-淘宝数据集实验">3.3 淘宝数据集实验</h2>
@@ -397,6 +397,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -430,10 +434,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -812,6 +812,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

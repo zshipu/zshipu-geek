@@ -207,7 +207,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="二推送平台redis使用介绍">二、推送平台Redis使用介绍</h1>
 <p>基于vivo推送平台的特点，对并发和时效性要求较高，并且消息数量多，消息有效期短。所以，推送平台选择使用Redis中间件作为消息存储和中转，以及token信息存储。之前主要使用两个Redis集群，采用Redis Cluster 集群模式。两个集群如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/47348babd8ea4a4780415fbea0472b07.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740743.webp" />   
     </p>
 <p>对Redis的操作，主要包括如下几方面：</p>
 <p>1）推送环节，在接入层存储消息体到msg Redis集群，消息过期时间为msg Redis存储消息的过期时间。</p>
@@ -216,12 +216,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>4）存储管理服务，会定期扫描cii索引，根据cii存储的最后更新时间，如果14天都没更新，说明是不活跃用户，会清理该token信息，同时清理该token对应的等待队列消息。</p>
 <p>推送环节操作Redis流程图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/15678e7a52f7497f91b6263e8a0e53e9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740571.webp" />   
     </p>
 <h1 id="三推送平台线上问题">三、推送平台线上问题</h1>
 <p>如上面介绍，推送平台使用Redis主要msg集群和client集群，随着业务的发展，系统对性能要求越来越高，Redis出现一些瓶颈问题，其中msg Redis集群在优化前，规模已达到220个master，4400G容量。随着集群规模变大，维护难度增加，事故率变高。特别是4月份，某某明星离婚事件，实时并发消息量5.2亿，msg Redis集群出现单节点连接数、内存暴增问题，其中一个节点连接数达到24674，内存达到23.46G，持续30分钟左右。期间msg Redis集群读写响应较慢，平均响应时间500ms左右，影响到整体系统的稳定性和可用性，可用性降到85%。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5afd3b82bf1841d692104283d95ae994.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740411.webp" />   
     </p>
 <h1 id="四推送平台redis优化">四、推送平台Redis优化</h1>
 <p>Redis一般从以下几方面优化：</p>
@@ -231,7 +231,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>这里有个问题：为什么Redis-Cluster使用16384个slot，而不是更多，最多可以有多少个节点？</p>
 <p>官方作者给出了 <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2Fredis%2Fredis%2Fissues%2F2576">解释</a>，并且在解释中说明，Redis-Cluster不建议超过1000个主节点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/23c4c43bea304e5698be9e409e32cf23.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740896.webp" />   
     </p>
 <p>基于以上一些优化方向，和自身业务特性，推送平台从以下几方面开启Redis优化之路。</p>
 <ul>
@@ -255,7 +255,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>经过这个优化后，缩容效果较明显。全量上线后容量缩小了2090G，原最高容量为3650G， <strong>容量缩小了58%</strong> 。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/949ad0f339884811be972eddd0f98d0f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740509.webp" />   
     </p>
 <h2 id="42-msg-redis大集群根据业务属性拆分">4.2 msg Redis大集群根据业务属性拆分</h2>
 <p>虽然进行了集群容量优化，但是高峰期msg Redis压力依然很大。</p>
@@ -289,7 +289,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>老集群的命中率和命中数通过通用监控增加埋点。</p>
 <p>方案二流程图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8ddb97d06b3443b2ae7e2a86bbd2ffda.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740181.webp" />   
     </p>
 <p>拆分后效果：</p>
 <ul>
@@ -297,7 +297,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>拆分后，同时期高峰期负载降低到70%，下降15%。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/884f82fe5873474387339b7b13ce4a83.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740699.webp" />   
     </p>
 <p>拆分前，msg Redis集群同时期高峰期平均响应时间1.2ms，高峰期存在调用Redis响应慢情况。拆分后，平均响应时间降低到0.5ms，高峰期无响应慢问题。</p>
 <h2 id="43-redis热点key排查">4.3 Redis热点key排查</h2>
@@ -305,11 +305,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>由于Redis集群使用的虚拟机，起初怀疑是虚拟机所在宿主机存在压力问题，因为根据排查发现出现问题的节点所在宿主机上挂载Redis主节点很多，大概10个左右，而其他宿主机挂载2-4个左右主节点，于是对master进行了一轮均衡化优化，使每台宿主机分配的主节点都比较均衡。均衡化之后，整体有一定改善。但是，在推送高峰期，尤其是全速全量推送时，还是会偶尔出现单节点连接数、内存飙升问题。观察宿主机网卡出入流量，都没出现瓶颈问题，同时也排除了宿主机上其他业务节点的影响。因此怀疑还是业务使用Redis存在热点倾斜问题。</p>
 <p>通过高峰期抓取调用链监控，从下图可以看到，我们11:49到12:59这期间调用msg Redis的hexists命令耗时很高，该命令主要是查询消息是否在mii索引中，链路分析耗时的key大都为mii:0。同时对问题节点Redis内存快照进行分析，发现mii:0容量占比很高，存在读取mii:0热点问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/efefcc7be18744a0964eddd945f08f49.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740459.webp" />   
     </p>
 <p>经过分析排查，发现生成消息id的雪花算法生成的messageId，存在倾斜问题，由于同一毫秒的序列值都是从0开始，并且序列长度为12位，所以对于并发不是很高的管理后台及api节点，生成的messageId基本都是最后12位为0。由于mii索引key是mi:${messageId%1024}，messageId最后12位为0，messageId%1024即为0，这样就导致msg Redis中mii:0这个key很大，查询时命中率高，因此导致了Redis的热key问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f893d0d202cf420ca9186f7230566ce5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740054.webp" />   
     </p>
 <p><strong>优化措施</strong> ：</p>
 <p>1）雪花算法改造，生成消息id时使用的sequence初始值不再是0，而是从0~1023随机取一个数，防止热点倾斜问题。</p>
@@ -319,7 +319,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>上游节点调用推送节点是通过clientId进行一致性hash调用的，推送节点会缓存clientInfo信息到本地，缓存时间7天，推送时，优先查询本地缓存，判断该client是否有效。对于重要且经常变更的信息，直接查询client Redis获取，这样导致推送高峰期，client Redis集群压力很大，并发高，cpu负载高。</p>
 <p>优化前推送节点操作缓存和client Redis流程图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2433bbd2563c4cb9add10913e66013d9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740540.webp" />   
     </p>
 <p><strong>优化方案</strong> ：对原有clientInfo缓存进行拆分，拆分成三个缓存，采取分级方案。</p>
 <ul>
@@ -333,20 +333,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>整体流程：消息推送时，优先查询本地缓存，缓存不存在或者已过期，才从client Redis中加载。推送到broker时，根据broker返回信息，更新或失效缓存。上行，收到disconnect、connect事件，及时更新或失效缓存，再次推送时重新从client Redis加载。</p>
 <p>优化后推送节点操作缓存和client Redis流程图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6e452ff6c24e41d4ade91d62325c932d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740308.webp" />   
     </p>
 <p><strong>优化后效果</strong> ：</p>
 <p>1）新增cache1缓存命中率52%，cache2缓存命中率30%。</p>
 <p>2）client Redis并发调用量减少了近20%。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e79712b85bf94af88976cdffa8b30d54.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740922.webp" />   
     </p>
 <p>3）高峰期Redis负载降低15%左右。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e5c2cd8b2d2f47369dc5831ccb9a02c6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740424.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e0717e84683a4399bb61f6b3e59148cb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271740311.webp" />   
     </p>
 <h1 id="五总结">五、总结</h1>
 <p>Redis由于其高并发性能和支持丰富的数据结构，在高并发系统中作为缓存中间件是较好的选择。当然，Redis是否能发挥高性能，还依赖业务是否真的理解和正确使用Redis。有如下几点需要注意：</p>
@@ -485,6 +485,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -518,10 +522,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -900,6 +900,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

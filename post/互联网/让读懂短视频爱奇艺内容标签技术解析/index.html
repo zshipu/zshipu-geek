@@ -200,7 +200,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>内容标签技术难点</strong></p>
 <p>短视频一般由短视频文本标题、封面图、视频内容等元素组成，要想较准确的抽取出内容标签，需要综合利用这些多模态信息。如何将这些不同模态的信息融合起来应用于模型中并取得较好的结果是需要较多的探索；又因为内容标签是一个开放集合，如何判断哪些词语可以作为内容标签也是比较困难的。在实际人工标注过程中发现，两个人同时标注同一批数据，标注的完全一致率只有22.1%，以下是一些标注例子：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f48cbb8d6c484393949b8dd3f66009c7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281814869.png" />   
     </p>
 <p>最后，大量的内容标签并没有在文本标题中出现，我们称这种标签为“抽象标签”，如短视频标题：“母亲染病雪上加霜，女儿自强渴望工作”，其内容标签为：“励志”、“正能量”。根据我们的统计，有 40% 以上的标签为抽象标签。</p>
 <p><strong>内容标签算法迭代之路</strong></p>
@@ -230,22 +230,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>排序模型使用基于注意力机制的语义相似度模型[1] [2] [3]，通过注意力机制生成短视频标题的向量表示，然后和候选标签向量做语义相似度计算，再通过划定阈值选取合适的标签。模型架构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/da10946fb0524630b6b6cc0c2518e586.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281814907.png" />   
     </p>
 <p>该模型结构简单，在对文章的建模上有比较好的效果。但在短视频标题上却有如下缺点：一是这一模型在抽象类的标签上的效果不是很好，通过人工定义的联想规则只能生成一小部分抽象标签；二是由于标题一般都比较短，注意力模型结构过于简单，无法进行准确的语义建模。</p>
 <p>“候选生成 + 排序”的结构本质上是一种抽取式的标签生成方式，即生成的标签主要是在标题中出现的词或短语。相比抽取式，通过端到端训练的生成模型具有比较好的语义抽象能力，其生成出来的标签不需要出现在原文。2017 年 Google 提出 Transformer 模型，其强大的特征提取能力和并行化带来训练速度的提升，使其在多项文本生成任务中达到了 SOTA 的效果，其模型结构如图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6f6fb5f62b8242039238adf27177b345.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281814947.png" />   
     </p>
 <p>我们最终使用基于 Transformer 的生成式 + 抽取式结合的方式来对文本标题进行建模，即先使用生成式来生成标签，如果没有结果则使用抽取式的结果。我们对抽取式模型做了如下改进：使用 self-attention 取代 attention 机制，增强文本表征能力；增加候选标签的上下文特征和文本的频道等特征，模型结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/85470f6466cb40458005bc469819f475.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281814203.png" />   
     </p>
 <p>文本模型通过分析视频的标题和描述等文本信息，生成内容标签。但是对于 UGC，经常存在文本信息缺失，不充分等情况，比如：</p>
 <p>a) 标题为“分享视频”，则文本模型会生成空标签；</p>
 <p>b) 标题为“天地山青，道法无常，李白斗酒诗百篇”，会生成“唐诗”、“李白”这样的标签。但是从封面图看，该视频其实为王者荣耀游戏：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ff6ce66663fe452baf860c48f407c28b.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281814258.jpeg" />   
     </p>
 <p>为了弥补文本模型的缺点，我们引入了封面图来弥补标题文本的语义信息缺失的问题，所以需要对封面图进行表征，并加入到生成模型中。</p>
 <p><strong>（二）</strong></p>
@@ -253,7 +253,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>1、图像特征提取</strong></p>
 <p>对于图像的表征，业界常见的做法是使用预训练的 ImageNet 在新的任务新的标注数据上进行 Fine-Tune，然后抽取某几层或最后一层作为图像的表征。我们通过实验比较 ResNet50、Inception V3、Xception 等模型的效果，Xception 在我们的数据上能达到最优的结果，模型结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f2897b616a884c98858d2d2b3bd5dae1.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281814363.jpeg" />   
     </p>
 <p>我们使用 Xception 对封面图进行特征提取，具体流程为：</p>
 <p>a) 选取高频抽象标签作为图像分类标签；</p>
@@ -267,24 +267,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>c) 图像特征添加到 Decoder 的初始输入。</p>
 <p>三种融合方式经过独立的 Feed-Forward Neural Network 分别映射到各个空间，模型的结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/71440e8339004fd6bd01b053f595910a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281814586.png" />   
     </p>
 <p><strong>（三）</strong></p>
 <p><strong>融合BERT向量模型</strong></p>
 <p>由于多模态模型的文本部分主要采用站内的短视频标题进行训练，训练集偏向于影视剧/娱乐领域，因此这会导致模型对于通用领域的文本语义理解有所欠缺，比如当模型对标题为“容易被男生吃定的8种类型的女生” 的内容进行分析时， 模型根据站内的数据训练得出结果为“女生”，然而更合适的标签应该为“恋爱技巧”，因此我们希望预训练模型可以解决这种问题。为此我们引入了目前表现最好的预训练模型 BERT。BERT是基于Transformer的深度双向语言表征模型，基本结构如下图所示，其本质上是利用Transformer结构构造了一个多层双向的Encoder网络。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d92a3855295b4a818a4372cf05297bd8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281814747.png" />   
     </p>
 <p>针对不同的任务，BERT 模型的输入可以是单句或者句对。对于每一个输入的 Token，它的表征由其对应的词表征（Token Embedding）、段表征（Segment Embedding）和位置表征（Position Embedding）相加产生，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2c269f0616bf45a1a7e049bf73178cca.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281814992.webp" />   
     </p>
 <p>BERT 是在海量通用文本语料上训练的语言模型，已被验证具有非常强的语义归纳能力。我们将 BERT sentence embedding 集成到现有的模型中，以期增强其对通用领域文本的理解能力， 融合方式为：</p>
 <p>a) 将文本经过 BERT 模型抽取语义特征（second-to-last 层经过 average pooling 后的向量）；</p>
 <p>b) 原始 BERT 特征经过非线性映射后，分别加入到模型的 encoder 输入、输出和 decoder 的初始输入中。</p>
 <p>模型结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/437320b1bb314ee29e63eed03858a857.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281814070.jpeg" />   
     </p>
 <p><strong>（四）</strong></p>
 <p><strong>融合视频帧模型</strong></p>
@@ -292,11 +292,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>a) 标题为“此‘八卦’非彼‘八卦’，看完视频后觉得，脑子是个好东西！”， 通过分析文本和封面图等信息，会打上“八卦” 标签，而视频内容为“陈翔六点半”；</p>
 <p>b) 标题为“民警晒从警前后对比照，6 年前是林志颖，6 年后成郭德纲”，通过分析文本和封面图等信息，会打上“林志颖”、“郭德纲”标签，而合适的标签应该为“民警”。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/738d8d17c438462592fb0f0a8d4d4585.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281814114.jpeg" />   
     </p>
 <p>为了弥补文本和封面图信息的不足，我们在多模态模型中引入了视频帧等信息，引入后模型的总体结构为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/29f1ded8d17a4fed90e69f8db4adc9d8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281814168.png" />   
     </p>
 <p><strong>1、特征提取</strong></p>
 <p>a) 对每个视频抽取若干个关键帧（信息最丰富的视频帧）；</p>
@@ -304,11 +304,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>2、特征融合</strong></p>
 <p>Encoder 端，将文本特征、文本 BERT 特征、封面图特征、视频帧特征 concatenate，然后经过 self-attention 进行 Early Fusion；将文本特征、视频特征，通过交叉 query, key, value， 经过 cross-attention 进行 Deep Fusion[5]，其结构如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dc1ee44e90374f088d2b1bd3e7383dda.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281815331.webp" />   
     </p>
 <p>Decoder 端，使用 EnhancedMulti-Head Self-Attention 对 early fusion 和 deep fusion 的编码特征以及视频帧特征进行融合[6]，其结构如图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/20a8b8bf1bd345c18dbc19b63b708db3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281815190.png" />   
     </p>
 <p><strong>内容标签的应用</strong></p>
 <p>短视频内容标签在爱奇艺得到了广泛的使用，典型的应用场景为:短视频的生产、个性化推荐及视频搜索方面，具体如下：</p>
@@ -448,6 +448,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -481,10 +485,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -863,6 +863,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

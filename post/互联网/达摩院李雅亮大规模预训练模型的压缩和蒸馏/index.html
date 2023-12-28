@@ -203,7 +203,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f4fb9fe10aa64dd88f133e60de2116f8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281857229.webp" />   
     </p>
 <blockquote>
 <p>分享嘉宾：李雅亮博士 阿里巴巴</p>
@@ -219,13 +219,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="01-背景介绍"><strong>01 背景介绍</strong></h1>
 <p>自2018年BERT预训练横空出世，NLP领域出现了一个全新的范式，大规模预训练模型给我们带来了很多新的能力。通俗来讲，我们会先从很多其他语料或者说很多大规模数据里面做一个预训练的模型，然后在具体任务的训练语料微调预训练的模型。基于“预训练-微调“范式，许多任务的性能都得到了极大的提升。如图1，文本分类（Text Classification）， 命名实体识别（Named Entity Recognition），基于机器阅读理解的问答（Question Answering, MachineReading Comprehension）等任务的性能得到显著提升。在BERT论文中他们指出BERT在11个经典的自然语言任务中超越当前的state-of-the-art的性能，“一石激起千层浪”，自此之后，大量的预训练模型层出不穷——GPT系列预训练模型，相比BERT炼制更加成熟的RoBERTa, 缓解序列长度的限制XLNET, 融入知识的K-BERT, 领域预训练模型SCIBERT等等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/695e36f9749a4274811d07748b2d42fb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281857824.webp" />   
     </p>
 <p>图1 BERT模型在不同任务上微调</p>
 <p>然而，预训练的大模型，顾名思义，他们的参数量会非常大，如12层transformer堆叠的wwmpytorch版本的预训练模型大小为400M左右，24层transformer的版本大概1.2G左右。但是在现实生活中，我们的计算资源有限的情况下，至少会引起两个问题，其一，我们设备终端无法加载这么大的模型，其二，参数太多，推断速度太慢。比如说在线搜索这些需要实时响应的应用，或者说我们自己的手机、车载系统，它们的计算资源是非常受限的，所以我们需要有一些小的模型来替代它的功能。</p>
 <p>所以，为了解决模型上述的痛点，模型的压缩技术在工业界和学术界应运而生。如图2，现在的BERT预训练模型压缩的基本研究思路如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ed4d204c983e40d49d84b8d20761d84a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281857933.webp" />   
     </p>
 <p>图2 BERT压缩常规研究方法</p>
 <ul>
@@ -238,14 +238,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>上述模型压缩的几个基本的研究思路（distillation,quantization, parameter sharing等）都是和下游任务(downstream)不相关的,即模型压缩的结果都是大模型统一压缩成小模型，然后再利用小模型去微调具体任务。</p>
 <p>但是，在2019年，Ian Tenney等人（如图3）揭示了——BERT学的knowledge非常的多，换一句说,BERT学到的非常多的general knowledge，但是不同下游任务需要的knowledge可能不太一样，比如做NER是你可能更关注的是细粒度的信息，做reading comprehension可能关注的是需要一些high level的信息。受此启发，我们提出AdaBERT：针对一个具体的下游任务，通过自动压缩一个小模型，来适配该任务，即小模型是专门为该任务服务的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/00481e36347a4e73ac11020e97a5b529.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281857083.webp" />   
     </p>
 <p>图3 自适应任务模型压缩的研究启发</p>
 <h2 id="2-模型介绍"><strong>2. 模型介绍</strong></h2>
 <p>我们利用神经网络结构搜索（NAS）来自动化搜索小模型的网络结构。下面我们从三个方面介绍模型的一些设计。</p>
 <p><strong>① 如何定义Search Space</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/59179836293e4bb2a8b034e236c0ef17.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281857170.webp" />   
     </p>
 <p>图4 Search space 设计</p>
 <p>不同于以往BERT的压缩——将Transformer结构压缩成更少参数transformer的结构。在这里我们采用基于CNN结构的architecture。原因如下：</p>
@@ -256,27 +256,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>② Search目标</strong></p>
 <p>Search的目标包含两个方面，一方面，需要小模型尽可能保留BERT中有用的knowledge，另一方面，需要权衡推断效率，即小模型的size。权衡保留大模型的有用的knowledge和 efficiency，故总体的Loss设计参见图5。其中L _{CE}为具体下游任务的Loss。,\beta, \gamma是超参数。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2649b7decfe44881be46d29f47e0adee.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281857155.webp" />   
     </p>
 <p>图5 权衡knowledge-efficiency损失函数设计</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0fa3204beeba4ba0a3f2068685a5ed35.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281857503.webp" />   
     </p>
 <p>图6 knowledge distillation Loss</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cf3c42b3abdb482aa849376c17a80271.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281857741.webp" />   
     </p>
 <p>图7 efficiency-aware Loss</p>
 <p><strong>③ 如何去搜</strong></p>
 <p>因为定义的CNN的网络架构是离散化的，从传统的方法来看的话，如采用随机采样的方式去尝试不同的architecture，费时费力，所以我们利用differential方法去优化。其思想是：首先，我们预定义好一些operation, 对于每个网络层，并行组织所有的operation，形成super net，即每个super net中不是存在一个operation，而是存在所有可能operation的一个集合，通过加权形成所有可能的operation，这样我们就可以用differential的方法去优化整个大网络的结构了。训练architecture的parameters使用Gumbel trick。Differential的更多的具体原理细节，可以参考Liu, Simonyan等人提出DARTS。</p>
 <h2 id="3-实验效果"><strong>3. 实验效果</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a0bc2b51bbe24a5e9f65c126deb0c28f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281857851.webp" />   
     </p>
 <p>图8 实验结果</p>
 <p>可以看出AdaBERT的performance基本都处于次优的结果，而参数量最少，inference speedup有明显提升。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/273d7ef1947e43bbaf1982afd1108d26.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281857014.webp" />   
     </p>
 <p>图9 验证Task-AdaBERT的实验</p>
 <p>如图9，为了验证网络结果符合任务自适应，将训练的任务自适应的小模型应用到其他任务上，完全符合我们的设想，自适应任务的模型在自己的任务上表现最优。</p>
@@ -286,7 +286,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>对于数据缺乏，NLP领域有大量的data augmentation的方法，如对于真实的文本序列做token 的增，删，改，插或者来回逆向翻译。然而从自动化的角度来看，这些data augmentation的方法需要花费大量时间成本去尝试，所以我们提出一种BERT蒸馏过程中自动学习增强数据缺少领域的方法。</p>
 <h2 id="2-模型介绍-1"><strong>2. 模型介绍</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4792c640a09641c784c514383e48c260.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281857195.webp" />   
     </p>
 <p>图10 L2A 模型结构</p>
 <p>如图10，模型的主要的思想基于transfer learning和对抗网络。我们通过对source Domain 和 target Domain的data generator自动产生generated data，形成的training data�</p>
@@ -419,6 +419,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -452,10 +456,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -834,6 +834,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

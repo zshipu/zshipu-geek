@@ -207,106 +207,106 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>对word的vector表达的研究早已有之，但让embedding方法空前流行，我们还是要归功于google的word2vec。我们简单讲一下word2vec的原理，这对我们之后理解AirBnB对loss function的改进至关重要。</p>
 <p>既然我们要训练一个对word的语义表达，那么训练样本显然是一个句子的集合。假设其中一个长度为T的句子为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/46cf079682e140508b7a3d5fa6fbd303.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271414112.svg&#43;xml" />   
     
 。这时我们假定每个词都跟其相邻的词的关系最密切，换句话说每个词都是由相邻的词决定的（CBOW模型的动机），或者每个词都决定了相邻的词（Skip-gram模型的动机）。如下图，CBOW的输入是 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b5bec33ebb194e298fcaf0a525565027.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271414526.svg&#43;xml" />   
     
 周边的词，预测的输出是 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bf88fc77c5c448d987a34c6ea53769ec.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271414158.svg&#43;xml" />   
     
 ，而Skip-gram则反之，经验上讲Skip-gram的效果好一点，所以本文从Skip-gram模型出发讲解模型细节。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5be238ffa28845c4926bdc9e6914f66f.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271414658.jpeg" />   
     </p>
 <p>word2vec的两种模型结构CBOW和Skip-gram</p>
 <p>那么为了产生模型的正样本，我们选一个长度为2c+1（目标词前后各选c个词）的滑动窗口，从句子左边滑倒右边，每滑一次，窗口中的词就形成了我们的一个正样本。</p>
 <p>有了训练样本之后我们就可以着手定义优化目标了，既然每个词 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/07055a66a14d401f8768de274b1368f1.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271414217.svg&#43;xml" />   
     
 都决定了相邻词 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3138030d0dac4d3c923ae607170f8107.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271414762.svg&#43;xml" />   
     
 ，基于极大似然，我们希望所有样本的条件概率 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8b42b543beba436ab0d35baec5cd821b.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271414098.svg&#43;xml" />   
     
 之积最大，这里我们使用log probability。我们的目标函数有了：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/754b70d59cae4f6aa83e9e14c40175e3.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271414414.jpeg" />   
     </p>
 <p>接下来的问题是怎么定义 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e53d21b38dc14cd5b7122c2b36d89e55.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271414779.svg&#43;xml" />   
     
 ，作为一个多分类问题，最简单最直接的方法当然是直接用softmax函数，我们又希望用向量 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/334adbad4f8b4953bc29d202c74b338a.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271415262.svg&#43;xml" />   
     
 表示每个词w，用词之间的距离 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2a8106a9fa654c44a9b75bb6071486e5.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271415332.svg&#43;xml" />   
     
 表示语义的接近程度，那么我们的条件概率的定义就可以很直观的写出。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4eab889eb58d4481b428dd678bca7d7d.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271415773.jpeg" />   
     </p>
 <p>看到上面的条件概率公式，很多同学可能会习惯性的忽略一个事实，就是</p>
 <p><strong>我们用 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a69370ff5734462b832701a7b0995072.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271415083.svg&#43;xml" />   
     
 去预测 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/05ff53ce7a4349b1a698a85b8469c2ae.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271415145.svg&#43;xml" />   
     
 ，但其实这二者的向量表达并不在一个向量空间内。</strong></p>
 <p>就像上面的条件概率公式写的一样， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8e77502ef44843128fa4453d0470c628.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271415452.svg&#43;xml" />   
     
 和 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/870463cf8c0b4303afca4a65a1d5da43.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271415667.svg&#43;xml" />   
     
 分别是词w的输出向量表达和输入向量表达。**那什么是输入向量表达和输出向量表达呢？**我们画一个word2vec的神经网络架构图就明白了。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2a7ddb3730cd41b2b6eae30603cda145.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271415165.jpeg" />   
     </p>
 <p>word2vec的算法架构</p>
 <p>根据 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d66895976169494498e213a98c383009.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271415709.svg&#43;xml" />   
     
 的定义，我们可以把两个vector的乘积再套上一个softmax的形式转换成上面的神经网络架构。在训练过程中我们就可以通过梯度下降的方式求解模型参数了。那么上文所说的输入向量表达就是input layer到hidden layer的权重矩阵 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/505f1aaad7814e82ad25cbf12f47573b.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271415278.svg&#43;xml" />   
     
 ，而输出向量表达就是hidden layer到output layer的权重矩阵 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fe8c5f8fabaf48c6908c6b66a47d9f61.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271415703.svg&#43;xml" />   
     
 。</p>
 <p><strong>那么到底什么是我们通常意义上所说的词向量 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/020a10764b204582afa06ce01cc57b1f.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271415057.svg&#43;xml" />   
     
 呢？</strong></p>
 <p>其实就是我们上面所说的输入向量矩阵 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/445e6f924d28415f80ec7bf630162ea1.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271415059.svg&#43;xml" />   
     
 中每一行对应的权重向量。于是这个权重矩阵自然转换成了word2vec的lookup table。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d09edb50392b4b5589b12892c756b784.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271415599.jpeg" />   
     </p>
 <p><strong>那么问题也来了，我们能把输出矩阵 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/190a8b02d30f4ee4b3ef19ab5bff3f53.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271416804.svg&#43;xml" />   
     
 的列向量当作word的vector表达吗？大家可以讨论一下。</strong></p>
 <p>当然在训练word2vec的过程中还有很多工程技巧，比如用negative sampling或Hierarchical Softmax减少词汇空间过大带来的计算量，对高频词汇进行降采样避免对于这些低信息词汇的无谓计算等。我们在之前的专栏文章中有过讨论，在具体实现的时候最好参考Google的原文 <a href="https://zshipu.com/t?url=http%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttps%253A%2F%2Fgithub.com%2Fwzhe06%2FReco-papers%2Ftree%2Fmaster%2FFamous%252520Machine%252520Learning%252520Papers">Distributed Representations of Words and Phrases and their Compositionality</a></p>
@@ -314,14 +314,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在word2vec诞生之后，embedding的思想迅速从NLP领域扩散到几乎所有机器学习的领域，我们既然可以对一个序列中的词进行embedding，那自然可以对用户购买序列中的一个商品，用户观看序列中的一个电影进行embedding。而广告、推荐、搜索等领域用户数据的稀疏性几乎必然要求在构建DNN之前对user和item进行embedding后才能进行有效的训练。</p>
 <p>具体来讲，如果item存在于一个序列中，item2vec的方法与word2vec没有任何区别。而如果我们摒弃序列中item的空间关系，在原来的目标函数基础上，自然是不存在时间窗口的概念了，取而代之的是item set中两两之间的条件概率。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9a9ad9d3a269489b93bea9d2e0e579e1.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271416110.jpeg" />   
     </p>
 <p>item2vec目标函数：大小为K的item set中两两item的log probability之和</p>
 <p>具体可以参考item2vec的原文 <a href="https://zshipu.com/t?url=http%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttps%253A%2F%2Fgithub.com%2Fwzhe06%2FReco-papers%2Fblob%2Fmaster%2FRecommendation%2FItem2Vec%252520-%252520Neural%252520Item%252520Embedding%252520for%252520Collaborative%252520Filtering.pdf">Item2Vec:Neural Item Embedding for Collaborative Filtering</a></p>
 <p>但embedding的应用又远不止于此，事实上，由于我们也可以把输出矩阵的列向量当作item embedding，这大大解放了我们可以用复杂网络生成embedding的能力。读过我专栏上一篇文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fzhuanlan.zhihu.com%2Fp%2F52504407">YouTube深度学习推荐系统的十大工程问题</a>
 的同学肯定知道，YouTube在serve其candidate generation model的时候，只将最后softmax层的输出矩阵的列向量当作item embedding vector，而将softmax之前一层的值当作user embedding vector。在线上serving时不用部署整个模型，而是只存储user vector和item vector，再用最近邻索引进行快速搜索，这无疑是非常实用的embedding工程经验，也证明了我们可以用复杂网络生成user和item的embedding。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/64e78cd163cd478e8fe105935dd18c7d.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271416346.jpeg" />   
     </p>
 <p>YouTube的user和video embedding网络</p>
 <p>KDD 2018 best paper <a href="https://zshipu.com/t?url=http%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttps%253A%2F%2Fwww.kdd.org%2Fkdd2018%2Faccepted-papers%2Fview%2Freal-time-personalization-using-embeddings-for-search-ranking-at-airbnb">Real-time Personalization using Embeddings for Search Ranking at Airbnb</a>
@@ -333,11 +333,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>为什么在计算word similarity的时候，我们要用cosine distance，我们能够用其他距离吗？</strong></li>
 <li><strong>在word2vec的目标函数中，两个词 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5ad43d2045904aaebd2e11db1da54cf4.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271416062.svg&#43;xml" />   
     
 的词向量 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9a255bd3e4344d1b878d2641a4412911.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271416412.svg&#43;xml" />   
     
 其实分别来自输入权重矩阵和输出权重矩阵，那么在实际使用时，我们需要分别存储输入矩阵和输出矩阵吗？还是直接用输入矩阵当作word2vec计算similarity就好了？</strong></li>
 </ol>
@@ -478,6 +478,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -511,10 +515,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -893,6 +893,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

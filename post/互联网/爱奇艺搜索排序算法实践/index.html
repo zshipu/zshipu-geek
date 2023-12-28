@@ -220,7 +220,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们以下图这个具体的搜索场景为例，首先，我们在搜索框输入对应的Query，点击搜索按钮，跳转到最终的结果页。</p>
 <p>结果页的情况如图所示：第一个是专辑长视频，下面是三个短视频，接着是相关小说， <strong>数据类型是比较多样的。</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5cbea6472adc41e88961252014b0ee34.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272236773.webp" />   
     </p>
 <p>此外，结果页 <strong>顶部的Tab栏</strong> 还分为综合、影视、短视频、小视频等等， <strong>“综合”栏对应的是我们的综合搜索业务，后面的“影视”“短视频”等对应的则是我们的多垂类搜索业务。</strong></p>
 <p>本文将主要介绍我们基于 <strong>综合搜索</strong> 的实践。</p>
@@ -235,7 +235,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>最上方是 <strong>用户业务方的调用接口</strong>，之后进入到 <strong>综合调度模块</strong>，这块主要负责URL的接收，以及整体业务逻辑的处理。</p>
 <p>综合调度会读取一系列数据，包括 <strong>Query的分词解析纠错以及Query的意图识别</strong>，例如Query本身要查询哪些品类？是电影、电视剧还是综艺？要查询查询长视频还是短视频？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5327f7c7beee4d2fb0dd644e5bdb6098.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272236772.png" />   
     </p>
 <p>另外，还有 <strong>运营配置模块</strong>，这里我们支持 <strong>人工定义</strong>，在特定的Query和场景下，吐出相应的Doc。</p>
 <p><strong>中间这一部分是归并重排</strong>，负责合并从多个分片的Doc并去重，同时进行重排以及策略调权。</p>
@@ -248,17 +248,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>此外， <strong>我们还需要对不同的分级进行分片</strong>，分片主要按照天级、小时级、实时等生成时间窗口划分， <strong>并基于索引进行基础搜索</strong>，即召回流程，如倒排索引、向量召回等。</p>
 <p><strong>框架的最上方则是上层排序</strong>，包括粗排、精排、Rerank的功能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/107e157ff8004f0e80bdc0c03f00eaac.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272236802.png" />   
     </p>
 <h3 id="5排序流程"><strong>5.排序流程</strong></h3>
 <p>爱奇艺综搜场景下， <strong>全量Corpus为亿级别</strong>，召回阶段候选集为十万量级，粗排为千级，精排为百级，Rerank为十级，最终展现到用户UI界面中。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/36ef5446799b4565a896e12743856bf1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272236945.png" />   
     </p>
 <h2 id="02-爱奇艺搜索排序算法实践"><strong>02 爱奇艺搜索排序算法实践</strong></h2>
 <p>接下来我们按照下图的搜索排序流程来依次进行介绍。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e3566be00a0e4bc0876bd7b538860628.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272236853.webp" />   
     </p>
 <h4 id="step1选择攻击对象"><strong>STEP1：选择攻击对象</strong></h4>
 <p>首先是 <strong>召回Trigger</strong> 的选取。</p>
@@ -270,14 +270,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>第三步，我们 <strong>基于翻译模型输出的候选对</strong>，进行一系列的特征的抽取，如翻译模型对应的 <strong>输出概率、分词特征、字向量</strong> 等，然后建立二分类质量模型。</p>
 <p>最后，我们会对模型分数较高的候选对进行 <strong>筛选评测</strong>，把质量较高的候选对存储到线上词表进行应用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/88a6ee07da3a4e81abcd664eb247e8a1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272236785.png" />   
     </p>
 <p>整体来看， <strong>Term可以分为三类：原始Term、对齐Term还有点击相似Term。</strong> 其中点击相似Term是通过构建Query-Doc的点击二部图，对 Query/Doc 的表达向量进行无监督的迭代训练获取。</p>
 <p>上图虚线框对应的是召回的种类，如 <strong>常规、结构化、语义的倒排索引以及向量召回等</strong>。向量召回包括DSSM召回、Bert召回等，线上采用ANN计算方式。</p>
 <p>下面主要详细介绍一下 <strong>Bert召回</strong>。</p>
 <p>离线训练主要采用三元组的构建方式，同时Query和Doc共享相同的Bert参数。Query和Doc的Bert输出层接入多层MLP后进行相似度计算。具体可以分为以下四部分介绍：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/33f3a8b34ceb48d9840d9187ec3a545b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272237070.png" />   
     </p>
 <p><strong>1.样本训练</strong></p>
 <p><strong>正样本主要包含当前Query下用户的长点击Doc。</strong></p>
@@ -297,7 +297,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="step2粗排"><strong>STEP2：粗排</strong></h4>
 <p>我们知道粗排的主要功能是 <strong>为精排提供候选集，其中最主要的就是负样本的选取</strong>。由于线上计算耗时的原因，对于比较重的精排， <strong>如果对全量的召回Doc进行预测，将会带来极大的延时，因此需要增加粗排来进一步过滤筛选。</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/63b449fe745a43999026306f559f9198.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272237209.png" />   
     </p>
 <p>粗排主要是把精排输出的 <strong>TopK以及用户的最终点击作为优化的目标</strong>。正样本为用户的正向点击，负样本除有展无点样本外，会按一定比例加入 <strong>精排分数较低的doc</strong>，同时 <strong>对相关性较差的样本进行负采样</strong>，以提高相关性。</p>
 <p>整体模型构建采用 <strong>树模型</strong> 的方式，以减小线上压力。整体来看，粗排阶段的Doc <strong>质量分、交叉特征、时效性</strong> 等特征重要性较高。</p>
@@ -306,7 +306,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>首先，我们回顾一下 <strong>Learning to Rank的基础概念</strong>。</p>
 <p>一是 <strong>Point-wise</strong>，把全局所有的单个Doc进行学习，当前Doc的Loss和其他Doc是相对独立的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/580ac025e1b7497fa82cb6e0ac3360b0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272237168.png" />   
     </p>
 <p><strong>二是Pair-wise。</strong> 这部分主要通过所有Doc两两组合，生成不同的Pair，学习各样本之间的大小关系。</p>
 <p>这种情况下会出现一个问题：没有考虑同一个Query对应的Doc Pair间的 <strong>内部依赖性</strong>，同时也没考虑Doc Pair的 <strong>相对位置</strong>，比如排行第一与排行第十的Pair之间的重要性比排行第四、第五之间的Pair重要性高很多， <strong>因此引入IR评价指标作为样本的权重显得非常重要</strong>。</p>
@@ -314,7 +314,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>2.RankNet &amp; LambdaMart</strong></p>
 <p>Pair-wise目前比较常用的模型是 <strong>RankNet</strong>，按照Doc Pair的点击 <strong>质量大小关系</strong>，打标为1、0和-1，之后采用 <strong>交叉熵Loss</strong> 进行学习，对应的计算公式如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/968c42e59fcb49479c35391e4f936096.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272237525.webp" />   
     </p>
 <p>在RankNet最终的梯度基础上，加入评估指标 <strong>NDCG</strong> 的变化量，可以将其转化为List-wise的学习，同时可以达到 <strong>损失可导的效果</strong>。</p>
 <p>另外，我们的训练框架采用 <strong>MART</strong>，其训练效率较高，而且支持不同特征组合及热启动等。</p>
@@ -328,7 +328,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>因此， <strong>我们做了DNN模型的升级</strong>。</p>
 <p>从其升级情况来看，首先，和树模型相比，只有稠密特征的前提下，DNN模型想要超越前者仍然较为困难。因此， <strong>我们新增了一部分稀疏特征</strong>，具体如下。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ec8fc4c30aa4407da9852056fef00656.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272237442.png" />   
     </p>
 <p>Query侧主要加入了 <strong>Query分词、意图识别标签等</strong>。</p>
 <p>Doc侧加入了 <strong>演员、内容标签、Title、Clicked-query等特征</strong>。</p>
@@ -340,7 +340,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>从搜索业务来看， <strong>TopK位置的展示效果</strong> 对用户体验的影响非常大，如果Top位置的内容质量及相关性较差，会直接导致用户跳出。</p>
 <p>因此，我们对其进行了特定优化。下图所展示的是热门Query部分的优化方案。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bd9ccba474a24d6ebb61bc87b2abc6aa.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272237760.png" />   
     </p>
 <p>首先，我们扩充大量 <strong>头部样本</strong>，对采样逻辑进行了大幅调整。从统计情况来看，TopK样本所在的List往往较短，用户点击并看完第一个位置的Doc后，可能会马上离开。在这种情况下，List内的Doc只能有两个左右。因此，我们调整样本采样策略， <strong>同时把List长度放开到大于等于2。</strong></p>
 <p>另外，List-wise的训练模型也存在一定的问题。不同的List下的Doc长度是不一样的，点击的总次数也不同，因此，整体Query会面临学习不是特别稳定的情况，构造权重也相对比较复杂。</p>
@@ -350,14 +350,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>5.TopK Optimization-Longtail Query</strong></p>
 <p>接下来，我们再来看一下长尾部分的优化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fc73e0bb54b44a33b482ba0ba91c9918.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272237938.png" />   
     </p>
 <p>我们主要是加大了对Top1的惩罚，具体实现的逻辑是：在当前模型训练中，对应Query下所有的Doc中，我们会把模型得分 <strong>最大的Doc对应的Label</strong> 取出来，二者进行 <strong>MSE计算</strong>，并加入到原始LambdaRank Loss中，这样就可以加大对Top1的排序和绝对值偏差的惩罚，长尾Query部分的点击率提升显著。</p>
 <p><strong>6.Residual PLE</strong></p>
 <p>下面是多任务学习这一部分，我们参考的是PLE的结构。如下图左边的网络所示，首先是 <strong>Input层</strong>，再往上是 <strong>点击以及时长的多任务多专家网络。</strong></p>
 <p>首先，PLE结构能够使不同的专家网络分工更加明确，如图所示， <strong>Experts Shared模块</strong> 是 <strong>多任务共享</strong> 的网络，Experts A模块则专门学习CTR目标，Experts B模块则专门学习播放时长目标。从Label层面来看， <strong>点击部分主要为点击率，时长部分则由于时长值域分布较广，</strong> 模型学习非常困难，因此对播放时长的原始值进行Log平滑处理，相对于指数平滑，这种方式更注重时长腰部的提升。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c136afbcb6f64cf197696d0b1e223c6a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272237676.webp" />   
     </p>
 <p>Loss部分我们采用的是 <strong>交叉熵与MSE的线性加权</strong>。</p>
 <p>从模型结构来看，单个Expert采用的是DCN结构，在我们的业务中，由于后验统计特征重要性是最高的，且DCN结构中融合了 <strong>线性与非线性交叉</strong> 的特征，同时包含残差的功能，因此非常适用于我们的场景。</p>
@@ -367,13 +367,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>下面，我们再介绍一下搜索场景比较常见的 <strong>Position偏差</strong> 的问题。</p>
 <p>图中蓝色部分代表的是 <strong>点击率</strong>，红色代表 <strong>曝光占比</strong>。从点击率来看，我们可以发现 <strong>Top1点击率要远远高于其他所有位置</strong>，并且Top1与其之后的位置间有着极大的落差。曝光占比也是头部远高于其他位置。其实这种情况说明了一个问题——当前所有Doc随机分发， <strong>Top区位置的Doc存在更大的概率被用户注意到并点击，因此存在一个较为明显的偏差问题。</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9d2ee5865856495198deef070b20fe44.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272237596.webp" />   
     </p>
 <p>另外，如果有的Doc一直排行在Top1位置，特征积累非常丰富，也会造成特征的偏差。 <strong>这样会使得有些Doc虽然效果并不好，但却常常处于Top1的位置。</strong></p>
 <p>于是，我们开展了 <strong>去Position Bias的工作</strong>。首先采用了较为常规的方法，利用Position特征以及少量上下文特征，构建了单独的 <strong>Position塔</strong>，并将其输出加入到 <strong>模型Wide部分</strong>。上线实验后效果较差，经分析，我们发现了Position特征与Label相关性过高，离线的模型非常依赖它，Position特征线上线下不一致性对指标影响非常严重，线上全部填1后AB指标降幅较大。</p>
 <p>因此，我们继续做了一些优化，加入了 <strong>当前Doc被用户看到（注意到）的概率建模。</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ec2cbbb40d1e436591803f5c2319b4d3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272237536.webp" />   
     </p>
 <p>整体来看，用户真实的点击率存在着一个 <strong>条件概率。</strong></p>
 <p>首先，这个用户在这个Position下能注意到它，如果排行靠前，用户更容易被它吸引。</p>
@@ -382,7 +382,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="step4重排"><strong>STEP4：重排</strong></h4>
 <p>这部分主要采用的是 <strong>SE-Rank模型</strong>。我们之所以要进行重排，是因为精排部分是分片的，没法加入上下文感知，比如同一个Query下，每一个Doc在精排阶段都是相对独立的，并不清楚要对比的候选集是怎样的，存在所有候选Doc的特征值相似，导致Doc之间的精排得分区分度不高，因此需要把上下文感知加进去，并进行重排。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d82c61e60c694db8b901304f44dffc32.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272237411.webp" />   
     </p>
 <p>SE-Rank中的X就是对应一系列输入的Doc及其对应的特征，上图中的L则表示对应 <strong>Doc的个数</strong>，C是特征的个数。在目前采用多Field的情况下， <strong>每一种特征都单独学习对应的上下文感知模块。</strong></p>
 <p>首先将原始Query下所有 <strong>候选Doc的特征联结起来</strong>，同时，对网络进行一定比例的压缩，降低模型复杂度，避免过拟合，效果有一定提升。</p>
@@ -390,7 +390,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>最终我们将Pooling后FC的结果返回给所有的候选Doc，这样完成上下文感知的构建。</p>
 <p>这里使用的训练的方式也是List-wise。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/750ae276023f4d09866e88ea423e46f3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272237137.webp" />   
     </p>
 <p>由于Transformer非常适合上下文场景感知的学习，于是我们在SE-Rank的基础上进行了优化。整体模型结构是 <strong>输入层接入Transformer结构</strong>，更利于当前Doc对所有候选Doc注意力及上下文影响的学习。</p>
 <p>我们的离线评估采用的是 <strong>NDCG</strong>，线上也取得了不错的效果。从离线NDCG来看，能够提升百分位以上。</p>
@@ -526,6 +526,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -559,10 +563,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -941,6 +941,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

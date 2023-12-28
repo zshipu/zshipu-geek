@@ -230,42 +230,42 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>判别式检索模型：该模型的目标是学习fΦ(q,d)，即尽量能够准确的判别q和d的相关程度</p>
 <p>因此，受到GAN的启发，我们将上述的两种IR模型结合起来做一个最大最小化的博弈：生成式模型的任务是尽可能的产生和query相关的document，以此来混淆判别式模型；判别式模型的任务是尽可能准确区分真正相关的document和生成模型生成的document，因此，我们总体的目标就是：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/83a886b9f01444d5abbd5749d5660e71.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957227.png" />   
     </p>
 <p>在上式中，生成式模型G为pθ(d|qn,r),生成式模型D对d是否与q相关进行判定，通过下面的式子给出相关性得分：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/861003510deb4cc4bc906b1590d48e1e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957974.png" />   
     </p>
 <h3 id="优化判别模型d">优化判别模型D</h3>
 <p>判别器的主要目标是最大化我们的对数似然，即正确的区分真正相关的文档和生成器生成的文档。最优的参数通过下面的式子得到：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/31a4fbd89cde4f78af5379284f56605e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957072.png" />   
     </p>
 <h3 id="优化生成模型g">优化生成模型G</h3>
 <p>生成器的主要目标是产生能够混淆判别器的document，判别器直接从给定的document池中选择document。在固定判别器参数fΦ(q,d)的情况下，生成器的学习目标是(第一项不包含θ,因此可以省略)：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c8030785f0304929958f43ff703b1a77.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957861.jpeg" />   
     </p>
 <p>我们把生成器的优化目标写作JG(qn)。</p>
 <p>由于生成的document是离散的，无法直接通过梯度下降法进行优化，一种通常的做法是使用强化学习中的策略梯度方法，我们将qn作为state，pθ(d|qn,r)作为对应的策略，而log(1+exp(fΦ(d，qn))作为对应的reward：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b2a0dc65bf7644fbb152e462ddc2fe27.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957865.jpeg" />   
     </p>
 <p>其中，第二步到第三步的变换利用了log函数求导的性质，而在最后一步则基于采样的document做了一个近似。</p>
 <h3 id="总体流程">总体流程</h3>
 <p>IRGAN的整体训练流程如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b6a156b7554e4ed6b11bd8cdddf27ced.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957913.jpeg" />   
     </p>
 <h3 id="pair-wise的情况">Pair-wise的情况</h3>
 <p>在很多IR问题中，我们的数据是对一个query的一系列排序文档对，因为相比判断一个文档的相关性，更容易判断用户对一对文档的相对偏好（比如说通过点击数据，如果两篇document同时展示给用户，用户点击了a而没有点击b，则可以说明用户对a的偏好大于对b的偏好），此外，如果我们使用相关性进行分级(用来表明不同文档对同一个query的匹配程度)而不是使用是否相关，训练数据也可以自然的表示成有序的文档对。</p>
 <p>IRGAN在pairwise情况下是同样适用的，假设我有一堆带标记的document组合Rn = {|di &gt; dj}。生成器G的任务是尽量生成正确的排序组合来混淆判别器D，判别器D的任务是尽可能区分真正的排序组合和生成器生成的排序组合。基于下面的式子来进行最大最小化博弈：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4fa03afe5e6145dfb8d85c105ca616b7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957817.png" />   
     </p>
 <p>其中，o=,o&rsquo;=分别代表正确的组合和生成器生成的组合。而D(du,dv|q)计算公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cbcd46affb72419e9bfcfb5b66cfae76.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271957580.png" />   
     </p>
 <p>接下来我们就来讲一下生成器的生成策略。首先我们选择一个正确的组合 ，我们首先选取dj，然后根据当前的生成器G的策略pθ(d|q,r)，选择比dj生成概率大的dk，组成一组。</p>
 <p>有关更多的IRGAN的细节，大家可以阅读原论文，接下来，我们来看一个简单的Demo吧。</p>
@@ -509,6 +509,10 @@ self.reward = 2 * (tf.sigmoid(self.reward_logits) - 0.5)
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -542,10 +546,6 @@ self.reward = 2 * (tf.sigmoid(self.reward_logits) - 0.5)
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -924,6 +924,8 @@ self.reward = 2 * (tf.sigmoid(self.reward_logits) - 0.5)
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

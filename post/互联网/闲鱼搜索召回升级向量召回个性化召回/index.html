@@ -215,7 +215,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>在搜索系统中，召回环节位于排序漏斗的最底层，决定了下游排序的空间大小，其重要程度毋庸置疑，在闲鱼搜索场景亦是如此。然而由于机器和人力资源的限制，长期以来闲鱼搜索的召回都是使用最简单的基于文本的召回方式，其优化迭代方式也只是在基础商品字段（标题、描述）之上，增加扩展字段。基于此，季度优化前，闲鱼主搜的召回整体方案如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a20a7cb6d89c4d56869842aee6c1f6e9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910774.webp" />   
     </p>
 <ul>
 <li>Query侧：通过Query改写，扩展Query语义，缓解用户侧搜索词表达不充分的问题，间接实现扩召回；</li>
@@ -237,7 +237,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>对于1，本季度我们增加基于语义的向量召回，缓解召回语义能力不足的问题；对于2则有很多思路，如考虑成交效率的向量召回、u2i、u2i2i等，这里做了一些尝试，发现有时常规的方案无法直接照搬到闲鱼场景，而最终本次优化我们优先采用了基于行为的I2I（准确说是Q2I2I），同时为了弥补长尾query召回仍然不足的问题，我们补充了基于多模态内容的I2I，从文本和视觉维度召回相关商品。</p>
 <p>对于上述扩召回的候选，我们使用类目、核心词、语义相关性等维度保证相关性，召回升级后整体模块构成如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e4d2a6cda01f4151989918a8fae93735.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910901.webp" />   
     </p>
 <p>后面的章节，将依次分模块进行详细方案的介绍。</p>
 <h2 id="语义向量召回"><strong>语义向量召回</strong></h2>
@@ -248,7 +248,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>对于无临近Query的Key Query，进行置空操作，此外对于有临近Query的Sample也会以一定几率置空，以适应新Query与超长尾Query缺少Q2Q的问题。</p>
 <p>模型架构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dc530a1582234af0aabf76320a5a4a29.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910857.webp" />   
     </p>
 <h3 id="实现细节">实现细节</h3>
 <ul>
@@ -275,12 +275,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>早些时候，语义向量召回的优化目标loss为经典的Triple loss：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/16b086f27c0540f3be5475e8237f7822.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910735.webp" />   
     </p>
 <p>其中 d(a,p)表示向量a和p的距离，a和p表示query和doc的正样本对，a和n表示负样本对。Triple loss训练的另一个标配是Online hard negative mining，即在mini-batch内，每个正样本对之间互为负样本，选择其中最难的样本作为负样本（相似度打分最高的样本对）。</p>
 <p>除了经典的Triple loss外，我们也借鉴了对比学习框架（如MOCO、SimCLR等）下常用的InfoNCE Loss，：，这里增加温度参数，进一步提升模型的泛化能力。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e31c9903514c4e8b846735b6e152d19d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911515.webp" />   
     </p>
 <p>其中q为query向量，k+为商品正样本对，k-为负样本对，τ为temperature超参数。InfoNCE在自监督对比学习中十分有效，同样在有监督的对比学习框架下，也被验证效果。上式从代码实现来看更加直观，也比较巧妙：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">loss_fun = torch.nn.CrossEntropyLoss()
@@ -309,7 +309,7 @@ loss = loss_func(scores, labels)
 </ul>
 <p>为了能够同时满足如上的需求，我们设计了如下的向量召回索引流程：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/674169827122413cbe71181f8254bf03.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911275.webp" />   
     </p>
 <ul>
 <li>
@@ -328,7 +328,7 @@ loss = loss_func(scores, labels)
 </ul>
 <p>在闲鱼搜索业务中，存在多个索引引擎，主要包括倒排引擎，即主引擎和优品引擎，在增加了向量引擎以及I2I引擎后，如何以最小的代价对链路改造多链路召回使其满足整体RT的要求，我们设计了如下的多路召回流程：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/624b62af6ade464589a19c548f25cded.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911247.webp" />   
     </p>
 <p>在实现的过程中，采用的是如上的并发多路召回的方式，目前索引引擎的种类分为两种，分别为Ha3引擎和KV引擎引擎。当前对于每一路引擎都是独立的召回，通过设置不同的召回量控制每一路引擎的召回结果。</p>
 <h2 id="问题讨论与优化方向">问题讨论与优化方向</h2>
@@ -374,7 +374,7 @@ loss = loss_func(scores, labels)
 <h2 id="建模目标-1">建模目标</h2>
 <p>分析发现，用户通过搜索到详情页猜你喜欢，通过猜你喜欢场景成交的商品占比可观，通过case分析发现，该部分diff商品，靠常规的文本召回方法难以成功检索到。一个参考统计数据，搜索导流到猜你喜欢的点击PV里 ，仅有约25%在当前query的召回集合中，也就是说有75%没有被召回。如一个例子：搜索引擎中检索“迪卡侬优惠券”，返回结果量不足，而点击相关商品进入详情页猜你喜欢却可以关联处满足需求的商品。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f30727e7de4749b29f62a800514b3178.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911126.webp" />   
     </p>
 <p>因此考虑直接通过I2I方法召�</p>
 
@@ -502,6 +502,10 @@ loss = loss_func(scores, labels)
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -535,10 +539,6 @@ loss = loss_func(scores, labels)
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -917,6 +917,8 @@ loss = loss_func(scores, labels)
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

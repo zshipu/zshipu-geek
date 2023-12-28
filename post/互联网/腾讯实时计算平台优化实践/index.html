@@ -203,7 +203,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/66f4a943227f43e9976eb8f94ed73320.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281732902.webp" />   
     </p>
 <blockquote>
 <p>分享：杜立 腾讯高级工程师</p>
@@ -221,7 +221,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="01-背景及现状"><strong>01 背景及现状</strong></h2>
 <h3 id="1-三种模式的分析"><strong>1. 三种模式的分析</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6c85f8ead10840a8a286f697ae3bada1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281732093.png" />   
     </p>
 <p>Flink 作业目前有三种创建方式：JAR 模式、画布模式和 SQL 模式。不同的提交作业的方式针对的人群也是不一样的。</p>
 <p><strong>■ Jar 模式</strong></p>
@@ -277,7 +277,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>使用 Flink SQL 基于某个 Window 去做双流 Join，现有的方案有两种，第一种方案就是先做 Join 再做 Group By，第二种就是 Interval Join。首先来分析一下第一种方案能否满足需求。</p>
 <p><strong>■ 1.1 先 Join 再开窗</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0207480c9e1c4237a06fb99813cb6405.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281732576.png" />   
     </p>
 <p>先 Join 再开窗的逻辑如上图所示，根据逻辑执行计划可以看到 Join 节点在 Window Aggregate 节点之下，所以会先进行流与流的 Join，Join 完了之后再去做Window Aggregate。</p>
 <p>图中右侧的流程图也可以看出，首先两边的流会做一个 Connect，然后基于 Join Key 做 Keyby 操作，以此保证两条流中拥有相同 Join Key 的数据能够 Shuffle 到同一个 task 上。左流会将数据存到自己的状态中，同时会去右流的状态中进行 Match，如果能 Match 上会将 Match 后的结果输出到下游。这种方案存在以下两个问题：</p>
@@ -287,7 +287,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p><strong>■ 1.2 Interval Join</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/56ed151b683549ea8182683306c7b37a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281732362.png" />   
     </p>
 <p>Interval Join 相对于前面一种写法，好处就是不存在状态无法清理的问题，因为在扫描左右两条流的数据时可以基于某一确定的窗口，过了窗口时间后，状态是可以被清理掉的。</p>
 <p>但是这种方案相对于第一种方案而言，数据准确性可能会更差一点，因为它对于窗口的划分不是基于一个确定窗口，而是基于数据进行驱动，即当前数据可以 Join 的另一条流上的数据的范围是基于当前数据所携带的 Eventtime 的。这种窗口划分的语义与我们的需求还是存在一定差距的。</p>
@@ -297,12 +297,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>■ 1.3 Windowing Table-Valued Function</strong></p>
 <p>腾讯扩展出了 Windowing Table-Valued Function 语法，该语法可以满足“在两条流上针对某个时间窗口做 Join 操作或者交并差操作”的需求。在 SQL 2016 标准中就有关于这一语法的描述，同时该语法在 Calcite1.23 里面就已存在。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/626b2148e54d439eaa49a97156c758e0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281732079.png" />   
     </p>
 <p>Windowing Table-Valued Function 语法中的 Source 可以把它整个的语义描述清楚，From 子句里面包含了 Window 定义所需要的所有信息，包括 Table Source、Eventtime Field、Window Size 等等。</p>
 <p>从上图的逻辑计划可以看出，该语法在 LogiclTableScan 上加了一个叫 LogicalTableFunctionScan 的节点。另外，LogicalProject 节点（输出节点）多了两个字段叫作 WindowStart 和 WindowEnd，基于这两个字段可以把数据归纳到一个确定的窗口。基于以上原理，Windowing Table-Valued Function 语法可以做到下面这些事情：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dcdd8f6547a840c08736740825b2b5b8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281732793.png" />   
     </p>
 <ul>
 <li>
@@ -311,7 +311,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/841b8553173c4d41bb5b935dfd7e8a46.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281733278.webp" />   
     </p>
 <ul>
 <li><strong>在双流上面</strong>，可以满足“在两条流上针对某个时间窗口做 Join 操作或者交并差操作”的原始需求。语法如上图，首先把两个窗口的 Window Table 构造好，然后利用 Join 关键字进行 Join 操作即可；交并差操作也一样，与传统数据库 SQL 的交并差操作无二。</li>
@@ -345,7 +345,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>基于 Tumble Window，自定义了 Incremental Trigger。该触发器确保，不仅仅是在 Windows 结束之后才去触发窗口计算，而是每个 SQL 中所定义的 Interval 周期都会触发一次窗口计算。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a41320ca6d224f21b3429a9ba390ce46.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281733297.png" />   
     </p>
 <p>如上图中的 SQL 案例，总的窗口大小是一秒，且每 0.2 秒触发一次，所以在窗口内会触发 5 次窗口计算。且下一次的输出结果是基于上一次结果进行累计计算。</p>
 <ul>
@@ -354,7 +354,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>针对 Incremental Window 做了一个名为 Lazy Trigger 的优化。在实际的生产过程中，一个窗口相同 Key 值在多次触发窗口计算后输出的结果是一样的。对于下游来讲，对于这种数据是没必要去重复接收的。因此，如果配置了 Lazy Trigger 的话，且在同一个窗口的同一个 Key 下，下一次输出的值跟上一次的是一模一样的，下游就不会接收到这次的更新数据，由此减少下游的存储压力和并发压力。</p>
 <p><strong>■ 2.2 Enhanced Tumble Window</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5c20702d9f9e4c03ba9f2c2829ff566e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281733919.png" />   
     </p>
 <p>有如下需求，用户希望在 Tumble Window 触发之后，不去丢弃迟到的数据，而是再次触发窗口计算。如果使用 DataStream API，使用 SideOutput 就可以完成需求。但是对于 SQL，目前是没办法做到的。因此，扩展了现有的 Tumble Window，把迟到的数据也收集起来，同时迟到的数据并不是每来一条就重新触发窗口计算并向下游输出，而是会重新定义一个 Trigger，Trigger 的时间间隔使用 SQL 中定义的窗口大小，以此减少向下游发送数据的频率。</p>
 <p>同时，侧输出流在累计数据的时候也会使用 Window 的逻辑再做一次聚合。这里需要注意，如果下游是类似于HBase这样的数据源，对于相同的 Window 相同的 Key，前一条正常被窗口触发的数据会被迟到的数据覆盖掉。理论上，迟到的数据跟正常窗口触发的数据的重要性是一样的，不能相互覆盖。最后，下游会将收到的同一个窗口同一个 Key 下的正常数据和延迟数据再做一次二次聚合。</p>
@@ -365,7 +365,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>首先介绍一下持续查询（Continuous Query），相对于批处理一次执行输出一次结果的特点，流的聚合是上游来一条数据，下游的话就会接收一条更新的数据，即结果是不断被上游的数据所更新的。因此，对于同一个 Key 下游能够接收到多条更新结果。</p>
 <p><strong>2. 回撤流</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9dec729f8aba42919493fdb595ec3d44.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281733523.png" />   
     </p>
 <p>以上图的 SQL 为例，当第二条 Java 到达聚合算子时，会去更新第一条 Java 所产生的状态并把结果发送到下游。如果下游对于多次更新的结果不做任何处理，就会产生错误的结果。针对这种场景，Flink SQL 引入了回撤流的概念。</p>
 <p>所谓回撤流的话，就是在原始数据前加了一个标识位，以 True/False 进行标识。如果标识位是 False，就表示这是一条回撤消息，它通知下游对这条数据做 Delete 操作；如果标识位是 True，下游直接会做 Insert 操作。</p>
@@ -379,13 +379,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>解释一下 Outer Join 为什么会产生回撤。以 Left Outer Join 为例，且假设左流的数据比右流的数据先到，左流的数据会去扫描右流数据的状态，如果找不到可以 Join 的数据，左流并不知道右流中是确实不存在这条数据还是说右流中的相应数据迟到了。为了满足 Outer join 的语义的话，左边流数据还是会产生一条 Join 数据发送到下游，类似于 MySQL Left Join，左流的字段以正常的表字段值填充，右流的相应字段以 Null 填充，然后输出到下游，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9a42077034af4276adba82f054075997.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281733883.webp" />   
     </p>
 <p>（图片来源于云栖社区）</p>
 <p>后期如果右流的相应数据到达，会去扫描左流的状态再次进行 Join，此时，为了保证语义的正确性，需要把前面已经输出到下游的这条特殊的数据进行回撤，同时会把最新 Join 上的数据输出到下游。注意，对于相同的 Key，如果产生了一次回撤，是不会再产生第二次回撤的，因为如果后期再有该 Key 的数据到达，是可以 Join 上另一条流上相应的数据的。</p>
 <p><strong>■ 2.2 如何处理回撤消息</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/164fd405531f4f22a28d1a5b4bf4e4d1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281733048.png" />   
     </p>
 <p>下面介绍 Flink 中处理回撤消息的逻辑。</p>
 <p>对于中间计算节点，通过上图中的 4 个标志位来控制，这些标识位表示当前节点是产生 Update 信息还是产生 Retract 信息，以及当前节点是否会消费这个 Retract 信息。这 4 个标识位能够决定整个关于 Retract 的产生和处理的逻辑。</p>
@@ -396,7 +396,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>2.3.1 中间节点的优化</strong></li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b404d86511bd49779ed1ce65b446a78c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281733554.png" />   
     </p>
 <p>产生回撤信息最根本的一个原因是不断地向下游多次发送更新结果，因此，为了减少更新的频率并降低并发，可以把更新结果累计一部分之后再发送出去。如上图所示：</p>
 <ul>
@@ -528,6 +528,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -561,10 +565,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -943,6 +943,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

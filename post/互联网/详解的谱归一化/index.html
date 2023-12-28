@@ -198,7 +198,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>本文主要介绍谱归一化这项技术，详细论文参考 <em><strong>Spectral Normalization for Generative Adversarial Networks</strong></em>。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a296ce0330f541e4bbde3218abb68f73.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281824113.webp" />   
     </p>
 <p>本文主要对论文中的基础知识和遗漏的细节做出补充，以便于更好地理解谱归一化。部分内容参考并整合了如下两篇博客。</p>
 <blockquote>
@@ -208,20 +208,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="lipschitz-continuity">Lipschitz Continuity</h1>
 <p>在 GAN 中，假设我们有一个判别器 D: I→R，其中 I 是图像空间。如果判别器是 K-Lipschitz continuous 的，那么对图像空间中的任意 x 和 y，有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/77aba509e3074e2ebdf5b062a3d39097.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281824975.webp" />   
     </p>
 <p>其中 || · || 为 L2 norm，如果 K 取到最小值，那么 K 被称为 Lipschitz constant。</p>
 <p>直观地来说，Lipschitz 条件限制了函数变化的剧烈程度，即函数的梯度。在一维空间中，很容易看出 y=sin(x) 是 1-Lipschitz 的，它的最大斜率是 1。</p>
 <p>那么，为什么要使判别器函数具有 Lipschitz continuity 呢？Wasserstein GAN 提出了用 wasserstein 距离取代之前的 KL 散度或者 JS 散度，作为 GAN 判别器的损失函数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0c3729a0afe143e4942bbcedf907f2ca.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281824919.webp" />   
     </p>
 <p>其中 Pr 和 Pg 分别为真实数据和生成数据的分布函数，Wasserstein 距离衡量了这两个分布函数的差异性。</p>
 <p>直观地理解，就是根据这两个分布函数分别生成一堆数据 x1, x2, &hellip; , xn 和另一堆数据 y1, y2, &hellip; , yn，然后计算这两堆数据之间的距离。距离的算法是找到一种一一对应的配对方案 γ~∏(Pr, Pg)，把 xi 移动到 yj，求总移动距离的最小值。</p>
 <p>由于在 GAN 中， Pr 和 Pg 都没有显式的表达式，只能是从里面不停地采样，所以不可能找到这样的 γ，无法直接优化公式 (2) 。W-GAN 的做法是根据 Kantorovich-Rubinstein duality，将公式 (2) 转化成公式 (3)，过程详见以下链接：</p>
 <p><a href="https://zshipu.com/t?url=https%3A%2F%2Fvincentherrmann.github.io%2Fblog%2Fwasserstein%2F">https://vincentherrmann.github.io/blog/wasserstein/</a></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a72510b4d661450dad77af0159735cc0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281824215.webp" />   
     </p>
 <p>其中 f 即为判别器函数。只有当判别器函数满足 1-Lipschitz 约束时，(2) 才能转化为 (3)。除此之外，正如上文所说，Lipschitz continuous 的函数的梯度上界被限制，因此函数更平滑，在神经网络的优化过程中，参数变化也会更稳定，不容易出现梯度爆炸，因此 Lipschitz continuity 是一个很好的性质。</p>
 <p>为了让判别器函数满足 1-Lipschitz continuity，W-GAN 和之后的 W-GAN GP 分别采用了 weight-clipping 和 gradient penalty 来约束判别器参数。这里的谱归一化，则是另一种让函数满足 1-Lipschitz continuity 的方式。</p>
@@ -229,60 +229,60 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>众所周知，矩阵的乘法是线性映射。对线性映射来说，如果它在零点处是 K-Lipschitz 的，那么它在整个定义域上都是 K-Lipschitz 的。</p>
 <p>想象一条过零点的直线，它的斜率是固定的，只要它上面任何一点是 K-Lipschitz 的，那么它上面所有点都是 K-Lipschitz 的。因此，对矩阵
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d8894e675fe3437e95b81884c0da83c9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281824060.webp" />   
      来说，它满足 K-Lipschitz 的充要条件是：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b14e09d43c78478face255efbe4c9c7e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281824801.webp" />   
     </p>
 <p>对其做如下变换：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/04a60416b2274d9f95a4929d1a6e654b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281824592.webp" />   
     </p>
 <p>其中 &lt;·&gt; 表示两个向量的内积。由于矩阵
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ba23c5bc50ec4ec1a4d796bc2ebec651.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281824284.webp" />   
      是半正定矩阵，它的所有特征值均为非负。我们假设它的特征向量构成的基底为 v1, v2,&hellip;, vn，对应的特征值为 λ1, λ2,&hellip;, λn，令 x=x1·v1+x2·v2+ &hellip; +xn·vn。那么，公式 (5) 的左半部分可以转化为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bd15ddef4b25490bad7f980b24ef14b3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281824000.webp" />   
     </p>
 <p>要使公式 (6) 对任意 xi 恒成立，且 λi 非负，则必有
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/daf67397657440cb8d9089cde070d352.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281824931.webp" />   
      。若 λ1 为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fa5ac6cc9a044abf9bdd471a27f1dcf6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281824765.webp" />   
      最大的特征值，只需要满足
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0c7b7d0017734532943aef1c42c7b31b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281824467.webp" />   
      ，这里
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/78cb362519dd4663be0170e0ef1e2163.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281824199.webp" />   
      即为矩阵 A 的 spectral norm。</p>
 <p>综上所述，映射
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/82f14a64b0824980b449b1a2ff4a7672.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825894.webp" />   
      满足 K-Lipschitz 连续，K 的最小值为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5326468388824ecab718956ed02cd2bf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825730.webp" />   
      。那么，要想让矩阵 A 满足 1-Lipschitz 连续，只需要在 A 的所有元素上同时除以
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dd4f372e29394abfa2bf68dd0705759e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825446.webp" />   
      即可（观察公式 (4) 左侧是线性映射）。</p>
 <p>通过上面的讨论，我们得出了这样的结论： <strong>矩阵 A 除以它的 spectral norm（
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e29e0ad37df74fd6bccf95f59ba2a919.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825131.webp" />   
      最大特征值的开根号
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/896f3aa5a5ae4d8cb44b72b3b35a12b5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825985.webp" />   
      ）可以使其具有 1-Lipschitz continuity。</strong></p>
 <h1 id="矩阵的奇异值分解">矩阵的奇异值分解</h1>
 <p>上文提到的矩阵的 spectral norm 的另一个称呼是矩阵的 <strong>最大奇异值</strong>。回顾矩阵的 SVD 分解：</p>
 <p>矩阵
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/11caa205a1434bfb93a4c9d45b833a81.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825669.webp" />   
      存在这样的一种分解：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c1defc64ee3f48bca0484c87c599b4ac.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825432.webp" />   
     </p>
 <p>其中：</p>
 <ul>
@@ -297,23 +297,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4f40b458c2a74556aaed069744348b37.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825228.webp" />   
     </p>
 <p>**▲**SVD分解</p>
 <p>由于 U 和 V 都是单位正交基，因此可以把矩阵乘以向量分成三步：旋转，拉伸，旋转。一前一后的两步旋转不改变向量的模长，唯一改变向量模长的是中间的拉伸，即与 Σ 相乘的那一步。而矩阵的 Lipschitz continuity 关心的正是矩阵对向量模长的改变，不关心旋转。</p>
 <p>因此，只需要研究中间的 Σ 即可。而 Σ 又是一个对角矩阵，因此，它对向量的模长拉长的最大值，就是对角线上的元素的最大值。也就是说，矩阵的最大奇异值即为它的 spectral norm。</p>
 <p>根据公式 (7) ，以及 SVD 分解中 U 和 V 都是单位正交基，单位正交基的转置乘以它本身为单位矩阵，有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/28d91e49b44d4d9d99e734e0af639846.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825000.webp" />   
     </p>
 <p>因此，只需要求出**
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a230b4a3a9ef4d9da59aa044802e2dce.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825757.webp" />   
      **的最大特征值，再开根号，就求出了矩阵的最大奇异值，也就是矩阵的 spectral norm，和上一小节的推导殊途同归。</p>
 <h1 id="神经网络的spectral-norm">神经网络的Spectral Norm</h1>
 <p>对于复合函数，我们有这样的定理：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4ffe3bf23f8e4558aece654518bbf9da.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825584.webp" />   
     </p>
 <p>而多层神经网络，正是多个复合函数嵌套的操作。最常见的嵌套是：一层卷积，一层激活函数，再一层卷积，再一层激活函数，这样层层包裹起来。</p>
 <p>激活函数通常选取的 ReLU，Leaky ReLU 都是 1-Lipschitz 的，带入到 (9) 中相乘不影响总体的 Lipschitz constant，我们只需要保证卷积的部分是 1-Lipschitz continuous 的，就可以保证整个神经网络都是 1-Lipschitz continuous 的。</p>
@@ -324,75 +324,75 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Power iteration 是用来近似计算矩阵最大的特征值（dominant eigenvalue 主特征值）和其对应的特征向量（主特征向量）的。</p>
 <p>假设矩阵 A 是一个 n × n 的满秩的方阵，它的单位特征向量为 v1, v2,&hellip;, vn，对应的特征值为λ1, λ2,&hellip;, λn。那么对任意向量 x=x1·v1+x2·v2+ &hellip; +xn·vn，有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/de45d527ec4743dfa35937b9b89538fc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825370.webp" />   
     </p>
 <p>我们经过 k 次迭代：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/625a9784d4cd401f809012ce903d15ad.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825170.webp" />   
     </p>
 <p>由于 λ1, λ2,&hellip;, λn（不考虑两个特征值相等的情况，因为太少见了）。可知，经过 k 次迭代后
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6b3be4454aee40d08deaa0812dd113b1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825959.webp" />   
      。因此：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8363a7d105974e03b8f3919d98b91bd3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825806.webp" />   
     </p>
 <p>也就是说，经过 k 次迭代后，我们将得到矩阵主特征向量的线性放缩，只要把这个向量归一化，就得到了该矩阵的单位主特征向量，进而可以解出矩阵的主特征值。</p>
 <p>而我们在神经网络中，想求的是权重矩阵 W 的最大奇异值，根据上面几节的推导，知道这个奇异值正是
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2f27c7c0cc3c4874bd7d8304b6627d23.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825622.webp" />   
      最大特征值的开方
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1e1306e95fec4750ba812140719645f9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825395.webp" />   
      。因此，我们可以采用 power iteration 的方式求解
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/583892f848674297b87e27094e30d8a1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825141.webp" />   
      的单位主特征向量，进而求出最大特征值 λ1。论文中给出的算法是这样的：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/34821a6ee4ba4fdb8385c503abe63e0d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825862.webp" />   
     </p>
 <p>如果单纯看分子，我们发现这两步合起来就是
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/797fa89078e34946a113f960d5772e63.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825603.webp" />   
      ，反复迭代 (13) 中上下两个式子 ，即可得到矩阵
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/00c6a2b3559d46cf9566e6129b439e27.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825575.webp" />   
      的单位主特征向量
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7f1b90768dc24f79b3ead689152f0da3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825273.webp" />   
      。只不过 (13) 的每算“半”步都归一化一次。</p>
 <p>其实这种归一化并不影响向量
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a013550e6357446cb6331a84f24acbc3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825063.webp" />   
      的方向收敛到主特征向量的方向，而只影响特征向量前面的系数。而每步归一化一次的好处是，每步都可以得到单位主特征向量的近似解。</p>
 <p>那么，知道
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/51cc3ddb2b204ecb83e43080131377a1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825745.webp" />   
      的单位主特征向量
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7ae0f15ee8b94a3396362a9c68155cf1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825576.webp" />   
      后，如何求出最大特征值 λ1 呢？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e2791a1c1dc54b7cbb673e30d3691ce3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825366.webp" />   
     </p>
 <p>而将公式 (13) 的第二个式子两边同时左乘
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/34afa50edbe64873ab8061536e633da5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825240.webp" />   
      :</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ab6bf1c382774a67b0641173057f44af.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825023.webp" />   
     </p>
 <p>最终，(15) 即为论文中提出的权重矩阵 W 的 spectral norm 公式。</p>
 <p>而在具体的代码实现过程中，可以随机初始化一个噪声向量
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/742c68159c714171acadfc3bd5820469.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825736.webp" />   
      代入公式 (13) 。由于每次更新参数的 step size 很小，矩阵 W 的参数变化都很小，矩阵可以长时间维持不变。</p>
 <p>因此，可以把参数更新的 step 和求矩阵最大奇异值的 step 融合在一起，即每更新一次权重 W ，更新一次
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/26dce8c118cd43a387436363505cfa11.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825464.webp" />   
      和
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/63a6a9a96ec545b2bd8ad20c1018f249.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825246.webp" />   
      ，并将矩阵归一化一次（除以公式 (15) 近似算出来的 spectral norm）。</p>
 <p>具体代码见：</p>
 <p>[https://github.com/christiancosgrove/pytorch-spectral-normalization-gan](<a href="https://www.6aiq.com/forward">https://www.6aiq.com/forward</a>?</p>
@@ -525,6 +525,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -558,10 +562,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -940,6 +940,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

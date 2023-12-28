@@ -209,7 +209,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f68a1f8bf9984c1099b19b5a7d55d4d8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747793.webp" />   
     </p>
 <blockquote>
 <p>分享嘉宾：邓威 腾讯 高级工程师</p>
@@ -219,7 +219,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>导读：</strong> 在腾讯金融场景，我们每天都会产生大量的数据，为了提升分析的交互性，让决策更加敏捷，我们引入了Impala来解决我们的分析需求。所以，本文将和大家分享Impala在腾讯金融大数据场景中的应用架构，Impala的原理，落地过程的案例和优化以及总结思考。</p>
 <h1 id="01-impala的架构"><strong>01 Impala的架构</strong></h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/711eecaa1663489a8a4a876896e865ae.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747496.webp" />   
     </p>
 <p>首先介绍Impala的整体架构，帮助大家从宏观角度理解整个Impala系统，掌握框架上的知识和概念。</p>
 <p>Impala存储的方式分为两种分别是Kudu和HDFS，其中Kudu实时点击流的场景，HDFS存储大多数据。</p>
@@ -241,12 +241,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="1-线程的分层"><strong>1. 线程的分层</strong></h2>
 <p>主要包括三类，分别是实例线程，数据扫描scan线程（解压缩），io线程。在impala的默认模式下，实现了计算和扫描一对多，扫描层充分开发，但在多线程模式下，在扫描层化为单线程直接使用实例线程，跟计算层构成以实例为单位的开发。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3aea7f7a179347698b1759300107266c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747510.webp" />   
     </p>
 <h2 id="2-遇到的两个问题"><strong>2. 遇到的两个问题</strong></h2>
 <p>① 高并发下抖动严重，原因出现在RPC相关的EXCHANGE：因为在高并发状态下，数据由sender端push给Receiver端，且Receiver端由BatchQueue进行接受，一旦队列满了或者deferred不为空，就会传输给deferredRPCS，因此极容易导致队列堆积。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/eec38cec73004a4682721ac44115aa5c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747401.webp" />   
     </p>
 <p>解决方式，首先将参数：</p>
 <p>datastream_service_num_deserialization_threads</p>
@@ -255,7 +255,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="3-并发特性的制约因素"><strong>3. 并发特性的制约因素</strong></h2>
 <p>并发的最小颗粒度为文件，因此当表字段比较少，且按照文件大小生成文件，将导致在同一个文件中所包含的行数增多，并发度降低；若选择将文件拆开提高并行度，但获取的数据量变小，导致磁盘的io效率降低。因此从这两方面来说，均制约了Impala的并发。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7567853947404097b23c065c2cbbb7a4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747259.webp" />   
     </p>
 <h1 id="03-impala表关联优化原理基于cbo成本优化"><strong>03 Impala表关联优化原理：基于CBO（成本优化）</strong></h1>
 <h2 id="1-基本工作"><strong>1. 基本工作</strong></h2>
@@ -264,13 +264,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>基于平均分布对每个关联子表的数据量进行预估，并判断大小表从而选择合理的顺序。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/970dabf4e681424787211d58c59fb679.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747025.webp" />   
     </p>
 <h2 id="2-三个问题"><strong>2. 三个问题</strong></h2>
 <p>① Outer join出现数据倾斜，采取轴心表策略控制join的顺序，提升效率。</p>
 <p>比如因为两表做了两次的exchange，所以A表join B表之后重新exchange导致大量NULL数据倾斜，对于这一问题采取的解决方案是轴心表策略，从join的顺序上控制数据的问题。该策略是基于RBO规则的，首先结合CBO预估子查询的数据量，以某个子查询为轴心，将其他的查询以这个表作为首位进行排列，并采用straight_join控制join的顺序，从而顺利解决该问题。并且在优化前后，效率得到了一个极大地提升。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d2e5bd026ce046d7b030efafc64f1023.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747254.webp" />   
     </p>
 <p>② 多个表group不一致导致多余的exchange，不同地子查询有不同地groupby顺序，频繁地交换数据产出地顺序，带来大量数据冗余，降低了后续相关数据查询地效率，因此解决这个问题需要保证多个表在执行group by顺序一致，才能有效减少exchange地次数，从而提高效率</p>
 <p>③ 平均分布假设引发的预估偏差导致broadcast join，因为impala在实践查询之前，会基于平均分布假设预估生成表地数据量，但一旦产生偏差，就会导致broadcast join地发生，从而影响该次查询的效率。</p>
@@ -279,14 +279,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>比如需要查询11.26日访问过首页banner的用户申购转化情况，首先需要根据访问11.26首页banner的用户数据，生成用户行为主题，随后提取所有访问过首页banner的人群，通过人群关联分析整个用户申购的情况，申城主站用户申购的主题。这一过程反映了原来的分析模型不支持主题分析，主题和主题之间需要通过人群包进行转化，效率低下。</p>
 <p>但在运用了impala的多表关联功能之后，可以将用户申赎回行为的虚拟主题这以请求进行拆分，转换成关联子查询，分为用户行为主题和主站用户申购主题，极大的提高了效率，也避免了人群包的使用，减少数据量的处理。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2f9be1a382024f7db538b692c2d48df5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747844.webp" />   
     </p>
 <p>除了以上介绍的两个基本原理，Impala的存储层实现的原理和应用在整个Impala中也是不可忽视的，接下来为大家介绍的就是其存储层的相关理论和运用。</p>
 <h1 id="04-impala的存储层"><strong>04 Impala的存储层</strong></h1>
 <h2 id="1-原理"><strong>1. 原理</strong></h2>
 <p>交互式分析引擎的实现思路分为进行预计算，提前计算出所有可能维度组合的结果，或通过即时计算包括建立倒排索引和列式存储统计信息。其中倒排索引是指对匹配的结果进行链表归并或bitmap处理，将每一列独立存储，并在符合olap每次只分析部分列的需求，同时利用统计信息减少io的消耗。在并发度不那么高的背景下，多采用列式存储的原理，因其采用单行组的形式对数据进行存储，可以减少io次数，从而提升QPS。下图为列式存储的抽象表示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5913ab54fa524b419ed444b4d9517fb1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271747819.webp" />   
     </p>
 <p>对于性能差异的原因，通过一个例子能够很好的理解，比如一个分区存储150G，供727个文件，平均每个文件211M，一共273列，平均每一列774k。impala再读取的过程中会向scanRange对象中填充读取一个内存块，所以若每次只读一列，只需要一次io，但如果分散再多个行组中就需要多次io，尤其是如果行组太多就同行存无异。因此在一个parquet文件与hdfs的block大小一致，并且仅包含一个row group，可以最大限度地提高QPS和运行效率，避免大量行组导致效率低下地问题。</p>
 <h2 id="2-数据过滤"><strong>2. 数据过滤</strong></h2>
@@ -416,6 +416,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -449,10 +453,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -831,6 +831,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

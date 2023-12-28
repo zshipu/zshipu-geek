@@ -203,39 +203,39 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <p>本文承接 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2020%2F0408%2F130.html">索引文件的生成（十）</a>，继续介绍剩余的内容，为了便于下文的介绍，先给出 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2Fsuoyinwenjian%2F2019%2F0424%2F53.html">生成索引文件.dim&amp;&amp;.dii</a> 的流程图以及流程点 <code>构建BKD树的节点值（node value）</code> 的流程图：</p>
 <p>图 1：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/1-281836fc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272220821.png" />   
     </p>
 <p>图 2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/2-684ade18.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272220647.png" />   
     </p>
 <h2 id="第一次更新-parentsplits-数组">第一次更新 parentSplits 数组</h2>
 <p>图 3：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/3-e316f768.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272220430.png" />   
     </p>
 <p>  parentSplits 数组的数组元素数量跟点数据的维度数量相同，下标值为 0 的数组元素描述的是维度编号（见文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2020%2F0408%2F130.html">索引文件的生成（十）之 dim&amp;&amp;dii</a>）为 0 的维度值在祖先节点中作为 <code>切分维度</code>(见文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2020%2F0408%2F130.html">索引文件的生成（十）之 dim&amp;&amp;dii</a>)的次数（累加值）：</p>
 <p>图 4：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/4-70a01c05.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272220529.png" />   
     </p>
 <p>  如果某一时刻，parentSplits 数组如上述所示，说明当前处理的点数据的维度为 3（数组大小），并且维度编号为 1（数组下标为 1）的维度在祖先节点中已经 3 次作为切分维度，如果执行完图 2 的流程点 <code>选出切分维度</code> 后，维度编号 1 再次作为了切分维度，那么在当前流程点，我们就需要 <code>第一次更新parentSplits数组</code>，更新后的 parentSplits 数组如下所示：</p>
 <p>图 5：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/5-e43eb7b2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272220589.png" />   
     </p>
 <p><strong>为什么要更新 parentSplits 数组</strong></p>
 <p>  如果当前节点划分后的左右子树还是内部节点，那么左右子树需要根据 parentSplits 数组提供执行流程点 <code>选出切分维度</code> 的条件判断依据。</p>
 <h2 id="设置左子树的准备数据设置右子树的准备数据">设置左子树的准备数据、设置右子树的准备数据</h2>
 <p>图 6：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/6-eeac5338.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272220727.png" />   
     </p>
 <p>  执行到当前流程点，内部节点的处理工作差不多已经全部完成（除了流程点 <code>第二次更新parentSplits数组</code>），当前流程点开始为后续的左右子树的处理做一些准备数据，根据当前的节点编号（见文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2020%2F0408%2F130.html">索引文件的生成（十）之 dim&amp;&amp;dii</a>），即将生成的左右子树可能仍然是内部节点，或者是叶子节点。这两种情况对应的准备数据是有差异的，我们会一一介绍。另外根据满二叉树的性质，如果当前节点编号为 n，那么左右子树的节点编号必然为 2*n、2*n + 1，在文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2020%2F0408%2F130.html">索引文件的生成（十）之 dim&amp;&amp;dii</a> 中我们说到，根据节点编号就能判断属于内部节点（非叶节点）还是叶子节点，不赘述。</p>
 <p>  处理节点（叶子节点或者内部节点）需要的准备数据有好几个，这些准备数据在源码中其实就是 <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2FLuXugang%2FLucene-7.5.0%2Fblob%2Fmaster%2Fsolr-8.4.0%2Flucene%2Fcore%2Fsrc%2Fjava%2Forg%2Fapache%2Flucene%2Futil%2Fbkd%2FBKDWriter.java">https://github.com/LuXugang/Lucene-7.5.0/blob/master/solr-8.4.0/lucene/core/src/java/org/apache/lucene/util/bkd/BKDWriter.java</a> 类中的 build(&hellip;)方法的参数：</p>
 <p>图 7：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/7-1006f728.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272220050.png" />   
     </p>
 <p>  图 6 中的 nodeID 参数即节点编号，leafNodeOffset 参数即最左叶子节点的节点编号值，其他的参数在下文中会部分介绍。</p>
 <h3 id="左右子树为内部节点">左右子树为内部节点</h3>
@@ -258,19 +258,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>  例如当前内部节点有如下的点数据集合，数量为 7，并且假设按照维度编号 2 进行了排序：</p>
 <p>图 8：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/8-1fd1dec6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272220151.png" />   
     </p>
 <p>  根据图 8，当前的 minPackedValue、maxPackedValue 以及左右子树的 minPackedValue、maxPackedValue 如下所示：</p>
 <p>图 9：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/9-e63fc10d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272220787.png" />   
     </p>
 <p>  从图 9 可以看出左子树的 maxPackedValue 跟右子树的 minPackedValue 的维度编号为 2 的值被更新为同一个新值，而该值就是序号为(N/2 -1) 的点数据的维度编号为 2（父节点的排序维度）对应的维度值，即图 8 中红色标注的维度值。</p>
 <p>  对于左右子树来说，如果他们还是内部节点，那么执行图 1 的 <code>选出切分维度</code> 的流程时就会使用到父节点提供给它们的参数 minPackedValue、maxPackedValue。</p>
 <p>  回看上文中内部节点给左右子树的准备参数 minPackedValue、maxPackedValue 是有点问题的，比如左子树的点数据集合以及 minPackedValue、maxPackedValue 如下所示：</p>
 <p>图 10：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/10-089cc622.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272220310.png" />   
     </p>
 <p>  图 10 中，左子树节点 <strong>实际</strong> 的 minPackedValue、maxPackedValue 应该是：</p>
 <div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
@@ -408,6 +408,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -441,10 +445,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -823,6 +823,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

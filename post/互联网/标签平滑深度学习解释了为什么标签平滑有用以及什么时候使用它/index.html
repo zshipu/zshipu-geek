@@ -200,14 +200,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>标签平滑算是一种常规技术了，但是这背后的原理不知道大家有没有深究过，Google brain给出了他们的解释，并给出了一些使用它的SOTA的建议。</p>
 <p>来自谷歌 Brain 的 Hinton, Muller 和 Cornblith 发表了一篇题为“When does label smoothing help？”的新论文，深入研究了标签平滑如何影响深度神经网络的最终激活层。他们建立了一种新的可视化方法来阐明标签平滑的内部效果，并对其内部工作原理提供了新的见解。标签平滑经常被使用，本文解释了为什么和标签平滑如何影响神经网络，以及何时使用，何时不使用的有价值的洞见。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f80572c1a239466f9e9a96f99f5ac0b0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272105173.webp" />   
     </p>
 <p>使用了标签平滑在广泛的深度学习模型中都有提升。</p>
 <p>这篇文章是对论文观点的总结，帮助你快速地利用这些发现来进行自己的深度学习工作。建议对全文进行深入分析。</p>
 <p><strong>什么是标签平滑？</strong></p>
 <p>标签平滑是一种损失函数的修正，已被证明是非常有效的训练深度学习网络的方法。标签平滑提高了图像分类、翻译甚至语音识别的准确性。我们的团队用它来打破许多 FastAI 排行榜记录：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c849160c6db44525bc3fc0cfc5ea6be1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272105066.webp" />   
     </p>
 <p>在我们的FastAI训练代码中调用了标签平滑</p>
 <p>简单的解释是，它将神经网络的训练目标从“1”调整为“1-label smoothing adjustment”，这意味着神经网络被训练得对自己的答案不那么自信。默认值通常是 0.1，这意味着目标答案是 0.9(1 - 0.1)而不是 1。</p>
@@ -217,28 +217,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>对于我们的二分类猫/狗示例，0.1 的标签平滑意味着目标答案将是 0.90(90%确信)这是一个狗的图像，而 0.10(10%确信)这是一只猫，而不是先前的向 1 或 0 移动的结果。由于不太确定，它作为一种正则化形式，提高了它对新数据的预测能力。</p>
 <p>可以看到，代码中的标签平滑有助于理解它如何比通常的数学运算更好地工作(来自 FastAI github)。ε 是标签平滑调整因子：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5d83a2ad2a1945889d2fa76c5d8a20a7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272105044.webp" />   
     </p>
 <p>标签平滑的FastAI实现</p>
 <p><strong>标签平滑对神经网络的影响</strong></p>
 <p>现在我们进入文章的核心部分，直观地展示标签平滑对神经网络分类处理的影响。</p>
 <p>首先，AlexNet 在训练中对“飞机、汽车和鸟类”进行分类。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/244f8206c0714c1fb8190a775c3f8d7f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272105949.webp" />   
     </p>
 <p>左：没有使用标签平滑进行训练，右：使用标签标签平滑进行训练</p>
 <p>验证集上的表现:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e8505509a12940e781b45f67e2650790.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272105853.webp" />   
     </p>
 <p>你可以看到的，标签平滑强制对分类进行更紧密的分组，同时强制在聚类之间进行更等距的间隔。</p>
 <p>“河狸、海豚和水獭”的 ResNet 例子更能说明问题：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/da9a536674cf4a8aadde97921385f6ec.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272105711.webp" />   
     </p>
 <p>ResNet训练用于分类3个图像类别…请注意在聚类紧密性方面的巨大差异</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/784da09d06a54649b8b6be5c9fd463cc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272105480.webp" />   
     </p>
 <p>ResNet验证集结果，标签平滑提高了最终的精度。请注意，在训练中，标签平滑会将激活值驱动到紧密的簇中，而在验证集中，它会在中心周围传播，并充分覆盖了预测的置信度范围</p>
 <p>正如图像所显示的，标签平滑为最终的激活产生了更紧密的聚类和更大的类别间的分离。</p>
@@ -248,7 +248,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>以前的研究(Guo et al)表明，神经网络常常过于自信，相对于它们的真实准确性校准得很差。为了证明这一点，Guo 等人开发了一种名为 ECE(预期校准误差)的校准度量。通过使用这种度量方法，他们能够使用一种称为温度缩放的训练后的修改器来调整给定神经网络的校准值，并使网络更好地与它的真实能力保持一致(减少 ECE)，从而提高最终精度。(在传递给 softmax 函数之前，通过将最终 logits 与温度标量相乘来执行温度缩放)。</p>
 <p>这篇论文展示了一些例子，但是最好的例子是在 ImageNet 上使用和不使用标签平滑训练的 ResNet，并将这两个网络与温度调整网络进行了比较。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fa361669b8cd4313a438eb8deefb6df7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272105244.webp" />   
     </p>
 <p>与未校准的网络相比，标签平滑极大地提高了置信度/准确率。其结果几乎与使用温度缩放进行手动调节相同。</p>
 <p>正如你所看到的，使用标签平滑训练产生的网络具有更好的 ECE(预期校准误差)，更简单地说，相对于它自己的精度有一个更理想的置信度。</p>
@@ -257,7 +257,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>论文的最后一部分讨论了这样一个发现，即尽管标签平滑可以产生用于各种任务的改进的神经网络……如果最终的模型将作为其他“学生”网络的老师，那么它不应该被使用。</p>
 <p>作者注意到，尽管使用标签平滑化训练提高了教师的最终准确性，但与使用“硬”目标训练的教师相比，它未能向学生网络传递足够多的知识(没有标签平滑化)。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/80eba50cf92f45d395b08497203ba16f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272105135.webp" />   
     </p>
 <p>标签平滑“擦除”了在hard目标训练中保留的一些细节。这样的泛化有利于教师网络的性能，但是它传递给学生网络的信息更少。</p>
 <p>标签平滑产生的模型是不好的教师模型的原因可以通过初始的可视化或多或少的表现出来。通过强制将最终的分类划分为更紧密的集群，该网络删除了更多的细节，将重点放在类之间的核心区别上。</p>
@@ -391,6 +391,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -424,10 +428,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -806,6 +806,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

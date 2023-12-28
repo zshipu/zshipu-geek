@@ -215,7 +215,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="背景"><strong>背景</strong></h2>
 <p>躺平APP是“躺平”这个大生态中生活记录社区，记录生活记录家。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-275631f9f5c743cf9ce257210d738468.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271710923.webp" />   
     </p>
 <p>该业务场景中，个性化推荐在充分利用流量实现精细化运营、促进信息流动方面有着不可或缺的地位。在业务成长初期，其内容推荐也面临着如下两个问题：</p>
 <ul>
@@ -240,7 +240,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="graph-embedding的实践"><strong>Graph Embedding的实践</strong></h2>
 <p>用户在躺平APP社区的行为，如发布、点击、点赞、评论和收藏等都可以抽象为网络关系图。因此Graph Embedding非常自然地成为学习社区中用户与内容embedding的一项关键技术。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-9e9b62afebf64e68adfa531a03178c06.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271710463.webp" />   
     </p>
 <p>目前落地的模型大致分为两类： <strong>直接优化节点的浅层网络模型和基于GNN的深层网络模型。</strong></p>
 <p>前者包括基于用户行为理解内容，学习内容向量表征的item2vec[1]，用于扩充i2i召回；同时学习用户与内容向量表征的异构网络表示学习模型metapath2vec[2]，用于提高内容召回的多样性；以群体行为代替个体行为的userCluster2vec[3]，缓解新用户冷启动问题。</p>
@@ -249,7 +249,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="-网络构图"><strong>▐ 网络构图</strong></h3>
 <p>我们将用户与内容的交互行为构建为user-item二部图。考虑社区用户行为数据的稀疏性，我们在user-item二部图网络中加入描述item-item相关性的同构网络，避免孤立节点无法学习有效向量表征问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ce483ed0e8e44406ab7480429a831053.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271710177.webp" />   
     </p>
 <p><strong>user-item 二部图网络</strong></p>
 <p>user-item二部图网络描述用户对内容的偏好，包含两类节点：user（用户）节点U={u_1, u_2,&hellip;}和item（内容）节点V={v_1, v_2,&hellip;}，以用户近7天的历史行为数据为一次session，构建网络的边。</p>
@@ -265,30 +265,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>GraphSAGE</strong></p>
 <p>GNN模型在向量召回应用的第一阶段，我们主要选择归纳学习——GraphSAGE来学习用户与内容的向量表征。该模型在对邻居节点进行聚合前，先对邻居节点进行采样得到一个子图，并用该子图代替原图进行邻域聚合计算，从而有效地避免了GCN由于需要融合所有邻居节点而无法完成大规模数据向量表征学习的弊端。伪代码如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-7d881ccf1a33404ab74940a1661f5e36.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271710102.webp" />   
     </p>
 <p>伪代码4-5行为邻域聚合层。以生成节点v第k层向量表征h_v^k为例，首先聚合采样得到的节点v所有近邻节点N(v)的第k-1层向量表示，从而得到节点v第k层的邻域聚合特征h^k_{N(v)}，并与节点v的k-1层向量表征h^{k-1}_v拼接起来，最终通过一层全连接转换得到节点v在第k层的向量表征h^k_v。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-c86e3f1bb5ac4e0badbf7a642ec06d0b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271710827.webp" />   
     </p>
 <p>为了在充分学习到网络的拓扑结构信息的同时控制训练成本，我们进行了多组离线实验，最终发现仅采用二阶的邻域聚合就能获得比较理想的效果。具体地，通过聚合2阶邻域节点的embedding，生成一阶邻域节点embedding，再聚合一阶邻居embedding，并融合自己本身embedding，完成自身embedding的更新。需要注意的是，内容侧从item-item同构网络中采样得到邻居节点的子图，用户侧从user-item二部图中采样得到邻居节点。采用Cross Entropy的分类损失函数进行模型训练。</p>
 <p><strong>GAT</strong></p>
 <p>考虑用户行为序列中存在许多噪声，如误点击等，且用户兴趣在具有多样性同时也具有侧重性。在GNN模型在向量召回应用的第二阶段，我们进一步引入attention机制到邻域信息聚合阶段，借鉴GAT[5]思想, 对节点邻域节点进行差异化的信息组合，从而对用户兴趣进行更准确捕捉，提升召回效果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-d349de63b77d473fa5330f2410b4f14c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271710474.webp" />   
     </p>
 <p>针对图结构数据，GAT（graph attention networks）使用masked self-attention层使得图中的每个节点可以根据邻节点的特征，为其分配不同的权值，聚焦在相关输入，且GAT无需使用预先构建好的图。</p>
 <p>实验证明，GAT模型可以有效地适用于（基于图的）归纳学习问题与转导学习问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-8c7d955247c84f6893eeeb90ad95679c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271710131.webp" />   
     </p>
 <p>我们基本沿用原始论文中的聚合方案，在各节点采样完成的邻居节点上进行Attention操作，详细原理参考[5]。</p>
 <p>对于user，通过
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-720b609065a941b39b063402d0ed7a6b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271710628.webp" />   
      的路径进行邻居采样；对于item，则仅通过
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5e5d7358ed974b88927f59281f41fab3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271710950.webp" />   
      的路径进行邻居采样用于后续embedding聚合阶段。在正负样本采样阶段，对于user节点，我们沿着path进行随机采样；对于item节点，借助item间的相似性系数，沿着path按照权重高低进行采样。</p>
 <h3 id="-效果">▐ <strong>效果</strong></h3>
 <p>我们将训练得到的用户与内容embedding用于躺平APP内容推荐的召回的阶段，以用户的embedding作为trigger，寻找与其相似的内容，并送入后续的精排模型，进行打分。</p>
@@ -297,16 +297,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>case study</strong></p>
 <p>随机挑选一名女性和男性用户，观察其召回效果。其中，女性用户倾向于消费美食、手工DIY和居家生活类内容，男性用户则偏好潮玩、摄影和居家生活类内容。两位用户召回结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-e4fe5fc135e34007aaee772ea1b75a93.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271710390.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-e34870df2a9f40d6b9895a9905b16f20.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271710173.webp" />   
     </p>
 <p>基本可命中用户的兴趣偏好。</p>
 <h2 id="多模态表征学习的实践"><strong>多模态表征学习的实践</strong></h2>
 <p>利用多模态信息学习内容的向量表征，是缓解由用户行为为主导的推荐系统中内容冷启动问题行之有效的方法之一，工业界也有很多相关的落地实践。受此启发，我们也希望从内容本身所包含的信息出发，挖掘内容之间的相关性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-427dc421706847a2bacdcbe9287642c5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271710967.webp" />   
     </p>
 <p>通过对社区内容调研发现，整体内容上存在以下两个明显的特点：</p>
 <ul>
@@ -460,6 +460,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -493,10 +497,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -875,6 +875,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

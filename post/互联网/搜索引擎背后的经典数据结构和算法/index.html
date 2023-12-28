@@ -210,7 +210,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="搜索引擎系统架构图">搜索引擎系统架构图</h2>
 <p>搜索引擎整体架构图如下图所示，大致可以分为 <strong>搜集</strong>， <strong>预处理</strong>， <strong>索引</strong>， <strong>查询</strong> 这四步，每一步的技术细节都很多，我们将在下文中详细分析每一步的工作原理。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-4136735513584238bb11fd3ed62d08e9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272017790.png" />   
     </p>
 <h2 id="搜索引擎工作原理详细剖析">搜索引擎工作原理详细剖析</h2>
 <p><strong>一、搜集</strong></p>
@@ -222,19 +222,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>如何避免网页的重复爬取呢，我们需要对 url 进行去重操作，去重怎么实现？可能有人说用散列表，将每个待抓取 url 存在散列表里，每次要加入待爬取 url 时都通过这个散列表来判断一下是否爬取过了，这样做确实没有问题，但我们需要注意到的是这样需要会出巨大的空间代价，有多大，我们简单算一下，假设有 10 亿 url （不要觉得 10 亿很大，像 Google, 百度这样的搜索引擎，它们要爬取的网页量级比 10 亿大得多），放在散列表里，需要多大存储空间呢？</p>
 <p>我们假设每个网页 url 平均长度 64 字节，则 10 亿个 url 大约需要 60 G 内存，如果用散列表实现的话，由于散列表为了避免过多的冲突，需要较小的装载因子（假设哈希表要装载 10 个元素，实际可能要分配 20 个元素的空间，以避免哈希冲突），同时不管是用链式存储还是用红黑树来处理冲突，都要存储指针，各种这些加起来所需内存可能会超过 100 G，再加上冲突时需要在链表中比较字符串，性能上也是一个损耗，当然 100 G 对大型搜索引擎来说不是什么大问题，但其实还有一种方案可以实现远小于 100 G 的内存：布隆过滤器。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-3656d3ee5de043d98a2be74e3bc2cbfe.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272017628.png" />   
     </p>
 <p>针对 10 亿个 url，我们分配 100 亿个 bit，大约 1.2 G, 相比 100 G 内存，提升了近百倍！可见技术方案的合理选择能很好地达到降本增效的效果。</p>
 <p>当然有人可能会提出疑问，布隆过滤器可能会存在误判的情况，即某个值经过布隆过滤器判断不存在，那这个值肯定不存在，但如果经布隆过滤器判断存在，那这个值 <strong>不一定存在</strong>,针对这种情况我们可以通过调整布隆过滤器的哈希函数或其底层的位图大小来尽可能地降低误判的概率，但如果误判还是发生了呢，此时针对这种 url 就不爬好了，毕竟互联网上这么多网页，少爬几个也无妨。</p>
 <p><strong>3、网页的存储文件： doc_raw.bin</strong></p>
 <p>爬完网页，网页该如何存储呢，有人说一个网页存一个文件不就行了，如果是这样，10 亿个网页就要存 10 亿个文件，一般的文件系统是不支持的，所以一般是把网页内容存储在一个文件（假设为 doc_raw.bin）中，如下</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-6d3266dfae024f57a565c53bc0b04533.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272017458.png" />   
     </p>
 <p>当然一般的文件系统对单个文件的大小也是有限制的，比如 1 G，那在文件超过 1 G 后再新建一个好了。</p>
 <p>图中网页 id 是怎么生成的，显然一个 url 对应一个网页 id，所以我们可以增加一个发号器，每爬取完一个网页，发号器给它分配一个 id，将网页 id 与 url 存储在一个文件里，假设命名为 doc_id.bin,如下</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-2f44daacca9e4b5d83dbf870df834ec2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272017323.png" />   
     </p>
 <p><strong>二、预处理</strong></p>
 <p>爬取完一个网页后我们需要对其进行预处理，我们拿到的是网页的 HTML 代码，需要把 ,,，找到之后，把起始终止标签及其中的内容全部去掉即可。</p>
@@ -248,11 +248,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </code></pre><p>分词一般是根据现成的词库来进行匹配，比如词库中有「中国」这个词，用处理过的网页文本进行匹配即可。当然在分词之前我们要把一些无意义的停止词如「的」,「地」,「得」先给去掉。</p>
 <p>经过分词之后我们得到了每个分词与其文本的关系，如下</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0fbd089cb13c457a99e791f6f702d911.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272017127.png" />   
     </p>
 <p>细心的你一定发现了，不同的网页内容有可能出现同样的分词，所以我们把具有相同分词的网页归在一起，如下所示</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-a75217509beb41c88968fb70d97e8286.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272017694.png" />   
     </p>
 <p>这样我们在搜「大学」的时候找到「大学」对应的行，就能找到所有包含有「大学」的文档 id 了。</p>
 <p>看到以上「分词」+「倒排索引」的处理流程，大家想到了什么？没错，这不就是 Elasticsearch 搜索引擎干的事吗，也是 ES 能达到毫秒级响应的关键！</p>
@@ -261,18 +261,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>四、查询</strong></p>
 <p>用户输入关键词后，首先肯定是要经过分词器的处理。比如我输入「中国人民」，假设分词器分将其分为「中国」,「人民」两个词，接下来就用这个两词去倒排索引里查相应的文档</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-87b30cbe0c5d440ebc27bb282be7f711.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272017410.png" />   
     </p>
 <p>得到网页 id 后，我们分别去 doc_id.bin，doc_raw.bin 里提取出网页的链接和内容，按权重从大到小排列即可。</p>
 <p>这里的权重除了和上文说的 PageRank 算法有关外，还与另外一个「 TF-IDF 」（ <a href="https://zshipu.com/t?url=https%3A%2F%2Fzh.wikipedia.org%2Fwiki%2FTf-idf">https://zh.wikipedia.org/wiki/Tf-idf</a>）算法有关，大家可以去了解一下。</p>
 <p>另外相信大家在搜索框输入搜索词的时候，都会注意到底下会出现一串搜索提示词，</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-10d7e143fcd24140a6a725683dc2037a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272017082.png" />   
     </p>
 <p><strong>如图示：输入 chin 这四个字母后，底下会出现一列提示词。</strong></p>
 <p>如何实现的，这就不得不提到一种树形结构：Trie 树。Trie 树又叫字典树、前缀树（Prefix Tree）、单词查找树，是一种多叉树结构，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ea62deaa39b64f2aab7f56f1ecb5cf9a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272017673.png" />   
     </p>
 <p>这颗多叉树表示了关键字集合 [&ldquo;to&rdquo;，&ldquo;tea&rdquo;，&ldquo;ted&rdquo;，&ldquo;ten&rdquo;，&ldquo;a&rdquo;，&ldquo;i&rdquo;，&ldquo;in&rdquo;, &ldquo;inn&rdquo;]。从中可以看出 Trie 树具有以下性质：</p>
 <ol>
@@ -409,6 +409,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -442,10 +446,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -824,6 +824,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

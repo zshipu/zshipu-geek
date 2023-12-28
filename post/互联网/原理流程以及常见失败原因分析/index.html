@@ -205,7 +205,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/19ec2cf9ce684356b6eb585f02030a9c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647681.webp" />   
     </p>
 <blockquote>
 <p>作者：沈磊</p>
@@ -225,14 +225,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Flink 任务状态整体可以划分两种：Operator 状态和 KeyedState。常见的 Operator 状态，比如 Kafka Topic 每个分区的偏移量。KeyedState 是基于 KeyedStream 来使用的，所以在使用前，你需要对你的流通过 keyby 来进行分区，常见的状态比如有 MapState、ListState、ValueState 等等。</p>
 <p>下面是一个实时计算奇数和偶数的任务的示例：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-8ea98c452c0d42ffb1908d0429575033.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647167.webp" />   
     </p>
 <p>在上图中，假如输入的流来自于 Kafka ，那么 Kafka Topic 分区的偏移量是状态，所有奇数的和、所有偶数的和也都是状态。</p>
 <h3 id="二-flink-checkpoint-流程和原理">二、 Flink Checkpoint 流程和原理</h3>
 <h4 id="21-开启-checkpoint-功能">2.1 开启 Checkpoint 功能</h4>
 <p>想要使用 Flink Checkpoint 功能，首先是要在实时任务开启 Checkpoint。Flink 默认情况下是关闭 Checkpoint 功能，下面代码是开启 Checkpoint ：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b356b26bcf5e4d7394835d7808aad563.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647826.webp" />   
     </p>
 <p>上述代码中，设置了 Flink Checkpoint 的间隔 3 秒，设置的 Checkpoint 的语义为 EXACTLY_ONCE。Flink 默认的 Checkpoint 语义为 EXACTLY_ONCE。上述代码也使用 RocksDBStateBackend 进行状态存储。用户也可以自己设置 Flink Checkpoint 的参数，通过 CheckpointConfig 这个类进行设置，代码如下：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">CheckpointConfig
@@ -244,7 +244,7 @@ chkConfig.setXXX
 </code></pre><h4 id="22-flink-一次-checkpoint-的参与者">2.2 Flink 一次 Checkpoint 的参与者</h4>
 <p>Flink 整体作业采用主从架构，Master 为 JobManager，Slave 为 TaskManager，Client 则是负责提交用户实时任务的代码逻辑 ，Flink 整体框架图如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-88eb21909b4a4479b3cc7b11667c8bd7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647360.webp" />   
     </p>
 <p>JobManager 主要负责实时任务的调度以及对 Checkpoint 的触发，TaskManager 负责真正用户的代码执行逻辑，具体表现形式则是 Task 在 TaskManager 上面进行运行，一个 Task 对应一个线程，它可能运行一个算子的 SubTask，也可能是运行多个 Chain 起来的算子的 SubTask。</p>
 <p>Flink 实时任务一次 Checkpoint 的参与者主要包括三块：JobManager、TaskManager 以及 Zookeeper。JobManager 定时会触发执行 Checkpoint，具体则是在 JobManager 中运行的 CheckpointCoordinator 中触发所有 Source 的 SubTask 向下游广播 CheckpointBarrier。</p>
@@ -252,12 +252,12 @@ chkConfig.setXXX
 <p>在高可用模式下，ZooKeeper 主要存储最新一次 Checkpoint 成功的目录，当 Flink 任务容错恢复时，会从最新成功的 Checkpoint 恢复。Zookeeper 同时也存储着 Flink 作业的元数据信息。比如在高可用模式下，Flink 会将 JobGraph 以及相关 Jar 包存储在 HDFS 上面，Zookeeper 记录着该信息。再次容错重启时，读取这些信息，进行任务启动。</p>
 <p>下图是一次 Checkpoint 的参与者：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-af96056edd9c4c87a52deb3df46b4809.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647031.webp" />   
     </p>
 <h4 id="23-checkpoint-协调者--checkpointcoordinator">2.3 Checkpoint 协调者 — CheckpointCoordinator</h4>
 <p>CheckpointCoordinator,是 Checkpoint 中最重要的类，协调着实时任务整个 Checkpoint 的执行。下图是 CheckpointCoordinator 中的方法：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-706466dfcc7e48159fa1c29b2654d8d4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647756.webp" />   
     </p>
 <p>Flink CheckpointCoordinator 中有几个比较重要的方法：</p>
 <ol>
@@ -269,7 +269,7 @@ chkConfig.setXXX
 </ol>
 <p>Flink CheckpointCoordinator 类是在 ExecutionGraph 形成时进行初始化的，具体则是在 ExecutionGraph 创建之后，调用 enableCheckpointing 方法，然后在该方法中，CheckpointCoordinator 进行创建。以下是 Flink Checkpoint 触发的时序图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-c3e2eec22e3e42e9a328bf2492c53c18.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647604.webp" />   
     </p>
 <p>当 Flink 作业状态由创建到运行时，CheckpointCoordinator 中的 ScheduledThreadPoolExecutor 会定时执行 ScheduledTrigger 中的逻辑。ScheduledTrigger 本质就是一个 Runnable，run 方法中执行 triggerCheckpoint 方法。</p>
 <h4 id="24-flink-checkpoint-流程与原理">2.4 Flink Checkpoint 流程与原理</h4>
@@ -286,7 +286,7 @@ chkConfig.setXXX
 <p>Flink 会定时在任务的 Source 算子的 SubTask 触发 CheckpointBarrier，CheckpointBarrier 是一种特殊的消息事件，会随着消息通道流入到下游的算子中。只有当最后 Sink 端的算子接收到 CheckpointBarrier 并确认该次 Checkpoint 完成时，该次 Checkpoint 才算完成。所以在某些算子的 Task 有多个输入时，会存在 Barrier 对齐时间，我们可以在 Flink Web UI 上面看到各个 Task 的 CheckpointBarrier 对齐时间。</p>
 <p>下图是一次 Flink Checkpoint 实例流程示意图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-05febe0626c1476684ce16ac8ba6db4e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647137.webp" />   
     </p>
 <p>Flin Checkpoint 保存的任务状态在程序取消停止时，默认会进行清除。Checkpoint 状态保留策略主要有两种：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">1. DELETE_ON_CANCELLATION,RETAIN_ON_CANCELLATION
@@ -306,12 +306,12 @@ chkConfig.setXXX
 <p><strong>At_Least_Once</strong> 含义是：每条数据对于 Flink 任务的状态计算至少影响一次。比如在 WordCount 程序中，你统计到的某个单词的单词数可能会比真实的单词数要大，因为同一条消息，当 Flink 任务容错恢复后，可能将其计算多次。</p>
 <p><strong>Flink 中 Exactly_Once 和 At_Least_Once 具体是针对 Flink 任务状态而言的</strong>，并不是 Flink 程序对消息记录只处理一次。举个例子，当前 Flink 任务正在做 Checkpoint，该次 Checkpoint 还没有完成，这次 Checkpoint 时间段的数据其实已经进入 Flink 程序处理，只是程序状态没有最终存储到远程存储。当程序突然遇到异常，进行容错恢复时，那么就会从最新的 Checkpoint 进行状态恢复重启，上一次 Checkpoint 成功到这次 Checkpoint 失败的数据还会进入 Flink 系统重新处理，具体实例如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-3fe6d9f84c6340588f9cb01ccfcbfeed.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647744.webp" />   
     </p>
 <p>上图中表示一个 WordCount 实时任务的 Checkpoint，在进行 chk-5 Checkpoint 时，突然遇到程序异常，那么实时任务会从 chk-4 进行恢复，那么之前 chk-5 处理的数据，Flink 系统会再次进行处理。不过这些数据的状态没有 Checkpoint 成功，所以 Flink 任务容错恢复再次运行时，对于状态的影响还是只有一次。</p>
 <p>Exactly_Once 和 At_Least_Once 具体在底层实现大致相同，具体差异表现在 CheckpointBarrier 对齐方式的处理：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b4874bc3b5b54e999a5e6091dbfaa84e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647223.webp" />   
     </p>
 <p>如果是 Exactly_Once 模式，某个算子的 Task 有多个输入通道时，当其中一个输入通道收到 CheckpointBarrier 时，Flink Task 会阻塞该通道，其不会处理该通道后续数据，但是会将这些数据缓存起来，一旦完成了所有输入通道的 CheckpointBarrier 对齐，才会继续对这些数据进行消费处理。</p>
 <p>对于 At_least_Once，同样针对某个算子的 Task 有多个输入通道的情况下，当某个输入通道接收到 CheckpointBarrier 时，它不同于 Exactly Once，即使没有完成所有输入通道 CheckpointBarrier 对齐，At Least Once 也会继续处理后续接收到的数据。所以使用 At Least Once 不能保证数据对于状态计算只有一次的计算影响。</p>
@@ -327,7 +327,7 @@ chkConfig.setXXX
 <p>从目前的具体实践情况来看，Flink Checkpoint 异常觉大多数还是用户代码逻辑的问题，对于程序异常没有正确的处理导致。所以在编写 Flink 实时任务时，一定要注意处理程序可能出现的各种异常。这样，也会让实时任务的逻辑更加的健壮。</p>
 <p>当自己的 Flink 实时任务 Checkpoint 失败时，用户可以先通过 Flink Web UI 进行快速定位 Checkpoint 失败的原因，如果在 Flink Web UI 上面没有看到异常信息，可以去看任务的具体日志进行定位，如下是 Flink Web UI 查看错误原因示意图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-aa2658049af34a2888d1de5348eca4c8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647598.webp" />   
     </p>
 <h4 id="32-flink-checkpoint-参数配置及注意点">3.2 Flink Checkpoint 参数配置及注意点</h4>
 <p>下面是设置 Flink Checkpoint 参数配置的建议及注意点：</p>
@@ -339,11 +339,11 @@ chkConfig.setXXX
 </ol>
 <p>下图是不设置 Checkpoint 最小时间间隔示例图，可以看到，系统一致在进行 Checkpoint，大量的资源使用在 Flink Chekpoint 上，可能对运行的任务产生一定影响：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ecf847a18c6f49e987b7f2849b867402.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647419.webp" />   
     </p>
 <p>还有一种特殊的情况，Flink 端到端 Sink 的 EXACTLYONCE 的问题，也就是数据从 Flink 端到外部消息系统的消息一致性。打个比方，Flink 输出数据到 Kafka 消息系统中，如果使用 Kafka 0.10 的版本，Flink 不支持端到端的 EXACTLYONCE，可能存在消息重复输入到 Kafka。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-3426355e0380433a80fb3b7b6e9190d8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271647042.webp" />   
     </p>
 <p>如上图所示，当做 chk-5 Checkpoint 的时候，chk-5 失败，然后从 chk-4 来进行恢复，但是 chk-5 的部分数据在 Chekpoint 失败之前就有部分进入到 Kafka 消息系统，再次恢复时，该部分数据可能再次重放到 Kafka 消息系统中。</p>
 <p>Flink 中解决端到端的一致性有两种方法： <strong>做幂等以及事务写</strong>，幂等的话，可以使用 KV 存储系统来做幂等，因为 KV 存储系统的多次操作结果都是相同的。Flink 内部目前支持二阶段事务提交，Kafka 0.11 以上版本支持事务写，所以支持 Flink 端到 Kafka 端的 EXACTLY_ONCE。</p>
@@ -477,6 +477,10 @@ chkConfig.setXXX
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -510,10 +514,6 @@ chkConfig.setXXX
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -892,6 +892,8 @@ chkConfig.setXXX
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

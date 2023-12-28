@@ -211,7 +211,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="1数据存储方案">1.数据存储方案</h2>
 <p>第二篇中我们解决了部署方案的问题，接下来要考虑的是数据如果存储。在分布式部署情况下，Milvus是需要使用Mysql来存储元数据的[1]。Milvus分布式部署时，数据只会写一份，如何实现数据的分布式使用呢？基本的思路有两种：1）内部数据复制，典型的例子如elasticsearch[2]，kafka[3][4]；2）数据存储在共享存储上，如NFS，glusterfs，AWS EBS，GCE PD，Azure Disk等，都提供了kubernetes下的支持[5]。两种思路没有本质的区分，前者是应用自己实现了数据的存储及高可用(多副本)；缺点是应用复杂度增加；优点是具有更高的灵活性。后者依赖于已有的通用的存储方案，只需要关注自身的核心功能，复杂度降低了，而且更方便在多种存储方案下切换。在云计算技术发展的今天，后者有一定的市场。Milvus选用了共享存储来存储数据。为了实现存储的统一及高可用，我们把单个Milvus集群所涉及到的所有数据存储（mysql数据文件和milvus的存储），都放到共享存储中。我们使用了glusterfs做为共享存储的具体实现。整体的存储方案如图1。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c8f8a6ad968941e7a15c80c2bd04ef60.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281837251.png" />   
      图1 使用glusterfs存储数据为了解决集群的自动创建，减少沟通维护成本以及物理资源的最大利用(Milvus是cpu密集型，glusterfs是存储密集型)，我们将glusterfs同Milvus混合部署。我们参考实现了glusterfs在kubernetes下的超融合(Full Hyper-Convergence)部署，并借助heketi[7]实现了存储资源的动态分配。另外，在部署过程中，还需要注意的是glusterfs需要一个独立的磁盘/分区，你也可以使用loop设备[8]；在部署过程中，因为各种原因，不可避免需要重置部署，这时你需要清除脏数据，可以参照以下命令。</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma"># 清除逻辑卷
 lvscan | awk &#39;system(&#34;lvremove  -y &#34;$2 )&#39;
@@ -220,13 +220,13 @@ lvscan | awk &#39;system(&#34;lvremove  -y &#34;$2 )&#39;
 vgscan | grep group | awk -F &#39;&#34;&#39; &#39;{system(&#34;vgremove &#34;$2)}&#39;
 </code></pre><p>glusterfs在kubernetes下的部署架构如图2所示，glusterfs服务可以分布在kubernetes的多个node上，我们可以根据存储的需求增加结点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/85e72e3539914593bb0ff24d9adfd5a3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281838670.png" />   
     </p>
 <p>图2 glusterfs in kubernetes</p>
 <p>实现了glusterfs在kubernetes的部署，我们更关心的是glusterfs本身的可用性：1）glusterfs是否可以实现数据的不丢失/高可用；2）glusterfs是否可以存储大批量数据。</p>
 <p>由[9]可知，glusterfs有Distributed volume、Replicated volume、Distributed Replicated volume、Dispersed Glusterfs Volume、Distributed Dispersed Glusterfs Volume 5种类型的卷，其中Distributed volume可以解决数据分布存储数据，从而实现大批量数据的存储，Replicated volume通过数据的冗余来实现高可用，Distributed Replicated volume同时解决了高可用和大批量数据存储的问题，Dispersed Glusterfs Volume、Distributed Dispersed Glusterfs Volume是分别对Replicated volume、Distributed Replicated volume的优化，借助一种前向纠错码（erasure code[10]）实现数据存储成本的降低。图3给出了Distributed Replicated volume类型卷的结构图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b94740e12eac42f08bf3f714b32c316f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281838122.png" />   
     </p>
 <p>图3 Distributed Replicated volume</p>
 <p>最后，借助heketi[7]、以及kubernetes的StorageClass[11]、PVC[12]，我们屏蔽掉了以上glusterfs卷创建、扩容、销毁的细节，比较完美解决了数据存储的问题。</p>
@@ -234,7 +234,7 @@ vgscan | grep group | awk -F &#39;&#34;&#39; &#39;{system(&#34;vgremove &#34;$2)
 <p>数据更新分为实时更新和批量/全量更新两种，Milvus本身是支持实时更新的，但是数据更新时需要重新创建索引，而索引构建需要消耗大量的CPU资源，从而引发服务整体的稳定性问题。综合考虑稳定性，以及业务的数据更新场景(绝大多数是T+1更新策略)，我们采用了如图4所示的数据更新策略。</p>
 <p>我们使用了A、B两组对等的资源(可以是同机房、跨机房)作为底层Milvus引擎，在引擎的外层，我们实现了读写分离，同一时刻，A、B集群只会承担读、写角色中的一个。在引擎外层，我们维护了读写角色与A、B集群的对照表；数据更新时，我们操作写集群完成数据写入、索引构建，写集群索引构建完成后，切换成角色成读集群；数据更新时出现任何问题，不影响读集群。另外，在读写集群都有正常数据(数据更新差一天)情况下，如果读集群出现问题，写集群可以随时切换成读集群，从而在实现数据更新的同时还实现了互备。由于底层资源使用对等的两份，如何没有特别的处理，不可避免会造成资源的浪费，后面内容会专门讨论解决这个问题的方案。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/55365ce20a2d40b3b711e9fc3269bfcf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281838377.png" />   
     </p>
 <p>图4 T+1数据更新策略</p>
 <h2 id="3-数据一致性保证">3. 数据一致性保证</h2>
@@ -263,7 +263,7 @@ vgscan | grep group | awk -F &#39;&#34;&#39; &#39;{system(&#34;vgremove &#34;$2)
 <li>引擎切换 - A、B引擎集群角色互换，并把对应关系持久化；对原有的读集群缩容。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9322295e55bb476cbdc5c17944793bec.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281838764.png" />   
     </p>
 <p>图5 数据全量更新流程</p>
 <h2 id="4存活检测">4.存活检测</h2>
@@ -286,11 +286,11 @@ else:
   print(&#39;2&#39;)
 </code></pre><p>为了解决exec的问题，我们采用了图6的方案。基于以上的分析，我们把python脚本包装成一个http服务器，在容器启动时，将http服务器启动为一个常驻的进程，然后我们采用httpGet方案解决检测的问题。经过实践检验，该方案对性能和资源占用基本没有影响。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7eba4394921747bcb8f76869f80bc79a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281838055.png" />   
      图6 httpGet存活检测方案## 5.资源伸缩</p>
 <p>考虑到资源的充分利用(我们重点考虑cpu资源)，我们有必要在不使用时，对资源进行回收。对资源的回收有手动和自动两方案，整体思路见图7。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9d1c9f98d43d405cab0c8c2112a9f6e6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281838111.png" />   
      图7 资源伸缩### 5.1 手动</p>
 <p>�</p>
 
@@ -418,6 +418,10 @@ else:
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -451,10 +455,6 @@ else:
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -833,6 +833,8 @@ else:
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

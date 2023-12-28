@@ -227,7 +227,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>按照现在的索引方式无疑大海捞针，假设我们有一个“对象”&ndash;→文章的映射关系，不就可以了吗？类似这样的反向建立映射关系的就叫倒排索引。</p>
 <p>如图1所示，将文章进行分词后得到关键词，在根据关键词建立倒排索引，关键词构建成一个词典，词典中存放着一个个词条（关键词），每个关键词都有一个列表与其对应，这个列表就是倒排表，存放的是章节文档编号和词频等信息，倒排列表中的每个元素就是一个倒排项，最后可以看到，整个倒排索引就像一本新华字典，所有单词的倒排列表往往顺序地存储在磁盘的某个文件里，这个文件被称之为倒排文件。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d8b42b4fa7934d9e929d49462c62c815.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271927501.webp" />   
     </p>
 <p>（图1）</p>
 <p>词典和倒排文件是Lucene的两种基本数据结构，但是存储方式不同，词典在内存中存储，倒排文件在磁盘上。本文不会去介绍分词，tf-idf，BM25，向量空间相似度等构建倒排索引和查询倒排索引所用到的技术，读者只需要对倒排索引有个基本的认识即可。</p>
@@ -246,7 +246,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>数据节点：</strong> 负责对数据的增、删、改、查、聚合等操作，数据的查询和存储都是由数据节点负责，对机器的CPU，IO以及内存的要求比较高，一般选择高配置的机器作为数据节点。</p>
 <p>此外还有一种节点角色叫做 <strong>协调节点</strong>，其本身不是通过设置来分配的，用户的请求可以随机发往任何一个节点，并由该节点负责分发请求、收集结果等操作，而不需要主节点转发。这种节点可称之为协调节点，集群中的任何节点都可以充当协调节点的角色。每个节点之间都会保持联系。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dacfb78d792140a09e84cb5780fbc0f1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271927677.webp" />   
     </p>
 <p>（图2）</p>
 <h2 id="2-发现机制"><strong>2. 发现机制</strong></h2>
@@ -266,7 +266,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>选主的发起由候选主节点发起，当前候选主节点发现自己不是master节点，并且通过ping其他节点发现无法联系到主节点，并且包括自己在内已经有超过minimum_master_nodes个节点无法联系到主节点，那么这个时候则发起选主。</p>
 <p>选主流程图</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/86766a1a822b4f3e8c2a41c151dbb9e6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271927352.webp" />   
     </p>
 <p>（图3）</p>
 <p>选主的时候按照集群节点的参数&lt;stateVersion, id&gt; 排序。stateVersion从大到小排序，以便选出集群元信息较新的节点作为Master，id从小到大排序，避免在stateVersion相同时发生分票无法选出 Master。</p>
@@ -296,7 +296,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>对doc的新建、索引和删除请求都是写操作，这些写操作是必须在主分片上完成，然后才能被复制到对应的副本上。ES为了提高写入的能力这个过程是并发写的，同时为了解决并发写的过程中数据冲突的问题，ES通过乐观锁的方式控制，每个文档都有一个 _version号，当文档被修改时版本号递增。</p>
 <p>一旦所有的副本分片都报告写成功才会向协调节点报告成功，协调节点向客户端报告成功。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/caed675de63f4c10bcf34ad135ec5223.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271927055.webp" />   
     </p>
 <p>（图4）</p>
 <h3 id="13-elasticsearch-的写索引流程"><strong>1.3 Elasticsearch 的写索引流程</strong></h3>
@@ -307,7 +307,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在ES集群中每个节点都通过上面的公式知道数据的在集群中的存放位置，所以每个节点都有接收读写请求的能力。</p>
 <p>那么为什么在创建索引的时候就确定好主分片的数量，并且不可修改？因为如果数量变化了，那么所有之前路由计算的值都会无效，数据也就再也找不到了。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/533177a1e2cf40af98868e0eeb03fed0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271927879.webp" />   
     </p>
 <p>（ 图5）</p>
 <p>如上图5所示，当前一个数据通过路由计算公式得到的值是 shard=hash(routing)%4=0，则具体流程如下：</p>
@@ -325,7 +325,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>当我们在进行写操作的测试的时候，可以通过手动刷新来保障数据能够被及时检索到，但是不要在生产环境下每次索引一个文档都去手动刷新，刷新操作会有一定的性能开销。一般业务场景中并不都需要每秒刷新。</p>
 <p>可以通过在 Settings 中调大 refresh_interval = &ldquo;30s&rdquo; 的值，来降低每个索引的刷新频率，设值时需要注意后面带上时间单位，否则默认是毫秒。当 refresh_interval=-1 时表示关闭索引的自动刷新。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/381d5558e81449d18be8e215519c2c7d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271927424.webp" />   
     </p>
 <p>（图6）</p>
 <p><strong>索引文件分段存储并且不可修改，那么新增、更新和删除如何处理呢？</strong></p>
@@ -483,6 +483,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -516,10 +520,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -898,6 +898,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

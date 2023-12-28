@@ -234,7 +234,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h2 id="01-以前的实时数据技术架构"><strong>01 以前的实时数据技术架构</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-fd41d05048c04387a83145feff54e564.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281758584.webp" />   
     </p>
 <p><strong>数据模型：</strong></p>
 <ul>
@@ -256,51 +256,51 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="02-数据模型升级"><strong>02 数据模型升级</strong></h2>
 <h3 id="1-模型分层"><strong>1. 模型分层</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-01fa4ba303974de8aa0f630ff794d0b8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281758634.webp" />   
     </p>
 <p>参考离线数仓，将实时数据进行分层，第一层是数据采集，将从 MySQL 等数据库中采集到的数据放到 TT 消息中间件中，然后基于 TT 消息中间件和 HBase 的各种维表关联产生事实明细宽表，再将生成的数据写到 TT 消息中间件中。通过订阅这个消息产生轻度汇总层和高度汇总层两层。轻度汇总层主要按照多个维度沉淀数据，高度汇总层主要用于大屏场景。</p>
 <h3 id="2-预置分流"><strong>2. 预置分流</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-fc075890f0e14321b55fef7ff1d975a9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281758868.webp" />   
     </p>
 <p>左边公共数据中间层是将所有业务线整合在一起，然后进行分层。右边的业务数据中间层是各个业务基于横向的公共数据中间层的基础上，去分流自己业务的数据中间层，然后根据这些实时的消息，个性化的产出自己业务的数据中间层。比如不同的订单，可以横向分流成进口供应链和出口供应链。这样实现了上游只需要一个公共分流作业完成，节约了计算资源。</p>
 <h3 id="3-菜鸟供应链实时数据模型"><strong>3. 菜鸟供应链实时数据模型</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5bb88841569843e6a78c9c59238bb5c7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281758011.webp" />   
     </p>
 <p>左边是公共的数据中间层，里面包含整个大盘的订单数据，大盘的物流详情，汇总的公共粒度数据等，在这个基础之上做了个分流任务，然后从物流订单，物流详情等里面拆分出我们自己个性化的业务，比如国内的供应链，进口的供应链以及出口的供应链等。经过这些步操作之后，可以轻易的区分哪些表是大屏的数据，哪些表是统计分析的数据，在数据易用性方面有了很大的提升。</p>
 <h2 id="03-计算引擎的提升"><strong>03 计算引擎的提升</strong></h2>
 <p>一开始，我们采用了 JStorm 和 Spark Streaming 进行实时开发。这两个计算引擎在满足大部分的场景时，没有特别大的问题，但是在应用到供应链或者物流场景时，不是那么简单。所以我们在 17 年切换到了 Flink 上，Flink 提供了一些很实用的功能，而这些功能在一些供应链的场景下比较适用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-2e329c4fac4f440e8dd2c4b2d088cada.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281758151.webp" />   
     </p>
 <p>首先是内部 Flink 支持一套完整的 SQL 写法，提高了开发效率。第二点是 Flink 内置的基于 State 的 retraction 机制，很好的支持了供应链当中的取消订单，换配等这种操作，而且非常简单。Flink 的 CEP 功能，方便的实现了超时统计的功能，还有目前正在推的 AtoScaling 方案，比如数据倾斜，资源配置等。另外一点是 Flink 在批流混合问题的处理，有很好的支持。</p>
 <h3 id="1-神奇的-retraction"><strong>1. 神奇的 Retraction</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-44a20ab534054f838b13b6134c938ac1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281758113.webp" />   
     </p>
 <p>左边有 4 列数据，第 1 列数据是物流订单，第 2 列的数据是物流订单的创建时间，第 3 列数据是这个订单是不是被取消，第 4 个数据是计划配送公司，就是订单分配给哪个配送公司。这个业务需求看上去非常简单，其实就是统计每个配送公司计划履行的有效单量有多少。但是有两个点需要注意一下，第一点，有一个订单 LP3，在开始的时候是有效的，然后在最后一条时取消了，就变成了一个无效订单，但这一条订单不应该统计在内，因为业务需求统计的是有效订单。第二点，配送公司的转变，LP1 这个订单在一分钟时是 tmsA 来配送，后来变成了 tmsB，再过了一段时间，这个订单又变成 tmsC 配送。如果基于 Storm 增量计算，得出的结果显然是错误的，这时要按照最后一次消息给我们传过来的数据统计。这样的场景在 Flink 中是如何实现的呢？Flink 也提供了一些非常好的回撤机制，下面是伪代码的实现：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b287a564ec954ed9ac09d54f43f0d4d2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281758136.webp" />   
     </p>
 <p>第一段代码使用 Flink 的 last_value 函数，获取这个订单最后一个消息非空的值，在这个基础上进行汇总。一旦 last_value 中字段发生变化，都会触发撤回机制，得到最后正确的值。</p>
 <h3 id="2-实时超时统计"><strong>2. 实时超时统计</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-004938dbb92b4e82885338817624e491.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281758348.webp" />   
     </p>
 <p>这个案例发生在菜鸟实际物流场景中，第 1 个表格是一个日志的时间，第 2 个是物流订单，第 3 个字段是出库时间，最后一个字段是揽收时间，现在需要统计的是出库超 6 个小时没有被揽收的单量。这里涉及到全链路时效问题，全链路时效指从下单到仓库发货到快递揽收到签收的整体时间，这个场景放在离线中是非常容易实现的，但是放到实时中来不是很简单， 比如 LP1 在 00:05 分的时候没有揽收，现在如果当下时刻是 12 点的话，也没有揽收，理论上应该计算这个订单，但是没有揽收就意味着没有消息进来，没有消息进来我们又要统计，其实我们用 Flink 是没法统计的，那这种情况我们怎么处理呢？我们的解决方案是如果没有这条消息我们用 Flink 来制造这条消息。这种超时消息统计我们想到了几种方法：</p>
 <p>包括引入消息中间件 ( kafka ) 和 Flink 的 CEP。最终选择了 Flink 的 Timer Service，因为这种消息不是特别多，中间件又特别重。而 CEP 会丢掉一些回传不准确的消息，导致数据计算不准确，针对这些情况，我们在调研之后选择了 Timer Service，同时我们对它底层的 ProcessElement 和 OnTimer 两个方法进行了改写。ProcessElement 告诉 Flink 存储什么样的数据，然后启动针对每一个超时的事件的 Timer Service。OnTimer 方法会在每个超时的时刻读这个超时的消息，并把这个超时的消息下发下来。基于下游跟正常流的关联操作之后就能计算超时消息的单量。伪代码如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-317cb1923a294521ae8008c253dcc259.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281758400.webp" />   
     </p>
 <p>先构造一个 process funcation 到 state 存数据，并为每一个超时的数据注册一个 Timer Service。然后执行 OnTimer 这个方法，读取并把这个超时的消息下发下去。</p>
 <h3 id="3-从手动优化到智能优化"><strong>3. 从手动优化到智能优化</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-eb2d954b7c4f421bb3246357d7594dc1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281758467.webp" />   
     </p>
 <p>关于数据倾斜的问题，左图显示在 map 阶段 shuffer 之后数据倾斜到了红色的 Agg 上，这时就出现热点了，原来我们是对这个 lg_order_code 进行 hash 取值操作，然后再针对散列的结果进行二次的聚合，这样操作后在一定程度上减轻了数据的倾斜。在最近的 Flink 的版本中已经实现了规避数据倾斜的方法，我们内部的 Blink 版本，有几个功能去优化热点的问题，第一个就是 MiniBatch，之前来一条数据，我们就去 State 里面查询然后写入，MiniBatch 的作用是把所有的数据先聚合一次，类似一个微批处理，然后再把这个数据写到 State 里面，或者在从 State 里面查出来，这样可以大大的减轻对 State 查询的压力。第二个办法就是 LocalGlobal，类似于在 hive 中 map 阶段中的 combiner，通过设置这个参数可以在读的时候先聚合。第三个办法是 PartialFinal，类似于散列的方式，分两次聚合，相当于 hive 中两个入 reduce 操作。通过设置这三个参数，可以在大部分场景规避数据倾斜的问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-bc4cb6282b644b118df0f87984d35d32.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281758580.webp" />   
     </p>
 <p>智能化功能支持的另一个场景是资源配置。在进行实时 ETL 过程中，首先要定义 DDL，然后编写 SQL，之后需要进行资源配置。针对资源配置问题，菜鸟之前的方案是对每一个节点进行配置，包括并发量、是否会涉及消息乱序操作、CPU、内存等，一方面配置过程非常复杂，另一方面无法提前预知某些节点的资源消耗量。Flink 目前提供了较好的优化方案来解决该问题：</p>
 <ul>
@@ -309,32 +309,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h2 id="04-数据服务的升级"><strong>04 数据服务的升级</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-729180cd05f34c5295e1d96959fb51c7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281758572.webp" />   
     </p>
 <p>在开发的过程中常用的数据库比较少，因此统一数据库连接标准是有必要的。我们开发的叫天工，它可以提供整个数据库统一的接入标准，提供统一的权限控制，提供统一的全链路的保障。这个中间件将 SQL 作为 DSL，并且提供一些标准化的 HSF 的服务方式。作为菜鸟数据服务的践行者，天工也提供了一些非常贴近业务的，非常实用的功能，下面是几个案例。</p>
 <h3 id="1-nosql-to-tgsql"><strong>1. NoSQL To TgSQL</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-9b640a536cbd4b418c828cf0068d7cba.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281758775.webp" />   
     </p>
 <p>对于 HBase 这种 NoSQL 数据库，BI 或者运营来说用代码来实现需求是比较困难的，所以开发天工的时候第一件事情就是把一些 NoSQL 转化成天工 SQL，包括我前面说的一个人员的表转化成一个二维表，这里是逻辑的转换，不是实际物理上的转化，大家通过运行这个 SQL，后台的中间件会自动转化成查询的语言，去查询后台的数据。</p>
 <h3 id="2-跨源数据转化"><strong>2. 跨源数据转化</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-43225213edd343f9a366ff5df02f1adb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281758907.webp" />   
     </p>
 <p>在开发数据产品的过程中，我们发现实时跟离线有时候分不开，比如有一个比较大的场景，需要统计实时 KPI 的完成率，它的分子是实际单量，分母是已经计划好的单量，数据源是来自两个部分，第一个部分来自已经做好的 KPI 的一个表，然后第二部分是一个实时计算出来的表。对于这种场景，之前我们是用 Java 去计算这两部分数据，然后在前端去运算，比较麻烦。现在通过天工 SQL 直接取这两部分数据关联，做到跨源数据的操作。</p>
 <h3 id="3-服务保障升级"><strong>3. 服务保障升级</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-bd1acf9578364cddb1fed9819d9b4fcd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281758884.webp" />   
     </p>
 <p>原来在整个服务的保障比较缺失，比如某个数据服务出了问题，我们直到运营反馈的时候才发现有问题，或者数据量比较大的时候，要去做限流和主备切换。所以在数据服务的这一层中也把数据服务保障加到了天工的中间件里面。还有主备双活，将流量大的放在主库，流量适中的放在备库上。针对一些复杂的查询，在执行的时候很慢，我们会自动识别这些慢查询，然后进行阻断，等待资源充足后再执行，当然，也可通过添加白名单用户进行限流。上面这些功能在天工里面都有实现。</p>
 <h2 id="05-其他技术工具的探索和创新"><strong>05 其他技术工具的探索和创新</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-dda058f12c1342c2b7b25e98bd6d3cdb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281758042.webp" />   
     </p>
 <p>除了前面讲的，我们在技术工具上也和阿里云计算平台的事业部进行了探索。每年遇到大促都要进行压测，大家要去启动数据，模拟大促流量，看看我们的实时作业能不能满足预期，比如有延迟，或者 QPS 过高，在原来我们会重启作业，然后把 source 和 sink 改成压测 source 和 sink，操作起来非常的麻烦。后来我们做了一个实时的压测工具，可以做到一键启动所有重要的压测任务，并且会生成压测报告。我们只需要看压测本报告有没有满足我们的预期就行。基于 Flink 之后，我们开始做基于作业进度的监控，比如延迟监控、checkpoint 的监控、TPS 的预警等。</p>
 <h2 id="06-未来发展与思考"><strong>06 未来发展与思考</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-e6a228c4bbf940a0bd18880ec4b1d7d0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281758975.webp" />   
      \<em>\</em>\**</p>
 <p>菜鸟目前在实时数仓方面更多的是基于 Flink 进行一系列功能的开发，未来的发展方向计划向批流混合以及 AI 方向演进。</p>
 <p>Flink 提供了 batch 功能。菜鸟很多中小型的表分析不再导入到 Hbase 中， 而是在定义 source 的时候直接将 MaxCompute 的离线维表读到内存中，直接去做关联，如此一来很多操作不需要再进行数据同步的工作。</p>
@@ -474,6 +474,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -507,10 +511,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -889,6 +889,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

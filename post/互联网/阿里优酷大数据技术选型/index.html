@@ -217,7 +217,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b554d09a261849838c942e8fa42c7871.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281912355.webp" />   
     </p>
 <blockquote>
 <p>分享嘉宾：五羖 阿里文娱 技术专家</p>
@@ -233,17 +233,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h2 id="01-大数据给传统数据技术带来的挑战"><strong>01 大数据给传统数据技术带来的挑战</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b11a0ea1d67c4d7f8fc4cb5d36866e24.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281912268.webp" />   
     </p>
 <p>我们知道，大数据在市场分析、性能诊断、客户关系、数据运营、广告投放等都占据着重要的地位。同时，在利用大数据的过程中，也给我们带来了诸多挑战：</p>
 <h3 id="1-大数据带来的挑战"><strong>1. 大数据带来的挑战</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ca734372df6e4aefb9d2fc3cfe8b2d92.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281912170.webp" />   
     </p>
 <p>在实际应用中的数据处理速度，假定是亿级数据量，如果使用传统的mysql进行分析需要耗时19分钟。</p>
 <h3 id="2-应对挑战"><strong>2. 应对挑战</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2dbc186cf59a4be68f6a52c661088f79.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281912216.webp" />   
     </p>
 <p>那遇到这样的问题有什么样的解决方案呢，通过对各OLAP引擎的观察，我分成了两大类：</p>
 <ul>
@@ -254,50 +254,50 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="02-市面上各类大数据olap技术方案一览"><strong>02 市面上各类大数据OLAP技术方案一览</strong></h2>
 <h3 id="1-加并发mpp架构"><strong>1. 加并发：MPP架构</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/604b85c59a6a46ec844f43a3162bc050.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281912283.webp" />   
     </p>
 <p>第一类的加并发方案，类似之前所说的添加多个mysql，GREENPLUM引擎也是基于一个传统的关系型数据库PostgreSQL，在GREENPLUM里面有多个PostgreSQL实例，每个实例都有Master节点去管理，再将接收到的请求拆分后分发到各实例，再将实例集中在一起返回，这就是一个MPP架构的基本原理。</p>
 <p><strong>MPP架构的缺陷</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/12c39052957d475d82de50764f6ac876.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281912252.webp" />   
     </p>
 <p>左边图是一个GREENPLUM的大致计算流程。不同的MPP架构会有所区别，但是大致原理都是差不多的，每次计算是所有节点都参与计算。</p>
 <p>举个例子：使用group by将每个节点上a和b的数量计算出来，每个节点都做这样的运算，计算完之后会有一个Redistribute的过程，将所有key到一个节点上再去合并，最后master将数据收集起来完成计算。</p>
 <p>存在的问题是所有的节点都参与计算，不存在特别强的水平拓展性，如果有千万级的节点必然会发生硬件故障，导致容量存在明显的天花板。</p>
 <h3 id="2-加并发批处理架构"><strong>2. 加并发：批处理架构</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/71f137fef7504a5585c51edb98415be6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281912320.webp" />   
     </p>
 <p>应对这样的问题的解决方案是使用批处理的架构来解决。我们平常使用的批处理架构，MR和Spark，并不需要所有的节点都参与运算，它在一个任务事件下发以后，控制节点会分配给一些集群中的节点，而这些节点各自完成自己的计算，然后把计算结果写到磁盘里，再交给下一个计算的节点去写入，每次不需要所有的节点去参与运算。因为节点和它的任务是解耦的，控制节点可以调节分配任务，来减少短板，大规模的水平扩容不会有太大的问题，但却需要一定的代价。</p>
 <p>为什么MPP需要所有的节点去参与运算？因为运算的结果还要通过通信的方式给其他节点来进行下一步的计算，包括资源存储中各个节点是不共享的，所以需要所有的节点参与运算。</p>
 <p>批处理架构需要节点和任务去进行解耦，解耦的代价是，需要共享资源，势必会带来写磁盘，不管是读磁盘还是写磁盘，相比MPP的通信方式来说显然会更慢。</p>
 <h3 id="3-批处理mpp的互补"><strong>3. 批处理&amp;MPP的互补</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cf4b2ed48e9f4ce0a455802339469a84.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281912407.webp" />   
     </p>
 <p>在实际使用中，两者其实是一个互补的关系，批处理速度慢，但是它的运行处理相对比较健壮，扩展性也比较好。适用于离线数据清洗。</p>
 <p>MPP的速度虽然相对较慢，且容量无法增大，每个部门相应的集群资源需要单独去搭建。适合于对清洗过的数据做交互式查询。</p>
 <h3 id="4-mpp-on-hadoop"><strong>4. MPP on Hadoop</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0e461ce1e9594c9b8c70ba9d86b1ce72.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281912431.webp" />   
     </p>
 <p>相对于互补的话，MPP on Hadoop就不得不提一下，网易使用Impala，还有相关的presto这些名字，在这里就把他们归类为MPP on Hadoop技术。MPP技术它是GREENPLUM，它的各个节点是传统关系型数据库postgre。比如，刚才场景中是先批处理再MPP，如果想用GREENPLUM，需要将Hadoop中的数据导入到GREENPLUM中，因为它们底层的存储是不一样的，Hadoop底层是HDFS，而GREENLUM底层是postgre，它们的存储上是没有关系的，必须要有一个导入的过程，正常来说Hadoop的生态，Hive是一个常用的批处理技术，它的速度比较慢，为了加速计算，就诞生了MPP on Hadoop这样的技术。</p>
 <p>这些技术大部分没有自己的存储，是一个类MPP的架构，需要控制节点把任务下发到对应的MPP的任务节点上，而在MPP节点的底层是HDFS，等于是这两者的一个结合，实际运用起来查询会比Hive更快一些。</p>
 <h3 id="5-预计算"><strong>5. 预计算</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/79e4776ce5484f9ea74c98ae48bdda6c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281912550.webp" />   
     </p>
 <p>讲到预计算，就不得不提到Apache Kylin，它的架构如图，需要预先定义查询的内容。</p>
 <p>比如说我要对某个Key进行计算，计算出A的数量，将其存在Kylin底下的HBase，它的Key是某某维度等于A，value等于A的值，因为这个Key还可能等于B，所以这个B的数据也存在HBase中，要达到这种情况，首先与Kylin之间一定要有一个交互式的协议，告诉它那些东西是我需要去查的，帮我做好计算。因为预计算中，当维度特别多的时候，是无法枚举所有要查询的东西，所以你要预先定义好Kylin，这在Kylin中叫做Cube，就是要定义你的Cube模型，告诉Kylin你的查询模式是怎么样的，而Kylin会根据定义的数据模型，去生成对应的Hive任务，Hive任务会根据模型规则去完成计算，计算好之后写入HBase里，在HBase中每一个查询对应一个Key，查询速度会很快。</p>
 <p>这个方案绕过了大数据查询下会比较慢的问题，变成了一个HBase查询的问题，构建为KV数据存入HBase里，基本上可以达到一个亚秒级别的查询，MPP的话当数据量比较大时，需要几十秒，使用Kylin基本上是一个亚秒级的RT。但我们需要预先去定义一个数据模型，肯定会影响数据的灵活性。</p>
 <p>比如播放的数据有没有发生卡顿，或者节点状况。我们在查询数据时，有分省份的查询，有分运营商的查询，要告诉Kylin要分省份的去查，分运营商的去查，还是需要省份和运营商交叉去查，如果没有明确，当临时的查询使用Kylin是达不到对应的效果的。业务上经常有变化，重新通过Hive去刷新任务，重新计算结果并写入HBase，这本身就是一个非常费时费力的过程，是一个变化比较大的业务。另外再维度的复杂性上也是没有上限，比如十几个维度都要各自交叉，都要去交互到很深的话，这个模式其实是没有办法支持，它的预计算结果会膨胀的特别厉害，可能会比原来的数据还要多，这时就无法进行下去。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8af6fb9a72f545a18f664ecd0f1351dd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281912577.webp" />   
     </p>
 <p>预计算还要介绍的是druid，将其归类为预计算并不是特别明确，它有预计算的能力，当数据写入时，它有一个roll-up这样的配置，在第一步数据写入时会帮助你进行一个数据减少的工作，在它本身内部的架构里，它不是Kylin需要HBase这样的存储，druid内部有一个自己的存储，专门针对OLAP进行了优化。druid还是一个时序的存储，在时序上做优化，让老的数据存在老的存储里，新的数据存在新的存储里。在预计算和查询的灵活性方面，如果说只能够选择一套方案的话，可以考虑只使用druid。</p>
 <h3 id="6-olap方案综述"><strong>6. OLAP方案综述</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/02e55fa86f9f463aac286db91a4c595c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281912619.webp" />   
     </p>
 <p>在这里将所说过的OLAP方案综述一下，将市面上的OLAP分为两种：</p>
 <ul>
@@ -312,7 +312,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="03-优酷不同业务场景的olap选型"><strong>03 优酷不同业务场景的OLAP选型</strong></h2>
 <h3 id="1-实战性场景"><strong>1. 实战性场景</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c4475e8b5ca0456b84226a7d9f96a7bf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281912902.webp" />   
     </p>
 <p>第一类场景是API与实时监控：API是系统访问，比如在我们的推荐系统里，需要用到一些实时特征，如用户截至目前曝光了多少次，会存在非常大的QPS，以及对RT要求很高，数据也要有分钟级的实时性要求。API与实时监控，目前在优酷是自建的预计算系统。</p>
 <p>为什么早期没有使用Kylin，是因为实时OLAP当时支持较差。Kylin和Hive还是有很强的依赖的。首先就是数据的收集，业界一般主要使用kafka，这里使用类似Kafka这种消息队列，会把流式的信息导入进来，流计算使用Flink，内部也存在Cube管理这样类似的协议，聚合得到和Kylin一样的KV结构数据，存储在阿里的表格存储里，和HBase差别比较小，然后用户去读取数据。</p>
@@ -321,7 +321,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>最后一个是维度字典，在实际使用中是非常重要的。比如版本的维度一直在变化，如果是在这样一个HIVE的平台里，可能使用Groupby可以查出具体版本，在将数据进行预计算后，存储在类似HBase的KV存储中。制作维度字典对应用性有比较好的提高，</p>
 <h3 id="2-bi报表批处理mpp"><strong>2. BI报表：批处理+MPP</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/39db448baa2e4cf1ae633c8124ed2ddd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281912006.webp" />   
     </p>
 <p>第二类是BI报表，是批处理+MPP组合的形式，�</p>
 
@@ -447,6 +447,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -480,10 +484,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -862,6 +862,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

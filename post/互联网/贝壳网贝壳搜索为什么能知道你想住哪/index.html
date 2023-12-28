@@ -201,7 +201,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://mmbiz.qpic.cn/mmbiz_jpg/xP3FzHyaDyxCrXjFXmPW2MOZibGEibyedO5wBdibYXDCZDnWVLHhlcsZSHmy8oC7IefXtoAXtboXdQCeeFeE1ZR8g/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849726.webp" />   
     </p>
 <blockquote>
 <p>在NLP（自然语言处理）中，NER（命名实体识别）是很多应用的关键一步，江湖地位毫无争议,它的研究主体一般包括3大类(实体类、时间类和数字类)和7小类(人名、地名、机构名、时间、日期、货币和百分比)命名实体。贝壳找房作为中国最大的居住服务平台，有丰富的数据和合适的场景，所以该技术也已被广泛应用，比如智能搜索、智能问答、智能推荐等系统中。我们到底是如何用命名实体识别这项技术来践行“技术驱动”和“为行业赋能”的理念呢？这就是今天我们要探讨的话题。</p>
@@ -230,7 +230,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <hr>
 <p>说到“住”，我们的第一反应是“住在哪”，对于智能搜索来说，贝壳找房用户的搜索词中包含大量的和地址相关的query，识别出用户query里的地址实体，了解用户想要“住在哪”，能够为用户找出更符合预期的房源。其次，随着智能客服与语音找房的落地，这两项技术也同样面临着大量包含地址的query，地址实体识别能帮助智能客服准确定位，迅速回做出应。同样的，准确识别出用户语音找房里的地址也能提高用户的使用体验.</p>
 <p>
-        <img class="mx-auto" alt="" src="https://mmbiz.qpic.cn/mmbiz_png/xP3FzHyaDyxCrXjFXmPW2MOZibGEibyedOSmoeQHwCQR3fY1fDnMmw8KBicdPB1M85RXnrxp7zFicCKdQbfTD0Au7Q/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849804.webp" />   
     </p>
 <ol>
 <li>算法概览</li>
@@ -239,7 +239,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>命名实体识别任务主要有三类方法，分别是基于规则和字典，基于统计的方法和混合方法。我们选择了基于统计的方法和混合方法进行验证，最终选择了BiLSTM-CRF混合方法。</p>
 <p>BiLSTM-CRF 的混合方法，目前已成为实体识别的主流。BiLSTM层负责每个字对应每个label的得分，CRF层能够学习到数据中的序列约束，负责保证句子序列的正确性。整个模型的结构如下图所示:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://mmbiz.qpic.cn/mmbiz_png/xP3FzHyaDyxCrXjFXmPW2MOZibGEibyedOL4pRzoIOChqs0tatpy2L7ENhibqAiblkfLtPMJ4b9eaW5sDrJs9Kpe2Q/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849938.jpeg" />   
     </p>
 <ul>
 <li>第一层是word-embedding层。</li>
@@ -250,7 +250,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>它是由前向的LSTM与后向的LSTM结合而成。比如我们对“海淀区”编码，模型如图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://mmbiz.qpic.cn/mmbiz_png/xP3FzHyaDyxCrXjFXmPW2MOZibGEibyedOZUoVajYAEGV1bicFvwTlgPQK3KOicgs3TB7dtS9gayh5LKkB0ibqibvW4g/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849004.jpeg" />   
     </p>
 <p>前向的LSTML依次输入“海”，“淀”，“区”得到三个向量{hL0,hL1,hL2}。后向的LSTMR依次输入“区”,“淀”,“海”得到三个向量{hR0,hR1,hR2}。最后将前向和后向的隐向量进行拼接得到{[hL0,hR0],[hL1,hR1], [hL2,hR2]}，即{h0,h1,h2}。拼接后的隐向量包含了前向与后向的所有信息，我们依此为每个字进行分类。Tensorflow中提供了双向 rnn 的接口,它就是tf.nn.bidirectionaldynamicrnn()，该函数内部可自动实现序列的反转。在设置dropout后，接入一个线性层，将隐状态向量从高维映射到低维，维度是标注集的标签数，从而得到自动提取的句子特征，接下来将接入一个CRF层来进行序列标注。</p>
 <ul>
@@ -258,13 +258,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>它可以为最后预测的标签添加一些约束来保证预测的标签是合法的。在训练数据训练过程中，这些约束可以通过CRF层自动学习到。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://mmbiz.qpic.cn/mmbiz_png/xP3FzHyaDyxCrXjFXmPW2MOZibGEibyedO5kib5bga9PslcfwEArSG1o7pTZxWZmj7sjKy2uw33tYMtYVM6nVI3Xg/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849903.webp" />   
     </p>
 <p>如图所示，当BiLSTM预测错误时，CRF学到的约束可以保证序列的正确性。这些约束可以是： 1.句子中第一个词总是以标签“B-“ 或 “O”开始，而不是“I-”。</p>
 <p>2.标签序列“O I-label” is 非法的。实体标签的首个标签应该是 “B-“ ，而非 “I-“, 换句话说,有效的标签序列应该是“O B-label”。</p>
 <p>CRF层的参数是一个K * K的矩阵 A, Aij表示的是从第i个标签到第j个标签的转移得分，进而在为一个位置进行标注的时候可以利用此前已经标注过的标签，如果记一个长度等于句子长度的标签序列y=(y1,y2,&hellip;,yn)，那么模型对于句子x的标签等于y的打分为:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://mmbiz.qpic.cn/mmbiz_png/xP3FzHyaDyxCrXjFXmPW2MOZibGEibyedOR7iaGhGV02NdTsF7P9th6oxgEq5JCO1Rf6sPTFoeN8qkP5JCrcjbUFQ/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849743.webp" />   
     </p>
 <p>可以看出整个序列的打分等于各个位置的打分之和，而每个位置的打分由两部分得到，一部分是由BiLSTM输出的Pi决定，另一部分则由CRF的转移矩阵A决定。最后进行解码运算来求解最优路径。</p>
 <ol>
@@ -273,7 +273,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <hr>
 <p>训练集的生成主要分为以下四个步骤：数据结构化，模板构建，样本抽取和将训练语料处理为模型的输入BIO标注模式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://mmbiz.qpic.cn/mmbiz_png/xP3FzHyaDyxCrXjFXmPW2MOZibGEibyedOoeuzrkRLBytGyQJJ3IcKEdgCf58QVFVtNn8xXicEUhziaGpwLFhJcGmw/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849814.webp" />   
     </p>
 <h3 id="31-数据结构化">3.1 数据结构化</h3>
 <p>数据是一个算法的灵魂，这个算法背后有着强大的数据支撑&mdash;贝壳找房在垂直领域私有的数据：楼盘字典，其覆盖类型有省、市、地区、商圈、社区、小区、开发商、地铁站、地铁线、学校、兴趣点等地理位置数据。拿到这些数据后，分别对这些地址实体进行结构化处理，使该11类文件形成统一的数据格式，各自按照城市id，地点id，地点名字，地点别名，经度，纬度和热度共7种属性进行排列。</p>
@@ -284,7 +284,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>另外值得一提的是，为保证训练数据的正确性，我们基于楼盘字典建立了对应关系，将省—市，市—区，区—商圈，商圈—小区，市—小区，区—小区对应起来，为之后训练集的随机抽取限定条件，例如只能出现北京市海淀区而不会出现河北省郑州市昌平区这样的情况。</p>
 <p>由于数据量巨大，生成训练集时将每种模板对应的地址实体全部排列组合是不可能实现的，因此我们的做法是：对于每种模板，在每类地址实体中随机抽取地址与其匹配。例如：BIZ|RES这类模板对应的权重为15，这就意味着需要在商圈和小区的地址表里分别随机抽取一个地址实体作为模板的替代，一共需要抽取15次，抽取同时仍需要符合上述映射条件。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://mmbiz.qpic.cn/mmbiz_png/xP3FzHyaDyxCrXjFXmPW2MOZibGEibyedOz7J3KJ9QIVhCwrZ70ObGwmUH3ibw0nCD1ic3xICjHS9bg66Pnb6s0CmQ/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849916.webp" />   
     </p>
 <p>除了正样本之外，我们也生成了一部分不含地址的负样本模板，就非地址实体而言，小区+房屋细节是用户的高频搜索，例如：某某小区三室一厅，或者某某小区x号楼等，其对应的模板就是RES|DET。</p>
 <p>为了增加模型的泛化能力，我们也将语音找房的数据作为负样本扩展到训练集中。语音找房数据有准确的地址定位和明显的意图，比如“我想在五道口买套房”，但和搜索数据相比，语音找房的数据有两个较为明显的特点：其一，语音找房中有大量口语化类的字词。其二，关于房屋细节（DET）的问法多样化。这两个特点均为负样本的构造提供了丰富的数据来源。</p>
@@ -324,7 +324,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>对比实验结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://mmbiz.qpic.cn/mmbiz_png/xP3FzHyaDyxCrXjFXmPW2MOZibGEibyedOt9ae6OpBTSg5yibUxKAicloDiayvAA0TxNW2tLrfUlVqrGLwEe8jOJOzA/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849755.webp" />   
     </p>
 <p>以上的三种算法，前两者均采用Tensorflow的框架搭建，设置相同的训练参数：epochnumber = 5，embeddingdim=300，hiddendim=300 ，batchsize=256 ，dropout=0.8。</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">
@@ -567,6 +567,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -600,10 +604,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -982,6 +982,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

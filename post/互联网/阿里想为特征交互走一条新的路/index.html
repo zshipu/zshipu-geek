@@ -201,7 +201,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5ae529ed62584ef6ad8cb49573d18ef6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281927635.webp" />   
     </p>
 <blockquote>
 <p>文章作者：周国睿 阿里巴巴 高级算法专家</p>
@@ -216,7 +216,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="02-第二次冲锋"><strong>02 第二次冲锋</strong></h2>
 <p>18年的时候，如何对十亿淘宝商品进行表征建模，或者简单点如何对item id学一个泛化性更强的embedding又开始来撩拨我的思想。想了一个res-embedding的方案，如果说直接学习每个item的embedding很难，那么把相似的item学习一个共享的mid embedding，再去学习每个item特有的信息 res embedding，用它们相加来表达一个item，相似item通过mid embedding共享信息可以缓解稀疏带来的学习难度，一定程度上提升泛化性。具体在如何找相似的item，以及如何设置mid时，我采用了图的方法，通过用户行为把item连接起来，最后这个方案有点类似后来比较火的graph sage。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a2788ec0065d4b679627b217f5fdfc70.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281927201.webp" />   
     </p>
 <p>不过这个方案实际使用时在样本量几亿规模时非常有效，到几十亿上百亿规模时收效甚微，这说明我还是没找到更好的表征建模方案。</p>
 <p><strong>03 第三次冲锋</strong></p>
@@ -228,7 +228,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="05-为何笛卡尔积有效"><strong>05 为何笛卡尔积有效</strong></h2>
 <p>当时细想一下，笛卡尔积有效并不神奇，同时一定能找到参数量更少的模型方案来替代笛卡尔积这种hard的id组合方式。比如用户行为序列中有一个商品ID为A，待预估商品为B，笛卡尔积形成新的ID A&amp;B，A&amp;B每次在一条样本里出现，训练时都会更新独立属于自己的embedding。而这个A&amp;B的embedding，我们认为其学习的是A,B两个ID在一条样本共现后对Label的co-action信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d756b75edfd94149bda2e24753ccfee0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281927130.webp" />   
     </p>
 <p>这个co-action信息为什么重要其实很好理解，比如CTR预估问题，要解决的本来就是每条样本最后预测是否点击，其实解的问题就是所有输入信息X条件下点击的概率 P(Y|X) 。建模co-action信息就是单独建模P(Y|A,B)。具体的，如果A和B分别是待预估的商品ID，和用户行为序列里的商品ID。如果我们对行为序列做SUM/AVG pooling就等于忽视了ID间的co-action，对序列做DIN/DIEN类似的aggregation，在co-action的视角下可以看做是一个scalar的co-action，没有方向，且只能对原始行为序列ID的embedding做一个纯量的修正。那么每个序列的ID都和预估商品ID做一个笛卡尔积呢，把原始的序列变成一个笛卡尔积ID序列，再给每个ID都学习一个embedding。这个时候co-action就是用向量来建模，且这个新的embedding和原始序列的embedding完全独立，自由度更大，模型capacity更大。如果原始ID的co-action信息建模本身有用，那么笛卡尔积就是建模co-action最直接的方式。笛卡尔积+端到端学习的embedding其实很像一个大的memory network，只不过写入和读出的索引相同，都是笛卡尔积化后的ID。这样的模式下这些代表co-action的笛卡尔积ID的embedding在训练时，具备样本穿越性。训练时，任意一个笛卡尔积ID A&amp;B的embedding都是独立学习的，同时强保证了，在下一条A&amp;B出现的样本里，这个embedding能把当前学到的co-action信息无损的带入。而简单的特征cross方法，比如把A_1的embedding和B_1的embedding做外积，这个时候A_1&amp;B_1的co-action为Emb_{A_1} * Emb_{B_1}，它在训练时也会被B_1 embedding本身的学习和A_1&amp;B_2等更新，很难保证学习到的co-action信息在下一次出现时，还保留上一次学习的信息。</p>
 <h2 id="06-笛卡尔积不是终局"><strong>06 笛卡尔积不是终局</strong></h2>
@@ -252,7 +252,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="07-canco-action-net"><strong>07 CAN：Co-Action Net</strong></h2>
 <p>最开始我们从memory net的视角想了一种方案，把item id的参数从D扩展到 <strong>T*D</strong>，即把embedding变成一个有T个slot的矩阵，这种方案下任意一个ID都有T个slot，每个slot存放维度为D的vector。这时候可以借attention的思路来建模co-action并保持不同组合co-action学习的部分独立性。比如在建模co-action时，让不同的slot对另一个ID的所有slot做attention aggregation，并和aggregation后的结果做外积 ( element wise乘法 )：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/01/image-f94ba2be.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281927116.png" />   
     </p>
 <p>![](<a href="https://img.6aiq.com/e/457">https://img.6aiq.com/e/457</a></p>
 
@@ -380,6 +380,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -413,10 +417,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -795,6 +795,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

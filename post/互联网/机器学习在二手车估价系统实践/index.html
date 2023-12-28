@@ -200,7 +200,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>c)使用标准数据进行算法去噪及特征处理，进行反复的模型训练，此处需要反复验证特征、超参、模型的合理性及准确性。最终生成模型，对模型进行线上数据评估。</p>
 <p>d)将模型部署到58自研的RPC服务框架，组合业务规则，提供稳定估价服务。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/88fbc54320ed4a2386b6f91f483eba86.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272044025.webp" />   
     </p>
 <p>估价系统架构图</p>
 <p><strong>数据处理</strong></p>
@@ -208,13 +208,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>进行模型训练，首先大量准确的样本是必不可少的，我们与其他平台合作，手中掌握市场上大量的成交数据与市面上大部分平台的展示数据。针对这些数据我们会进行的初步去噪并匹配车型库数据丰富特征。最后进行业务去噪处理，例如将一些雷同或均值类似的帖子进行去重，过滤一些价格里程上牌时间明显不合理的样本。</p>
 <p><strong>•去噪、预处理</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fb0c128cf15b4e528f63f6ef5c91e618.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272044137.webp" />   
     </p>
 <p>在样本处理的过程中比较头痛的就是样本本身的准确性与波动性，原始样本整体平滑度较差，需要对其进行多步去噪以及预处理。</p>
 <p>a)规则去噪：主要是针对上牌时间与车型上市时间和下市时间的过滤规则</p>
 <p>b)统计去噪：这里采用箱线图去噪，估值这个场景的目标就是找到最常规的保值率，偏离整体的样本越少越对能提升模型的准确率，忽视异常值会严重影响模型效果。如下图五条线从上至下依次为上边缘，上四分位数Q3，中位数，下四分位数Q1，下边缘，上边缘与下边缘分别定义为Q3与Q1在Q3-Q1的基础上增加与减少的上限与下限，在外线以外的极端值视为异常值处理。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/81f5ab54eb1a4e91a34665625aef30ed.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272044659.webp" />   
     </p>
 <p>箱线图去噪</p>
 <p>c)规则去重：在对样本统计分析，根据其特点制定的规则，例如对相同车型、里程、价格的，取上牌时间更早的样本等。</p>
@@ -222,7 +222,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>e)滤波：对排好序的每个车型，将原始的rate做滤波，假设原始的rate顺序应该与排好序的一致，滤波的大小为s，那么以当前点为中心的s个点区域内，如果当前点不是极值就跳过，是极值就取平均值。滤波大小和次数可以调。</p>
 <p>f)调整顺序序：根据重置成本法得到估价，按照该估价对每个车型排序。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f263a66e21074e579ae64f58f4da8f41.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272044466.webp" />   
     </p>
 <p>利用滤波函数平滑样本</p>
 <p>**•** <strong>获取样本特征处理</strong></p>
@@ -232,13 +232,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>之后可以尝试用一批样本测试信息增益率，其它维度还可以考虑如过滤覆盖率低的特征、利用单个特征训练模型得到AUC值作比较等方法进行特征选择。</p>
 <p>这里要说一下为什么不保留所有特征或者组合的高维特征：1.特征维度越高越容易产生过拟合；2.随着特征或维度越来越多，可能会降低性能和精度，达到相同效果可能越需要更多的训练样本；3.样本如果越多也会造成更大的训练时间与人力，并且特征不容易分析，需要权衡成本；</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/10fb98d47d58482888464ba09947ce59.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272044503.webp" />   
     </p>
 <p>但是特征工程不是到此为止的，根据统计分析与业务规则，往往能得出一些在定量样本下模型无法学习到的特性。举个例子，车龄理论上讲是上牌时间到现在的时间，但在实际市场交易中上市时间与实际上牌时间可能会差距比较大，有延后上牌的情况，但交易中该车的出厂时间被定在买卖双方的潜意识里面，例如一辆2014年上市，2016年上牌的奔驰C级，按交易时间2019年算车龄为3年，但实际上双方认为它的车龄应该在4-5年来评估最终的价格，所以我们将车龄与上市时间进行换算，如上例将车龄定义为x=上牌车龄+(上牌时间-上市时间)*i,i为调整延迟上牌系数，得出一个新的关于车龄的参数x来代替原本的车龄，这样产生的新模型可以明显改善这种case的预测准确性。</p>
 <p>再例如二手车在其他条件相同的情况下，总里程数对保值率的影响不是线性增长的，新车影响比较大，但随着里程数越来越高，对最终的价格影响越来越小，而且会发现，车龄越高的车影响会更小，但这样的样本其实市场上并不多，模型也很难学到，所以我们需要对特征进行处理，我们对里程进行取对数，利用斜率随x增大而减小的特性进行系数λ调整，得到一个效果更好的新特征。</p>
 <p>mile_future = ln ( λ / use_year * mile_per_year + 1)</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/13c7955114d949209f33e97cec277c5c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272044708.webp" />   
     </p>
 <p>利用对数函数导数特性</p>
 <p><strong>模型训练</strong></p>
@@ -372,6 +372,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -405,10 +409,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -787,6 +787,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

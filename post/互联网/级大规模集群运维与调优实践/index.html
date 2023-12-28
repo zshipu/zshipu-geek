@@ -277,7 +277,7 @@ or decrease the maximum message size the broker will allow (using message.max.by
 <p>云盘切换为本地盘，是通过调用云服务后台的 API 自动实施的。在实施之后，触发了数据从旧节点迁移到新节点的流程，但是大约半个小时候，问题又出现了：</p>
 <p>XX 公司运维小: bellen, 快看一下，ES 的写入快掉 0 了。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-1504296dfa8148969444ee02c16ecdc6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281639088.png" />   
      通过查看集群监控，发现写入 qps 直接由 50w 降到 1w，写入拒绝率猛增，通过查看集群日志，发现是因为当前小时的索引没有创建成功导致写入失败。</p>
 <p>紧急情况下，执行了以下操作定位到了原因：</p>
 <ol>
@@ -325,7 +325,7 @@ or decrease the maximum message size the broker will allow (using message.max.by
 </ol>
 <p>现在看到迁移中的分片数量慢慢减少，新索引已经创建成功了，写入恢复正常了。到下个整点时，发现新建索引还是比较慢，因为还有几百个分片在迁移中，创建新索引大概耗时 5 分钟，这 5 分钟内写入也是失败的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-48a667ce81634b629e317276d5cb8123.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281639215.png" />   
      等几百个迁移中的分片都执行完毕后，新建索引就比较快了，也不会再写入失败了。但是问题是当前正在执行云盘节点切换为本地盘的流程，需要把数据从旧的130个节点上迁移到新的130个节点上，数据迁移的任务不能停，那该怎么办？既然新创建索引比较慢，那就只好提前把索引都创建好，避免了在每个整点数据写入失败的情况。通过编写python脚本，每天执行一次，提前把第二天的每个小时的索引创建好，创建完成了再把&quot;cluster.routing.allocation.exclude._name&quot;更改为所有的旧节点，保证数据迁移任务能够正常执行。</p>
 <ol>
 <li>结果展示</li>
@@ -361,10 +361,10 @@ initialized];&#34;,&#34;statusCode&#34;:503,&#34;error&#34;:&#34;Service Unavail
 <p>在上文中，虽然通过临时给 master 节点增加内存，抗住了 10w 分片，但是不能从根本上解决问题。客户的数据是计划保留一年的，如果不进行优化，集群必然扛不住数十万个分片。所以接下来需要着重解决集群整体分片数量过多的问题。前文也提到了，客户可以接受开启 shrink 以及降低索引创建粒度(经过调整后，每两个小时创建一个索引)，这在一定程度上减少了分片的数量，能够使集群暂时稳定一阵。</p>
 <p>辅助客户在 kibana 上配置了如下的 ILM 策略：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-d8bb5a7f78c24cb68ad9122f707529c0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281639326.png" />   
      在 warm phase, 把创建时间超过 360 小时的索引从 hot 节点迁移到 warm 节点上，保持索引的副本数量为 1。之所以使用 360 小时作为条件，而不是 15 天作为条件，是因为客户的索引是按小时创建的，如果以 15 天作为迁移条件，则在每天凌晨都会同时触发 15 天前的 24 个索引一共 24*120=2880 个分片同时开始迁移索引，容易引发前文介绍的由于迁移分片数量过多导致创建索引被阻塞的问题。所以以 360 小时作为条件，则在每个小时只会执行一个索引的迁移，这样把 24 个索引的迁移任务打平，避免其它任务被阻塞的情况发生。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-7caad385a25e4560bf6e74eb6ab2ceee.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281639614.png" />   
      同时，也在 warm phase 阶段，设置索引 shrink，把索引的分片数缩成 5 个，因为老的索引已经不执行写入了，所以也可以执行 force merge, 强制把 segment 文件合并为 1 个，可以获得更好的查询性能。</p>
 <p>另外，设置了 ILM 策略后，可以在索引模板里增加 index.lifecycle.name 配置，使得所有新创建的索引都可以和新添加的 ILM 策略关联，从而使得 ILM 能够正常运行。</p>
 <p>客户使用的 ES 版本是 6.8.2， 在运行 ILM 的过程中， 也发现一些问题：</p>
@@ -436,7 +436,7 @@ initialized];&#34;,&#34;statusCode&#34;:503,&#34;error&#34;:&#34;Service Unavail
 <p>接下来实施第二个步骤，需要每天执行一次快照，多创建时间较久的索引进行备份。实施比较简单，可以通过 crontab 定时执行脚本或者使用腾讯云 SCF 执行。</p>
 <p>之后，就可以修改 ILM 策略，开启 cold phase, 修改索引副本数量为 0:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0fd0b7fe8298457bb21af089f3ffe04e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281639796.png" />   
      此处的 timing 是创建时间 20 天后，需要保证在第二步骤中，对过去老索引数据备份先执行完成后才可以进入到 cold phase.</p>
 <p>通过老索引数据冷备并且降低索引副本，我们可以把集群整体的分片数量维持在一个较低的水位。但是还有另外一个问题待解决，也即 shrink 失败的问题。刚好，我们可以利用对老索引数据冷备并且降低索引副本的方案，来彻底解决 shrink 失败的问题。</p>
 <p>在前文有提到，shrink 失败归根结底是因为索引的副本数量为 1， 现在我们可以把数据备份和降低副本提前，让老索引进入到 ILM 的 warm phase 中时已经是 0 副本，之后再执行 shrink 操作就不会有问题了；同时，因为副本降低了，索引从 hot 节点迁移到 warm 节点迁移的数据量也减少了一半，从而降低了集群负载，一举两得。</p>
@@ -581,6 +581,10 @@ initialized];&#34;,&#34;statusCode&#34;:503,&#34;error&#34;:&#34;Service Unavail
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -614,10 +618,6 @@ initialized];&#34;,&#34;statusCode&#34;:503,&#34;error&#34;:&#34;Service Unavail
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -996,6 +996,8 @@ initialized];&#34;,&#34;statusCode&#34;:503,&#34;error&#34;:&#34;Service Unavail
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

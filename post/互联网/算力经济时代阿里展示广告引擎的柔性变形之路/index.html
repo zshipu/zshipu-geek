@@ -247,7 +247,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2875fa29bb1a4e258b20d2524cba8249.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281627297.png" />   
     </p>
 <p>图 1：算力分配的微观 &amp;宏观视角</p>
 <p>Transformers 引擎的核心理念，就是将算力分配纳入到系统的设计范畴。对于古典广告引擎而言，其使命是确保引擎系统能够准确地实现和运行业务逻辑。对任意一条流量请求，原则上执行的计算逻辑是一致的(这里仅考虑算力差异化视角)。在资源充足时这是合理的策略，但在算力紧张、需要腾挪资源甚至算法策略降级才能在特定的系统资源约束下完成业务逻辑时，这背后就隐藏着巨大的效能空间。以广告系统为例，我们可以选择：1. 开足算力对每条流量做最精细化最复杂的计算，对超出系统算力的部分流量做丢弃操作； 2. 对不同价值的流量做差异化的算力规划，确保系统对每条流量都有效服务。 哪种策略是最优？这就是 Transformers 引擎的目标：在有限的资源中做&quot;柔性&quot;算力伸缩，确保业务收益最大化。</p>
@@ -255,7 +255,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们来具体分析宏观、微观两个层面的算力分配问题。首先，我们需要具象化地理解“算力”。系统算力往往被计算相关的参数控制，包括算法策略参数(检索 token 数/打分 doc 数/模型版本等)和系统性能参数(线程数/缓存规则等)。在线系统通常会包含很多这样的算力参数。我们用“档位”来描述这些算力参数的取值，不同档位代表不同的算力消耗。档位选择的过程就是算力分配的过程。对某个算力参数来说：流量i需要在K个候选档位中选择一个档位，其中第 j个候选档位 action_{i,j}​  将会带来 cost_{i,j}​的算力消耗和 value_{i,j}​的业务收益。</p>
 <p><strong>微观层面：</strong> 对某一时刻 t，若用 s(i)表示流量 i 选择的算力档位，那么该时刻的算力分配问题可以描述为：该时刻的 N(t)个流量的总算力消耗 \sum_{i \leq N} cost_{i,s(i)}在不超过总算力约束 C 的前提下，如何最大化总业务收益 \sum_{i \leq N(t)} value_{i,s(i)} 的问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b774c8b5ae4547039ad0c09eae5b99bb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281627561.png" />   
     </p>
 <p>图 2：算力分配问题定义</p>
 <p><strong>宏观层面：</strong> 对不同时刻 t，流量大小 N(t)在不断变化，但系统的总算力约束 C通常会相对稳定。我们将某一时刻在 \sum_{i \leq N} cost_{i,s(i)} \leq C 约束下的 \max_s \sum_{i \leq N} value_{i,s(i)} ​策略推广到所有时刻，理论上就可以实现动态的算力最优分配。</p>
@@ -282,7 +282,7 @@ value_{i,j&rsquo;} - \lambda cost_{i,j&rsquo;}​，即：  \frac{ \Delta value_
 λ。也就是说：一个档位相比另一档位更优，当且仅当其算力边际收益</p>
 <p>\frac{\Delta value }{\Delta cost }&gt; \lambda 。因此， <strong>可以认为 λ 是对算力边际收益的约束。</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e3da7b027b0741d798d1b62d5943cef1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281627910.png" />   
     </p>
 <p>图 3：算力消耗-收益曲线(边际收益递减)</p>
 <p>不难看出，λ越小(放宽性价比约束)最优档位j就越大，对应的算力消耗和业务收益也越大，反之亦然。因此， <strong>总消耗和总收益会随着λ减小而单调递增，而整体算力性价比会随着λ减小而单调递减。</strong></p>
@@ -291,7 +291,7 @@ value_{i,j&rsquo;} - \lambda cost_{i,j&rsquo;}​，即：  \frac{ \Delta value_
 </ul>
 <p>知道了λ的含义，接下来看使得g(λ)最优的λ如何计算。由单调性和算力约束可以想到，尽可能地多用算力可最大化价值。而稍加整理也能看到g(λ)的现实含义就是“已使用算力的总收益” + “λ倍的剩余可用算力&quot;。通过分析λ减小/增大时这两部分的增减量，可以发现当\<em>\<em>算力恰好被用完时 \</em>\</em> \sum_{i \leq N} cost_{i,s(i)} = C，此时g(λ∗)取到极大值。由弱对偶性可知，此时的g(λ∗)对应的解也正是全局最优解。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8277774f62e6444eaf2681e03fc96b97.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281627960.png" />   
     </p>
 <p>因此，在离线静态求解λ时， <strong>利用算力总消耗随λ减小而单调增加的性质</strong>，我们只需通过二分查找去找到最接近算力约束C的λ即可。而面对在线流量的连续变化，我们也无须每时每刻重新求解λ，只需根据每一时刻的算力消耗和算力约束的相对关系，对λ进行实时微调即可——全局维护当前时刻的λ(t)并统计当前时刻的总算力消耗 \sum_{i \le N_t} cost_{i, s(i)}。若当前时刻总算力消耗超过了C，则在下一时刻通过上调λ_{t+1}​来降低算力消耗从而满足约束，反之亦然。由此，在流量平稳时，通过动态维持总算力消耗恰好满足算力约束，几乎可以保证每时每刻系统都处在最优的算力分配状态；而当流量突变时，系统也可以在较短时间内调整到满足约束的状态。具体的系统方案将在下面章节展开。</p>
 <ul>
@@ -310,7 +310,7 @@ value_{i,j&rsquo;} - \lambda cost_{i,j&rsquo;}​，即：  \frac{ \Delta value_
 <p>DCAF 算力分配算法中的 λ、最优档位 i是针对每个算力参数的，也就是这个参数在所有流量上共享一个全局的 λ，也可以认为所有流量的平均档位对应一个全局的 λ 。为了便于理解和简化实现， <strong>在线系统可以考虑直接对每个参数的平均档位进行实时调节</strong>。另一方面，为了实现系统整体的算力最优分配，系统的每个模块都定义了不止一个算力参数，这些参数如果分别独立地自我调节，一是非常复杂，二是不容易形成全局最优。因此真实场景中的算力参数设计需要考虑更加全面。例如我们采用了模块失败率作为主要调控目标，那么就可以把同一模块内所有按失败率调节的算力参数聚合成一个 <strong>调控单元</strong>，一个调控单元由一组 { 调控目标、调控策略、平均档位 } 组成，单元内的所有参数共享调控策略和平均参考档位。</p>
 <p>再回到系统设计。实时反馈调节系统可以认为是在线引擎的非侵入式控制器，它既是一套独立的框架，也能够与在线引擎系统密切配合，共同实现算力调节的能力。我们将整体框架取名为 AllSpark(来自于《变形金刚》中的“火种源”，能够赋予机械生命，使它们具有变形的能力)。AllSpark 框架主要由四个部分组成： <strong>调节链路、反馈链路、控制面板、监控视图</strong>。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7f9246224ac94623818cfbfffff98050.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281627173.jpeg" />   
     </p>
 <p>图 4：AllSpark 动态算力框架</p>
 <blockquote>
@@ -324,7 +324,7 @@ value_{i,j&rsquo;} - \lambda cost_{i,j&rsquo;}​，即：  \frac{ \Delta value_
 </ul>
 <p>我们以今年双十一大促当天展示广告系统的表现来说明 AllSpark 系统的柔性能力。展示广告场景在双十一零点高峰时段有十倍于日常流量的洪峰。零点之后，流量呈阶梯状逐步回落。往年为了扛住流量洪峰，需要手动推动策略降级预案，并且需要根据流量的变化推送不同版本的降级预案，实现流量和算法策略的最优组合，来确保业务收益最大化。问题在于人工操作的成本很高，风险也很大。AllSpark 的上线使得今年双十一的保障有了很大改观。零点时段只需要推送一个基础版本的降级预案保护，然后通过 AllSpark 根据流量的变化自适应地调节算力，就可以实现系统在高水位下的平稳运行，同时确保了零点黄金时段的业务效果。事实上，仅零点附近 1、2 个小时的系统服务能力增强(用更强的算法策略服务更多的流量)，就给我们今年的广告收入创造了千万人民币规模的收入增量。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/056167956fe146578cd344ebda768339.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281627079.png" />   
     </p>
 <p>图 5：2020 双十一大促系统表现示意图</p>
 <p>除了能够在大促期间柔性应对各种流量洪峰之外，AllSpark 在系统的日常稳定性保障上也发挥了重要作用。当系统偶尔出现局部模块的超时抖动时，AllSpark 能够自动降低问题模块的算力负载、加速问题恢复，从而将故障隔离在局部，确保系统整体的健壮可用。</p>
@@ -465,6 +465,10 @@ value_{i,j&rsquo;} - \lambda cost_{i,j&rsquo;}​，即：  \frac{ \Delta value_
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -498,10 +502,6 @@ value_{i,j&rsquo;} - \lambda cost_{i,j&rsquo;}​，即：  \frac{ \Delta value_
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -880,6 +880,8 @@ value_{i,j&rsquo;} - \lambda cost_{i,j&rsquo;}​，即：  \frac{ \Delta value_
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

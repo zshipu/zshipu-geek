@@ -208,31 +208,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="调用-indexwriter-的构造函数的流程图">调用 IndexWriter 的构造函数的流程图</h1>
 <p>图 1：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/1-354c65dd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272059244.png" />   
     </p>
 <h2 id="生成对象-indexfiledeleter">生成对象 IndexFileDeleter</h2>
 <p>  在文章 <a href="https://www.6aiq.com/article/1586279638090">构造 IndexWriter 对象（六）</a> 中，我们简单介绍了 IndexFileDeleter 作用，即用来删除索引目录中的索引文件，本文根据 IndexFileDeleter 的构造函数的实现来介绍关于计数引用、删除无效（Invalid）索引文件的内容。</p>
 <h3 id="indexfiledeleter-的构造函数流程图">IndexFileDeleter 的构造函数流程图</h3>
 <p>图 2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/2-f0710f42.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272059648.png" />   
     </p>
 <h4 id="segmentinfos">SegmentInfos</h4>
 <p>图 3：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/3-daaab38a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272059860.png" />   
     </p>
 <p>  构造 IndexFileDeleter 最重要的一个对象就是 SegmentInfos，它是在图 1 的 <code>生成对象IndexFileDeleter</code> 流程点之前通过用户配置的 IndexCommit 或者索引目录中的旧索引生成的 SegmentInfos 对象（见 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F1118%2F108.html">构造 IndexWriter 对象（三）</a>、 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F1125%2F109.html">构造 IndexWriter 对象（四）</a>、 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F1126%2F110.html">构造 IndexWriter 对象（五）</a> 中关于生成 SegmentInfos 的介绍），并作为 IndexFileDeleter 的构造函数的参数之一。</p>
 <h4 id="是否能获得索引文件-segments_n-的文件名">是否能获得索引文件 segments_N 的文件名？</h4>
 <p>图 4：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/4-266b1941.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272059801.png" />   
     </p>
 <p>  构造 IndexWriter 对象里面调用 IndexFileDeleter 的构造函数时，总是能通过 SegmentInfos 获得一个 segments_N 的文件名，并且通过下面的方法来获得 segments_N 的文件名，那么当前流程点的判断结果总是为 true，由于该方法可能会返回 null，所以在这里会有一个判断。</p>
 <p>SegmentInfos.getSegmentsFileName()#### 判断索引文件是否满足要求</p>
 <p>图 5：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/5-6213fbed.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100926.png" />   
     </p>
 <p>  接着就是从索引目录依次取出索引文件，然后判断是否满足某个要求。</p>
 <p><strong>需要满足什么要求：</strong></p>
@@ -252,7 +252,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>图 6：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/6-626a39d5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100879.png" />   
     </p>
 <ul>
 <li>子要求二：fileName.startsWith(IndexFileNames.SEGMENTS)
@@ -269,7 +269,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="初始化索引文件的计数引用">初始化索引文件的计数引用</h4>
 <p>图 7：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/7-e5fdd691.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100443.png" />   
     </p>
 <p>  如果索引文件满足上文中的要求，那么我们初始化这些索引文件的计数引用。</p>
 <p><strong>Lucene 中如何实现对索引文件的计数引用</strong>：</p>
@@ -293,20 +293,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="索引文件是否为-segments_n">索引文件是否为 segments_N？</h4>
 <p>图 8：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/8-b03ae9a8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100318.png" />   
     </p>
 <p>  如果是 segments_N 文件，那么需要对该文件进行额外的处理，判断方法同上文中的子要求二。</p>
 <h4 id="处理索引目录中所有的-segments_n">处理索引目录中所有的 segments_N</h4>
 <p>图 9：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/9-d240bbc0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100256.png" />   
     </p>
 <p>  索引目录中可能存在多个 segments_N 文件，那么这些文件都需要被处理，其中只有一个 segments_N 对应的 SegmentInfos 为构造 IndexFileDeleter 对象的参数，即图 2 中 <code>SegmentInfos</code> 流程点的 segmentInfos。</p>
 <p><strong>为什么索引目录中会存在多个 segments_N 文件</strong>：</p>
 <p>  原因主要取决于上一个 IndexWriter 对象使用了哪种索引删除策略 IndexDeletionPolicy（见 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F0909%2F92.html">文档提交之 commit（二）</a> 关于 IndexDeletionPolicy 的介绍），比如使用了索引删除策略 <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2FLuXugang%2FLucene-7.5.0%2Fblob%2Fmaster%2Fsolr-7.5.0%2Flucene%2Fcore%2Fsrc%2Fjava%2Forg%2Fapache%2Flucene%2Findex%2FNoDeletionPolicy.java">NoDeletionPolicy</a>，那么每次提交都会保留，又比如使用了默认的索引删除策略 KeepOnlyLastCommitDeletionPolicy，那么只会保留最后一次提交。</p>
 <p>图 10：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/10-4d65838e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100457.png" />   
     </p>
 <p>  在图 10 中，使用不同的索引删除策略对相同的数据进行索引，在执行了 4 次 commit 提交后，对于 NODeletetionPolicy 来说，它会保留所有的提交，而对于 KeepOnlyLastCommitDeletionPolicy，当生成 segments_2 时，会删除 segments_1，生成 segments_3 时，会删除 segments_2，以此类推，即只保留最后一次提交。</p>
 <p><strong>为什么要根据每一个 segments_N 对应的 SegmentInfos 生成 CommitPoint，并且添加到 CommitPoint 集合 commits 中</strong>：</p>
@@ -437,6 +437,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -470,10 +474,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -852,6 +852,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

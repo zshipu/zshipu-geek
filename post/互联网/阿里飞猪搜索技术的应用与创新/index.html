@@ -230,7 +230,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="01-猪搜背景"><strong>01 猪搜背景</strong></h2>
 <h3 id="1-飞猪搜索"><strong>1. 飞猪搜索</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/73e6a26b1fca47a084ac775e6a75384a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281938528.webp" />   
     </p>
 <p>飞猪搜索业务分为两大部分：一是全局搜索，二是行业小搜。右边飞猪界面的全局搜索就是最上方的输入框。直接对应飞猪内部所有内容的搜索入口，都可以从全局搜索获得。右图中间部分就是产业小搜的垂直入口。比如搜索酒店机票和旅游度假产品，一般用户会使用行业小搜，垂直搜索需求。随着飞猪业务的发展，以及用户需求的变化，流量会从行业小搜逐渐迁移到飞猪的全局搜索上。主要是因为：</p>
 <ul>
@@ -240,12 +240,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h3 id="2-猪搜框架"><strong>2. 猪搜框架</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6f7d0df3378b4ccabfad1b9a0777c933.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281938595.webp" />   
     </p>
 <p>猪搜框架如图所示，首先通过调用QP来获得当前的Query理解，以及需要召回的Query生成，然后通过SP分页服务调用HA3倒排索引来获取召回的结果。通过粗排序和加权排序将结果通过LTP服务做重排序，最后将得到的结果展示给用户。这里主要介绍下QP的工作。</p>
 <h3 id="3-qp"><strong>3. QP</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/49bb8c159f814a8999e20f9d7060cce3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281938689.webp" />   
     </p>
 <p>QP即Query理解与召回生成服务。在这个服务中，我们面临的挑战主要有：</p>
 <ul>
@@ -258,7 +258,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>接下来，为大家介绍下飞猪在具体基础建设上的一些工作。</p>
 <h3 id="1-query-tagging"><strong>1. Query tagging</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4d20324722b24d048cb293e6c7b5282d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281938759.webp" />   
     </p>
 <p>Tagging是QP中的一个基础任务。负责的功能是把一个query 打出目的地和意图。举个例子，“北京自由行”中“北京”就是用户的目的地，“自由行”是用户的意图需求，可以看出用户希望的是一个自由行的商品，而不是跟团游这类的产品，可能会更希望获得一些机票+酒店或者是无购物的产品。</p>
 <p>这里的工作，主要分为以下几层：</p>
@@ -271,16 +271,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="2-商品poi挖掘"><strong>2. 商品POI挖掘</strong></h3>
 <p><strong>① QueryTagging</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/89ecc4eac16d4c8eb00cbab4ee28552f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281938700.webp" />   
      POI的挖掘除了商品title 可能会有一些景点信息外，详情也会包含大量的信息。因此，我们需要从这些内容中挖掘出有价值的信息，来扩充词表。例如图中的景点POI，可以用作索引参与召回，但是详情是非结构化的HTML文本，要挖掘POI实体，会有比较大的难度。</p>
 <p><strong>② 建模方式</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5f2caaf0a6c44bc089ecfb93431995b8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281938918.webp" />   
     </p>
 <p>我们采用了典型的序列标注问题来解决这个问题。我们通过一些特征，如词特征、数字特征、类目特征，进行筛选，通过人工标注来训练我们的CRF++模型。后续我们还升级成了Template下的模型来训练NER模型，使我们可以在离线，对接了大量的文本数据，进行序列标注。最终，我们达到了99%以上的准确率，召回率也超过95%。扩充了大量的没有挖掘出POI商品/POI特征的度假商品，使它们产生了POI的特征，可以更好地为后续的POI及检索做出服务。</p>
 <p><strong>3. 同义词挖掘</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/59ed0d07ad774cae8a4a6808d488397d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281938216.webp" />   
     </p>
 <p>在旅行行业，存在四种类型的同义词：</p>
 <ul>
@@ -291,7 +291,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>我们希望可以用一个通用的模型来解决这种同义词关系。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e4effe0b52044b22acfc92af38fa5461.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281938351.webp" />   
     </p>
 <p>我们的办法是基于用户点击行为，拼接query和商品title，使得query和title中的词形成上下文，然后基于word2vec的skip-gram模型，得到每个词的词向量，并基于语义相似性，产生每个词top 20的候选，同时将问题转换为二分类问题。</p>
 <p>另外，在特征工程上，我们会利用中英文的编辑距离、共现数目以及是否包含关系、余弦相似度等来构建特征。</p>
@@ -299,7 +299,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>最后，我们还会经过一层人工审核，因为同义词的影响面积比较大，如果直接通过算法挖掘，在线上的效果可能不会特别好。所以我们没有采用复杂的模型，只是够用就可以了。这样在万级别的人工标注上，我们的准确率可以达到94%。</p>
 <h3 id="4-纠错"><strong>4. 纠错</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2d4e895d8e784f1dac9fab9c1267b2c4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281938599.webp" />   
     </p>
 <p><strong>① 背景</strong></p>
 <p>对于纠错，刚才提到了词级别的错误，事实上，整个Query中也会出现一些错误。只用词级别的纠错，不能满足用户需求，需要一个全query纠错逻辑。</p>
@@ -311,7 +311,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>形近字：比较难获得，因为很难判断两个字是否有些相似。我们这里，通过字体图像和字体结构来解决的。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ecc770cc0c4a461db4f9bb622f517693.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281938707.webp" />   
     </p>
 <p><strong>③ 基于图像</strong></p>
 <p>说到基于图像的方式，最直接的方式就是基于CNN图像网络的匹配算法。但是出于性能方面的考虑，这种方法的效果往往达不到我们的性能要求，所以我们采用了一个比较简单且有效的方法，就是我们直接对两个可能形近的字的图像进行计算。对形近字而言，我们在标准的字体库中，发现它有两个特点：</p>
@@ -323,7 +323,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="03-召回策略"><strong>03 召回策略</strong></h2>
 <p>接下来为大家介绍下飞猪在召回策略上的一些技术：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1da3e8d5ffc140b29ecbfe570e7d49f1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281938817.webp" />   
     </p>
 <p>航旅召回跟常用的搜索召回有相似的地方，也有不同，面临的挑战主要有：</p>
 <ul>
@@ -335,12 +335,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>鉴于这种情况，我们对用户的召回分成了以下四种召回方式：经典召回（同义词挖掘、相似query改写、商品POI挖掘）、LBS召回、向量召回、个性化召回（I2I&amp;U2I以及向量模型），来满足用户的需求。</p>
 <h3 id="1-经典召回"><strong>1. 经典召回</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4b3d4cafb7aa4e2ba8bc0e1af93bf354.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281938044.webp" />   
     </p>
 <p>刚刚已经介绍过同义词挖掘和商品POI挖掘，这里主要介绍下相似query改写。以“上海迪士尼乐园门票”为例，其实标准的商品是“上海迪士尼度假区”，而“黄山风景区”的标准商品其实是“黄山”。在这样的情况下，如果我们直接创建搜索，可能召回的效果比较差。因而，我们会进行一些相似query挖掘，来满足这种query和title GAP的情况。</p>
 <p><strong>Learning To Rewrite：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e8a3192e82064eb09f9926daf5bd8991.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281938561.webp" />   
     </p>
 <p>我们思路是使用多路改写产生候选集合，然后用learning to Rank 选取top K结果。</p>
 <p>首先假设用户在筛选中输入了query，这个query是比较相似的。因为用户在筛选中是想要获得他想要的结果。如果用户第一个query，没有得到想要的结果，用户会进行一些改写。就相当于用户帮助我们完成了一次改写，我们从中可以学到用户改写的信息。这里我们是用类似word2vec的模型实现的。</p>
@@ -351,28 +351,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>最终，我们线上使用的模型是PS-SMART 模型。加上规则过滤之后，准确率可以达到99%。可以影响线上36%的PV，对一次UV的无结果率可以相对降低18%。</p>
 <h3 id="2-航旅特色召回lbs召回"><strong>2. 航旅特色召回：LBS召回</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cad82d7e12fb492498ad188c35dc9ca8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281938286.webp" />   
      由于用户是在旅行场景下搜索，用户天然会需要LBS 相关的信息。如果是差旅用户，可能会定阿里巴巴园区附近的酒店，如果是旅游用户，可能会定黄山风景区附近的酒店。这就需要识别用户想要的商品大概在什么样的LBS范围内。解决的方法是通过对query中用户POI的识别，获取用户的经纬度，进行召回上的限制。</p>
 <p><strong>建模过程：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a71fae83214a4ab7a5c2993917aa5008.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281938427.webp" />   
     </p>
 <p>首先会对query进行常规的分词，然后在POI专用的倒排索引库进行检索，获得候选POI。接下来对候选POI query进行特征计算，计算出文本相似性、embedding相似距离，以及用户当前位置输入后，与历史点击的商品地点的距离做特征。然后用特征构建模型算出一个分数，通过一定的阈值得到结果。</p>
 <p>最后，我们的准确率可以达到95%，GMV和成交都得到了一定的提升。</p>
 <h3 id="3-深度召回向量召回"><strong>3. 深度召回：向量召回</strong></h3>
 <p><strong>① 背景</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2cfacfde3c9e411c8b98940a1101f6c3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281938565.webp" />   
     </p>
 <p>前面提到的都是一些简单的文本召回，以及LBS召回等偏传统的方法。前面说过，我们的商品按照目的地切换后，还是很稀疏，还会存在无召回的情况。对于这种情况，我们想到引入向量召回的方式进行补充召回。可以覆盖改写没有的情况，可以召回一些原来不能召回的产品。</p>
 <p><strong>② 向量召回整体架构</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7a812758f9e74df7be75a05ad280e96b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281938798.webp" />   
     </p>
 <p>向量召回架构如上图。在线通过对query 进行embedding。离线通过HA3引擎，把所有的item embedding存储到HA3引擎中。最后，SP通过从QP获得query embedding，进行HA3检索，获得需要的商品。</p>
 <p><strong>③ 模型结构</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/711c739d35fb42d1bee97598557d447e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281938248.webp" />   
     </p>
 <p>模型结构，如上所示：</p>
 <ul>
@@ -384,7 +384,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>对于损失函数，我们使用的large margin loss。对于学的足够充分的case ，就丢弃掉，不再进行学习，让模型更快的达到我们想要的效果。</p>
 <p><strong>④ 样本选择</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/41ffe06a10714fb59df7712e2d3dee34.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281938379.webp" />   
     </p>
 <p>在样本选择上，我们对正负样本也做了一些探索。</p>
 <p>集团内通用的方法：</p>
@@ -401,7 +401,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>使用随机选择有两方面：一是在全量商品中，进行随机选择；二是在一个类目或者目的地下，进行随机选择。这样可以提升训练的难度，达到我们想要的效果。</p>
 <p><strong>⑤ 模型产出与使用方式</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d9fdc3d2f3be4f95a5fc724ffe25a654.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281938484.webp" />   
     </p>
 <p>最终产出的分数，也给排序使用了，作为排序的一个特征，取得了不错的效果，可以排在第4位。另外，线上召回可以让无结果率降低32.7%。同时，扩充了1.7倍�</p>
 
@@ -527,6 +527,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -560,10 +564,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -942,6 +942,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

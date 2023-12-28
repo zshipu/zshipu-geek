@@ -208,15 +208,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>上文提到的 <strong>“拉肚子”</strong> 和 <strong>“腹泻”</strong> 两个词，从汉字、拼音、字形上都存在巨大差异，一般很难使用规则的手段的做关联，更常见的方式是首先离线准备好这批数据。比如在搜索场景中，提前准备好一份 <code>同义词映射表</code>，当输入 Query 遇到 <strong>“拉肚子”</strong>、 <strong>闹肚子</strong> 等都向 **“腹泻”**对齐。准备这份同义词表的确是个比较头疼的事情，词的语义、句子的语义本身就是在文字之上的抽象，人能够从少量文字中推理出同义词的信息，因为我们有不断获取的知识做支撑，但是计算机很困难（在知识图谱还未完善时）。因此， <code>同义词表</code> 常常需要业务人员手工收集，这种方式准确率高，但是因为自然语言的灵活性，对一些长尾数据很难保障召回率，后期会变成遇到一个 case，向词表里补一个词的情况。</p>
 <p>既然人工枚举同义词的能力有限，从哪些数据里可以找到现成的同义词呢？这里分为两个思路，首先是从现成的 <strong>结构化数据</strong> 里寻找，最简单的可以找现有的知识图谱数据，比如 OpenKG ( <a href="https://zshipu.com/t?url=http%3A%2F%2Fopenkg.cn%2F">http://openkg.cn/</a>) 、OwnThink ( <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.ownthink.com%2F">https://www.ownthink.com/</a>) 里就可以找到不同领域下的开放知识图谱数据</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5bcc556e35e94e8b886d38a0b393b3af.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271811489.jpeg" />   
     </p>
 <p>这些数据集常有设置 <strong>别名</strong> 一类的字段：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/471e6abc7f8c4815818edf474de12af7.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271811440.jpeg" />   
     </p>
 <p>除此之外，另一种结构化数据稍微麻烦一些，在百度百科、维基百科页面中也很容易找到别名信息：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/60b7947a7bfc49348866aa4886c69af0.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271812566.jpeg" />   
     </p>
 <p>这部分数据虽然需要做一些清洗，但是毕竟是经过专家整理，正确率可以保障。</p>
 <p>如果现成数据集中无法满足，另一种思路只能从 <strong>非结构化数据</strong> 中获取。这一途径的关键点就在于 <strong>上下文</strong> 的使用，观察下面这个例子：</p>
@@ -226,12 +226,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>回忆我们是如何思考 <strong>拉肚子</strong> 这个词的同义词的，假设这个词对我们来说是陌生的，一个很自然的方式是去看句子中对这个词的描述，以及其他的实体词的类型，发现与消化内科相关知识接近，也许它与 <strong>腹泻</strong> 大可能有相近的意思，交给计算机做的话无非也是遵循相同的逻辑方法。</p>
 <p>OK，那么从数据层面来说，使用 <strong>非结构化数据</strong> 获取同义词的方案，一个关键点就在于如何建立 <strong>平行语料</strong>，通俗的讲就是两个文本段落在描述同一个事物，这个过程说起来容易，但是其实如果对语料数据不加梳理，最后收集的文本数据中很难有好的覆盖度。因此，我们应该“主动出击”去寻找更有可能产生平行语料的场景，比如在 <strong>丁香医生</strong> 产品中健康问答场景</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/314fd3501c894757b965ce2b8c77b6c2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271812673.webp" />   
     </p>
 <p>其中有大量的医生与患者的对话数据，他们在表述上有所差异，但是因为在这个业务场景内，讨论的核心是固定的，因此可以天然地形成平行语料。</p>
 <p>如果目前手头没有类似的场景，而又想构造尽量平行的语料数据的话，一个比较 tricky 的方案是借助现有的搜索引擎，比如我们用百度搜索**“闹肚子”**这个关键词：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e20342a94175417e943e2e3cce31ee49.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271812797.webp" />   
     </p>
 <p>现有的搜索引擎大多也集成了同义词映射、扩展查询等功能，虽然爬取后数据的清洗也比较费劲，但是在数据不足的情况下也不失为一种策略。</p>
 <h4 id="常见的同义词挖掘思路">常见的同义词挖掘思路</h4>
@@ -245,26 +245,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h5 id="pattern-的使用">Pattern 的使用</h5>
 <p>提到从文本数据中抽取数据，一个很朴素的想法就是使用 <code>模板</code>，这点我们在之前的文章知识图谱构建综述中也讨论过。其实 <code>同义词</code> 也算是一种特殊的三元组关系，使用 <code>Pattern</code> 抽取的方式在正确率上可以保障，但是它的主要问题在于模板的数量以及 <code>语义漂移</code>。另外，因为同义词这种关系的特殊性，使用模板抽取的方式对语料数据也有额外的要求，比如我们使用特定的触发词：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/34b1f064200e4f57aeca45505640f495.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271812811.webp" />   
     </p>
 <p>或者特定的抽取模板：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/93b5996aa05046638830d395b26caf63.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271812534.webp" />   
     </p>
 <p>这些句式只会在 <strong>百科类</strong> 或 <strong>词条解释类</strong> 的文本中高频出现，在其他类型文本中并不容易找到如此工整的表述。</p>
 <p>虽然有缺陷，但是 pattern 还是有可取之处，常见的增强方式的设计部分 <code>种子pattern</code> 后，使用 <code>bootstrapping</code> 的方式挖掘更多的 pattern。随后 pattern 抽取的数据不可直接使用，而是作为产生新候选词的途径。</p>
 <h6 id="multi-distribution-characteristics-based-chinese-entity-synonym-extraction-from-the-web">《Multi-Distribution Characteristics Based Chinese Entity Synonym Extraction from The Web》</h6>
 <p>这篇工作的主要内容是从利用百科类数据中的结构化、非结构化文本中获取同义词。整体流程如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a0972bbe95484818833deb072fea6a0f.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271812201.jpeg" />   
     </p>
 <p>作者提到了使用 <code>bootstrapping</code> 的方式产生更多的 <code>Soft pattern</code>，利用所有的模板去产生更多的同义词候选。值得注意的是从同义词候选集进行筛选是这一类工作的核心，本文在获得同义词候选集后，会继续抽取每一组同义词的上下文特征，利用这些特征的相似度构建一个相似图结构：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1ab9106bb1f64f109b93b4e2db43252d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271812123.webp" />   
     </p>
 <p>在这个图的基础上，作者设计了相应的 <code>Spreading Activation</code> 算法：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/420fe4ce46e44d4bbbb32add5bc7fa84.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271812961.webp" />   
     </p>
 <p>在扩散激活模型得到的同义词对还会再使用一个 <code>重排模型</code> 才会得到最终的结果。</p>
 <h5 id="更好的预训练">更好的预训练</h5>
@@ -272,13 +272,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h6 id="hierarchical-multi-task-word-embedding-learning-for-synonym-prediction">《Hierarchical Multi-Task Word Embedding Learning for Synonym Prediction》</h6>
 <p>这篇工作的重点在于如何为同义词挖掘这个任务获得更好的预训练词向量。熟悉 <code>Skip-gram</code> 等词向量训练方法的同学应该都知道，这种方式的本事其实是利用一个有限长度的滑动窗口去获得某个词的表示，这是一个反向映射的过程，而这个过程本身与语义无关。当数据量足够大的时候，我们可能恰巧得到了一个词的同义词，但是更多的时候，我们只能说两个词在语义上比较“相关”，比如**“感冒” <strong>和</strong>“发烧”**在医疗领域高频共现，简单的词向量求相似其实难以发现它们的区别。本文就是在 <code>Skip-gram</code> 的基础上加以改进，以试图加入更多语义相关的信息：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/320ad79a229f463fb05b6ecb5dd56657.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271812913.webp" />   
     </p>
 <p>作者把原始的 <code>Skip-gram</code> 模型修改成 multi-task 的两项任务，一项用于预测目标词所在句子中的各个实体类型，另一项用于词本身的预测，如此加入了实体的语义信息，在作者的测试集中，模型可以显著提高词向量之间的语义相似性。</p>
 <h6 id="surfcon-synonym-discovery-on-privacy-aware-clinical-data">《SurfCon: Synonym Discovery on Privacy-Aware Clinical Data》</h6>
 <p>除了加入语义特征，另一个增强预训练的方式是在数据本身做更多的挖掘</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4683a42737724940bfc23ae7a1c07791.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271812841.webp" />   
     </p>
 <p>本文由于医疗电子病历的特殊的应用场景，更加关注 Query 短文本中的实体词。因此作者拓展了字级别、词级别，以及医疗实体在电子病历中的共现特征来增强词向量的预训练过程。同样，作者也会在最后使用一个排序模块来增强整个系统的健壮性。</p>
 <h5 id="善用知识库中的种子数据">善用知识库中的种子数据</h5>
@@ -286,17 +286,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h6 id="automatic-synonym-discovery-with-knowledge-bases">《Automatic Synonym Discovery with Knowledge Bases》</h6>
 <p>本文是韩嘉炜老师团队在 KDD2017 年发表的一篇工作：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2e481295e4b048f29d407216dc7be7cf.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271812677.jpeg" />   
     </p>
 <p>与前面提到的工作相似，文章中同样也是对词级别和句子级别特征完成了预训练向量，对于 <code>pattern</code> 也使用了 bootstrapping 的方法做扩充。不同的是在 Model Learning 的阶段里，作者收集了分布式方法和模板方法中产生的 <strong>Seeds 数据</strong>，这些种子同义词对数据会被进而训练成二分类的分类器，从而在进一步对候选词进行约束，提高准确率。</p>
 <h6 id="mining-entity-synonyms-with-efficient-neural-set-generation">《Mining Entity Synonyms with Efficient Neural Set Generation》</h6>
 <p>同样是韩嘉炜老师团队的工作，发表在 AAAI2019 的同义词挖掘工作：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7b05772963cf4998a09300f65297e810.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271812453.jpeg" />   
     </p>
 <p>这篇工作进一步增强了对知识图谱中已有同义词数据集的利用。文章中提到了 <code>entity synonym set</code> 的概念，在整个流程中，作者意在利用库中众多的同义词簇的整体分布，来评估实体词是否属于某一同义词簇。文章的亮点在于 <strong>集合 Set</strong> 的表示学习，以及新实体进入 Set 的判定方法。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9e71b59eda2245d29113dcddfde65a49.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271812235.webp" />   
     </p>
 <h4 id="总结">总结</h4>
 <p>综上所述，在实际工业场景的工作中，同义词挖掘工作应该先从数据源层面开始，寻找现有可以利用的结构化数据加以清洗，这可能是�</p>
@@ -423,6 +423,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -456,10 +460,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -838,6 +838,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

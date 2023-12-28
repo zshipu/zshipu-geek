@@ -193,52 +193,52 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="post-content">
             <p>本文根据OPPO黄树东老师在OPPO&amp;DataFun Talk算法架构系列活动“AI在OPPO业务场景下的应用实践”所分享的《OPPO CTR预估系统实践》编辑整理而成，在未改变原意的基础上稍做修改。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b6198b5cce08490e9d02259251c4c192.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271730727.webp" />   
     </p>
 <p>CTR预估系统在商业变现领域有一个非常大的应用，也是非常核心的一个模块。业内各大公司都非常重视这项工作，如百度CTR系统做到样本迁移的特性，功能非常复杂。今天分享的是OPPO在广告业务快速增长的场景下CTR预估系统从搭建到迭代引擎的一些实践经验以及思路，接下来将从系统架构、算法模型、特征工程以及策略来阐述CTR预估系统。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/994a1cf4b66a4a6bbdb698232cb1b23d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271730368.webp" />   
     </p>
 <p>首先介绍一下CTR预估系统业务对接的一个场景，应用层主要在应用分发领域、搜索、联盟、信息流四个领域上的一个呈现。图中左边是我们的一个分层架构模型，底层是数据层（数据量庞大、复杂）；数据层往上就是特征抽象层，将数据抽象成机器学习能够使用的一些特征或符号。这里面就包含各种各样的挖掘算法，比如ID特征、统计类特征等；再往上就是我们的预测层，这是系统比较核心的地方。比如GBDT（相关性计算）、大规模离散LR（主要是CTR预估），DNN模型目前在研发中；上层主要是根据我们的目标做一些排序，更关注是ECPM，或者转化率等，这些通过配置化都是可以实现的。右边是我们的一些支撑系统，有实验框架、特征引擎、配置中心、数据同步等模块。依赖集群主要是Hadoop、Spark、MPI、Kafka等集群系统。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1c9c6bb2b1a8477c8ebedc2564afa0e2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271730847.webp" />   
     </p>
 <p>下面是我们的数据流，我们现在支持从Offline到Nearline到Online的一种学习方式。最开始我们也是从Offline上面来做，慢慢迭代做到Nearline，再到Online，时效是从天级到小时级再到分钟级的一个迭代引进。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/61ea390a44ba40d7a1584dff38807c24.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271730479.webp" />   
     </p>
 <p>接下来讲一下我们CTR预估系统的一个演进，我们是从16年开始做CTR预估系统，通过机器学习模型来提升我们的收益。面对的场景是业务的快速发展，另外一个就是我们各项的资源有很大的限制，今天主要讲如何在业务的快速发展过程中达到我们业务的目标。我们最开始的版本是从统计模型开始的（基于热度的一个排行），最后上线的是基于用户群体的，我们可以更细粒度的去统计，比如之前我们有一个排行榜，每个item是一个榜，我们可以分为不同年龄性别，不同的地域机型的一个不一样的列表。在这个阶段面临两个问题：一个是偏置的问题（在互联网数据，比如在搜索的时候，地域偏置很严重，第一点击是第二第三点击的好几倍）；另一个是稀疏性问题，统计模型是一个记忆性的模型，它是没有任何泛化能力，这就会面临很多新广告是没法计算的。在16年下半年在1.0基础上升级到2.0，从用户群体的粒度做到真正的个性化（离线、在线预估，特征引擎，batch LR算法来支持后面的计算），这一方面主要是框架搭建，比如线上系统、离线、在线系统打通，还有数据同步特征引擎都在CTR2.0版本完成。17年上半年我们主要是做特征工程，各种各样的特征挖掘（Embedding特征、相关性特征、实时特征），这一块是提升空间比较大的阶段，因为架构搭建好了无非是加入更多的数据和更多的特征。在17年下半年我们做了一个Online LR算法，背景是解决批量场景时效性问题，再者没法快速响应用户请求问题，比如天气模型更新其实是很难去快速反应这样一个场景。这方面也做了一些算法优化，以及实时特征上报等一致性问题。后面主要做的是Online DNN一些事情，主要是基于Tensorflow、深度定制等工作，后面会详细介绍。在模型演进的过程中最难的是我们如何在不同阶段做什么事情来达到不同阶段的目的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ef129e41f7dd48438f48382befff5b70.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271730249.webp" />   
     </p>
 <p>接下来将介绍一下在算法模型方面的工作和思考，目前，数据不大也不算太小。最开始我们去做学习的时候，是怎么快怎么来，最开始是单机liblinear，这个代码比较简单易用效果也还OK，但是无法支持我们现在的数据量；之后引入spark mllib，因为它是集成在Spark里面，简单易用。尝试了两个算法LBFGS和SGD，发现前者效果要好些，但是样本的权重以及线上效果并不是很理想；之后我们切换到了spark liblinear平台，他是TRON优化算法，效果比较好，在线上先验也比较符合我们的预期，缺点是需要多次迭代，效率很慢。另外一点就是我们业务特性以及特有的一些特征无法与开源框架结合，我们自己开发了基于spark的Batch GD算法。支持支持pretrain、稀疏特征优化、细粒度正则、check point等来支持错误重启，训练完效率比TRON效率提升2-4倍。随着业务增长和数据量的增加，基于spark的机器学习平台还是出现瓶颈，后面考虑基于MPI的OWLQN的算法训练速度快7倍、效果与Batch GD持平，但是缺点开发门槛较高，因为MPI是很底层框架 ，需要很多额外工作。但是有些场景还是无法满足，比如快速反应类场景无法满足，因此基于TensorFlow做了一些Online LR的优化，效果也比较好。接下来会详细将MPI和Online LR算法及优化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/15c4626d449b4c198290a1c4dd46bd5b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271730955.webp" />   
     </p>
 <p>我们从spark切换到MPI的效果提升，训练时间下降到6小时，需要的核数从1000下降到240，收益是非常明显的。从Batch Model 到Online Model也是有比较好的收益，但是也不是一帆风顺，因为Online Model有很多问题，如如何在记忆与遗忘间平衡、我们的model是偏向历史样本还是当前样本、如何调参、稳定性问题（线上断流，作弊流量很容易把模型带偏）、从离线计算到流式计算对功能架构要求比较高，尤其是业务发展非常快，人数不足时挑战比较大。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c1726a4ac26d4044b642894a459aeae0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271730766.webp" />   
     </p>
 <p>我们在Online LR模型做了一些优化，FTRL算法是google在13年提出的一个算法，主要解决在广告场景下大规模离线LR训练的问题。第一项其实是一个梯度，第二项是一个严格的凸优化式子，第三项是正则。这里面存在一个问题是梯度是0-t的累加，梯度是历史累加到现在，很多样本越训练到后面梯度是慢慢衰减。腾讯数据平台专家提出一个算法，是FTRL算法的改进，公式中有ρt-s，模型会做历史样本衰减，随着样本不断训练，历史样本的权重会越来越低，当前样本权重会越来越高，就回去调节ρ的权重。我们的改进是对衰减因子做了归一化处理，使得调参更加方便，另一个我们在图优化约束更加激进些，权重变化只跟当前权重有关，这样能更好适应当前样本变化情况。我们从Batch Model 切换到Online Model效果方面，性能由6小时提升到1小时（Batch LR需要30天训练数据，Online LR每个样本过滤一遍），另一个效果方面在信息流场景下天气预测方面Batch LR能达到2.6%的收益，而从天级到小时级Online LR有2%的收益，而在应用分发场景两个达到持平效果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4120f9c3c4644941b6b9bc0b5744cd28.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271730381.webp" />   
     </p>
 <p>我们目前也在做Online DNN的工作，有些人疑惑推荐系统需不需要DNN，需不需要做的这么复杂呢？DNN相对于LR模型有很大的拟合能力，我们海量数据能提供很好地训练能力。比如数据量由10亿增加到100亿，对于LR效果提升不大，DNN能够提供很好地效果提升。另外一个能突破特征的瓶颈，DNN自动学习特征的能力能够很好地突破人工选择特征。第三个就是业界的一些经验，Google、BAT等大公司在深度学习积累很多经验。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/97d08fcf1ae94f2b8f03b575633f1381.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271730183.webp" />   
     </p>
 <p>DNN切换到逻辑回归模型也是有很多挑战，除了一些大公司外，中小公司切换难度很大。主要是DNN是非凸优化，优化过程往往需要很多trick、调参难度大（papers和公司分享不会透露很多细节）。另一个相比于图像领域，端对端学习，CTR预估面对的是非标准化场景，即使知道公司如何优化，业界成功经验并不能很好借鉴。第三个是工程架构要求比较高，因为CTR预估是用在线上而不是刷比赛或者实验，线上需要达到稳定性的要求，对工程挑战还是比较大的。</p>
 <p>我们在选型的时候是Google在16年发表的《Wide &amp; Deep Learning for Recommender Systems》得一个算法，这个算法的优点：机油宽模型的记忆性也有深模型的泛化能力，这样模型层面比较优雅，我们先前的LR有很多经验可以借鉴。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a5c85f50b11f4cd2ae4c283422f70374.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271730824.webp" />   
     </p>
 <p>在我们网络结构确定后，我们如何去落地去实现这个系统。深度学习框架有很多，如TensorFlow、Caffe、Keras、CNTK等，TensorFlow相对于其他框架优点在于：易用性好，功能很完善，缺点也很明显就是太重，因为既要做到通用性也要很业务性去支持学术、工业界的要求。主要表现在python上它做的很厚，我们是面对单一或者专业领域，所以我们优化就是将python逻辑下发到C++层，另一个算子、io、特征工程性能优化，做到更粗粒度。比如做梯度下降根据我们的目标去做而不是拆分为一个个粒子再串起来，这样在性能达到好几倍的提升。比较重要的一块是我们的线上服务，DNN训练出来，我们需要在线预估，TensorFlow提供一个很好方案是Tensor service，但是它和我们原有工程和特征工程结合成本比较高，而面对的场景是比较专业，并不需要CNN或RNN，因此我们自己去研发这样一个预估服务器成本还是可控的，因为DNN就是几个矩阵相乘，因此最后我们自己研发（正在研发，没有太多数据可分享）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2ede39dd397f4c6796110ef1f2c13438.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271730408.webp" />   
     </p>
 <p>接下来讲一下特征工程方面的工作，随着DNN的出现，特征工程的工作被弱化。但在CTR系统中还是需要做很多特征工程，包括我们的Embedding 统计等都需要做。主要介绍一下我们提高特征提取的效率以及保证一致性的工作，那如何去保证我们的特征是一致性的，比如线下使用Python开发，端对端训练，线上使用Java开发；有可能开发人员还不同，这样很容易导致一致性问题。另一个随着系统复杂性增加，线上很难保证一致性。我们的工作是把特征提取统一化，线上线下都用统一特征提取技术，输入特征描述和数据，算子是可以复用的，真正实现一处开发、多处可用，提升迭代效率还有就是自动分析特征间依存关系及生命周期，最大限度进行cache，提升提取性能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6bef23077a0b4744bc00791001b10ae6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271730031.webp" />   
     </p>
 <p>单独一个统一特征提取引擎可能还不够，在线上数据上报在特征拼接和训练流程做了三个方面的迭代来达到完全特征一致性。一开始我们是线下通过拼接各种数据，扩宽图表再去提取特征，但是这样很难去模拟当时状态发生的现场，另一个是特征与样本的穿越，会出现严重的过拟合问题；第二版就是把现场的一些上下文信息保存下来，在训练时直接拼接上下文信息再去特征提取。但是这种数据延迟很难保证；后面就是直接从线上�</p>
 
@@ -370,6 +370,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -403,10 +407,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -785,6 +785,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

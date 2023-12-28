@@ -214,37 +214,37 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="二匹配算法的应用场景">二、匹配算法的应用场景</h2>
 <p>整个智能客服的架构如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-e4c640e4f0e446fcaa4b99cfc4cf9e86.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272205505.png" />   
     </p>
 <ul>
 <li><strong>NLU层</strong>：NLU层是对用户输入的query进行解析，包含意图识别、分词与词法分析、短语改写等功能。意图识别是为了识别出query的意图，我们通过日志分析总结出了116个意图，其中包含7个Task意图，1个寒暄意图，和108个具体业务意图，会根据不同的意图识别结果走不同的bot。这里的意图识别模型用的是fastText，该模型有高效的训练速度和较高的识别准确率，做出来的结果也可以达到上线使用的标准。词法分析维护了一些词典，通过词典匹配能获得query中的关键词和关键短语。短语改写的目的是为了纠错，比如“搏学考试”手误输入成了“博学考试”，短语改写便能将其纠正，query改写后能更容易召回正确答案。</li>
 <li><strong>召回层</strong>：召回层是将候选答案从FAQ库中拿回，获得待排序的候选集。此处用了两种召回方式：检索召回和语义召回。检索召回会根据NLU层的意图识别与词法分析结果进行关键词和意图的加权，同时，n-gram的使用也一定程度上减弱了分词错误带来的负面影响。语义召回是将相似问构建成一个faiss索引，这些相似问已经由知识库运营人员总结成标准问，并和知识产生了挂接。query和相似问会被映射到同一个语义向量空间，通过KNN能快速拿到和query最相近的相似问，从而拿到最可能回答query的答案。下图直观展示了语义召回的过程：</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-62fbaf12fba54c68bb6f647fc13af7f2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272205400.png" />   
     </p>
 <ul>
 <li><strong>排序层</strong>：排序层是将召回层拿到的候选知识进行排序，将和query最相关的知识尽可能往前排。排序模型采用了GBDT，GBDT作为一种常用的树模型，可天然地对原始特征进行特征划分、特征组合和特征选择，并得到高阶特征属性和非线性映射。我们考虑用GBDT可以组合多种特征，可扩展性强，并且后期验证GBDT的效果好于单独使用匹配算法效果，因此，当前 <strong>匹配算法在排序层中作为一种特征来使用</strong>。</li>
 <li><strong>返回层</strong>：query经过上述处理之后会对处理结果进行返回。四种返回层场景展示，依次是Chat-bot,Task-Bot,KBQA和QA-Bot：</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-86a9a5a4f74a4d5f9fa31c446a23bd9a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272205992.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-3b865eba437c4e57bca597953e9b9d92.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272205903.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-1c0ec7d35f034f989b24c2b0ff7ca99f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272205935.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-a7f28a81abf64a13a2742fe3cc644418.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272206047.jpeg" />   
     </p>
 <p>&laquo;&lt; 左右滑动见更多 &raquo;&gt;</p>
 <h2 id="三匹配算法的实践">三、匹配算法的实践</h2>
 <h3 id="31-数据准备">3.1 数据准备</h3>
 <p>随着标准问数量的增加，知识库中存在大量query和标准问的匹配对，将这些匹配对当作正样本，label为1。将query随机抽取一条与之不匹配的标准问作为负样本，label为0。共产生12w+的训练样本和5000条测试样本，正负样本比例为1:1。标准问是由人工标注总结，因此数据集质量较高，正样本匹配关系很强，数据比较规整。训练样本展示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-df7609226a064c3b90b1626b03e87dee.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272206503.png" />   
     </p>
 <h3 id="32-模型训练">3.2 模型训练</h3>
 <p>我们对4种交互型的深度语义匹配模型进行尝试，分别是ABCNN（ABCNN-1，ABCNN-2，ABCNN-3），PairCNN，ESIM和Bimpm。使用交互型匹配模型的原因如下：</p>
@@ -426,6 +426,10 @@ RO_0 = all_pool(variable_scope=&#34;input-right&#34;, x=x2_expanded)
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -459,10 +463,6 @@ RO_0 = all_pool(variable_scope=&#34;input-right&#34;, x=x2_expanded)
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -841,6 +841,8 @@ RO_0 = all_pool(variable_scope=&#34;input-right&#34;, x=x2_expanded)
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

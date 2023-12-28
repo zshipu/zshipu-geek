@@ -205,7 +205,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-93ce1fa4c534464dbedfe191e4e37963.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272203976.webp" />   
     </p>
 <p><strong>桔妹导读：</strong> 滴滴的路线引擎每天要处理超过400亿次的路线规划请求，路径规划是滴滴地图输出的核心服务之一。不同于传统的路径规划算法，本文主要介绍的是一次深度强化学习在路径规划业务场景下的探索，目标是为用户规划出最符合司乘双方习惯的路线，降低偏航率。</p>
 <p>当我们打开滴滴使用网约车服务时，出发前我们往往会关注要走哪条路，这条路要花多长时间，要花多少钱，有多少个红绿灯，路况是否拥堵&hellip;&hellip;这些都与路径规划密切相关。路径规划对滴滴来说十分重要，它是网约车服务的重要一环，与用户体验直接相关，一次糟糕的“绕路”可能会引起一次投诉进线，甚至影响用户留存；而良好的路径规划不仅可以显著提升司乘双方的使用体验，还能让司机少堵在路上，进一步提升整体出行效率。</p>
@@ -213,14 +213,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>以及业务逻辑的复杂性</strong></p>
 <p>类似于语言任务中的token，物理世界的道路会被建模成一段一段的link，这些link都具有唯一的id以及对应的道路属性，比如长度，方向，道路等级等。对于路口来说，进入路口的link和出路口的link往往都有多个。拿北京举例，北京的路网包含大约200W个link，网约车订单可能会包含数十甚至上百个路口，在如此庞大且复杂的路网中和较为苛刻的时间限制下，规划出高质量的路线绝非易事。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-c6d01223e02043ceabf5d3fec7e66342.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272203984.png" />   
     </p>
 <p>图中每一个带箭头的红色线段表示一个link，可以看出不同link之间的长度差别是比较大的。</p>
 <p>此外，我们知道物理世界的道路是会发生改变的，这种改变可能是永久的，比如修路，也可能是临时的，比如交通管制。所以路网数据也是动态的，实际上目前我们地图的路网数据是天级更新的，这也加大了路径规划任务的复杂度。</p>
 <p>从实际业务来看，和自驾推荐走更快，更通畅的路线不同，由于网约车会基于里程、时长计费，我们需要同时考虑时间、距离、价格、安全因素，推荐相对快又相对便宜的路线。考虑用户的偏好，让用户在安全、快速到达目的地的同时，让行驶距离尽量短，总花费尽量少，是我们路径规划的核心原则。但很多时候“快”和“近”很难同时满足。距离更短的路往往是次干路或者支路，红绿灯多，堵车可能性更大；而绕远的高速路或者环路，通行能力更强，只要不极拥堵，车速通常更快，反倒用时更短。</p>
 <p>有乘客希望更快，也有乘客希望不绕远。为了尽量平衡，从去年3月起，我们率先在网约车上线了“选择路线”功能，充分考虑乘客的出行偏好，提供最多三条路线供乘客选择(拼车、一口价订单司机需按照平台指定路线行驶)；并联动司机服务部鼓励司机主动询问乘客是否有常走路线。今年8月，我们还进一步在北京、杭州、深圳、南京、西安、厦门等28个城市试行“行前多路线选择”功能。乘客实时呼叫网约车，发单前可以根据路线标签、预估里程、行驶时长等信息选择最合适的路线，系统自动同步至司机端导航。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-af04b9004e9845c294903e6aeb331966.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272203415.png" />   
     </p>
 <p>综上，想要做好让司乘双方都满意的路径规划是一件极具挑战的事情，但是这也为我们进一步提高出行服务质量提供了机遇。</p>
 <h2 id="2-路径规划算法和ai技术的融合"><strong>2. 路径规划算法和AI技术的融合</strong></h2>
@@ -228,7 +228,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>得益于滴滴海量的出行数据尤其是高质量的轨迹数据，我们可以利用深度学习技术去挖掘和学习司机的驾驶行为以及用户对路线的偏好，借助训练出的深度模型在短时间内为用户规划出满意的路线，降低线上的偏航率。</p>
 <p>我们这里可以把寻路的过程和AlphaGo下围棋的场景进行类比，司机在路网中行驶犹如棋手在棋盘上落子，初级棋手往往通过记忆棋谱来获取暂时的领先，而最终赢棋往往要求棋手有“大局观”，每一步的落子考虑到之后棋局的演变，关键在于最终赢棋，而不在于一时的得失。寻路过程也是需要往后多看几步的，因为在某个路口的选择眼前可能看是最优的，放在全局看则不一定是最好的选择。我们探索路线生成的过程是和AlphaGo“进化”过程是相似的[1]，是一个从监督学习到强化学习的过程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-7f4591e51da24e41afd050d65931fc35.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272203122.png" />   
     </p>
 <h2 id="3-规划最符合司乘习惯的路线"><strong>3. 规划最符合司乘习惯的路线：</strong></h2>
 <p><strong>从监督学习到强化学习</strong></p>
@@ -237,22 +237,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在实际处理中，因为路线是被建模成连续的link序列，所以我们在网络结构中引入了在序列预测上表现强大的lstm，用lstm可以更好地建模用户从起点到当前位置的状态信息，在经过百万量级条轨迹训练后，我们的模型在每个路口的决策准确率达到了98%+，我们将这个能够在每个路口输出决策概率的模型称作寻路agent，它已经基本可以模拟用户的真实选择。</p>
 <p>如果在每一次决策都选择概率最大的那一个link（即贪心搜索）往往只能找到局部最优解，比如一条路前半段看起来更优，但是后半段可能不是最佳的。为了尽可能找到最符合用户习惯（即整条路线的概率最大），我们使用了beam search搜索策略，其主要思想就是在寻路过程中维护若干个（即beam size）最优的候选集，这种方式相比穷举法大大缩减了需要探索的空间，相比于贪心搜索考虑的情况更多，往往能够找到得分更高的路线，在自然语言处理领域，比如机器翻译任务中被大量使用。可以通过下面简单的例子理解beam search的过程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-d644622be04f43c19e9609b93d497c62.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272203423.png" />   
     </p>
 <p>图中移动的小车展示了beam search在路径规划中的应用，在小车前进的过程中，我们可以给不同的路线打分，维护得分最高的topK路线，直到小车抵达终点。红色的路线表示最终得分最高的路线，也是最符合用户习惯的路线。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b3fdc0146db74cb4be7b550bfca97bb5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272203765.png" />   
     </p>
 <h3 id="32-行为克隆的问题"><strong>▍3.2 行为克隆的问题</strong></h3>
 <p>行为克隆实际上属于监督学习的范畴，在AlphaGo中如果让agent纯粹的去学习棋谱中的走法，它很难打败更加专业的棋手，所以AlphaGo引入了强化学习并搭配MCTS这一搜索策略，从而大大提升了对弈的胜率。同样的，纯粹的拟合专家轨迹是存在问题的:当寻路agent在某个路口判断错误，那么就会进入到没有遇到过的状态，在这种状态下agent的判断容易出错，而错误的累积会容易导致寻路过程演变成“一步错步步错”的结果。虽然我们的模型具有一定的泛化能力，寻路agent也可以找到终点，但由于我们没有显式的引入偏航后的监督信号，寻路agent往往需要更多不必要的“绕路”才能回到理想的路线上来。图中蓝色轨迹是小车偏航后所致，小车既有可能回到demo轨迹（红色路线）上来，也有可能越来越远，偏离demo轨迹，因为模型并没有学习到发生偏航后该如何快速纠正。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0eef2938444146c1bd14f515174a51b5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272203569.png" />   
     </p>
 <h3 id="33-强化学习的应用"><strong>▍3.3 强化学习的应用</strong></h3>
 <p>强化学习是近年来解决行为克隆带来的问题的热门方向。在文本生成领域，seqGAN通过判别器（简称D）来指导生成器(简称G)的训练，在G生成下一个单词时，使用MCTS和D来评估这个单词的好坏，通过reward作为反馈，使用Policy Gradient来更新G的参数，从而增加reward大的单词的生成概率。与此方法类似的还有在游戏系列数据集上表现优秀的GAIL，AIRL，这些方法的主要思想是另外训练一个能够指导生成网络更新的评估网络，缺点在于略显复杂，训练难度和计算量较大。</p>
 <p>AlphaGoZero通过“自己与自己对弈”的过程大大增强了棋力，类似的，我们想要通过生成学习的方式来增强路线引擎的能力。这里我们采用Q-learning的方式来学习一个寻路策略，为了加速模型收敛的速度，我们这里先使用前文提到的行为克隆的方式训练一个能够容易走到目的地的基础模型，然后使用该基础模型在路网上寻路，生成大量的采样轨迹，如果在某个状态，模型采取的动作与用户一致，则给该状态-动作对以+1的reward，相反如果在该状态模型采取的动作与用户不一致，则给该状态-动作对的reawrd为0。这种人为设定reward的方式既没有引入对抗学习的过程，也不要额外学一个reward函数，计算量大幅度减小，同时它可以有效克服行为克隆带来的状态分布偏移的问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-92642cf9d10e49c29e65cd74f401fff8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272203064.png" />   
     </p>
 <p>图中大致展示了我们的训练流程，通过老模型的self-play获取新的轨迹数据，将采样得到的新轨迹和真实轨迹融合训练，更新我们的策略模型，该过程是可以不断迭代的。经过多轮迭代后，路线生成模型的分类准确率虽然没有明显提升，但是生成轨迹质量更高：与真实轨轨迹的重合率明显提高，偏航后返回到demo轨迹的速度更快。这是让人惊喜的结果。</p>
 <h2 id="4-总结"><strong>4. 总结</strong></h2>
@@ -385,6 +385,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -418,10 +422,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -800,6 +800,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

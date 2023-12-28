@@ -218,7 +218,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>随着自媒体时代的蓬勃发展，各类自媒体平台每天涌现出海量信息。微信作为最优质的自媒体平台，每天新发表文章数百万篇。汹涌而来的信息，极大地丰富了人们的精神和娱乐生活，但同时也存在着信息繁杂无序、内容同质化、质量参差不齐等问题，而用户最关心的是最新、最热的新闻热点事件。在此背景下，如何快速、准确地挖掘新闻热点内容，帮助用户更快、更好地了解热点事件，并追踪事件的来龙去脉和不同观点，是非常值得深入研究的问题。就此，我们针对微信生态特色，并结合外部媒体资源，构建了热点挖掘平台，对微信热点、全网热点、细分领域热点进行实时监控和深度挖掘。目前热点挖掘平台已广泛应用于微信看一看和搜一搜，以强化新闻热点感知，优化用户时新体验。</p>
 <h2 id="二技术框架">二、技术框架</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/41d7d772dce7459d88ed5ea3f757faa9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272008749.webp" />   
     </p>
 <p>如上图所示，在资源建设方面，我们在微信公众号文章的基础上，接入了腾讯新闻、腾讯视频等数据源，并对外部媒体进行实时监控。考虑到公众号文章在微信生态内具有丰富的阅读、分享和搜索等用户行为，我们在内容侧的基础上，结合了用户侧共同进行热点资源建设。在技术方面，我们主要针对 <em>热点内容识别</em>、 <em>热点展现</em> 开展工作，并在此基础上积累 <em>主动学习</em> 等语料支撑技术，本文的重点也是分享这三个方面技术经验。</p>
 <p>在应用方面，我们已经将相关技术广泛应用于微信看一看，例如，使用热度召回、热度加权进行新闻排序，提升推荐系统时新体验；构建半自动化热门话题，强化热点感知、提升用户互动；利用聚合结果进行多样性控制，解决内容同质化问题。此外，在微信搜一搜的微信热词、query suggestion 和新闻意图等工作中，我们也对热点挖掘技术进行了有效应用。</p>
@@ -226,69 +226,69 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="质量模型">质量模型</h3>
 <p>自媒体在提供丰富数据的同时，也带来了大量低质量的内容。由于新闻热点内容在时新、格调、权威方面的特殊需求，有必要进一步完善内容质量衡量体系，对新闻内容进行更多方位的质量把控，以帮助我们更好地甄别优质、热点内容。为此，我们在垃圾广告、色情低俗、标题党等传统通用的低质指标基础上，补充构建了新闻性、调性和普适性等新闻特有衡量指标，以更加精准地识别新闻内容的时新程度、衡量新闻内容的格调高低、判断新闻内容的适用人群。此外，考虑到账号在新闻内容质量控制中的关键作用，我们还建立了账号的质量等级、权威度等级和地域账号体系，以期从内容、账号两个维度，对新闻内容质量进行更好的判断和控制。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b056056df55a4dadaf7d13d73e44e6a2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272008434.webp" />   
     </p>
 <p>在内容新闻性、调性等指标构建中，我们主要使用一套通用的文章分类方法（如下图所示），综合考虑文章标题、正文、账号和图片等信息，使用关键词、embedding、规则进行特征表达，基于 Stacking 方法训练子模型，并使用 XGBoost 算法进行多模型融合。在实际应用中，我们也可以对比 Wide&amp;Deep 和 DeepFM 等方法融合 embedding 特征和传统人工特征，通常情况下 Stacking+XGBoost 的模型更容易调试、可控性更强，可以针对不同场景的具体效果进行选择。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8dd7983cc2cf417cb002ef1d8ecd3bb1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272008208.webp" />   
     </p>
 <h3 id="热点发现">热点发现</h3>
 <p>热点发现是随着互联网内容爆炸式增长而兴起的研究课题，集中体现在 TDT（Topic Detection and Tracking）研究任务中，旨在帮助人们应对日益严重的互联网信息爆炸问题，在新闻媒体信息流中进行新话题的自动识别、追踪话题的来龙去脉。在工业界实际应用中，Google 资讯、百度资讯等都用到 TDT 中的相关技术，随着互联网产品的多样化发展，基于搜索引擎、社交传播的热点发现也逐渐加入研究范畴。近阶段的研究主要集中在利用神经网络解决 TDT 中的一些子任务，意图通过新技术、新思想进一步提高 TDT 的效果。下图列举了我们目前主要使用的一些热点发现方法。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/66f5c6924a094e10a8f867733224d912.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272008967.webp" />   
     </p>
 <p>目前我们主要综合内容侧和用户侧两个方面进行热点发现，以挖掘全局、行业、地域、热词、话题、视频等细分领域热点。其中我们用到了一些基础技术，例如长文本之间相似度计算、长短文本相似度计算、聚类算法、分类算法以及时序分析等算法。下文我们将重点介绍上图中的话题聚合、热点预测和热点追踪技术。</p>
 <h3 id="话题聚合">话题聚合</h3>
 <p>话题是一个抽象概念，表征围绕事件发展的时序、因果和评论等内容构成一个集合，在我们的工作中大致类似于 TDT 中的 story 定义。话题聚合的关键在于两个方面：聚类算法和相似度计算。聚类算法包括离线聚类和在线聚类两种。传统的离线聚类使用 batch learning 方式，例如 K-means、HAC、DBSCAN、AP 聚类等，其缺点主要在于不能及时为逐个到来的报道进行聚类，且聚类效率低、稳定性差。</p>
 <p>在线聚类适用于流式内容输入，在原有聚类结果的基础上进行增量计算，例如 Single-Pass，与离线聚类相比，在线聚类效率更高、效果更加稳定，所以我们在工作中更偏向于使用在线聚类算法。在传统 TDT 任务中，相似度计算大多使用了无监督模型，例如余弦相似度、Incremental TF-IDF Model、Incremental TF-ICF Model，由于没有使用人工标注的语料指导模型训练，导致相似度计算的误判率高，效果得不到保证。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/05eee2e4ce5b4462b6c54a234f87ebfd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272008746.webp" />   
     </p>
 <p>为了进一步提升话题聚合的效果，我们在传统算法的基础上进行了优化，设计了上图中的聚类算法。文章使用流式进入聚类系统，通过话题追踪模型判断当前文章能否匹配已有话题池中的话题，该话题追踪模型模型使用人工标注语料进行有监督训练获得（详见后文多粒度语义相似度计算）。如果当前文章可以匹配已有话题，则把文章并入已有话题并更新话题表达，否则，则会形成新的话题加入话题池中。此外，考虑到传统 Single-Pass 算法容易出现匹配一错皆错问题，我们使用 HAC 层次聚类、话题精选机制对话题池子进行及时修正，保证话题池的纯正。经实验验证，在开源语料和微信语料上，此聚类算法均取得了优异的效果，效率上也能支持快速并行化。</p>
 <h3 id="热点预测">热点预测</h3>
 <p>热点发现的传统方法主要依赖于内容侧和用户侧特征的丰富程度，比如话题发文量、文章用户行为等信息，然而当我们能够获取到足够热点特征时，用户往往已经通过其他渠道获取到了相关热点内容，导致热点发现和热点推荐出现一定滞后性。因此，如何实现提前、精准预测热点，最大程度减少对后验信息的依赖，是非常值得研究的工作。为此，我们开发了一个有效的热度预测模型，在文章发表初期便可以预测出文章未来的热度，如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d413f708d5444bbd812abf0bbfeb61d8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272008381.webp" />   
     </p>
 <p>在设计热点预测模型时，我们综合考虑文章文本、图片、用户行为时序等多模态特征，结合 DNN 模型和传统机器学习模型进行建模。模型主要分为两部分：特征提取器、特征融合器。特征提取器分别对文章文本、图片、动态行为序列、账号等进行特征提取，其中长短文本和图片的特征提取可以使用目前比较流行的 CNN、Gated-CNN、LSTM、BERT 等模型。而在在用户动态行为特征抽取时，我们区别于传统做法，对用户行为进行时序片段切分，使用 LSTM 进行提取特征。最后，使用 XGBoost 融合器对各个特征进行融合，并得到最终的预测结果。</p>
 <h2 id="四热点展现">四、热点展现</h2>
 <h3 id="热门话题">热门话题</h3>
 <p>发现热点内容后的另一个关键问题是如何把热点内容呈现给用户。在实际工作中我们发现，除单篇文章展现形式以外，话题、热词、摘要、分栏等方式都是加强热点感知的重要方式。为了加强热点内容的认知、聚合热点中的用户互动，热门话题是我们在热点展现上的一个重要产品形式。热门话题中综合了话题聚合、话题追踪、事件短描述生成、摘要抽取、事件脉络、内容分栏等多种技术。上文中我们已经分享了话题聚合的主要技术经验，下文将重点介绍热门话题中的话题追踪和事件脉络、多粒度文本匹配、事件短描述生成等技术。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/512a0af22e854c7684fff3ab21038468.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272008046.webp" />   
     </p>
 <h3 id="话题追踪和事件脉络">话题追踪和事件脉络</h3>
 <p>话题追踪工作主要包括两个方面：一是判断文章究竟属于旧话题还是新话题（Story Detection）；二是在话题中进行子话题识别（Event Detection），判断文章是否属于话题最新进展。随着事件发展，话题不断涌现新的进展，但不同媒体反应时间差异较大，而且自媒体账号质量参差不齐，经常会出现旧闻新发的问题。话题追踪技术恰好可以帮助解决此类问题。此外，当我们积累历史热点话题，例如孙小果案件，当案件出现新的报道内容时，话题追踪技术可以帮助我们迅速检测此类热点内容。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d7863e9ad0f84407ac183c2d8217a767.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272008935.webp" />   
     </p>
 <p>在话题追踪方面，比较值得借鉴的研究成果是 Growing Story Forest [B Liu,CIKM2017]，文中先对 event 进行聚合，然后对同话题 event 进行 linking，最终构建 story tree 进行表达。在实际工作中，针对具体应用情况，我们构建了一套话题追踪框架，如上图所示。首先，在文章特征构建时，我们综合使用了多种特征表达，特别是抽取事件要素（News Frame）进行精准表示；其次，考虑到效率优化，我们使用了自顶向下的方式——先进行话题聚合，然后在话题内部进行子话题（event）识别。</p>
 <p>为了更方便用户理解事件发生的时序或逻辑关系，同时兼顾产品应用，最终的表达形式我们使用了传统的事件脉络；在话题聚合和子话题识别中，我们训练了有监督模型，计算 story 粒度和 event 粒度长文本匹配度，下文将会详细介绍。下图是“沙特记者失踪事件”的机器自动生成脉络，从图中可以清晰了解 story 发生的重要节点以及发生时序。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b8eb1c6d8fa74d71b05fb366f1a6db5b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272008750.webp" />   
     </p>
 <h3 id="多粒度文本匹配算法">多粒度文本匹配算法</h3>
 <p>话题追踪的核心在于判断两篇文章是否属于同一个话题（story）或同一个事件（event），这本质上是一个不同粒度的长文本相似度计算问题，同时相似度计算也是聚类算法中的关键技术。传统长文本相似度计算主要使用 one-hot 编码、浅层语义编码（例如 BM25、LDA 等）。随着深度学习的兴起，CNN 和 LSTM 等网络由于其端到端的优势、能较好地捕捉文本中的深度语义特征而被广泛使用。从匹配方式上，深度学习语义匹配模型可以分为 Representation-based 和 Interaction-based 两种，在 MatchZoo 中有一系列模型可以参考使用。</p>
 <p>但在实际工作中我们也发现，在话题追踪问题中，相似度计算与上述提到匹配算法存在差异，事件的构成要素在文本匹配时起到了决定性作用。因此，如何更好地表达事件特征，并进行特征匹配，是亟需解决的重要问题。为此，我们构建了如下长文本匹配算法 GIM 模型（Graph-based Interactive Matching）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e9a73f322d7c46d887d76be1442c7fbe.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272008600.webp" />   
     </p>
 <p>考虑到事件的定义和组成元素，我们假定事件要素是点，多个事件要素按照特定方式排列成一条线组成一个事件，一篇文章则可以认为是多个事件关联和交叉所组成的一张图。据此，我们在 GIM 模型使用了图方式对长文本进行表达（EEG, Event Element Graph）。为了表达深层语义，我们借鉴图模型中的多层 GCN 网络进行高维语义编码，同时对每层编码使用 Interaction-based 方式进行特征交叉。最后使用 attention mask 机制，结合先验知识，加强语义重心的匹配。以上模型同时适用于 event 粒度和 story 粒度的语义相似度计算，在开源语料和微信语料上，GIM 都取得了优异的效果。</p>
 <h3 id="事件短描述生成">事件短描述生成</h3>
 <p>事件短描述在热点榜单、热词推荐、热门话题外显标题等场景下具有重要应用价值。事件短描述生成模型旨在将文章所包含的核心事件以尽可能精炼的文本概括描述，并确保其语意连贯可理解。传统的标题压缩模型（J Wang,AAAI2018）、句子压缩模型（S2S-del、S2S-gen 等）、文本摘要生成（S2S、ConvS2S 等）等技术，对事件的要素理解较为不足，容易出现语义缺失、不通顺、信息冗余等问题；而自媒体文章标题命名又较为无规则，很容易出现标题党等情况，传统方法无法解决标题事件语义缺失的情况。针对事件短描述存在的上述问题，我们设计了一个多源指针网络生成模型，如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c0c6978c047a41f2a5028d10632b9757.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272008424.webp" />   
     </p>
 <p>该模型以 pointer network 为基础模型（通过拷贝的机制，直接从输入序列中复制最终的生成词汇），在模型编码时利用 attention 机制融合文章标题信息和内容信息，同时引入常用事件描述词词库、命名实体信息来保证事件描述的完整性和通顺性。在预测阶段，我们主要使用了长度限制、语义完整性限制等 penalty，控制短描述的质量。此外，我们发现用户搜索 query 具有较好的事件概括性和通顺性，所以我们基于用户搜索日志，多方面挖掘预训练语料，并进行端到端的预训练，使得开放域场景下的事件短描述生成效果明显提升。</p>
 <h2 id="五主动学习">五、主动学习</h2>
 <p>在进行长文本分类标注时，标注人员不得不阅读整篇文章，才能决定文章的标注，这导致长文本标注成为一个耗时费力的工作。而在热点发现工作中，又经常需要构建大量的长文本语料。为了提升长文本语料标注效率，我们面向长文本分类构建了一种生成式的主动学习方法，生成最具有信息量和多样性的样本，并利用 sparse reconstruction 近似表示成一些概括性词语再进行标注。该主动学习方法，大大提升了长文本标注效率，有效避免了浪费标注人力和时间，更适用于大数据集分类任务。相关工作成果已发表于 AAAI2020 （Active Learning with Query Generation for Cost-Effective Text Classification）。</p>
 <p>传统的不确定性是主动学习中一个很有效的衡量方法。但我们研究发现，单纯使用不确定性会导致生成的样本陷入一个局部空间，进而导致信息冗余，浪费标注人力。所以我们在不确定性的基础上，又研究增加了多样性的衡量目标，并使用神经网络方法进行优化，有效防止信息冗余问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/307f469d816b47de80136e68c8d46855.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272008213.webp" />   
     </p>
 <p>此外，由于生成的样本使用特征空间表示，标注人员难以理解和标注，我们把生成的样本利用 sparse reconstruction 近似表示成一些概括性词语，使得标注人员能更快速便捷地理解并进行标注，避免了阅读整篇文章。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/970d47aa388444ad92756bc44158640f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272008956.webp" />   
     </p>
 <p>实验表明，我们的方法能有效应用于面�</p>
 
@@ -416,6 +416,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -449,10 +453,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -831,6 +831,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -207,24 +207,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>  将 PackedBlock 的信息写入到跳表 skipList 的时机点如下图红色框所示：</p>
 <p>图 1：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/1-724a5477.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218791.png" />   
     </p>
 <p>  本篇文章介绍下 skipList 的写入/读取的过程，在介绍之前，我们先大致的描述下跳表是什么，如下图所示：</p>
 <p>图 2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/2-0fa38363.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218901.png" />   
     </p>
 <p>  图 2 中每一层中的数值描述的是信息的编号，例如在 level=0 中的数值&quot;3&quot;描述的是第 3 条信息，在写入的过程中，每处理 skipMultiplier 个信息就在上一层生成一个索引，例如在 level=1 中的第 6 条信息中有一个索引，他指向 level=0 的一个位置；level=2 中的第 38 条信息，它包含一个索引，指向 level=1 中的一个位置。由此可见跳表是一个多层次的数据结构，除了第 0 层外，其他层中的每一条信息中拥有一个指向下一层的索引。</p>
 <p>  接着我们开始介绍在 Lucene 中如何生成以及读取 SkipList。</p>
 <h2 id="写入到跳表-skiplist-中的流程图">写入到跳表 skipList 中的流程图</h2>
 <p>图 3：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/3-036cb6bd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218562.png" />   
     </p>
 <h3 id="初始化">初始化</h3>
 <p>图 4：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/4-26b6f06f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218280.png" />   
     </p>
 <p>  需要初始化的内容如下所示：</p>
 <ul>
@@ -234,7 +234,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>  skipInterval、skipMultiplier、skipDatum 的关系在 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2Fsuoyinwenjian%2F2019%2F0324%2F42.html">索引文件.doc</a> 中的关系如下所示：</p>
 <p>图 5：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/5-8b2e0e0f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218188.png" />   
     </p>
 <ul>
 <li>numberOfSkipLevels：该值描述的是我们即将生成的 skipList 中的层数，即图 2 中的 level 的最大值</li>
@@ -257,12 +257,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>图 6：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/6-9fb0acc2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218788.png" />   
     </p>
 <h3 id="计算写入的层数-numlevels">计算写入的层数 numLevels</h3>
 <p>图 7：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/7-773b8600.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218443.png" />   
     </p>
 <p>  根据当前已经处理的文档数量，预先计算出将待写入 SkipDatum 信息的层数，计算方式如下：</p>
 <div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
@@ -292,18 +292,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div><h3 id="是否还有未处理的层">是否还有未处理的层？</h3>
 <p>图 8：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/8-5163abcb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218435.png" />   
     </p>
 <p>  在上一个流程中，如果 numLevels 的值 &gt; 1，那么按照 level 从小到大依次处理。</p>
 <h3 id="层内处理">层内处理</h3>
 <p>图 9：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/9-7b00dcbf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218772.png" />   
     </p>
 <p>  在 <code>层内处理</code> 的流程中，首先将在图 1 中 <code>是否生成了PackedBlock</code> 流程中生成的 block 信息生成一个 SkipDatum 写入到 skipData 中，block 包含的信息如下图红框所示：</p>
 <p>图 10：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/10-4d877409.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218214.png" />   
     </p>
 <p>  另外，在图 10 中，如果在 level&gt;0 的层写入一个 SkipDatum 后，相比较在 level=0 中的 SKipDatum， <strong>它多了一个字段 SkipChildLevelPointer</strong>，它是一个指针，指向下一层的一个 SkipDatum。</p>
 <p>  SkipDatum 中的字段含义在文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2Fsuoyinwenjian%2F2019%2F0324%2F42.html">索引文件之.doc</a> 中已经介绍，不赘述，另外图 10 中的 SkipDatum 中的信息除了 SkipChildLevelPointer，其他所有的字段都是用 <strong>差值存储</strong>，所以在图 9 中，我们需要执行 <code>记录当前层的skipData信息</code> 的流程，使得下一个同一层内的新生成的 SkipDatum 可以用来进行差值计算。</p>
@@ -320,7 +320,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>  SkipDatum 中的字段与索引文件.doc、.pos、.pay 的关系如下所示：</p>
 <p>图 11：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/11-5ca76a22.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218927.png" />   
     </p>
 <p>  图 10 中，由于是按照每处理 128 篇文档才执行 <code>写入到跳表skipList中</code> 的流程，那么有可能此时位置信息 position、偏移信息 offset，payload 信息没有生成一个 PackedBlock，那么 SkipDatum 需要两个指针的组合才能找到在索引文件。pos、.pay 中的位置，比如说我们需要 PosFPSkip+PosBlockOffset 的组合值才能找到位置信息（没明白的话说明你没有看文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F1226%2F121.html">索引文件的生成（一）</a> 以及 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F1227%2F122.html">索引文件的生成（二）</a>）</p>
 <h2 id="结语">结语</h2>
@@ -448,6 +448,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -481,10 +485,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -863,6 +863,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

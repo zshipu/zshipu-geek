@@ -202,11 +202,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>说到 ABTest 相信很多读者都不陌生。简单来说，ABTest 就是将用户分成不同的组，，同时在线试验产品的不同版本，通过用户反馈的真实数据来找出采用哪一个版本方案更好的过程。</p>
 <p>我们将原始版本作为对照组，以每个版本进行尽量是小的流量迭代作为原则去使用 ABTest。一旦指标分析完成，用户反馈数据表现最佳的版本再去全量上线。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6ac551ef398b4cc0a5c8cb7fad4e3433.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281958369.webp" />   
     </p>
 <p>很多时候，一个按钮、一张图片或者一句文案的调整，可能都会带来非常明显的增长。这里分享一个ABTest 在马蜂窝的应用案例：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d4748c79747a4eecb7a85f8f8aeac888.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281958318.webp" />   
     </p>
 <p>如图所示，之前我们搜索团队和电商团队希望优化一个关于「滑雪」的搜索列表。可以看到优化之前的页面显示从感觉上是比较单薄的。但是大家又不确定复杂一些的展现形式会不会让用户觉得不够简洁，产生反感。因此，我们将改版前后的页面放在线上进行了 ABTest。最终的数据反馈表明，优化之后的样式 UV 提高了 15.21%，转化率提高了 11.83%。使用 ABTest 帮助我们降低了迭代的风险。</p>
 <p>通过这个例子，我们可以更加直观地理解 ABTest 的几个特性：</p>
@@ -227,11 +227,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>为了解决以上问题，我们的分流系统选择基于 Openresty 实现，通过 HTTP 或者 GRPC 协议来传递分流信息。这样一来，分流系统就工作在业务的上游，并且由于 Openresty 自带流量分发的特性不会产生二次流量。对于业务方而言，只需要提供差异化的服务即可，不会侵入到业务当中。</p>
 <p>选型 Openresty 来做 ABTest 的原因主要有以下几个：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2c92fc7a62b644dba8817a1b6385e2b0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281958427.webp" />   
     </p>
 <p>整体流程</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/864c85aa415f4cdf9b893a63e96cd073.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281958463.webp" />   
     </p>
 <p>在设计 ABTest 系统的时候我们拆分出来分流三要素，第一是确定的终端，终端上包含了设备和用户信息；第二是确定的 URI ；第三是与之匹配的分配策略，也就是流量如何分配。</p>
 <p>首先设备发起请求，AB 网关从请求中提取设备 ID 、URI 等信息，这时终端信息和 URI 信息已经确定了。然后通过 URI 信息遍历匹配到对应的策略，请求经过分流算法找到当前匹配的 AB 实验和版本后，AB 网关会通过两种方式来通知下游。针对运行在物理 web 机的应用会在 header 中添加一个名为 abtest 的 key，里面包含命中的 AB 实验和版本信息。针对微服务应用，会将命中微服务的信息添加到 Cookie 中交由微服务网关去处理。</p>
@@ -259,18 +259,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>流量层内实验的 hash 因子有设备 id、流量层 id。当请求流经一个流量层时，只会命中层内一个实验，即同一个用户同一个请求每层最多只会命中一个实验。首先对 hash 因子进行 hash 操作，采用 murmurhash2 算法，可以保证 hash 因子微小变化但是结果的值变化激烈，然后对 100 求余之后+1，最终得到 1 到 100 之间的数值。</p>
 <p>示意图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/461ae256e1764f78a9b4a887e9342778.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281958275.webp" />   
     </p>
 <p><strong>实验内版本分流</strong></p>
 <p>实验的 hash 因子有设备 id、策略 id、流量层 id。采用相同的策略进行版本匹配。匹配规则如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d8620c25e4c4400893e99ca9c683529f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281958109.webp" />   
     </p>
 <p>稳定性保障：多级缓存策略</p>
 <p>刚才说到，每一个请求来临之后，系统都会尝试去获取与之匹配的实验策略。实验策略是在从后台配置的，我们通过消息队列的形式，将经过配置之后的策略，同步到我们的策略池当中。</p>
 <p>我们最初的方案是每一个请求来临之后，都会从 Redis 当中去读取数据，这样的话对 Redis 的稳定性要求较高，大量的请求也会对 Redis 造成比较高的压力。因此，我们引入了多级缓存机制来组成策略池。策略池总共分为三层：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4d3cf7101c414e8cb6b70dca715b5335.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281958906.webp" />   
     </p>
 <p><strong>第一层 lrucache</strong>，是一个简单高效的缓存策略。它的特点是伴随着 Nginx worker 进程的生命周期存在，worker 独占，十分高效。由于独占的特性，每一份缓存都会在每个 worker 进程中存在，所以它会占用较多的内存。</p>
 <p><strong>第二层 lua_shared_dic</strong> t，顾名思义，这个缓存可以跨 worker 共享。当 Nginx reload 时它的数据也会不丢失，只有当 restart 的时候才会丢失。但有个特点，为了安全读写，实现了读写锁。所以再某些极端情况下可能会存在性能问题。</p>
@@ -401,6 +401,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -434,10 +438,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -816,6 +816,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

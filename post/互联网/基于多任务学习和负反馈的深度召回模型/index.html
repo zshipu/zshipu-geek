@@ -216,7 +216,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="一-背景"><strong>一 背景</strong></h2>
 <p>传统的推荐系统通常由两部分构成，分别是 Candidate Generation（候选生成）和 Ranking（排序），以下图中经典的 YouTube 视频推荐为例[1]，整个系统分为了两层：第一层是 Candidate Generation（候选生成），负责从全量的视频中快速筛选出几百个候选视频，这一步通常也被成为 Matching（召回）；第二层是 Ranking（排序），负责对几百个视频进行精准打分并重新排序，决定最终向用户展示的结果顺序。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ff49b8009054489cbe5787e55a8d82b6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748660.webp" />   
     </p>
 <p>图 1 YouTube 视频推荐</p>
 <p>本文主要研究 Matching（召回）部分，这部分通常面对的是整个推荐 item 集合，既要尽可能多的保留相关性高的结果，又要保证速度，召回结果的好坏对整个推荐结果有着至关重要的影响。最近的一系列实践和研究表明，基于行为序列的深度学习推荐模型[2-4]搭配高性能的近似检索算法[5]可以实现既准又快的召回性能（这套方案通常被称为DeepMatch），和传统的召回方法相比（比如 swing、etrec、SVD），DeepMatch 的优势主要如下：</p>
@@ -233,7 +233,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="二-方法"><strong>二 方法</strong></h2>
 <p>总体来说，由于近似最近邻检索算法的限制，我们的召回模型需要独立地对用户历史行为序列进行编码以生成用户的每一步的向量表示，然后再和 Target Item 向量做内积运算，得到打分，模型基于 Self-Attention 的架构来实现，总体结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-103d3d2af33b4992a95e89f5e3b53594.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271749337.webp" />   
     </p>
 <p>图 2 模型总体结构</p>
 <h3 id="1-input-representations">1 Input Representations</h3>
@@ -249,38 +249,38 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>E_r=V_r * X_r</p>
 <p>其中， X_r 是 Play Rate， V_r是随机初始化的 Embedding， 是最终得到的 Play Rate Embedding，由于我们 Train Set 1 数据只有播放时长较高的歌曲，并且没有播放完成率的信息，因此对于 Train Set 1，我们固定所有 Play Rate 为 0.99：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-7b75ab0b3d9f47f3b3a3ba95366c0e77.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271749180.png" />   
     </p>
 <p><strong>4）Intent Type Embedding</strong></p>
 <p>用户意图类型表示了用户进入这个 Item 的方式，比如在天猫精灵端，点播（用户明确点播出的歌曲）和推荐（天猫精灵为用户推荐的歌曲）就是两种不同的 Intent Type（天猫精灵的实际场景中类型会更多），类似 Item 本身的表示，我们把 Intent Type 也映射到了一个固定的低维向量空间：</p>
 <p>E_t=V_t * X_t</p>
 <p>我们不知道 Train Set 1 数据中的 Intent Type，在此我们假设所有的 Train Set 1 数据的 Intent Type 全部为点播：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ac1944a1a8f346f9b43635629fcf2396.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271749824.png" />   
     </p>
 <h3 id="2-factorized-embedding-parameterization">2 Factorized Embedding Parameterization</h3>
 <p>在推荐的任务中，Vocabulary Size 通常是巨大的，这导致了我们无法使用太大的 Embedding Size 来表示 Item，否则显存放不下，但很多使用 Transformer 的工作证明，提高 Hidden Size 可以有效的提升模型效果[10]，参照 ALBERT[11] 压缩模型的方式，我们首先把 Item 的 One-Hot 向量映射到一个低维度的空间，大小为 E ，然后再映射回高维度的空间再输入Transformer，从而把参数量从 O(V\times H ) 降低到了O(V \times E + E \times H) ，当 E &laquo; H 时参数量会明显减少。</p>
 <h3 id="3-feedback-aware-multi-head-self-attention">3 Feedback-Aware Multi-Head Self-Attention</h3>
 <p>在获得用户行为序列的特征表示后，我们就可以准备构建用户向量了，我们采用了注意力机制来编码用户的行为序列。如 Transformer[8] 中所述，注意力机制可以被描述为一个将 Query 和一系列的 Key-Value Pairs 映射到 Output 的函数，其中 Query，Key，Value 和 Output 都是向量，Output 被计算为 Value 的加权和，其中分配给每个 Value 的权重由 Query 与对应 Key 的打分函数计算，由于召回模型的限制，我们无法使用 Target Item 提前和用户行为序列中的 Item 做运算，因此采用 Self-Attention 的方式，直接把用户行为序列作为 Query，Key，Value 来进行计算。具体来说，我们使用了 Multi-Head Self-Attention 的方式来提升模型对于复杂交互的建模能力：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5e1e8a054e2f4dffa320a2df7201d943.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271749565.png" />   
     </p>
 <p>其中， W^Q_i 、W^K_i 、W^V_i 是线性投影矩阵，h 是 head 的数量。在经典的 Transformer 结构中，Q ，K ，V 由 Item Embedding 和 Position Embedding 构成，在我们的模型中，我们将外部信息（播放完成率和用户意图类型）引入到 Attention 中来，我们称之为 Feedback-Aware Attention，通过对这些信息的引入，我们的模型就有能力结合用户的反馈信息感知用户对于各个歌曲的不同的偏好程度了：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-1e15201f3ac24a0782a7d13dd929c053.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271749355.png" />   
     </p>
 <p>除此之外我们还参照 ALBERT[11]，尝试了 Cross-layer Parameter Sharing 的方案，这种方案让每层 Transformer Layer 全部共享一组参数，同样量级（层数相同）下的 Transformer 采用该方案后实际上的效果是会有所下降的，但是参数量减少了很多，训练速度也会快很多，对于推荐这种数据规模比较庞大的场景，采用这种策略可以在尽量节约训练时间的前提下提升模型性能。</p>
 <h3 id="4-sampled-softmax-loss-for-positive-feedback-and-sigmoid-ce-loss-for-negative-feedback">4 Sampled Softmax Loss For Positive Feedback and Sigmoid CE Loss For Negative Feedback</h3>
 <p>在获得用户的向量表示后，就可以定义多任务学习的目标了，由于之前我们已经统一了 Train Set 1 和 Train Set 2 的数据表示，因此这两个任务可以放在一起进行联合多任务训练。具体来说，我们的任务类似于语言模型：给定前 t 个已经听过的音乐，预测第 t+1 步用户想要听什么音乐，我们根据播放完成率的高低将信号分成两种（实际实现时会使用一个阈值来区分），一种是 Positive Feedback，这种的优化目标是使其打分排序尽量靠前，另一种是 Negative Feedback，这种的优化目标是使其打分排序尽量靠后。</p>
 <p>如下图的左图所示，如果只做传统的 Positive Feedback Loss 的话，我们的模型可以拉近用户向量和喜欢的 Item（正向样本）的距离并拉大其和未观测 Item 的距离，但是不喜欢的 Item（负向样本）的距离可能并不会被拉开，我们希望我们的模型可以向右图一样，在做到上述特性的同时，拉大用户向量与不喜欢的 Item 的距离：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-664808e9cc864b7bbbae1383bf7d41c7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271749053.webp" />   
     </p>
 <p>图 3 优化目标对比</p>
 <p>因此我们使用了 Positive Feedback 和 Negative Feedback 结合的优化目标：</p>
 <p>对于 Positive Feedback，我们使用 Sampled Softmax Loss 来优化。在之前的很多工作中[12-13]，Sampled Softmax Loss 已经被证明非常适用于大规模推荐召回模型，它的定义如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-84e45a8e3a814906a785a810123c1f34.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271749842.png" />   
     </p>
 <p>在使用 Tensorflow 实现的时候，sampled_softmax 默认使用的采样器为 log_uniform_candidate_sampler（TF 版 Word2Vec 基于此实现），它基于 Zipfian 分布来采样，每个 Item 被采样的概率只跟他词频的排序相关，采样概率不是词的频率，但是推荐中的商品和 NLP 中的词可能不同，因此我们尝试了另外两个采样器：</p>
 <ul>
@@ -290,11 +290,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在我们的实验中，learned_unigram_candidate_sampler 可以实现最好的效果。除此之外，我们发现了类似[2]中的结论，负采样的数量是一个比较重要的参数，在显存允许的情况下，适当调高负采样的数量可以有效的提升模型收敛效果。</p>
 <p>对于 Negative Feedback，我们直接使用 Sigmoid Cross Entropy Loss 来优化，将播放完成率低的 Item 全部看成负例，使其打分尽量低：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-3f866adf30114cc18b547ba7ac097436.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271749521.png" />   
     </p>
 <p>最终的总 Loss 则为两者的加和：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5f68d15790e54640a8313a759972f1e8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271749438.png" />   
     </p>
 <h2 id="三-实验"><strong>三 实验</strong></h2>
 <h3 id="1-分布式训练">1 分布式训练</h3>
@@ -305,7 +305,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="2-实验结果">2 实验结果</h3>
 <p>离线实验的指标采用 R@N，即打分排序的前 N 项结果包含Target Item 的比例，对于正向样本，指标称为 POS@N，我们希望这个值越高越好，对于负向样本，指标称为 NEG@N，我们希望这个值越低越好。由于篇幅限制，我们只列出一组主要的实验结果，这组实验验证了 Multitask Learning 和 Negative Feedback 的效果，我们在其他策略都采用上述最优的情况下（比如优化器，采样方法等），a 采用传统 DM 方式训练，只保留完播率较高的正反馈 Item 来构建行为序列，b 在 a 的基础上加入 Play Rate、Play Type 特征，c 在 b 的基础上再加入负向反馈信号进行多任务训练：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ec24c670e67b4fe7b85a7bad8df2602a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271749906.webp" />   
     </p>
 <p>可以看出，加入反馈信号（Play Rate）和歌曲点播 query 意图信号（Intent Type）后，b 的效果要优于 a，再加入 Negative Feedback 目标进行 Multitask Learning 后，c 可以保证 POS@Nmailto:POS@N 微小变化的情况下明显降低 NEG@N。</p>
 <p>我们在猜你喜欢的线上场景中也证明了新方法的有效性，和基于 DM 原方案的分桶相比，新模型（DM with Play Rate/Intent Type and NEG MTL）分桶的人均播放时长提高了 +9.2%；同时该方法已经应用于天猫精灵推荐的更多场景中并取得了不错的收益。</p>
@@ -446,6 +446,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -479,10 +483,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -861,6 +861,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

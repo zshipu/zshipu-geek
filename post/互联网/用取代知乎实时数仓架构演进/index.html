@@ -217,7 +217,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/778541abe3264215b069a2d7a83087eb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272248960.png" />   
     </p>
 <p>“数据智能” (Data Intelligence) 有一个必须且基础的环节，就是数据仓库的建设，同时，数据仓库也是公司数据发展到一定规模后必然会提供的一种基础服务。从智能商业的角度来讲，数据的结果代表了用户的反馈，获取结果的及时性就显得尤为重要，快速的获取数据反馈能够帮助公司更快的做出决策，更好的进行产品迭代，实时数仓在这一过程中起到了不可替代的作用。</p>
 <p>本文主要讲述知乎的实时数仓实践以及架构的演进，这包括以下几个方面</p>
@@ -235,7 +235,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="实时数仓-10-版本">实时数仓 1.0 版本</h3>
 <p>1.0 版本的实时数仓主要是对流量数据做实时 ETL，并不计算实时指标，也未建立起实时数仓体系，实时场景比较单一，对实时数据流的处理主要是为了提升数据平台的服务能力。实时数据的处理向上依赖数据的收集，向下关系到数据的查询和可视化，下图是实时数仓 1.0 版本的整体数据架构图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b037edd25a684c0b87ddd687182207e5.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272248356.jpeg" />   
     </p>
 <p>第一部分是数据采集，由三端 SDK 采集数据并通过 Log Collector Server 发送到 Kafka。第二部分是数据 ETL，主要完成对原始数据的清洗和加工并分实时和离线导入 Druid。第三部分是数据可视化，由 Druid 负责计算指标并通过 Web Server 配合前端完成数据可视化。</p>
 <p>其中第一、三部分的相关内容请分别参考： <a href="https://zshipu.com/t?url=https%3A%2F%2Fmp.weixin.qq.com%2Fs%2FIvGkPnYdifuAzrUV3MTyhA">知乎客户端埋点流程、模型和平台技术</a>， <a href="https://zshipu.com/t?url=https%3A%2F%2Fmp.weixin.qq.com%2Fs%2FWXA_Pn5xwlL-cA4JaGRw6Q">Druid 与知乎数据分析平台</a>，此处我们详细介绍第二部分。由于实时数据流的稳定性不如离线数据流，当实时流出现问题后需要离线数据重刷历史数据，因此实时处理部分我们采用了 lambda 架构。</p>
@@ -259,13 +259,13 @@ message LogEntry {
 <h3 id="动态配置-streaming">动态配置 Streaming</h3>
 <p>由于 Streaming 任务需要 7 * 24 小时运行，但有些业务逻辑，比如：存在一个元数据信息中心，当这个元数据发生变化时，需要将这种变化映射到数据流上方便下游使用数据，这种变化可能需要停止 Streaming 任务以更新业务逻辑，但元数据变化的频率非常高，且在元数据变化后如何及时通知程序的维护者也很难。动态配置 Streaming 为我们提供了一个解决方案，该方案如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9de35026988b4e98934e36eadc7fd021.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272248541.jpeg" />   
     </p>
 <p>我们可以把经常变化的元数据作为 Streaming Broadcast 变量，该变量扮演的角色类似于只读缓存，同时针对该变量可设置 TTL，缓存过期后 Executor 节点会重新向 Driver 请求最新的变量。通过这种机制可以非常自然的将元数据的变化映射到数据流上，无需重启任务也无需通知程序的维护者。</p>
 <h3 id="utm-参数解析">UTM 参数解析</h3>
 <p>UTM 的全称是 Urchin Tracking Module，是用于追踪网站流量来源的利器，关于 UTM 背景知识介绍可以参考网上其他内容，这里不再赘述。下图是我们解析 UTM 信息的完整逻辑。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a596a1ea786d44328522fe5584e2a334.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272248454.jpeg" />   
     </p>
 <p>流量数据通过 UTM 参数解析后，我们可以很容易满足以下需求</p>
 <ol>
@@ -282,7 +282,7 @@ message LogEntry {
 <h3 id="新老用户识别">新老用户识别</h3>
 <p>对于互联网公司而言，增长是一个永恒的话题，实时拿到新增用户量，对于增长运营十分重要。例如：一次投放 n 个渠道，如果能拿到每个渠道的实时新增用户数，就可以快速判断出那些渠道更有价值。我们用下图来表达 Streaming ETL 中是如何识别新老用户的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/70ecb2266af24f4685e3ac32acf7ca80.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272248511.jpeg" />   
     </p>
 <p>判断一个用户是不是新用户，最简单的办法就是维护一个历史用户池，对每条日志判断该用户是否存在于用户池中。 由于日志量巨大，为了不影响 Streaming 任务的处理速度，我们设计了两层缓存：Thread Local Cache 和 Redis Cache，同时用 HBase 做持久化存储以保存历史用户。访问速度：本地内存 &gt; 远端内存 &gt; 远端磁盘，对于我们这个任务来说，只有 1% 左右的请求会打到 HBase，日志高峰期 26w/s，完全不会影响任务的实时性。当然本地缓存 LruCache 的容量大小和 Redis 的性能也是影响实时性的两个因素。</p>
 <p>Streaming ETL 除了上述几个通用场景外，还有一些其他逻辑，这些逻辑的存在有的是为了满足下游更方便的使用数据的需求，有的是对某些错误埋点的修复，总之 Streaming ETL 在整个实时数仓中处于指标计算的上游，有着不可替代的作用。</p>
@@ -325,7 +325,7 @@ message LogEntry {
 <h3 id="实时数仓-20-版本">实时数仓 2.0 版本</h3>
 <p>随着数据量的暴涨，Druid 中的流量数据源经常查询超时同时各业务消费实时数据的需求也开始增多，如果继续沿用实时数仓 1.0 架构，需要付出大量的额外成本。于是，在实时数仓 1.0 的基础上，我们建立起了实时数仓 2.0，梳理出了新的架构设计并开始着手建立实时数仓体系，新的架构如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/51650bf1ca7343128fc04fa774c9516b.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272248350.jpeg" />   
     </p>
 <h4 id="原始层">原始层</h4>
 <p>实时数仓 1.0 我们只对流量数据做 ETL 处理，在 2.0 版本中我们加入了对业务库的变更日志 Binlog 的处理，Binlog 日志在原始层为库级别或者 Mysql 实例级别，即：一个库或者实例的变更日志存放在同一个 Kafka Topic 中。同时随着公司业务的发展不断有新 App 产生，在原始层不仅采集「知乎」日志，像知乎极速版以及内部孵化项目的埋点数据也需要采集，不同 App 的埋点数据仍然使用同一套 PB Schema。</p>
@@ -334,7 +334,7 @@ message LogEntry {
 <h4 id="汇总层之明细汇总">汇总层之明细汇总</h4>
 <p>明细汇总层是由明细层通过 ETL 得到，主要以宽表形式存在。业务明细汇总是由业务事实明细表和维度表 Join 得到，流量明细汇总是由流量日志按业务线拆分和流量维度 Join 得到。流量按业务拆分后可以满足各业务实时消费的需求，我们在流量拆分这一块做到了自动化，下图演示了流量数据自动切分的过程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/31a8ff13188c4306ae5db5ca5341729e.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272248259.jpeg" />   
     </p>
 <p>Streaming Proxy 是流量分发模块，它消费上游 ETL 后的全量数据并定期读取埋点元信息，通过将流量数据与元信息数据进行「Join」完成按业务进行流量拆分的逻辑，同时也会对切分后的流量按业务做 ETL 处理。 只要埋点元信息中新增一个埋点，那么这个埋点对应的数据就会自动切分到该业务的 Kafka 中，最终业务 Kafka 中的数据是独属于当前业务的且已经被通用 ETL 和业务 ETL 处理过，这大大降低了各个业务使用数据的成本。</p>
 <h4 id="汇总层之指标汇总">汇总层之指标汇总</h4>
@@ -344,7 +344,7 @@ message LogEntry {
 <h4 id="指标计算打通指标系统和可视化系统">指标计算打通指标系统和可视化系统</h4>
 <p>指标口径管理依赖指标系统，指标可视化依赖可视化系统，我们通过下图的需求开发过程来讲解如何将三者联系起来。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bb1ffc2c5a3341bcbe6b9c4db81a1bd1.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272248236.jpeg" />   
     </p>
 <ol>
 <li>
@@ -523,6 +523,10 @@ message LogEntry {
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -556,10 +560,6 @@ message LogEntry {
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -938,6 +938,8 @@ message LogEntry {
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

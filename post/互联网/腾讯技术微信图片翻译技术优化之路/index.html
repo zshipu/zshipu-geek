@@ -220,15 +220,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>首先简要介绍微信图片翻译 1.0 版本的技术方案，重点梳理其中的关键问题。</p>
 <p>1.0 版本中微信图片翻译采用相对简单的方案，主要分为两个模块：后台 Server 负责图片的文字识别、段落合并、段落翻译等，客户端根据文字识别和翻译结果渲染生成翻译图片。整体 pipeline 如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/19105a5c4149431b8afb4ce1d5a63b67.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281736114.webp" />   
     </p>
 <p>首先通过一批图片例子来看 1.0 版本的效果，这里我们对比竞品如有道、搜狗等图片翻译，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/12/image-707aa2dc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281736264.png" />   
     </p>
 <p>通过上述例子，对于图片翻译中间的关键步骤进行简单对比得到如下结果：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7b6902628fdf4aa5a176644cb81b4318.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281736984.webp" />   
     </p>
 <p>因此，整体上来看 1.0 版本的图片翻译效果体验还有很大的提升空间，其关键模块的效果都需要进行较大的优化，特别是 <strong>文本段落、图文渲染</strong> 最直接影响用户体验的模块。</p>
 <h3 id="2-微信图片翻译-20"><strong>2. 微信图片翻译 2.0</strong></h3>
@@ -241,11 +241,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>于是，整体微信图片翻译 2.0 版本的 pipeline 如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6e765a2261a84b82890119206695156d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281736739.webp" />   
     </p>
 <p>主要模块关系如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ed071315616e4aa6aab0306bfd433807.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281736661.webp" />   
     </p>
 <h4 id="21-图片语种识别"><strong>2.1 图片语种识别</strong></h4>
 <p>图片语种识别是给定一张图片，判断其中是否包含文字，进一步判断图片中文字所属的语种，即 Image Script Identification。</p>
@@ -255,7 +255,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h5 id="211-vit"><strong>2.1.1 ViT</strong></h5>
 <p>原始 ViT 结构如下图（源自[1]）：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b6704117fd9e44d7bf4ce38dd63ccb7c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281736571.webp" />   
     </p>
 <p>这里简要介绍 ViT 的 forward 过程：</p>
 <ol>
@@ -268,20 +268,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h5 id="212-shrinkvit"><strong>2.1.2 ShrinkViT</strong></h5>
 <p>可以看到 ViT 需要对原始图片每一层的 patch token sequence 进行 self-attention，计算量是 <strong>平方</strong> 复杂度，线上耗时压力较大。而对于图片语种识别任务来讲，我们只需要关注图片中有文字的 patch 即可（如下图例子中红色圈对应区域）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/47c65b206cd045fcba4a615b630e1eab.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281736616.webp" />   
     </p>
 <p>因此很自然的想法是在训练过程中动态控制 patch tokens 的长度，将非文字的 patch 过滤掉，不参与后续的计算。工作[5] 也是基于此策略来优化提出了 DynamicViT，但是论文中的方法需要显式过滤的 patch 采用了离散的操作，导致了训练梯度无法传递的问题，同时论文中基于传统 CNN 大模型作为 Teacher 模型来蒸馏学习 ViT Student 模型较为复杂，不易复现。</p>
 <p>这里借鉴 CNN 中 Conv 操作考虑图片局部特性和参数共享带来的转换等变性，我们考虑结合 Conv 操作到 ViT 中来提取 high level patch representations，同时在 Conv 过程中可以通过 kernel size 控制生成 patch 的数量，在保证信息不丢失的同时达到缩减 patch tokens 数量的目的，我们命名为 ShrinkViT。</p>
 <p>ShrinkViT 对比 ViT 的模型结构如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/edc2ea07b20d404ead79598c7153e4fd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281736478.webp" />   
     </p>
 <p>这里我们在原始 Transformer block 结果之后增加 Shrink Block，可以通过 Conv1d 实现（也可以通过 MLP 实现），如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/babb7b402f6849fe9b4c40c69f895acd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281736432.webp" />   
      实际当中，考虑模型的效果不一定每一层都需要加 Shrink Block，基础的 ViT depth=12，以下结果是我们在 3、6、9 层分别加入 Shrink Block 的离线实验结果：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f9835f0548574d82b78ac67a5706aab9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281736381.webp" />   
     </p>
 <p>注：ViT 采用 base 结构（patch_size=16, embed_dim=768, depth=12, num_heads=12）。从以上结果可以看到，引入 Shrink Block 在保证模型效果的同时，模型参数仅少量增加（3MB），但是计算量减小到原来的一半（**49** **GFLOPs -&gt; 24 GFLOPs** ），耗时也相对减少（**14ms -&gt; 8ms** ）。优化之后的 ShrinkViT 目前已部署上线，GPU 服务耗时减少**30ms** 。</p>
 <h4 id="22-图片段落框检测"><strong>2.2 图片段落框检测</strong></h4>
@@ -292,23 +292,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>因此在 OCR 之后，基于 <strong>段落粒度</strong> 来进行结果合并和下游翻译、图文合成等任务。这里 <strong>段落</strong> 主要是定义为文本内容完整且位置独立的文本区域。如下图绿色框表示（两张图分别包含了 4 个和 3 个文本段落）：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2bb984d651cf46a9aa6d0ebfa8bd30aa.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281736089.webp" />   
     </p>
 <h5 id="221-图片文档分析"><strong>2.2.1 图片文档分析</strong></h5>
 <p>图片的段落框检测可以属于图片文档分析（Document Image Analysis，DIA，包括如图片文档分类、文档版面分析、表格检测等）中的任务之一，近年来业界相关的工作有 LayoutParser [11]、LayoutLM [13,15]、LayoutLM2 [12,13]等。</p>
 <p>LayoutParser 是基于 Facebook（Meta）目标检测框架 Detectron2 [14]搭建的图片文档版面分析工具，基于开源数据集提供部分预训练模型。但是主要问题是开源的数据集和模型基于单一场景数据，如表格、学术论文、新闻报纸结构等，而且多数框是基于 4 点坐标，不能满足实际复杂业务场景。</p>
 <p>LayoutLM 和 LayoutLM2 等是 Microsoft 提出结合图片和文本的图片文档版面分析预训练模型（参考 BERT 和 Transformer），如下图（图片分别来自[15]、[12]）所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/55d432f9bcb74c5aa98cd7c61cb66441.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281736123.webp" />   
     
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/87a5a532771b4ff4826b3aee021fc820.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281736221.webp" />   
     </p>
 <p>LayoutLM、LayoutLM2 等第一步需要提取 <strong>token level</strong> 的文本和对应 bounding box 信息， <strong>数据预处理</strong> 代价较大。</p>
 <h5 id="222-dbnet段落框检测"><strong>2.2.2 DBNet段落框检测</strong></h5>
 <p>综上，这里我们借鉴 LayoutParser [11]的方法，来做段落 level 的文本框检测。考虑到段落框可能是任意形状（多边形），这里采用基于 <strong>分割</strong> （segmentation-based）的 DBNet [9]，主体结构如下图（源自[9]）所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d6fe6cd97e2544cbb604a26589e98292.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281736340.webp" />   
     </p>
 <p>直接利用 DBNet 训练段落框的检测模型，相比文本行的检测，实验中我们发现有以下的问题：</p>
 <ol>
@@ -328,7 +328,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>整体上在引入上述（1）（2）（3）（4）（5）的优化，实验中段落框的检测效果（h-mean 值）效果提升显著，达到预期可用的结果。优化前后的 <strong>段落框检测</strong> 结果对比样例如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/12/image-d1032198.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281736832.png" />   
     </p>
 <h4 id="23-文本段落矫正"><strong>2.3 文本段落矫正</strong></h4>
 <p>上述段落结果主要是基于 <strong>视觉信息</strong> （图像层面）来做段落的检测，但是在实际 case 存在一定的情况，需要从 <strong>文本</strong> 的角度做进一步的段落检测。如下场景：</p>
@@ -338,7 +338,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>另外在视觉模型效果存在误差的情况下，基于文本的段落模型可以提供额外的参考。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d6d0a2eb9c684c2cb8902f578727c5ec.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281736226.webp" />   
     </p>
 <p>因此，这里我们构建了基于 <strong>文本（语义）</strong> 层面的段落检测模型，对段落结果进行一定程度的矫正。</p>
 <p>文本段落检测即判断给定的两个文本片段（非完整句子）是否应该拼接组成一个段落。相关的方法主要有以下：</p>
@@ -354,7 +354,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>[CLS] several members represent the irish national [SEP] india , aboard the [SEP]</p>
 <p>之后进行 BERT Encoder，在输出层拿到 CLS token representation 与 output weights 矩阵计算，之后计算 Softmax 得到各个 label 的概率分布。整体结构如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a18f23649583473c8bde2336c3039a0b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281736350.webp" />   
     </p>
 <p>训练数据方面，我们基于开源大规模 wiki 单语语料数据构造大批量的伪数据作为 BERT 分类器初始训练数据，之后在有限的标注数据进行 finetune。整体分类 Accuray 在 <strong>90%</strong> 以上。</p>
 <p>有了基于 BERT 的文本段落模型之后，在原始段落的基础上，我们对其进行矫正,基础的矫正策略如下：</p>
@@ -364,11 +364,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>整体上，增加文本段落模型之后，我们对于图片翻译整体效果进行了端到端的 GSB 评估，相比没有文本段落模型的结果如下（随机采样 100 张图片人工评估）：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/60da362536854f93b6c6268396e8828a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281736376.webp" />   
     </p>
 <p>如下例子：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/12/image-08793ea4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281737323.png" />   
     </p>
 <p>其中第一张图片中 BERT 段落矫正模型可以将原属于同一图片段落的文本（“In-Store Pickup Sep 24” 和 “iPhone 13 Pro Max”）拆分为独立的两个段落。第二张图片中可以将原属于不同段落的相邻文本（“the information contained in your CAS” 和 “STATEMENT below when making your student”）合并为同一个段落，因此整体上翻译效果和排版更好。</p>
 <p>从 GSB 的结果看出，文本段落模型对于图片文本段落框划分以及最终的图片翻译质量有明显的提升。</p>
@@ -388,11 +388,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>从图片中擦除文字内容，且保留背景可以作为一种 <strong>图片修复</strong> （Image Inpainting [16]）任务，首先对于图片中的文字区域进行 mask 选定，之后对于图片中的缺失内容（mask 区域），进行重构恢复原有背景。</p>
 <p>常用的 Image Inpainting 方法主要是生成式模型，如 GAN、VAE、Flow-based models、Diffusion models [17,18]。GAN 的效果和应用最广泛，主要挑战是比较难训练，VAE 和 Flows 在特定领域效果不错，但是质量和广泛性不如 GAN，Diffusion models 最近得到比较多的关注，在语音合成（speech synthesis）方面接近人类的水平。另外在部分图片生成、超分辨率任务中超越 GANs [18]。这几类生成模型对比如下图（源自[17]）：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2ad6c141a7444556b8392a7044f60eef.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281737110.webp" />   
     </p>
 <p>这里我们首先尝试主流基于 GAN [19,20] 的方法，基于 <strong>文本框和文字轮廓</strong> 分别标记文字 mask 区域，之后根据 Generator 网络重构生成 mask 区域，例子如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/12/image-5202a976.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281737321.png" />   
     </p>
 <p>可以看到，上表第一行基于 bounding box 的 mask 图片，对于大范围单一背景（如蓝色背景）区域，GAN 的重构效果可以接受，但是对于复杂背景（如红色背景白色字、底部混合背景颜色排列）的重构效果比较差（多种背景色混合）。第二行基于文字 mask 的结果，生成式的 Image Inpainting 方法重构的区域依旧存在原文字轮廓模糊噪音、不够平滑。在图片翻译场景特别是要求背景和文字 <strong>对比清晰</strong> 的情况下，目前的模型效果不太适用。以下简单列举通用生成式 Image inpainting 方法不适用于本任务的原因：</p>
 <ol>
@@ -405,21 +405,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h5 id="252-基于-opencv-的图文合成"><strong>2.5.2 基于 OpenCV 的图文合成</strong></h5>
 <p>结合目前的实际情况，对于图片合成文字过程，考虑到基于 OpenCV 来实现第一版效果，拆分为多个步骤，可以灵活调整结果。主要步骤如下表：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/12/image-e5daa247.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281737985.png" />   
     </p>
 <h4 id="26-结果评估体验"><strong>2.6 结果评估&amp;体验</strong></h4>
 <p>微信图片翻译 2.0 版本主要优化目前已上线，同样以文章开头图片为例展示 2.0 版本的效果对比如下表所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/12/image-cc31a35d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281737103.png" />   
     </p>
 <p>从以上结果可以看看到，相比 1.0 版本，微信图片翻译 2.0 版本在文本段落识别、翻译质量和图文合成排版等多方面的体验得到了较大的提升。</p>
 <p>同时对于微信图片翻译 2.0 和 1.0 版本，人工评估 GSB，2.0 版本提升显著，结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/581765a1e3af49399a63a7f376821257.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281737670.webp" />   
     </p>
 <p>图片翻译 2.0 版本已上线到微信 iOS 客户端，体验方式：微信聊天框点击图片选择翻译、扫一扫图片翻译等入口，如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/86248cb9c1a442a1a265f2f5feb5438f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281737312.webp" />   
     </p>
 <p>另外对于新 2.0 版本图片翻译与旧 1.0 版本进行了线上真实用户的 ABTest，2.0 版本相比 1.0 版本，单个用户平均图片翻译文本句段增加 <strong>21%</strong> 。</p>
 <p>数据反应出随着新版图片翻译各方面质量的提升，用户的翻译行为也变的更加活跃。后续 2.0 版本将灰度到全量微信用户。</p>
@@ -572,6 +572,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -605,10 +609,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -987,6 +987,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

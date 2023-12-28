@@ -215,7 +215,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="初版我们遇到的问题">初版我们遇到的问题</h1>
 <p>2018年我们发布了第一版的实时计算平台，整体基于Flink1.7版本开发，提供SQL和JAR包两种开发方式。JAR包任务比较简单，用户基于官方依赖库开发，上传即可；SQL方式我们采用了Antrl自定义了自己的一套SQL语法，实现了DDL、SET、CREATE FUNCTION、DIM JOIN 等语义，实现了流表的创建、属性设置、函数创建、以及维表JOIN等功能，然后集成FLINK1.7本身SQL的能力实现了一套SQL的开发能力，其整体架构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/646f1b8154834a12889bc962f96ad7de.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647489.webp" />   
     </p>
 <p>和目前业界很多的流计算平台一样，用户在使用SQL开发时需要先定义DDL，然后使用SQL定义开发逻辑，具体可以参考阿里云或者sloth目前公开出来的实时计算平台的版本，基本使用方式差不多。在业务初期这套架构很好的满足了我们业务的发展，很好的解决了很多问题，但是随着业务越来越大，我们也发现了很多问题：</p>
 <p><strong>数据理解问题</strong></p>
@@ -238,11 +238,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>随着我们整体平台服务生态完善，以及FLINK本身的发展，我们在2019年底开始做底层技术的改造，开发有元数据体系的SQL开发框架，希望解决上面提到几个问题，提升平台的稳定性。</p>
 <p>通过统一的元数据管理来解决数据理解问题，整体架构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c35fa9a4601a4354ab115069b217b0b3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647441.webp" />   
     </p>
 <p>MetaHub元数数据中心是我们服务生态里面统一的元数据服务，其整体架构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cda7e58c394a4d1fad98e4324cb17cc3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647306.webp" />   
     </p>
 <p>元数据中心在我们数据平台的整个服务生态中功能类似于Apache Altas，但是功能比Altas更加完善，详细在这里不做太多详细的介绍，简单介绍下源数据中心关键的几个功能：</p>
 <ul>
@@ -255,7 +255,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Flink从1.9开始提供了全新的Catalog API，外部的Calalog可以很方便的插拔式的接入Flink，我们希望基于这套全新的CatalogAPI，将Flink和元数据中心打通，将元数据中心作为Flink SQL的元数据管理系统，为了实现这一想法我们实现了自己MaginaCatalog，我们主要做了以下几个事情：</p>
 <p>类型系统转换：因为元数据中心有一套自己的类型系统，我们只需要实现元数据中心这套类型系统到Flink类型系统的转换就可以实现任何元数据中心支持数据源的Table的Schema到Flink Table Schema的转换。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8513e03dd954471696a1836ebc0919b7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647254.webp" />   
     </p>
 <p>整体大部分的工作元数据中心都帮我们Cover掉了，实现比较简单。</p>
 <p>数据源属性转换：连接信息属性转换，Flink每一种Connector都有自己的一套properties系统和元数据中心中的连接的属性信息基本都不相同。如mysql的连接地址在元数据中心的key叫url但是在Flink中JDBC的Connector的连接地址的属性叫connector.url，我们需要做一些key的转换，这块工作相对繁碎一点，但是实现起来相对简单。</p>
@@ -268,7 +268,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>对于流式数据，我们使用元数据中心自带的元数据系统Nest登记管理；对于维表以及落地数据源等落地数据源，可以直接通过元数据中心获取库表Schema信息，无需额外的Schema登记，只需要一次性登记下数据源连接信息即可，整体对应我们系统中数仓模块的元数据管理、数据源登记两个页面。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/14226a5d14a84fcf94011ac86a25dac5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647890.webp" />   
     </p>
 <p><strong>数据访问：</strong> 利用flink catalog提供的API，我们通过catalog、db、table三个元素来定位一张表，catalog相当于数据源的标识，db和table和其它数据库系统类似表示库和表，如我们访问截图hive_da_music数据源的music_dwd库中的user_play_fact表，只需要使用hive_da_music.music_dwd.user_play_fact访问即可，其中music_dwd.user_play_fact不需要额外登记直接使用的就是hive_da_music这个hive库中的DB和Table。</p>
 <p>DEMO：</p>
@@ -332,11 +332,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>前端优化</strong></p>
 <p>元数据的搜索和代码生成功能，方便用户查找的想要外部表，并生成相应的SQL代码</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6329f520fdea4607b82a1d198225ce89.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647968.webp" />   
     </p>
 <p>debug功能：我们参考了flink on zeppelin的实现，实现了一套自己的debug服务，用户可以通过debug获取结果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/180f5b88d316468cb4270bf25254f6e7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647888.webp" />   
     </p>
 <p>为了方便一些特殊数据端的写入，以及方便我们后续跳出SQL规范枷锁，做一些额外的功能我们还开发了SINK输出组件，用户只需要简单的勾勾选选就可以�</p>
 
@@ -466,6 +466,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -499,10 +503,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -881,6 +881,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

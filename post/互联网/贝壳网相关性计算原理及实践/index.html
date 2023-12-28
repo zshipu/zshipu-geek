@@ -224,37 +224,37 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="11-tf-idf算法">1.1 tf-idf算法</h3>
 <p>tf-idf算法可以分成tf和idf两部分，通过将两部分乘积完成相关性计算。词频（term frequency，tf）指的是某一个给定的词语在该文件中出现的频率。tf是对词数（term count）的归一化，防止偏向长文档（对于同一个词，通常长文档出现的次数会更多）。通过公式1.1计算得到tf，freq表示词W出现次数，fieldLength表示该文档总词数。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/69f7e61bbe3a476fbb5bfc86fb925217.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281848426.webp" />   
     </p>
 <p>词频能够在一定程度上衡量一个词语的重要性，但是如果简单的用词频衡量相关度是不准确的，对于助词等一些无实际意义的词汇，在每篇文档中出现的次数可能都很多，但是他们和文档的主题并不相关。所以，不能简单用词频来唯一衡量这个词语跟文档的相关度。因此有了逆向文档频率(Inverse Dcument Frequency, 缩写为IDF)，利用公式1.2计算得到idf，其中numDocs表示全部文档数，docFreq表示包含词语W的文档数。逆向文档频率表示越多的文档包含这个词，这个词就越不重要。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/24ead3404c604ab2bb112a9a9223856a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281848224.webp" />   
     </p>
 <h3 id="12-es的tf-idf计算方式">1.2 ES的tf-idf计算方式</h3>
 <p>ES的打分过程是以TF-IDF为基础，做了简单调整作为默认相似度计算方式，计算公式为1.3:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/17f73331e6a0447dac52f03e4524c532.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849032.webp" />   
     </p>
 <p>docCount：索引中文档数量；docFreq: 包含关键字的文档数量。在idf中，</p>
 <p>ES对docFreq进行加1是为了避免分母为0；在tf中，进行了开根号，是为了减小tf的增速；限制tf的增速，主要是针对多个词进行检索可能出现的问题进行的优化。</p>
 <p>一个query分完词后得到ab&hellip;n个词语，利用公式1.3以及1.4可以计算得到每个文档针对这个query的相关性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c935272748b446d89c729e1baa9750c8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849880.webp" />   
     </p>
 <h3 id="13-bm25计算方式">1.3 BM25计算方式</h3>
 <p>ES新的相关性计算方式（BM25），利用了tf-idf的思想，但具体计算过程和tf-idf有了很大的差异。</p>
 <p>BM25在计算tf中增加了一个 <strong>常量k</strong>(默认取1.2)，这个参数控制着词频结果在词频饱和度中的上升速度，过快的上升速度会导致什么问题呢？例如有一个搜索query，分词为abcd，过快的增长速度可能会导致包含较少词的文档相关性比同时包含更多词的相关性更大，这是不符合预期的。</p>
 <p>BM25在计算tf过程中里除了引入k外，引入另外两个参数：L和b。avgFieldLength表示文档的平均文档长度，单个文档长度对相关性的影响力与它和平均长度的比值有关系。L是文档长度与平均长度的比值。b是一个常数，这个参数控制着文档长度归一化粒度， <strong>0禁用归一化， 1.0启用完全归一化，默认值为0.75</strong>。最终公式为1.6：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3f871a5414bc4386a59780e990d5830a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849683.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f67a197272954a90acfbba00e1042769.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849509.webp" />   
     </p>
 <p>在实践中， <strong>k和b的默认值适用于绝大多数文档集合</strong>，但最优值还是会因为文档集不同而有所区别，为了找到某个文档集合的最优值，就必须对参数进行反复修改验证。</p>
 <p>在BM25中，idf也进行了调整，转换成公式1.7。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6271c9df32084a4d842c67b6344b56ff.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849311.webp" />   
     </p>
 <h2 id="2-相关性调优">2 相关性调优</h2>
 <h3 id="21-multi_match检索">2.1 multi_match检索</h3>
@@ -262,29 +262,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在搜索过程中会对query进行分词，再将分词结果分别和每个字段进行匹配。例如用户输入query“贝壳找房大平台”，分词结果为“贝壳”，“找房”，“大平台”，每个词都对应一个should查询语句。</p>
 <p>most_fields和best_fields是一种以字段为中心的检索方式，计算过程如图1所示，fn()分别为sum和max。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/291af401e9c346af9ef0eee0aeb15f36.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849114.webp" />   
     </p>
 <p>图1</p>
 <p>而cross_fields是一种类似于以词为中心的搜索分值计算方式。cross_fields的计算过程是把所有字段合并成一个大的字段进行计算。</p>
 <h4 id="211-most_fields计分方式">2.1.1 most_fields计分方式</h4>
 <p>对于一个文档有title，overview，content等多个字段，在利用most_fields（多字段匹配）进行检索时，es会单独计算每个字段的得分，然后将结果合并，得分为公式2.1，其中coord为匹配的子条件和总的子条件比值。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1cb5e9b89a824873b6e4be00f3f953da.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849913.webp" />   
     </p>
 <h4 id="212-best_fields计分方式">2.1.2 best_fields计分方式</h4>
 <p>best_fields（最佳字段匹配）的计算方式和most_fields不同，它侧重考虑 <strong>分值最高</strong> 的字段，计算过程见公式2.2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/76277cc28ab04c5e975ce6ce8c9f0c9f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849647.webp" />   
     </p>
 <p>公式2.2中可以指定协调因子（tie_breaker），当tie_breaker的值为0时（默认为0），只考虑得分最高的字段，当值为1时和most_fields计算方式一样。</p>
 <h4 id="213-cross_fields计分方式">2.1.3 cross_fields计分方式</h4>
 <p>cross_fields类型采用了一种类似于以词条为中心(Term-centric)的方法，它将所有的字段视为一个大的字段，然后在这个大字段中搜索每个词条。计算过程可以简化为公式2.3。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cbfea8f378d34c7d9d566235fd54cd6e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849377.webp" />   
     </p>
 <p>以字段为中心的检索可能会导致白象化，而以词为中心的搜索方式能比较好的解决这个问题。接下来我们用一个例子简单介绍下白象化现象，我们在索引中添加两篇文档，如图2所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/98712dad178a4b77bff71ecd3c5602c8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849218.webp" />   
     </p>
 <p>图2</p>
 <p>利用query“albino elepahant”进行检索，按照我们的认知，文档2应该更相关，理应排在文档1之前，但是结果却不然，在以字段为中心的检索过程中，两者的得分是一致的，es没有对“albino elepahant”整个词语进行额外的加分，而使用以词为中心的搜索就能解决这个问题。</p>
@@ -316,7 +316,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>利用TF-IDF衡量词的权重时，倾向于给不常见的词赋予高权重。有两个索引字段： first_name、last_name。假设有一篇文档的内容是：“Smith Jones”，其中Smith 在索引的first_name字段，Jones在索引的last_name字段。而根据人类起名字的习惯，很少有人把 词 Smith 作为first_name，当词“Smith”出现在 first_name字段时，相应的文档得分就会异常的高。而现在刚好有个名字 &ldquo;Smith Jones&rdquo;，用户查询的是：“Will Smith”，但是返回的最佳匹配文档是：“Smith Jones”，而不是&quot;Will Smith&quot;这个词。这也是一个未给整词进行额外加分造成的白象化现象。</p>
 <p>前文介绍到cross_fields是一种类似于以词为中心的检索方式，可以比较好的解决白象化问题，但是cross_fields只是把多个字段拼成一个大的字段，并不是真正意义上的以词为中心的计算方式，接下来介绍query_string打分方式，一种真正意义上的以词为中心的计算过程。具体计算过程如图3所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/33a6639698bf4a8d8a4e3c52a87b732b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849012.webp" />   
     </p>
 <p>图3</p>
 <p>以词为中心的搜索方式是计算每个词在对应字段中的分值，侧重于最大值，这一点与best_fields很像，可以通过设定tie_breaker(新的版本用tie_breaker，一些版本上用dismax字段设置)，把其他字段得分纳入考虑，tie_breaker取值为0-1，默认为0。以词为中心的搜索相比于multi_match更灵活，可以在query中拼写条件，query_string默认使用所有字段，也可以在query中指定每个词条对应字段，同时还支持通过analyze_wildcard开启使用通配符功能，在es中的使用方式见代码2：</p>
@@ -345,10 +345,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在检索的时候，我们可以指定对哪些字段进行检索，ES就会对其中的每一个字段进行打分。标题和摘要相对于内容来说更能体现一篇文档的主题，通常我们希望标题和摘要能给更大的权重。</p>
 <p>我们可以通过ES的放大机制针对不同字段赋予不同的权重进行提权。通过前文介绍的计算方式得到某个字段得分，然后乘以boost权重，得到这个字段的最终得分，实现放大的目的。在一次搜索中，检索字段为&quot;title&quot;和&quot;content&quot;搜索query分词完得到A、B两个词，我们对&quot;content&quot;字段进行了放大处理，权重为&quot;boost&quot;，用2.4表示词A在字段&quot;content&quot;的相关性得分，则最终得分可以用公式2.5表示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bfd03c0aa06b4babaee7ccc35d3db8ac.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849937.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/64130964db0c4bd39dec8e958d3aec4d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849731.webp" />   
     </p>
 <p>在es中可以使用代码3实现对title的放大。</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">1.  `   {`
@@ -766,6 +766,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -799,10 +803,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1181,6 +1181,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -203,70 +203,70 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>这篇文章从理论的角度介绍了激活函数的作用。承接上篇，在今天这篇文章中， <a href="https://zshipu.com/t?url=https%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttp%253A%2F%2Fmp.weixin.qq.com%2Fs%253F__biz%253DMzU4MjQ3MDkwNA%253D%253D%2526mid%253D2247485741%2526idx%253D2%2526sn%253D9d0ff0a6c1d68c3c01dd004c60add74b%2526chksm%253Dfdb694bacac11dac12ac28aebe744940dedcafe4e4af5083b19c8f829ea08745e4a1aa423a17%2526scene%253D21%2523wechat_redirect">SIGAI</a> 将为大家介绍当前深度学习中常用的一些激活函数，包括它们的工程实现。我们将以Caffe为例。</p>
 <p>激活函数实现的是一对一的变换，即用相同的函数对输入向量的每个分量进行映射，得到输出向量，输入和输出向量的维数相同：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c23bc5dcdcab46969338e51b3a7185af.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281618869.png" />   
     </p>
 <p>其中x和y都是n维向量。写成分量的形式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1aaaac6b763549eeb430be912d451cd3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281618642.png" />   
     </p>
 <p>在工程实现时，如果将激活函数作为一个单独的层，则在正向传播时对输入向量的每个分量计算激活函数值f(x)。在反向传播时对输入数据计算导数值f’(x)，然后乘以后一层送入的误差项，得到本层的误差项，送人前一层中：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d3b1eca194fc4a57a4f0f308e3586b6c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281618352.png" />   
     </p>
 <p>如果你对反向传播算法的原理还不清楚，请阅读 <a href="https://zshipu.com/t?url=https%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttp%253A%2F%2Fmp.weixin.qq.com%2Fs%253F__biz%253DMzU4MjQ3MDkwNA%253D%253D%2526mid%253D2247485741%2526idx%253D2%2526sn%253D9d0ff0a6c1d68c3c01dd004c60add74b%2526chksm%253Dfdb694bacac11dac12ac28aebe744940dedcafe4e4af5083b19c8f829ea08745e4a1aa423a17%2526scene%253D21%2523wechat_redirect">SIGAI</a> 之前的公众号文章“ <a href="https://zshipu.com/t?url=https%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttp%253A%2F%2Fmp.weixin.qq.com%2Fs%253F__biz%253DMzU4MjQ3MDkwNA%253D%253D%2526mid%253D2247485446%2526idx%253D1%2526sn%253D57d7d866443810c20c4ea2c6ee8018cc%2526chksm%253Dfdb69591cac11c8773638b396abe43c0161e4d339f0fa845e54326be3e8c4933a3b6a2713dae%2526scene%253D21%2523wechat_redirect">反向传播算法推导-全连接神经网络</a>”。这里的乘法是向量逐元素对应相乘。由于激活函数没有需要学习训练得到的参数，因此无需根据误差项计算本层参数的导数值。</p>
 <p>在神经网络的早期阶段，sigmoid函数，tanh被广为使用。在AlexNet出现之后，ReLU函数逐渐取代了这两个函数，得到了广泛使用，因为ReLU函数更不容易产生梯度消失问题。如果你对梯度消失问题，激活函数的饱和性还不清楚，请阅读我们之前的公众号文章“ <a href="https://zshipu.com/t?url=https%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttp%253A%2F%2Fmp.weixin.qq.com%2Fs%253F__biz%253DMzU4MjQ3MDkwNA%253D%253D%2526mid%253D2247483977%2526idx%253D1%2526sn%253D401b211bf72bc70f733d6ac90f7352cc%2526chksm%253Dfdb69fdecac116c81aad9e5adae42142d67f50258106f501af07dc651d2c1473c52fad8678c3%2526scene%253D21%2523wechat_redirect">理解神经网络的激活函数</a>”。</p>
 <p>由于当前被提出的激活函数众多，为了便于大家理解与记忆，我们对此做了总结。各种常用的激活函数与它们的导数如下表所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f1070aad85854db3847b597bc5dea599.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281618053.png" />   
     </p>
 <p>根据这些函数的定义，我们很容易计算出它们的导数。</p>
 <p>下面我们以Caffe为例，介绍这些激活函数的具体实现细节。在Caffe中，激活函数是一个单独的层，把它和全连接层，卷据层拆开的好处是更为灵活，便于代码复用和组合。因为无论是全连接层，还是卷据层，它们激活函数的实现是相同的，因此可以用一套代码来完成。</p>
 <p>激活函数由神经元层完成，它们的基类是NeuronLayer，所有的激活函数层均从它派生得到，下面分别进行介绍，限于篇幅，我们只介绍一部分，其他的原理类似。此外，Dropout机制也由神经元层实现。</p>
 <p>SigmoidLayer类实现了标准sigmoid激活函数。正向传播函数对每个输入数据计算sigmoid函数值，在这里count是输入数据的维数。实现代码如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/03e499bd3da3407db86d1769c0e1b3bd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281618816.png" />   
     </p>
 <p>TanHLayer类实现了tanh激活函数。正向传播函数实现代码如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/96c91f54c2ea4065bf078a356c0b1d11.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281618074.png" />   
     </p>
 <p>类ReLULayer实现ReLU激活函数，和前面介绍的标准ReLU不同，这里做了改进，定义为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3c17c233d88d440abf0ed523036e6c2e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281618530.png" />   
     </p>
 <p>其中a是人工设定的大于0的参数。显然该函数的导数为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/78ba1f51a1e34352b93c2ef34bb96db6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281618198.png" />   
     </p>
 <p>下面来看正向传播函数的代码：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0b9ac94394ac42ca8a48d7340a76ac6f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281618986.png" />   
     </p>
 <p>反向传播函数的实现如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2b4580d1a38b45488f3e827084520b14.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281618183.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d5338d62194449f19884921680c7bd39.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281618358.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/52aff90d079649758181b3f71a6ff160.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281618418.png" />   
     </p>
 <p>这样可以通过函数值得到导数值，减少计算量。正向传播函数的实现如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/86a983092a7d4f8ea7a311de12a52074.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281619093.png" />   
     </p>
 <p>类PReLULayer实现了PReLU激活函数。正向传播函数的实现如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/03d17ca3b68443feb87df0d2ccfad1db.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281619738.png" />   
     </p>
 <p>反向传播函数的实现如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0a342be1f45b47fa862e6e78de8aaa90.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281619097.png" />   
     </p>
 <p>类DropoutLayer实现Dropout机制。在训练阶段，随机丢掉一部分神经元，用剩下的节点进行前向和后向传播。这里实现时通过二项分布随机数来控制神经元是否启用，如果随机数取值为1则启用，否则不启用。正向传播函数的实现如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9787005aa5214426b5b3c572d954efb8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281619391.png" />   
     </p>
 <p>推荐阅读[1] <a href="https://zshipu.com/t?url=https%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttp%253A%2F%2Fmp.weixin.qq.com%2Fs%253F__biz%253DMzU4MjQ3MDkwNA%253D%253D%2526mid%253D2247483705%2526idx%253D1%2526sn%253Dc6e7c4a2e14a2469308b41eb60f155ac%2526chksm%253Dfdb69caecac115b8712653600e526e99a3f6976fdaa2f6b6a09388fa6f9677ccb57b40c40ae3%2526scene%253D21%2523wechat_redirect">机器学习-波澜壮阔40年</a>
 SIGAI 2018.4.13.</p>
@@ -471,6 +471,10 @@ SIGAI0716</p>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -504,10 +508,6 @@ SIGAI0716</p>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -886,6 +886,8 @@ SIGAI0716</p>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

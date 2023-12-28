@@ -200,125 +200,125 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>今天分享话题主要是跟强化学习有关，因为强化学习最近在工业界是非常火热。从加入百度开始，我主要就是做这一块。强化学习是一个比较大的话题，分享的内容大概是三个部分：1）强化学习的基本算法；2）部分百度内部的强化学习应用；3）最后是强化学习的工具介绍，最近团队刚发布一款工具叫做PARL，是PaddlePaddle的一个强化学习库。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6effd041675c4f2aa37aa9f69ce34f81.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271718552.webp" />   
     </p>
 <p><strong>算法部分</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1f5cf003a51941a3bc74834488640824.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271718111.webp" />   
     </p>
 <p>上图右边部分是最能说明强化学习的过程：一个机器人（agent），它会跟环境（environment）有一个交互，其中agent是通过action来影响environment，environment会返回reward和state，这个交互过程会不断地交互迭代。上图左下角部分描述以上迭代过程，我们称之为马尔可夫决策过程。</p>
 <p>如果熟悉有监督学习，但是不熟悉强化学习，可以通过“三轴”图（图中左上角部分）来看强化学习与之联系和区别：第一条轴deterministic-stochastic描述转移概率，决策过程和奖励值分布的随机性。第二条轴fixed dataset - interactive data，表示的是学习数据的来源和分布规律。最后一个轴是instant reward- delayed reward，该轴表示奖励值是立即的还是有延迟的。 我们熟知的有监督学习，针对的是静态的学习数据，以及近似可以看作无延迟的奖励。动态规划针对的则是确定性的环境，以及静态的数据。主动学习则针对无延迟的奖励以及确定性的数据。 多臂老虎机（multi-armed bandits）则同时处理随机性和交互类型的数据，但依旧是无延迟的奖励问题。只有强化学习处理三个方向（随机，有延时，交互）的问题，因此，他能够解决很多有监督学习无法解决的新问题。</p>
 <p>举个例子如雅利达游戏，状态（state）指看到当前电游屏幕上，包括图像还有其他各种信号信息。当人或者机器看到一个state可以有相应的action。这个action就是游戏手柄的操作。然后进入下一个过程。整个过程可以用马尔可夫决策过程来描述。马尔可夫决策过程有两个要素，一个是transition代表环境转移的概率，另外一个reward。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/87f04a9313ec49a0b6f23f5e19a4d2fa.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271718797.webp" />   
     </p>
 <p>从有监督和强化学习两个学习目标的角度来理解以上过程，在有监督学习过程中，在t时刻action我们称为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/332ded0915ac47c389be332d20e7dc15.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271718514.webp" />   
      。在有监督的学习过程中需要人来示范动作, 我们希望机器去学习人的示范动作，那么这个人的示范就成了label。我们通过最小Negative Log-Likelihood (NLL)来使得我们的policy函数逼近人的示范。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6ffda34f74064302accf5f9954c3abe4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271718927.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7f7d111bd34e40afb8b53bca0cfbc88d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271718543.webp" />   
     </p>
 <p>接下来介绍另外一种学习策略目标是最大化长期收益，序列过程如下图最上面所示。定义一个Q值，是从某个t开始，一直到最终结束的回报总和。这种序列可能无限长，为了不致于使得Q值没有清晰的定义，我们引入gamma（衰减系数）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5ffaeb8bc5a047eaba27fc3597cb8762.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271718367.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ed70c1ce2b48449998676d1fdc9044f3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271718944.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b6bbdcd0b67b456ca12f3cd40e4e3ac6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271718651.webp" />   
     </p>
 <p>在离散过程中，state和action都是有限的，用目标Q减去当前Q作为误差。让Q值逼近想要目标。连续情况会比较复杂，需要一个model或者function来逼近它，此时Q值是一个模型，theta是参数，state和action是特征，比如深度学习中神经网络模型，此时模型的目标函数是希望贝尔曼误差最小，这就是temporal difference error。</p>
 <p>目前用得比较多的DQN仍然无法解决Action是连续的情况，为了解决action连续的情况，我们还是需要引入policy function。但是，REINFORCE这类直接求解Policy Function的方法，效率通常比DQN要低很多。举例来说，比如说下围棋前99步都下得很好，最后一步下的不好，导致满盘皆输。但是如果我们用REINFORCE方法，我们认为这100步都不好，包括其中下得其实不错的前99步。虽然从统计意义上来说，如果下的次数足够多，梯度更新最终仍然是会往正确的方向，但毋庸置疑，即这是一种学习效率很低的算法。为了改善这个问题，另一类应用更广的方法是actor-critic。actor是policy，critic是评价函数。 我们希望评价函数做一件事情，不论结果怎么样，都会给action返回一个合适针对它自己对于整个棋局影响的“综合”反馈，这个所谓的综合反馈在学术界又叫做credit assignment。REINFORCE是可以认为用整个序列的总体Reward作为credit。 而actor-critic赋予每一个动作一个独特的反馈
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fdfa85e24953454495261412b2c81c72.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271718366.webp" />   
      ，叫做advantage，它能够针对action做一些独立的反馈。下面列出的是一些不同的advantage的计算方式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bf4aae791795441b94e93d7c34f685c7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271718914.webp" />   
     </p>
 <p>强化学习涉及的算法范围非常广，包括：</p>
 <p>1）model-free算法， 这类现在应用比较多，它又可以分为critic only，actor only和actor-critic。</p>
 <p>2）model based算法，通过对环境建模来进行规划，这类算法最近逐渐获得越来越多的关注。</p>
 <p>3）还有一些和不同算法结合在一起的advanced RL，如Auxiliary Tasks可以学习一些稀疏的任务。还有反向强化学习，元强化学习等等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c7eafedb772a42fe84279ffc9dc805a6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271718594.webp" />   
     </p>
 <p><strong>应用部分-推荐系统</strong></p>
 <p>2011年之前强化学习是处于一个不温不火的状态。主要用到强化学习的是Intelligent Robotics，用在控制问题，因为控制问题特别适用于强化学习。2012-2013年，强化学习是伴随深度学习的高涨逐渐火热起来， 这一年openAI发布了Gym环境。就百度来说，2012年的时候，百度开始用multi-armed bandit在排序和搜索上面。2014-2017年百度在工业界进行探索，有一些成功和失败的经验。百度早在12年也成立深度学习研究院，其中一项工作是发布了XWorld，这个作为一个通用AI（AGI）环境在学术界引起了不小关注。到2017年，百度有不少强化学习应用，例如凤巢的定价系统，还有feed流的推荐。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2b976ced611540a0bbd8d9f8fd4aaa9e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271718204.webp" />   
     </p>
 <p>强化学习在百度的一个重要应用是feed流推荐系统。工业界的推荐系统最早使用方法是协同过滤，追求用户对一个新闻的偏好估计。现在的推荐系统有两个研究热点：</p>
 <p>1）intra-list correlations：考虑的是列表页多样性，即列表里的内容关联。举例来说，在同一个页面一次展现多个相同或者类似内容，哪怕用户喜欢其中单独每一个，也不一定能接受。</p>
 <p>2）dynamic evolution或者inter-list correlations：考虑的是列表页之间关联，即推出的一个新闻不仅仅于点击与否，还需考虑点击行为对接下来的推荐影响，例如头条或者百度等App一次会推荐很多新闻。另外一个层级是内容是不断出现的，例如刷新一次过后，又推荐一次内容。核心点是在于激发用户的兴趣点，例如昨天对某种类型新闻感兴趣，那今天可能就不那么感兴趣。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2c9b710d1a3d4566a915e5ec2b345bdd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271718873.webp" />   
     </p>
 <p>我们一般的推荐，可以认为叫做k-items recommender system，问题定义为一次性给用户k个item，然后收集用户点击行为。以往经典做法是基于item independent 的假设，来预估点击ctr之类的，我们把这个叫做item-independent prediction. 不同用户的item点击是独立的，这种假设存在的问题是没有考虑多样性的情况。</p>
 <p>一般解决多样性的方法有1）submodular ranking（次模函数排序），submodular实际上就对“边际效用递减”这个说法的形式化，通俗的说就是把所有商品看成一个集合，随着所拥有的物品数量的增加，那么获得剩下物品所得到的满足程度越来越小。在推荐系统中，在上文推荐的基础上进行重新估计，例如下面的图中第i次新闻推荐内容项为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/19ab24dd5237421787ad2690d4a27929.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719421.webp" />   
      ，第i+1次推荐的内容需要考虑去掉已推荐过的相似内容，考虑用户感兴趣的topic空间，给用户推荐的应该是月牙形区域的内容，这便是submodular中的net gain的定义。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9b35b7d5d8ac418e8741e8623bc6fce1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719826.webp" />   
     </p>
 <p>这种假设存在问题有：</p>
 <p>1）模型任务多样性不是一个简单的统一的公式能总结的，实际上是跟用户和其topic是相关的。例如有的用户就是喜欢多看一样或类似的东西，另一些用户不喜欢。</p>
 <p>2）多样性之外的correlation没有考虑，这些correlation可能包括正向的correlation,例如推荐两个有关联的topic，比单独推荐一个topic更感兴趣。</p>
 <p>3）还有一个问题是局部与全局最优的问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d05f1b0cc3604cd7b43077573d33f891.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719303.webp" />   
     </p>
 <p>首先考虑的建模方式是：</p>
 <p>1）将已经排列的前文建模到模型中。这种建模方式也存在缺点，如实际中用户可能会被有些东西迷住，然后回过头看东西，这种情况是无法用前文的内容来描述。</p>
 <p>2）采用上文和下文来同时建模。我们采用rnn/gru/lstm建模上文或者下文，上下文同时建模就会变成双向的rnn/gru/lstm模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e415676e5060453291d2e25ed3525922.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719959.webp" />   
     </p>
 <p>但是双向模型是无法直接用来排序的。为此我们提出一种方法Evaluator-generator framework，该系统特点是把高精度的评估模型作为一个衰减序列的模型。系统中有一系列的generator结构，generator的目标是生成能够在evaluator上面拿到最高的分数的序列。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a93fdbaf0e9c4e998e39bb2c9d4ab749.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719528.webp" />   
     </p>
 <p>对于Generator来说，因为建模没有考虑到下文和全局（整个序列）的整体收益，所以最佳方式是考虑强化学习，为此我们提出了一种网络结构，revised pointer network(RPN)适合这种情况，RPN的特点是：</p>
 <p>1）是一种set2seq的建模方法；</p>
 <p>2）能够将候选未排序的结合变成推荐序列。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c3eef07664c74e57b1db4073e3c51607.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719172.webp" />   
     </p>
 <p>以下是实验部分结果，已在百度的内容分发取得不错的结果，获得过百度最高奖。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fbc320cf66374bdabc0f13a7e5812b66.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719636.webp" />   
     </p>
 <p><strong>应用部分-对话系统</strong></p>
 <p>NLU里面最重要的应用就是对话系统，小组从2012年就开始探索对话系统，做了不少原型系统。小组还参与部分度秘（duer os前身）的工作，还有一个就是open-domain对话系统的工作。</p>
 <p>对话系统主要包括NLU、state tracker、dialogue policy和NLG四个部分。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ba89cb543db6412796e7885b4c7611bf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719397.webp" />   
     </p>
 <p>图中state tracker把状态流变成state descriptor，dialogue policy根据state descriptor来获取action，最终生成结果。目前基于任务的对话系统大概还是这个结构。</p>
 <p>最早强化学习在对话系统中的应用是2012-2013年做的点餐系统，这个项目拿到一些结论，但不是很确信。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ed704412b8304561af243b0d11515723.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719160.webp" />   
     </p>
 <p>另外一个原型是天气预报系统，特征相对点餐系统多一些，这个原型能得出些重要结论，如发现有些指标能够超越人精心设计的规则策略，说明即通过学习还是有可能超过工程师精心设计的规则对话管理。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ceb5f9f021714d15b5a334caf9041834.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719711.webp" />   
     </p>
 <p>后来度秘里面也做了一个这样类似的功能，如对话引导，引导用户下一句说话，这过程可以通过强化学习来进行，核心部分是语义匹配DQN。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2ed8f562bb2b4c27a58631334506389c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719307.webp" />   
     </p>
 <p>2016年Wen Tsung-Hsien提出一种端到端的面向任务对话系统，使用神经网络把四个模块综合起来。所有模块中的状态都是可训练，这相对以前工作是进步一大步。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f1e83aafda19401784693ed9eb7a7f8d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719996.webp" />   
     </p>
 <p>在open-domain方向最近的进展情况分为基于检索、自动生成两种方式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d25d49b870ac4eeba90f90e0eebadea5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719880.webp" />   
     </p>
 <p>而对于开放域的对话系统，则尚没有标准的解决方案。一般认为，端到端神经网络是一个非常有潜力的方向。而端到端的对话系统存在的问题有：</p>
 <p>1）生成式回答中没有内容，如对话会变成“哈哈”，“呵呵”</p>
@@ -334,64 +334,64 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>3）adversarial self-play，即在评估的时候，加入对抗训练，把机器对话定义为假性对话，人与人之间对话是真性对话，评估时需要分辨出真假性对话，那就能给出正确的reward。</p>
 <p>小组目前在做的是把以上的方法集成起来，让对话自动进行，具体如下。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c43cbe206762434ea4fe9e5502023a56.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719611.webp" />   
     </p>
 <p>基于以上考虑，我们做一些尝试性工作，图中是FB发布的数据集persona，基于两个persona（个性数据），产生两个人之间的对话. 这两个机器人相互聊，聊完之后用evalution-system来进行评估获得reward，然后用来强化这两个机器人的对话。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a2715fad36b844fc84ba149aa5d2df17.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719341.webp" />   
     </p>
 <p><strong>应用部分-移行控制</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ad64e2b65efd4745b56deb334598ec33.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719346.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9698fc7683cd489a9b6c0e95db2c02ce.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719043.webp" />   
     </p>
 <p>另外一个工作，是NeurIPS 2018中的一个比赛，叫AI for Prosthetics. 在这个比赛中，需要控制一个人体骨骼肌肉模型的肌肉（19维），需要学习的目标是按照外部不断变换的给定的速度行走。对没有按照速度行走或者跌落扣分处理。这个任务需要将强化学习和迁移学习相结合才能解决。</p>
 <p>这次比赛中用到4个trick：</p>
 <p>1）模型结构上：使用deep deterministic policy gradient，该网络结构由4层MLP组成，以速度为学习目标，具体网络结构与强化学习结合情况如下。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/442671b87b724b0aaf297a6b859fbebe.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719590.webp" />   
     </p>
 <p>2）Curriculum Learning ：课程学习并不是一开始就使用的。开始的学习指定速度低速行走的效果并不是很好，所以尝试换个思路改变问题的目标，让其跑的越快越好。这样训练我们发现能够得到非常高效的姿态。我们猜测低速行走是一个多解的问题。而在高速时，机器的姿态必须特别高效，其解相对更少。但比赛中的目标是更为低速的行走空间，因此需要进行迁移学习。我们将高速奔跑但是姿势较好的policy用于热启动，然后训练其逐步往低速的空间前一。通过这种方式我们得到了更好的奔跑姿势。在其中我们利用了课程学习，设计一系列从易到难的课程，让其逐渐地降低速度。通过这种方式，会得到一种特别稳定的姿态用于热启动。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2ef42c7a04e14b228d8b4f9a1fd96698.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719026.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d7b83b75cd214162afff7d7cdf0d5f88.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719443.webp" />   
     </p>
 <p>3）Deep Exploration 我们利用多个header的相似预测，得到其预测的波动，这个波动代表了当前策略和值的波动范围。这个能够帮助策略有效探索到探索不足的空间。</p>
 <p>4）Parallelization：我们基于PaddlePaddle的高效的计算框架，能将性能提高几百上千倍。基于多个CPU的模拟器，以及一个data server、一个高性能GPU作为单机多卡的训练。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5361f1c135d24d718e8264333f115b6e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719158.webp" />   
     </p>
 <p>另外一个项目跟自动驾驶方面相关，我们利用原始的传感器信号直接决策控制信号（端到端控制）。我们在一个飞行器上进行这个实验。而训练控制模型是典型的延迟反馈问题，强化学习非常适合解决这类问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1444d22f73eb421a98fd512ad7012d92.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719817.webp" />   
     </p>
 <p>然而强化学习用在autonomous driving中存在的问题有：</p>
 <p>1）需要大量的数据；</p>
 <p>2）强化学习需要一些冒进的动作，并且需要经历一些风险和失败（比如碰撞）。然而在真实的世界这个成本过大，我们不可能让无人车真的撞毁无数次来学会如何躲避障碍。</p>
 <p>我们设想的解决方案是利用安全员，当发现紧急情况时，安全员会做一些紧急动作。假设我们policy如下图所示，是一个比较复杂的端到端网络结构，融合CNN与LSTM（多帧信息）。但是我们不能把无人车或者飞行器真的完全交给这个模型，而是通过引入安全员来保障安全。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cd84f6b08faa4a93ae564f3ae36d35a4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719324.webp" />   
     </p>
 <p>当我们系统做出错误判断或者出现高危动作是，安全员会及时介入。在以往的无人车中，安全员都只作为安全保障或者测试用。然而，安全员的每次干预，说明机器的工作不对。这其实是一个非常珍贵的反馈信息，应该被机器反过来学习。这也是设计IARL的初衷。我们设计的IARL算法包括两个方面：</p>
 <p>1）惩罚任何干预；</p>
 <p>2）学习安全员干预时所采用的操作。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/05a323e02b6149da9532cb89166e7a91.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719850.webp" />   
     </p>
 <p>IARL在policy和loss function中的体现如下：</p>
 <p>1）我们需要修改behvior policy,因为现在的policy不再是机器完全自主，而是变成了机器和干预的混合策略。</p>
 <p>2）我们在reward上，对干预的过程做出惩罚。</p>
 <p>3）我们对于policy的目标函数进行修改，增加一项用于学习干预过程的安全员操作。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d8a7647875854300a7b77f8e4f01e233.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719538.webp" />   
     </p>
 <p>实验结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/17672df1c8ed43f7be06aa5228a61381.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719150.webp" />   
     </p>
 <p><strong>工具-PARL</strong></p>
 <p>PARL是PaddlePaddle上的一个强化学习平台，特点是：</p>
@@ -400,19 +400,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>3）同时支持工业界应用和科研任务。</p>
 <p>这套强化学习框架基于3个基础类，分别是agent、algorithm、model。 通过不同层级的定制，PARL能够实现方便，灵活，可服用，定制方便的强化学习算法。 同时，对于大规模并行能力有很好的支持。用户可以很方便写出自己独特的定制算法，而不必去管具体通信接口等逻辑。 以DQN为例，我们提供了algorithm的现成算法，用户只需要定制自己的模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f3a2feedba9b4fe5b157d9352cf0239a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719890.webp" />   
     </p>
 <p>而如果用户需要定制全新的RL算法，而且库里面本来没有，也可以童工定制Algorithm简单地实现。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/58ca8d4486464f7384bdccdd799a2a95.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719663.webp" />   
     </p>
 <p>最后，我们也展示一个例子，用户能够通过定义一些通信逻辑，实现一些并行化的复杂操作。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9b740cf6855542bcbbda1d8ceb145df9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719638.webp" />   
     </p>
 <p><strong>强化学习的存在问题及应对方法</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5c9d154ad2bf4f439518098f0e940a77.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719258.webp" />   
     </p>
 <p>最后讲讲强化学习当前存在的一些问题和最有潜力的方向。</p>
 <p>1） 在很多应用中，往往是目标不明确，例如对话最终目的是什么，像人？像人这个目标又该如何定义？解决方法是reward modeling，最近谷歌也在做这个方向。例如百度在推荐排序的时候，使用evalution-generator的框架，即首先对reward的建模而不是一上来就学习。</p>
@@ -433,7 +433,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>[10] Wang, F., Zhou, B., Chen, K., Fan, T., Zhang, X., Li, J., &hellip; &amp; Pan, J. (2018, October). Intervention Aided Reinforcement Learning for Safe and Practical Policy Optimization in Navigation. In Conference on Robot Learning.</p>
 <p><strong>作者介绍：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/15d3690c1a0a4f219b34f20cab201106.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271719863.webp" />   
     </p>
 <p>王凡 百度 资深研发工程师</p>
 <p>**王凡，百度自然语言处理部资深研发工程师。**负责在线学习技术方向。长期深耕MAB（Multi-Armed Bandits）、强化学习等机器学习领域的研究工作，并领导相关技术在大规模工业级场景的应用。18年参与“川流”项目，通过在百度信息流产品实现多目标序列最优化框架 RSE框架，获得百度最高奖。</p>
@@ -577,6 +577,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -610,10 +614,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -992,6 +992,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

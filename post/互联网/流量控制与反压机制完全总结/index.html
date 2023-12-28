@@ -205,13 +205,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="flink网络传输的数据流向">Flink网络传输的数据流向</h4>
 <p>Flink网络传输的数据流向如下图所示。
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ecfd3eb5b4614d859ef1bb475f46c3b7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272119564.png" />   
     </p>
 <p>Sender在发送数据时，首先写入TaskManager内部的网络缓存，利用Netty进行传输——将待发送的数据存入Netty的ChannelOutboundBuffer，再经由Socket的发送缓存发送出去。Receiver在接收数据时是反过来的，同样要经过3层缓存，即Socket接收缓存→Netty ChannelInboundBuffer→TaskManager网络缓存。要实现流量控制，就是在上面的流程上做文章。</p>
 <h4 id="flink的反压传播">Flink的反压传播</h4>
 <p>反压（back pressure）就是流式系统中关于处理能力的动态反馈机制，并且是从下游到上游的反馈。下图示出数据流在Flink TaskManager之间流动的逻辑。
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ae23e0cd9ddf44cb8449484001b67315.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272119711.png" />   
      可见，一旦因为下游处理能力不足而出现反压，反压信号的传播应该分为两个阶段：一是从下游TaskManager的输入端（InputGate）传播到直接上游TaskManager的输出端（ResultPartition）；二是在TaskManager内部从输出端传播到输入端。当然，我们要重点考虑的是跨TaskManager的反压传播，因为它的链路比较长（参考上一节的数据流向图），更有可能成为瓶颈。</p>
 <p>下面先来介绍旧版本中的流控和反压机制。</p>
 <p>Flink 1.5之前：基于TCP的流控和反压 在1.5版本之前，Flink并没有特别地去实现自己的流控机制，而是在传输层直接依靠TCP协议自身具备的滑动窗口机制（大学计算机网络课程必讲）。下面通过实例来复习TCP滑动窗口是如何实现流控的。</p>
@@ -219,28 +219,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>初始情况如下图所示。Sender每单位时间发送3个包，发送窗口初始大小为3；Receiver每单位时间接收1个包，接收窗口初始大小为5（与接收缓存的大小相同）。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f5bb9d8b1c084311b1fe820f302171d9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272119888.png" />   
     </p>
 <ol>
 <li>Sender发送1~3三个包，Receiver接收到之后将它们放入缓存。
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ab266398d74f4524b4ed232e2b6d9840.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272119605.png" />   
     </li>
 <li>Receiver消费一个包，接收窗口向前滑动一格，并告知Sender ACK=4（表示可以从第4个包开始发送），以及Window=3（表示接收窗口当前的空余量为3）。
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/55f66dcf8d96439690538cae4a019fd9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272119784.png" />   
     </li>
 <li>Sender接收到ACK消息后发送4~6三个包，Receiver接收到之后将它们放入缓存。
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/afd02fc37df94c19a28748949e075129.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272119020.png" />   
     </li>
 <li>Receiver消费一个包，接收窗口向前滑动一格，并告知Sender ACK=7（表示可以从第7个包开始发送），以及Window=1（表示接收窗口当前的空余量为1）。Sender接收到ACK消息之后，发现Receiver只能再接收1个包了，就将发送窗口的大小调整为1并发送包7，达到了限流的目的。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ec1cadf1dd4c46af8b02fb25547a2ef1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272119321.png" />   
     
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d07b9e5d043d405eaad46c7415ef895b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272119908.png" />   
     </p>
 <p>接着这个流程分析下去，可以得知Sender最终会无法发送数据（因为Receiver报告Window=0），直到Receiver消费掉缓存中的数据才能继续发送。同时Sender还会定时向Receiver发送ZeroWindowProbe探测消息，保证Receiver能够及时将消费能力报告给Sender。</p>
 <p>接下来用实例介绍反压流程。</p>
@@ -248,55 +248,55 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>如图所示，Sender发送速度与Receiver接收速度的比是2:1，起初是可以正常发送与接收的。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9162b8799ed647ec97a3c82ca8d1d314.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272120338.png" />   
     </p>
 <ol>
 <li>一段时间过后，Receiver端InputChannel本身的缓存被耗尽，因此会向本地缓存池LocalBufferPool申请新的缓存。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-a5ba04edcb954a8292ffc716d324958d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272120613.png" />   
     </p>
 <ol>
 <li>一段时间过后，LocalBufferPool的可用额度会被耗尽，因此会向网络缓存池NetworkBufferPool申请新的缓存。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/92bc190df02a49feb5bf6bd574896f08.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272120982.png" />   
     </p>
 <ol>
 <li>随着数据不断积压，NetworkBufferPool的额度也会被耗尽，此时没有空间再接收新的数据，Netty的auto read会被关闭，不再从Socket缓存读取数据。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5b7ba0a5bfb84b82831ccbc6da7f69fb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272120368.png" />   
     </p>
 <ol>
 <li>Socket缓存耗尽后，Receiver报告Window=0（参见上文的滑动窗口），Sender的Socket就会停止发送数据。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a54c948335e64cb7bcc700f7b01c7ad7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272120988.png" />   
     </p>
 <ol>
 <li>Sender端的Socket缓存积压，导致Netty无法再发送数据。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1897cba071c747daac63b4969da69311.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272120427.png" />   
     </p>
 <ol>
 <li>待发送的数据都积压在Sender的ChannelOutboundBuffer中，当数据量超过Netty的high watermark之后，Channel被置为不可写，ResultSubPartition也就不再向Netty写数据。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0f50f792441a4befaa67a54e96ab6b09.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272120222.png" />   
     </p>
 <ol>
 <li>Sender端的ResultSubPartition缓存满了之后，就会像Receiver端的InputChannel一样，不断地向LocalBufferPool和NetworkBufferPool申请新的缓存，直到缓存全部耗尽，RecordWriter不能再写数据。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b228bb043bc849b4b9a1ceb0faadf1b0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272120493.png" />   
     
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f7b1e979660841e085bb54b765fcff86.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272120976.png" />   
     
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e7247654b8854adf8a8b8cd8cf035488.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272120305.png" />   
      这样，我们就实现了反压向上游TaskManager的传递。</p>
 <h4 id="flink-15之后基于credit的流控和反压">Flink 1.5之后：基于Credit的流控和反压</h4>
 <p>基于TCP的流控和反压方案有两大缺点：</p>
@@ -314,13 +314,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>仍然是Sender发送速度与Receiver接收速度的比是2:1的情景。Sender端的ResultSubPartition积压了2个缓存的数据，因此会将该批次要发送的数据与backlog size = 2一同发往Receiver。Receiver收到当前批数据和backlog size之后，会计算InputChannel是否有足够的缓存来接收下一批数据，如果不够，则会去LocalBufferPool/NetworkBufferPool申请缓存，并将credit = 3通知到上游的ResultSubPartition，表示自己能够接收3个缓存的消息。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b86b9c1c71ce4d1f96c64cce9280770d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272120741.png" />   
     </p>
 <ol>
 <li>随着Receiver端的数据不断积压，网络缓存最终被耗尽，因此会反馈给上游credit = 0（相当于TCP滑动窗口中的window = 0），Sender端ResultPartition到Netty的链路会被阻断。按照上一节所述的流程，Sender端的网络缓存会被更快地耗尽，RecordWriter不能再写数据，从而达到反压的效果。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b8c2a0c30e4d40ba90ff91c7645d3acb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272120171.png" />   
     </p>
 <p>由上可知，反压信号在TaskManager之间不需要再通过传�</p>
 
@@ -446,6 +446,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -479,10 +483,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -861,6 +861,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

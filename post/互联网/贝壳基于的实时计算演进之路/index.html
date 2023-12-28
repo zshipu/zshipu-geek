@@ -214,26 +214,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>首先是平台的发展历程。最早是因为业务方在实时计算方面有比较多的业务场景，包括业务方自研的实时任务，需要自行开发、部署及维护，我们的大数据部门也会承接客户大数据的实时开发需求。</p>
 <p>这些看起来都是一些烟囱式的开发架构（即每个业务线之间由不同的开发团队独立建设，技术栈不同，互不联系），缺乏统一的任务管控，也很难保留开发过程中积累的技术沉淀。因此，我们在 18 年时上线了基于 Spark Streaming 的实时计算平台，统一部署管理实时计算任务。之后我们又在此基础上提供了任务开发功能 - 标准化的 SQL 语言（SQL 1.0），以提高数据开发效率。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/17cbd106d0074913b3002eb587d29257.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281830870.webp" />   
     </p>
 <p>随着我们承接的任务越来越多，我们也发现了 Spark Streaming 的一些使用问题，主要是其 Checkpoint 是同步的，有时会造成比较大的延迟。此外，Kafka 消费的 Offset 数据存在 Checkpoint，很难做到任务细粒度的监控，比如消费状态的获取，于是我们开始转向 Flink。</p>
 <p>19 年，我们的平台开始支持 Flink 任务，并且很快提供了基于 Flink 1.8 的 SQL 2.0 功能，包括 DDL 定义和维表关联。接下来，在 SQL 2.0 的基础上，我们开始了实时数仓的建设。</p>
 <p>今年初，在收集了业务方的需求场景后，我们认为在实时事件处理方面需求明确，而且目前的实现也存在较多的弊端，因此我们开始着手事件处理平台的开发。今年发布的 Flink 1.11 在 SQL 方面有很大的提升，我们在其基础上正在开发一套统一的 SQL（3.0）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d0a795b5df064f188b89a9fbc1d8136e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281830859.webp" />   
     </p>
 <p>目前平台支持的部门涵盖了贝壳绝大部分的业务方，支持各种场景，包括人店相关的房源、客源、经纪人、风控以及运营等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a75720bc44b341f2b704651b5ee60249.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281830707.webp" />   
     </p>
 <p>目前平台支持的项目有 30 多个。在 SQL2.0 后，平台上的任务数有明显增长，达到 800 多个。由于贝壳所有的流量数据、用户行为分析、以及数仓的建设都是通过平台来构建的，所以数据量很大，每天处理的消息达 2500 亿条，单任务的消息吞吐量峰值达 3 百万。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2d2d404823e14fb99742d94b0445a100.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281830763.webp" />   
     </p>
 <p>这是我们平台任务的增长情况，可以明显看到 19 年 10 月 SQL 2.0 上线且支持实时数仓开发后，任务增长势头显著。</p>
 <h2 id="二平台建设"><strong>二、平台建设</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6834755f8b3a401381108e2e3f536636.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281830767.webp" />   
     </p>
 <p>平台的功能概览包括四个方面：</p>
 <ul>
@@ -243,22 +243,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>支持公共队列（针对较数据量小的需求），对于数据量大的需求，要有稳定的资源保证，我们可以提供专有队列，运行更为可靠。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/451411683dce479dbdd6ef3ef6d83152.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831685.webp" />   
     </p>
 <p>平台的整体架构与其它公司的差不多。底层是计算和存储层，计算支持 Flink 和 Spark，主要包括消息队列和各种 OLAP 存储，同时也支持 MySQL，Hive 也可以做到实时落地，维表支持 Redis，HBase 存储。ClickHouse 是目前主要的实时 OLAP 存储，由于 Doris 支持 update，同时对关联查询的支持也比较好，我们也在尝试 Doris 存储。</p>
 <p>引擎层主要封装的是 SQL 引擎、DataStream 的通用性操作。在事件处理方面，对 Flink 的 CEP，包括对其它普通规则也做了较好的封装。</p>
 <p>开发管理层提供了各种任务的开发、监控和资源管理。</p>
 <p>平台之上，也是提供了对 ETL、BI、推荐、监控、风控等各种业务场景的支持。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b530ff68a5644d12a4aa537a9ec58a03.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831700.webp" />   
     </p>
 <p>这是平台任务生命周期的管理。可以看到，在启动后会新建实例，从集群拿到运行状态后会判断是否正常运行。“是”则转成运行中状态。在运行过程中会对任务做延迟和心跳的监控；如果说任务发生了异常，并且在配置中设置了延迟或心跳时长的阈值，则会尝试进行重启。用户可以在启动任务时设置重启次数，当超过该值时，则认为重启失败，将发送告警给任务负责人。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/851bde4d5b744a8fb2e57e5e4e12a5ef.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831759.webp" />   
     </p>
 <p>这是平台监控报警的架构。我们在 Spark 引入了 sdk 依赖，在用户开发任务时用代码显示添加就可以监听系统关心的指标。Flink 任务支持自定义 Reporter 的 metrics 的获取。我们还支持 java agent 的依赖注入，通过依赖注入我们可以获取实时任务的制定信息。在 Hermes 平台，我们可以拿到这些监控信息，来支持延时报警、心跳报警、及数据血缘基础上的流量分析，后续的有状态任务恢复也依赖这些监控指标。监控日志落入存储（InfluxDB）之后可以进行可视化处理，方便的查看历史运行状态。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/456a6795d6504478b47ee9ee64c97fc6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831609.webp" />   
     </p>
 <p>这是平台监控查看页面，分别显示了数据读入、写出、及延时的情况。</p>
 <h2 id="三实时数仓"><strong>三、实时数仓</strong></h2>
@@ -270,40 +270,40 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>最后是多源支持，对公司内部用到的各种存储做到了较好的支持。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ac7a8ea3dc1d498b978ab3c2639ae06e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831559.webp" />   
     </p>
 <p>这是简易的实时数仓架构图，总体来说是属于 Lambda 架构，包括实时流和离线流，以及离线流对实时流数据覆盖的修复。从用户行为日志、后端服务器日志及业务数据库采集来的消息流，汇入并通过 ODS（Opertional Data Source）层再到 DW（Data Warehouse）层，我们支持 ODS 和 DW 层对维度进行扩充，关联维表。</p>
 <p>目前 DWD（Data Warehouse Detail）层的数据直接送入 ClickHouse，ClickHouse 现在是我们 OLAP 引擎的一个主力存储。从 DWD 到 ClickHouse 的存储只满足了部分业务场景，还存在一些问题。比如我们需要做数据汇总，那么我们现在 DWS（Data Warehouse Service）层在这方面还稍微欠缺。目前明细数据进入了 ClickHouse，我们首先对那些应该汇总的数据存了明细，这样会导致存储量比较大，查询效率较低。后续我们会考虑引入 Doris，因为它可以在实时计算侧做实时聚合，依托 Doris 对 Update 的支持，就可以完善 DWS 功能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4bae9de8d77347ad9ea8bda962859c5e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831511.webp" />   
     </p>
 <p>这里展示的是我们的 SQL 编辑器。可以看到左边是正在编辑的 SQL，我们支持 Flink 执行计划的查看、任务调试。右侧一列可以定义源表、维表、输出表。可以在自定义的数据源基础上定义流表，并自动生产 DDL。同时，对于某些自动生成 DDL 难以支持的场景，用户可以在左边的编辑区域自行编写 DDL。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/55e5c3b6d88b45f19016b96f6d3a405e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831400.webp" />   
     </p>
 <p>任务调式分为手动和自动两种方式。手动方式需准备样例数据，拷贝到开发界面；自动方式则会从 SQL 任务的上游获取样例数据。元数据信息（kafka、HBase、ClickHouse 等）是动态获得的，元信息和样例共同生成的 DebugSQL 去调用 SQL 引擎的公共服务。SQL 引擎得到样例数据后，比如，如果有关联维表的操作，则会关联线上维表，在 SQL 引擎中执行调试，将结果送给 UI 端进行展示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f8947920c6e84769a7340042f8234b87.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831289.webp" />   
     </p>
 <p>这是一个完整的调试界面，可以看到左侧是自动获取的样例数据，右侧是下游的输出。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/80748a48428d46d1804f62d2ea354679.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831262.webp" />   
     </p>
 <p>根据元数据的定义及上报的指标等监控数据，我们可以生成一个实时数据血缘链路。图中的箭头展示了数据流转的健康状况，未来会对血缘链路上的数据监控做得更细致。数据血缘满足了 4 个方面的需求：溯源分析、问题排查、数据差异分析、提升用户体验。在血缘链路上还可以进行比较复杂的异常预警，例如，数据源字段的变更对下游的影响。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b8ce699875c74e46bf0e6edf5e6bebc1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831146.webp" />   
     </p>
 <p>这是我们 SQL2.0 引擎的大致架构，通过 Antlr4 扩展标准 SQL 的语法，从而支持 Flink 的各种源，维表和下游存储表的定义。通过 SqljobParser 内置的 SqlStmtParser 生成 SqlContext，在逻辑计划（Logical Plan）中做解析。如果遇到维表，则经过一系列维表关联的流程。上图中下半部分是底层 API 架构。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b39b82d01b8c4744a6c764786bc9557a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831982.webp" />   
     </p>
 <p>这是平台 DDL 样例。对于源表（Source），支持 Kafka，未来在新版本的 Flink 之上将可以支持更多种源。对于维表（Dim），支持 HBase、Redis、MySQL。数据存储表（Sink）支持图中所列五种。表格下面的是 DDL 定义的语法规则，右边是一些表定义的样例，分别是 Kafka 源表、维表和输出表（输出到控制台）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ba76a6ccce544fdd97d7647e90a6c93b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831870.webp" />   
     </p>
 <p>再看我们的维表关联，从 SQL 引擎结构可以看出，输入的 SQL 进行解析，当有维表关联时（包含 join 字段），我们会从语法层面做转换。我们在表的层面定义了流和维关联之后的表的形态，左下角是其生成过程。关联维表、流维转换、用异步 IO 获取数据等过程不在这里细说。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f3ea6c1fc72440cfadc4ee623d86e299.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831824.webp" />   
     </p>
 <p>随着 Flink 社区新版本的发布，在 SQL 方面的支持越来越强，我们目前正在做基于 Flink1.11 的新版 SQL 引擎，也会将之前的 SQL 引擎统一。因为 Flink1.11 支持DDL，所以这部分我们不会再做，而是直接使用其新特性：</p>
 <ul>
@@ -314,16 +314,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>SDK Model 是对外提供的标准化服务，如 SQL 文本开发的验证，debug 功能等。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b6566ab18b0944d3a9dba0883568199f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831686.webp" />   
     </p>
 <p>这是实时数仓的一个落地场景：交易的实时大屏，也是我们第一个落地的典型业务场景。我们支持各种交易实时指标，用户可以通过实时查询 ClickHouse 得到交易数据的各种图表展示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/792872f553e84d859214c95e94507531.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831677.webp" />   
     </p>
 <p>客户实时热力图是我们正在跟业务方沟通的一个需求场景，能实时获取用户线上的行为，使经纪人对客户行为有一个比较全面的实时掌控，促进客户维护的转化率。另一方面，也使客户更方便地了解房源热度状态，促使用户做出购买决策。</p>
 <h2 id="四事件驱动"><strong>四、事件驱动</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c74691aa89ab4a2a9141cc41f11ccb13.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831672.webp" />   
     </p>
 <p>先了解一下事件驱动型和数据分析型的区别：</p>
 <ul>
@@ -331,7 +331,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>数据分析型主要是从原始数据中提取有价值的信息，重在分析。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/686cb7dfaf55415f891e75c95d56f581.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831576.webp" />   
     </p>
 <p>在我们跟业务方的沟通过程中，我们发现很多场景中他们希望实时获取用户的行为。比较典型的是风控场景，根据用户线上的行为模式判断其是否触发风控规则。此外，我们的实时运营，根据用户线上行为给用户进行积分的增加及信息推送。搜索推荐也是我们非常关心的，即用户在搜索之前的实时行为。综合这些，我们提取出三方面问题：</p>
 <ul>
@@ -341,23 +341,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>基于以上三个痛点，我们构建了事件处理平台，抽象成三个模块，事件管理，规则引擎和动作触发。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c121ff78584f440b8523bdfb4e636f79.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831581.webp" />   
     </p>
 <p>这是事件处理平台所支持的业务场景。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0208090b0999411aa4eed4f9e70db138.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831649.png" />   
     </p>
 <p>这是事件处理平台的架构，总体来说就是管理模块，引擎和动作触发。在中间这里我们提供了一个适配层，可以跟第三方系统进行集成。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7632030ec9b848ce995b00e8c7f3dc1f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831034.webp" />   
     </p>
 <p>这是我们事件处理的操作流程，首先是创建数据源，与实时计算平台类似，主要支持 Kafka，在 Kafka 消息流上定义我们的数据格式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/73796d9d2f1043c6a4a62afe57b61d27.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831867.webp" />   
     </p>
 <p>在数据源基础上创建事件流，事件流包含了同类事件，我们实现了一些算子，可以在数据源的基础上做一些操作。从右侧可以看到，在多个数据源上进行了一些过滤、加解密的操作，最终通过 union 算子汇总成一个统一格式的同类事件的事件流，方便后续使用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/99deefca5a6b4b8e831dfe9e6ef43d38.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831911.webp" />   
     </p>
 <p>在事件流的基础上可以定义单个的事件，之后可以创建事件组，以对接我们的业务含义，即明确具体的业务是做什么的，如用户的点击、浏览、分享、关注等事件。创建事件组有两种方式：</p>
 <ul>
@@ -365,11 +365,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>二是远程方式，这与我们的埋点系统（用户行为日志）直接连通，可以直接得到用户事件的定义。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b0f6544ab2ad4ac4b53e040ac3c1b71f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831076.webp" />   
     </p>
 <p>任务配置过程分几个部分，这是 log 监控的任务样例。上图展示的是事件处理的规则设置部分。这是一个 CEP 事件，可以定义事件窗口，获取具体事件，在此之上定义 CEP 的模式，还可以定义事件的输出，例如需要输出哪些字段。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/650f87f21c78439d9e4d43685e64358b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281831912.webp" />   
     </p>
 <p>这是触发动作调用，支持消息发送，服务调用及落地 Kafka�</p>
 
@@ -497,6 +497,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -530,10 +534,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -912,6 +912,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

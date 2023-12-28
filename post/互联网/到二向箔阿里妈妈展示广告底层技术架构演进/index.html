@@ -252,12 +252,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>1）第一阶段向量形式的 \hat{f}_\theta(u,v) 模型训练过程中，一般不会考虑第二阶段检索过程的精度损失，因此可能会导致近似近邻检索（ANN）的误差较大，这也是通常所说的两阶段目标不一致的问题。针对这一问题，业界有一些工作已经尝试解决，例如在模型训练阶段就把检索误差纳入考虑[6]等。但是在实际应用中，即使训练阶段不考虑检索误差，一些ANN检索工具如 Proxima[2] 一般都能将精度做到 95% 甚至更高。所以在实际应用中两个阶段目标不一致并不算是一个严重的问题；</p>
 <p>2）由于 ANN 检索的需求， \hat{f}_\theta(u,v) 模型结构最终需要被设计成用户向量与 item 向量之间直接计算的模式，而这一要求对模型能力造成了较大的限制。事实上，如果不考虑检索模式对模型结构的要求，召回模型结构设计与后链路的一些模型如点击率、转化率预估模型等，可能并没有太本质的差异，但正是由于向量结构限制的存在，使得召回模型能力的天花板受到了较大限制。虽然目前还没有发现严格的证明与推导，能够论证向量结构到底在多大程度上影响了模型能力，但很多的实践结果都表明了这一限制切实存在且影响很大。下图中，我们给了一个简单的实验数据验证，来说明模型结构限制对模型能力的影响程度。不难发现，当结构从内积升级成带 target attention 的 DIN 结构后，模型精度有了一个大的提升。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9f1bbdf3b9214b97807e50da370473b2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281603094.webp" />   
     </p>
 <h2 id="23-一段式解决方案">2.3 一段式解决方案</h2>
 <p>鉴于两段式解法存在的目标不一致、模型结构受限的问题，业界在技术迭代的过程中，也发展出了一段式的召回解决方案，其中代表性的工作为我们团队之前提出的 TDM 系列算法[7-9]和字节跳动提出的 Deep Retrieval 算法[10]。所谓的“一段式”，是相较两段式的价值度量模型训练、Topk 检索分开考虑而言，直接面向检索目标来同时学习索引结构和检索模型。这类方法一个比较大的特点是需要定义“参数化的索引结构”，并在训练中和模型进行同步优化。像 TDM 中的树结构、DR 中的多层编码结构，以及索引结构中虚拟节点的 embedding，都属于索引结构参数的一部分。此外，在 TDM、DR 中，item 与树的叶节点、与最底层编码节点之间的挂载关系映射函数，同样属于索引结构参数的一部分，是需要通过训练过程来优化的。正是由于索引结构与模型联合优化的模式存在，这类一段式解决方案通常不存在两阶段目标不一致的问题。同时，显式建模的检索过程往往能实现高效的候选集剪枝，所以可以使用计算力要求更高的复杂模型结构，而不局限于向量计算的模式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/af798b0c477443829a685302719eb006.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281603861.webp" />   
     </p>
 <p>一段式的解决方案同时解决了两段式中存在的两阶段目标不一致、模型结构受限两大问题，但在长期实践过程中，也发现了这一方式存在的不足，主要也是有两点：</p>
 <p>1）索引结构与模型联合训练，从原理上实现了对召回目标的 end-to-end 一致优化，但是也给训练带来了额外的系统、时间成本。在 TDM 和 DR 中，都是通过 EM 算法来交替优化索引结构、检索模型，最终实现索引和模型的共同收敛，这一过程通常需要过多轮训练，相比两段式方案中的 \hat{f}_\theta(u,v) 模型训练及训练后的一次性索引构建而言，一般会需要更多的时间。此外，在训练引擎中实现索引结构训练算法，并同时考虑新增item在索引中的引入问题，会带来不少额外的工程成本；</p>
@@ -268,21 +268,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="32-post-training的索引构建">3.2 Post-training的索引构建</h2>
 <p>为了使模型训练不再依赖于索引，我们选择在模型训练后再构建没有任何虚拟节点的索引。一种很自然的想法是，将 TDM 树索引构建方式修改为通过层次 k-medoids 聚类的方式构建，其中叶节点依然为所有 item，但中间节点不再是虚拟节点，而是类簇的中心 item。但是，这种索引构建方式要求 item embedding 有层次化的类簇结构，实际上模型在训练时并没有加入相关约束，因此学出的 item embedding 并没有层次化类簇结构。从离线实验结果来看，这种索引构建方案的效果也比较差。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/88e1aa2c617148f2bc83a269232ab05c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281603704.webp" />   
      k-mediods层次聚类构建树索引因此，我们的目光转向了对模型和 item embedding 都没有任何约束的图检索。具体来说，我们选用检索精度较高的 HNSW 检索图[11]来根据所有候选项的 embedding 构建索引（构建算法见原始论文）。如下图所示，HNSW 检索图是一个层次化的图检索结构，第0层包含所有节点，上层节点为下层节点的随机采样，每层采样比固定（如32、64）；每层都是一个近似 Delaunay 图 [12]，图中每个节点都有节点与之相邻，且相邻节点距离相近（如欧式距离）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/afa199167e0c4877b40c7be923f509c2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281603719.webp" />   
     </p>
 <p>HNSW层次化图检索结构</p>
 <h2 id="33-检索实现">3.3 检索实现</h2>
 <p>检索过程如下，给定打分模型 \hat{f}_\theta(u,v) 、HNSW 检索图G 、用户u，从上往下逐层检索(通过 SEARCH-LAYER 函数)得到每层打分最高的候选项v ，作为下一层的检索起始点；最后，将最底层的检索结果中打分最高的 K 个候选项作为该用户u 的最终检索结果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3dbc271bc3774a2a85bb992e4453b75b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281603706.webp" />   
     </p>
 <p>每层的检索算法如下，给定打分模型 \hat{f}_\theta(u,v) 、用户 u、检索起始点ep 。使用 S 记录本层访问过的节点， C记录待拓展近邻的候选集， W动态记录本层检索结果。初始化 S、C、W 均为检索起始点ep 。</p>
 <p>核心检索过程包含多次循环。每次循环中，首先获取候选集 C 中所有节点的所有未访问过的近邻N ，并将 N 中所有节点设为已访问，然后维护 W为旧W 和 N 中打分最高的 ef 个节点，最后更新待拓展近邻的候选集 C 为W \cap N ，即 N 中打分较高的节点集。因此，每层检索共包含 T_c 次近邻查询、模型打分和集合交并差操作，这些操作在 Tensorflow 中可以高效实现。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/94b81a3d361246569839017c8aa73a47.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281603017.webp" />   
     </p>
 <h2 id="34-模型结构">3.4 模型结构</h2>
 <p>采用的打分模型结构如下图，其主要由以下四部分构成：</p>
@@ -293,12 +293,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>MLP 打分：</strong> 将上述三路深度特征合并后，经由多轮 MLP 得到最终打分。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b13c39bf815d4fc7a70fc532670891bd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281603182.webp" />   
      二向箔模型结构# **▐ **4. 二向箔工程链路</p>
 <h1 id="41-整体链路">4.1 整体链路</h1>
 <p>从链路设计上， 我们将索引与模型两个部分放入模型推理模块中，实现模型推理模块的“features in、tokens out”，减少了请求的传输成本，相较之前的链路，通信部分 rt 减少 12ms。从整体链路上看，“features in、tokens out”的方式简化了链路，即召回模块只负责特征生成及对返回 token 的正/倒排查询，将所有打分及检索逻辑在模型推理模块完成。该设计与排序模型的做法是一致的， 这种简化的链路设计完全兼容向量 ANN 检索。与此同时，索引与模型在同一模块进行部署避免了跨模块同步更新时出现系统卡顿或者版本一致性问题的可能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5b79a3056fd0478fbd8f2fe319b1c5bb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281603052.webp" />   
     </p>
 <h2 id="42-在线检索与打分流程">4.2 在线检索与打分流程</h2>
 <h3 id="421-图表示">4.2.1 图表示</h3>
@@ -309,12 +309,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>其表示的图关系如下:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9a2e6c36eab84ad6b66cbb755f40e5eb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281603356.webp" />   
     </p>
 <h3 id="422-检索">4.2.2 检索</h3>
 <p>如下图所示，在实际运行时，在 CPU 端进行检索以得到扩展且未曾打分的邻居集合 ，然后在 CPU 端 gather 出对应的 embedding，通过 PCIe 将 embedding 由 host 传至 device（GPU），在 GPU 上完成打分，并同样通过 PCIe 将打分结果从 GPU 传至 CPU，然后进行 TopK 运算，进而进入下一轮检索。具体实现中，将检索过程归纳为了多个算子，如：set difference、set union等。针对原生 Tensorflow 没有或者性能较差的 Op 进行了定制化，整个检索过程均由 Tensorflow Op 构成。此外，set 相关 Op 也经历了多轮迭代，最终采用了 bitmap 来实现了 set difference/set union 相关逻辑，详细的压测数据将会在后文给出。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bfb5fea093f24beeaf45de2ba20824c0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281603000.webp" />   
     </p>
 <h3 id="423-打分">4.2.3 打分</h3>
 <p>采用了 DNN 模型进行打分，该 DNN 模型由 user 侧的 transfomer、target attention、多层 fc 构成。模型结构见 3.4 节。在打分过程中，target 没有实时特征，也没有 feature generation 的过程，而是在离线计算所有 target 侧 embedding，并在 host 上以 tensor 的形式缓存。而 user 侧则接入了实时序列特征来保证兴趣捕捉的实时性。</p>
@@ -331,21 +331,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>内积形式对召回模型能力的限制</strong></li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2e6fe37d175547438929c98e21562846.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281603876.webp" />   
     </p>
 <p>为了高效进行大规模内积近邻检索，现有两段式解决方案的模型结构被限制为用户向量与 item 向量之间直接内积计算的向量结构，而这一要求大幅限制了模型表达能力。而在二向箔算法体系下，模型结构没有任何限制，可以和后链路的点击率、转化率预估等任务用相似的模型。上述结果对比了 DNN 结构和向量结构的离线 recall。其中 DNN 结构为本文采用的模型结构（见第 3.4 节）；多兴趣向量结构与DNN结构拥有相同的特征输入，同时采用 transformer 来提取用户的多峰兴趣向量（参考 comiRec[4]），然后多个兴趣向量分别召回 top-1500 再统一排序产出最终 top-1500。由上表可知，去掉向量结构限制后，召回模型的检索精度天花板获得大幅提升，全量打分情况下离线 recall 绝对值提升 5.71%，DNN 结构下二向箔检索的离线 recall 也比向量结构下的全量打分 recall 高 3.03%。</p>
 <ul>
 <li><strong>不同打分量的离线recall</strong></li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5bb03f6e9bd6405d85c521c77b4b1ca5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281603503.webp" />   
     </p>
 <p>在二向箔算法体系下，仅需 1.9% 打分量就可以达到 95% 的检索精度（51.55% / 54.23%）。说明虽然构建索引时只基于 item 侧 embedding，没有引入 user 侧和 ad 侧的交互或者打分信息，但是也足以胜任检索过程中大幅减少打分量的需求。</p>
 <ul>
 <li><strong>目标item侧的side information特征的重要性</strong></li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c1db985fbfb3437f8fb9149563d6ae2b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281603082.webp" />   
     </p>
 <p>虽然 TDM 和 DR 等一段式解决方案的模型结构不再局限于内积形式，但由于索引和模型强耦合，且索引中存在虚拟中间节点，导致不易使用目标 item 侧的 side information 特征 。而在二向箔体系下，由于图索引对模型结构没有任何限制，因此可以很自然的加入 item 侧的 side information 特征。由上表可知，去掉 item 侧的 side information 特征后，全量打分 recall 和 DVF 检索 recall 都大幅下跌（绝对值约 9%），这一定程度体现出了二向箔算法体系相对于 TDM 和 DR 等一段式解决方案的优越性。</p>
 <h2 id="52-在线性能优化">5.2 在线性能优化</h2>
@@ -357,7 +357,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>+Bitmap OP：</strong> 在 Set Op 基础上，对检索 Op 再升级，进一步升级了性能。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/82d1054d86cb4a24b10cc2108f4abece.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281603632.webp" />   
      注：以上数据压测环境及设置为：T4 单卡、半精度推理、开启 XLA 优化、单次召回打分总量约 1.7 万</p>
 <h3 id="521-索引">5.2.1 索引</h3>
 <p>索引优化主要分为两个阶段：</p>
@@ -524,6 +524,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -557,10 +561,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -939,6 +939,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

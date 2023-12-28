@@ -223,7 +223,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="architecture-selection">Architecture Selection</h3>
 <p>对于深度强化学习的模型，主要有下面两种结构：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/75e134c7891c43a79ab3e670c3625455.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003171.png" />   
     </p>
 <p>左边的两个是经典的DQN结构，(a)这种结构只需要输入一个state，然后输出是所有动作的Q-value，当action太多时，这种结构明显的就不适用。(b)的输入时state和一个具体的action，然后模型的输出是一个具体的Q-value，但对于这个模型结构来说，时间复杂度非常高。</p>
 <p>因此本文选择的深度强化学习结构是(c)，即Actor-Critic结构。Actor输入一个具体的state，输出一个action，然后Critic输入这个state和Actor输出的action，得到一个Q-value，Actor根据Critic的反馈来更新自身的策略。</p>
@@ -240,62 +240,62 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>状态空间</strong></p>
 <p>状态定义为用户的历史浏览行为，即在推荐之前，用户点击或购买过的最新的N个物品。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/055c75e3a5714c6dbe82025968c29a9b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003658.png" />   
     </p>
 <p><strong>动作空间</strong></p>
 <p>动作定义为要推荐给用户的商品列表。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/cba1cc83e8a74efe8a3a5574e1c3ffc4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003690.png" />   
     </p>
 <p><strong>奖励</strong></p>
 <p>agent根据当前的state，采取相应的action即推荐K个物品列表给用户之后，根据用户对推荐列表的反馈(忽略、点击或购买)来得到当前state-action的即时奖励reward。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/05e53fe8a6ff4365bd099a3a1b4ca759.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003146.webp" />   
     </p>
 <p><strong>转移概率</strong></p>
 <p>在本文中，状态的转移定义如下定义，当前的state是用户最近浏览的N个物品，action是新推荐给用户的K个商品，如果用户忽略了全部的这些商品，那么下一个时刻的state和当前的state是一样的，如果用户点击了其中的两个物品，那么下一个时刻的state是在当前state的基础上，从前面剔除两个商品同时将点击的这两个物品放在最后得到的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/60c64c93359b4f62a452265a87106bb0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003768.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/29fc6d044f2e4f569716b2792ba04f4b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003759.png" />   
     </p>
 <p><strong>折扣因子</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/8c6ebb16f1b04fd5afd4a2fda0804ef4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003723.png" />   
     </p>
 <p>这里还需要强调的一点是，本文中将物品当作一个单词，通过embedding的方式表示每一个物品，因此每一个state和action都是通过word embedding来表示的。</p>
 <h2 id="22-线上user-agent交互仿真环境构建">2.2 线上User-Agent交互仿真环境构建</h2>
 <p>仿真器主要基于历史数据，因此我们首先需要对历史真实数据的((state,action)-reward)对进行一个存储，这将作为仿真器的历史记忆：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/f43b93dc874e4920aa1ed57b141e9a46.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003205.png" />   
     </p>
 <p>有了历史记忆之后，仿真器就可以输出没有见过的(state，action)对的奖励，该(state，action)定义为pt。首先需要计算pt和历史中状态-动作对的相似性，基于如下的公式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/7363d6c59e674d19964818f10d0c252c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003668.png" />   
     </p>
 <p>上式中mi代表了历史记忆中的一条状态-动作对。因此pt获得mi对应的奖励ri的可能性定义如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/59b91af1f5ac4246ab534c12e98ec3d5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003708.png" />   
     </p>
 <p>但是，这种做法计算复杂度太高了，需要计算pt和历史记忆中每条记录的相似性，为了处理这个问题，本文的做法是按照奖励序列对历史记忆进行分组，来建模pt获得某个奖励序列的可能性。</p>
 <p>奖励序列这里先解释一下，假设我们按一定的顺序推荐了两个商品，用户对每个商品的反馈可能有忽略／点击／下单，对应的奖励分别是0/1/5，那么我们推荐给用户这两个物品的反馈一共有九种可能的情况(0,0),(0,1),(0,5),(1,0),(1,1),(1,5),(5,0),(5,1),(5,5)。这九种情况就是我们刚才所说的奖励序列，定义为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/4374bd546bbd4a2185947e0ce9800d0b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003669.png" />   
     </p>
 <p>因此，将历史记忆按照奖励序列进行分组，pt所能获得某个奖励序列的概率是：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/365123eab01d4ccca156557ad5390acb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003400.png" />   
     </p>
 <p>基于上面的公式，我们只是得到了pt所能获得的奖励序列的概率，就可以进行采样得到具体的奖励序列。得到奖励序列还没完事，实际中我们的奖励都是一个具体的值，而不是一个vector，那么按照如下的公式将奖励序列转化为一个具体的奖励值：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/730ae271d8dc4febbba572d78fae94f9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272003591.png" />   
     </p>
 <p>K是推荐列表的长度，可以看到，我们这里任务排在前面的商品，奖励的权重越高。</p>
 <h2 id="23-模型结构">2.3 模型结构</h2>
 <p>使用强化学习里的AC模型结合刚才提到的仿真器，模型框架如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/37abf8810060439e802483573802744e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272004653.png" />   
     </p>
 <p><strong>Actor部分</strong></p>
 <p>对Actor部分来说，输入是一个具体的state，输出一个K维的向量w，K对应推荐列表的长度：</p>
@@ -429,6 +429,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -462,10 +466,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -844,6 +844,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

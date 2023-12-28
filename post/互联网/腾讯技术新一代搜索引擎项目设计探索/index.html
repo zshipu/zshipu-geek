@@ -217,7 +217,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>由于 ES 的盛行，以及网页搜索(搜索领域的大 boss)体验的存在，大多数人对检索引擎的认识可能都是基于磁盘检索引擎来理解的，即系统的倒排，正排数据都位于磁盘中，只有在执行检索时，才会将相关的数据 load 到内存中。</p>
 <p>其整体的流程大概如图所示:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-d4f8b75e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281743846.png" />   
     </p>
 <p>磁盘搜索引擎在设计的过程中面临的主要问题为：</p>
 <ul>
@@ -233,7 +233,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>现在回到内存搜索引擎的讨论上来。很明显，内存检索引擎在去除磁盘 IO 后，其要解决的核心问题是计算量的分配问题，即如何合理的分配计算量，能尽可能的让优质结果展现给用户。</p>
 <p>下面是我们给内存检索引擎制定的核心流程：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-bba7db28cdff4bb4971d835772e89fbf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281743110.png" />   
     </p>
 <p>可以看到我们对于计算量的分配，抽象出了求交，L1 打分，L2 打分等 3 个逻辑阶段。</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">求交
@@ -269,7 +269,7 @@ L1得分Top的文档才能进入L2打分
 <h4 id="线程模型设计">线程模型设计</h4>
 <p>下图是我们的检索组件目前使用的线程模型：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-80700463.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281743999.png" />   
     </p>
 <p>每个检索请求到达时，会生成一系列的求交与打分任务，在召回完成之后，会生成一个资源清理任务进行提交，请求完成。</p>
 <p>下面对图中的主要元素做下简单的介绍</p>
@@ -299,7 +299,7 @@ L1得分Top的文档才能进入L2打分
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">清理Task &gt; L1Task &gt; L2Task &gt; 求交Task
 </code></pre><p>在 Push 任务时，优先级越高的直接插入到队首，但是同类 Task 之间依然保持先进先出的关系。最终是一个这样的队列：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-046f29cf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281743210.png" />   
     </p>
 <p>为什么要这样做呢？</p>
 <p>可以有效解决由于求交任务的高消耗和集中入队导致其它任务饿死的问题。通俗一点理解，那就是只有当所有的打分任务都完成了才会去执行求交任务。</p>
@@ -323,7 +323,7 @@ L1得分Top的文档才能进入L2打分
 <p>线程模型更专注于计算量(任务)的执行，而任务模型更专注于计算量(任务)的分配。对于执行者来说，它是任务无关的，而对于分配者来说，它本身就是任务的创建者，与任务是强相关的。在介绍线程模型时，其实我们已经大概清楚了，引擎中有以下 4 类任务，分别为清理任务，求交任务，L1 打分任务，L2 打分任务。其中清理任务较为独立，就不多花笔墨介绍了。</p>
 <p>下面直接看我们的求交打分任务模型：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-e21670b7ab014465bbb5f82b3f8598c9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281743168.png" />   
      任务模型的核心要素为以下 3 点：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">1 求交依然维持单库单线程求交(小库例外，多个小库合并一个求交任务)
 
@@ -399,7 +399,7 @@ sum(各个库的求交耗时+l1打分耗时) / 引擎工作线程数 = avg(各�
 <h4 id="语法树求交设计">语法树求交设计</h4>
 <p>对于求交而言，基本的理解其实就是取出几条倒排链，然后计算出倒排链中公共的文档。不过实际情况比这个要复杂很多。对于求交设计而言，第一步要考虑的是查询语法树的设计，我们从同义词开始，在新引擎的设计里，我们采用的 3 层结构语法树。假设 <strong>[苹果手机]</strong> 存在同义词 <strong>[iphone]</strong>,那么对于 query <strong>[苹果手机回收]</strong> 的最终的检索语法树为下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-06baf82230f14f2ab73b2a4e5ffaceb4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281743098.png" />   
      这里以宽度优先的方式给每个节点进行了编号。可以看到这是一颗 and-or-and 的语法树，可以支持多对多的同义词表达形式,例如这里的节点 2 下面的两个同义词词组，就是一个 2 对 1 的同义词组。</p>
 <p>现在我们要需要考虑一下这样的一颗语法树如何做召回。一种很直观的做法是这样的：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">1 节点6与节点7的倒排链进行求交，得到的pageid作为节点4的pageid
@@ -438,7 +438,7 @@ sum(各个库的求交耗时+l1打分耗时) / 引擎工作线程数 = avg(各�
 <h5 id="笛卡尔积语法树">笛卡尔积语法树</h5>
 <p>通过将 3 层语法树结构里的同义词节点做笛卡尔积，可得到与其等效的 2 层结构语法树，还是以 query <strong>[苹果手机回收]</strong> 为例，其中 <strong>[苹果手机]和[iphone]</strong> 互为同义词,将其转换为笛卡尔积语法树后，其结构如下图所示</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-af2cf86cde824be993b69383353076b1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281743230.png" />   
     </p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">其原理为
 (A &amp;&amp; B) || (C &amp;&amp; D)
@@ -466,7 +466,7 @@ End(苹果 || 手机)  &amp;&amp;  End(iphone) = End(苹果 || iphone) || End(�
 因此结束条件的位置其实是一致的。
 </code></pre><p>为了简化性能评估，我们假定每次语法节点的操作损耗相同，则性能评估的大致公式为:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-168d3b64.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281743350.png" />   
     </p>
 <p>从公式上来看，决定性能的因素主要有以下 4 点：</p>
 <ul>
@@ -494,7 +494,7 @@ WeakAnd求交方式是我们目前处于计划中，但还未实现的一个功�
 <p>正如上面提过的一样，求交损耗的本质为各条倒排链的跳跃查找次数，跳跃查找次数越少的，性能也就越好。语法树求交设计解决的问题是尽可能减少跳跃查找次数，而查找算法设计解决的问题是尽可能减少每次跳跃查找的消耗。</p>
 <p>由于新引擎的倒排索引结构细节较多，为了方便阐述这块的内容，这里看一下我们组内上一代内存检索引擎的倒排索引结构,由于其相对简单，适合拿来介绍查找算法。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-ed5b4f6e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281743630.png" />   
     </p>
 <p>倒排结构整体是先分块(Block,BLK),每个块内再保存具体的 page 信息，page 信息主要分为两部分，一部分自然是 pageid 列表，另一块是 page info 结构，保存的各个文档的 term 级别的信息，这里就不对其进行介绍了，直接忽略它即可。</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">关于分块设计的背景
@@ -512,7 +512,7 @@ WeakAnd求交方式是我们目前处于计划中，但还未实现的一个功�
 <p><strong>3 长链与短链</strong> 长链与短链对于求交的影响如何，是否应该区别处理，长链与短链该如何去定义。通过对求交过程进行分析和思考，得出了这 3 个点。下面我们以一个特殊的实例来看一下求交过程。</p>
 <p>假设存在这样的一条短链 L1 和一条长链 L2，它们的 pageid 范围相近，且前后 pageid 的间距都是固定的(数据分布均匀)，其中短链的前后 pageid 固定为 d1，长链的前后 pageid 固定为 d2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-44e39d8afadf4e3abe1830ef9bedc881.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281743280.png" />   
      现在分析一下存在的求交组合情况，主要从查找消耗和求交基准两点进行分析。</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">1 短链与短链求交
 查找消耗:由于本身链路短，因此二分查找时，总的查找范围较小，查找消耗较低。
@@ -572,7 +572,7 @@ WeakAnd求交方式是我们目前处于计划中，但还未实现的一个功�
 <p>从步长增长查找的复杂度公式里的最小值和最大值可以知道，越在前面找到下一个求交基准的位置，那么步长增长查找带来的提升就越大，再往后，其性能就开始落后于二分查找了。现在可以开始考虑短链与长链了。假设存在阈值 K，Block 数目大于 K 的就是长链，小于 K 的就是短链，我们希望的最理想的效果是使用步长增长查找时的平均复杂度小于等于使用二分查找的平均时间复杂度。</p>
 <p>由于二分查找的时间复杂度固定为 logn，因此其平均复杂度也就是 logn 了。而步长增长查找的平均时间复杂度的计算要麻烦许多，假定求交基准落在每一个 Block 的概率是相等的话，那么其平均时间复杂度为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-346e38b99f134a3cbf5ac3b2dfa99f91.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281743547.png" />   
     </p>
 <p>乍一看好像挺复杂的，完全误会了，本人数学底子非常渣。这里其实就是对于每一个 X，都乘了一下[当前 X 所覆盖的 Block 数量 / 总 Block 数量]的比例值，得到的平均时间复杂度的公式。</p>
 <p>总之，由于本人的数学底子非常渣的原因，我这里就直接给出我们这边计划尝试的 K 值了，K=15。怎么得出来的呢？通过计算 k=3，7，15，31，63 等等情况下的两者的平均时间复杂度，发现 k 值越大，步长增长查找的平均时间复杂度就越高(但其实算法实现的时候会发现，当我们限定了只查找多少个 Block 时，步长增长查找方式的逻辑会轻很多，尽管查找次数上并不占优)。最后因为如下 2 点原因选择了 15:</p>
@@ -606,7 +606,7 @@ x = (1 + logN) / 2
 <p><strong>4</strong> 相关性接口同样封装成类，业务通过反射的形式来实现注入</p>
 <p>整体如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-f2acccee.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281743381.png" />   
     </p>
 <p>在进行组件化设计之后，检索的细节都被封装在库里。这里对 SearcherStage 设计和相关性接口设计再简单介绍一下。</p>
 <p>Searcher 是在线检索组件的名称，Stage 是我以我拙劣的英文水平选的一个词，意为阶段。在大环节上面，检索流程分为预处理，核心处理，回包 3 个环节，我们在每个大环节的开始和结束阶段都暴露了接口，并把所有接口放到了 SearcherStage 类中进行管理。对于任何想使用 Searcher 来作为部门内通用搜索引擎的用户来说，它必须通过继承并实现 SearcherStage 类的相关接口来实现自己的通用搜索引擎，一般来说，至少需要通过 SearcherStage 类完成以下 2 件事情。</p>
@@ -751,6 +751,10 @@ x = (1 + logN) / 2
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -784,10 +788,6 @@ x = (1 + logN) / 2
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1166,6 +1166,8 @@ x = (1 + logN) / 2
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

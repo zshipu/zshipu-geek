@@ -208,7 +208,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="系统背景"><strong>系统背景</strong></h2>
 <p>Teddy出入库系统，是进销存概念里的进和销，核心能力是仓库货物的出库和入库的流转，在严选供应链体系中承上启下，对接了数十个上下游系统，如下图所示，是订单履约、采购补货、仓间调拨、特殊出入库等业务场景的核心流程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a391b87219174baf82a25358328ef25d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281644917.webp" />   
     </p>
 <p>Teddy出入库系统作为一个元老级的应用，16年就已经存在，当时还叫做进销存，17年底做过一次拆分，自拆分上线以来，也已经经过了接近三年时间，这期间需求不断，迭代节奏飞快，原来的包袱不仅没卸下，反而越来越重，当下已经积重难返；此外，在这期间也经历了相当多的产品和开发，由于缺乏长期维护的文档和规范，业务逻辑演进的愈发复杂，代码风格也不加节制的多种多样。</p>
 <p>总结下当前面临的一些问题，主要是以下几点：</p>
@@ -218,7 +218,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="架构混乱功能分散"><strong>架构混乱，功能分散</strong></h4>
 <p>22万行的代码，层级就是没有层级，如下图所示，各种相互的依赖关系，功能逻辑散落在各种类里面。如果认真去看，可以找到每一种代码里的坏味道，比如循环查询、分散的功能点、过长的方法、分不清层次的service、模糊的模块边界等等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e0959cdb9a9b41268fe7c329b110fc2a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281644233.webp" />   
     </p>
 <p>多种单据、多个仓库服务商，多个功能按仓配置等都在这里面</p>
 <h4 id="需求交付效率不可控"><strong>需求交付效率不可控</strong></h4>
@@ -236,7 +236,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>第二种，领域驱动设计，以领域模型为核心，解耦业务逻辑与数据库表结构的强耦合关系</p>
 <p>领域驱动设计与之前的系统设计开发过程有很大的不同，第一点，就在于系统的参与角色，产品、开发、测试等，需要形成一套通用语言；第二点，在于方案设计不再把db设计放在一个核心问题去解决，更加专注于业务模型本身，进行领域、业务聚合的设计，领域层的聚合及实体才是整个系统的核心内容；第三点，真正的面向对象编程，由过程式的事务脚本方式，转变为真正的面向对象。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d4598108d3704efe987260871247c6fa.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281645547.webp" />   
     </p>
 <p>如上图所示，第一种方案的优点很明确，把架构划分清楚，采用一些优秀的设计模式，重新写一遍代码，确实能得到不少收益，但是缺点也是很明显的，面向过程的编程方式，功能逻辑易分散，长期迭代很容易又走回到原来的状态；相比较而言，第二种方案虽然前期学习成本、开发成本都比较高，但优势也很明确，业务导向，领域模型优先，边界规范易维持，核心业务逻辑内聚在领域内，低耦合，高内聚，易于长期维护。</p>
 <p>基于我们的整体诉求，以及之前长期迭代下来面临到的一些问题，核心业务逻辑的高度内聚，逻辑功能避免分散是我们比较关注的目标，所以我们决定选择领域驱动设计。</p>
@@ -245,11 +245,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>第一步建模：简单说，就是基于业务场景，与产品、开发、测试等协作，充分沟通，达成共识，形成通用语言，构建领域模型。这里我们采取了用例法，将主要的业务逻辑作为用例输入，聚焦事件 -&gt; 命令-&gt;提取实体，最终划定出限界上下文。建模的过程不再详述，本文着重点在于一套领域驱动设计的落地代码模板，如对建模过程感兴趣可以留言联系交流。</p>
 <p>第二步实施：通过领域模型指导架构设计和编码实现，并落地实施。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/09ca714069c54805a97622cd6faed1eb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281645603.webp" />   
     </p>
 <p>我们先看系统架构，整体上基于严选这边的中台应用架构（如上图）进行设计，系统架构如下图所示，基本上是一个洋葱架构的底子，加上CQRS，并基于具体实践演化出的一个结构，与洋葱架构的一个显著区别在于：应用层依赖了基础设施层，而不是基础设施层依赖应用层，这样可以带来编码上的很多便利；另一个小的区别是，在此之外增加了一个共享依赖包，放置一些工具类、枚举值、异常类、领域层的入参DTO等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a3cc231c3a6a4358a0ce49e83916b980.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281645831.webp" />   
     </p>
 <p><strong>领域层</strong>：处于系统最底层，包含业务聚合、实体、领域能力等；领域层需要的持久化，以及其他能力需要在领域层定义gateWay接口，在基础设施层或者应用层进行实现。</p>
 <p><strong>基础设施层</strong>：依赖领域层，承接数据持久化等基础服务，实现了领域层定义的持久化gateWay接口，进行DO - PO数据转换，封装持久化细节等。</p>
@@ -258,13 +258,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>共享包</strong>：工具类、异常类、服务中的DTO对象等，共享包的存在主要是为了解决领域层和应用层共享数据结构的问题。</p>
 <p>以一次命令执行为例，各组件在执行流程中的作用如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2869a0ca2eef42d382483ac042b44763.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281645918.webp" />   
     </p>
 <h4 id="实践中遇到的问题"><strong>实践中遇到的问题：</strong></h4>
 <h6 id="1-背着包袱的重构场景聚合与实体要怎么设计"><strong>1. 背着包袱的重构场景，聚合与实体要怎么设计？</strong></h6>
 <p>这里面的问题是，面对已经存在的复杂业务模型，自顶向下设计（如下图所示）非常困难，而且与原有的数据结构模型会有很大的出入，这会带来大量的数据转换工作。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/26e887429e9e427d9941395a14e51d63.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281645796.webp" />   
     </p>
 <p>考虑到这种场景的特殊性，盲目的自顶向下设计可能无法落地实施，那么有没有可能不去忽视这种现状，而是在自顶向下划分了服务边界、聚合边界之后，结合原有的数据结构去设计聚合内的实体，以及实体间的关系？这会带来相当程度的便利：</p>
 <p>（1）实体与db持久化数据间的转换相对简单一些</p>
@@ -275,23 +275,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h6 id="2-号称很薄的逻辑编排真的能薄下来吗"><strong>2. 号称很薄的逻辑编排，真的能薄下来吗？</strong></h6>
 <p>逻辑编排的问题在于，应用层提供给外围的接口能力，大多数情况下并不仅仅是直接更新领域聚合这么简单，它还需要做很多其他的事情，比如调用下第三方服务、发个消息等。在步骤比较少的情况下，应用层平铺直下（如下图）也无可厚非，但当应用层需要编排更多的步骤时，这样的代码就会越来越复杂臃肿了。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b94880a02a964fd2880bcedc82aa3cea.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281645727.webp" />   
     </p>
 <p>逻辑编排基本上还是事务脚本式的过程式编码，这意味着很容易走回到原本的状态，逻辑会越来越分散，代码会越来越臃肿，为此，我们引入了责任链的设计模式，来对这些逻辑编排进行结构上的优化。</p>
 <p>如下图所示，聚合更新、第三方调用、消息发送等，这些都能封装成一个一个的节点，在cmd命令内，将它们串联起来。逻辑结构清晰稳固，而且，还可以做到节点粒度的复用。这里面需要特别提到的一个点是，针对某个命令，领域层的聚合模型更新只会有一个入口，而聚合模型组装、持久化等又是单独的调用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/154a2f8d7f134376acfdfc45f043ecc7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281645581.webp" />   
     </p>
 <h6 id="3-离开权力中心的数据库持久化该怎么实现"><strong>3. 离开权力中心的数据库持久化，该怎么实现？</strong></h6>
 <p>如前所述，在领域聚合设计中，我们将持久化方法与聚合能力区分开来，让每一个实体不需要独自考虑持久化的问题，这就带来第一个问题，在业务逻辑处理完，怎么才能知道哪一个实体需要持久化？</p>
 <p>有很多种方式可以考虑，此处我们选择了一个比较简单的解决方案，为每一个实体添加状态标签（mode：read、update、insert）。如下图所示，在进行相应的操作后，我们会更新该实体的状态标签，在最终持久化的过程中，遍历所有实体，根据标签进行相应的处理。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7674a86e50154f98aaf0fbf970f6e586.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281645416.webp" />   
     </p>
 <p>这个时候，会带来持久化的第二个问题，即持久化过程中需要大量的if else代码去判断实体是处于什么状态。</p>
 <p>为此，我们引入了一个模板方法，如下图所示，poWrapper内部包含一个po实例，和一个状态标签（等同于实体的状态标签），poWrapper同时定义了一套执行模板，执行模板里包含 insert以及update接口，对于每一个实体来说，要做的事情就很明确了，首先进行do -&gt; poWrpper的转换（包含状态标签），然后poWrapper根据wrapper的状态标签，以及具体的insert/update的实现方法，进行po的更新或插入，这个持久化模板的最大好处是：代码非常简洁，同时隐藏了dao的实现细节。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fb5ac2fb72b64b16a303f168ad9cd663.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281645241.webp" />   
     </p>
 <h6 id="4-cqrs中的q怎样才能简化下实现"><strong>4. CQRS中的Q，怎样才能简化下实现？</strong></h6>
 <p>查询应用相对命令应用来说简单一些，但是也正是查询应用，让我们决定打破洋葱架构的依赖关系。洋葱架构依赖关系图如下，假如遵从这种依赖层级，就意味着应用</p>
@@ -420,6 +420,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -453,10 +457,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -835,6 +835,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

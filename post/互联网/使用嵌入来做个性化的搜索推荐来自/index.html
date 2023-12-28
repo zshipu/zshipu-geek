@@ -198,7 +198,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p><strong>导读</strong>： 这是Airbnb的一篇经典文章的解读，使用房屋的嵌入来做搜索推荐，这篇文章也是KDD2018的best paper，思路很清楚：把房屋用嵌入向量来表示，两个技巧：全局正样本和市场内负采样，很有效，离线评估指标：预定前的平均点击数量，非常的贴近业务。确实值的重温一遍。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-f4b7cf4fa786456fbbf8a83cf405a4a7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280915158.png" />   
     </p>
 <p>Airbnb的市场中包含了数以百万计的房屋，潜在客户通过复杂的机器学习模型搜索生成的结果来探索这些房屋，这些机器学习模型使用超过几百信号来决定在一个特定的搜索页面上，房屋是如何进行排序的。一旦客户查看了某个房子，他们要么返回，要么可以浏览类似的房子继续进行搜索，推荐的房子都是和用户查看的房子类似的。总的来说，搜索排名和相似房屋的推荐驱动了我们99%的预订转化。</p>
 <p>在这篇博文中，我们描述了我们在Airbnb开发和部署的一种房屋嵌入技术，目的是改进搜索排名中的相似房屋推荐和实时个性化。嵌入是Airbnb房屋从搜索会话中学习到的向量表示，它允许我们衡量房屋之间的相似性。它们有效地编码了许多房屋的特征，例如位置、价格、房屋类型、结构和风格，所有这些都只使用了32个浮点数。我们相信，个性化和推荐的嵌入方法对于任何类型的在线市场中都是非常强大和有用的。</p>
@@ -210,7 +210,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>房屋嵌入的维数被设置为 <em>d = 32</em>，因为我们发现这是离线性能(在下一节中讨论)和将向量存储在搜索机器的RAM内存中以进行实时相似度计算所需的内存之间的一个很好的平衡。</p>
 <p>有几种不同的训练嵌入的方法。我们将重点介绍一种称为负采样的技术。它首先将嵌入初始化为随机向量，然后通过滑动窗口的方式阅读搜索会话，通过随机梯度下降来更新它们。在每一步中，它滑动窗口的 <strong>中心房屋</strong> 向量，让它更靠近正上下文向量，这些正上下文向量是在同一个滑动窗口（比如长度为5）中，中心向量之前和之后的向量，推动它远离负上下文向量，也就是随机选择的房屋，大概率和滑动窗口的中心房屋是没什么关系的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-82c60eef63cd4ec093e7f13b80eb9620.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280915811.png" />   
     </p>
 <p>为了简单起见，我们将跳过训练过程的细节，重点解释我们为使这种方法适应我们自己的用例所做的一些修改：</p>
 <ul>
@@ -219,7 +219,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>综上所述，最终优化目标可表示为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-fcd2280fce6b41f49dd0c98032c3d271.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280915925.png" />   
     </p>
 <p>预订全局上下文+市场负采样优化公式</p>
 <p>其中：</p>
@@ -234,7 +234,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>嵌入冷启动</strong>，每天都有新的房源由房东创建并在Airbnb上发布。些房屋没有嵌入，因为它们没有出现在我们的训练数据中。为了创建新房屋的嵌入，我们找到了3个地理位置最接近的房屋，它们具有嵌入，并且与新房屋具有相同的房屋类型和价格范围，并计算它们的平均向量。</p>
 <h1 id="嵌入到底学到了什么">嵌入到底学到了什么？</h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ec7a86b441304b15a254ab67f8634f53.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280915747.png" />   
     </p>
 <p>为了评估嵌入所捕获的房屋的特征，我们以几种方式对它们进行了研究。首先，为了评估地理相似性是否被编码，我们在已学习的嵌入上执行k-means聚类。左边的图显示了在加利福尼亚产生的100个聚类，证实了来自类似位置的列表是聚集在一起的。接下来，我们评估了不同类型的房源(全屋、私人房、共享房)和价格区间之间的平均余弦相似性，并证实了同类型房源和价格区间之间的余弦相似性要比不同类型房源和价格区间之间的余弦相似性高得多。因此，我们可以得出结论，这两个房屋的特征在已学习的嵌入中也得到了很好的编码。</p>
 <p>虽然有些房屋特征(如价格)不需要学习，因为它们可以从房屋元数据中提取，但是其他类型的房屋特征(如结构、风格和感觉)则很难以房屋特征的形式提取。为了评估这些特征，并能够在嵌入空间中进行快速而简单的探索，我们开发了一个内部相似性探索工具，如下面的视频所示：https://youtu.be/1kJSAG91TrI</p>
@@ -245,13 +245,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>更具体地说，我们假设我们得到了最近点击过的房屋和需要排序的候选房屋，其中包含用户最终预订的房屋。通过计算被点击房屋和候选房屋的嵌入之间的余弦相似性，我们可以对候选房屋进行排序，并观察已预订房屋的排序位置。</p>
 <p>在下图中，我们显示这样一个评估的结果，搜索结果基于在嵌入空间的相似性重新进行排序，预订了的房屋的排序结果序是按照每次预定前的点击数量的平均值来计算得到，最多追溯到预定前的17 次点击。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-872e85a6b99f4f1aae38c2a4455cd354.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280915486.png" />   
     </p>
 <p>我们比较多个嵌入版本，1) <strong>d32正则</strong>，对原来的算法没有任何的修改。2) <strong>d32预订全局上下文</strong> 使用预定作为全局上下文进行训练。3) <strong>d32预订全局上下文+市场内负采样</strong> 使用预定作为全局上下文和市场内负采样进行训练。从持续较低的预订房屋前的平均点击次数我们可以得出结论，第3个模型优于其他两个嵌入模型。</p>
 <h1 id="使用嵌入进行相似性房屋推荐">使用嵌入进行相似性房屋推荐</h1>
 <p>Airbnb的每个房屋页面都包含相似房屋推荐，会推荐与之相似的房屋，并在相同的日期提供这些房屋。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-d189727b0a3e471986e2a47cba9decde.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280916689.png" />   
     </p>
 <p>在测试embeddings时，针对相似房屋的现有算法包括调用我们的主搜索排名模型，搜索给定房屋的相同位置，然后过滤相同的价格范围和房屋类型。</p>
 <p>我们进行了一个A/B测试，将现有的相似房屋算法与基于嵌入的解决方案进行了比较，在该解决方案中，通过在房屋嵌入空间中查找k个最近邻来生成相似的房屋。更精确地说，给定学习过的房屋嵌入，通过计算来自同一市场的所有房屋之间的余弦相似性，可以找到给定房屋的相似房屋。相似度最高的k=12个房屋显示为相似房屋。</p>
@@ -268,7 +268,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>EmbClickSim</strong>：候选房屋嵌入和用户点击的房屋嵌入之间的相似性(来自 <em>Hc</em>)。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-099b5a661567402aae9320405a0c9a95.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280916053.png" />   
     </p>
 <p>具体地，我们计算了来自 <em>Hc</em> 中的市场级别的中心房屋之间的相似性，并选择最大相似性。例如，如果 <em>Hc</em> 包含来自纽约和洛杉矶的房屋，这两个市场的房屋的嵌入将被平均，形成一个市场级的中心。</p>
 <ul>
@@ -402,6 +402,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -435,10 +439,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -817,6 +817,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

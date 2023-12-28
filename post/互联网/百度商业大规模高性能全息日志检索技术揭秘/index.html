@@ -199,37 +199,37 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1d8949464da84c48b5b6498c34e8dd5b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272311595.webp" />   
     </p>
 <h2 id="一背景介绍"><strong>一、背景介绍</strong></h2>
 <p>百度商业产品是服务于百度广告主用来投放广告而打造的产品生态。包含搜索推广、信息流推广、品牌等推广渠道以及观星盘、基木鱼等营销工具。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5da4f89dff5d468982030a05cab9bd90.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272311708.webp" />   
      百度商业产品全景图</p>
 <p>这一系列商业产品底层多为复杂的 Java 业务系统。复杂性主要体现在底层微服务子系统多、应用间调用关系复杂、基础组件依赖多。复杂性高就就意味着容易出问题，并且出了问题定位困难。但是这些产品出问题会直接导致广告主是否成功投放广告或者修改出价、创意等操作失败。</p>
 <p><strong>「如果有过在广告业务系统一线工作经历的同学，应该深知排查线上问题的枯燥和耗时」</strong></p>
 <p>如何在出问题第一时间定位问题，从而快速止损和修复问题，是商业产品系统中一个关键的技术痛点。为了解决这个痛点，百度商业平台部打造了大规模分布式微服务监控系统。公众号前文**「 <strong><a href="https://zshipu.com/t?url=http%3A%2F%2Fmp.weixin.qq.com%2Fs%3F__biz%3DMzg5MjU0NTI5OQ%3D%3D%26mid%3D2247491371%26idx%3D1%26sn%3D695d770526e5d151eec512b5489c835f%26chksm%3Dc03d2f57f74aa64123dbb09b076955545251780c95f7af7dde9a6efaa9cfbc6a83d23623178e%26scene%3D21%23wechat_redirect"><strong>百度商业大规模微服务业务监控系统-凤睛</strong></a></strong>」**已经讲述了凤睛如何通过自研无侵入探针以及高性能调用链存储系统为百度各业务线提供微服务系统性能指标、业务黄金指标、健康状况、监控告警等。</p>
 <p>当收到线上报警时，值班同学需要首先找到出问题的根因模块，然后找出该模块出错的服务接口，最后定位到问题代码行栈。凤睛提供了调用链数据能够查看各个调用环节的状态码、耗时等，同时也收录了业务系统打印的错误堆栈。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/76dfce6f835744788b4bdd8eb2e4cd28.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272311804.webp" />   
      凤睛提供的调用链表格视图（红色箭头标识的是耗时长关键路径）</p>
 <p>大部分情况下，通过调用链以及系统打印的错误堆栈可以确定问题。但是，部分情况下问题与用户请求返回、业务访问缓存的情况等等比较特殊的场景有关。这需要通过系统打印的业务日志辅助定位。</p>
 <p>凤睛并没有采集和存储业务日志，这与数据量有关，它部署在数千个微服务子系统上，运行在数万个容器中。每天采集的调用链数据条数达千亿，日存储数据在TB级别。而更加庞大、抽象程度最低的业务日志，预估单日总量接近PB级别，存储开销实在太大。</p>
 <h2 id="二技术原理"><strong>二、技术原理</strong></h2>
 <p>传统做法：为了检索到单个请求相关的所有业务日志，日志会被采集走存储在 ES 里面提供检索功能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4b06d9f321b743b0a3968a20359442f6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272311677.webp" />   
      日志采集架构</p>
 <p>诚然，Kibana+ES会提供更丰富灵活的检索功能，但是对于凤睛这种平台级别监控系统，基本不可行。ES的资源成本过于昂贵，整个平台单日日志数据接近 PB。如果全部存储在 ES 中，那么集群资源消耗以及维护成本都是很高的。并且，单纯定位线上问题，并不需要特别复杂的日志检索功能。</p>
 <p>那么能否在少量资源消耗下，满足用户可以看到单个请求相关的完整调用链以及业务日志呢？</p>
 <p>凤睛整个迭代过程就是不断利用有限资源来创造性解决实际问题的过程。而真正好的系统架构亦然如此，要**「因地制宜」 <strong>。在阿里巴巴钟华同学的《企业IT架构转型之道：阿里巴巴中台战略思想与架构实战》一书中，开篇就提到过</strong>「好的创新一定是基于企业现状因地制宜」。**</p>
 <p>目前商业平台 Java 系统统一部署在企业级微服务托管平台 Jarvis上，同时凤睛探针能够无侵入式跟踪和采集系统的动作，这是我们的技术优势。能否利用这个优势，来规避掉存储资源有限的短板。探针既然能够记录系统在每个请求发生过程中的所有的动作；那么同样可以记录系统打印日志的动作。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d4418632026741ad9efde5017c2009d1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272311375.webp" />   
      全息日志技术思路示意图</p>
 <p>我们通过探针记录下请求相关的业务日志文件名、日志偏移量，并且存储数据库中。当用户在Jarvis管理端检索调用链相关的业务日志时，系统会先通过调用链 ID 去获取相关的虚拟容器地址、日志文件名、日志偏移量等元数据信息，然后通过这些元数据去具体的容器中取到完整的日志内容，最后展现给用户。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/980f96125d25497ebbb87b5706dc929a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272311292.webp" />   
      全息日志实际产品效果图</p>
 <p>这样虽然我们只消耗少量的存储和计算资源，也可以轻松检索到海量调用链相关的业务日志。这个受限于日志在容器中的实际存储时间，但是线上问题很少需要借助远久历史日志来分析定位。绝大多数情况下借助当前日志就可以满足需求了。</p>
 <p><strong>「全息日志技术是凤睛自研技术，也申请了相关专利」</strong></p>
@@ -248,7 +248,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/439e0a79370c4b0db876bf0d71de6eb7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272311149.webp" />   
      元数据项与采集原理图</p>
 <ul>
 <li>在原始打印日志操作之前插入字节码，记录开始时间、读文件标识符获取打印前文件偏移量、文件的滚动策略（包括文件最大大小、文件滚动时间等）、日志级别;</li>
@@ -262,7 +262,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8e38a47b2b704b47800b690198735990.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272311030.webp" />   
      检索算法流程图</p>
 <ul>
 <li>根据调用链traceId查询出与该traceId相同的所以日志元数据记录；</li>
@@ -403,6 +403,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -436,10 +440,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -818,6 +818,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

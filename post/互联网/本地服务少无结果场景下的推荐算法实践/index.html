@@ -203,31 +203,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cb98eefe195a456a96481e304806c2e9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272039066.webp" />   
     </p>
 <h1 id="01-背-景">01 背 景</h1>
 <p>58同城APP是一个生活服务信息平台，用户可以在平台上寻找自己所需要的服务，商家可以在平台上展示自己可提供的服务。58本地服务主要为用户提供生活中的基础服务信息，58本地服务推荐场景主要包括大类页推荐、猜你喜欢和猜你想找等，本文主要介绍猜你想找的技术迭代。58本地服务大部分的流量来自于搜索入口，但是在搜索落地页会有空白需要补充情况，如图1所示，为了提高这部分流量的转化，我们在用户搜索少无结果的情况下增加了猜你想找模块，旨在解决用户搜索少无结果的推荐问题，提升用户体验，降低少无结果率，并且达到提升58本地服务用户转化的目的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fd7a343ea26a497f8ef4a76b537326e3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272039147.webp" />   
     </p>
 <p>图1 猜你想找示意图</p>
 <h1 id="02-整体框架">02 整体框架</h1>
 <p>猜你想找推荐位针对少无结果的问题进行推荐，因此我们首先要降低少无结果率，然后达到提升用户转化的目的。猜你想找的整体框架如图2所示，主要包括数据层、召回层、排序层和渲染层。数据层是对用户日志及业务数据进行分析统计，为后续模块提供基础数据，召回层主要召回与用户查询相关的帖子，包括基于用户搜索的标签的召回、向量召回、基于用户意图的召回以及补充召回，采用这种多路召回模式来提高召回率和召回帖子的多样性；排序层负责将召回层的结果进行排列，这里采用模型排序加业务规则干预的方式，把用户最有可能点击并拨打电话的帖子排到前面，最后渲染层对帖子信息进行渲染展示给用户。本文主要介绍召回层和排序层。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e1cbcaad427d4f1a8c2cd98aabd3520d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272039308.webp" />   
     </p>
 <p>图2 整体框图</p>
 <h1 id="03-召回层">03 <strong>召回层</strong></h1>
 <p>召回层作为首个漏斗从海量帖子中滤出用户可能感兴趣的帖子交给后续排序技术处理，它直接决定着后续推荐结果的效果上限。在猜你想找场景中需要扩大召回，尽可能多的召回相关帖子，为后续的排序提供充足的候选集。因此采用多路召回模式，如图3所示，用户意图召回主要是为了提高召回集的类目多样性，向量召回和标签召回主要是召回与用户搜索语义相关的帖子，另外防止其他召回策略均没有结果，我们还添加了热门帖的召回作为补充策略。下面分别介绍每一路召回策略。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/453247c7ef5d4d8096314356f9d40a03.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272039552.webp" />   
     </p>
 <p>图3 多路召回</p>
 <h3 id="一基于用户意图召回"><strong>一、基于用户意图召回</strong></h3>
 <p>基于用户意图的召回，旨在提高类目多样性。首先根据用户查询文本进行意图类目的预测，然后根据预测的多个类目进行帖子召回。</p>
 <p>在进行意图类目预测时，由于58本地服务类目体系复杂，二级类目有200多个，如果直接进行二级类目预测准确率不高，模型效果差。而一级类目仅有十几个，并且每个一级类目下属的二级类目也在二十个左右，因此我们考虑结合一级类目体系，采用分级预测的方式，先进行一级类目的预测，然后在该一级类目下再进行二级类目的预测。类目预测的流程如图4所示，包括样本数据准备和模型训练两部分。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dce6beb7f8dd4c34bc7d0f9fdce05463.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272039449.webp" />   
     </p>
 <p>图4 类目预测</p>
 <p><strong>1、样本数据</strong></p>
@@ -244,7 +244,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="二基于搜索词向量的召回"><strong>二、基于搜索词向量的召回</strong></h3>
 <p>基于搜索词的向量召回，旨在召回与用户查询文本语义相关的帖子。如图5所示，离线部分采用DSSM模型进行查询向量embedding，然后将embedding向量灌入FAISS中建立索引。在线部分，将用户查询文本生成embedding向量，在FAISS中查找最近的向量，将对应的帖子作为召回结果返回。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dfe0f44abd654aaeb7aef37ebed986ff.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272039359.webp" />   
     </p>
 <p>图5 向量召回</p>
 <p>我们这里采用DSSM模型建立用户历史查询与帖子标题之间的相关性。网络结构比较简单，如图5所示，由几层全连接组成网络，将用户查询文本和对应的帖子标题输入到网络，进行模型训练，最终得到embedding向量。</p>
@@ -255,19 +255,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>所以我们在负样本的选择时，对一个正样本通过随机采样的方法选取k个帖子，作为负样本。我们对负样本的选择进行了不同模型的训练，离线效果数据如表1，结果显示随机选取负样本的离线效果是最优的。</p>
 <p>表1 负样本auc对比</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/08790fc8c1b0482ba6a7b871fcb42b58.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272039227.webp" />   
     </p>
 <p>使用准备好的样本进行DSSM模型训练，生成embedding向量，利用FAISS索引技术建立相应索引。FAISS可以对向量进行相似搜索，根据给定的向量，在所有已知的向量库中找出与其相似度最高的一些向量，并且具有查询速度快、占用空间小的优点，同时可以根据实际业务需要选择合适的索引：IndexFlatL2，IndexIVFFlat和IndexIVFPQ。在保证召回相关性的前提下，我们采用了IndexIVFFlat索引。</p>
 <h3 id="三基于扩展标签召回"><strong>三、基于扩展标签召回</strong></h3>
 <p>为了更多的召回与用户查询文本相关的帖子，我们还进行了标签召回，如图6所示。58本地服务标签系统中有大量优质的相关业务标签，系统较为完备，因此我们利用标签系统对用户查询文本进行扩展，从用户的查询文本中提取相关的标签，得到与业务相贴合的标签词，最后结合标签词，利用主搜服务召回相关帖子。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4dfb54ec25d14e4f9c495a2aef5c4fc8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272039887.webp" />   
     </p>
 <p>图6 标签召回</p>
 <h3 id="四补充召回"><strong>四、补充召回</strong></h3>
 <p>补充召回目的是在其他召回策略均无结果的情况下，进行策略兜底，主要包括根据用户查询文本进行相关热门帖的召回，如图7所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1c4519658dc04c36801053ef56ce14f7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272039741.webp" />   
     </p>
 <p>图7 补充召回</p>
 <p>在热门帖的召回策略中，由于我们优化的目标是提升连接数，因此我们离线统计历史帖子的call/uv，然后按照城市和类目的维度将top帖子作为热门帖进行离线存储方便线上使用。在线上召回时，首先对用户搜索文本进行类目预测，然后根据类目预测的结果进行该城市类目下的热门帖。</p>
@@ -277,31 +277,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>初始模型我们采用树模型：XGBoost，该模型实现了非线性和自动的特征组合。树节点的分裂实现了特征的非线性，树的层次结构实现了特征的自动组合，而且树模型对特征的包容性非常好，树的分裂通过判断相对大小来实现，不需要对特征做特殊处理，为了快速上线我们首先考虑了树模型，并将其作为baseline。</p>
 <p>XGBoost擅长处理连续特征，对离散特征不太友好，另外XGBoost具有很强的记忆行为，为防止过拟合需要剪枝，限制树的深度，这就导致特征组合的能力有限。而DNN类的模型有很强的模型表达能力，能够学习高阶特征，同时容易扩充其他类别的特征，因此我们考虑DeepFM模型，如图8所示，该模型结合了FM算法和DNN算法，可以同时提取低阶特征和高阶特征。DeepFM模型将输入的id类稀疏特征如城市、类目等先通过embedding层转化低维稠密的向量，左边的FM子网络用它们计算二阶交叉分数，右边的DNN子网络把它们和其他连续型特征拼接起来输入一个MLP获取其最后一层输出，最后将FM一阶、二阶分数和DNN的最后一层拼接在一起，做一个投影得到最终的打分。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5f05c5ec904c4d748cd2aa86e4a906ad.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272039675.webp" />   
     </p>
 <p>图8 DeepFM模型框</p>
 <p>DeepFM上线后，电话量有所提升，但是我们期望在提升连接数的同时优化转化率，因此我们引入多任务模型MMoE。该模型引入了多个专家子网络和门控结构，通过门控用不同的专家组合分别去学习不同的目标，使得各个目标能被更好地学习。图9是MMoE模型结构示意图，输入向量分别输入到两个专家网络Expert 1和Expert 2中，每个专家是一个DNN子网络，DNN的最后一层为专家的输出向量。输入向量和各个专家的输出向量会传入门控，门控的内部结构如图6(b)所示，输入向量首先经过一个MLP，最后一层softmax得到各个专家的权重，然后以此权重对各个专家的输出做一个加权求和，得到该门控下的输出向量。在MMoE中，专家网络是所有目标共享的，每个目标有一个自己的门控，用于确定该目标下各个专家的权重。MMoE中的门控，可以被看成是一个分类器，每个目标的门控会根据当前样本的特征，判别它由哪些专家来拟合会更好，预估出每个专家的权重。MMoE不同目标不一样的动态输入为各目标的拟合提供了更大的自由度。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/34199c3af4d343ce94af530230ef9b40.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272039866.webp" />   
     </p>
 <p>(a) MMoE结构图</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8ca3c3aa8ec448c4bbf5af6d8b80af5b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272039288.webp" />   
     </p>
 <p>(b) 门控结构图</p>
 <p>图9 MMoE模型</p>
 <p>MMoE虽然可以同时学习ctr和cvr，但是并没有过多的考虑任务之间的联系，而ctr、cvr存在关联，用户的转化行为产生于点击行为之后。在58本地服务推荐场景中曝光的帖子量是很大的， 用户点击的帖子只是其中的一小部分，用户进行转化的帖子又只是有点击帖子的一部分，这就导致正负样本极度不均衡，加大了模型训练的难度，同样带来了泛化性问题。另外，由于训练和预测数据的范围不一致，还存在样本偏差的问题。为缓解上述问题，我们采用ESMM 模型，该模型可以利用用户行为序列数据，结合ctr和cvr的关联信息，在完整的样本数据空间同时学习点击率和转化率。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/965926c65fd84e3280a8c4a0dcc5ceb4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272039286.webp" />   
     </p>
 <p>ESMM利用上式中的关联关系，通过学习ctr和ctcvr两个任务，隐式地学习cvr任务，具体结构如图10所示。左边的子网络用来拟合 pcvr，右边的子网络用来拟合 pctr。两个子网络的结构是完全相同的，并且共享 Embedding 参数。两个子网络的输出结果相乘之后即得到 pctcvr，并作为整个任务的输出。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a9be518a228141edb492108bf5e25ca0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272039110.webp" />   
     </p>
 <p>图10 ESMM模型图</p>
 <p>ESMM模型利用不同任务之间的相互联系，进行多个任务的预估，但是任务子网络为简单的DNN结构，而deepFM可以将DNN与FM相结合同时提取高阶特征和低阶特征，我们是否可以将deepFM和ESMM模型相结合，提取低阶高阶特征的同时进行多任务的学习。如图11所示，保留了deepFM中的FM部分，deepFM的DNN部分使用ESMM的结构，ESMM的cvr任务模块和ctr任务模块输出的向量分别与FM的一阶二阶分数拼接在一起，得到两个新的向量，然后分别预估ctr和cvr，ctr和cvr的乘积则可得到ctcvr的预估值。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/36c12a46a9db473890adeee9edcc5297.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272039052.webp" />   
     </p>
 <p>图11 deepFM+ESMM模型</p>
 <p>另外我们也考虑过将deepFM、MMoE及ESMM相结合，即将deepFM的DNN模块替换为MMoE，然�</p>
@@ -432,6 +432,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -465,10 +469,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -847,6 +847,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

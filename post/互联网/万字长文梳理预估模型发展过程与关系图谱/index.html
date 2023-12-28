@@ -246,10 +246,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在推荐、搜索、广告等领域，CTR（click-through rate）预估是一项非常核心的技术，这里引用阿里妈妈资深算法专家朱小强大佬的一句话：“它（CTR 预估）是镶嵌在互联网技术上的明珠”。</p>
 <p>本篇文章主要是对 CTR 预估中的常见模型进行梳理与总结，并分成模块进行概述。每个模型都会从「模型结构」、「优势」、「不足」三个方面进行探讨，在最后对所有模型之间的关系进行比较与总结。本篇文章讨论的模型如下图所示（原创图），这个图中展示了本篇文章所要讲述的算法以及之间的关系，在文章的最后总结会对这张图进行详细地说明。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1ba09c07069947dc8d7691c858604b5a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271350976.jpeg" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/25100bf54037443490b0a5807964a600.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271351326.jpeg" />   
     </p>
 <h2 id="目录">目录</h2>
 <p>本篇文章将会按照整个 CTR 预估模型的演进过程进行组织，共分为 7 个大部分：</p>
@@ -287,7 +287,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Logistic Regression 是每一位算法工程师再也熟悉不过的基本算法之一了，毫不夸张地说，LR 作为最经典的统计学习算法几乎统治了早期工业机器学习时代。这是因为其具备简单、时间复杂度低、可大规模并行化等优良特性。在早期的 CTR 预估中，算法工程师们通过手动设计交叉特征以及特征离散化等方式，赋予 LR 这样的线性模型对数据集的非线性学习能力，高维离散特征 + 手动交叉特征构成了 CTR 预估的基础特征。LR 在工程上易于大规模并行化训练恰恰适应了这个时代的要求。</p>
 <p><strong>模型结构：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f%28x%29%3Dw_0%2B%5Csum_%7Bi%3D1%7D%5En&#43;w_i&#43;x_i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271351297.svg&#43;xml" />   
     </p>
 <p><strong>优势：</strong></p>
 <ul>
@@ -308,19 +308,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>模型结构：</strong></p>
 <p>通过 GBDT 训练模型，得到组合的特征向量。例如训练了两棵树，每棵树有 5 个叶子结点，对于某个特定样本来说，落在了第一棵树的第 3 个结点，此时我们可以得到向量
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5B0%2C0%2C1%2C0%2C0%5D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271351320.svg&#43;xml" />   
     
 ；落在第二棵树的第 4 个结点，此时的到向量
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5B0%2C0%2C0%2C1%2C0%5D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271351709.svg&#43;xml" />   
     
 ；那么最终通过 concat 所有树的向量，得到这个样本的最终向量
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5B0%2C0%2C1%2C0%2C0%2C0%2C0%2C0%2C1%2C0%5D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271351983.svg&#43;xml" />   
     
 。将这个向量作为下游 LR 模型的 inputs，进行训练。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://pic4.zhimg.com/80/v2-5152835e605985e026fc74fe42185c7b_1440w.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271351188.jpeg" />   
     </p>
 <p><strong>优势：</strong></p>
 <ul>
@@ -338,60 +338,60 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>FM 是在 2010 年提出的一种可以学习二阶特征交叉的模型，通过在原先线性模型的基础上，枚举了所有特征的二阶交叉信息后融入模型，提高了模型的表达能力。但不同的是，模型在二阶交叉信息的权重学习上，采用了隐向量内积（也可看做 embedding）的方式进行学习。</p>
 <p><strong>模型结构：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://pic2.zhimg.com/80/v2-02627959debfaf325293833ef7a873cd_1440w.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271351143.jpeg" />   
     </p>
 <p>FM 的公式包含了一阶线性部分与二阶特征交叉部分：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f%28x%29%3Dw_0%2B%5Csum_%7Bi%3D1%7D%5En&#43;w_i&#43;x_i%2B%5Csum_%7Bi%3D1%7D%5En&#43;%5Csum_%7Bj%3Di%2B1%7D%5En&#43;%5Clangle&#43;v_i%2Cv_j&#43;%5Crangle&#43;x_i&#43;x_j" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271351714.svg&#43;xml" />   
     </p>
 <p>在 LR 中，一般是通过手动构造交叉特征后，喂给模型进行训练，例如我们构造性别与广告类别的交叉特征：
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x_i%3D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271351215.svg&#43;xml" />   
     
 (gender=&lsquo;女&rsquo; &amp; ad_category=&lsquo;美妆&rsquo;)，此时我们会针对这个交叉特征学习一个参数
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=w_i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271351646.svg&#43;xml" />   
     
 。但是在 LR 中，参数梯度更新公式与该特征取值
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x_i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271352867.svg&#43;xml" />   
     
 关系密切：
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=w_i%3A%3Dw_i%2B%5Calpha%28y-%5Chat%7By%7D%29x_i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271352180.svg&#43;xml" />   
     
 ，当
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x_i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271352417.svg&#43;xml" />   
     
 取值为 0 时，参数
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=w_i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271352670.svg&#43;xml" />   
     
 就无法得到更新，而
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x_i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271352961.svg&#43;xml" />   
     
 要非零就要求交叉特征的两项都要非零，但实际在数据高度稀疏，一旦两个特征只要有一个取 0，参数
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=w_i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271352238.svg&#43;xml" />   
     
 不能得到有效更新；除此之外，对于训练集中没有出现的交叉特征，也没办法学习这类权重，泛化性能不够好。</p>
 <p>另外，在 FM 中通过将特征隐射到 k 维空间求内积的方式，打破了交叉特征权重间的隔离性（break the independence of the interaction parameters），增加模型在稀疏场景下学习交叉特征的能力。一个交叉特征参数的估计，可以帮助估计其他相关的交叉特征参数。例如，假设我们有交叉特征 gender=male &amp; movie_genre=war，我们需要估计这个交叉特征前的参数
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=w_%7Bmale%5C_and%5C_war%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271352570.svg&#43;xml" />   
     
 ，FM 通过将
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=w_%7Bmale%5C_and%5C_war%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271352019.svg&#43;xml" />   
     
 分解为
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Clangle&#43;v_%7Bmale%7D%2Cv_%7Bwar%7D%5Crangle" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271352379.svg&#43;xml" />   
     
 的方式进行估计，那么对于每次更新 male 或者 war 的隐向量
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=v" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271352595.svg&#43;xml" />   
     
 时，都会影响其他与 male 或者 war 交叉的特征参数估计，使得特征权重的学习不再互相独立。这样做的好处是，对于 traindata set 中没有出现过的交叉特征，FM 仍然可以给到一个较好的非零预估值。</p>
 <p><strong>优势：</strong></p>
@@ -399,7 +399,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>可以有效处理稀疏场景下的特征学习</li>
 <li>具有线性时间复杂度（化简思路：
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=ab%3D%5Cfrac%7B1%7D%7B2%7D%5B%28a%2Bb%29%5E2-%28a%5E2%2Bb%5E2%29%5D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271352870.svg&#43;xml" />   
     
 ）</li>
 <li>对训练集中未出现的交叉特征信息也可进行泛化</li>
@@ -414,88 +414,88 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="2afmattentional-factorization-machines-2017--引入-attention-机制的-fm">（2）AFM：Attentional Factorization Machines, 2017 —— 引入 Attention 机制的 FM</h3>
 <p>AFM 全称 Attentional Factorization Machines，顾名思义就是引入 Attention 机制的 FM 模型。我们知道 FM 模型枚举了所有的二阶交叉特征（second-order interactions），即
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Csum_%7Bi%3D1%7D%5En%5Csum_%7Bj%3Di%2B1%7D%5En&#43;%5Clangle&#43;v_i%2Cv_j%5Crangle&#43;x_i&#43;x_j" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271353364.svg&#43;xml" />   
     
 ，实际上有一些交叉特征可能与我们的预估目标关联性不是很大；AFM 就是通过 Attention 机制来学习不同二阶交叉特征的重要性（这个思路与 FFM 中不同 field 特征交叉使用不同的 embedding 实际上是一致的，都是通过引入额外信息来表达不同特征交叉的重要性）。</p>
 <p>举例来说，在预估用户是否会点击广告时，我们假设有用户性别、广告版位尺寸大小、广告类型三个特征，分别对应三个 embedding：
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=v_%7Bgender%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271353572.svg&#43;xml" />   
     
 ，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=v_%7Bad%5C_size%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271353004.svg&#43;xml" />   
     
 ，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=v_%7Bad%5C_category%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271353377.svg&#43;xml" />   
     
 ，对于用户“是否点击”这一目标
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=y" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271353706.svg&#43;xml" />   
     
 来说，显然性别与 ad_size 的交叉特征对于
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=y" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271353905.svg&#43;xml" />   
     
 的相关度不大，但性别与 ad_category 的交叉特征（如 gender= 女性&amp;category= 美妆）就会与
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=y" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271353126.svg&#43;xml" />   
     
 更加相关；换句话说，我们认为当性别与 ad_category 交叉时，重要性应该要高于性别与 ad_size 的交叉；FFM 中通过引入 Field-aware 的概念来量化这种与不同特征交叉时的重要性，AFM 则是通过加入 Attention 机制，赋予重要交叉特征更高的重要性。</p>
 <p><strong>模型结构：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://pic1.zhimg.com/80/v2-280a60b1ad44bdf3b193c6b9d818ff0c_1440w.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271353624.jpeg" />   
     </p>
 <p>AFM 在 FM 的二阶交叉特征上引入 Attention 权重，公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Chat%7By%7D%3Dw_0%2B%5Csum_%7Bi%3D1%7D%5En&#43;w_i&#43;x_i%2Bp%5ET%5Csum_%7Bi%3D1%7D%5En&#43;%5Csum_%7Bj%3Di%2B1%7D%5En&#43;%5Calpha_%7Bij%7D%28v_i%5Codot&#43;v_j%29x_ix_j" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271353605.svg&#43;xml" />   
     </p>
 <blockquote>
 <p>其中
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Codot" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271353970.svg&#43;xml" />   
     
 代表 element-wise 的向量相乘，下同。</p>
 </blockquote>
 <p>其中，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Calpha_%7Bij%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271354722.svg&#43;xml" />   
     
 是模型所学习到的
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x_i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271354008.svg&#43;xml" />   
     
 与
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x_j" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271354306.svg&#43;xml" />   
     
 特征交叉的重要性，其公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=e_%7Bij%7D%3Dh%5ETReLU%28W%28v_i%5Codot&#43;v_j%29x_ix_j%2Bb%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271354717.svg&#43;xml" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Calpha_%7Bij%7D%3D%5Cfrac%7B%5Cexp%7B%28e_%7Bij%7D%29%7D%7D%7B%5Csum_%7Bi%2Cj%7D%5Cexp%28e_%7Bij%7D%29%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271354193.svg&#43;xml" />   
     </p>
 <p>我们可以看到这里的权重
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Calpha_%7Bij%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271354444.svg&#43;xml" />   
     
 实际是通过输入
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=v_i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271354566.svg&#43;xml" />   
     
 和
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=v_j" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271354961.svg&#43;xml" />   
     
 训练了一个一层隐藏层的 NN 网络，让模型自行去学习这个权重。</p>
 <p>对比 AFM 和 FM 的公式我们可以发现，AFM 实际上是 FM 的更加泛化的一种形式。当我们令向量
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=p%3D%5B1%2C1%2C1%2C%5Ccdots%2C1%5D%5ET" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271354558.svg&#43;xml" />   
     
 ，权重
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Calpha_%7Bij%7D%3D1&#43;" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271354053.svg&#43;xml" />   
     
 时，AFM 就会退化成 FM 模型。</p>
 <p><strong>优势：</strong></p>
@@ -514,7 +514,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>FNN 是 2016 年提出的一种基于 FM 预训练 Embedding 的 NN 模型，其思路也比较简单；FM 本身具备学习特征 Embedding 的能力，DNN 具备高阶特征交叉的能力，因此将两者结合是很直接的思路。FM 预训练的 Embedding 可以看做是“先验专家知识”，直接将专家知识输入 NN 来进行学习。注意，FNN 本质上也是两阶段的模型，与 Facebook 在 2014 年提出 GBDT+LR 模型在思想上一脉相承。</p>
 <p><strong>模型结构：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://pic3.zhimg.com/80/v2-36bfe310f784f721755ad98a09009f8e_1440w.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271354669.jpeg" />   
     </p>
 <p>FNN 本身在结构上并不复杂，如上图所示，就是将 FM 预训练好的 Embedding 向量直接喂给下游的 DNN 模型，让 DNN 来进行更高阶交叉信息的学习。</p>
 <p><strong>优势：</strong></p>
@@ -533,83 +533,83 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>PNN 是 2016 年提出的一种在 NN 中引入 Product Layer 的模型，其本质上和 FNN 类似，都属于 Embedding+MLP 结构。作者认为，在 DNN 中特征 Embedding 通过简单的 concat 或者 add 都不足以学习到特征之间复杂的依赖信息，因此 PNN 通过引入 Product Layer 来进行更复杂和充分的特征交叉关系的学习。PNN 主要包含了 IPNN 和 OPNN 两种结构，分别对应特征之间 Inner Product 的交叉计算和 Outer Product 的交叉计算方式。</p>
 <p><strong>模型结构：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://pic3.zhimg.com/80/v2-8da07619b36c07e7a15c41e54a6dcebe_1440w.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271355814.jpeg" />   
     </p>
 <p>PNN 结构显示通过 Embedding Lookup 得到每个 field 的 Embedding 向量，接着将这些向量输入 Product Layer，在 Product Layer 中包含了两部分，一部分是左边的
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=z&#43;" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271355629.svg&#43;xml" />   
     
 ，就是将特征原始的 Embedding 向量直接保留；另一部分是右侧的
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=p" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271355833.svg&#43;xml" />   
     
 ，即对应特征之间的 product 操作；可以看到 PNN 相比于 FNN 一个优势就是保留了原始的低阶 embedding 特征。</p>
 <p>在 PNN 中，由于引入 Product 操作，会使模型的时间和空间复杂度都进一步增加。这里以 IPNN 为例，其中
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=p&#43;" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271355330.svg&#43;xml" />   
     
 是 pair-wise 的特征交叉向量，假设我们共有 N 个特征，每个特征的 embedding 信息
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f_i%5Cin&#43;R%5EM" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271355850.svg&#43;xml" />   
     
 ；在 Inner Product 的情况下，通过交叉项公式
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=g%28f_i%2Cf_j%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271355462.svg&#43;xml" />   
     
 会得到
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=p%5Cin&#43;R%5E%7BN%5Ctimes&#43;N%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271355766.svg&#43;xml" />   
     
 （其中
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=p" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271355007.svg&#43;xml" />   
     
 是对称矩阵），此时从 Product 层到
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=L1&#43;" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271355290.svg&#43;xml" />   
     
 层（假设
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=L1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271355665.svg&#43;xml" />   
     
 层有
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=D_1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271355528.svg&#43;xml" />   
     
 个结点），对于
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=L1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271355230.svg&#43;xml" />   
     
 层的每个结点我们有：
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=W_p%5En%5Codot&#43;p%3D%5Csum_%7Bi%3D1%7D%5EN%5Csum_%7Bj%3D1%7D%5EN%28W_p%5En%29_%7Bi%2Cj%7Dp_%7Bi%2Cj%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271356494.svg&#43;xml" />   
     
 ，因此这里从 product layer 到 L1 层参数空间复杂度为
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=O%28D_1N%5E2%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271356046.svg&#43;xml" />   
     
 ；作者借鉴了 FM 的思想对参数
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=W_p%5En" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271356413.svg&#43;xml" />   
     
 进行了矩阵分解：
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=W_p%5En%3D%5Ctheta%5En%5Ctheta%5E%7BnT%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271356897.svg&#43;xml" />   
     
 ，此时 L1 层每个结点的计算可以化简为：
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=W_p%5En%5Codot&#43;p%3D%5Csum_%7Bi%3D1%7D%5EN%5Csum_%7Bj%3D1%7D%5EN%5Clangle&#43;%5Ctheta_i%5En%2C%5Ctheta_j%5En%5Crangle&#43;%5Clangle&#43;f_i%2Cf_j%5Crangle" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271356112.svg&#43;xml" />   
     
 ，空间复杂度退化
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=O%28D_1NM%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271356327.svg&#43;xml" />   
     
 。</p>
 <p><strong>优势：</strong></p>
 <ul>
 <li>PNN 通过
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=z" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271356605.svg&#43;xml" />   
     
 保留了低阶 Embedding 特征信息</li>
 <li>通过 Product Layer 引入更复杂的特征交叉方式，</li>
@@ -623,32 +623,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>模型结构：</strong></p>
 <p>NFM 的整个模型公式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Chat%7By%7D%3Dw_0%2B%5Csum_%7Bi%3D1%7Dw_ix_i%2Bf%28%5Coverrightarrow%7Bx%7D%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271356408.svg&#43;xml" />   
     </p>
 <p>其中
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f%28%5Coverrightarrow%7Bx%7D%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271356749.svg&#43;xml" />   
     
 是 Bi-Interaction Pooling+NN 部分的输出结果。我们重点关注 NFM 中的 Bi-Interaction Pooling 层：
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3c6eaed1f48441efa37a8406a4eb09cf.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271356496.jpeg" />   
     </p>
 <p>NFM 的结构如上图所示，通过对特征 Embedding 之后，进入 Bi-Interaction Pooling 层。这里注意一个小细节，NFM 的对 Dense Feature，Embedding 方式于 AFM 相同，将 Dense Feature Embedding 以后再用 dense feature 原始的数据进行了 scale，即
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=v_ix_i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271357173.svg&#43;xml" />   
     
 。</p>
 <p>NFM 的 Bi-Interaction Pooling 层是对两两特征的 embedding 进行 element-wise 的乘法，公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f_%7BBI%7D%28V_x%29%3D%5Csum_%7Bi%3D1%7D%5En%5Csum_%7Bj%3Di%2B1%7D%5En&#43;x_iv_i%5Codot&#43;x_jv_j" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271357006.svg&#43;xml" />   
     </p>
 <p>假设我们每个特征 Embedding 向量的维度为
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=k&#43;" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271357059.svg&#43;xml" />   
     
 ，则
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f_%7BBI%7D%5Cin&#43;R%5Ek" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271357489.svg&#43;xml" />   
     
 ，Bi-Interaction Pooling 的操作简单来说就是将所有二阶交叉的结果向量进行 sum pooling 后再送入 NN 进行训练。对比 AFM 的 Attention 层，Bi-Interaction Pooling 层采用直接 sum 的方式，缺少了 Attention 机制；对比 FM 莫明星，NFM 如果将后续 DNN 隐藏层删掉，就会退化为一个 FM 模型。</p>
 <blockquote>
@@ -675,7 +675,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>对比上面三个模型，本质上都是给模型增加更多的表达能力，个人觉得 ONN 就是 FFM 与 NN 的结合。</p>
 <p><strong>模型结构：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://pic4.zhimg.com/80/v2-13519298002270ce240bb00c444cec53_1440w.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271357122.jpeg" />   
     </p>
 <p>ONN 沿袭了 Embedding+MLP 结构。在 Embedding 层采用 Operation-aware Embedding，可以看到对于一个 feature，会得到多个 embedding 结果；在图中以红色虚线为分割，第一列的 embedding 是 feature 本身的 embedding 信息，从第二列开始往后是当前特征与第 n 个特征交叉所使用的 embedding。</p>
 <p>在 Embedding features 层中，我们可以看到包含了两部分：</p>
@@ -699,7 +699,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Wide And Deep 是 2016 年 Google 提出的用于 Google Play app 推荐业务的一种算法。其核心思想是通过结合 Wide 线性模型的记忆性（memorization）和 Deep 深度模型的泛化性（generalization）来对用户行为信息进行学习建模。</p>
 <p><strong>模型结构：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://pic1.zhimg.com/80/v2-6f70ee1ad3e145b7eb12d13200776678_1440w.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271357235.jpeg" />   
     </p>
 <p><strong>优势：</strong></p>
 <ul>
@@ -716,11 +716,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>模型结构：</strong></p>
 <p>DeepFM 包含了 FM 和 NN 两部分，这两部分共享了 Embedding 层：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://pic3.zhimg.com/80/v2-255d5964372aec4bbd388e5dff6307aa_1440w.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271357949.jpeg" />   
     </p>
 <p>左侧 FM 部分就是 2-way 的 FM：包含了线性部分和二阶交叉部分右侧 NN 部分与 FM 共享 Embedding，将所有特征的 embedding 进行 concat 之后作为 NN 部分的输入，最终通过 NN 得到。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Chat%7By%7D%3D%5Csigma%28logits_%7BFM%7D%2Blogits_%7BNN%7D%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271357875.svg&#43;xml" />   
     </p>
 <p><strong>优势：</strong></p>
 <ul>
@@ -746,11 +746,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>模型结构：</strong></p>
 <p>DCN 模型包含了两部分，左边一路是通过 CrossNet 来显式地学习有限阶特征交叉，右边一路是通过 DNN 来隐式学习交叉特征，进一步提高模型的多样性和表达能力。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://pic4.zhimg.com/80/v2-e52fc238149b68a503f178c2b9ead18f_1440w.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271357350.jpeg" />   
     </p>
 <p>CrossNet 的主要思想是显式地计算内积来进行层与层之间的信息交叉；另外，CrossNet 在设计上还借鉴了残差网络的思想，使得每一层的输出结果能够包含原始的输入信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://pic1.zhimg.com/80/v2-02cb11f94ffbcfe2536601a8a73fdb38_1440w.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271357276.jpeg" />   
     </p>
 <p>对于 CrossNet 中的某一层，其计算方法如上图所示。分为三部分：</p>
 <ul>
@@ -760,56 +760,56 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>公式可以表达为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x_%7Bl%2B1%7D%3Dx_0x_l%5ETw_l%2Bb_l%2Bx_l%3Df%28x_l%2Cw_l%2Cb_l%29%2Bx_l" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271358956.svg&#43;xml" />   
     </p>
 <p>其中
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x_0%2Cx_l%2Cw_l%2Cb_l%5Cin&#43;R%5Ed" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271358391.svg&#43;xml" />   
     
 ，通过上式得到
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f%28x_l%2Cw_l%2Cb_l%29%3Dx_%7Bl%2B1%7D-x_l" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271358548.svg&#43;xml" />   
     
 ，我们可以发现 mapping function
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=f%3AR%5Ed%5Crightarrow&#43;R%5Ed" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271358844.svg&#43;xml" />   
     
 正好在拟合两层网络之间的残差。对于 CrossNet 中的第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=l" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271358609.svg&#43;xml" />   
     
 层，其能够捕捉到的特征交叉的最高阶为
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=l%2B1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271358865.svg&#43;xml" />   
     
 。</p>
 <p>CrossNet 本身在计算消耗上也不大，假设 CrossNet 共有
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=L" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271358767.svg&#43;xml" />   
     
 层，输入的 input vector 是一个
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=d" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271358052.svg&#43;xml" />   
     
 维向量，那么对于每一层来说有
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=w_l%2Cb_l" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271358347.svg&#43;xml" />   
     
 两个参数，即
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=d%5Ctimes&#43;2" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271358707.svg&#43;xml" />   
     
 个参数，总共
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=L" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271359027.svg&#43;xml" />   
     
 层，共有
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=L%5Ctimes&#43;d%5Ctimes&#43;2" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271359252.svg&#43;xml" />   
     
 个参数，参数规模与输入的维度
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=d" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271359469.svg&#43;xml" />   
     
 呈线性相关。</p>
 <p><strong>优势：</strong></p>
@@ -822,7 +822,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>CrossNet 在进行交叉时是 bit-wise 方式</li>
 <li>CrossNet 最终的输出有一定的局限性，CrossNet 的每一层输出都是输入向量
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x_0" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271359775.svg&#43;xml" />   
     
 的标量倍，这种形式在一定程度上限制了模型的表达能力</li>
 </ul>
@@ -830,60 +830,60 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>证明：</p>
 <p>我们令 CrossNet 的输入为
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x_0%5Cin&#43;R%5Ed" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271359013.svg&#43;xml" />   
     
 ，忽略每一层中的 bias 项，对于第一次 cross，有：</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x_1%3Dx_0x_0%5ETw_1%2Bx_0%3Dx_0%28x_0%5ETw_1%2B1%29%3D%5Calpha_1x_0" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271359267.svg&#43;xml" />   
     
 ，其中
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Calpha_1%3Dx_0%5ETw_1%2B1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271359677.svg&#43;xml" />   
     
 ；</p>
 <blockquote>
 <p>对于第二次 cross，有：</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x_2%3Dx_0x_1%5ETw_2%2Bx_1%3Dx_0%28%5Calpha_1x_0%29%5ETw_2%2B%5Calpha_1x_0%3D%5Calpha_1x_0%28x_0%5ETw_2%2B1%29%3D%5Calpha_2x_0" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271400860.svg&#43;xml" />   
     
 ，其中
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Calpha_2%3D%5Calpha_1%28x_0%5ETw_2%2B1%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271400245.svg&#43;xml" />   
     </p>
 <blockquote>
 <p>基于上式进行推广可以得到
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x_k%3D%5Calpha_kx_0" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271400833.svg&#43;xml" />   
     
 ，即证得 CrossNet 的输出是输入
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x_0" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271400711.svg&#43;xml" />   
     
 的标量倍。</p>
 <p>这里要注意的是，
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x_k" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271400362.svg&#43;xml" />   
     
 与
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x_0" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271400926.svg&#43;xml" />   
     
 并不是线性关系，这是因为
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Calpha_i" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271400549.svg&#43;xml" />   
     
 也是关于
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x_0" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271401148.svg&#43;xml" />   
     
 的函数。</p>
 </blockquote>
 <h3 id="2xdeepfmextreme-deep-factorization-machine-2018--compressed-interaction-network-的诞生">**（2）xDeepFM：**eXtreme Deep Factorization Machine, 2018 —— <strong>Compressed Interaction Network 的诞生</strong></h3>
 <p>xDeepFM 全称为 eXtreme Deep Factorization Machine，可以看出其是在 DeepFM 基础上进行了改进。xDeepFM 的贡献主要在于提出了压缩交互网络（Compressed Interaction Network），与 DCN 相同的是，都提出了要 cross feature explicitly；但不同的是，DCN 中的特征交叉是 element-wise 的，而 CIN 中的特征交叉是 vector-wise 的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://pic1.zhimg.com/80/v2-d8cca9bb1bbe48e65a77c86451aa3e1c_1440w.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271401598.jpeg" />   
     </p>
 <p><strong>模型结构：</strong></p>
 <p>xDeepFM 模型结构如下，整个模型分为三个部分：</p>
@@ -893,67 +893,67 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>DNN Part：隐式地、bit-wise 地学习高阶交叉特征</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://pic4.zhimg.com/80/v2-71206b222b3d286a722293491b675be7_1440w.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271401456.jpeg" />   
     </p>
 <p>CIN 网络的设计主要分为两步：交互（interaction）与压缩（compression）。</p>
 <p>在交互部分，如下图（a）所示，将第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=k" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271401492.svg&#43;xml" />   
     
 层的 feature map 与
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x_0" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271401337.svg&#43;xml" />   
     
 （输入层，这里将输入层表示为一个
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=m%5Ctimes&#43;D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271401814.svg&#43;xml" />   
     
 的 tensor，其中 m 为特征个数，D 为 embedding 的 size）。在 D 的每一个维度上，进行外积计算，得到
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=z_%7Bk%2B1%7D%5Cin&#43;R%5E%7BH_k%7D%5Ctimes&#43;m%5Ctimes&#43;D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271401954.svg&#43;xml" />   
     
 。</p>
 <p>在压缩部分，借鉴了 CNN 卷积 +Pooling 的思想，先通过
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=H_%7Bk%2B1%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271401289.svg&#43;xml" />   
     
 个 filter 将三维的
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=z_%7Bk%2B1%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271401582.svg&#43;xml" />   
     
 （可看做一张图片）进行压缩计算，得到
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x_%7Bk%2B1%7D%5Cin&#43;R%5E%7BH_%7Bk%2B1%7D%5Ctimes&#43;D%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271401859.svg&#43;xml" />   
     
 。紧接着在 D 维上进行 sum pooling 操作，得到最后输出向量（如 c 图中的黄色小圆圈）。</p>
 <p>经过多个串行的压缩与交互步骤，可以得到多个输出向量，最终将这些向量 concat 起来，作为 CIN 的输出结果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://pic1.zhimg.com/80/v2-f561091ee742864eda3924d37a07e134_1440w.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271402258.jpeg" />   
     </p>
 <p>可以看出 CIN 在计算上相对比较复杂，但是由于 CNN 参数共享机制以及 sum pooling 层的存在，CIN 部分的参数规模与特征的 Embedding size 大小
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271402236.svg&#43;xml" />   
     
 是无关的。假设输入 field 有
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=m" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271402502.svg&#43;xml" />   
     
 个，共有
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=L" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271402024.svg&#43;xml" />   
     
 层，每层有
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=H" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271402101.svg&#43;xml" />   
     
 个 feature map，那么 CIN 部分的参数规模为
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=H%5Ctimes&#43;H%5Ctimes&#43;m&#43;%5Ctimes&#43;L" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271402528.svg&#43;xml" />   
     
 。</p>
 <p>但是在时间复杂度上，CIN 存在很大劣势，CIN 的时间复杂度为
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=O%28mH%5E2DL%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271402321.svg&#43;xml" />   
     
 。</p>
 <p><strong>优势：</strong></p>
@@ -970,75 +970,75 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>AutoInt 是 2019 年发表的比较新的论文，它的思路和 DCN 以及 xDeepFM 相似，都是提出了能够显式学习高阶特征交叉的网络。除此之外，AutoInt 算法借鉴了 NLP 模型中 Transformer 的 Multi-head self-attention 机制，给模型的交叉特征引入了可解释性，可以让模型知道哪些特征交叉的重要性更大。</p>
 <p>AutoInt 的 Attention 机制采用了 NLP 中标准的 Q,K,V 形式，即给定 Query 词和候选的 Key 词，计算相关性
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Calpha" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271402819.svg&#43;xml" />   
     
 ，再用
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Calpha" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271402146.svg&#43;xml" />   
     
 对 Value 进行加权得到结果。</p>
 <p><strong>模型结构：</strong></p>
 <p>相比于 DCN 和 xDeepFM 采用交叉网络 +DNN 的双路结构，AutoInt 直接采用了单路的模型结构，将原始特征 Embedding 之后，直接采用多层 Interacting Layer 进行学习（作者在论文的实验部分也列出了 AutoInt+DNN 的双路模型结构：AutoInt+）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://pic4.zhimg.com/80/v2-bc9273d3a93930afa65ee82265769347_1440w.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271402062.jpeg" />   
     </p>
 <p>AutoInt 中的 Interacting Layer 包含了两部分：Multi-head Self-Attention 和 ResNet 部分。</p>
 <p>在 self-attention 中，采用的是 Q,K,V 形式，具体来说：我们只考虑 1 个 head self-attention 的情况，假设我们共有
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=M" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271403158.svg&#43;xml" />   
     
 个特征，对于输入的第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=m" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271403416.svg&#43;xml" />   
     
 个 feature embedding 来说，AutoInt 认为它与
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=M" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271403157.svg&#43;xml" />   
     
 个特征交叉后的特征拥有不同的权重，对于我们第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=m" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271403468.svg&#43;xml" />   
     
 个特征，它与第
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=k" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271403980.svg&#43;xml" />   
     
 个特征交叉的权重为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Calpha_%7Bm%2Ck%7D%3D%5Cfrac%7B%5Cexp&#43;%28%5Cphi%28e_m%2Ce_k%29%29%7D%7B%5Csum_%7Bl%3D1%7D%5EM%5Cexp%28%5Cphi%28e_m%2Ce_l%29%29%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271403054.svg&#43;xml" />   
     </p>
 <p>其中
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Cphi%28e_m%2Ce_k%29%3D%5Clangle&#43;W_%7BQuery%7De_m%2CW_%7BKey%7De_k&#43;%5Crangle" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271403179.svg&#43;xml" />   
     
 ，函数
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Cphi" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271403754.svg&#43;xml" />   
      是衡量两个向量距离的函数，在 AutoInt 中作者采用了简单高效的向量内积来计算距离。得到权重信息后，我们对 M 个特征的 Value 进行加权：
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Ctilde%7Be%7D_m%3D%5Csum_%7Bk%3D1%7D%5EM%5Calpha_%7Bm%2Ck%7D%28W_%7BValue%7De_k%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271404967.svg&#43;xml" />   
      ，得到向量 m 与其余特征的加权二阶交叉信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://pic3.zhimg.com/80/v2-c6d0712e7f1ca95e957fca195a434ba2_1440w.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271404250.jpeg" />   
     </p>
 <p>进一步地，作者使用了多个 self-attention（multi-head self-attention）来计算不同 subspaces 中的特征交叉，其实就是进一步增加了模型的表达能力。采用 h 个 multi-head 之后，我们会得到 h 个
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Ctilde%7Be%7D_m%5E%7B%28h%29%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271404253.svg&#43;xml" />   
      ，将这 h 个
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Ctilde%7Be%7D_m%5E%7B%28h%29%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271404857.svg&#43;xml" />   
      concat 起来，得到
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=%5Ctilde%7Be%7D_m%3D%5B%5Ctilde%7Be%7D%5E%7B%281%29%7D%2C%5Ctilde%7Be%7D%5E%7B%282%29%7D%2C%5Ccdots%2C%5Ctilde%7Be%7D%5E%7B%28h%29%7D%5D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271404585.svg&#43;xml" />   
      。</p>
 <p>为了保留上一步学到的交叉信息，AutoInt 和 CrossNet 一样，都使用了 ResNet 的思想：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=e_m%5E%7BRes%7D%3DReLU%28%5Ctilde%7Be%7D_m%2BW_%7BRes%7De_m%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271404330.svg&#43;xml" />   
     </p>
 <p>使用 ResNet 可以使得之前学习到的信息也被更新到新的层中，例如第一层原始的 embedding 也可以被融入到最终的输出中。</p>
 <p>剩余的特征也以同样的方式进行 multi-head attention 计算，得到
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=e_1%5E%7BRes%7D%2Ce%5E%7BRes%7D_2%2C%5Ccdots%2Ce_M%5E%7BRes%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271404596.svg&#43;xml" />   
      ，将这 M 个向量 concat 之后连接输出层得到最终的预估值。</p>
 <p><strong>优势：</strong></p>
 <ul>
@@ -1048,26 +1048,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <blockquote>
 <p>原文这里给出了一个例子，两层 Interacting Layer 就可以学习到 4 阶特征交叉。定义交叉函数为
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=g%28%5Ccdot%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271404243.svg&#43;xml" />   
     
 ， 假如我们有 4 个特征
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=x_1%2Cx_2%2Cx_3%2Cx_4" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271404547.svg&#43;xml" />   
      ，第一层 Interacting Layer 之后，我们可以得到
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=g%28x_1%2Cx_2%29%2Cg%28x_1%2Cx_3%29%2Cg%28x_2%2Cx_3%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271405659.svg&#43;xml" />   
      等二阶交叉信息，即两两特征的二阶交叉；将二阶交叉送入下一层 Interacting Layer 之后，由于输入第一层网络融入了二阶交叉信息，那么在本层中就可以得到四阶交叉，如
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=g%28x_1%2Cx_2%2Cx_3%2Cx_4%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271405071.svg&#43;xml" />   
      就可以通过
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=g%28g%28x_1%2Cx_3%29%2Cg%28x_2%2Cx_4%29%29" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271405562.svg&#43;xml" />   
      得到。</p>
 </blockquote>
 <ul>
 <li>Interacting Layer 的参数规模与输入特征个数
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=M" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271405245.svg&#43;xml" />   
      无关。</li>
 </ul>
 <hr>
@@ -1076,7 +1076,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="1ctr-预估模型关系图谱">（1）CTR 预估模型关系图谱</h3>
 <p>现在我们再回头来看开篇的这张关系图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://pic4.zhimg.com/80/v2-487aa1bb3473fba349827a6b99a7b7b7_1440w.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271405195.jpeg" />   
     </p>
 <p>从上往下，代表了整个 CTR 预估的发展趋势：</p>
 <ul>
@@ -1115,7 +1115,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>Explicitly High-Order Crossing：是否包含显式特征交叉</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://pic4.zhimg.com/80/v2-7daeeceabca034bfd72133bef520500f_1440w.jpg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271405879.jpeg" />   
     </p>
 <h2 id="结语">结语</h2>
 <p>至此我们对于常见的 CTR 预估模型的演进过程与关系就讲解完毕，纵观整个过程，CTR 预估模型从开始的 LR，到利用树模型自动化组合特征，再发展到端到端的 Embedding+MLP 结构，再到如今越来越复杂的显式交叉网络等，每一次发展都是在不断提升模型对于用户行为的表达与学习能力。CTR 预估不仅是一个数学优化问题，更是一个工程问题，因此如何能够以较低的计算成本，高效地提高模型表达能力将是未来需要努力的方向。</p>
@@ -1260,6 +1260,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -1293,10 +1297,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1675,6 +1675,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

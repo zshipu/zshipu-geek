@@ -211,7 +211,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>PackedBlock只能存储单一整数(Integer/Long)数组结构。这里主要介绍PackedInts：它将一个int[]打包成一个Block。PackedBlock只能存储固定长度的数组（Lucene规定其长度为128个元素），它的压缩方式是将每个元素截断为一个预算的长度（length，单位是bit），以达到压缩的目的。所以当长度length不是8的倍数时，会出现一个byte被多个元素占用的情形。</p>
 <p>PackedBlock需要把整个int[]的所有条目指定长度编码，所以PackedBlock只能选择int[]最大的数来计算长度，否则会让大数失真。反过来，PackedBlock都选择64位，则会浪费空间，不能达到压缩的目的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3971696db3284815ac20cc4c35f60f66.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281552190.webp" />   
     </p>
 <p><em>Lucene预先编译了64个PackedFormat编码器和解码器，即针对Long以内的每种长度都数据都有自己的解码和编码器，以提高编解码的性能。</em></p>
 <p>PackedPosDeltaBlock、PackedDocDeltaBlock以及PackedFreqBlock都采用了PackedInts结构，它能存储的信息实际上是很有限的，只能存储Int的数组。所以在PackedPosDeltaBlock的时候，只能存储position信息，在VIntBlock则会存储更多必要信息，减少搜索时的IO操作。</p>
@@ -227,7 +227,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="frequencies-and-skip-datadoc文件"><strong>Frequencies And Skip Data(.doc文件)</strong></h4>
 <p>在Lucene倒排索引中，只有.doc是Postings必要文件，即它是不能被省略的。除此之外的两个文件通过配置都是可以省略的。那么.doc到底存储了哪些关键信息呢？直接上图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8838192565ca4e7bae4da7d8fb0f4c7c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281552790.webp" />   
     </p>
 <p>这里画得不够清晰，每个Term都有成对的TermFreqs和SkipData的。换言之，SkipData是为TermFreqs构建的跳表结构，所以它们是成对出现的。</p>
 <h5 id="termfreqs--frequencies"><strong>TermFreqs — Frequencies</strong></h5>
@@ -240,7 +240,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p><strong>Lucene尽可能优先采用PackedBlocks，剩余部分（不足128部分）则用VIntBlocks存储</strong>。引入PackedBlock之后，PackedDocDeltaBlock跟PackedFreqBlock是成对的，所以它的写出来的示意图应该是如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8e8297297fb04c4295a794d891ac58d1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281552454.webp" />   
     </p>
 <p>每个PackedBlock由一个PackedDocDeltaBlock和一个PackedFreqBlock构成，它们都采用PackedInts格式。</p>
 <p>例如，在同一个Segment里，某一个Term A在259个文档同一个字段出现，那么Term A就需要把这259个文档的文档编号和Term A在每个文档出现的频率一同记下来存储在 <code>.doc</code>。此时，Lucene需要用到2个PackedBlocks和3个VIntBlocks来存储它们。</p>
@@ -252,13 +252,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h5 id="multi-level-skiplist--skipdata"><strong>Multi-level SkipList — SkipData</strong></h5>
 <p>SkipData是.doc文件核心部件之一，Lucene采用的是多层次跳表结构，首先我们先预热一下SkipList的逻辑结构图，最后剖析Lucene存储SkipList的物理结构图。下图(源自网图)很好的描述了SkipList的结构：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/628e60b6511d42d384789d52a7821564.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281552344.webp" />   
     </p>
 <p><em>跳表的原理非常简单，跳表其实就是一种可以进行二分查找的有序链表。跳表在原有的有序链表上面增加了多级索引，通过索引来实现快速查找。首先在最高级索引上查找最后一个小于当前查找元素的位置，然后再跳到次高级索引继续查找，直到跳到最底层为止，这时候以及十分接近要查找的元素的位置了(如果查找元素存在的话)。由于根据索引可以一次跳过多个元素，所以跳查找的查找速度也就变快了。 ——— 百度百科</em></p>
 <p>将搜索时耗时转嫁给索引时，这就是Lucene索引的“空间换时间”的基本思想。为此Lucene为Postings构建SkipList ，并把按层级将它系列化存储。第一个SkipLevel是最高，拥有最少的索引数。</p>
 <p>Lucene在索引时构建了SkipList，在Segment中每个Term都有自己唯一的Postings，每个Postings都有需要构建一个SkipList，这三者是一一对应的。所以画出来结构图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1c54a0f10cc2435fa2c3bd5fb580a40c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281552233.webp" />   
     </p>
 <p>除了第0层之外所有SkipLevel的每个跳表数据块（SkipDatum）会存储了指向下一个SkipLevel的指针。图中SkipChildLevelFPg带 <code>?</code> 的原因是在 <code>Level 0</code> 时，SkipDatum没有下一级可以记录。如果Postings有存储positions、payloads和offsets的话，在跳表数据块中也会记录它们的Block所有文件指针。</p>
 <p>通过SkipList可以找到DocID和TermFreq之外，还能找到Positions、Payloads和Offsets这三部分信息。因此，在搜索时通过SkipList可以快速定位Postings的所有相关信息。</p>
@@ -398,6 +398,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -431,10 +435,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -813,6 +813,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

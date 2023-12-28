@@ -197,7 +197,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>本文根据贝壳找房资深工程师肖赞老师在2020年&quot;面向AI技术的工程架构实践&quot;大会上的演讲速记整理而成。</p>
 <h1 id="1-贝壳olap平台架的构演化历程">1 贝壳OLAP平台架的构演化历程</h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fe41b111d42547859eb1e13e8e3a3a52.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281845725.webp" />   
     </p>
 <p>如上图所示，贝壳OLAP平台架构的演化历程大致可以分成三个阶段：</p>
 <ul>
@@ -206,7 +206,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>第三个阶段是从 2019 年初到现在，灵活支持多种OLAP引擎的OLAP平台建设阶段，这个阶段解耦了OLAP平台与Kylin的强绑定，具备灵活支持Kylin之外多种不同OLAP引擎的能力；</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c866fae5a4c042898263fb6e57e1980b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281845730.webp" />   
     </p>
 <p>首先是第0阶段 - Hive2MySQL初期阶段</p>
 <p>在这个阶段，数据处理流程比较简单，数据包括日志、Dblog等，经过Sqoop批量或Kafka实时接入大数据平台HDFS里，在大数据平台完成ETL处理后，通过大数据调度系统Ooize每天定时写入到关系型数据库MySQL中，然后再以MySQL中的数据为基础产出各种报表。</p>
@@ -217,12 +217,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>这也是我们为什么称为第0阶段，因为这个阶段平台化工作比较少，严格说还称不上一个平台。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/620e0e1fc64b483998556b27bcf1710a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281845766.webp" />   
     </p>
 <p>随着公司业务的迅速发展，数据应用需求的急剧增加，Hive2MySQL的问题逐步突显，对这种原始架构进行升级改造是一个必然的选择。改造的目标很直接，首先解决MySQL无法支持海量数据分析查询的问题；第二就是要平台化，沉淀共性能力。</p>
 <p>对于第一个问题的话，很直接就是引入一个能够支持大数据量的OLAP引擎，这块经过一系列对比调研，选择了Kylin，对于Kylin后面会有介绍；另外，对平台化不够的问题，一方面规范化数仓建模，另一方面引入了一个指标和指标平台，通过指标来向公司各业务线提供数据分析服务。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a56fad00f53e43e0ae64d9033c13e867.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281846704.webp" />   
     </p>
 <p>引入指标，一方面有利于业务方更好地与数仓开发人员进行沟通，业务方给出业务层面的指标定义和口径，然后由数仓开发人员转化为底层数仓表和维度模型（星型或雪花）， 指标开发完成后业务方使用指标即可，而不是要了解数仓内部技术细节；另外也可以在指标的层面更好的实现复用。</p>
 <p>指标是业务单元细分后量化的度量值，包括维度与度量：</p>
@@ -232,17 +232,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>本质上指标是对维度建模（星型或雪花模型）在业务层的抽象。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/52ac49a72a09410a9bcb4b167815145e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281846772.webp" />   
     </p>
 <p>基于前面所述的思考，就有了第1阶段 - 基于Kylin的OLAP平台架构。</p>
 <p>OLAP平台的架构如上图所示，从底向上分为3层：OLAP引擎层，这里就是Apche Kylin；在Kylin之上是指标平台层，它对外提供统一API、指标统一定义和口径管理，支持指标的查询；在最上面是应用层，就是奥丁（这是贝壳内部的一个数据可视化产品）和各种数据应用产品，它们通过统一的指标API来获得数据，不直接使用SQL访问Kylin。另外，Kylin下面的是数据仓库层，里面有ODS、DWD、DWS、OLAP各层数仓表，这里就不仔细介绍了。</p>
 <p>下面先介绍一下指标平台层。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5488192093c342dda1c62eb3541a8236.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281846816.webp" />   
     </p>
 <p>首先，先重点介绍一下指标的概念。在前面提到，指标是指是对维度建模（星型或雪花模型）的抽象，指标包括维度和度量，分别对应维度建模中的度量和维度。在这里给了一个指标平台上具体指标的示例，“带看量_集团”指标，可以看到它的度量是对show_num字段count distinct排重计数，支持分公司编码、运营管理大区编码、运营大区编码等将近20个维度。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/36963eb55d3e49c9b3f010257a4de872.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281846775.webp" />   
     </p>
 <p>指标的类型可以分为3类：</p>
 <ul>
@@ -252,21 +252,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>所有的指标的定义和口径都是在指标平台进行管理的。各个业务方都主要通过在OLAP平台上定义和使用指标，来实现多维数据分析的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/da4371ac9b4542d188966db91511120f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281846821.webp" />   
     </p>
 <p>接下来看一下指标查询，前面有说过，指标平台对外提供统一的API来获取指标数据，上图就是一个指标调用参数示例，参数传到指标平台，指标平台会根据调用参数自动转换为Kylin查询SQL，对Kylin发起查询，获得数据，并根据需求做进一步处理，例如同环比计算、指标间运算等。上图中左边框架的示例调用参数，将转化成对应的Kylin SQL，如右框所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/41a99492fb624a3a85ce329e2d0d0a0e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281846913.webp" />   
     </p>
 <p>接下来看一下指标的应用，可以在奥丁可视化平台中利用指标配置各种报表，也可以自己开发数据应用产品，在产品里调用指标API获取数据。</p>
 <p>了解了指标平台后，再看一下Apache Kylin。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e1a98b02ffb94bb0972ed6deb20b7709.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281846834.webp" />   
     </p>
 <p>首先，为什么选型Apache Kylin。其实很简单，就是因为当时Kylin对平台的几个诉求，如亚秒级响应、支持百亿数据量、支持较高的并发和支持SQL等都有较好的支持。</p>
 <p>下面简单的介绍一下Kylin，它是由中国人主导比较成功的Apahce开源项目之一，由国内Kylingence公司提供商业服务。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4297c6dac2bc422a9aeb8edf0ac5b028.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281846860.webp" />   
     </p>
 <p>Kylin的整体架构如上图所示，其核心思想是预计算，对多维分析可能用到的度量进行预计算，用空间换时间。要预算首先需要知道怎么去预计算，也就是需要知道有哪些维度和度量，Kylin 通过要求用户首先定义Cube来获得这些信息，Cube定义支持星型或雪花模型，由Kylin的Metadata模块管理；</p>
 <p>定义完Cube后，就通过Kylin的Cube Build Engine模块来进行预计算构建Cube，具体可以通过MR任务，Spark或Flink来实现，完成预计算后结果就存储在HBase中。</p>
@@ -274,11 +274,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>预计算的一个最大的问题就是“维度爆炸”，也就维度组合太多，Kylin提供了很多优化技巧来缓解这个问题，例如强制维度、层次维度、联合维度等。</p>
 <p>其实Cube预计算这种方法并不是Kylin发明的，只是Kylin基于大数据平台来实现了这一套，使得它可以支持海量的数据，而之前没有大数据平台的支持，基于这种预计算方式的OLAP引擎支持的数据量很有限。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/891bbb2b084442569f09caba8f00240b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281846746.webp" />   
     </p>
 <p>这样，在OLAP平台就建立了标准的指标开发流程。整个流程如上图所示。从上面的流程上看：有在Kylin中操作的部分，也有在指标平台操作的部分。这也是为什么说是围绕Kylin来构建的OLAP平台。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6bdf70fd4a89448fa442b8e3d593b8dd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281846688.webp" />   
     </p>
 <p>经过2，3年的推广应用，指标在公司内部获得广泛的应用。支撑公司整个指标体系的建立，覆盖公司所有的业务线：</p>
 <ul>
@@ -287,7 +287,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>调用3s内返回99.5%</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/55e1e947a53645cd808c4c0ba49cf128.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281846562.webp" />   
     </p>
 <p>围绕Kylin我们也做了很多工作，主要包括3个方面：</p>
 <ul>
@@ -299,7 +299,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>这块工作公司其他同事进行过多次分享，此处就不再详述，感兴趣可以去了解一下。</p>
 <p>那是不是这样就比较完美了？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fc8001f265dd4f3d8b2a77bfe2a0959c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281846519.webp" />   
     </p>
 <p>在指标大量推广使用后，业务方也反馈了许多的问题。简单总结一下，主要包括以下几个方面。</p>
 <ul>
@@ -312,14 +312,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>那么，该怎么去解决这些问题？经过仔细分析，可以发现这些很多问题都是Kylin本身的原理所决定的，如果只依赖Kylin是没法解决的。因此，单一Kylin引擎无法满足公司不同业务场景下的应用需求，需要针对不同的业务场景来使用不同的OLAP引擎。为了让OLAP平台能够支持不同的 OLAP 引擎，OLAP 平台的架构就要做出相应的升级优化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/abb8c372a68344eeaca5e680aabcf58c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281846538.webp" />   
     </p>
 <p>这就到了第2阶段- 灵活支持多种OLAP引擎的OLAP平台</p>
 <p>这个阶段OLAP平台的架构如上图所示，从底向上分为4层：OLAP层，这里包括Kylin等各种引擎，在OLAP层之上是查询引擎层，它负责为指标平台屏蔽底层OLAP引擎查询接口的差异；再上面是指标平台，它对外提供统一API、指标统一定义和口径管理，支持指标的查询；在最上面是应用层，就是奥丁（这是我们一个数据可视化产品）和各种数据应用产品，它们通过统一的指标API来获得数据，不直接使用SQL访问OLAP。</p>
 <p>其中一个关键点就是，由于第2阶段中我们引入指标平台，通过指标API的方式对上层应用提供服务，这样我们可以在用户透明的情况下，扩展更多的OLAP引擎。</p>
 <p>下面简单介绍下各层。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b453db268bc742c5a2c2a678dd91d996.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281846583.webp" />   
     </p>
 <p>首先指标平台层，原来Cube管理这些功能是依赖Kylin的，现在把这部分抽象到指标平台里，也就将Cube定义和管理从Kylin解耦到指标平台里：</p>
 <ul>
@@ -328,7 +328,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>可将Cube动态绑定到不同的OLAP引擎</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-db7c380f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281846644.png" />   
     </p>
 <p>同时引入的查询引擎，它的功能主要包括：</p>
 <ul>
@@ -338,22 +338,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>因此指标平台仅需要使用QueryEngine的查询接口，不需要关注底层OLAP引擎。除此外，QueryEngine还具备查询优化（把GroupBy转TopN)、缓存、路由、熔断等功能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-c6922a58.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281846321.png" />   
     </p>
 <p>上面的例子，同一个调用参数，查询引擎分别生成的Kylin SQL和Druid native查询参数，如上图所示。</p>
 <p>上面的例子，同一个调用参数，查询引擎分别生成的Kylin SQL和Druid native查询参数，如上图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/da28cd1791f44fc68babd8acf275180d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281846012.webp" />   
     </p>
 <p>这样的在新的OLAP平台上，指标的开发流程如上图所示。所有的步骤都是在指标平台上完成，不再依赖于Kylin 。同时，构建Cube对不同的引擎有不同的含义。例如，对于Druid引擎来说，构建Cube并不会像Kylin一样去枚举维度组合进行预计算，而只是根据Cube中的Join关系生成临时宽表，并将宽表导入Druid。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3793380cb16943fcb36250b2f13832d6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281846010.webp" />   
     </p>
 <p>同时，我们开发一个配套的工具来支持多OLAP引擎指标的开发，包括指标定义、Cube建模、指标加工等。</p>
 <p>现在OLAP平台能够灵活地支持不同的OLAP引擎，那该选择哪些OLAP引擎？这就到了第2部分OLAP引擎选型与实践。</p>
 <h1 id="2-贝壳olap引擎选型与实践">2 贝壳OLAP引擎选型与实践</h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7986c42681364c80b37095b4a1777f6f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281846854.webp" />   
     </p>
 <p>OLAP 选型一般关注三个方面：</p>
 <ul>
@@ -367,7 +367,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>另外一类是存储计算不分离，即引擎自己管理存储的，其架构可能基于MPP或Scatter-Gatter的或预计算的，这类OLAP引擎的特点是，可以支持较大的数据量，具有较快的响应时间和较高的QPS，灵活性方面各OLAP不同，各有特点，例如，有些对SQL支持较好，有些支持Join，有些SQL支持较差。</p>
 <p>了解这些之后，再结合我们的业务需求进行权衡。公司业务方一般对响应时间和QPS要求均较高，所以基本只能在自带存储引擎里的类型中选择。Kylin是已经在用，其他的我们主要关注 了Druid，Clickhouse和Doris，其比较如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0e442b848550494492042fc2628c7b35.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281846929.webp" />   
     </p>
 <p>对于数据量和查询性能（包括响应时间和高并发），这几个引擎的支持都是不错的，可以满足公司 TB 级的需求。灵活性关注的几个方面主要包括对SQL的支持、实时数据导入、实时更新、Online Schema变更等特性，这些是在业务需求处理中经常需要用到的特性。</p>
 <p>接下来我简单介绍一下这几个引擎以及其在贝壳的应用情况，由于时间有限，将主要介绍Druid。</p>
@@ -497,6 +497,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -530,10 +534,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -912,6 +912,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

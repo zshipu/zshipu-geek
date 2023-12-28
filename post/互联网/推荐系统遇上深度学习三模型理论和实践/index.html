@@ -204,58 +204,58 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>下面的图片来自于张俊林教授在AI大会上所使用的PPT。</p>
 <p>我们之前也介绍过了，对于离散特征的处理，我们使用的是将特征转换成为one-hot的形式，但是将One-hot类型的特征输入到DNN中，会导致网络参数太多：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/17e936d04a8d490d94907793aec991a7.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953418.jpeg" />   
     </p>
 <p>如何解决这个问题呢，类似于FFM中的思想，将特征分为不同的field：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/31d6947a4f5e47fead51d29aeb6ca0c2.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953056.jpeg" />   
     </p>
 <p>再加两层的全链接层，让Dense Vector进行组合，那么高阶特征的组合就出来了</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/22a3ba10f9524cada7af0cd4621c8440.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953745.jpeg" />   
     </p>
 <p>但是低阶和高阶特征组合隐含地体现在隐藏层中，如果我们希望把低阶特征组合单独建模，然后融合高阶特征组合。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d6a2d8d912b34ecfa5a8f2d8f873a158.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953380.jpeg" />   
     </p>
 <p>即将DNN与FM进行一个合理的融合：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b575fa3778934513b5b55451aff65de6.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953058.jpeg" />   
     </p>
 <p>二者的融合总的来说有两种形式，一是串行结构，二是并行结构</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6647be9a90b14f759faada2dfca6b342.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953819.jpeg" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f10d19d9d8e34101baea0065aea9a72f.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271954660.jpeg" />   
     </p>
 <p>而我们今天要讲到的DeepFM，就是并行结构中的一种典型代表。</p>
 <h1 id="2deepfm模型">2、DeepFM模型</h1>
 <p>我们先来看一下DeepFM的模型结构：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8d27f957d28041779c37f9cfac28c32e.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271954454.jpeg" />   
     </p>
 <p>DeepFM包含两部分：神经网络部分与因子分解机部分，分别负责低阶特征的提取和高阶特征的提取。这两部分共享同样的输入。DeepFM的预测结果可以写为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/af84a97df8cb4bdeb45465377c3e5321.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271954180.png" />   
     </p>
 <p><strong>FM部分</strong></p>
 <p>FM部分的详细结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/58697928bf97424ea6770254d85f57a4.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271954807.jpeg" />   
     </p>
 <p>FM部分是一个因子分解机。关于因子分解机可以参阅文章[Rendle, 2010] Steffen Rendle. Factorization machines. In ICDM, 2010.。因为引入了隐变量的原因，对于几乎不出现或者很少出现的隐变量，FM也可以很好的学习。</p>
 <p>FM的输出公式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ce43dc36177c487fb591683074398b02.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271954624.png" />   
     </p>
 <p><strong>深度部分</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/08d285427d184654bdb449418843eef7.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271954399.jpeg" />   
     </p>
 <p>深度部分是一个前馈神经网络。与图像或者语音这类输入不同，图像语音的输入一般是连续而且密集的，然而用于CTR的输入一般是及其稀疏的。因此需要重新设计网络结构。具体实现中为，在第一层隐含层之前，引入一个嵌入层来完成将输入向量压缩到低维稠密向量。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ebff14de039e4195babf8934703be2c2.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271954154.jpeg" />   
     </p>
 <p>嵌入层(embedding layer)的结构如上图所示。当前网络结构有两个有趣的特性，1）尽管不同field的输入长度不同，但是embedding之后向量的长度均为K。2)在FM里得到的隐变量Vik现在作为了嵌入层网络的权重。</p>
 <p>这里的第二点如何理解呢，假设我们的k=5，首先，对于输入的一条记录，同一个field 只有一个位置是1，那么在由输入得到dense vector的过程中，输入层只有一个神经元起作用，得到的dense vector其实就是输入层到embedding层该神经元相连的五条线的权重，即vi1，vi2，vi3，vi4，vi5。这五个值组合起来就是我们在FM中所提到的Vi。在FM部分和DNN部分，这一块是共享权重的，对同一个特征来说，得到的Vi是相同的。</p>
@@ -271,18 +271,18 @@ actual = [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">Sorted Actual Values [0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 1]
 </code></pre><p>然后，我们可以画出如下的图片：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6a235b2d42834c118c317d5905562722.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271954845.jpeg" />   
     </p>
 <p>接下来我们将数据Normalization到0，1之间。并画出45度线。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a2df18f439744f56b4b2b3c49c79dc34.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271954629.jpeg" />   
     </p>
 <p>橙色区域的面积，就是我们得到的Normalization的Gini系数。</p>
 <p>这里，由于我们是将预测概率从小到大排的，所以我们希望实际值中的0尽可能出现在前面，因此Normalization的Gini系数越大，分类效果越好。</p>
 <p><strong>embedding_lookup</strong></p>
 <p>在tensorflow中有个embedding_lookup函数，我们可以直接根据一个序号来得到一个词或者一个特征的embedding值，那么他内部其实是包含一个网络结构的，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6370f992a2994df8837d6b8b1610a88c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271954450.jpeg" />   
     </p>
 <p>假设我们想要找到2的embedding值，这个值其实是输入层第二个神经元与embedding层连线的权重值。</p>
 <p>之前有大佬跟我探讨word2vec输入的问题，现在也算是有个比较明确的答案，输入其实就是one-hot Embedding，而word2vec要学习的是new Embedding。</p>
@@ -295,7 +295,7 @@ actual = [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 <p><strong>项目结构</strong></p>
 <p>项目结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/018cc83f23c340a8858ac6a746f05284.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271954341.png" />   
     </p>
 <p>其实还应该有一个存放data的路径。config.py保存了我们模型的一些配置。DataReader对数据进行处理，得到模型可以使用的输入。DeepFM是我们构建的模型。main是项目的入口。metrics是计算normalized gini系数的代码。</p>
 <p><strong>模型输入</strong></p>
@@ -329,7 +329,7 @@ self.embeddings = tf.multiply(self.embeddings,feat_value)
 </code></pre><p><strong>FM part</strong></p>
 <p>首先来回顾一下我们之前对FM的化简公式，之前去今日头条面试还问到过公式的推导。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/607ac85405184f848b61703be4646640.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271954103.png" />   
     </p>
 <p>所以我们的二次项可以根据化简公式轻松的得到，再加上我们的一次项，FM的part就算完了。同时更为方便的是，由于权重共享，我们这里可以直接用Embedding part计算出的embeddings来得到我们的二次项：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma"># first order term
@@ -490,6 +490,10 @@ for i in range(0,len(self.deep_layers)):
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -523,10 +527,6 @@ for i in range(0,len(self.deep_layers)):
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -905,6 +905,8 @@ for i in range(0,len(self.deep_layers)):
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

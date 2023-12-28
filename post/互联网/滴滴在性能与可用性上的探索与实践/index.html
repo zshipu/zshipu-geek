@@ -214,14 +214,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/57e4b32e90c44dc28c89fe10685b67eb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272229006.webp" />   
     </p>
 <p><strong>桔妹导读</strong>：HBase作为Hadoop生态中表现较为突出的分布式在线数据存储产品，在滴滴有着非常广泛的应用，但同样存在比较突出的短板问题——例如可用性较弱、毛刺严重等，一定程度上限制了它的业务边界。本文主要介绍在此背景下，HBase团队近期进行的一些探索工作。</p>
 <h2 id="1-背景">1. 背景</h2>
 <p>HBase 是一个基于 HDFS 的低成本、分布式LSM结构数据库，可以支持毫秒级别查询；支持海量的PB级的大数据存储，适用于高QPS的随机读写和前缀范围查询等场景。此外，优秀的开源环境使得HBase还可以支持丰富的上下游生态与离线任务。</p>
 <p>目前在滴滴内部，HBase基本覆盖了全部业务线，数据量PB规模，吞吐超千万级别；业务包含司乘轨迹、订单、特征工程、推荐引擎、IOT、APM等各种场景，基于HBase的多模生态诸如OLAP（Kylin）、时序（OpenTSDB）、时空（GeoMesa）、图（JanusGraph）亦均有应用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/34ef89bb5885438790976677b9270858.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272229889.png" />   
     </p>
 <p>2020年下半年，HBase团队逐渐将视野投向端上/类端上业务，希望能够承载更加重要的流量。然而对于HBase自身架构和实现而言，主要存在两方面痛点：</p>
 <h3 id="1可用性问题">▍1.可用性问题</h3>
@@ -237,7 +237,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>1</strong>. <strong>replication主备</strong></p>
 <p>replication是HBase的异步数据同步机制，和Mysql利用Binlog实现主从库类似，HBase利用WAL实现主备集群的数据同步。大致流程为主集群记录写入的WAL，并将数据异步发送给备集群，备集群接收数据并将其转换为put/delete操作，批量写入备集群。提供最终一致性保证。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/12/image-6057afc2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272229551.png" />   
     </p>
 <p>图片来源：HBase官方文档</p>
 <p>detailed_information_about_cluster_replication</p>
@@ -249,7 +249,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>2. replication + failover</strong></p>
 <p>failover是滴滴HBase团队基于replication自研的增强feature，架构如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/849c61cce6d9436bae2dc060f48f3810.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272229707.png" />   
     </p>
 <ul>
 <li>相比第一阶段，failover可以基于zk实现服务切换，不需用户操作。但仍然存在用户有感知、备集群无法充分利用的问题；</li>
@@ -263,7 +263,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h3 id="1-设计">▍1. 设计</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6d28ef3cd7b541c09ee860fe6a0353e2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272229966.png" />   
     </p>
 <p>整体设计参考HDFS的hedgedRead功能，客户端首先向主集群发起读请求，一定时间没有返回结果则并发向备集群发起请求，两者取先完成者返回。</p>
 <p>实际上HBase的regionReplica也是类似的实现。</p>
@@ -279,15 +279,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p><strong>3.2 测试结论</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/563fe1760a864dc7986339c7878f8dc1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272229232.png" />   
     </p>
 <p>max对比</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/abde523aeb6744098edb8c4b832908d0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272229602.png" />   
     </p>
 <p>P999对比</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a0014720501a4ddf8e44fd839a1b0d83.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272229871.png" />   
     </p>
 <p>P99对比</p>
 <p>多路读对于max和P999有较佳优化效果，可以有效打磨毛刺。</p>
@@ -310,7 +310,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>随着滴滴内部越来越多的端上和类端上业务使用HBase作为存储引擎，用户对HBase读写延迟稳定性的要求也越来越高，HBase的GC毛刺问题尤为突出，G1无法满足性能需求。</p>
 <p>好消息是JDK15在9月15号正式发布，划时代的ZGC正式转正，我们决定尝试用ZGC来解决GC毛刺问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f95e2044334e4e2aaf64e10e435c6e38.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272229944.webp" />   
     </p>
 <p><strong>ZGC（The Z Garbage Collector）</strong>：ZGC是JDK11之后发布的一款可伸缩的低延迟JVM垃圾收集器。</p>
 <p><strong>ZGC官方的设计目标如下：</strong></p>
@@ -449,6 +449,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -482,10 +486,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -864,6 +864,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

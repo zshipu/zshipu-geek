@@ -208,7 +208,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ce58500bda6d4ca39d3033bc0c63b0a8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272243026.png" />   
     </p>
 <p>现在很多互联网公司都有自己的机器学习平台，冠以之名虽然形形色色，但就平台所要解决的问题和技术选型基本还是大同小异。</p>
 <p>所谓大同是指大家所要处理的问题都相似，技术架构和选型也差不太多，比如都会使用 GPU 集群、采用 Spark 或 K8s 平台等。所谓小异是指各家规模不同，各家都在结合自己的情况、所处的阶段并根据自己的特点解决平台化的问题。</p>
@@ -223,7 +223,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>统一资源管理、环境管理后，不得不面对的问题是多个资源节点间数据共享的问题，用户在当前资源释放后申请新资源时往往对之前的数据有依赖。多节点数据共享在作坊式时期受限于单个的规模，问题不会十分突出，但是集中化之后随用户增多就会逐渐尖锐起来乃至是个大的技术挑战。因为：1. 机器学习的任务计算特点依赖于 GPU 的高速计算，它们对数据访问延迟有一定要求，这要求必须有足够高的 IO 带宽做支持；2. 用户数量增加，对存储带宽的需求会变的非常大；3. 对存储系统来说，支持 POSIX 接口的要求使得现有技术方案大大减小，另外也需在高可靠性、高性能以及成本之间做折中。</p>
 <p>滴滴机器学习平台在存储系统上的尝试还是借用传统超算使用的 PFS 作为整个数据存储的一级，底层网络基础设施使用高带宽的以太网络，使用 RoCE 协议做 RDMA 的支持，并往这个方向演进。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b6f73ee6eb3b4dc2b0a66a3fd0404208.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272243661.png" />   
     </p>
 <p>总的来看，这个阶段所面对的问题以内部问题为主，从作坊式到集中化生产的发展阶段，要解决的相关重复性的问题也比较简单。其中有些问题本质属于集中化后产生的问题，但是解决思路还是作坊式的，技术选型上的局限性也没有完全暴露出来。</p>
 <h3 id="机器学习平台-20平台发展">机器学习平台 2.0：平台发展</h3>
@@ -232,30 +232,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>每种性质的任务都有各自重复的具体形式，比如用户在模型生产后要部署模型服务，就需要解决服务的 HA、负载均衡等生产服务问题，每一个在线模型都要解决这类问题；再比如，用户训练时往往需要调参，而这些参数都是同形的，只是数值上的变化，这种值上的变化后就是一个个独立的任务，需要用户提交任务的流程，这提交流程也是重复性的工作；再比如，用户在运行多机多卡时需要参数服务器，低效的参数服务器把大量的时间浪费在通信上，这种浪费会加重用户资源使用上的重复；与这种重复形式相似的，还有比如模型服务要上线，为了满足服务的延迟、QPS、资源的约束，需要做从服务、到深度学习框架、再到计算库的全栈优化，基本上，大部分模型上线也需要经历这个优化过程。</p>
 <p>针对上述新出现的问题，平台需要更加强大的资源管理和任务调度能力。在上一时期选用作为资源管理和任务调度器的 Yarn 开始呈现出疲态，具体表现在 K8s 日臻成熟，与 Docker 的结合更加合理和完整，并能够整合多种维度的资源，使用 K8s 为解决模型服务的自动化部署提供了环境和条件，也降低了服务的运维成本，综合 K8s 和 Yarn 各自的利弊，滴滴机器学习平台开始由 Yarn 架构向 K8s 建构迁移。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/db4a167db1ed4e8d8908546fbb9c9712.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272243746.png" />   
     </p>
 <p>针对用户同形调参的效率问题，平台对用户的 Python 代码做语义分析以自动识别出哪些参数可能会是需要调整的参数，用户只需要设置值域和步距就可以自动获取整套参数的模型训练任务以及最终的结果。</p>
 <p>针对多机多卡训练效率问题，平台结合自己的硬件特点和通信模式特点，开发了滴滴参数服务器。滴滴参数服务器采取环状结构，实现了高效的 RDMA 通信的 Allreduce 算法。环状结构而非中心集中的 server-client 模式，消除了网络传输可能的带宽竞争和网络拥塞。底层自研的高效 RDMA 通信库，规避了设备厂家提供用户态 Verbs 内部分性能损失，重写的底层通信库实现了 sig/read 及 post/recv 两种模式，尽量规避了 RDMA 固有的通信开销，充分挖掘了硬件的属性来提高性能。另外，自研的 Allreduce 算法巧妙重叠了计算和传输，尽量减少了不必要的内存拷贝来减少额外代价，并充分考虑了 GPU 拓扑、CPU 亲和性等硬件属性来提高性能。</p>
 <p>在机房 40G 带宽的 RoCE v2 RDMA 网络实际测试中，对比业界的 OpenMPI 和 Nvidia 的 NCCL2 方案，滴滴参数服务器有明显优势。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5865c4cccf15462fb6ea9a45d12fcdca.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272243922.png" />   
     </p>
 <p>针对模型服务部署和优化，平台结合自己的场景特点开发了 DDL（DiDi Deep Learning） Serving 服务框架、IFX 框架和 Autotuning 优化库，极大的加速了模型上线部署和优化过程。DDL Serving 独创自适应的 batch 机制，优化 RPC 协议，解决 Tensorflow Serving 的缺陷，相比于 Tensorflow Serving 性能对比加速如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b12d6926019e42a981cc294936ab2321.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272243206.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a07dd74c9bf244d7ba5285d48fe1b49e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272243786.png" />   
     </p>
 <p>DDL Serving 框架服务本身不再成为整个服务链路中的瓶颈点，对于一些轻量模型可以有 3 倍的性能提升，包括 RT 和 QPS 的提升, 而对于一般模型，性能热点落在深度学习框架层。</p>
 <p>因此，针对框架层，我们自主研发了深度学习框架 IFX，并同时适配于 GPU 服务器和移动端平台。在 GPU 服务器上，由于 CUDA 存在 context 管理的问题，所以我们设计实现了一种 GPU 上的并发机制，有效地绕开了这些问题所带来的额外开销，另外对大量的 OP 做了优化，使得 IFX 的性能远高于 Tensoflow 乃至 TensorRT ；IFX 针对移动端的不同硬件配置，比如：流水线长度、顺序乱序、超标量等特点进行指令重排、访存优化，结合业务的计算特点，使得 IFX 的性能取得不俗的表现：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a96794f9dcb04bc4acd78524d88b0f11.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272243489.png" />   
     </p>
 <p>在 IFX 的优化过程中，大量的重复工作基本在 Tuning Blas 计算，由于硬件架构不同，不同模型的计算量、计算访存比、计算访存模式都不同，在极高性能要求下都需要综合这些具体的情况做针对性的优化。这些优化都很底层，并且调优都相对繁琐，对于上层服务用户来讲，不必关心这些底层细节。</p>
 <p>为解决这类问题，平台开发了 Autotuning 工具链，包括 Kepler、Pascal、Volta 架构的原生汇编器。对于用户来讲，只需要把 GPU 上的二进制代码发给平台，平台就可产生在该 GPU 平台上几乎是最优，也就是当前最高性能优化后的二进制代码。滴滴机器学习平台团队也是目前除了 NV 以外，自己掌握 NV GPU 原生汇编器支持版本最多，对 NV GPU 微架构最了解的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/127f26d9e85b424f97e3fb3a1d1adb32.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272243538.png" />   
     </p>
 <p>这些“重复问题”随着集中化和平台化产生，也在平台化的环境下使得解决这些“重复”变得有意义。集中化、平台化带来的第二个好处便是在此基础上，通用性的需求逐渐会沉淀为平台的服务。比如相似检索的需求在滴滴地图的 POI 优化、人脸检索、视频图像内容检索等业务场景中都是共性需求，因此平台会获得足够的业务信息来开发这种平台级的服务，而在作坊式时代很难获得这类跨业务场景的需求而自发的沉淀出平台服务，大多还是自扫门前雪。</p>
 <h3 id="机器学习平台-21内外云平台成形">机器学习平台 2.1：内外云平台成形</h3>
@@ -265,7 +265,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="gpu-资源减少资源的重复性工作">GPU 资源：减少资源的重复性工作</h4>
 <p>相比于内部的用户，外部用户使用资源需要有一个安全的隔离环境，仅用 Docker 的弱隔离方式无法给用户提供安全且隔离的环境。所以滴滴云上 GPU 云资源使用 KVM 和 GPU 透传的方式把 GPU 资源透传给用户。滴滴机器学习平台技术团队对 GPU 的使用颇有心得，团队成员也是早期一批在工业界尝试 GPU 的团队，积累了丰富的 GPU 使用一线的知识和经验，而且这些在滴滴内部被佐证十分有效，从 GPU 资源、拓扑和相关配套上都特别花心思，所以相同 GPU 型号，用户往往可以获得更好的性能，对比如下图。这部分的沉淀也减少了外部用户在探索使用 GPU 过程中的重复性工作，降低了使用的隐性成本。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/975a012ac3c14bc28dfa6790f4eba003.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272243554.png" />   
     </p>
 <h4 id="弹性推理服务eis减少服务部署优化的重复">弹性推理服务（EIS）：减少服务部署优化的重复</h4>
 <p>所有的算法模型最终都需要用于生产服务，国外有很多 PAML 平台能够部署机器学习模型服务，机器学习平台在滴滴云上也提供了一种模型部署服务——EIS（弹性预测服务）。EIS 服务根植于内部使用的 DDL Serving 服务，但因在云上服务我们对一些理念的坚持，所以大家可能会产生我们有“起大早赶晚集”的疑问，诚然，EIS 在滴滴内部以 DDL 的形式出现的相对不算晚，但这一块的服务市场现在只能说是刚刚起步，产品的差异化和多样化会是必然的趋势，对用户来讲也有更好更大的选择空间。</p>
@@ -275,18 +275,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>根据我们内部用户和一些外部用户的经验，服务最核心的技术指标是 QPS 和 RT，进而才是满足这两个指标情况下的部署成本和使用成本。而这些成本的降低则必须在尽可能减少用户的重复工作和“实用实销”的基础上，除了一般服务部署需要的 HA 和运维支持外，EIS 从技术架构设计上侧重于解决这两方面问题。</p>
 <p>从 RT 来讲：用户服务 RT 的开销受限于网络链路和实际前向计算的开销，为了减少网络链路的开销，滴滴云花了不少时间，在公有云上实现了纯公有云化的 Gateway，这一方面用于支持用户自定义的鉴权等操作，另一方面也最小化网路跳数以降低网络的开销，保证用户服务的 RT；从 QPS 来讲，EIS 使用滴滴机器学习平台的 DDL Serving 作为服务引擎框架，使用 DDL Serving 的用户可以忽略底层硬件的细节，从而可以避免用户重复地去做服务框架层面的已知的优化工作，这样也为实现用户“实用实销”提供了条件。可以通过以下的架构图了解：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/25090687590e4f7c9fe3efa20df6e104.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272243042.png" />   
     </p>
 <p>要做到“实用实销”，还有一个非常关键的环节就是需要知道用户的模型实际的计算需求量，以及某一种硬件下的计算利用率。我们开发了一个自动压测模块，用户提供模型和部署输入就可以获得使用 DDL Serving 在某种硬件下的计算性能，进一步回归出某种 RT 性能要求下的 QPS 能力。对用户来讲，用户折算出业务需总的 QPS 后按 QPS 横向扩容即可，相当于用户只负担了实际消耗的计算性能的那部分资源，这比之前的模式是更加细粒度的资源控制。</p>
 <p>用户优化上的重复性工作的减少，如之前讲过的除了服务框架的优化外，还有一部分优化是花在计算性能的优化上，但计算性能的优化往往取决于程序的计算特性和相关的硬件特性，并且每种模型都有各自的特点，这部分工作 EIS 也提供了 Autotuning 的优化服务，用户需要提供他的二进制代码，通过 Autotuning 服务后会产生某种模型和框架下在指定硬件下几乎是最优的性能代码。</p>
 <p>Autotuning 服务除了能降低重复基础的和琐碎的优化工作外，也能够提升用户模型服务 RT 和每 QPS 实际资源消耗资源。目前 EIS 已经接入滴滴内部大量的业务，其整个功能模块图如下。因为一些限制，对外部客户，当前滴滴云 EIS 服务还是通过提交工单接入的方法，用户自助的方式马上会上线。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/58800464bfa74ba881113e0b8bf34632.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272243075.png" />   
     </p>
 <h4 id="简枢降低用户重复平台建设">简枢：降低用户重复平台建设</h4>
 <p>同 EIS 一样，机器学习平台级产品在内部积累了丰富的一线平台经验，基于此，机器学习平台在 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.didiyun.com%2F%3Fchannel%3D14302">滴滴云</a> 上开发了平台级产品简枢。简枢包装了多种平台能力，弱隔离方案的资源管理、多种任务管理、监控报警、在线服务快速部署等，能够帮助其他公司在平台化过程中少踩坑，快速具备平台能力，提高生产效益。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e8e4c083281044c9a2da15243123dc79.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272243851.png" />   
     </p>
 <h3 id="未来展望">未来展望</h3>
 <p>对于机器学习来讲，计算力仍然是最具革命性的力量，正如 2011 年开始的这波深度学习浪潮的助力正是 GPU 一样，未来计算力还是工程层面的制约力。正如 Jeff Dean 所言“事实证明，我们真正需要的是超过现在 100 万倍的计算能力，而不仅�</p>
@@ -415,6 +415,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -448,10 +452,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -830,6 +830,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

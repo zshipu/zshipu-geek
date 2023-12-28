@@ -199,36 +199,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在CTR预估中，为了解决稀疏特征的问题，学者们提出了FM模型来建模特征之间的交互关系。但是FM模型只能表达特征之间两两组合之间的关系，无法建模两个特征之间深层次的关系或者说多个特征之间的交互关系，因此学者们通过Deep Network来建模更高阶的特征之间的关系。</p>
 <p>因此 FM和深度网络DNN的结合也就成为了CTR预估问题中主流的方法。有关FM和DNN的结合有两种主流的方法，并行结构和串行结构。两种结构的理解以及实现如下表所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/16f0d0a34f64462480153187d33bbcfb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953026.png" />   
     </p>
 <p>今天介绍的NFM模型(Neural Factorization Machine)，便是串行结构中一种较为简单的网络模型。</p>
 <h1 id="2nfm模型介绍">2、NFM模型介绍</h1>
 <p>我们首先来回顾一下FM模型，FM模型用n个隐变量来刻画特征之间的交互关系。这里要强调的一点是，n是特征的总数，是one-hot展开之后的，比如有三组特征，两个连续特征，一个离散特征有5个取值，那么n=7而不是n=3.</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/c712aa76f2de475aa4c25a3f825a4366.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953248.png" />   
     </p>
 <p>顺便回顾一下化简过程：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/1f34a3ccd0824c6aaba80dde8cd8f6f3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953022.png" />   
     </p>
 <p>可以看到，不考虑最外层的求和，我们可以得到一个K维的向量。</p>
 <p>对于NFM模型，目标值的预测公式变为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/0f239c592be44f35b95dc02685cb1047.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953823.png" />   
     </p>
 <p>其中，f(x)是用来建模特征之间交互关系的多层前馈神经网络模块，架构图如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/a3f330909a544b1f9270b89062e987dc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953733.png" />   
     </p>
 <p><strong>Embedding Layer</strong> 和我们之间几个网络是一样的，embedding 得到的vector其实就是我们在FM中要学习的隐变量v。</p>
 <p><strong>Bi-Interaction Layer</strong> 名字挺高大上的，其实它就是计算FM中的二次项的过程，因此得到的向量维度就是我们的Embedding的维度。最终的结果是：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/a465caaba2c4494db264f0de6c21f5ae.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953826.png" />   
     </p>
 <p>Hidden Layers就是我们的DNN部分，将Bi-Interaction Layer得到的结果接入多层的神经网络进行训练，从而捕捉到特征之间复杂的非线性关系。</p>
 <p>在进行多层训练之后，将最后一层的输出求和同时加上一次项和偏置项，就得到了我们的预测输出：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/8da32fdd6b244ce39a5c3daff88974d3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271953624.png" />   
     </p>
 <p>是不是很简单呢，哈哈。</p>
 <h1 id="3代码实战">3、代码实战</h1>
@@ -453,6 +453,10 @@ self.out = tf.add_n([tf.reduce_sum(self.y_first_order,axis=1,keep_dims=True),
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -486,10 +490,6 @@ self.out = tf.add_n([tf.reduce_sum(self.y_first_order,axis=1,keep_dims=True),
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -868,6 +868,8 @@ self.out = tf.add_n([tf.reduce_sum(self.y_first_order,axis=1,keep_dims=True),
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

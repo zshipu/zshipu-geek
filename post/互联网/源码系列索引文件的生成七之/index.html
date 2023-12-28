@@ -206,12 +206,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="生成索引文件timtip-的流程图">生成索引文件。tim、.tip 的流程图</h2>
 <p>图 1：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/1-ddaa6a2d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218389.png" />   
     </p>
 <h3 id="统计每一个-term-的信息">统计每一个 term 的信息</h3>
 <p>图 2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/2-75597016.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218185.png" />   
     </p>
 <p>  执行到该流程，我们需要将当前 term 的一些信息（图 1 中的 IntBlockTermState，见文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2020%2F0110%2F125.html">索引文件的生成（五）</a>）的汇总到所属域的信息中（这里先提一下的是，这些信息在后面使用 FieldMetaData 封装），图 2 中出现的字段的含义如下：</p>
 <ul>
@@ -224,7 +224,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>  例如我们有如下几篇文档：</p>
 <p>图 3：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/3-0fed9f27.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218675.png" />   
     </p>
 <p>  其中用红色标注的 term 属于域名为&quot;content&quot;的域，那么在处理完&quot;content&quot;之后，图 2 中的字段的值如下所示：</p>
 <ul>
@@ -237,28 +237,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>  再处理完所有域之后，上述的信息在索引文件。tim 中的位置如下：</p>
 <p>图 4：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/4-7f6fe516.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218054.png" />   
     </p>
 <h3 id="生成-nodeblock">生成 NodeBlock</h3>
 <p>图 5：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/5-2cd62f21.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218777.png" />   
     </p>
 <p>  当前域的所有 term 处理结束后，那么将 term 栈中剩余未处理的 PendingEntry 生成 NodeBlock（见文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2020%2F0115%2F126.html">索引文件的生成（六）</a>）。</p>
 <h3 id="记录当前域的信息在tip-文件中的起始位置-indexstartfp">记录当前域的信息在。tip 文件中的起始位置 indexStartFP</h3>
 <p>图 6：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/6-70ca8733.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218862.png" />   
     </p>
 <p>  到此流程，Lucene 将要在索引文件。tip 中写入当前域的 FSTIndex 信息，在读取阶段，通过读取索引文件。tip 中的 FSTIndex 信息来获取当前域在索引文件。tim 的内容，而所有域的 FSTIndex 信息连续的存储在索引文件。tip 中，那么需要 indexStartFP 来实现&quot;索引&quot;功能，如下图所示：</p>
 <p>图 7：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/7-9778b8a3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218983.png" />   
     </p>
 <h3 id="生成当前域的-fstindex-信息">生成当前域的 FSTIndex 信息</h3>
 <p>图 8：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/8-b9499254.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272218596.png" />   
     </p>
 <p>  在图 5 的流程中，当前域的所有 term 处理结束后，term 栈中剩余未处理的 PendingEntry 会被处理为 NodeBlock，最终只会生成一个 PendingBlock（没明白？见文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2020%2F0115%2F126.html">索引文件的生成（六）</a>），并且 PendingBlock 中的 index 信息，即 FST 信息将会被写入到 FSTIndex 中，由于本人还未对 FST 在 Lucene 中的应用有过文章的介绍，即使在本篇文章中列出 FSTIndex 中包含的字段信息，相信读者也无法理解，故只能通过几句话大概介绍下 FSTIndex 的内容以及功能：FSTIndex 包含了当前域中的 term 的一些前缀值的信息，根据该信息就可以在索引文件。tip 中找到每一种前缀值对应的 NodeBlock，该 NodeBlock 中包含了具有该相同前缀值的所有 term 的信息。</p>
 <p>  在文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2Fyasuocunchu%2F2019%2F0220%2F35.html">FST 算法（上）</a> 中只是简单的介绍了 FST 的</p>
@@ -385,6 +385,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -418,10 +422,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -800,6 +800,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

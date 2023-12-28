@@ -220,11 +220,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="一搜索质量面临的问题及痛点">一、搜索质量面临的问题及痛点</h1>
 <p>目前搜索业务架构如下图所示，笼统的说可以分两层，最上面一层协同网络效应层，也就是服务业务层，包括商品、交易、会员、营销、资产这几个核心业务场景，还有外围的零售、教育、美业、直播业务，第二层折叠效应层，将各种底层能力折叠在一起，包括索引写，索引读，索引管理，集群管理，其中集群管理包括双机房同步、索引重建、重载、监控等，依赖的组件不限于ES，还有Hbase、DTS、Flink、DP等；</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1a4cb62f032a4e86b8a4ba14dac6709f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121481.webp" />   
     </p>
 <p>针对服务应用层、底层能力支撑层都面临着不同的问题，概括的分为三个部分，分别是影响面评估不准、流程规范为零、稳定性较差：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d368a781519a416ca8c703603e99d14c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121444.webp" />   
     </p>
 <h3 id="痛点1影响面评估不准">痛点1：影响面评估不准</h3>
 <p>服务业务层面临的最大的问题就是业务场景评估，目前有赞搜索业务几乎包含B端C端大部分核心业务，读场景占比量更大，例如B端商品管理页面、订单管理页面、会员业务搜索等，这时候就会遇到一个问题，如果ES进行了升级或者底层做了改造，怎样才能保障上游各个业务场景都没有问题，怎样保障回归用例完全覆盖，避免引发业务线上故障，是搜索中台核心要考虑的问题。</p>
@@ -240,24 +240,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>流量回放：目前搜索主要接流量回放的场景都是读场景，经评估搜索读应用可接入应用12个已接入12个，涉及读接口35个，每个读接口对应的场景都配置相应标签识别，整体可覆盖读场景80%以上，但是流量回放有个弊端，能覆盖80%的场景，剩余的20%的场景因流量太小可能采集不到，这样就需要额外的集成用例补充以保证用例集的完整；</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ce3e9073daf14044848e5431263740c3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121146.webp" />   
     </p>
 <ul>
 <li>CI集成用例：我们单独搭建了搜索测试工程：bit-search-platform，用以补充剩下的小流量场景用例及异常用例，包括业务层的ic-search和showcase-render，底层的es-proxy及console等等；</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4f0459ad91784773ac9487e84cbdb4d8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121824.webp" />   
     </p>
 <ul>
 <li>场景用例执行集：以上两种都是针对应用级别的用例，但是如果支持项目的话，需要单独的用例执行集，方便开发自测和测试回归，我们针对几个大模块在接口测试平台补充了相应的核心场景执行集，例如：C端商品搜索、B端商品搜索、搜索BOS场景等。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f00b49f9bc0d4938ab4721014c9df675.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121923.webp" />   
     </p>
 <h2 id="2-业务及集群稳定性实践">2 业务及集群稳定性实践</h2>
 <p>原架构中底层es-proxy承接整个公司的读写流量，不同业务公用一套应用难免就会相互影响，例如商品业务这边有大量读操作过来了，走到proxy会把线程池占满，请求会大量堆积在线程队列里无法处理，从而影响其他业务线。此问题是线上偶发问题，在测试环境和压测中会被放大，测试抛出风险推开发出优化方案。优化方案最终采取dubbo分组隔离的方式进行业务隔离，如下图：商品业务线走ic分组、交易业务线走trade分组，这样的话大流量的C端商品读并不会影响到交易订单搜索了，实现了业务单元的影响隔离；本次的架构升级给后续的整个搜索业务和集群的稳定性做了不少贡献。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/31ccdc4c62c3425d911661666fd047cc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121898.webp" />   
     </p>
 <p>接下来会从三个方面具体介绍搜索稳定性保障：性能专项、演练预案、监控治理：</p>
 <h3 id="21-性能专项测试"><strong>2.1 性能专项测试</strong></h3>
@@ -269,34 +269,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>压测过程中共发现性能问题粗略计算下来26个，主要集中在强弱依赖，这就涉及到强依赖如何进行兜底、弱依赖如何降级的问题；</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7d97f4f794b343678ec348e4b788b1e8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121774.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2ffd34db231e48fdaa36fb3a321d202a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121995.webp" />   
     </p>
 <p>下面统计了一下从2019年中开始到目前为止通过性能压测手段间接推进落地的一些措施，核心在限流降级：
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/95db4220e540463a8f34dbb4dd2f8b1e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121016.webp" />   
     
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/49e7842da7f943ea825047f62eb8cb77.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121724.webp" />   
     </p>
 <h3 id="22-演练及紧急预案"><strong>2.2 演练及紧急预案</strong></h3>
 <h4 id="221-演练">2.2.1 演练</h4>
 <p>针对异常及故障进行常态化演练，包括ES双机房切换演练、索引迁移演练、业务线日常演练，异常演练等等，截止目前为止大大小小的演练执行了大概18次，值得一提的双机房切换演练，往年ES双机房切换方案无脚本化执行，纯手工敲命令，全靠经验跟临场发挥，切换耗时基本1个小时以上，且每次切换必修数据，耗时耗人耗精力，演练的目的是为了快速高效切换，一键脚本化，保障了切换时间保持在10分钟内，打破了“ES一切换必故障”的魔咒！</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a7dcff2017414cf0992634041680aeb8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121415.webp" />   
     </p>
 <h4 id="222-预案">2.2.2 预案</h4>
 <p>通过演练以及结合线上问题预估出可能的风险，推进开发进行一些技术改造，配合执行验证预案效果，下图为核心的几个预案：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6207d3947f964ec7b2c0074e825c5146.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121529.webp" />   
     </p>
 <p>简单举例：</p>
 <p>ES异常处理Tips：</p>
 <p>ES集群异常场景大部分都会涉及到一个索引切流到备的操作，我们通过apollo配置双机房分流，紧急情况直接切备：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f7797407546740efbb889d42b8e4804d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121568.webp" />   
     </p>
 <p>但是如果切备还解决不了问题，就需要对集群做更细粒度操作，问题大致可分为以下几个异常场景：</p>
 <p>1、proxy线程池满</p>
@@ -327,10 +327,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="事前监控">事前监控</h4>
 <p>ES慢查统计、Top Query、错误码监控、总体性能指标、操作占比等，这些以天网大盘的形式实时监测，目前总共配置了11个大盘，主要是为了提前感知到业务方错误使用的方式和慢查Query的业务场景，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/361e1906c72c44cbbd1f11644a95570a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121360.webp" />   
     
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6f3c25e5c8664b96be0ad9c661568a0a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121243.webp" />   
     </p>
 <h4 id="事中监控">事中监控</h4>
 <p>主要包括应用级别监控，底层集群监控，另外还有依赖的中间件监控，Tesla告警等，主要是应用发布或者集群索引迁移的时候能够及时观测应用及集群情况；</p>
@@ -339,21 +339,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>中间件主要有：kv、nsq配置在应用级别，flink监控告警配置在任务级别；</p>
 <p>此外错误日志治理是2021 H1重点，为了提高error日志的准确性，降低排查难度，目前L1应用error量至少降低60%，报警粒度细化到了场景，例如“获取商品详情异常”、“店铺服务异常”、“美业深翻&amp;value过长”等等；</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/85d8c1de9ec54e37a848116495663afb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121134.webp" />   
     
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d79aa9a9459a4086b12af76b7a1fb193.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121905.webp" />   
     </p>
 <p>经过2021年上半年监控告警治理，线上有效bug数明显降低，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b0266729f30245e8be0917742d438833.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121675.webp" />   
     </p>
 <h4 id="事后监控">事后监控</h4>
 <p>搜索事后监控场景不是很多，事后的线上数据如果有问题肯定也是“木已成舟”，主要包括BCP定时对账，即同步链路上Hbase与es数据对比，还包括一些索引级别的每天读写请求量，大部分是为了统计或后续索引优化提供依据。</p>
 <h2 id="3-搜索中台流程规范补全">3 搜索中台流程规范补全</h2>
 <p>俗话说：无规矩不成方圆，搜索各项流程的制定也是经历一波阵痛，有不少是依据线上问题和跟研发的合作磨合下一步步补充起来的，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9354e8d7bd1840e98f562fbb43d78d58.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121677.webp" />   
     </p>
 <p>其中在研发提测质量上，搜索中台从搭建初始单测覆盖率为0，针对这种情况，我们对搜索的应用进行了一个梳理，重新定义各应用的UT标准，其中L1级别应用增量覆盖率需要达85%，L2级别应用增量覆盖率达75%，杜绝出现无断言或断言过简的情况，通过流程规范的卡点，目前搜索核心应用单测情况：</p>
 <p>![](https://img.6</p>
@@ -480,6 +480,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -513,10 +517,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -895,6 +895,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -202,12 +202,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>以深度学习为代表的 AI 技术近年来在搜索推荐场景中得到广泛的应用，对用户 Query 和内容侧的理解不断深入，用户体验得到显著提升。</p>
 <p>搜索是一种典型的 AI 应用，关键技术包括 Query 分析 、内容理解、文本相关性计算以及排序等。从统计机器学习到深度学习，算法结合大数据将搜索引擎精度不断的提升。本次分享以部分技术为例探讨小米移动搜索中应用的 AI 技术。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/871047bcd10f4fa4babe62c5f2394bc0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271830908.webp" />   
     </p>
 <p>小米的移动搜索主要有两个场景，MIUI 的主搜索入口，以及浏览器中搜索提示。小米的移动搜索针对移动端搜索的特点，致力于为用户提供精准便捷的体验。实现了应用、内容、服务的直达。例如搜索视频时，直接够唤起爱奇艺/腾讯视频等 app 观看特定选集。</p>
 <p>覆盖小米体系和外部合作方内容，以下是部分合作垂类内容提供方：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4856ac54dd954d8f903de47092cd8637.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271830643.webp" />   
     </p>
 <p><strong>今天分享的技术内容分几个部分：</strong></p>
 <ul>
@@ -223,7 +223,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>先介绍下搜索系统的典型结构：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0eac6158c94f48298f36ee4f4cc95fe2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271830300.webp" />   
     </p>
 <p>最基本的搜索架构大体上也都有这样几个部分，百度、搜狗、神马、360等各大搜索厂商采用的基本架构都是类似的，包括：</p>
 <ul>
@@ -248,47 +248,47 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>中文的文本相关性计算是一个比较复杂的问题。</p>
 <p>例如：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8584c5bb1fdf4299af1cbb1adcd46b89.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271830015.webp" />   
     </p>
 <p>举一个简单的例子，第一个问答中的两种表述存在差异；第二个例子中，在句子中插入不同的字符，对语义的影响也存在不同。</p>
 <p>我们设计了两个基本模型解决文本相关性计算的问题，最终使用两个模型融合的结果。</p>
 <p>2.3 相关性 GBDT 模型</p>
 <p>首先介绍使用 GBDT 模型计算 query 和 document 文本相关性。通过特征工程从人工标注数据中进行学习。有如下几大类特征：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/22331f6762e741dbbd76083843b68d1b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271830671.webp" />   
     </p>
 <p>在图中的样本打分为1的样本，query 中的核心词 &quot; 33集 &quot; 在查询结果中没有命中，核心词未命中是模型中很强的一个特征。这两句话在浅层语义上差异也很大。在 &quot; 锦绣未央：唐嫣受伤 &quot; 中主体有 &quot; 锦绣未央 &quot; 和 &quot; 唐嫣 &ldquo;，而在 query &quot; 锦绣未央33集 &quot; 中主体是 &quot; 锦绣未央 &quot; 和 &quot; 33集 &quot; 。打分为2的样本，主体葱爆海参对海参做了限定，但没有超出海参的范畴。</p>
 <p>在匹配特征设计中需要分析命中词权重、是否命中同义词、未匹配词是否为停动词等，例如 query 中的词没有在 document 中出现。在上图中标注3分的例子中，去掉不重要词 &quot; : &ldquo;，整个 query 依然是连续命中，该项特征得分就较高。还有就是同义词的处理，这里需要同构离线挖掘同义词的表。类似的特征还有编辑距离，逆序对的数量，考虑词权重的匹配等等。</p>
 <p>相关性计算还有一种方法是使用用户行为日志，利用用户更多点击和未点击文档构建训练样本对。与经典的基于关键词匹配相关性算法相比，DNN 模型极大的提高了语义相关性的判断范围和准确性，对于长尾查询的效果也更好。DNN 模型使用的训练样本数据量比较大，我们的场景中目前用到亿级别样本。下图以 C-DSSM 为例 ( 基于微软的论文 ) 。中文与英文相比处理有一点差异，需要先分词之后是取单字和词的 embedding，另外这里推荐 trainable 的 embedding 。模型能够学习出查询与文档的量化表示，并计算相似度。我们还做了一些改进包括输入层增加额外信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/902b8976c60047a0a66239e1e5f8a803.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831567.webp" />   
     </p>
 <p>获取 DSSM 模型处理的结果后，进行模型融合，利用好两种模型的优势。</p>
 <p>人工标注样本的优点是精度高，交叉标注可以使得准确率达到90%以上。从用户行为中收集的样本，样本精度大约只有70%，优势是数据量大长尾覆盖度好，能将 query 与 document 的语义结果放在同一个向量空间。以下是两种方式比较具体结果：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fa128e8779f94fd8a07c2e42a12c205b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831293.webp" />   
     </p>
 <p><strong>三、意图识别与词权重</strong></p>
 <p>首先看下意图识别的例子，根据输入来识别出不同的意图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b35d2c4fe8ce46838c4caa20eafacba3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831910.webp" />   
     </p>
 <p>输入是 &quot; 男士用洗面奶洗脸的正确方法 &ldquo;，在识别出意图后，放到 &quot; jingyan &quot; 、 &quot; zhidao &quot; 等垂类索引中去搜索，能够提升性能并为后续的排序等流程提供信息。</p>
 <p>这个项目早期解决的方法是词典+规则的方式，这种方法是精度高、依赖人工挖掘，覆盖度有限，规则之间可能冲突，维护成本高。后来改进为在词典+规则的基础上，使用 LR 和 DNN 两个模型计算意图分数。</p>
 <p>使用 FTRL 优化的 LR 模型做意图识别能获得在线学习的方法的好处，是因为意图是动态变化的过程，这使得线上模型能够快速的更新。这里将意图识别建模分为多个二分类问题；构建的特征有 N-Gram 、长度特征、首位位置特征等；单类别的样本量在千万级别。此外还使用了 DNN 模型做意图识别，把多类别的样本放到 DNN 模型中，需要数量保持一定程度的均衡。</p>
 <p>在对 query 进行分词后，还需要计算分词结果的词权重，最容易想到的方法是 IDF，这种方法比较简单应用在工业级系统中效果不够理想。因为一个句子具有整体含义，是一个上下文相关的问题。传统的方法是使用 CRF 模型来进行计算，目前 SOTA 的方法是用 BiLSTM+CRF 的方法。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fe4a19f9a5fe448c82dd512f2aca6d95.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831587.webp" />   
     </p>
 <p><strong>四、点击模型排序</strong></p>
 <p>用户的浏览和点击等行为数据除了计算相关性还可以用来改善排序的效果。</p>
 <p>移动搜索业务与传统的网页搜索有一个明显的区别，传统的网页搜索结果，不同的网页之间有类似的结构，移动搜索排序面临的一个挑战是异构结果。比如搜索结果中其字段表述的含义跟视频跟应用是不同的，视频里面分级、主演，应用是有哪家厂商发布/应用类型，这些信息在不同结果之间是对不齐的，网页搜索场景中的排序一般是同构结果排序。业务中采用了点击模型进行异构结果的排序。下面介绍几种点击模型： PBM 、Cascade Model 、DBN 。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9444a1e9f9e540f2aacbed08e504e58a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831379.webp" />   
     </p>
 <p><strong>4.1 点击模型—PBM</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e65bf47b378d44b0ad69f05418858c23.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271831075.webp" />   
     </p>
 <p>PBM 是一个比较简单的基于位置模型，即结果与用户看的概率、实际看的概率来决定。</p>
 <p><strong>4.2 点击模型-CM</strong></p>
@@ -422,6 +422,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -455,10 +459,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -837,6 +837,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

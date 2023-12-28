@@ -199,37 +199,37 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>模型介绍</strong></p>
 <p>在介绍BiLSTM之前，先了解下RNN、LSTM、BiLSTM的关系。RNN结构可简化如下图，其具有一种重复神经网络模块（图中隐层节点A）的链式结构。每个输入对应隐层节点，隐层节点之间形成有向的线性序列，隐层节点的输出取决于输入和前一个节点的状态输出。RNN之所以能流行于NLP并占据过主导地位，主要还是源于RNN的结构天然适配处理NLP中的不定长序列问题。下图右部分所示结构即可解决序列标注问题，比如分词、词性标注、实体识别和语义标注等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fc174a8aa7cf414db95da887db673449.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271656705.webp" />   
     </p>
 <p>LSTM是RNN的一种特殊类型，其总体结构也如上图，而与标准的RNN的区别则在于重复神经网络模块的结构不同。LSTM通过刻意的设计来避免长期依赖问题，而标准的RNN为实现长期依赖往往需要更大的代价（难于训练）。BiLSTM则是两个不同方向的LSTM累加而成，可以同时捕获过去特征和未来特征。BiLSTM本身已经可以处理序列标注问题，下图给出了其结构,右部分为BiLSTM单元的局部结构图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/de7ea70a85ab4b369f44142bbdaa4ade.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271656413.webp" />   
     </p>
 <p>输入为字序列，每个字可以表示为Word Embedding，可以由外部的模型预训练获得（直接使用），比如Word2Vec、GloVe等，也可以通过在本模型中直接作为参数来训练。这里需要指定Word Embedding的维数dim_embedding。BiLSTM层需要指定三个参数：1）BiLSTM的最大链长num_steps（或称时间步数，即模型能处理文本序列的最大长度）；2）BiLSTM层数num_layers，一层BiLSTM由一左向一右向的LSTM层构成；3）LSTM单元中各网络模块（LSTM单元中有4个网络模块）的隐层节点数hidden_size，则各LSTM单元输出的状态向量的维数也是hidden_size。输出层需加一个softmax层，将隐层输出映射为字被标为各标签的概率，这里需要指定标签的个数num_labels。</p>
 <p>这种结构用来解决序列标注问题时，还有个小问题，对每个字，模型都能预测到它对应最大概率的标签，但最终的得到标注序列并不一定最优。比如会出现下图这种情形。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c63aefce84274dbeb41920078f746870.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271657159.webp" />   
     </p>
 <p>最终会预测出“BBME”这种明显错误的序列。此时若再加一层CRF，考虑到转移概率则能有效避免此类情形，完整结构如下。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e99ede9b3b4a4aaeb30040299be95166.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271657746.webp" />   
     </p>
 <p>对每一个输入序列X，其标注为序列y的得分为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2407e76bc95d48a4b9411d77f451d956.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271657352.webp" />   
     </p>
 <p>式中P为字被标注对应标签的概率；A为转移概率矩阵。得分经过归一化可得标注序列的概率：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/05f3e1ecf8824ba4bff74758b5bf2eba.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271657884.webp" />   
     </p>
 <p>式中Yx为输入序列X所有可能的标注序列的集合。则损失函数可表示为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/22efabf542ba4ba7b6562e61166a15cc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271657270.webp" />   
     </p>
 <p>损失函数最小则意味着真实的标注序列概率最大，优化该损失函数即可求解模型参数。</p>
 <p>当模型训练完毕后，根据训练好的参数求出对应最大得分的标注序列y即为最终结果，这里也可使用维特比算法求解。预测过程即求解下式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0741d62073234a808558c5b691c78b8c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271657656.webp" />   
     </p>
 <p><strong>模型训练</strong></p>
 <p>模型训练我们采用TensorFlow框架实现，训练数据为人工标注的58场景语料以及少量的人民日报对齐语料总计在30w句。下面按实现过程提几点需要注意的细节问题:</p>
@@ -254,13 +254,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>BERT的大名相信很多人都听说过，它应该是目前通过大规模语料预训练语言模型来解决具体的NLP问题这种方式的最优秀代表了。在BERT之前这种处理问题的方式就已经存在了，这里先以LSTM为例来简单介绍下这种方式，方便过渡。</p>
 <p>上部分有提到，LSTM是可以用做语言模型的，其结构可如下图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6e761a2803054febb33fc5b89d72c604.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271657141.webp" />   
     </p>
 <p>输入是一句话的前N个字序列，输出是第N+1个字。语言模型的训练是一个无监督训练的过程，可以很方便的获取大量样本数据，学习到丰富的语言特征。细心的读者可能发现了上图的结构也很适合做文本分类的任务，只需稍稍改动下输出层的结构。比如语言模型训练时输出层通过全连接将隐层变量映射到字典空间，而分类任务则是映射到标签维度（比如0和1），而他们的输入和隐层结构基本一致。预训练的思想就是先通过大量的文本按语言模型的方式预训练模型参数，然后改造输出层结构即可直接用于分类任务。之前训练好的参数此时可作为分类任务的初始化参数，然后将分类任务的样本数据喂给模型来微调网络参数（fine-tune）。这样做有几个好处：1）在只有少量标注数据的情况下，也能使用复杂的模型；2）加快训练速度；3）充分利用了大量的文本语料训练而来的语言特征。</p>
 <p>预训练除了fine-tune这种操作外，另一种有效的方式是将预训练得到的网络参数比如词嵌入（Word Embedding），直接迁移到另一个具体任务（其模型结构可以与原模型完全不同）中直接使用。BERT的文章中也提到fine-tune的方式要略优于后者。因此我们使用的也是fine-tune方式。</p>
 <p>NLP任务大致可分为四大类：1）序列标注，比如分词、实体识别、语义标注等；2）分类任务，比如文本分类、情感分析、文本相似性等；3）句子关系判断，比如QA、自然语言推理等；4）生成式任务,比如机器翻译、摘要等。而BERT可以解决前三类中的大部分问题，并且在很多的任务中都有当前最佳表现。BERT模型是一个多层双向的Transformer编码器结构，其简化结构图如下。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bf475c4b76254448a32fa95390a5ee15.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271657510.webp" />   
     </p>
 <p>可以看出，这个图和前面BiLSTM用作序列标注任务时的结构有些相似。主要区别是隐层使用的基本单元不一样，BERT中使用的是Transformer,输入和隐层之间均是全连接，同层各Transformer之间没有信息传递，这种连接结构也是由Transformer的特性决定的。Transformer是目前NLP领域最优秀的特征抽取器，其本质是自注意力机制（self-attention）的叠加,该模型由Google 团队在Attentionis all your need论文中提出。</p>
 <p>注意力机制最早是在图像领域提出来的，它们认为要对一个场景做出一种特定判断时，往往不需要关注场景的所有区域，关注某几个区域就足以做出该判断。比如给你一个人像图，让你判断喜欢与否，为了快速而准确的识别（注意力资源是有限的），那么你只需关注某几个位置就足以做出判断了，而可以忽略其他位置信息的干扰。注意力模型简单概括下就是，给予需要重点关注的目标区域更重要的注意力（可理解为权重），同时给予周围的区域更低的注意力。</p>
@@ -268,7 +268,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Transformer使用的是自注意力机制，从机器翻译中可理解到注意力机制是目标句子中各词和源句子中各词间的相关性程度，那么自注意力则是描述同一句子中各词之间的相关关系，也就是说该句子既是源也是目标。每个位置的目标向量就是其他各位置词向量与注意力权重的加权总和。回想下RNN的结构，字与字之间的相关作用需要经过线性结构一步一步传递过来，而Transformer这种注意力机制使得每个字与其他各字的作用都是一步直达的。这种构造也使得Transformer是可以并行计算的，而RNN很难做这一点。</p>
 <p>我们再来看一下Transformer的编码器（完整的还包括了解码器模块，BERT中仅使用了编码器部分）结构如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b032c39ea8074789abdc38558c7c0ece.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271657052.webp" />   
     </p>
 <p>第一层是Multi-HeadAttention，所谓多头可以理解为有多组注意力权重，则每个位置可得到多个目标向量，然后将这多个目标向量拼接成一个向量即为该层输出，这可能是作者认为词与词之间会存在多种相关关系吧。再之上是一层前馈神经网络，目的是让模型中的参数有更多的互动。每个子层采用残差连接和层规范化，便于训练。多层Transformer互连即构成了BERT模型。</p>
 <p>官方给出了BERT base和BERT large两种模型，我们使用的是中文的BERT base模型，隐层深度(Transformer叠加的层数)layer=12，hidden_size=768(Transformer输出向量维度)，多头个数为12，整个模型约110M参数，我们可直接使用官方训练好的预训练模型。</p>
@@ -402,6 +402,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -435,10 +439,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -817,6 +817,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

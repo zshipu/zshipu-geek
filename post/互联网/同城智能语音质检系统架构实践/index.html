@@ -199,13 +199,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>传统语音质检通常是指质检员听取一定比例的电话录音进行人工质检，检测坐席在通话过程中是否有违规或非标准话术行为，如骂人、嘲讽、推诿、过度承诺等，以规范坐席人员行为，进而提升客户服务质量。纯人工听取录音效率低，单人日均仅能听取约 3 小时，在大规模呼叫中心中往往只能实现少量录音的抽检，覆盖率低。随着语音识别、自然语言理解技术的高速发展，近年来诞生了智能语音质检系统，在语音质检上起到了越来越重要的作用。</p>
 <p>智能语音质检一般采用机器质检与人工复检相结合的方式，会覆盖客户和坐席的每一句话，可以很好地辅助提升人工坐席的服务质量，智能语音质检相比传统语音质检具有以下优势：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-a88f6313410e4106a61b7f6a9b3c2a52.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705805.webp" />   
     </p>
 <p>目前 58 同城呼叫中心每年有上亿通电话，为了能够实现海量电话录音全量自动化质检，TEG 技术工程平台群 AI Lab 自研了智能语音质检系统，它是利用语音识别、自然语言处理、大数据技术构建起来的质检管理系统，集成了数据收集、存储、质检、分析等功能。58 智能语音质检系统的工作流程是：首先收集话务中心话务数据，其次利用语音识别技术将录音转成文本，然后利用自然语言处理技术与深度学习技术对文本进行分析处理，最终将质检的结果在 Web 管理平台上展示，由质检人员进行人工复检。</p>
 <p><strong>整体架构</strong></p>
 <p>语音质检架构包括基础能力层、数据层、逻辑层、编辑运营层和 Web 管理层，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-6b8d6a6e0b674bd2a07f8a958adaffee.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705362.webp" />   
     </p>
 <p>基础层为语音质检提供了基础的语义分析能力，包括由 NLP 自然语言处理模块和 ASR 语音识别模块组成。NLP 模块主要功能包含分词、文本聚类、文本分类、关键词提取、实体提取等。ASR（语音识别）模块集成封装了第三方语音识别接口，用于语音转文本、角色分离。</p>
 <p>数据层提供了数据接入能力，接入了 Kafka、WMB（58 自研消息总线）实时话务数据，并提供了质检话务数据接口服务，实现对实时录音数据、离线语音数据的多种数据格式质检、存储支持。</p>
@@ -216,17 +216,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>语音识别是一种将语音转换成文本的技术，对于双声道的录音，客户和坐席的声音在不同的声道，因此可以很容易地将通话双方的说话内容分开并转写成文本，对于单声道录音（我们的质检录音绝大多数都是单声道），客户和坐席的声音混在一起，将说话内容转写成文本之前，我们还需要进行语音分离，将双方的说话内容在语音粒度上分开。语音分离的效果直接影响到后续的质检工作，假如误把客户的说话内容判别为坐席的说话内容，必然会降低质检的效果。衡量语音分离的通用指标是分离错误率（DiarizationError Rate）DER，它指的是语音总时长中识别错误的语音时长所占的比重，DER 越小说明分离的效果越好。</p>
 <p>此外对于单声道的语音，我们将分离后的语音识别成文本后，还需要进行角色识别的工作，语音分离只是识别出哪些说话内容是 A 的，哪些是 B 的，还需要依靠角色识别来判断 A 和 B 哪个是坐席，哪个是客户。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-3fb3ca993f5e42e494fb8058be145c56.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705019.webp" />   
     </p>
 <p>角色识别服务分两步进行，首先会根据音频特征判断说话人双方是否是异性，如果是异性，使用语音性别模型识别出每一句说话内容的性别，然后进行角色的判定。如果无法确定认为双方为异性，则会进行通用角色识别：获得 A 和 B 的说话内容之后，第一步是整体判别 A 和 B 的角色，整体判别之后可能还会有部分语句的角色是错的（由于语音分离不完全准确造成），比如“有什么还可以帮您的吗？”明显是坐席说的话，但是却被分到了客户的角色上，因此第二步我们会做单句角色纠正。客户和坐席的说话内容都有明显的角色特征，在角色整体判别和单句角色纠正中，我们使用了深度学习模型 Transformer 和 TextCNN 并结合挖掘到的一些规则来进行识别。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-d248d9c8a3e24c629e1a7ea88d40a121.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705834.webp" />   
     </p>
 <p>语音转文字</p>
 <p><strong>质检标签识别</strong></p>
 <p>销售质检包括销售违规质检和销售常规质检。销售违规质检是为了找出客户有投诉倾向的录音，为此我们定义了“客户表示将去投诉”，“销售辱骂客户”，“客户表示被骚扰”，“客户表示打错了”等标签。语音质检系统可以检测出包含这些标签的录音，并将这些录音反馈给销售主管，销售主管获取这些录音做进一步的处理以避免客户投诉的发生。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-bc58d06222a54c7eb49af1af376627d0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705565.webp" />   
     </p>
 <p>销售常规质检针对所有业务线的销售录音，包括“过度承诺”，“工作作假”，“销售辱骂客户”等标签，销售常规质检对于监督销售工作、规范销售行为起到了重要作用。</p>
 <p>客服质检针对的是客服录音，目标是检测出通话中客服不文明或者不合规的行为，客服质检对于提升客服服务质量有重要作用。比如招聘业务线新户客服的工作是告知新会员需要注意的事项，包括“安全提示”，“号码保护”和“客户热线”等标签，语音质检系统会给出新户首通客服录音包含的所有标签，并对本次通话给出一个评分。</p>
@@ -234,13 +234,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>复检系统</strong></p>
 <p>复检系统是 Web 管理平台的一部分，我们会把质检结果展示在 Web 页面上，质检员可以看到整体质检报表，也可以对单通语音进行复检，人工复检的详情页面如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-6f911b12ab934762a3841a6f46434fcb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705999.webp" />   
     </p>
 <p>质检员在标签栏可以看到质检系统给出的标签，点击标签可以直接定位到标签的说话内容，点击说话内容左侧的播放按钮可以听这句话的录音，同时最下侧的录音进度条也会移动到相应位置。质检员不仅可以很快地复检标签内容，也可以通过快速浏览文字检查质检系统未覆盖到的内容并手动添加标签，复检结果会存入数据库中供后续分析使用。传统的人工质检，质检时边听录音边做记录，一通语音要反复听好几遍才会有一个质检结果，效率非常低下。相比于传统的人工质检方式，使用复检系统的人效提高 2 至 3 倍。</p>
 <p><strong>后端架构设计</strong></p>
 <p>语音质检后台系统基于 58 同城自研 RPC 框架 SCF 实现，使用 WMonitor 实现对各个服务的监控，存储依据不同数据的特性分别选用了 WOS（58 自研对象存储服务）、Redis、WTable（58 自研 KV 存储服务）、WCS（58 自研索引服务）、MySQL 等。整个后台服务的设计如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-feb3631d80c7412796040cf135fbad27.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705585.webp" />   
     </p>
 <p>语音质检接入了呼叫中心的实时话务消息队列，以实现对坐席电话的实时质检功能，此外还额外提供了话务数据接口服务，实现对离线数据的提交质检。</p>
 <p>语音质检后台系统由数据服务、主体服务、ASR 服务、ASR 回调服务、说话人识别服务、质检标签服务等多个微服务组成。</p>
@@ -249,7 +249,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>说话人识别以及质检语音标签分析依赖的模型经离线训练后部署在 WPAI 中，此外 WPAI 提供了算法模型在线预测服务，供说话人识别服务、质检语义标签服务在线调用，质检结果由主体服务统一存储到 MySQL 中。</p>
 <p>在将录音转写成文本、给每通录音打上质检标签后，为便于质检员实时复检操作，我们构建了智能质检 Web 平台，平台提供机检标签查询、人工复检、录音文本查看、录音调听、统计报表汇总等功能。Web 系统涉及大量的标签查询以及统计功能，单一的 SQL 查询难以满足性能指标，对此我们引入了 58 自研的 58 云搜（WCS）搜索私有云平台，将质检结果数据实时同步至 WCS 中，Web 查询由 WCS 统一承载，目前在千万级数据接口查询速度约为 20ms。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-797fe41046f54b8184be5be58e1808e5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705178.webp" />   
     </p>
 <p>列表查询</p>
 <p><strong>总结</strong></p>
@@ -257,7 +257,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>目前智能语音质检系统已稳定接入 58 同城呼叫中心销售、客服全量录音，涉及 13 个业务，日均质检电话录音数十万通，其中客服录音质检场景折合节省人力近千人，提高了呼叫中心人效和服务质量。</p>
 <p>同时智能语音质检系统提供了通用的语音分析能力，除了目前应用的语音质检场景外同样的技术也可以用于 C2B 平台语音分析场景，58 同城作为平台方为商家以及客户搭建了方便快捷的沟通途径，其中语音电话也是一大重要的沟通方式，对于 C 端客户与 B 端商家的语音分析可提供如低质通话过滤、客户需求挖掘分析等多种业务能力。C2B 的语音一般是双声道，不需要做语音分离和角色识别，可以很好地区分客户和商家说话内容，因此具有更好的分析效果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-1809b8858201412ab81a8fba038bef10.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705873.webp" />   
     </p>
 <p>此外语音质检后续将重点提高角色识别、标签识别准确率，提供简单快捷的接入平台的能力，进一步挖掘语音数据中潜藏信息，服务业务方，提高语音质检、分析工作人效，为广大用户提供更好更优质的服务。</p>
 <p><strong>作者简介</strong></p>
@@ -387,6 +387,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -420,10 +424,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -802,6 +802,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

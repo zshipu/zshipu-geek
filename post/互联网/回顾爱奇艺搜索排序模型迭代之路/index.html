@@ -218,16 +218,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="二-介绍">二、 <strong>介绍</strong></h2>
 <p>首先介绍一下我们支持的搜索入口，在我们app的搜索框里，支持下图所示的搜索方式：图搜索、台词搜索、语音搜索。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/164950b4cc2e4dedb1a386cd1b8f65bb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725944.webp" />   
     </p>
 <p>今天分享的，其实还是一个更加通用的搜索方式，即文本查询。通过把用户输入的文本做自然语言处理后进行的关键字查询，在此，我们做了很多自然语言处理和语义的理解。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/50d4bbe34082493bba56f000eb212794.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725557.webp" />   
     </p>
 <p>在视频内容层面，最重要的是视频本身的描述信息，如标题，演职人员等信息。还有一个是内容的语义，我们当前并不是多模态特征去抽取，更多的是通过用户对该视频的观看行为，如搜索、浏览、评论、弹幕等各种行为，由此产生的数学结构去抽取语义信息。所以我们今天更关注在doc层和query层是如何做这些匹配的。</p>
 <p>在介绍具体的匹配过程之前，我们先了解一下一个通用的搜索系统的约束条件（下图所示）：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ea2ee75b6b07453899951ac9fea0ad64.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725222.webp" />   
     </p>
 <blockquote>
 <p><strong>1)
@@ -244,12 +244,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>此外，我们发现，当用户在搜索产生的结果使得自身的的主需求得到满足的时候，可以激发用户一些其他的语义相关的结果。</p>
 <p>在这样五个约束条件下，我们如何搭建全网的搜索引擎呢？下图即是我们的整体系统框架。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e5d87aea8365474bbbd99c95fef096e9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725940.webp" />   
     </p>
 <p>我们有大量视频资源，通过召回系统，即基于文本匹配的matching system，得到候选集，经过粗排和精排，最后返回给用户，这是大体的流程图，其中最重要的是召回系统和排序系统。</p>
 <p>两个系统的重要模块很多，下图列举其中一些：包括改写纠错，基础召回，知识图谱召回，语义匹配召回；排序模块关注特征工程，学习模型的选择，模型融合与智能决策。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/04993c9aea544b6cae17cb6850e634e1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725454.webp" />   
     </p>
 <p>在此我们将要展开的是我们是如何进行一步步迭代的。</p>
 <blockquote>
@@ -257,14 +257,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>第二</strong>， 排序模型的尝试。</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9d67b87def38452d84a55e39bd4fc1f2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725052.webp" />   
     </p>
 <h2 id="三召回策略迭代">三、 <strong>召回策略迭代</strong></h2>
 <h3 id="1基础相关性"><strong>1. 基础相关性</strong></h3>
 <hr>
 <p>首先是基础相关性，搜索引擎处理流程图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e53bd405dcce4067bf3727ce1132fb26.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725766.webp" />   
     </p>
 <p>通过对用户的query进行切词，将右边的视频资源的文本描述信息构建构建倒排索引，此过程为精确匹配过程，词匹配则倒排索引拉回归并，然后返回用户，此过程较为经典，在传统的搜索引擎也是比较成熟的应用方式。</p>
 <p>这样一个流程里面，它解决的问题也比较通用：</p>
@@ -277,25 +277,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>这其实是基础相关性中需要解决的问题，也是我们在1.0版本中，花了很多力气去解决的问题。需要注意的是，上面的问题并没有最优解，这是一个根据bad case不断做优化的过程。</p>
 <p>这里举个例子，如下图（例子描述见视频）：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/18c4175657ad49778128c7abe91ddbf9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725475.webp" />   
     </p>
 <p>基础相关性解决不了的问题，我们归为四类：词汇的同义多以问题、语言表达差异、输入错误兼容、泛语义召回。</p>
 <h3 id="2语义相关性"><strong>2. 语义相关性</strong></h3>
 <hr>
 <p>在解决基础相关性遇到问题的时候，我们再来思考一下，在文本匹配上是怎么解决语义的问题，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/89ee3548d9d54f7088beba4ceed9f781.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725135.webp" />   
     </p>
 <p>左边是XX老师整理的五个层面：词、词组、词义、主题、结构。在搜索场景下：我们有天然的用户搜索之后的点击行为，基于点击行为，我们可以在不同层面做语义匹配，紫色框是我们要解决的问题所用到的技术。</p>
 <p>下图是机器翻译模型：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8733a6f2218140cbb53f57c56ea3b278.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725761.webp" />   
     </p>
 <p>机器翻译是一个目前比较火热的领域，并且在深度学习出现之后，其准确率得到了飞跃性的提高。这是我们解决语义相关性的第一个手段。</p>
 <h4 id="21-翻译模型"><strong>2.1 翻译模型</strong></h4>
 <hr>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a48184a78288458f97ca910aa883f8e2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725310.webp" />   
     </p>
 <p>由于用户在搜词的时候，并不会去把相关词汇都搜索一遍，这就需要由搜索引擎去拓展用户的查询词汇。通过翻译系统，可以将查询词转化成与语义需求相同的其他词汇，用这些扩展后的新词与视频做相关性计算，取top结果返回给用户，以此来实现拓展词召回。</p>
 <p>具体策略为：</p>
@@ -312,7 +312,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>做一个假设，当用户有一个搜索需求时，假设其用到的搜索词和编辑取的标题不在同一个语义空间，那么该场景造成的mismatch现象会非常严重。那么此时，我们就需要把二者映射到同一语义空间，以提升命中概率。</p>
 <p><strong>具体做法</strong>：利用搜索点击日志，来构建一个搜索点击二部图。如下图中可以看到：doc4与query2和query4和query6有较强的相关性，虽然此时我们并不知道doc4是什么内容，但是我们已然不难看出，三个query词之间具有较强的相关性，并且这个结论的置信度也是很高的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c3f167409a4c47dab14b85118cfba2d2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725084.webp" />   
     </p>
 <p>这对于查询结果来说是一个不错的拓展方式；在这样的二部图中，我们可以进行多次的迭代，并以次来拓展query的表达。</p>
 <p>在构建二部图的时候有许多高挑战性的事情：</p>
@@ -325,7 +325,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>如下图所示，右侧为一个例子。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4a6c7b4906754dfda76cfc6f04107498.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725931.webp" />   
     </p>
 <h4 id="23-深度学习"><strong>2.3 深度学习</strong></h4>
 <hr>
@@ -339,16 +339,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8c0bfaec5b174882a4c4ac99a5d4a33a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725541.webp" />   
     </p>
 <p>我们当前的策略是基于表达，如下图所示框架：首先，抽取query下的正负样例；之后，做多粒度切词，用embedding做加权平均，得到文本串的向量表示；再经过两个全连接层生成正样例相关性和负样例相关性；在此基础上，构造损失函数使得正样例大于负样例相关性，用反向传播来优化网络参数。</p>
 <p>在视频短文本场景下：表达型方式比交互型方式效果好；网络结构和权重对结果影响很大，idf权重很高；最难点在于ground true构建，严重影响语义模型的效果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/85d77a46ed6449c1a979fdae88c285ee.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725130.webp" />   
     </p>
 <p>下图是精确匹配2.0的版本，在这个版本我们基于翻译模型把query进行查询词拓展，同时click-simi的方式去拓展点击相关性的查询词，然后去搜索原倒排索引和语义倒排索引，最后基于相关性模型去计算query和视频内容是否相关。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/36ea82632b574968b593e2a73f7f3c18.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725777.webp" />   
     </p>
 <p>以上是在解决基础相关性的bad case的时候，应用的语义相关性的技术，这些技术是学术界提出的，在工业界通过a/b test，不断的尝试后得出的比较成功的案例。</p>
 <h2 id="四排序策略迭代">四、 <strong>排序策略迭代</strong></h2>
@@ -370,13 +370,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>四种因素组合加上产品策略以及规则返回给系统，该版本可以解决大多数常见问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/67a8dd56692b48ebb042bd0ab3cb4060.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725322.webp" />   
     </p>
 <p>后面当我们的特征越来越多的时候，以上四个因素已经开始很难全面地涵盖各种排序因子了。所以，我们需要了解：策略系统无法得到最优解，因为需要不断根据经验去尝试参数。</p>
 <p>所以后面迁移到了学习系统，基于用户在历史的排序结果的点击行为收集起来构造label，根据用户在搜索时候给出的query以及展现给用户的video以及上下文信息构造特征向量，与label进行join，得到ground turth，之后进入学习系统进行学习，训练处一个排序模型，就可以对数据进行预测排序。</p>
 <p>下图是排序系统的整体流程：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://mmbiz.qpic.cn/mmbiz_png/zHbzQPKIBPhAv36buOD1GdIz8XjKF3PYDicsnAe3qD951NUyVqjuzzLsUW1ACQicEcHS8XBR9uyuluZBJu4ic5CcA/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725050.webp" />   
     </p>
 <p>对于一个排序系统，挑战来自于四点：</p>
 <blockquote>
@@ -394,7 +394,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 模型</strong>：学习能力，泛化能力。</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/33a18e22ee694c12a819e79855724b9b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725891.webp" />   
     </p>
 <p>在我们的场景中，</p>
 <p><strong>1)
@@ -409,14 +409,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>用户的点击行为，点击并不代表喜欢，点击后的行为也需要考虑进来，如：点击后观看了多长时间，观看时间占整个视频时间多少，观看市场分布如何，最后会将其映射称观看满意度，量化为三个等级：excllent, good, normal</p>
 <p>负样例：skip-above看到的没有点为负样例，相关性负采样，排序靠后的位置做随机负采样，从而构建学习样本。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9206c60130644f788e503c59c2faa6e5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725464.webp" />   
     </p>
 <p>**</p>
 <p><strong>3)
 对于特征：</strong></p>
 <p>与业务结合非常紧密，如何把排序场景描述的非常准确，把固定问题泛化，在向量的维度表达出来，即特征提取。Query维度：意图类别（喜欢那个类型的数据），时效性偏好；document维度：质量特征（码流、码率、用户评论、视频帧、视频标签、类别、来源等）；相关性特征：命中特征，bm25等；后验特征：包括用户真实点击率，观看时长，满意程度、点击位置（马太效应影响）、各种维度交叉特征。如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e88af1534c6c49d19c978420e3a7cef9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725017.webp" />   
     </p>
 <p>以上是我们在刚迁入机器学习时所采用的特征。</p>
 <p>后面我们发现，id特征也是有重要意义的，在特征工程中应该予以考虑，由于我们在提取相关性特征时，是把相关性综合到一个特征中的，该方式丢掉了一些原始信息，那么，如何把这些信息放进去？</p>
@@ -424,7 +424,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>所以，第二个版本我们的特征工程中，增加了稀疏的id类特征。</p>
 <p>在没有加入稀疏类特征之前，我们的模型是lambda-mart模型，在IR领域是最先进的模型，该模型是一个gbdt模型，基于boosting思想，不断增加决策树，来减小残差。该模型在很多竞赛中表现良好，因为不用过多的特征处理，树模型会考虑特征本身的数据分布，同时有很好的学习泛化能力，树结构很难兼容高维稀疏特征，比方说我们的document是上亿级的特征，很难每个节点走一次树的分割，所以对于加入稀疏特征的时候，树模型会遇到瓶颈。但是在出来高维稀疏特征的时候，像LR、FM、FFM可以认为是线性模型，特征的增加并不会对此类模型造成压力，上亿维也没关系。LR模型弱点在于特征组合能力不足，很多情况下特征组合方式比较重要，树模型从根节点到叶子节点的路径其实是一种组合方式。如下如所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c8fa11dd50314f2c942f2f0b439bf750.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725566.webp" />   
     </p>
 <p>所以针对两类模型的优缺点，我们做了进一步的模型融合的尝试：</p>
 <blockquote>
@@ -439,12 +439,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>两次尝试的模型框架如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4e4ed644a8604be1a489d51d5ee4b6e3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271725500.webp" />   
     </p>
 <p>经过这两种不成功的试验之后，我们引入了基于dnn的排序模型，此模型也需要解决：稀疏特征和稠密特征如何去综合的问题。</p>
 <p>如图是我们的dnn排序框架：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://mmbiz.qpic.cn/mmbiz_png/zHbzQPKIBPhAv36buOD1GdIz8XjKF3PYjmINCib7iaSabuRHTKNzdk1h5LYPBFx3Kntia91qK75FEHqTIf7TrlwKg/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271726127.webp" />   
     </p>
 <p>底层是query和document的一些描述文本做多粒度切词，之后做embedding然后做加权平均，得到document和query的向量表达，拼接这两组向量，同时再做点积，（两个向量越来越相近，拼接的时候希望上层网络学到两个向量的相似性，需要有足够的样本和正负样例，所以我们自己做了点积），同时用稠密特征，即在gbdt中用到的特征抽取出来，与embedding特征做拼接，最后经过三个全连接层，接sigmoid函数，就可以得到样本的score，并在此基础上用ndcg的衡量标准去计算损失，从而反向优化网络结构。</p>
 <p>而在online服务侧，则直接用样本去predict得分。这个模型上线之后，效果非常明显。其中，二次搜索率降低（二次搜索率越低越好，说明用户一次搜中）。</p>
@@ -583,6 +583,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -616,10 +620,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -998,6 +998,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

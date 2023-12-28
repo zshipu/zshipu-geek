@@ -195,7 +195,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="01-背-景">01 <strong>背 景</strong></h1>
 <p>AI正在驱动行业变革，为加速58同城AI应用的落地，我们自2017年9月开始构建机器学习平台WPAI（Wuba Platform of AI），支持机器学习算法一站式开发，以提高AI工程师的研发效率。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ca688f535f2f4f53ad850ea3e0e17737.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281940459.webp" />   
     </p>
 <p>WPAI包括基础计算平台、算法应用平台两部分：</p>
 <ul>
@@ -212,15 +212,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>（3）平台训练集群GPU卡型号众多，训练时由用户选择卡型号，导致不同型号的GPU卡使用不均衡，一部分型号GPU显卡用满而另一部分型号GPU显卡比较空闲。</p>
 <p>针对训练集群出现的上述问题，平台对训练任务资源调度进行了优化，实现了一套离线训练资源调度系统。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bad278348cd640b0be4fef926da0e318.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281940571.webp" />   
     </p>
 <p>离线训练资源调度系统整体架构如下图所求，包括任务画像、训练任务资源调度器、K8S操作部署服务、K8S集群，核心模块为任务画像和训练任务资源调度器。任务画像是整个调度系统的基础，为调度系统提供历史和实时的数据支持；训练任务资源调度器基于任务画像数据实现资源调度控制策略，主要包括任务配置资源自动调整策略、基于优先级抢占调度策略、被抢占任务重调度策略、异构GPU资源调度策略；K8S操作部署服务负责与K8S集群进行交互，操作K8S集群启动pod。下面将重点对任务画像和训练任务资源调度器进行介绍。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ae31deee40cb435199b0be7b1d3c8b72.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281940687.webp" />   
     </p>
 <p>任务画像主要采集任务资源数据和任务训练调度情况数据，任务资源数据包括使用的资源类型、GPU卡具体型号、GPU/CPU/显存/内存配额、训练时各个资源的平均使用率和峰值使用率，任务训练调度情况数据包括等待时长、训练时长、训练状态。如一个任务历史训练多次我们会计算出这个任务GPU、CPU、显存、内存的平均使用率、峰值使用率、平均训练时长、平均等待时长等数据。训练任务资源使用数据由Prometheus进行监控，为了便于进行任务画像数据构建，如下图所求，我们将Prometheus数据实时写入kafka，使用Flink进行实时计算分析后存入MySQL形成实时画像，同时kafka数据会配置落盘到HDFS，每天凌晨会定时启动Spark程序对前一天历史数据进行分析形成历史画像。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/de843b5f0e7446a6badbc6716da50f87.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281940895.webp" />   
     </p>
 <p>训练任务资源调度器是整个系统的核心，利用任务画像数据进行资源调度策略控制：</p>
 <p>（1）任务配置资源自动调整策略：针对用户申请资源往往大于实际需要资源导致任务资源利用率低问题，我们在进行任务调度时根据任务画像数据为任务自动分配合适的资源量，如GPU配额取最近3次GPU使用率均值和显存使用率峰值较大者除以90%，CPU配额limit取最近3次的CPU峰值除以50%，CPU配额request取最近3次CPU使用均值除以50%。</p>
@@ -237,7 +237,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>（1）智能扩容：模型推理服务的扩容需要开发人员主动触发，当流量暴增时，业务有损时间取决于开发人员对报警的响应速度，智能扩容基于模型推理节点实时资源使用情况和模型预测自动调整节点数量，流量突增时无需人工干预。</p>
 <p>（2）自动缩容：主动回收推理服务低谷空闲资源和业务方多申请的冗余资源，提升平台资源使用率；长时间无流量未及时下线模型或间断有流量模型通过1-&gt;0&amp;0-&gt;1自动伸缩来节省资源。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/416c1d08eccc4aa99236a100facae559.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281940931.webp" />   
     </p>
 <p>自动弹性扩缩容的基本思想是根据各种指标来配置扩缩容策略，一期上线的主要是资源使用率指标，包括GPU、CPU、内存、显存，当前正在加入QPS、平均耗时、TP99耗时、异常量、限流量等指标。针对资源使用率指标，每个推理模型可配置扩容阈值maxRate、缩容阈值minRate和期望阈值expectRate，假设当前实际的资源使用率是y，当 y &gt; maxRate 时服务进行扩容，增加节点数量，当y &lt; minRate 时服务缩容，减少节点数量，具体扩容和缩容的节点数量以扩缩后资源使用率y达到期望阈值expectRate为目标，计算公式如下：</p>
 <p>扩容计算公式：</p>
@@ -246,49 +246,49 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>floor(y/expectRate∗NodeNum)</p>
 <p>自动扩容除了根据实时的资源使用率进行计算还会基于模型进行预测提前扩容，保证服务流量上涨时服务的稳定性，整个自动弹性扩缩容系统架构设计如下图所求，包括监控数据接入模块、模型预测模块、Flink实时处理模块、弹性扩缩策略服务。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f02750345f9b4ea1b2a6316be3775e67.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281940506.webp" />   
     </p>
 <p>推理服务弹性扩缩容系统接入线上资源监控数据和流量监控数据，线上推理服务资源监控Prometheus数据实时写入Kafka后接入Flink实时分析，同时落地HDFS，推理服务线上请求量、耗时、请求状态等流量数据通过Rsyslog对Istio gateway日志进行实时采集写入Kafka后接入Flink实时分析，同时落地Elasticsearch和HDFS。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b367e9a8aff2415192177cf13800b9c3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281940777.webp" />   
     </p>
 <p>模型预测模块基于WPAI排序学习平台完成，对HDFS上最近一个月推理服务资源监控数据和流量监控数据先进行特征工程处理，生成Libsvm格式的特征数据，然后再进行XGBoost模型训练，最后在WPAI排序学习平台进行上线，为弹性扩缩系统提供在线预测服务。我们训练了10个XGBoost模型，分别用来预测未来1分钟、2分钟、3分钟、4分钟、5分钟推理服务的GPU使用率、CPU使用率。在做特征工程时，我们选择推理服务模型ID、当天第几分钟、星期几、是否节假日、节点CPU使用率、节点GPU使用率、节点个数、推理请求qps、推理请求异常量、推理平均耗时等字段为特征。模型预测为推理服务弹性扩缩策略提供参考，在推理服务流量高峰来临时提前进行扩容，防止扩容不及时导致线上流量损失。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a3468ab7f9624ba7b8d7c4cc84b70ce4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281940718.webp" />   
     </p>
 <p>Flink实时处理模块，实时计算各个推理服务最近5分钟的资源使用数据，以推理服务为维度对不同模型节点资源使用进行汇总，得出每个服务每分钟的GPU/CPU平均使用率，并调用XGBoost资源使用率预测模型得到服务未来5分钟的GPU/CPU平均使用率。在Flink处理的filter阶段对单个pod的资源监控数据、流量监控数据指标进行过滤提取所需要的指标，然后在keyBy阶段以推理服务任务ID维度进行聚合。最后将推理服务最近五分钟汇总计算的数据和模型预测的未来五分钟数据发给策略服务，为扩缩策略提供实时数据。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2c8a5f5fe82b46ab935a2d2e2ffba065.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281940720.webp" />   
     </p>
 <p>弹性扩缩策略服务受数据驱动提供多重计算策略，包括实时扩缩计算策略、预测扩缩计算策略、过滤策略、系统策略、兜底策略、告警策略等。实时扩缩计算策略接受推理服务最近5分钟的CPU、GPU资源使用数据，计算出当前资源使用率，对CPU和GPU使用率分别进行判断，当最近2分钟使用率都超过扩容阈值时则按扩容公式进行增大副本数，当最近5分钟使用率都小于缩容阈值时则按缩容公式进行减小副本数。预测扩缩计算策略跟实时扩缩计算策略流程相似，取的是调用模型预测计算得到的未来5分钟的GPU、CPU使用率数据，当未来5分钟中任意2分钟超过扩容阈值时则按扩容公式进行增大副本数。过滤策略则会过滤各种异常状态，如Kafka实时数据消费过慢超过2分钟之前的数据过滤不处理，正在进行扩缩容操作的推理服务不进行重复扩缩处理，已下线及未开启扩缩容功能的推理服务不进行处理，正在进行手动部署的模型不进行处理，判断推理服务最近3分钟的节点数是不是一个稳定状态等。系统策略指系统定义的基本规则，如每个推理服务最少节点数为2个，白天流量高峰时段不进行缩容等。兜底策略指自动扩缩容系统监控接入数据异常的处理策略，比如某个推理服凌晨进行了缩容，白天流量高峰时策略服务获取不到推理服务实时的指标数据不能进行扩容导致线上请求异常，针对这种极端情况系统对已经开启自动扩缩容的推理服务进行实时监控，连续5分钟没有实时指标数据时则将服务节点数恢复至昨天的最大节点数。告警策略对服务扩容失败等异常情况进行及时告警。</p>
 <p>推理服务弹性扩缩容除实现节点的水平自动扩缩外，还实现了节点数量1-&gt;0&amp;0-&gt;1自动扩容、定时扩缩容、垂直扩缩容等功能，未来扩容缩计算指标除了GPU/CPU使用率还将加入推理请求QPS、耗时、异常量、限流量等指标。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b861130db33c4781870e89049d3776f5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281940678.webp" />   
     </p>
 <p>推理服务弹性扩缩容上线后线上应用效果明显，自动扩容能力对推理服务线上突增流量能及时甚至提前进行响应，保证模型推理服务的高可用。如下图所求，某推理模型应用自动扩缩容功能后，在两次流量高峰来临时及时进行了扩容，线上推理请求没有因为流量突增而出现请求异常或耗时增加现象。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/db0e0edff8274fec9d6c8805933c7350.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281940961.webp" />   
     </p>
 <p>推理服务弹性扩缩容能有效回收夜间低谷资源，将回收的资源通过离在线混部出让给训练作业使用，通过自动扩缩容让推理服务节点资源使用率维持在期望值附近。1-&gt;0&amp;0-&gt;1扩缩功能及时回收无流量推理服务资源，有效提升了平台资源利用率。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fddf1d89cbe34e478fbded48a798088d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281940219.webp" />   
     </p>
 <h1 id="04-离在线资源混部">04 <strong>离在线资源混部</strong></h1>
 <p>WPAI上任务分为在线推理服务和离线训练作业两种类型，在线推理服务为线上业务，业务方通过HTTP或RPC方式接入，对延时敏感，有毫秒级SLO要求，白天流量高而夜间流量低，离线训练作业没有毫秒级SLO要求，业务方只关心模型能否在要求的时间内训练完，不同模型训练时间从几十分钟到几小时不等，只要训练任务一启动机器负载就很高。如下图所示在线推理服务的GPU负载随着流量变化呈明显的潮汐特征，离线训练GPU负载在训练期间基本上都比较高。GPU等硬件计算资源成本昂贵，通过离在线混部能将推理服务流量低谷时的空闲资源进行充分利用，节省成本，同时当在线服务出现流量高峰时，能通过混部对训练资源进行拆借以应对在线资源不足。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cf397e39bf38436793eb1b07f24cae20.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281940635.webp" />   
     </p>
 <p>离在线混部方案大体分为两种，第一种是离线和在线业务部署在同一台物理机上，这种方案需要控制物理机上CPU、内存、带宽、磁盘IO、L3 Cache等资源的完全隔离，尽可能降低混部后离线业务的高负载对在线业务的影响，同时需要考虑当资源不足时在线业务如何及时抢占离线业务，整体开发工作量比较大；第二种是通过整机出让实现离线和在线的动态混部，一台物理机在一个时间段内跑在线业务另外一个时间段内跑离线业务，根据在线业务和离线业务负载情况进行动态调整。我们采取的是第二种方案，通过整机出让实现训练和推理资源的动态调配，白天推理流量高峰时将离线训练资源出让给在线用于支撑流量高峰，夜间推理服务自动缩容空闲出的资源整机出让用于离线训练。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f48fcdd53a004f848cb35e43321dc0fe.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281940829.webp" />   
     </p>
 <p>在整机出让的离在线混部方案中，核心是如何实现物理节点状态在离线和在线之间动态转换。我们首先对物理节点按资源类型进行分组，分为CPU、P40、P40 vGPU、T4、T4 vGPU等资源组，以资源组为单位，在资源组内根据在线和离线负载情况进行物理节点状态动态转化，当推理服务流量低资源空闲时进行OnlineToOffline转换（物理节点状态由在线转换为离线，需迁移节点上在线推理服务pod），而当推理服务流量高峰来临资源紧缺时进行OfflineToOnline转换（物理节点状态由离线转换为在线，需清理节点上离线训练作业pod）。OnlineToOffline开始的前提是在线资源组的quota使用率低于设定的阈值下限minRate，为了减少在线推理服务pod不必要的迁移，当离线训练作业出现pending时我们才触发OnlineToOffline转换，每次转换的节点数量根据当前在线资源组quota使用率计算得到，使得转换一定数量的节点在线资源组quota使用率达到期望的阈值excpectRate。当在线资源组qutota使用率超过设定的阈值上限maxRate或在线资源组有pod生pending时，会触发OfflineToOnline转换。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/98212b7e91ac461fbad847051454e11e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281940114.webp" />   
     </p>
 <p>为了保证物理节点OnlineToOffline、OfflineToOnline整机出让过程的平稳，我们引入了unnormal中间状态，正常物理节点用于离线训练作业任务调度时状态为offline normal，用于在线推理服务部署时状态为online normal。节点为normal状态时才允许往上面调度新的任务，而当节点为unnormal状态时禁止向节点上调度任务。OnlineToOffline开始时先将状态置为offline unnormal，这时pod不会往上面调度，然后开始对节点上面已经调度的在线推理服务pod进行清理，清理完毕后将节点状态置为offline normal，开始向上面调度离线训练作业。OfflineToOnline也是类似处理过程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1362ab82d5d647caa4b878d560611474.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281940306.webp" />   
     </p>
 <p>OnlineToOffline关键是如何确保转换过程中在线推理服务的稳定性，转换时我们进行步长控制，设定每次并行转换的节点数量为3，让在线推理资源平滑出让给离线训练作业，同时为了减少在线推理服务pod驱逐，选择物理节点时会优先选择pod数量最少的节点。在对节点上在线推理pod进行迁移时，我们采用先创建再删除策略，避免在线推理服务由于pod数量减少而导致耗时上升，先将要删除的pod从现有ReplicaSet中进行隔离，这时k8s会在其他节点上创建pod，待新的pod创建好后再将隔离的pod进行删除。</p>
 <p>OfflineToOnline则需要在推理资源不足时进行快速响应，当在线推理资源组quota使用率低于阈值下限时或在线pod出现pending时会触发OfflineToOnline转换，一次转换的节点数量为pending pod需要的资源量或在线推理资源组quota使用率达到期望值所需要的资源量。在选择离线节点时优先选择训练任务少且训练任务开始时间短的节点。</p>
@@ -306,7 +306,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>针对部署在GPU上的深度学习模型，我们采用TensorRT+TIS加速方案，TensorFlow构建的SavedModel格式模型、PyTorch构建的pth格式模型、Keras构建的H5格式模型等先统一转换为ONNX格式，然后通过TensorRT的ONNX Parser模块进行加载解析为TensorRT内部的网络图，最后利用TensorRT进行图层融合等方式进行优化，序列化为Optimized Plans文件。而对于含有TensorRT不支持算子的模型，平台建立自定义算子库，利用TensorRT Plugin插件机制进行实现，将不支持的算子替换为用户自定义的计算逻辑以获得TensorRT优化支持。优化后的Optimized Plans文件通过TIS进行加载提供线上推理服务。</p>
 <p>此外平台还提供了TensorRT INT8量化功能，用户训练好的TensorFlow和PyTorch模型在平台上进行TensorRT+TIS加速部署时，只需要打开INT8量化选项并配置好校验数据集，平台通过实现TensorRT量化接口构建插件，在模型优化过程中直接量化，并基于实验的迭代搜索阀值 ，通过配置校验数据集，在模型的每一网络层首先运行标准的FP32推理，收集到激活值的直方图，然后基于不同的INT8量化scale阈值进行推理产生不同的量化分布，最后计算每个分布与原分布的相对熵，选择熵最少的一个，也就是跟原分布最像的一个，即精度损失最小的scale值。通过TensorRT+TIS加速后模型推理性能大幅提升，比如在T4型号显卡上部署RestNet50模型推理，相比TensorFlow Serving直接部署推理，在不降低推理精度情况下，TensorRT+TIS加速后QPS提升80%耗时降低18%，在使用INT8量化后QPS提升6.6倍耗时降低67%。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b89658d4e5234ebaa45fb5c8cae9083e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281940550.webp" />   
     </p>
 <p>OpenVINO是Intel基于自身现有的硬件平台开发的，一种可以加快高性能计算机视觉和深度学习视觉应用开发速度的工具套件，包括Model Optimizer和Model Server两个核心组件。Model Optimizer是一个跨平台命令行工具，可将TensorFlow、ONNX、Caffe等框架格式模型转换为与nGraph兼容的开源中间表示IR格式，然后再通过Model Server进行加载提供推理服务能力。Model Optimizer在执行优化时，尽可能删除过多的层和群运算，以更简单、更快速地形成图表，主要优化项包括分组卷积融合、裁剪无效算子、线性运算融合等。</p>
 <p>平台基于OpenVINO Model Optimizer和Model Server实现CPU上推理加速，封装了模型转换工具集，将TensorFlow训练的SavedMoel格式模型、PyTorch训练的pth格式模型结合Model Optimizer自动优化为IR格式，然后通过Model Server加载对外提供gRPC/HTTP调用。我们在应用OpenVINO工具时也发现一些问题，如OpenVINO虽然支持大多数主流的OP操作，但也有少量OP暂时还没有支持，如果模型中含有这类OP，则这个模型的优化转换流程执行就会失败，另外OpenVINO并不支持动态输入模型，对于一些输入无法确定的OP和模型无法进行优化。平台从自定义OP扩展、相似OP替换、模型重塑三个方面提供解决方案。</p>
@@ -435,6 +435,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -468,10 +472,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -850,6 +850,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

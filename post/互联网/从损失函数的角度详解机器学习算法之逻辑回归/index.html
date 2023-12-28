@@ -208,50 +208,50 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>逻辑回归在某些书中也被称为对数几率回归，明明被叫做回归，却用在了分类问题上，我个人认为这是因为逻辑回归用了和回归类似的方法来解决了分类问题。</p>
 <p>假设有一个二分类问题，输出为y∈{0,1}，而线性回归模型产生的预测值为 z=w^T x+b 是实数值，我们希望有一个理想的阶跃函数来帮我们实现z值到0/1值的转化：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e8a70c9293a746e3a32c0201f1791e01.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271609056.webp" />   
     </p>
 <p>然而该函数不连续，我们希望有一个单调可微的函数来供我们使用，于是便找到了 Sigmoid 函数来替代：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d1dad65ef8274d108170500dd3afa70d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271609081.webp" />   
     </p>
 <p>他们的函数图像如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/11d814ea683649b7b9bf1907404b3311.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271609924.webp" />   
     </p>
 <p>有了Sigmoid 函数之后，由于其取值范围为[0,1]。我们就可以将其视为类1的后验概率估计p(y=1|x)。说白了，就是如果有了一个测试点x，那么就可以用Sigmoid 函数算出来的结果来当做该点x属于类别1的概率大小。</p>
 <p>于是，非常自然地，我们把Sigmoid函数计算得到的值大于等于0.5的归为类别1，小于0.5的归为类别0：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/854bfaff18b740e7891fc03740406fc8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271609577.webp" />   
     </p>
 <p>同时逻辑回归于自适应线性网络非常相似，两者的区别在于逻辑回归的激活函数时Sigmoid function而自适应线性网络的激活函数是y=x，两者的网络结构如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/974ba518a68b4f4c8ceef39907fcab92.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271609050.webp" />   
     </p>
 <p><strong>自适应线性网络</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/14152fdc3c2547c08d3b036626927897.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271609280.webp" />   
     </p>
 <p><strong>逻辑回归网络</strong></p>
 <h2 id="02-逻辑回归的损失函数">02 逻辑回归的损失函数</h2>
 <p>好了，所要用的几个函数我们都好了，接下来要做的就是根据给定的训练集，把参数w给求出来了。要找参数w，首先就是得把代价函数（cost function）给定义出来，也就是目标函数。</p>
 <p>我们第一个想到的自然是模仿线性回归的做法，利用误差平方和来当代价函数。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d4ad0ec38fba48ba8bdf2a28d3eaa3b1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271609733.webp" />   
     </p>
 <p>其中，z^(i)=w^T x^(i)+b，i表示第i个样本点，y^(i)
 表示第i个样本的真实值，ϕ(z^(i))
 表示第i个样本的预测值。</p>
 <p>这时，如果我们将 ϕ(z^(i))=1 / ( 1+epx(−z^(i)) ) 代入的话，会发现这时一个非凸函数，这就意味着代价函数有着许多的局部最小值，这不利于我们的求解：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/240df0345c554c1895d3c1f581513c9f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271610094.webp" />   
     </p>
 <p>那么我们不妨来换一个思路解决这个问题。前面，我们提到了ϕ(z)可以视为类1的后验估计，所以我们有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9331a11bdd4e45b9b22405d11516c88b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271610521.webp" />   
     </p>
 <p>其中，p(y=1|x;W) 表示给定w，那么x点y=1的概率大小。 于是上面两式可以写成一般形式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/26db55a0cec7446eb083cafe7d846c56.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271610803.webp" />   
     </p>
 <p>注：以上的过�</p>
 
@@ -383,6 +383,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -416,10 +420,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -798,6 +798,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

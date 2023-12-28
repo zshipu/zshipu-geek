@@ -224,7 +224,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="什么是搜索离线"><strong>什么是搜索离线？</strong></h2>
 <p>一个典型的商品搜索架构如下图所示，本文将要重点介绍的就是下图中的离线数据处理系统（Offline System）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f161456707344f7380c9ff9de74ca2d5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281914061.webp" />   
     </p>
 <p>何谓离线？在阿里搜索工程体系中我们把搜索引擎、在线算分、SearchPlanner等ms级响应用户请求的服务称之为“在线”服务；与之相对应的，将各种来源数据转换处理后送入搜索引擎等“在线”服务的系统统称为“离线”系统。商品搜索的业务特性（海量数据、复杂业务）决定了离线系统从诞生伊始就是一个大数据系统，它有以下一些特点：</p>
 <p>1. 任务模型上区分全量和增量</p>
@@ -239,12 +239,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="-淘宝搜索阶段">★ 淘宝搜索阶段</h3>
 <p>在2008-2012这个阶段，我们重点支持淘宝搜索的业务发展，随着淘宝商品量的不断增加，逐步引入Hadoop、Hbase等开源大数据计算和存储框架，实现了搜索离线系统的分布式化，有力地支持了淘宝搜索业务的发展。但是在这个阶段，我们支持的业务线只有淘系合计不到5个业务线，为此投入了大约10名开发人员，整体效率不高。另一方面相关系统框架代码与淘系业务高度耦合，量身定制了很多特殊代码，不利于架构的推广和其它业务的支持。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/967a42dd7aa24db59eb77917e068542b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281914135.webp" />   
     </p>
 <h3 id="-组件平台化阶段">★ 组件&amp;平台化阶段</h3>
 <p>2013年底以来，特别是最近两年，随着集团技术业务线的梳理以及中台化战略的推行，搜索离线系统需要为越来越多的不同业务团队（飞猪、钉钉、1688、AE、Lazada等等）提供支持，技术框架复用、开发效率提升和平台化支持的需求越来越强烈。另一方面随着大数据计算、存储技术的发展，尤其是流计算引擎的飞速发展，离线系统技术架构上的进一步演进也具备了绝佳的土壤。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/42c61e2ec403439da60926cdbb1093c3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281914400.webp" />   
     </p>
 <p>我们可以看到整个搜索离线系统的演进是沿着性能和效率两条主线，以业务和技术为双轮驱动，一步一个脚印的走到今天。这是一个技术与业务高度融合互动，互相促进发展的典型样例。</p>
 <h1 id="离线平台技术架构"><strong>离线平台技术架构</strong></h1>
@@ -255,7 +255,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>**</p>
 <p>**</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/006c396019e2495ba46954537c81a00a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281914883.webp" />   
     </p>
 <p>上图描述了离线平台技术组件结构，其中部分组件的简介如下：</p>
 <ul>
@@ -294,7 +294,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3fc5c9ffb71b48a2847983d78e463ae4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281914642.webp" />   
     </p>
 <h2 id="全增量统一的计算模型"><strong>全增量统一的计算模型</strong></h2>
 <p>那么如何实现对用户屏蔽离线平台内部的这些技术细节，让用户只需要关注业务实现呢？回顾第一节介绍的离线任务概念，离线任务包含全量和增量，它们业务逻辑相同，但是执行模式上有区别。为了让用户能够专注业务逻辑的开发，屏蔽离线平台技术细节实现全增量统一的计算逻辑，我们引入了Business Table（业务表）的概念。</p>
@@ -303,7 +303,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>基于业务表和数据处理组件，用户可以开发出一个描述离线处理流程的业务逻辑图，我们称之为Business Graph。下图就是一个Business Graph的样例，其中上侧红框标识的就是只包含ODPS全量数据源的Business Table，最下方红框中标识的是包含Hdfs+Swift的Business Table，除此之外我们还支持Mysql+DRC/ODPS+Swift等多种业务表的组合。图中还可以看到Join、UDTF等常用的数据处理组件，业务表与处理组件结合在一起就能够描述常见的离线业务处理逻辑。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3e9ac86fb7d448fa87df86c90d94a83c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281914843.webp" />   
     </p>
 <p>那么如何把这个Business Graph转化为真正的离线任务呢？Bahamut作为离线平台的执行引擎，会按照Business Graph-&gt;APP Graph-&gt;Job Graph-&gt;(Blink Job/Maat Job)的顺序把一个业务描述转化为可执行的离线任务，具体如下：</p>
 <p>1. Business Graph-&gt;APP Graph：在这个环节中我们主要有2个重要的工作：</p>
@@ -498,6 +498,10 @@ FROM DRCSource_1;
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -531,10 +535,6 @@ FROM DRCSource_1;
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -913,6 +913,8 @@ FROM DRCSource_1;
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

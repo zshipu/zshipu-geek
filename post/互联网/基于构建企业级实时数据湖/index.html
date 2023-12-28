@@ -211,7 +211,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>数据湖是个什么概念呢？一般来说我们把一家企业产生的数据都维护在一个平台内，这个平台我们就称之为“数据湖”。</p>
 <p>看下面这幅图，这个湖的数据来源多种多样，有的可能是结构化数据，有的可能是非结构数据，有的甚至是二进制数据。有一波人站在湖的入口，用设备在检测水质，这对应着数据湖上的流处理作业；有一批抽水机从湖里面抽水，这对应着数据湖的批处理作业；还有一批人在船头钓鱼或者在岸上捕鱼，这对应着数据科学家从数据湖中通过机器学习的手段来提取数据价值。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-09e28c40.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271751033.png" />   
     </p>
 <p>我们总结起来，其实数据湖主要有 4 个方面的特点。</p>
 <ul>
@@ -221,7 +221,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>第四个特点是灵活的底层存储，一般用 ds3、oss、hdfs 这种廉价的分布式文件系统，采用特定的文件格式和缓存，满足对应场景的数据分析需求。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-a2f3a320.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271751367.png" />   
     </p>
 <p>那么开源数据湖架构一般是啥样的呢？这里我画了一个架构图，主要分为四层：</p>
 <ol>
@@ -231,42 +231,42 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>最上层就是不同计算场景的计算引擎了。开源的一般有 Spark、Flink、Hive、Presto、Hive MR 等，这一批计算引擎是可以同时访问同一张数据湖的表的。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-556bdf38.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271751586.png" />   
     </p>
 <h2 id="经典业务场景介绍"><strong>经典业务场景介绍</strong></h2>
 <p>那么，Flink 和数据湖结合可以有哪些经典的应用场景呢？这里我们探讨业务场景时默认选型了 Apache Iceberg 来作为我们的数据湖选型，后面一节会详细阐述选型背后的理由。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-3d109183.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271751068.png" />   
     </p>
 <p>首先，Flink+Iceberg 最经典的一个场景就是构建实时的 Data Pipeline。业务端产生的大量日志数据，被导入到 Kafka 这样的消息队列。运用 Flink 流计算引擎执行 ETL后，导入到 Apache Iceberg 原始表中。有一些业务场景需要直接跑分析作业来分析原始表的数据，而另外一些业务需要对数据做进一步的提纯。那么我们可以再新起一个 Flink 作业从 Apache Iceberg 表中消费增量数据，经过处理之后写入到提纯之后的 Iceberg 表中。此时，可能还有业务需要对数据做进一步的聚合，那么我们继续在iceberg 表上启动增量 Flink 作业，将聚合之后的数据结果写入到聚合表中。</p>
 <p>有人会想，这个场景好像通过 Flink+Hive 也能实现。 Flink+Hive 的确可以实现，但写入到 Hive 的数据更多地是为了实现数仓的数据分析，而不是为了做增量拉取。一般来说，Hive 的增量写入以 partition 为单位，时间是 15min 以上，Flink 长期高频率地写入会造成 partition 膨胀。而 Iceberg 容许实现 1 分钟甚至 30秒的增量写入，这样就可以大大提高了端到端数据的实时性，上层的分析作业可以看到更新的数据，下游的增量作业可以读取到更新的数据。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-33e4b83b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271751453.png" />   
     </p>
 <p>第二个经典的场景，就是可以用 Flink+Iceberg 来分析来自 MySQL 等关系型数据库的 binlog 等。一方面，Apache Flink 已经原生地支持 CDC 数据解析，一条 binlog 数据通过 ververica flink-cdc-connector 拉取之后，自动转换成 Flink Runtime 能识别的 INSERT、DELETE、UPDATE_BEFORE、UPDATE_AFTER 四种消息，供用户做进一步的实时计算。</p>
 <p>另外一方面，Apache Iceberg 已经较为完善地实现了 equality delete 功能，也就是用户定义好待删除的 Record，直接写到 Apache Iceberg 表内就可以删除对应的行，本身就是为了实现数据湖的流式删除。在 Iceberg 未来的版本中，用户将不需要设计任何额外的业务字段，不用写几行代码就可以完成 binlog 流式入湖到 Apache Iceberg（社区的这个 Pull Request 已经提供了一个 flink 写入 CDC 数据的原型）。</p>
 <p>此外，CDC 数据成功入湖 Iceberg 之后，我们还会打通常见的计算引擎，例如 Presto、Spark、Hive 等，他们都可以实时地读取到 Iceberg 表中的最新数据。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-03bb1b1d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271751674.png" />   
     </p>
 <p>第三个经典场景是近实时场景的流批统一。在常用的 lambda 架构中，我们有一条实时链路和一条离线链路。实时链路一般由 Flink、Kafka、HBase 这些组件构建而成，而离线链路一般会用到 Parquet、Spark 等组件构建。这里面涉及到计算组件和存储组件都非常多，系统维护成本和业务开发成本都非常高。有很多场景，他们的实时性要求并没有那么苛刻，例如可以放松到分钟级别，这种场景我们称之为近实时场景。那么，我们是不是可以通过 Flink + Iceberg 来优化我们常用的 lambda 架构呢？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-bcdbdedd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271751757.png" />   
     </p>
 <p>我们可以用 Flink+Iceberg 把整个架构优化成上图所示。实时的数据通过 Flink 写入到 Iceberg 表中，近实时链路依然可以通过flink计算增量数据，离线链路也可以通过 flink 批计算读取某个快照做全局分析，得到对应的分析结果，供不同场景下的用户读取和分析。经过这种改进之后，我们把计算引擎统一成了 Flink，把存储组件统一成了 Iceberg，整个系统的维护开发成本大大降低。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-742a4610.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271751771.png" />   
     </p>
 <p>第四个场景，是采用 Iceberg 全量数据和 Kafka 的增量数据来 Bootstrap 新的 Flink 作业。我们现有的流作业在线上跑着，突然有一天某个业务方跑过来说，他们遇到一个新的计算场景，需要设计一个新的 Flink 作业，跑一遍去年一年的历史数据，跑完之后再对接到正在产生的 Kafka 增量数据。那么这时候应该怎么办呢？</p>
 <p>我们依然可以采用常见的 lambda 架构，离线链路通过 kafka-&gt;flink-&gt;iceberg 同步写入到数据湖，由于 Kafka 成本较高，保留最近 7 天数据即可，Iceberg 存储成本较低，可以存储全量的历史数据（按照 checkpoint 拆分成多个数据区间）。启动新 Flink 作业的时候，只需要去拉 Iceberg 的数据，跑完之后平滑地对接到 kafka 数据即可。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-de052e4a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271751813.png" />   
     </p>
 <p>第五个场景和第四个场景有点类似。同样是在 lambda 架构下，实时链路由于事件丢失或者到达顺序的问题，可能导致流计算端结果不一定完全准确，这时候一般都需要全量的历史数据来订正实时计算的结果。而我们的 Iceberg 可以很好地充当这个角色，因为它可以高性价比地管理好历史数据。</p>
 <h2 id="为什么选择-apache-iceberg"><strong>为什么选择 Apache Iceberg</strong></h2>
 <p>回到上一节遗留的一个问题，为什么当时 Flink 在众多开源数据湖项目中会选择 Apache Iceberg 呢？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-559eff72.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271751045.png" />   
     </p>
 <p>我们当时详细地调研了 Delta、Hudi、Iceberg 三个开源项目，并写了一篇调研报告。我们发现 Delta 和 Hudi 跟 Spark 的代码路径绑定太深，尤其是写入路径。毕竟当时这两个项目设计之初，都多多少少把 Spark 作为的他们默认的计算引擎了。而Apache Iceberg 的方向非常坚定，宗旨就是要做一个通用化设计的 Table Format。因此，它完美地解耦了计算引擎和底下的存储系统，便于接入多样化计算引擎和文件格式，可以说正确地完成了数据湖架构中的 Table Format 这一层的实现。我们认为它也更容易成为 Table Format 层的开源事实标准。</p>
 <p>另外一方面，Apache Iceberg 正在朝着流批一体的数据湖存储层发展，manifest 和snapshot 的设计，有效地隔离不同 transaction 的变更，非常方便批处理和增量计算。而我们知道 Apache Flink 已经是一个流批一体的计算引擎，可以说这二者的长远规划完美匹配，未来二者将合力打造流批一体的数据湖架构。</p>
@@ -406,6 +406,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -439,10 +443,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -821,6 +821,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

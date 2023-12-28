@@ -206,7 +206,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="base双塔模型">Base双塔模型</h1>
 <p>深度U2I召回的Base模型是传统向量化召回的双塔模型，用户侧塔包含内容行为序列和商品行为序列，模型结构如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e5b96d8918e746bca4345c5e4db759dd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272135860.webp" />   
     </p>
 <p>模型会学习到表征用户的user embedding和表征内容的content embedding。在线服务时模型部署在BE上，会为请求的用户实时生成user embedding并通过向量索引快速召回TopN个内容。</p>
 <h1 id="dan双序列融合网络">DAN双序列融合网络</h1>
@@ -214,15 +214,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="-模型结构"><strong>▐ 模型结构</strong></h2>
 <p>为了利用两个序列之间的信息交叉，充分融合商品点击序列和内容点击序列，我们从自然语言处理的VQA任务中得到启发。如下图所示，VQA是用自然语言回答给定图像的问题的任务。常用做法是在图片上应用视觉注意力，在文本上应用文本注意力，再分别将图片、文字多模态向量输入到一个联合的学习空间，通过融合映射到共享语义空间。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4e704433ce15432b944a2cb005a2572c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272135917.webp" />   
     </p>
 <p>而DAN[1]结构是VQA任务中一个十分有效的模型结构，DAN通过设计模块化网络，允许视觉和文本注意力在协作期间相互引导并共享语义信息。在第一版改进的深度U2I模型中，我们使用DAN结构将内容序列和商品序列进行融合，其结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3976a1c4b29f49eb83cc8a14614f68a8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272135205.webp" />   
     </p>
 <p>在DAN双序列融合网络中，内容点击序列C={c1,c2,&hellip;.cn}和商品点击序列I={i1,i2,&hellip;in}(其中cn和in分别表示第n个内容/商品的embedding)分别通过MeanPooling得到内容序列表征Ec1和商品序列表征Ei1，而后Ec和Ei通过点积生成内容和商品的一级融合表征Ef1，而初始的序列C与I进一步通过一级融合表征Ef1产生二级融合表征Ef2，最终生成双序列的融合表征F，其完整公式如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/625b21ab89354ac180ce54831845b5de.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272135336.webp" />   
     </p>
 <p>最终融合表征F与其他user侧特征concat后，进入用户侧塔进行学习。</p>
 <h2 id="-离线评估"><strong>▐ 离线评估</strong></h2>
@@ -246,16 +246,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="-模型结构-1"><strong>▐ 模型结构</strong></h2>
 <p>我们对DAN结构进行了改进，设计了Contextual Gate DAN 双序列融合网络，其结构如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c95cd4a27c1f45c684d3b6d8bd09fcd0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272135327.webp" />   
     </p>
 <p>在Contextual Gate DAN结构中，我们引入了Contextual embedding作为主导序列融合程度的关键信息，记为T。Contextual embedding由如下特征的embedding组合而成，包括新用户标识特征、用户场景活跃统计特征、实时Top5商品类目偏好和实时Top5内容类目偏好特征。</p>
 <p>我们对生成最终融合表征F的公式(1)和生成二级融合表征Ef2的公司(2)进行调整，通过contextual gate结构动态控制内容序列和商品序列的融合， 完整公式如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/010d96a9723f47119c0f82f78ce99e6e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272136156.webp" />   
     </p>
 <p>同时，我们也使用Contextual embedding辅助一级融合表征f1的生成，动态对商品和内容序列的元素进行筛选，为每个元素赋予一个动态的融合权重，内容序列表征Ec1和商品序列表征Ei1调整为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6498c294a2f14f42be2f7616361ee957.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272136208.webp" />   
     </p>
 <p>其余部分和DAN结构一致，Contextual Gate DAN结构使用Contextual gate控制了内容序列和商品序列的贡献度，并调整了序列中各元素的权重。</p>
 <h2 id="-离线评估-1"><strong>▐ 离线评估</strong></h2>
@@ -386,6 +386,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -419,10 +423,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -801,6 +801,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

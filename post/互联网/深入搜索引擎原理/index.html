@@ -252,7 +252,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </code></pre><p>如上，大家第一能想到的实现是用 like，但这无法使用上索引，会在大量数据集上做一次遍历操作，查询会非常的慢。有没有更简单的方法呢，可能会说能不能加个秋裤的分类或者标签，很好，那如果新增一个商品品类怎么办呢？要加无数个分类和标签吗？如何能更简单高效的处理全文检索呢？</p>
 <h3 id="使用搜索引擎">使用搜索引擎</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/93f6bc7103754a5cb71905d4e7025592.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272141095.png" />   
     </p>
 <p>答案是搜索，会事先 build 一个倒排索引，通过词法语法分析、分词、构建词典、构建倒排表、压缩优化等操作构建一个索引，查询时通过词典能快速拿到结果。这既能解决全文检索的问题，又能解决了SQL查询速度慢的问题。</p>
 <p><strong>那么，淘宝是如何在1毫秒从上亿个商品找到上千种秋裤的呢，谷歌如何在1毫秒从万亿个网页中找寻到与你关键字匹配的几十万个网页，如此大的数据量是怎么做到毫秒返回的。</strong></p>
@@ -348,7 +348,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>倒排索引到此也就讲清楚了吧。</p>
 <h3 id="存储结构">存储结构</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cc3066f57ed443f5810f10baa84b51af.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272141574.png" />   
     </p>
 <p>以 Lucene 为例，简单说明一下 Lucene 的存储结构。从大到小是Index -&gt; Segment -&gt; Doc -&gt; Field -&gt; Term，类比 MySQL 为 Database -&gt; Table -&gt; Record -&gt; Field -&gt; Value。</p>
 <h2 id="part-3查询结果排序">Part 3、查询结果排序</h2>
@@ -364,12 +364,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>BM25算法，通常用来作搜索相关性平分。一句话概况其主要思想：对Query进行语素解析，生成语素qi；然后，对于每个搜索结果D，计算每个语素qi与D的相关性得分，最后，将qi相对于D的相关性得分进行加权求和，从而得到Query与D的相关性得分。</p>
 <p>BM25算法的一般性公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fe6306f3d7ae436caa174ef5b893d2c5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272142821.png" />   
     </p>
 <p>其中，Q表示Query，qi表示Q解析之后的一个语素（对中文而言，我们可以把对Query的分词作为语素分析，每个词看成语素qi。）；d表示一个搜索结果文档；Wi表示语素qi的权重；R(qi，d)表示语素qi与文档d的相关性得分。</p>
 <p>其中 Wi 通常使用 IDF 来表达，R 使用 TF 来表达；综上，BM25算法的相关性得分公式可总结为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/79dcbdafe8074d58b03403b638a7c013.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272142664.png" />   
     </p>
 <p>BM25 通过使用不同的语素分析方法、语素权重判定方法，以及语素与文档的相关性判定方法，我们可以衍生出不同的搜索相关性得分计算方法，这就为我们设计算法提供了较大的灵活性。</p>
 <h2 id="part-4空间索引">Part 4、空间索引</h2>
@@ -377,7 +377,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在数据库中可以通过暴力计算、矩形过滤、以及B树对经度和维度建索引，但这性能仍然很慢(可参考 <a href="https://zshipu.com/t?url=https%3A%2F%2Fyq.aliyun.com%2Fgo%2FarticleRenderRedirect%3Furl%3Dhttps%253A%252F%252Fwww.cnblogs.com%252FLBSer%252Fp%252F3392491.html">为什么需要空间索引</a>
 )。搜索里用了一个很巧妙的方法，Geo Hash。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/40e2b8f90cf948cb9dc6f03fed710147.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272142570.png" />   
     </p>
 <p>如上图，表示根据 GeoHash 对北京几个区域生成的字符串，有几个特点：</p>
 <ul>
@@ -408,12 +408,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>即最后天安门的4位 Geo Hash 为 “WX4G”，如果需要经度更准确，在对应的经纬度编码粒度再往下追溯即可。</p>
 <p>附：Base32 编码图</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2ff8572cfa0f4cfd8ec8b558a1e6397f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272142693.png" />   
     </p>
 <h3 id="geo-hash-如何用于地理搜索">Geo Hash 如何用于地理搜索？</h3>
 <p>举个例子，搜索天安门附近 200 米的景点，如下是天安门附近的Geo编码</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c0b3573a62a84009815c867f0d5605bb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272142644.png" />   
     </p>
 <p>搜索过程如下：</p>
 <ol>
@@ -425,12 +425,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>由上面步骤可以看出，Geo Hash 将原本大量的距离计算，变成一个字符串检索缩小范围后，再进行小范围的距离计算，及快速又准确的进行距离搜索。</p>
 <h3 id="geo-hash-依据的数学原理">Geo Hash 依据的数学原理</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ece2b7c5897d4b3b9d18df6753f05141.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272142914.png" />   
     </p>
 <p>如图所示，我们将二进制编码的结果填写到空间中，当将空间划分为四块时候，编码的顺序分别是左下角00，左上角01，右下脚10，右上角11，也就是类似于Z的曲线。当我们递归的将各个块分解成更小的子块时，编码的顺序是自相似的（分形），每一个子快也形成Z曲线，这种类型的曲线被称为Peano空间填充曲线。</p>
 <p>这种类型的空间填充曲线的优点是将二维空间转换成一维曲线（事实上是分形维），对大部分而言，编码相似的距离也相近， 但Peano空间填充曲线最大的缺点就是突变性，有些编码相邻但距离却相差很远，比如0111与1000，编码是相邻的，但距离相差很大。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/01d949f66b274c83ba5f27c6f94e244f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272142195.png" />   
     </p>
 <p>除Peano空间填充曲线外，还有很多空间填充曲线，如图所示，其中效果公认较好是Hilbert空间填充曲线，相较于Peano曲线而言，Hilbert曲线没有较大的突变。为什么GeoHash不选择Hilbert空间填充曲线呢？可能是Peano曲线思路以及计算上比较简单吧，事实上，Peano曲线就是一种四叉树线性编码方式。</p>
 <h2 id="part-5数值索引">Part 5、数值索引</h2>
@@ -449,7 +449,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>就是：</p>
 <p>数值Trie树，下面详细介绍</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dbb0201313c64b8aa94807c880fea510.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272142431.png" />   
     </p>
 <p>上面说了怎么索引，那么Query呢？比如我给你一个Range Query从423-642，怎么找到那6个term呢？</p>
 <p>我们首先可以用shift==0找到范围的起点后终点（有可能没有相等的，比如搜索422，也会找到423）。然后一直往上找，直到找到一个共同的祖先（肯定能找到，因为树根是所有叶子节点的祖先），对应起点，每次往上走的时候, 左边范围节点都要把它右边的兄弟节点都加进去, 右边范围节点都要把它左边的兄弟节点加进去, 若已经到达顶点, 则是将左边范围节点和右边范围节点之间的节点加进行去</p>
@@ -480,7 +480,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Basic Compaction</p>
 <p>每个文件固定N个数量，超过N，则新建一个sstable；当sstable数大于M，则合并一个大sstable；当大sstable的数量大于M，则合并一个更大的sstable文件，依次类推。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a062f1a8cc7040fc9f01aebc101ecf53.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272142819.png" />   
     </p>
 <p>但是，这会出现一个问题，就是大量的文件被创建，在最坏的情况下，所有的文件都要搜索。</p>
 <p>Levelled Compaction</p>
@@ -504,11 +504,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>而FST呢，就是一种特殊的 FSM，在 Lucene 中用来实现字典查找功能(NLP中还可以做转换功能)，FST 可以表示成FST的形式</p>
 <p>举例：对“cat”、 “deep”、 “do”、 “dog” 、“dogs” 这5个单词构建FST（注：必须已排序），结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3714436fdfd843b2ae99bf665f507edb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272142744.png" />   
     </p>
 <p>当存在 value 为对应的 docId 时，如 cat/0 deep/1 do/2 dog/3 dogs/4， FST 结构图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/823a1b147063460f9be4b516abcfa26e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272142533.png" />   
     </p>
 <p>FST 还有一个特点，就是在前缀公用的基础上，还会做一个后缀公用，目标同样是为了压缩存储空间。</p>
 <p>其中红色的弧线表 NEXT-optimized，可以通过 <a href="https://zshipu.com/t?url=https%3A%2F%2Fyq.aliyun.com%2Fgo%2FarticleRenderRedirect%3Furl%3Dhttp%253A%252F%252Fexamples.mikemccandless.com%252Ffst.py%253Fterms%253Dcat%25252F0%25250D%25250Adeep%25252F1%25250D%25250Ado%25252F2%25250D%25250Adog%25252F3%25250D%25250Adogs%25252F4%2526amp%253Bcmd%253DBuild%252Bit%252521">画图工具</a>
@@ -521,7 +521,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>SkipList的层次，这个是指整个SkipList有几层</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/efc1c899fc0a40ffb3b4b95a413baa77.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272142414.png" />   
     </p>
 <p>在什么位置设置跳表指针？</p>
 <p>• 设置较多的指针，较短的步长， 更多的跳跃机会</p>
@@ -531,7 +531,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="bkd-tree">BKD Tree</h2>
 <p>也叫 Block KD-tree，根据FST思路，如果查询条件非常多，需要对每个条件根据 FST 查出结果，进行求并集操作。如果是数值类型，那么潜在的 Term 可能非常多，查询销量也会很低，为了支持高效的数值类或者多维度查询，引入 BKD Tree。在一维下就是一棵二叉搜索树，在二维下是如果要查询一个区间，logN的复杂度就可以访问到叶子节点对应的倒排链。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dad64d0f044441a9a1fc9b69f61f3b6b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272142748.png" />   
     </p>
 <ol>
 <li>确定切分维度，这里维度的选取顺序是数据在这个维度方法最大的维度优先。一个直接的理解就是，数据分散越开的维度，我们优先切分。</li>
@@ -660,6 +660,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -693,10 +697,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1075,6 +1075,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

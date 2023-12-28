@@ -202,7 +202,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c6da8d1afe7e4810b70bbac20203d22d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910918.webp" />   
     </p>
 <blockquote>
 <p>作者 | 闲鱼技术 - 雨成</p>
@@ -234,7 +234,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="数据模型"><strong>数据模型</strong></h2>
 <p>不管是从计算成本，易用性，复用性，还是一致性等方面，我们都必须避免烟囱式的开发模式，而是以中间层的方式去建设实时数仓，烟囱式架构有很大弊端，它无法与其他系统进行有效协调工作，不利于业务沉淀，而且后期维护成本非常大。下图展示了闲鱼实时数仓的数据模型设计架构图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0525f3a2b6544c2e85788bf94a4aeb8f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910114.png" />   
     </p>
 <p>从上图可以看出我们将实时数仓的数据模型分为4层，自底向上依次为ODS、DWD、DWS和ADS。通过多层设计可以将处理数据的流程沉淀在各层完成。比如在数据明细层统一完成数据的过滤、清洗、规范、脱敏流程；在数据汇总层加工共性的多维指标汇总数据，提高了代码的复用率和整体生产效率。同时各层级处理的任务类型相似，可以采用统一的技术方案优化性能，使数仓技术架构更简洁。下面对这四层进行简单的介绍：</p>
 <ul>
@@ -253,7 +253,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="整体架构"><strong>整体架构</strong></h2>
 <p>上面对闲鱼实时数仓的数据模型进行了解剖并详细地介绍了模型的各层次设计思想和实际运用。下面是根据数据模型构建的技术架构图，共分为五个层次，自底向上分别为数据源、数据接入层、数据计算层、数据服务层和应用层。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b5c4a9a6f8564444aad4879e2d7c1b86.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910122.png" />   
     </p>
 <p>数据源是整个实时数仓的底座，闲鱼拥有众多场景，例如首页推荐、猜你喜欢、搜索等，在这些场景中会有不同的用户行为，用户产生的曝光、点击、浏览等行为日志会被上层存储工具收集。如上图中的数据接入层，可以将数据源接入到UT[3]日志、黄金令箭、数据备库或服务端日志中存储。</p>
 <p>数据清洗与规整是构建实时数仓的核心过程，数据计算层利用Blink的实时处理能力将不同格式的数据统一清洗、补充和规整后存入TT[4]中。数据服务层是实时数仓的网关层，将实时数据进行逻辑处理后对外提供数据服务和API网关能力。</p>
@@ -269,7 +269,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>首先如何能够即稳定又高效地处理数据是我们亟待解决的问题，在面临海量数据计算处理时，我们选用了集团内部的流式计算框架Blink，它是基于开源框架Flink的再封装的新一代流式计算引擎，经过多年双11的考验，其实时计算能力对我们系统来说是毋庸置疑的。</p>
 <p>我们在做实时报表展示时结合性能和实际情况，会对实时数据进行分钟级别的数据聚合，通过Blink提供的滚动窗口聚合就能够高效地解决该问题。滚动窗口将每个元素分配到一个指定窗口大小的窗口中，滚动窗口有一个固定的大小，并且不会出现重叠。例如：如果指定了一个1分钟大小的滚动窗口，那么无限流的数据会根据时间划分成[0:00 - 0:01), [0:01, 0:02), [0:02, 0:03)&hellip; 等窗口，滚动窗口划分形式如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4addbb07d3b94f7f9b656c27de13f08b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910347.png" />   
     </p>
 <p>我们在编写分钟级别的Blink任务时，只需要在 GROUP BY 子句中定义滚动窗口即可，伪代码如下：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">GROUP BY TUMBLE(&lt;time-attr&gt;, &lt;size-interval&gt;)
@@ -282,12 +282,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>通过Blink的这个法宝我们能够高效实时地处理海量数据，那在面临数据分析场景复杂并且交互非常频繁的这种情况下，我们又如何去避免传统OLAP的存储计算弊端呢？在寻找实时的并且兼并服务/分析一体化的系统工具时我们发现了一款利器，它就是Hologres(Holographic+Postgres)，它支持对万亿级数据进行高并发低延时多维分析透视和业务探索，可以轻松而且经济的使用现有BI工具分析所有数据，在面临PB级数据时依然能够保持秒级响应的能力，并且简单易用，能够快速上手。</p>
 <p>Hologres是基于存储计算分离的设计模式而构建的，数据全部存在一个分布式文件系统中，存储引擎的总体架构如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f3de6b2521024544aef20a4d7c3054bf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910249.png" />   
     </p>
 <p>每个分片(shard)构成了一个存储管理和恢复的单元(recovery unit)，上图展示了一个分片的基本架构，一个分片由多个tablet组成，这些tablet会共享一个日志（Write-Ahead Log，简称WAL，所有的新数据都是以append-only的形式插入的。当写操作不断进来，每个tablet里会积累出很多文件。当一个tablet里小文件积累到一定数量时，存储引擎会在后台把小文件合并起来，能减少使用系统资源且合并后的文件减少了，提高了读的性能，为实时高效分析提供了可能性。</p>
 <p>上面详细描述了海量数据的实时处理、数据存储以及分析的解决方案，那在面对异构数据源接入又是如何处理的呢？闲鱼由于场景众多，业务复杂，在处理异构数据源时我们采用领域维度统计的方式，将不同领域的各类数据源字段统一化，在Blink清洗数据时会结合场景、人群、分桶等维度信息来解决异构数据源的问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/abfefc8373244591b5d5488cbe193103.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910293.png" />   
     </p>
 <p>由上图可知，领域模块主要分为流量域、用户域、交易域、互动域等，每个领域中都会抽象出相应的对象，例如流量域中有商品、广告和运营投放；用户域中有用户、设备、卖家和买家；交易域中有询单、成交、GMV；互动域中有收藏、超赞和评论。</p>
 <p>在设计异构数据源的解决方案时也考虑到后面打造开放平台的需求，所以将数据接入层抽象成不同领域的接口对外提供接入服务并且在应用层也开放了各个维度的统计接口。这样对有接入实时数仓的业务需求时可以通过数据层和应用层开放的抽象接口快速接入，不用考虑整个链路中间的细节，能够极大地减少开发周期。</p>
@@ -299,10 +299,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>能够给产品同学提供圈品后的实时报表信息等等。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0598aebc50c5468cbd4554f0f188ecf3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910361.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a9b0bd50571049989cdf9a981c31454b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910483.png" />   
     </p>
 <h1 id="5展望"><strong>5.展望</strong></h1>
 <p>目前我们对实时数仓</p>
@@ -431,6 +431,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -464,10 +468,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -846,6 +846,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

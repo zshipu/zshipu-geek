@@ -212,12 +212,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们的用户包括搜索的运营、产品、算法以及采销人员。虽然不同用户关心的数据粒度不同、时间频率不同、维度也不同，但是我们希望能够建立统一的实时OLAP数据仓库，并提供一套安全、可靠的、灵活的实时数据服务。</p>
 <p>目前每日新增的曝光日志达到几亿条记录，而拆分到SKU粒度的日志则要翻10倍，再细拆到AB实验的SKU粒度时，数据量则多达上百亿记录，多维数据组合下的聚合查询要求秒级响应时间，这样的数据量也给团队带来了不小的挑战。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6923a6f7532f419a8f3b009f3b8272de.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271737066.png" />   
     </p>
 <h2 id="4实时技术架构演进"><strong>4、实时技术架构演进</strong></h2>
 <p>我们之前的方案是以Apache Storm引擎进行点对点的数据处理，这种方式在业务需求快速增长的阶段，可以快速的满足实时报表的需求。但是随着业务的不断发展、数据量逐渐增加以及需求逐渐多样化，弊端随之产生。例如灵活性差、数据一致性无法满足、开发效率较低、资源成本增加等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/09175bf3c5bc4301b3c8e3a218b2f63b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271737565.png" />   
     </p>
 <p>为解决之前架构出现的问题，我们首先进行了架构升级，将storm引擎替换为Apache Flink，用以实现高吞吐、exactly once的处理语义。同时根据搜索数据的特点，将实时数据进行分层处理，构建出PV流明细层、SKU流明细层和AB实验流明细层，期望基于不同明细层的实时流，构建上层的实时OLAP层。</p>
 <p>OLAP层的技术选型，需要满足以下几点：</p>
@@ -229,17 +229,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>6：前端业务较多，查询并发度不能太低</p>
 <p>通过对比目前业界广泛使用的支持实时导入的OLAP引擎，我们在druid、ES、clickhouse和doris之间做了横向比较：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a90e05b47a4448c783d1793f8e5c7f69.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271737683.png" />   
     </p>
 <p>通过对比开源的几款实时OLAP引擎，我们发现doris和clickhouse能够满足我们的需求，但是clickhouse的并发度太低是个潜在的风险，而且clickhouse的数据导入没有事务支持，无法实现exactly once语义，对标准sql的支持也是有限的。</p>
 <p>最终，我们选定doris作为聚合层，用于实时OLAP分析。对于流量数据，使用聚合模型建表；对于订单行，我们将聚合模型换成Uniq模型，保证同一个订单最终只会存储一条记录，从而达到订单行精准去重的目的。在flink处理时，我们也将之前的任务拆解，将反复加工的逻辑封装，每一次处理都生成新的topic流，明细层细分了不同粒度的实时流。新方案如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d5b1bd16b81b4e77a6ad23cc7a848d31.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271737813.png" />   
     </p>
 <p>目前的技术架构中，flink的任务是非常轻的，state状态非常小，并没有使用KeyedState自定义状态，而OperatorState中只包含kafka的offset信息，这样保证任务的运行开销很小，稳定性大大提升。同时基于生产的数据明细层，我们直接使用了doris来充当聚合层的功能，将原本可以在flink中实现的窗口计算，下沉到doris中完成。利用doris的routine load消费实时数据，虽然数据在导入前是明细粒度，但是基于聚合模型，导入后自动进行异步聚合。而聚合度的高低，完全根据维度的个数与维度的基数决定。通过在base表上建立rollup，在导入时双写或多写并进行预聚合操作，这有点类似于物化视图的功能，可以将数据进行高度的汇总，以提升查询性能。</p>
 <p>在明细层采用kafka直接对接到doris，还有一个好处就是这种方式天然的支持数据回溯。数据回溯简单说就是当遇到实时数据的乱序问题时，可以将“迟到”的数据进行重新计算，更新之前的结果。这是因为我们导入的是明细数据，延迟的数据无论何时到达都可以被写入到表中，而查询接口只需要再次进行查询即可获得最新的计算结果。最终方案的数据流图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/821718264d4143af902dd82ec301d44b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271737082.png" />   
     </p>
 <h2 id="5技术取舍"><strong>5、技术取舍</strong></h2>
 <p>实时数据处理的技术实现，需要在低延迟、准确性和成本之间进行取舍。我们采用doris作为实时仓库的聚合层，其实也是在多方面进行了取舍。例如：</p>
@@ -248,7 +248,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>3、PV、UV等流量指标在聚合时采用的是HLL计算，降低了精度，换来了更短的查询响应时间</p>
 <p>以上几点取舍，是结合业务场景与需求的要求而决定的，并非绝对的情况。所以，面对实时数据大规模、无界、乱序等特点，实时流计算的选型，最终考虑的就是如何取舍。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7456b60a4e5f4cf09d22fb58921fd0c7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271737391.png" />   
     </p>
 <p><strong>6、Doris在大促期间的优化</strong></p>
 <p>上文提到我们在doris中建立了不同粒度的聚合模型，包括PV粒度、SKU粒度以及AB实验粒度。我们这里以每日生产数据量最大的曝光AB实验模型为例，阐述在doris中如何支持大促期间每日新增百亿条记录的查询的。</p>
@@ -379,6 +379,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -412,10 +416,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -794,6 +794,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

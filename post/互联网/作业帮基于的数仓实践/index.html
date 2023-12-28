@@ -207,12 +207,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>作业帮大数据团队主要负责建设公司级数仓，向公司各个重要产品线（拉新、教学、BI等）提供面向业务的数据信息，如到课时长、答题情况等。在过去半年多时间内，我们基于Apache Doris，构建了数仓实时查询系统。本文总结并分享下期间的工作内容，也欢迎大家一起讨论。</p>
 <p>典型的数仓从逻辑上划分为下图所示的几个部分。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-6bfc57dc5c9f4129b4f64e69908d828b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280914277.png" />   
     </p>
 <p>大数据团队主要负责到ODS-DWS的建设，从DWS到ADS一般是数仓系统和业务线系统的边界。</p>
 <p>在过去，由于缺失统一的查询系统，我们探索了很多模式来支持各个业务线发展。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-c591341663324bbdaf9803a899ad8dba.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280914500.png" />   
     </p>
 <p><strong>非流量类</strong>：</p>
 <ul>
@@ -228,14 +228,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="2-总体方案"><strong>2 总体方案</strong></h2>
 <p>经过数月的探索与实践，我们确立了以Doris为基础的数仓实时查询系统，同时也对整个数仓的数据计算系统做了一次大的重构。最终整体的架构图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-a8a1dd039c5443b386ebe10500020ef6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280914771.png" />   
     </p>
 <p>如图所示（从下到上），原始业务层日志经数据摄入系统进入数仓，在数据清洗计算层，我们将原来的Spark系统升级到了Flink，并且基于Flink-SQL提供了统一数据开发框架，从原有的代码开发升级到Sql开发来极大的提升数据的研发效率。</p>
 <p>其后查询系统将Kafka的数据实时同步到查询引擎内，并通过OpenAPI的统一接口对外提供查询服务。接下来，重点讲一下查询系统的工作。</p>
 <h3 id="21-查询引擎选型"><strong>2.1 查询引擎选型</strong></h3>
 <p>实时查询系统的核心在于确定查询引擎。社区的查询引擎较多，如Impala、Presto、Doris、ES（xpack），以及云上的ADB等。这块考虑到调研成本、团队技术生态、维护成本等多种因素，我们最后选择了Doris 作为我们的查询引擎。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-17da5608c0db4f3bac087f915cc7c324.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280914081.png" />   
     </p>
 <p>注意：上图各性能指标对应的业务查询不完全相同。</p>
 <p>在性能调研时，我们也走了一些弯路：第一次使用Doris来做查询引擎，我们发现业务SQL查询延迟比较大，且CPU使用率很高（IDLE &lt; 10%）。后来发现，原因在于我们使用了AGGREGATE模型。如，对于订单数据，我们一般会将用户支付金额等作为指标列（如一个用户从订单预订到支付，状态的改变会修改支付金额值），但是业务端的SQL中有大量的基于支付金额（指标列）的筛选查询，如统计支付金额 &gt; 某个值的用户数。</p>
@@ -261,7 +261,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>而对于聚合查询，由于不同指标的Sql计算的数据范围不同，且业务侧对于聚合的计算没有明细查询的时效性，因此，我们通过微批（如1min、5mins、10mins……）的调度能力定期计算聚合指标，并存放到ADS层的业务数据库中供前端平台查询。</p>
 <p>为了提高数据使用效率，方便业务侧获得特定时间窗口的数据，在数据模型上，我们统一设置了Meta字段如数据更新时间，这样业务可以用来划分每次更新的数据窗口，做增量计算。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b14a90a876484cb4b2209d81e0baa2b9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280914897.png" />   
     </p>
 <p>这个模式的主要好处：</p>
 <ul>
@@ -304,7 +304,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>上述的这些问题虽然短期内无法一一解决，但是需要提供一个能力：将来解决时成本可控，尽量做到对业务无感知。这些都需要进一步定义出系统的接口边界，否则耦合各个系统，后续使用的用户越多，问题持续时间越久、迁移成本也越高。</p>
 <p>因此我们设计了OneModel来统一数据模型，并且构建了OpenAPI来统一服务接口。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5b2a0412bf1b4cb69d969a5febd11a47.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280914181.png" />   
     </p>
 <p>目前完成的功能包括</p>
 <ul>
@@ -345,7 +345,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>当前Doris集群在作业帮已经有5+个集群，~50+表、500GB+数据，用于支持核心业务线如售卖、广告、拍搜、业务数仓等。</p>
 <p><strong>我们的人效也得到了了数十倍的提升</strong>：从过去一个需求“进入查询系统到对外交付数据”需要数人周，提升到当前模式的小时级甚至分钟级。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-056c851fe33740bc84189b004d90f4b5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280914292.png" />   
     </p>
 <h2 id="4-总结和规划"><strong>4 总结和规划</strong></h2>
 <p>通过引入Doris，我们解决了明细&amp;聚合数据查询不统一的问题，奠定了整个数据中台在查询侧的基石。这对于后续数仓向数据中台发展的路径起到了非常关键的作用。未来我们对Doris在作业帮的应用有不少规划：</p>
@@ -480,6 +480,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -513,10 +517,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -895,6 +895,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -240,7 +240,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>参考已有的业界的实践，我们基于公司的深度模型训练平台，实现了在线学习在短视频信息流和图文信息流推荐的成功落地，下面介绍关于爱奇艺的实践方案：</p>
 <p><strong>1. 主模型结构</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/49fde20d8ea546838c72d1451b7468bb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745016.png" />   
     </p>
 <p>这是一个 W&amp;D 模型变种，但是 Wide 侧和 Deep 侧是各自经过一个 FM 后再进行结果融合：</p>
 <ul>
@@ -259,7 +259,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>1. 在线学习 + 离线模型热启动的范式</strong></p>
 <p>爱奇艺技术团队通过实践探索，形成了一个比较成熟的在线学习框架——在线学习 + 离线模型热启动的范式。这里来先介绍下框架：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d359ae6923b347d785a0737f06925480.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745129.png" />   
     </p>
 <ul>
 <li><strong>左侧是在线学习，右侧是离线学习</strong>：离线训练仍然保留，它基于 7 天历史数据训练，主要是用于在线学习模型每天的热启动重启。在线学习消费 Kafka 实时数据流，实时训练模型；</li>
@@ -269,7 +269,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>以图文信息流推荐为例，在线学习引入前后的整体数据流图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/170a10c386fc4dacbe1c91f589f07d58.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745501.png" />   
     </p>
 <p><strong>2. 数据实时化难点</strong></p>
 <ul>
@@ -290,27 +290,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>第一个时间窗口，我们结合 t1 和 t1’来统计信息，即 label 的归因；</p>
 <p>第二个时间窗口，我们结合 t1’，t2 和 t2’来统计 label。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d136191af5934a8a8ef2e7f1f3ed4a5d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745701.png" />   
     </p>
 <p>没有 cache, 每条最新样本都去更新模型，这样会存在 False Negative 或者说无法确定 Label 的样本也更新了模型这样的问题。Twitter 2019 最新的一篇论文 [6] 提出了如何在进行纠正，主要包括以下四种方法：</p>
 <ul>
 <li><strong>样本重要性采样 (importance sampling)</strong>：机器学习模型一般是假设样本符合一个特定数据分布，模型训练就是一个搜索最佳的数据分布参数的过程。观察到实时样本流样本分布由于包含了 FN 样本，其实是一个有偏的分布。类似于强化学习等场景，会使用到重要性采样方法对给予每个观察到的样本权重进行纠正，近似一个无偏数据分布。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c79af572922e48ecab27b6528466513b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745385.png" />   
     </p>
 <ul>
 <li><strong>FN 矫正</strong>：模型拟合当前观察到的有偏分布 b， 经过论文推导，无偏预测 p(y|x) 和有偏预测 b(y|x) 的关系如下。因此用包含 FN 的实时样本训练模型 b 后，预测时用下面的公式进行矫正即可。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1e302004e195493a8fc1d7acaf81eb40.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745886.png" />   
     </p>
 <ul>
 <li><strong>PU loss (Positive-unlabeled loss)</strong>: 本质就是认为所有观察到的负样本都是 unlabeled. 因此对 loss 进行了如下改造，核心思想就是在观察到一个实例的正样本到达时，除了使用正样本进行梯度下降，还会对相应的负样本进行一个反向的梯度下降，抵消之前观察到的 FN 样本对 loss 的影响。</li>
 <li><strong>延迟反馈 Loss</strong>: 使用一个额外的模型去建模当前样本的真实 Label 确定时的时间延迟，基于当前样本距离上次展示的时间距离去评估当前样本的 Label，是一个 true label 的概率。这个时间延迟模型和 pCTR 模型联合训练，优化 loss 如下，其中 Wd 就是时间延迟模型的参数。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7f779680a8e14fca8ca498f7e6d3b9ee.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745513.png" />   
     </p>
 <p>我们尝试了上面的第二种和第三种方法，目前线上使用的版本是第三种方法，论文实验中效果最好的是第二种方法，这个可能和业务数据分布不一致有关。</p>
 <h2 id="模型实时化">模型实时化</h2>
@@ -335,11 +335,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>1. 累积测试集</strong>：每个小时实时样本流不放回抽样 1.5% 加入累积测试集。T-1 小时的模型预测 T+1 hour 的数据，在线学习 AUC 是基于每个小时测试集的累积预测结果计算。</p>
 <p><strong>2. 离线模型</strong>：基于历史 7 天数据训练的离线模型，同时用于当天在线学习的热启动。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/abedd88012ef45e2a7967d84cba0676f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745135.png" />   
     </p>
 <p>在图文信息流推荐产品上，我们论证了实时特征 + 在线学习的组合更能发挥出实时特征的最大化效果。下图是三个实验的多天在线 AUC 走势，可见实时特征 + 在线学习的 AUC 明显高于基线，优于实时特征 + 离线训练的组合。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b63b1fae94ed41bb9115c979773f8e0d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271745248.png" />   
     </p>
 <h2 id="后续优化">后续优化</h2>
 <ol>
@@ -481,6 +481,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -514,10 +518,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -896,6 +896,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

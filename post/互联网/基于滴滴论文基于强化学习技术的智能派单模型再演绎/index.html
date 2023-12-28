@@ -192,7 +192,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/631a1d249f4c4509bdb095261e26b974.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753913.webp" />   
     </p>
 <p>文章作者：洪九 滴滴 高级算法工程师</p>
 <blockquote>
@@ -208,93 +208,93 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>理想的分单引擎应该可以同时满足上述三方的诉求，然而现实是残酷的，各方诉求其实存在着相互冲突，如此看来分单引擎必须在三者之间做好 trade-off 。平台不同发展阶段的业务目标，决定着如何在各方诉求的之间做倾斜，比如当前平台的目标是拉单量、提升 GMV 还是提升留存等等。</p>
 <p>论文中将分单引擎的目标形式化表达成如下最优化形式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e38dd8ec94ae4d558fc8d40b24630e4a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753559.webp" />   
     </p>
 <p>公式1 分单引擎最优化目标函数</p>
 <p>其中
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/583eece67b7349b58d82cd6595813515.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753235.webp" />   
      ，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4882401399e54b5db0dc31eb72e112aa.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753742.webp" />   
      是当前时空未分配的订单。
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e030f78c4f5c4762a5d77ab01e357ce4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753214.webp" />   
     
 为订单 j 分配给司机 i 的价值函数。</p>
 <p>公式1 的含义是在司乘 1:1 的匹配 ( 拼车与外卖场景为 1:N 匹配 ) 前提下，使得最终匹配结果的司乘匹配对 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4047102ce07749f48c4b7f06a4d25dfd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753704.webp" />   
     
 之和最大。
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/65d5d98ee3f94e02b9456d63d7a39b87.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753092.webp" />   
     
 刻画了我们对司乘匹配好坏的预期，同时 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3c8f8d572fbb4883a514742ce936e769.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753588.webp" />   
     
 是整个分单引擎设计的核心，可以考虑接驾距离、订单价值、司机倾斜、乘客倾斜、实时供需状况等各种各样的因素，后面会对 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/99f4b1771ef54b54a85debd2d1c51ad1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753146.webp" />   
     
 的设计思考做详细的讨论。</p>
 <p>同时对于订单数量 N 和司机数量 M 的关系也需要做一下讨论。</p>
 <p>如果 N&gt;M : 供不应求，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8b0478d9fb284233a518bd0f9152e0fd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753587.webp" />   
     
 越大的订单越优先得到司机。</p>
 <p>如果 N=M : 供需平衡，每个订单都会得到匹配，当然可能需要过滤极端情况。</p>
 <p>如果 N : 供大于求，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3dcc6a7066bf4e89bcdc74acefa250e5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753013.webp" />   
     
 越大的司机越优先接到订单。</p>
 <p>如果对一个城市的所有订单和司机按照 公式1 的目标同时做匹配，计算量会非常大。因此为了计算的实时性，通常需要在时间和空间两个维度上对原始问题降维。根据行业最佳实践，空间可以采用六边形格子 ( google S2 ) 对地图进行划分，单独的格子可能会有稀疏问题，因此可以对相邻的格子依据供需状况做聚类，最终作为统一的空间分片。时间上可以依据实时性要求划分成 N 秒的时间片。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c2850d2d358c45dba70227157682ad11.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753503.webp" />   
     </p>
 <p>图 1 地图格子划分图</p>
 <p>假如在某一时空有 N 个订单，M 个司机，同时 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6c29d382bce04a889d098d1420b1d59d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753984.webp" />   
     
 形式已知。那 公式1 的优化目标可以抽象成如 图2 所示的二部图。D 表示司机，O 表示乘客，OD 之间的连线代表可以将该乘客分派给司机，OD 的权重代表司乘对之间的价值 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7d2183cc8f5746bab101272898c4a6dd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753594.webp" />   
      。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7a91956aebb546e18e619e71997dd7cd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753118.webp" />   
     </p>
 <p>图 2 二部图示意图</p>
 <p>在涉及到匹配的领域，比如外卖骑手订单匹配、客服工单匹配等，二部图的建模方式应该是通用解法。解这类问题通常有两种类型的算法：**1. 贪心法，2. KM 算法。**无论那种方法，都会事先构造一张打分表格，表中元素值就是上面提到的 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8f82c6da53b9455ba770a09dfa5d62ad.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753648.webp" />   
      。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8ebe049302954ea0b02e1858f5542dea.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753381.webp" />   
     </p>
 <p>图 3 司乘匹配打分表</p>
 <p>首先说下贪心法。**贪心法，简而言之就是一单一单的分配。**每次挑选 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cc68b8eb1ec04ab6906aa9db48209ed0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753792.webp" />   
     
 最大的司乘对分派，然后删除该司乘对，并且更新打分表 ( 在外卖场景，一个骑手可以接多单的情况下，当一对司乘分派后，其他的 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/58be2c0f3fb04a1b9e6e2b6646e3cd62.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753182.webp" />   
     
 值也会收到影响 ) 。继续上面的过程，直到达到停止条件。贪心法简单、易实现、速度快，适合业务初期快速上线。但是贪心法的缺点也是显而易见的，贪心法容易陷入局部最优解，无法保证全局最优。</p>
 <p>接着介绍的就是专门用于解决二部图完美匹配的 <strong>KM ( Kuhn-Munkres )</strong> 算法。KM 用于解决带权二部图最优匹配问题，与这里的场景正好 Match 。这里借用网上一个相亲的例子简单介绍下 KM 算法。</p>
 <p>问题定义:  话说有 N 男 N 女，男生和女生每两个人之间有好感度，希望把他们两两配对，并且最后希望好感度之和最大。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/97c2ed77fefe41a196084c25fe140427.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753690.webp" />   
     </p>
 <p>图 4 KM 算法示例图</p>
 <p>图中红线表示女生对男生的好感度。在这个男多女少的年代，男生的期望为零，反正只要是女的就行。一个女生可能同时对多个男生有好感，但是喜欢的程度不同，这就是传说中的备胎吧！一个男生也可能同时被多个女生喜欢，男2好惨！ 不出意外男3应该是男神！唉，各位好友不要千万不要自行代入，我不希望大家含着泪读完本文，写到这里是本人泪以沾襟。我是含着泪写完本文的呀！</p>
 <p>首先把每个女生的期望度标一下，女生的期望度就是有好感度的男生中好感度最高的值。这也很好理解，比如一个女生喜欢宋仲基，那她大概率也会找宋仲基那样的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/572a34b50a8a4067940b2747d23bb5d0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753112.webp" />   
     </p>
 <p>图 5 KM 算法示例图</p>
 <p><strong>第一轮匹配：</strong></p>
@@ -304,7 +304,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>那就让女1和女2都降低一下期望吧，没有宋仲基，宋仲猫，宋仲猴之类的也阔以的。那降多少是可行的呢？ 总不能一下子从宋仲基降成宋小宝吧，这落差也太大了。两个女生都在能选择的其他男生中，也就是男1男2中，选择一个期望值降低的尽可能小的人，就是给别人一点点机会喽。比如，女1选男1，期望值要降低1，女2选择男1期望值要降低1。女2选择男2，期望值要降低2。那就都降低1好了。</p>
 <p>同时男3发现自己被这么多女生喜欢，竟然飘了，居然也有期望了，女生降多少我就升多少。更新后的期望值如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/117fc073dfec4339af35b7f6e203b642.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753658.webp" />   
     </p>
 <p>图 6 KM 算法示例图</p>
 <p><strong>第二轮匹配：</strong></p>
@@ -314,7 +314,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>好吧，只能再次降低期望值了。痴情的女生，为了你的幸福，大家的期望值都要降低了，果然专一的女生最好命。</p>
 <p>那需要怎么调整呢？参与此次分配的男生都加1，所有女生都降1。再次为男2默哀！</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c51afce64fa74dd1b793ab51edafe035.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753107.webp" />   
     </p>
 <p>图 7 KM 算法示例图</p>
 <p><strong>第三轮匹配：</strong></p>
@@ -324,88 +324,88 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>女2：同样是被分手的女2，看破了红尘，选择了一直默默喜欢这自己的男2，最终过上了幸福美满的生活。</p>
 <p>一场爱恨情仇就此结束。当我们回顾上面的过程，整体理解一下，为什么最后的总好感度之和是最大的？在这里不想讲数学证明 ( 其实我不会 ) 。整个过程来看是一个不断妥协的过程，每个人都选择自己最喜欢的，然后一点一点降低自己的期望，直到一个可行解。就好比一个女生把她班里最帅最豪的男生从高到低排序，然后挨个去试，那最后匹配成功的那个就是在这个女生条件下最好的选择。都是为了帮大家理解，我是相信缘分的，我不是那样的人！</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/5/f0915c545a3646e5a9ea2671d4b11fbb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753689.png" />   
     </p>
 <p>图 8 分单引擎简图</p>
 <p>在上面介绍的基础上，不难总结出分单引擎 ( 如图8 ) 要做的事情。在每个时空分片，从 Order List 和 Driver List 中分别取出 N 个订单和 M 个司机，用贪心法或 KM 算法求解使得公式1 所示目标函数最大的匹配方案，该轮匹配结束后把结果推送到端上，之后再进行下一轮的匹配。当然实际系统要复杂的多，鉴于目前还没有相关 Paper，更细节的实现方案还无法得知。</p>
 <p>其实无论在出行和外卖领域，匹配的基本算法框架就是这样。真正复杂的是价值函数 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4d107c6af3a94ed59a7f78a99782ec85.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271753700.webp" />   
     
 的设计。不然，公司那么多人都在干嘛呢？</p>
 <p>一个出行平台初期，处于业务试错阶段，此时要做的首要事情就是快速扩大司乘规模，通过烧钱的方式拉新引流，GMV 可能并不是平台的首要目标。运营抓手比较粗放，只要保证乘客打上车司机接到单就可以。所以，此时 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f35961ab44774f5cb14a56d60b9247c9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754229.webp" />   
     
 最简单的形式可以如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9bdfb760b1a148148d3960570b4eca53.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754866.webp" />   
     </p>
 <p>其中 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cb567216d50545c8b13e323928de42b2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754385.webp" />   
     
 为订单i和司机j之间的距离的代价函数，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bd9a9c3dbea44422a70c8b0e731c18b0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754035.webp" />   
     
 为反函数。显然我们希望分单引擎的匹配结果使得司乘之间的接驾距离最小。其实这样的策略非常符合用户心智，因为用户总希望最近的司机来接自己。同时，对于平台来说此时运力效率也是比较高的，因为接驾距离小意味着空驶距离占比相对也小。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e7cc4848363244ae9ebced655401dfaf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754469.webp" />   
     </p>
 <p>图 9 司乘分布示意图</p>
 <p>那这种初期仅考虑司乘距离的匹配策略有什么问题呢？一方面可能会导致作弊，另一方面涉及到对订单结构的认知。这里简单以订单实际距离 ( 起终点路面距离 ) 为维度将订单拆分为长单和短单，显然长单的价值更高一些。在平台发展到一定规模后，用户已经逐渐养成打车习惯，第一道护城河基本建成，此时平台的业务目标可能会从单量规模到 GMV 规模过度。因此希望提高长单占比来提升平台的 GMV。显然开始的策略是无法对长短单做出区分的。要改进策略也很简单，继续在 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/da59aafa1ce542a89c1d5562e5bd2eb1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754025.webp" />   
     
 上加目标项，如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fa3bea98575544ecadaf8900ce8eae28.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754459.webp" />   
     </p>
 <p>其中 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6c35d8662695405691c8ed2120315911.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754938.webp" />   
     
 为订单长度的代价函数，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dfc0017143c747489fcc458d4a4804f5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754311.webp" />   
     
 与订单长度正相关。通过加权将多目标问题转换成单一目标优化问题，这样分单引擎的分配策略兼顾接驾距离和订单长度。</p>
 <p>说到这里，我们一直在关注订单的当前价值。这里对订单价值做解构，订单价值= 当前价值+未来价值。如何理解未来价值呢？举个例子，在早上 9:00 某某小区，有两个订单 A 和 B 同时产生，A 订单的目的地是用友产业园，B 订单的目的地是北京南站。假设两个订单都在 9:30 左右到达目的地。请问 A 与 B 哪个订单的未来价值更高呢？</p>
 <p>答案是 B 订单。站在司机师傅的角度来看这个问题，9:30 的用友产业园是上班高峰期，司机师傅在送达该乘客后不容易马上接另一单。相反，9:30 的北京南站，司机师傅送达乘客后可以相对容易的接到另一单。这样司机师傅的空驶率会进一步减小，提高了司机体验。同样从平台角度看提高了运力效率，对单量和 GMV 都有一定的提升作用。通过这个 Case 相信对于订单的未来价值有了概念上的认识。我们的 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/44ba002abb0240cfb3d4d4ab6e7565ed.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754801.webp" />   
     
 可以进一步更新成如下形式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f55627aedd8f4cd9a6095a50a9a71d3e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754242.webp" />   
     </p>
 <p>接下来的问题就是如何量化订单的未来价值 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/42670951cf9149659747d82c1b8e0a49.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754653.webp" />   
      ？</p>
 <p>我们暂且不考虑 Paper 中是怎么实现的，如果自己简单设计一个方案来估计订单的未来价值可以怎么做呢。订单的未来价值可以近似看成订单终点在订单结束时间片 ( 比如10分钟的时间片 ) 的价值。这里的价值如果理解？订单越多司机师傅越容易接上单，说明价值越高。所以，可以简单的通过历史数据统计下历史上每个格子在每个时间片的 ( 10分钟粒度下每天144个时间片 ) 平均订单量不就可以了。这可能是一种简单可行的思路，不过我没有尝试过，只是为了帮助大家理解。</p>
 <p>在 Paper 中，作者将该问题建模成一个用于解决序列决策的强化学习问题，也就是 <strong>MDP ( Markov Decision Process )</strong> 问题。一个 MDP 问题可以用四个最基本的要素描述-状态空间，行为空间，奖励函数和状态转移矩阵。求解 MDP 问题就是给出智能体在某种状态下应该采取哪种动作，以最大化收益。在分单问题中，每个司机看做是独立的智能体，这样会使得问题足够简单。</p>
 <p>在分单问题中， <strong>MDP</strong> 定义如下：</p>
 <p>**状态空间：**对所有时间 T ( 比如10分钟粒度 ) ，和所有的区域 G ( 六边形格子 ) ，进行离散化，那么时间和空间的笛卡尔积就是所有状态集 S，其中一个状态表示为 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0a0d166cf17b48b8b611c31ff842a843.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754032.webp" />   
      ，其中 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3a637c91f475478da7cf8f6dbeeaa2ae.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754567.webp" />   
     
 是时间离散化的索引，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4a5055f577c946c7846ba1aa5695d9fa.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754115.webp" />   
     
 是空间离散化的索引。</p>
 <p>**奖励函数：**因为分单的目标是最大化 GMV，immediate reward ( 不知道怎么翻译 ) 就是该订单的价格。但是在分单问题中，一个订单的价格需要在订单完成以后才能确定，所以需要预估价格。我们对于未来的不确定性，包括预估的不确定性，这里需要一个折扣因子，即时奖励表达式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/86e5a4215a594fd2a3b7896e0bf02094.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754627.webp" />   
     </p>
 <p>其中 R 是订单的预估价格，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b9b6cf7cc8cf46219b1ab914f650dc8a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754246.webp" />   
     
 为订单的预估到达时间 ( ETA )，整个式子可以理解为将订单预估价格进行分段折扣。</p>
 <p>**行为空间：**分单问题中有两种行为，第一种是某个司机被分配一个订单，该司机会去一个约定的地点接乘客，并经过一段时间，到达目的地。第二种行为是，在该时间片中，该司机没有被分配任何订单，它将闲置 ( idle )
@@ -413,62 +413,62 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>**状态转移：**状态转移是伴随着行为发生的，对于 idle 司机，状态从 s=( t , g )-&gt; s&rsquo;=( t+1 , g )
 ，即时间片加1，地区不变；对于分配了订单的司机，s=( t ,g)-&gt;
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f474c0dcec67467e8751929d01c363a0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754636.webp" />   
     
 ，其中 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4e39821b5a0742fba3ccff1b8120a8ef.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754010.webp" />   
     
 表示预估接驾时间与送达时间之和，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/914adf301892489c91b04d338a1c8adf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754420.webp" />   
     
 表示目标地点的索引。</p>
 <p>截一张论文中示例图解释下时空价值 V(S)
 的计算。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ca9ac2b85d5d4954a7cb0b61ce2a2e63.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754927.webp" />   
     </p>
 <p>图 10 论文中价值函数计算示意图</p>
 <p>Idle action：在空闲状态司机没有接单，因此订单收益 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cce555cc4161413c838f142ca72ab6bc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754576.webp" />   
      。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c6f5bfa6901c4e04997f2cc6193d6b04.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754078.webp" />   
     
 时空状态原有的价值加上 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ae2f7df5ff5d44fbaa1e83b21a0cbef9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754681.webp" />   
     
 的差值等于 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7bdfc07dc49d4645a54f0aff21e3ffb7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754223.webp" />   
     
 时空新的价值函数。</p>
 <p>Serving action：与空闲状态不同的是，此时订单收益 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ed03b8c989114932abe03d5cf70e0a0d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754690.webp" />   
     
 不为0。</p>
 <p>从上面的价值函数更新公式可以看出，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3bbbe7b2dd954d37834ca212c880e8c7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754174.webp" />   
     
 的更新依赖于后续 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4e7b8e3a12e6484e887dfd498ffedfad.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754628.webp" />   
      、
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8b84af527f16495ca7eb6b48bd73b13e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754994.webp" />   
     
 等的计算。因此价值函数的整个更新过程从后往前推的过程，本质是动态规划求解。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7b41e7b244cb4b1297e595b0bdb86d42.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754513.webp" />   
     </p>
 <p>图 11 动态规划求解</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/424e0762d9e94d05bbd864c2eea77d16.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271754122.webp" />   
     </p>
 <p>图 12 价值函数求解过程</p>
 <p>通过上面的算法求解到每个时空格子的时空价值后，可以 look-up table 的形式保存起来。线上可以根据订单结束时的时空格子查询时空价值。</p>
@@ -605,6 +605,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -638,10 +642,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1020,6 +1020,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

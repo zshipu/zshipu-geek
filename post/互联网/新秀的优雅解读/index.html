@@ -201,25 +201,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><em>LM：Language Model，语言模型，一串词序列的概率分布，通过概率模型来表示文本语义。</em></p>
 <p>语言模型有什么作用？通过语言模型，可以量化地衡量一段文本存在的可能性。对于一段长度为n的文本，文本里每个单词都有上文预测该单词的过程，所有单词的概率乘积便可以用来评估文本。在实践中，如果文本很长，P(wi|context(wi))的估算会很困难，因此有了简化版：N元模型。在N元模型中，通过对当前词的前N个词进行计算来估算该词的条件概率。对于N元模型，常用的有unigram、bigram和trigram，N越大，越容易出现数据稀疏问题，估算结果越不准。此外，N元模型没法解决一词多义和一义多词问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8064222f6580458dbde6b8e944077e19.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272034276.png" />   
      为了解决N元模型估算概率时的数据稀疏问题，研究者提出了神经网络语言模型，代表作有2003年Bengio等提出了的NNLM，但效果并不吸引人，足足沉寂了十年。在另一计算机科学领域机器视觉，深度学习混得风生水起，特别值得一提的是预训练处理，典型代表：基于ImageNet预训练的Fine-Tuning模型。图像领域的预处理跟现在NLP领域的预训练处理思路相似，基于大规模图像训练数据集，利用神经网络预先训练，将训练好的网络参数保存。当有新的任务时，采用相同的网络结构，加载预训练的网络参数初始化，基于新任务的数据训练模型，Frozen或者Fine-Tuning。Frozen指底层加载的预训练网络参数在新任务训练过程中不变，Fine-Tuning指底层加载的预训练网络参数会随着新任务训练过程不断调整以适应当前任务。深度学习是适用于大规模数据，数据量少训练出来的神经网络模型效果并没有那么好。所以，预训练带来的好处非常明显，新任务即使训练数据集很小，基于预训练结果，也能训练出不错的效果。</p>
 <p>深度学习预训练在图像领域的成果，吸引研究者探索预训练在NLP领域的应用，譬如Word Embedding。2013年开始大火的Word Embedding工具Word2Vec，Glove跟随其后。Word2Vec有2种训练方式：CBOW和Skip-gram。CBOW指抠掉一个词，通过上下文预测该词；Skip-gram则与CBOW相反，通过一个词预测其上下文。不得不说，Word2Vec的CBOW训练方式，跟BERT“完形填空”的学习思路有异曲同工之妙。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3da229453c9b4f56a973ab09ef61c87a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272034101.png" />   
     </p>
 <p>一个单词通过Word Embedding表示，很容易找到语义相近的单词，但单一词向量表示，不可避免一词多义问题。于是有了基于上下文表示的ELMo和OpenAI GPT。</p>
 <p>ELMo，Embedding from Language Models，基于上下文对Word Embedding动态调整的双向神经网络语言模型。ELMo采用的是一种“Feature-based Approaches”的预训练模式，分两个阶段：第一阶段采用双层双向的LSTM模型进行预训练；第二阶段处理下游任务时，预训练网络中提取出的Word Embedding作为新特征添加到下游任务中，通过双层双向LSTM模型补充语法语义特征。相比Word2Vec，ELMo很好地解决了一词多义问题，在6个NLP测试任务中取得SOTA。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/68b6b90a4be041afbf4fece061d88c5a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272034937.png" />   
     </p>
 <p><em>Transformer：谷歌提出的新网络结构，这里指Encoder特征提取器。LSTM提取长距离特征有长度限制，而Transformer基于self-Attention机制，任意单元都会交互，没有长度限制问题，能够更好捕获长距离特征。</em></p>
 <p>GPT，Generative Pre-Training，OpenAI提出的基于生成式预训练的单向神经网络语言模型。GPT采用的是一种“Fine-Tuning Approaches”的预训练模式，同样分两个阶段： 第一阶段采用Transformer模型通过上文预测的方式进行预训练；第二阶段采用Fine-Tuning的模式应用到下游任务。GPT的效果同样不错，在9个NLP测试任务中取得SOTA。不过，GPT这种单向训练模式，会丢失下文很多信息，在阅读理解这类任务场景就没有双向训练模式那么优秀。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/82aea933327b42d1a58a476540d84f71.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272034064.png" />   
     </p>
 <p>BERT，Bidirectional Encoder Representations from Transformers，基于Transformer的双向语言模型。同样，BERT采用跟GPT一样的“Fine-Tuning Approaches”预训练模式，分两个阶段：第一阶段采用双层双向Transformer模型通过MLM和NSP两种策略进行预训练；第二阶段采用Fine-Tuning的模式应用到下游任务。有人戏称：Word2Vec + ELMo + GPT = BERT，不过也并无道理，BERT吸收了这些模型的优点：“完形填空”的学习模式迫使模型更多依赖上下文信息预测单词，赋予了模型一定的纠错能力；Transformer模型相比LSTM模型没有长度限制问题，具备更好的能力捕获上下文信息特征；相比单向训练模式，双向训练模型捕获上下文信息会更加全面；等等。当然，效果才是王道，集大成者BERT拿了11项SOTA。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/76af50195cab4cd2b6b172c680d7e3bd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272034286.png" />   
     </p>
 <p><strong>论文解读：BERT原理</strong></p>
 <p><em>相关论文：</em></p>
@@ -229,26 +229,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>1.特征提取器</strong></p>
 <p>Transformer Encoder，特征提取器，由Nx个完全一样的layer组成，每个layer有2个sub-layer，分别是：Multi-Head Self-Attention机制、Position-Wise全连接前向神经网络。对于每个sub-layer，都添加了2个操作：残差连接Residual Connection和归一化Normalization，用公式来表示sub-layer的输出结果就是LayerNorm(x+Sublayer(x))。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6f7d56f17a804e23805e569a7c59e6bd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272034379.png" />   
     </p>
 <p>Attention Mechanism。为什么要有注意力机制？换句话说，注意力机制有什么好处？类比人类世界，当我们看到一个人走过来，为了识别这个人的身份，眼睛注意力会关注在脸上，除了脸之后的其他区域信息会被暂时无视或不怎么重视。对于语言模型，为了模型能够更加准确地判断，需要对输入的文本提取出关键且重要的信息。怎么做？对输入文本的每个单词赋予不同的权重，携带关键重要信息的单词偏向性地赋予更高的权重。抽象来说，即是：对于输入Input，有相应的向量query和key-value对，通过计算query和key关系的function，赋予每个value不同的权重，最终得到一个正确的向量输出Output。在Transformer编码器里，应用了两个Attention单元：Scaled Dot-Product Attention和Multi-Head Attention。</p>
 <p>Scaled Dot-Product Attention。Self-Attention机制是在该单元实现的。对于输入Input，通过线性变换得到Q、K、V，然后将Q和K通过Dot-Product相乘计算，得到输入Input中词与词之间的依赖关系，再通过尺度变换Scale、掩码Mask和Softmax操作，得到Self-Attention矩阵，最后跟V进行Dot-Product相乘计算。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1fd4f4642eee49ab89fc2f453b3838b3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272034696.png" />   
     </p>
 <p>Multi-Head Attention。通过h个不同线性变换，将d_model维的Q、K、V分别映射成d_k、d_k、d_v维，并行应用Self-Attention机制，得到h个d_v维的输出，进行拼接计算Concat、线性变换Linear操作。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1e6cae96eaf34368afe57d9b879fd98d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272034599.png" />   
     </p>
 <p><strong>2.输入特征处理</strong></p>
 <p>BERT的输入是一个线性序列，支持单句文本和句对文本，句首用符号[CLS]表示，句尾用符号[SEP]表示，如果是句对，句子之间添加符号[SEP]。输入特征，由Token向量、Segment向量和Position向量三个共同组成，分别代表单词信息、句子信息、位置信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/089eccf3fac7428782ec4bb7b665a682.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272034615.png" />   
     </p>
 <p><strong>3.预训练</strong></p>
 <p>BERT采用了MLM和NSP两种策略用于模型预训练。为了证明这两种策略的效果，谷歌额外增加了两组对照实验。对照组一：No NSP，保留MLM，但没有NSP；对照组二：LTR &amp; No NSP，没有MLM和NSP，替换成一个Left-to-Right（LTR）模型，甚至为了增强可信性，在对照组二的基础上增加一个随机初始化的BiLSTM。实验数据表明，BERT采用MLM&amp;NSP策略完胜其他。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bd2ac9e9cf8d407baee558744fd3bdde.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272034881.png" />   
     </p>
 <p>MLM，Masked LM。对输入的单词序列，随机地掩盖15%的单词，然后对掩盖的单词做预测任务。相比传统标准条件语言模型只能left-to-right或right-to-left单向预测目标函数，MLM可以从任意方向预测被掩盖的单词。不过这种做法会带来两个缺点：1.预训练阶段随机用符号[MASK]替换掩盖的单词，而下游任务微调阶段并没有Mask操作，会造成预训练跟微调阶段的不匹配；2.预训练阶段只对15%被掩盖的单词进行预测，而不是整个句子，模型收敛需要花更多时间。对于第二点，作者们觉得效果提升明显还是值得；而对于第一点，为了缓和，15%随机掩盖的单词并不是都用符号[MASK]替换，掩盖单词操作进行了以下改进，同时举例“my dog is hairy”挑中单词“hairy”。</p>
 <p><em>80%用符号[MASK]替换：my dog is hairy -&gt; my dog is [MASK]</em></p>
@@ -384,6 +384,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -417,10 +421,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -799,6 +799,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

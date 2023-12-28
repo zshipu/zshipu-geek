@@ -222,7 +222,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>相应地，卖家完成交易，认可闲鱼平台真的能帮助一般卖家发布和销售闲置商品后，可以让用户对平台更易形成依赖与粘性。接下来，如何对卖家策略作AB实验，是一个新的挑战。为什么这么说，先让我们回顾下传统的AB实验设计。</p>
 <p>AB实验是互联网各厂主流的一种策略评估手段。比如一个推荐系统想迭代一次ctr预估模型，就可以对流量作随机分组，不同分组使用不同的ctr预估模型，然后观察用户日志作数据回收。这样就完成了一次随机对照实验(RCT，RandomizedControlledTrial)。根据实际数据得到客观、量化的策略效果影响，为产品迭代提供精准的指导。那如何实现AB实验呢? 最简单的，按照请求id对流量作随机划分，此时同一用户的多次请求会落到不同的实验分组中，每个实验桶可以实验不同的参数模型预估ctr，由于流量是随机划分的所以每个实验是统计独立的，从中可以挑选效果最好的模型。电商场景下，关注的已不只是ctr这样单纯的流量指标，而是以人为维度的uv指标，如买家的人均订单数以及uv留存等，所以实验流量的划分会更进一步，从&quot;请求id&quot;变为&quot;买家id&quot;为维度。闲鱼搜索场景也是如此，见图1。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f204e901e6be4297ad1b8e432825fc8b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910847.png" />   
     </p>
 <p>图1.一般ab实验框图</p>
 <p>在图1这样的设计下，可以满足对买家的实验控制，如迭代一版交互ui，或者一版搜索相关性模型等。但现在实验的对象是卖家，我们简单作角色替换行不行? 答案是否定的，因为我们永远不可能像买家划分那样，同一个卖家只能出现在某一个流量桶中，这样相当于搜索候选池缩小至1/N(N为划分的桶数)，成交势必严重下跌。目前有一些其他的折中设计，但也不完美，列举如下。一种是以类目作为流量的划分依据。即根据query所属类目的不同，来区分对控制组与实验组。它的不足之处在于不同类目的供需关系及成交效率天然就会存在差异，难以做到随机分组的要求。还有一种做法是隔天实验，即T日流量使用控制策略，T+1日流量使用实验策略，T+2日再使用控制策略，这样交替进行，即相当于把时间当做划分依据。但是这种设计有两处不足:1)太过理想化，忽略了不同时间本身可能就是一个影响因子，如周末，节假日，app更新等都会影响到用户表现；2)当观察指标本身涉及到时间时，比如长期留存，它就要求同一个用户下不同时间的策略也要一致。在提出全流量AB实验的设计思想前，我们先列出一个具有说服力的AB实验需要满足的条件。</p>
@@ -236,7 +236,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="全流量ab实验的设计"><strong>全流量AB实验的设计</strong></h3>
 <p>与以上三个准则呼应，我们对搜索结果页的卖家id作流量划分，对比见图2。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d68a5730fd4e46f8a5d01979ae663a01.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910175.webp" />   
     </p>
 <p>图2.全流量AB实验设计思想</p>
 <p>1.全流量桶AB。所有买家桶中都是一样的代码。这些代码自带卖家分组的if-else逻辑。</p>
@@ -249,25 +249,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="任务背景"><strong>任务背景</strong></h3>
 <p>表1.流失卖家与新卖家受到聊天(买家点&quot;我想要&quot;发起询单)激励后，留存增益显著</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3af17596d611415c842eec4d20fb5619.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910230.png" />   
     </p>
 <p>所以从留存价值考虑，对当日到访的且未受到我想要激励的新/流失卖家，作流量倾斜实验，为什么不直接选成交呢，因为&quot;商品曝光-&gt;询单&quot;的转化率为&quot;商品曝光-&gt;成交&quot;的转化率的10倍，意味着可以节省流量扶持更多目标卖家。</p>
 <p><strong>全流量AB实操</strong></p>
 <p>除了章节二中的理由外，当日到访新卖家总共才1万量级，不做全流量AB，影响到的uv过少，波动会是个大的干扰。见图3。此时我们要对比的就是，A1卖家相较B1卖家，在聊天uv，成交uv，留存效果上的提升。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a142b6f2b2a642d5aea931dab6ab3140.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910481.png" />   
     </p>
 <p>图3.全流量卖家AB在流失卖家倾斜实验中的案例</p>
 <h3 id="43实验结果"><strong>4.3实验结果</strong></h3>
 <h3 id="目标卖家扶持的有效性"><strong>目标卖家扶持的有效性</strong></h3>
 <p>表2.全流量AB实验5天数据见下。收到&quot;聊天&quot;激励的卖家uv占比提升了+22%，符合预期。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e15e671caffb4de5930f6f3b92f763a1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910038.png" />   
     </p>
 <h3 id="验证扶持后对整体的交易效率有无伤害"><strong>验证扶持后对整体的交易效率有无伤害</strong></h3>
 <p>既然是扶持，意味着此前排序靠后的商品加权排在了前面，那是否真的会影响整体的人均买卖家指标呢? 下表显示实验组的人均买卖家反而有提升。5日平均人均买卖家提升了+1%（如下表3）</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/97f5d74c996641eab54f306c4e9f2eeb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281910558.png" />   
     </p>
 <p>需要进一步印证。查看扶持后新卖家商品的ctcvr，流失卖家商品的ctcvr，均高�</p>
 
@@ -393,6 +393,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -426,10 +430,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -808,6 +808,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

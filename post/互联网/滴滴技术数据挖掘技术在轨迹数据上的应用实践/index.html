@@ -212,68 +212,68 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-13be83f3eb904536bdc989ad77a71130.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272230134.png" />   
     </p>
 <p><strong>桔妹导读：</strong> 每天滴滴都会为上千万人提供出行服务，在这一过程中积累了海量轨迹数据。这些轨迹数据来自于公共服务，本文介绍如何利用这些数据回馈大众，改善出行体验。</p>
 <h2 id="一-背景"><strong>一 背景</strong></h2>
 <p>首先简要介绍一下什么是数据挖掘。数据挖掘（Data Mining）是指从大量数据中发现特定信息和模式的过程，也有很多人将这一过程看作知识发现（Knowledge Discovery in Database）。数据挖掘常用的算法手段有回归、分类、聚类和模式发现，工程上数据挖掘通常和大数据技术联系在一起，工业实践中还需要从业人员对数据中包含的领域知识有足够了解。业界挖掘手段经常用在用户画像、商业智能（Business Intelligence）、社群关系发现等场景。</p>
 <p>本文主要分享如何从海量轨迹数据中提取关键信息，改善用户出行体验。滴滴在业务运营过程中，司机端APP 会持续向后台上传位置信息，这些信息被用于分单、司乘碰面、导航、里程计费。每天滴滴都会为上千万人提供出行服务，在这一过程中积累了海量轨迹数据。这些轨迹数据不涉及用户隐私，主要反应了公共道路上的交通状况和司机驾驶习惯。下面我们会具体介绍两个典型场景。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cf7a5312339f4da982e580e8ba11f1c2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272230404.png" />   
     </p>
 <h2 id="二-路网更新">二 路网更新</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/24ef7ce8838244f79a504dbcf1232fea.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272230086.png" />   
     </p>
 <p>作为数字道路地图的关键部分，道路交叉口是多条相互连接道路的交汇处，其几何特征和拓扑属性的精确性在移动导航和其他位置服务中起着重要作用。随着城市发展，交叉口的更新越来越频繁，主要包含挂接关系变更、新路、形态变更，这类拓扑错误如果不能及时检测及更新，会影响路网匹配、路径规划、导航播报等基于路网数据的地图服务，产生导航绕路、播报不合理等用户体验问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/20cc71fb758840d6ab00aa0fd67b11f7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272230906.png" />   
     </p>
 <h3 id="21-技术挑战">▍2.1 技术挑战</h3>
 <p>交叉口拓扑更新可以抽象成这样一个问题：路口范围内的轨迹矢量模式与路网是否匹配？为此，需要解决以下几个关键问题：第一，轨迹数据包含了大量噪声，如何进行有效去噪；第二，路口位置及范围如何确定；第三，轨迹矢量模式如何表达以及如何与路网差分。</p>
 <p>为了解决以上问题，我们设计出的算法框架如下，包含三个核心模块：轨迹质量提升，路口影响区域检测和拓扑结构校准模块。相关工作发表在数据挖掘与数据库技术顶级学术会议 International Conference on Data Engineering (ICDE) 2020上。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3a8e5ece3de64d9193608fdb6f17c691.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272230478.png" />   
     </p>
 <h3 id="22-轨迹质量提升">▍2.2 轨迹质量提升</h3>
 <p>原始轨迹数据可能受设备故障、信号不佳等因素影响导致采集到的定位信息存在漂移甚至异常，我们根据前后轨迹点的距离和时间间隔进行轨迹段的分割，保证同一轨迹段在时空上具有连续性；此外，车辆在路口一般会因为等红绿灯或交通拥堵停留，导致在短距离范围内产生大量具有不同方向的位置信息（噪声），不仅增加了路口检测的计算开销，还给检测精度带来较大影响。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3b9596000f4a491395ace5446bd5f4c2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272230128.png" />   
     </p>
 <p>针对这一问题，我们基于轨迹点的密度（时间密度、空间密度）进行数据过滤，并对局部自相交轨迹段进行分段，最后通过Douglas Peucker算法提取轨迹段关键形状点，在保留轨迹转向特征的同时，对数据实现了压缩。因此，通过轨迹分段、去噪、压缩的预处理，实现了对原始轨迹数据的质量提升。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8d943554f1d74268a9f356d480c09ff6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272230070.png" />   
     </p>
 <h3 id="23-交叉口位置及范围生成">▍2.3 交叉口位置及范围生成</h3>
 <p>为了检测道路交叉口影响区内的详细拓扑信息，首先需要识别道路交叉口的核心区域，即路口位置和覆盖范围。考虑到不同路口大小不一，并且路口范围内轨迹通常具有减速、转向等特征，我们设计了一套基于四叉树空间划分和Mean-shift的自适应路口位置检测算法。在搜索道路交叉口单元的过程中，将四叉树的最小边长设置为25米，并从200米大小边长开始的层（即从四叉树底部开始的第四层）搜索道路交叉口单元。由于交叉口中心位置的轨迹往往比路段具有更多的转向与较低的转速，我们对每个网格单元中的所有特征点（轨迹压缩获得）执行速度分析和基于方向的DBSCAN聚类，筛选潜在的道路交叉口网格单元。随后，鉴于Mean-Shift算法可以在聚类过程中同时检测出密度中心，我们通过该算法，结合候选交叉口单元内的轨迹点识别路口的中心位置。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/958234e1dea64a4faef30ee213a10df2.gif" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272230106.gif" />   
     </p>
 <p>不同路口其形状有较大差异，如何更通用地基于轨迹数据确定路口的核心区范围？实质上道路交叉口的中心位置附近并不总是具有相对于路段区域更多转向行为，例如，环岛和立交桥。本文中我们利用环状几何模型逐层检测路口覆盖范围。对于一个路口而言，越到核心区边缘的环包含的转向点密度越低、速度越大，因此该路口模型适于不同形状路口的范围提取。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1dd56db0a3724dcdb0a917bbdf5ce5be.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272230695.png" />   
     </p>
 <h3 id="24-拓扑结构校准"><strong>▍2.4 拓扑结构校准</strong></h3>
 <p>在路口范围拓扑结构的校准阶段，我们基于检测的路口中心位置和核心区范围向外扩展，获取交叉路口影响区内的全部轨迹。我们对这些轨迹进行转向簇提取与中心线拟合，并将拟合的转向路径与基准路网进行地图匹配。</p>
 <p>Frechet距离适于评测曲线之间的相似性，但是对于复杂形状的路口以及路口邻接路段间朝向偏差较小的情况，Frechet表现不佳。鉴于此，我们将方向权重引入轨迹相似性度量中。对于任意两条轨迹序列，分别计算起点与终点间的方向差，并结合Frechet距离生成轨迹集合的距离矩阵。基于该矩阵结合DBSCAN聚类实现路口范围内的转向簇提取。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2eba3e7094f447d5a79737d19f3556e0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272230936.png" />   
     </p>
 <p>在提取转向簇后，需要对各簇轨迹进行拟合来得到转向矢量模式。我们采用基于Force Attraction的聚类方法获取各簇对应的转向路径，相比如其他依赖点信息的拟合算法如Sweeping等，Force Attraction方法能够充分运用轨迹线信息，因此对复杂转向场景的拟合更加鲁棒。Force Attraction方法首先随机采样簇中的一条轨迹作为参考轨迹，随后使用同簇内其余轨迹对参考轨迹中点的位置进行迭代调整。在调整过程中，Force Attraction算法假定任意轨迹点上有吸引力和排斥力作用，通过搜索两个力达到平衡的位置来获得参考轨迹对应点的新位置。由于随机采样轨迹容易导致拟合得到的中心线不精准，特别是当随机采样的参考轨迹远离实际道路中心时，拟合偏差较大。因此，我们引入基于Frechet的采样策略。具体来说，我们从簇中随机采样k条轨迹作为候选参考轨迹，并分别计算每个候选者与该簇的其余轨迹之间的Frechet距离。将具有最小距离和的候选轨迹视为参考轨迹。</p>
 <hr>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b4548a39f0cd41f6be0bea7a6b6c9ea2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272230508.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fe325636b5d4413c8ec58ea1924d6d78.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272230822.png" />   
     </p>
 <p>在获得转向路径后，我们采用经典的HMM算法结合基准路网进行地图匹配。为加速匹配过程，我们基于每个路口的转向路径集生成凸包再与路网空间关联。根据匹配概率得到低置信度转向路径，作为需修正拓扑情报。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a4707aadfcc0429db5f34284d1911eb2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272230076.png" />   
     </p>
 <p>在最终的路口拓扑校准上，为了评估我们解决方案的有效性，我们基于滴滴实际轨迹数据和路网检测两种类型的错误拓扑：转向路径缺失和转向路径偏移。根据我们的评估，整体的精确率能够达到70%，转向路径缺失和偏移的比例在1 : 5。目前该方法已经在滴滴路网更新产线中得到应用，下图为两个典型案例（路网为淡灰色线，轨迹分布以深蓝色表示，校正的转向路径以红色箭头线突出显示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ffa0c49474aa4b76aa3f5ca79a663dbf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272230576.png" />   
     </p>
 <h2 id="三-路线偏移"><strong>三. 路线偏移</strong></h2>
 <p>在网约车业务场景中，可能会出现司机师傅未能按照导航路线行驶而出现路线偏移的现象，导致此类场景出现的原因可能是路况不佳、路线不合理、道路封闭，也可能是司机发现了更好的路线躲避拥堵，或者是对路线不熟悉，甚至故意绕路等。挖掘此类场景对于网约车提升地图用户体验、避免司乘纠纷、保障司乘安全具有至关重要的意义。为了解决此类问题，地图团队通过全局/局部的起终点（Origin-Destination，简称OD) 约束，基于用户历史轨迹行为特征建模，实时观测目标用户轨迹行为空间分布特征，从而检测路线偏移行为。基于用户轨迹的路线偏移检测，我们最终构建了实时触达用户的轨迹安全产品与路网状态更新体系。</p>
@@ -286,7 +286,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5449440b858d469a8baac96bf904ce52.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272230481.png" />   
     </p>
 <ol start="2">
 <li>
@@ -302,7 +302,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="32-少而不同绕路检测"><strong>▍3.2 &ldquo;少而不同&quot;绕路检测</strong></h3>
 <p>该类场景主要是检测单一、少数绕路订单的异常状态，该类订单在OD约束下，与其他正常相同OD下其他正常订单轨迹空间分布存在明显的差异，主要表现为连续地出现离群轨迹点，所以可以将我们的任务转化为实时离群轨迹点检测，检测方法可以由以下部分组成：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9f54c92475ed45b08474f078ed642c5a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272230068.png" />   
     </p>
 <ul>
 <li>
@@ -315,7 +315,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9a88ee4f5ad44553bff1c8766101057d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272230907.png" />   
     </p>
 <ul>
 <li>
@@ -324,7 +324,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/946ae2b174bc46ff860311f8756455ae.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272230234.png" />   
     </p>
 <p>其中，地理特征矩阵更新学习的过程为：</p>
 <p><strong>S1)</strong> 将行驶的轨迹T={p1, p2, … , pn}根据坐标映射到对应的路网网格中。轨迹可以表示为T={g1, g2, … , gn}其中gi为行驶轨迹中坐标pi在路网中对应的网格。</p>
@@ -340,39 +340,39 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/93e2c5b7b64a42ff81f9d89434a7bf70.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231245.png" />   
     </p>
 <p>图一</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6b8440b7686e4fe58a6e0788e47dcddc.gif" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231449.gif" />   
     </p>
 <p>图二</p>
 <h3 id="33-多而不同封路检测"><strong>▍3.3 “多而不同”封路检测</strong></h3>
 <p>基于“少而不同”的思路针对极少数用户轨迹偏移的异常检测主要是为了解决司乘纠纷、轨迹安全等问题；“多而不同”主要是多数用户在同OD空间约束下，出现了群体性的路线偏移，该现象往往意味路网的状态发生了变更而导航依旧按照发生变更前状态规划，从而导致用户的集体被迫绕路。因此针对路网状态异常，以道路封闭为例，我们提出了一种基于 Siamese LSTM (孪生长短期记忆网络)与LSPD（缺失路段模式检测方法）的轨迹时空模型来解决路网封闭检测问题。相关工作发表在GIS领域国际会议ACM SIGSPATIAL 2019 (International Workshop on Ride-hailing Algorithms, Applications, and Systems)(SIGSPATIAL 2019 RAAS)</p>
 <p>该模型主要结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b62169f35920434fac0ded34d40a3c4a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231903.png" />   
     </p>
 <p>该模型主要分为两个模块，第一个算法模块是基于时间序列流量信息相似性建模，该模型可以引入经典的Siamese LSTM网络，并融合注意力机制与自定义损失函数，实时刻画历史同期流量曲线与当前流量曲线的相似性，从而在线检测流量异常。由于采取了与历史同期（例如本周一与上周一）的流量序列建模，因而对流量自然下降及波动具备很强的鲁棒性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/90699dda93e54d81839cc4b85f80c9fe.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231211.png" />   
     </p>
 <p>基于Siamese LSTM流量异常检测可以对全路网空间的流量异常进行实时检测，其检测的结果需要更强的证据佐证道路异常，因此，我们设计了第二个算法模块LSPD， 该算法侧重于通过群体用户行为的异常判别第一个算法模块结果的可解释性与概率性，主要思想是统计同OD下路线模式的分布变更，不同于轨迹异常检测算法(iBOAT) 在OD场景下关注“少而不同“的异常轨迹，我们重点关注“多而不同“的用户群体性异常行为，例如某时间段内历史用户集中出现了绕路事件，则通过我们的LSPD算法模块可以精确定位到哪些路段可能出现了道路封闭以及发生发生该类事件的置信度有多大。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b36397014781481e9895a286d4313755.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231756.png" />   
     </p>
 <p>以北京市某处道路封闭事件为例，该道路在下午17时左右发生道路封闭，我们的系统在18时通过Siamese LSTM深度网络检测出该道路存在明显的流量异常，异常置信度为0.99，随后，该事例被系统流转至LSPD检测模块寻求更多的轨迹证据佐证该道路的确存在道路异常，在该模块，我们的算法检测到在局部起终点（OD）的作用下，用户的出行方式已经发生了巨大的变化，之前多数用户选择右侧红色路线，而当前状态下，用户多选择左侧蓝色路线（红色路线的支持度从30降低到6，而蓝色路线的支持度则由3上升至43），从而被系统整体判别该道路出现了道路异常，即道路封闭。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6257550ed08548f6b8fa9eda88783315.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231037.png" />   
     </p>
 <hr>
 <h2 id="四-总结"><strong>四. 总结</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/61a061a879b045ccb53ac6e2c6130265.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231610.png" />   
     </p>
 <p>在当前的工业实践中，数据挖掘也常常和一些热门词汇联席出现，比如人工智能、机器学习、大数据、数据分析、数据科学等，如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e65c41263c884b0c9ee947a6edc3c7cf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272231526.png" />   
     </p>
 <p>相比于其他概念，数据挖掘不强调应用何种手段，更强调目的：从数据中提取信息。在这个意义上讲，数据挖掘天然是交叉学科，需要从业人员具备统计、机器学习、大数据乃至高并发后台服务、数据可视化等复合技能。另一方面，目前的人工智能技术水平仅仅达到刻�</p>
 
@@ -498,6 +498,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -531,10 +535,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -913,6 +913,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

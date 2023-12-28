@@ -199,7 +199,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>人工智能是当下金融产业转型的重要助力，本文主要介绍51信用卡管家在这方面如何搭建模型体系，如何发掘数据价值，如何成立自己私有的扫码平台或个性化体系。</p>
 <p>51信用卡管家最开始以账单管理业务为主，国内比较早的用于管理信用卡账单的APP，目前公司的业务领域涉及负债管理、金融、技术服务等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/35c7803a5dec4852a85b1c7006844416.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281551742.webp" />   
     </p>
 <p>目前51信用卡管家在运营增长面临的问题： “推荐”或“搜索”主要应用在电商行业里面，电商里面推荐系统重召回，包括“粗排”和“精排”，在金融领域产品少，为何要做复杂的召回呢？其实，金融里面我们重“排序”，举例说明，比如今天客户来51的目的可能是为了办卡，结果没有选到合适的卡，那么这个时候应该怎么办呢？由于金融客户价值非常大，我们不想失去任何机会，因此就给客户推荐其它业务。</p>
 <p>下面介绍一下“推荐”在我们金融领域会遇到什么样的问题：</p>
@@ -212,48 +212,48 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>(2) 如何构建一套实时预测用户偏好并线上应用的模型架构?在电商中实时推荐系统、在线测试、在线规则引擎比较多，成熟案例也多，而在金融里面相关资料和成熟案例相对较少，金融类用户偏好有一定的深度，重要的一点在于如何在第一时间捕捉到用户金融类的偏好，因此构建一套成熟的体系架构是非常困难的。</p>
 <p>(3) 如何体系化帮助渠道有效增长？在广告投放时，如果反向的用户价值观念比较大，比如ROI特别高的情况下，那么渠道投放信心也是倍增的，对于广告平台的也非常有价值。渠道有效增长对站内和站外影响都比较大。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/eca8438d11af4041a4220ad06ae37408.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281551663.webp" />   
     </p>
 <p>下面介绍一下 <strong>系统的架构平台相关内容</strong>，金融业务如何基于账单和APP构建用户标签？金融业务中数据来源第一个是账单，数据量较大，用户的很多账单需要管理和分析，提供很多定制化服务，比如推线下的很多活动等，这个对用户来说意义比较大，这里的账单主要是消费类的数据。第二类数据是APP数据，经过很多分析表明这类数据重要性比较高，在后面将结合具体算法介绍基于APP构建用户标签。</p>
 <p>举例说明基于账单构建用户标签。假如今天在杨国福麻辣烫消费了一笔账单，账单里面可能会形成“支付宝消费—杨国福麻辣烫—**金额”等没有语法结构的短文本，我们需要挖掘有用信息，经过很长时间的探索，我们发现这些短文本基本都有一个核心短语，将这些核心短语分类列出来对我们帮助非常大。下图是我们设计的分词系统，大概有三层体系，第一个是主向量化，有字级别向量以及词级别向量化，词向量化也需要很多算法；再往上一层是合并规则，如果名词之间相关性比较大时合并起来就是短语，此外我们也有自有词库；再往下一层就是概率图推理模型，简单介绍一下这层的作用，对于账单来说有几大问题，假如有一笔套现账单，这种账单在这情况下意义不大，但对于判断风险评估来说比较有用，比如判断用户偏好，这样的账单记录会影响系统分词效果。再比如有一笔信贷业务的账单，我们要判断用户是否具有还款或负债能力，此时具有欺诈性质的假账单影响比较大，需要筛选出来。总体原则是避免有问题账单进入系统而影响结果。</p>
 <p>以“支付宝消费—杨国福麻辣烫—**金额”为例继续介绍，如下图所示，先将账单记录分为两大类，关键词还是实体名，将“杨国福麻辣烫”提取出来，其它部分作为other部分。像“支付宝消费”这样的词在分词系统里面other部分一步步分离，最终进入系统概率图部分。概率图有什么作用呢？将训练过程历史记录中出现词的贡献概率或联合概率识别出来，即图中边与边之间的关系。假如进入这个概率图后形成四个短语，在四个图中各出现一次，其他图都没有出现的话，这种意味着这四个短语在图之间的关系在历史训练中比较弱，独立性比较强，那么我们看一下这四个图各处在什么位置，与库里面其他词概率关系是怎么样的，然后构建模型。此外，我们也可以通过人工系统进行审核。下图右侧账单算法分词案例，首先将账单所有短语列出来，大的地区通过将中国的地理位置排列识别，小的地方通过其他解决办法也可识别。还有一个问题，商家都有明显的酒店短语，为何还要做呢？大多数账单能够识别出有多少是住宿类别，但有些时候识别不出怎么办呢，比如“香米拉客家商务酒店”，那么需要通过其它方式提供有效信息再进行分类。以上内容是基于账单体系架构构建用户标签的过程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/73e3e93d7a554dab974f284f47a64d85.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281551839.webp" />   
     </p>
 <p>基于APP构建用户标签。我们在实际中，不只把APP词用一次，甚至把描述词也用到了。单点类APP通过one-vector一维方式提取，通过矩阵或者一维向量表示，第2个是交叉类cross-vector二维或三维方式。先简单介绍一下cross-vector，比如我们在制作APP时会给它一个类别，很多APP不仅有一级name还有double级name，我们有一个二次name的预测过程，比如51信用管家被很多人作为简单的管理信用类工具，事实上还有理财与借贷类，如果只注意到某一个类别，容易忽略APP的价值挖掘，我们可以将APP里面两个类进行简单加和等组合，也可以以人工方式进行组合，3维的交叉则是在2维基础上扩充类。此外，APP里面描述要不要采用呢？我们认为一定要用，因为每个APP开发完后在上传的时候一定要有标识类代表性的转账信息，这些描述信息非常有用。这样就能得到足够的数据拟合场景了，那么这种体系我们可以适用于哪些地方呢？比如可以用于判断用户的性别和年龄，也可以用于判断用户理财价值比较大还是旅游比较多类别。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8b6e948fbd21406ea6c431ab763659f3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281551057.webp" />   
     </p>
 <p>接下来介绍如何将这些模型高效利用，各个业务线如何打通呢，建模人员如何高效利用起来呢？在金融领域这类介绍的比较少，接下来简单介绍一下我们的算法框架。我们算法上线时候，有一个统一的自动化翻译过程，不管是Python、C++还是R语言写的算法统统被屏蔽掉，因为我们要求线上环境必须是稳定的，此外产品上线情况下还需要做移植性校验，将翻译过程的错误进行封装。流程再往上走，51作为一个个性化通用平台，特征生成包括实时特征扫描、离线特征自动对接以及多元特征融合，训练方式包括模型在线训练、模型离线训练，效果评估包括模型打分指标：AUC、Recall、Precision、F1-score、MAP、K-fold波动率等，鲁棒性检测包括线上模拟测试(时间片数据与带噪样本融合测试)。再往上走就是环境适配，包括模型线上运行环境翻译与线上模型一致性验证。再往上就是51CG运营管理平台，实现了全自动化，因此我们模型上线速度特别快，只要配置好信息随时能够上线对接。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/00f3562f1583439d990a25379f189b45.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281551884.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a6e35005290e49649b1a8ce11f29c5cd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281552756.webp" />   
     </p>
 <p>**增长的案例1：**新手专区个性化AB。51管家最大的功能点就是管理账单，如下图所示针对多种类型新用户（导单、还款、理财、办卡贷款、征信）实现T+0（实时毫秒级）个性化新手专区AB测试新手专区转化率较默认业务排序提升7-14%。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f2cf59880c1449619a9dc3d40cec2872.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281552589.webp" />   
     </p>
 <p>第2个案例就是前面提到的51管家重推送（Push），首先简单说明Push优化五个关键问题: 合适的时间、以合适的文案、给合适的人、推送合适的内容、疲劳度控制。什么是合适的时间，建立推送时间优化AB迭代机制，这个主要依靠运营或产品脑洞，没有特别好的方法，每个产品有个合适的时间。如下图所示，我们的思路是看平均活跃时间、最活跃时间、最活跃时间提前1小时以及活跃次数90分位数的最早时间等，这样就可以划分活动分布。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4cb0272de12c4afbae6d6876ee40e910.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281552355.webp" />   
     </p>
 <p>理财文案比较多，我们通过MAB算法来选择最佳文案，简单介绍一下我们如何应用的？MAB是一个算法模型，我们采用UCB算法（置信区间上界）来计算每一个文案下收益，置信区间上下限宽度需要注意一下，如果置信区间上下限很宽的话是存在风险的，由于实验不够可能每次都定位同一个位置，这个时候如何校验需要一定的拆分实验功底。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/df07f4268ece4706aaf75a049cc0c6a8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281552990.webp" />   
     </p>
 <p>如何通过数据驱动设计疲劳度控制？通过预测加分档方式进行调整。这里打开率预估是Push里面最基础的模型，需要持续迭代优化，通过MVP(Minimum Viable Produc)最小化产品可行来驱动，预估分档为规则(最近N天打开Push)-LR模型(纯打开率)-融合(转化率)+校准(calibration)，有些情况下打开次数频繁，此时需要进行一定限制。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fb73ed3aca4b40a287415fe9b673965b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281552972.webp" />   
     </p>
 <p>**增长案例2：**基于用户标签对理财用户进行细分预测。我们对用户定义分群非常清楚，比如低活流失用户、高活流失用户、周期型用户、尝试型用户等，包括前面提到的Push在增加用户活跃量的条件下，用户打开APP时基本就是活跃的，那么这些是基于我们数据的积累。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/beeb0a20eb804e90851d1b3975c81f9a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281552735.webp" />   
     </p>
 <p>下图所示，基于push渠道精细化运营的结果。针对6种细分人群做差异化运营策略跟踪一个月时间，最终AB实验，六个人群较未提供策略都有比较显著的ROI净值提升。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e5d84fc7b5cb44418f69d9de1f3153eb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281552340.webp" />   
     </p>
 <p><strong>作者介绍：</strong></p>
 <p><strong>陈兵强</strong>, 现担任51信用卡管家资深算法专家，曾担任美国nanjee公司算法研发总监、国内领先大数据公司的ID-Graph团队负责人，长期从事金融领域的ML、DL等相关算法研究和落地解决方案。</p>
@@ -387,6 +387,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -420,10 +424,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -802,6 +802,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

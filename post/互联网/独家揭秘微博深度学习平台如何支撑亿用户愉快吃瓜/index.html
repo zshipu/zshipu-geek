@@ -212,7 +212,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3e0138345064482e9953623f6423719c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272243963.jpeg" />   
     </p>
 <blockquote>
 <p>作者： 于翔</p>
@@ -232,12 +232,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在线流程也是一一对应的，在线的样本数据经过特征处理，特征处理与离线使用同一套配置文件，以保证一致性与正确性。经过模型预测得到预估值，然后业务根据预估值，再去做一些相应的排序与处理，这是在线部分。</p>
 <p>K8s 在这里的应用主要是模型训练和模型预测两个环节，后面会具体展开讲。大家可以看到整个工作流环节比较多，除了模型训练，还有模型部署、样本生成、模型部署等许多环节，深度学习平台的目标是为业务提供一站式的工作流服务，让业务不用关心底层烦琐的工程细节，比如资源的调度、GPU 的分配细节等等，专注于算法和效果的调优。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b3a4f3de801c4fa79c38c38180b3789b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272243400.png" />   
     </p>
 <p>图 1 微博深度学习工作流</p>
 <p>图 2 显示的是深度学习平台的整体架构，主要分为算法、存储、计算、调度还有资源。在算法方面，算法又分为算法训练和算法服务，算法训练主要是样本的处理和数据处理，模型训练和评估流程，这一部分是基于 weilearn 计算框架来实现；算法服务主要是在线的特征查询、模型服务。另外，平台目前也在做端上内容生成的业务需求：比如图片风格化，给你一张目标图片，生成跟目标图片一样风格的图片，这里有一个端上引擎。最后，对于成熟的 CTR 任务它需要一个迭代的更新上线的系统机制，这部分目前基于 K8s 和 weiflow ，实现了一套持续训练持续部署的方案。调度这方面目前主要用 Yarn 和 K8s ，这是深度学习平台架构。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fdd0f67c54344ec2970e8e0e2204bcef.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272243443.png" />   
     </p>
 <p>图 2 深度学习平台整体架构</p>
 <h2 id="离线训练篇">离线训练篇</h2>
@@ -267,7 +267,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="深度学习训练框架">深度学习训练框架</h3>
 <p>出于这两点，我们开发了 weilearn 深度学习框架，主要分为这四部分：样本库、训练库、调度计算、模型库。实现业务内容的配置化，比如说你要提交一个任务，只要把参数配置一下，配需要的资源和算法，通过训练框架将它转化成具体的计算任务，通过配置化降低业务的接入成本。另外我们通过统一调度，提高任务的效率和平台稳定性。基于 Yarn 跟 K8s ，跟阿里容器团队合作，使用的 Arena 深度学习训练工具，通过调度提交到集群，训练完之后，把模型放到模型库里。另外，比如像 BERT 这种模型刚出来，每个业务都有自己的需求，自己都想试一下，其实这些任务是重复的，我们就打通了样本库和模型库，实现了模型和样本的共享，通过这种方式避免业务重复造轮子。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b5cf78c104404032a823b3b522878ed9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272243674.png" />   
     </p>
 <p>图 3 weilearn- 深度学习训练框架</p>
 <h3 id="分布式-tensorflow">分布式 TensorFlow</h3>
@@ -286,7 +286,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>对于 TensorFlow PS 模式展开讲，其实它的 ParamaterServer 模式可以分为同步和异步，对于同步模式，性能是最大的瓶颈，为了提升性能，TensorFlow 使用了一个 Worker backup 的方式，简单来讲如果我们的集群起了 10 个 Worker，但是真正进行梯度聚合的时候用了 7 个，这样通过丢掉一定的样本数据，在保证同步的训练效果的同时保证性能。ring All reduce 如果细分，除了 MPI 本身的 Allreduce 语义，它还有基于环状的 ring All reduce，还有基于树状的 treeAllreduce。对于分布式策略现在支持的有单机多卡的 mirrored 模式，还有多机多卡的模式。</p>
 <p>从这里可以看到，集群拓扑比较复杂，我们的训练系统需要适配各种的模式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e371f8a8b42f4b04ba0c8158da18e697.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272243893.png" />   
     </p>
 <p>图 4 TensorFlow - 分布式训练集群拓扑模式</p>
 <p>关于 TensorFlow 在分布式训练遇到的一些问题，首先是前面提到的集群拓扑模式繁多，另外对于静态拓扑，需要额外去保证端口不重复，因为静态拓扑需要在集群启动前，明确各个结点的服务发现信息、包括 IP 以及端口号，TensorFlow 并没有帮你管理这些端口，需要自己去管理。另外一个问题就是任务稳定性和状态跟踪，这是分布式计算任务里面基本的需求。此外，TensorFlow 在启动的时候，不论你的机器上有多少张卡，会把机器所有的 GPU 卡占满，这也是一个比较头疼的地方。</p>
@@ -294,7 +294,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>K8s 分布式训练的解决方案，我们是基于 Arena 来实现的，关于 Arena，现在阿里云已经开源，大家如果想尝试，可以从网上去下载。图 5 显示的是 Arena 的基础架构，基于 Kubeflow 来做的集成与扩展。</p>
 <p>Kubeflow 包括两部分，一个是 ksonnet，另一个是自定义的 Operator，在 Arena 实现时，使用 helm 替代了 ksonnect，在上面又封装了一层 CLI 的接口。回到 TensorFlow ，分布式机制是基于自定义资源对象 TFjob，实现对分布式集群的管理 ，简单来说，当前提交了一个分布式任务后，会生成一个 TFjob 描述文件，自定义控制器 TFoperator 发现 TFJob 后，根据描述文件去起一个分布式任务集群。另外在通信方面，arena 是基于 headless Service 来实现的节点寻址。普通的 Service 如果我们要根据 DNS 寻址，它实际上线找到的是 Service 的 VIP 地址，然后在进行一次路由转发，找到 Pod 对应的地址。而 headless service 在 DNS 寻址时直接 对 Pod 寻址， 跳过了 Service 这层路由转发，会提升一定的性能，Pod 使用的是 Host 的网络，这种方式也保证了集群通讯的性能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8b7fd02a436748399f8737326e1484db.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272243195.png" />   
     </p>
 <p>图 5 Arena- 基于 K8s 的分布式解决方案</p>
 <p>前面讲了基本原理，那 Arena 都做了哪些事情？第一，支持多种集群拓扑，包括 PS、MPI、单机模式，都可以通过 Arena 提交。第二，简化了任务的管理，前面提到到端口分配与资源调度等都是 Arena 去管理，支持多种代码提交方式， rsync 或者 git，这部分是基于 init container 机制实现的，起任务之前先把代码拉到本地去做。第三，TFJob 提供了一个 Dashboard，可以通过这个 Dashboard 看分布式任务的状态和日志。</p>
@@ -306,7 +306,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>第二层就是核心架构层，是在线服务和性能提升的关键层，通过统一的版本管理，对模型进行动态加载，保证线上服务更新的及时性。另外通过批处理，还有编译优化的一些机制，保证 GPU 的性能和利用率。</p>
 <p>第三层是算法模型层，主要封装机器学习与深度学习常见的模型，另外离线开源的训练框架现在有很多，不同框架导出的模型格式各不相同，这方面我们也做了兼容。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8811add45ecf4a53ba2c6b60298199ce.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272243129.png" />   
     </p>
 <p>图 6 weiServing- 基于 K8s 的分布式预测框架</p>
 <p>接下来从以下几个场景跟大家介绍：多任务多模型、高可用高性能、持续训练持续部署。</p>
@@ -320,7 +320,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>首先，我们实现了客户端的负载均衡功能，这里没有使用 K8s 原生负载均衡机制机制， K8s 的负载均衡总体分为两类，不论是 4 层的 Service，基于四层链路的 IPtable 与 IPVS 来实现的，还有基于 7 层链路 ingress，都属于服务端的负载均衡。服务端的负载均衡有很多好处，这里就不一一列举了，它的缺点对于我们来说就是加长了一个网络链路，转发会引起一定的性能损耗，另外在入流量比较大的时候，proxy 可能会成为瓶颈，这张图显示的是早期我们用 LVS 做负载均衡，某个业务扩张了 30%，proxy 网卡将近被打满。</p>
 <p>基于这些原因，我们选择了客户端负载均衡。客户端负载均衡，第一是直连，性能服务有保障；第二就是大的入流量情况下，没有单点的瓶颈，任一结点故障，不会影响到整个系统的性能。客户端的负载均衡实现也比较简单，大同小异，这块基于 Zookeeper 做的服务发现，客户端做了一个缓存。我们的在线集群是一个异构的集群，CPU 核数不一样，每台机器的处理能力也不一样，这里服务端做了一些动态的权重调整，保证异构集群的性能稳定</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6905fcbe314341f38763190e0f9b2e58.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272243683.png" />   
     </p>
 <p>图 7 客户端负载均衡</p>
 <p>另外，基于 K8s 的探针模式实现了服务的健康检查，服务上线之后，通过执行业务自定义的健康检查命令进行检查 Pod，如果这个 Pod 失效，我们会将这种无状态的服务进行重启。业务方上线的这些服务，因为它的特征处理不一样，算法模式也不太一样，有的是分类模型，分类模型有得分就可以了，对于回归模型，它需要一个连续的得分，所以在线服务有效性校验这一块需要业务去自定义，我们是通过 initContainer 去加载业务自定义的健康检查插件。</p>
@@ -459,6 +459,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -492,10 +496,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -874,6 +874,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

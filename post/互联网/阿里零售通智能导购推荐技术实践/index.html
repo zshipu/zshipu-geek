@@ -196,14 +196,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>零售通 APP 导购推荐主要包括大促会场、日常频道和猜你喜欢3大类核心场景，如下图1所示。左侧图为618会场入口，包括榜单主会场入口以及行业分会场入口，榜单主会场为小店主提供当季该区域最适合的商品进货清单，供小店主采购决策，行业分会场是品牌商的营销阵地，通过品牌券和红包等营销方式触达更多的小店和 C 端消费者，实现品牌商数字分销渠道下沉；右侧上图为日常频道，包括羚羚发、网红美食、进货洋货，以及精选频道和限时特价等，通过差异化的频道定位，满足不同小店主个性化的进货诉求；右侧下图为猜你喜欢，具体场景包括 APP 首页、进货单页、凑单页、商品详情页、支付成功页等推荐区块，猜你喜欢贯穿在小店主购前、购中、购后整个采购流程，提供个性化交互式沉浸式采购体验。</p>
 <p>**
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2c07dc180f444d52b93a1d8701c30627.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281934548.webp" />   
      **</p>
 <p>图1 零售通 APP 导购推荐场景</p>
 <p>从图1介绍可以看出，零售通导购推荐涉及的业务领域比较广泛，通过一篇文章讲清楚整个业务领域所有的问题以及技术实践背后的思考可能不太现实，因此本文后续部分围绕零售通猜你喜欢重点展开介绍，一方面是因为猜你喜欢产品形态在诸如电商购物、本地生活、旅游出行、文化娱乐、在线教育等行业的 C 端 APP 场景比较成熟，大家阅读起来易于理解，更为重要的是我们想与大家一起分享探讨以零售通为代表的 B2b2c 猜你喜欢具有哪些业务特点？遇到了哪些技术挑战？以及我们的一些实践和经验总结。</p>
 <p>零售通猜你喜欢贯穿在小店主购前、购中、购后整个采购流程，如下图2所示。当小店主打开零售通 APP，首页猜你喜欢提供精准流量分发入口，意图明确的小店主通过 Query 推荐引导到搜索页，意图模糊的小店通过精选爆品、品牌专辑、类目榜单等逐步引导到商品详情页；通过购前流量引导，小店主逐步进入了购中流程，此时小店主可能在商品详情页找同款，或在凑单页凑足营销活动门槛以及388包邮，亦或者在进货单页找相似品，然后在进货单页下单；商品下单后进入了购后流程，支付成功页推荐复购券引导小店再次购买。</p>
 <p>**
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a55743c0e2c448ca96f6d966832a2477.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281934625.webp" />   
      **</p>
 <p>图2 零售通猜你喜欢场景</p>
 <p>在零售通 B2b2c 业务模式下，猜你喜欢具有如下业务特点和挑战：</p>
@@ -214,7 +214,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>零售通猜你喜欢技术架构如下图3所示。用户打开零售通 APP，产生的实时数据存在 ABFS，TPP 请求 ABFS、UPS 分析用户意图，通过推荐引擎 BE 召回商品返回给 TPP，TPP 接着调用 RTP 打分服务进行精排和重排，最后展现给用户。离线和实时排序模型训练和参数调优通过 PAI 和 Porsche 完成，排序模型支持 T+1 和实时更新。</p>
 <p>**
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bdd109696b6c460d953b01a2f76be3d2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281934740.webp" />   
      **</p>
 <p>图3 零售通猜你喜欢技术架构</p>
 <p>推荐服务 TPP ( The Personalization Platform )，阿里个性化推荐平台，TPP 依托阿里中台强大技术架构能力，简化了数据流的调用过程，使得各种推荐算法、数据、模型能够积累、对比和复用，支持实时 AB 报表，支持算法快速迭代上线。</p>
@@ -227,39 +227,39 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>协同过滤主要基于图结构，现实世界中的图主要分为 user-user 同质网络 ( 社交网络、Facebook… )，以及 user-object ( 电商、视频… ) 二部图网络两种。零售通导购推荐 CF 主要基于 user-object 网络，分为 item-CF 和 user-CF 两种，item-CF 侧重于挖掘 item 之间关系，通过用户历史共现行为计算 item 之间相似度，离线计算方便，应用较为广泛，其中图的相似度计算有很多种[1]，例如 Cosine、Adamic/Adar、Jaccard、PageRank、simRank…，目前零售通 item-CF 主要采用阿里巴巴自主研发的 eTREC 和 Swing，算法原理如下图4所示，线上实践证明，相比于传统 item-CF，eTREC 和 Swing 抗噪声更强，并且通过调参能一定程度抑制“哈里波特”和长尾现象。</p>
 <p>**
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3b46d48f5c7344ecb0ade9cfe873d874.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281934881.webp" />   
      **</p>
 <p>图4 Item-CF 相似度计算</p>
 <p>上述 Item-CF 在零售通进货单相似商品推荐、APP 首页猜你喜欢基于用户实时行为触发 U2I2I 召回等场景，取得了不错的业务效果，但都是基于用户共同行为关系挖掘的 I2I 算法，召回限定在有用户历史行为的商品候选集中，推荐的商品的发现性偏弱，容易导致“越推越窄”的问题，因此我们尝试了 Graph embedding I2I，在 User-Item 二部图加权采样 ( 带权重的随机游走 )，采用 Skip Gram 模型 ( DeepWalk[2]、Node2Vec[3]… ) 训练出商品的 Embedding，使用语义距离计算得出商品之间的距离，截取 TOPK 相似度商品作为商品的 embedding I2I，目前已经在进货单推荐场景上线。</p>
 <p>在 Graph Embedding I2I 的基础上，我们目前正在尝试加入商品的 Side Information，进一步提升 Embedding 的泛化学习能力，更好地解决长尾以及商品冷启动问题，如图5所示[4]。</p>
 <p>**
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7d165a2023884146828b32c3445b2a2e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281934850.webp" />   
      **</p>
 <p>图5 Graph embedding I2I</p>
 <p>前面介绍了 item-CF 在零售通导购推荐场景的应用，同样 user-CF 在零售通导购推荐也有相关业务实践和结果，我们知道 user-CF 多用于挖掘有共同兴趣的小团体，第一节业务背景中已经谈到小店的 LBS 属性非常明显，下面我们介绍如何将传统的 user-CF 与小店 LBS 属性相结合，深挖小店 U2U 相似度模型，为小店主推荐的新颖性更好的商品。</p>
 <p>零售通小店有哪些关键 LBS 属性呢？如图6所示，我们通过小店 APP 采购行为分析以及线下小店走访调研发现，小店商圈 ( 学校、医院、高端住宅&hellip; ) 和面积 ( 20平米、50平米、100平米… ) 是影响小店采购的关键因素，商圈刻画了小店周边 C 端消费人群和消费目的，也是商品售卖和品牌营销重要的区域粒度，小店面积则反映小店满足消费者需求的能力，因此同一商圈、面积差不多的小店在消费需求、商品结构、供给能力、采购习惯等方面相似度较高。</p>
 <p>**
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/954faf292c7842648c7db7a933879c66.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281934736.webp" />   
      **</p>
 <p>图6 小店 LBS 属性信息</p>
 <p>user-CF 核心是小店相似度计算，首先我们通过小店商圈、城市层级、区域街道、面积等因子，计算小店间 LBS 属性相似度，其次基于小店主在零售通的采购商品序列，通过 Doc2vector 训练小店主的向量表示，通过 simHash 计算向量距离，得出 APP 采购行为相似度，最后综合考虑 LBS 属性相似度、APP 采购行为相似度两方面计算得出小店相似度得分。</p>
 <p>**
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/780ffc3a29724a678b6309273a6d6b29.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281934869.webp" />   
      **</p>
 <p>图7 小店相似度计算</p>
 <p>基于上述思路，我们开发了一套基于小店属性的 user-CF 混合推荐模型，如下图8所示，该模型综合考虑了不同生活习惯及气候因素的地域差异、不同消费能力的城市层级差异、同城市不同街道区域的差异，以及不同小店群的进货习惯，在 APP 猜你喜欢取得了不错的业务效果。</p>
 <p>**
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5ff737ac4ec44d128280ea598bd056f3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281934905.webp" />   
      **</p>
 <p>图8 基于小店属性的 user-CF 推荐</p>
 <p>前面介绍了零售通导购推荐热门召回、协同过滤相关技术实践，在深度匹配模型方面，我们也正在进行了一系列尝试，如图9所示[5,6]，深度匹配对用户和商品在同一空间进行向量表达，通过用户向量在线召回 TopK 个与其近邻的商品向量，得到用户感兴趣的商品,增加 Side Information 能进一步提升用户和商品的 High-Level 表达能力。</p>
 <p>**
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/deb44412c1e24cdca62b317b832a2caf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281934919.webp" />   
      **</p>
 <p>图9 Multi-Interest Network with Dynamic Routing ( MIND ) 模型</p>
 <p>3. 排序模型</p>
@@ -279,7 +279,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>**
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0e98063445a04d47afbbe531ed13d1c8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281934953.webp" />   
      **</p>
 <p>图10 零售通导购推荐排序模型演进</p>
 <p>零售通导购推荐排序模型演进如图10所示，传统的机器学习模型 ( LR、GBDT、GBDT+LR… ) 通过特征工程持续迭代，目前在已经取得了较好的业务效果，目前作为排序模型迭代的基线。</p>
@@ -289,7 +289,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>零售通 APP 货架导购技术核心是基于 LBS 的精准组货推荐和商品成列算法，基于阿里巴巴大数据中台，结合小店周边消费者线上数据 ( 支付宝、淘宝、饿了么… ) 和线下数据 ( 大润发、POS… )，以及小店主在阿里经济体全域行为数据，运用大数据和算法的力量，推荐最适合线下零售小店盈利增收的商品组合货架，实现“让线下没有难做的生意”。</p>
 <p>**
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/92eaf44a63d9402db415d5997750b5fa.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281934947.webp" />   
      **</p>
 <p>图11 零售通导购推荐 - APP 货架</p>
 <p><strong>▌总结思考</strong>\<em>\</em>\******</p>
@@ -429,6 +429,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -462,10 +466,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -844,6 +844,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

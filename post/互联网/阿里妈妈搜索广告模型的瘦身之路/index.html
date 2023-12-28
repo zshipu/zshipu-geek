@@ -211,7 +211,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="-1-超大规模模型演进之路的辩证思考">▐ 1. 超大规模模型演进之路的辩证思考</h2>
 <p>阿里妈妈搜索广告的 CTR 模型伴随直通车业务的发展持续迭代多年，主要包括两个优化路径，分别是特征优化和模型结构优化。特征优化主要包括多模态特征的丰富、高阶特征的升级和动态特征的引入等；模型结构优化主要包括围绕搜索意图挖掘的序列建模 Transformer 系列和图建模 GNN 系列的改造等。因为同时期享受到硬件算力的增长红利，所以算法迭代显得非常阔绰，结合工程基建的迅猛发展，CTR 模型逐年变得既宽又深。直通车的日常 CTR 模型已经到了数T规模，暗合了“模型越大、预估能力越强”暴力美学的发展路径。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dde4d5f135b0442a94965a4061574a48.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281917318.png" />   
      阿里搜索广告特征模型优化发展路径但是日益臃肿的 CTR 模型不仅给工程实现带来艰巨的挑战，也开始制约算法创新的迭代效率。单套模型所依赖的存储和计算资源开销不菲，考虑到多人迭代的实验场景，多套并行对系统压力更大。另外，真实的迭代环境是存量算力逐渐耗尽、增量算力又显著放缓。因此，我们不得不重新审视算法迭代的资源利用率问题，开始重视投入产出比对模型迭代效率的影响；而且重新思考超大规模的 CTR 模型是否具有普世价值，毕竟还有诸多中小场景的业务依赖模型提效，但能够配备如此规模的机器资源和工程能力是一种奢望。</p>
 <p>于是，为了在有限资源的约束下，模型仍然能够高效迭代支撑业务快速发展，直通车 CTR 模型开始走上了“减肥瘦身”之路。考虑到广告场景的特殊性，模型预估能力的微小下降会使得线上产生营收的真实损失，所以直通车 CTR 模型在瘦身的同时要求保持预估精度不降，这对模型精简来说是个不小的挑战。我们认为在庞大冗余的模型结构中应该存在不必要的信息编码，且实践证明类似 dropout 相关的操作还能使得模型的鲁棒性和泛化性得以提升，这中间应该存在着“预估精度保持不变，模型规模显著降低”的优化空间。</p>
 <p>搜索、推荐和广告场景的 CTR 模型的特点是高维、稀疏且离散，模型的绝大部分参数主要集中在特征的 Embedding 层，所以如何经济有效地压缩 Embedding 层的参数规模是 CTR 模型瘦身的关键。Embedding 层的压缩主要有3个方向：</p>
@@ -222,7 +222,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>我们在这3个方向都有充分实践，本文主要介绍在 <strong>行维度的特征压缩</strong>，也是在直通车场景可以做到训练过程中自压缩，模型压缩比有量级（其他两个优化方向只有倍数压缩比）上的显著收益且模型预估精度保持不变，下图举例说明。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1de27aaa6aff479f984bcdd106e4ace1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281917110.png" />   
      常用Embedding层压缩思路</p>
 <h2 id="-2-小而美模型的蜕变之路">▐ 2. 小而美模型的蜕变之路</h2>
 <p>直通车场景 Embedding 层的行维度即特征空间随着常年的迭代，在提效的同时规模也一路狂奔。在线服务系统从单机到分布式，分布式又由数列扩到十几列，系统复杂性和维护成本越来越高。虽然特征类型非常丰富，异构性也非常显著，但从存储规模的角度来说，整体服从幂律分布即少数类型的特征占据了存储规模大头。下面表格给出直通车主要特征的规模分布情况，因为存储规模还受到另外两个维度即 Embedding 维度数和值精度大小的影响，所以 Embedding 行占比和实际存储占比是不一致的。从表中可以看出，以下几类特征占据了不小的存储规模，分别是：</p>
@@ -232,7 +232,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>单特征的核心id类特征</strong>，例如query_id，item_id，user_id等，这一类特征是模型预估的基石，随着模型的演进我们也由有冲突 hash 升级到无冲突 hash 模式。虽然效果有提升，但为了控制住模型规模，系统需要配置相应的特征准入准出策略，当遇到数据分布变化剧烈的时期，例如季节变换或者大促时节，策略需要频繁调整，鲁棒性较低。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7aa481a3b5c148d9a0d2fa3062e566ce.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281917505.webp" />   
      直通车特征分布情况针对上述主要特征，我们在真实业务环境下通过以下系统性实践逐步精简模型：</p>
 <ul>
 <li><strong>设计关系网络</strong>，取代复合特征的隐式类型的id类特征；</li>
@@ -250,11 +250,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>虽然深度学习的全连接层 MLP 具有万能的拟合能力，但实践表明如果没有设计显式的模型结构来针对性刻画上述有待挖掘的特征交互关系，模型很难自己领悟到。这一类特征伴随直通车 CTR 模型从 LR 升级到 DNN，提效均是非常显著。但问题也显而易见，笛卡尔积式的特征交互使得模型规模膨胀非常大，需要通过设置合理的阈值系数才能把规模控制到合理的范围内。模型瘦身首当其冲就是设计关系网络来改善这个问题。</p>
 <p><strong>交叉特征</strong> 的隐式 Embedding 表征是业界关注最多的话题，我们借鉴业界较为常用的特征交叉建模方案(例如 FM 系列，DCN[1]，AutoInt[2]等)，设计适配直通车场景的交叉网络。该网络的特点是参考 self-attention 结构，基于共享的交互强度矩阵，对称性地双视角建模两两特征的交叉关系。且根据实际情况，对交叉特征域做先验设定（只保留流量需求侧与供给侧交互关系），整体交叉网络作为 Deep 的一部分（实验表明 Wide 设计效果不佳），大块的矩阵线性计算也有利于 GPU 加速，整体很好地刻画了交叉特征的 Embedding 表征。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/771662f19229483fa26289db11f07bff.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281917673.webp" />   
     </p>
 <p><strong>匹配特征</strong> 一般刻画特征交互的强度关系，主要有两类：1）hard match，特征相同进行统计计数；2）soft match，特征相似进行相似度计算。我们参考业界较为常用的特征匹配建模方案（例如 K-NRM[3]，DRMM[4]等），设计 hard 和 soft 匹配相结合的交互强度分布的直方图。该直方图不仅作用在文本语义匹配，刻画搜索意图相似度；还作用在用户历史行为序列上，刻画个性化的兴趣强度。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6aacf5080c8a4ad78711c39f83dea92f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281917947.webp" />   
     </p>
 <h3 id="22-基于-graph-的预训练网络">2.2. 基于 Graph 的预训练网络</h3>
 <p>复合特征除了上述提到的隐式类型以外，另一类就是显式的统计值，这类特征业务提效也非常明显，是业界提效公开的秘密手段，存储规模占比也不小，但是想做精简却无法像上述关系网络拟合一样来处理。举例来说，&lt;user_age, item_id&gt;交叉特征的 Embedding，可以通过单特征各自 user_age 的 Embedding 和 item_id 的 Embedding 计算得到，但是&lt;user_age, item_id&gt;交叉特征的 CTR，无法拆解成 user_age 的 CTR 和 item_id 的 CTR 交互计算。</p>
@@ -391,6 +391,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -424,10 +428,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -806,6 +806,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

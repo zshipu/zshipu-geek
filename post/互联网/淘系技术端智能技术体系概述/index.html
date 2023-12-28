@@ -210,7 +210,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>阿里巴巴内部丰富的业务场景为技术创新提供了肥沃的土壤，手机淘宝作为国内规模最大的电商App之一，早在2016年就在拍立淘场景中进行端智能相关应用实践。经过多年探索、实践和沉淀，我们目前已经构建了相对完整的端智能技术体系，并且在拍立淘、直播内容理解、AR商品导购等场景获得规模化应用。据不完全统计，阿里巴巴集团内部已经有超过30个移动App应用了端智能技术，手机淘宝内部应用场景超过25个。</p>
 <h1 id="问题和挑战">问题和挑战</h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/873c025599534f82b68a152c4b22ab63.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272138926.webp" />   
     </p>
 <p>图1 端智能业务应用流程</p>
 <p>端智能在手机App上的应用开发链路如图1所示。首先是问题定义，通过需求分析，识别业务问题并将其拆解为AI算法问题；其次进行数据采集、模型设计、训练、压缩和转换；最后将模型部署到端上，当业务应用时，加载算法模型做推断运行。端智能全链路较长，涉及服务端和移动端、算法开发和移动开发，面临的核心问题和主要挑战如表1所示。</p>
@@ -218,7 +218,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>表1 端智能面临的核心问题和主要挑战</p>
 <h1 id="端智能技术体系">端智能技术体系</h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7a4f300a157e46e89d1d913ff29ccc66.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272138843.webp" />   
     </p>
 <p>图2 端智能技术体系</p>
 <p>针对上述问题和挑战，淘系端智能团队经过长期思考和实践，构建了端智能完整技术体系，如图2所示，其设计的基本思想和特点是：</p>
@@ -231,7 +231,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="-基础层"><strong>▐ 基础层</strong></h2>
 <p>端智能技术体系的基础层主要包含支持模型运行和前后处理的一系列计算库，目前在终端运行的算法模型主要以深度模型为主，因此解决深度模型在终端设备高效运行的问题尤为重要，为此我们自研并开源了端侧推理引擎MNN，如图3所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7f688a04e7bd4860b2e13fbfe43129b4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272138563.webp" />   
     </p>
 <p>图3 端侧推理引擎MNN全景图</p>
 <h2 id="-推理引擎面临的挑战"><strong>▐ 推理引擎面临的挑战</strong></h2>
@@ -250,7 +250,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>几何计算：MNN所需要支持的硬件后端呈现碎片化和多样性特性。有移动端ARM CPU（ARMv7、ARMv8、ARMv8.2）/GPU（OpenCL、OpenGL、Metal）/海思NPU，服务端x86 CPU（SSE、AVX、AVX2、AVX512）和NVIDIA GPU，而每个硬件后端都需要实现超过100个算子。如何低成本地实现多后端高性能算子是极具挑战的工作。几何计算是一种从根本上解决碎片化环境下算子优化问题的技术方案，其基本思想是：在网络中张量形状已知的前提下，将算子的坐标映射关系固化为一系列数据，进而将众多算子归一化为少量核心算子。</p>
 <p>设MNN支持的算子数为N，后端数为B，则实现所有算子所需工作量为O(BN)。几何计算的核心目标是通过算子拆解化归，使用少数核心算子组合实现其余算子，从而将O(BN)工作量降至O(B) +O(N)。具体而言，如图4所示，任意算子实现可拆分为形状计算（即计算输出张量维度，复杂度为O(N)）、资源分配（即在相应后端申请内存，复杂度为O(B)）以及内容计算（即算子自身逻辑，复杂度为O(BN)）。内容计算进一步拆解为复杂度为O(BN)的坐标映射和复杂度为O(B)的基础算子，如Exp、Add、Multiply、MatMul、Conv。几何计算的核心是将坐标映射拆解为算子相关的区域信息计算逻辑（即图示的“几何计算”）和硬件相关的数据搬运逻辑（即图示的“光栅算子”）。光栅算子根据给定的输入输出张量的区域计算逻辑，进行实际的数据搬运，得到输出张量。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/76767cbdfeb94fe0ba35c29fb249cd08.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272138569.webp" />   
     </p>
 <p>图4 几何计算示意图</p>
 <h2 id="-mnn的特性"><strong>▐ MNN的特性</strong></h2>
@@ -264,7 +264,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在研发期，主要存在以下问题。（1）迭代效率：如图1所示，算法人员从训练完模型到真正部署到端侧运行，还涉及模型转换、压缩、真机调试、业务封装、集成发布等工作，中间需要算法、工程和测试人员互相协作，根据实践经验，整个过程往往以月度来计算；（2）任务质量：移动App因其版本发布慢、修复问题困难等特点，对端智能算法任务的稳定性和性能提出更高要求，如果算法人员对移动App研发不熟悉，对工程实践中的稳定性、性能等内容关注不足，将影响任务质量。</p>
 <p>在运行期，主要存在以下问题。（1）计算：计算单元需要考虑移动设备天然碎片化和差异化的软硬件生态。端侧运行的算法任务除模型推断运行外，往往存在前后处理计算，涉及图像处理、数值计算等，在若干场景下还需要做端和云之间的计算中继。（2）数据：端侧算法任务计算的中间和最终结果往往需要上传至云端使用，云侧资源数据也需要下载到端侧作为算法任务的输入，因此需要做好数据的上传下达以及为算法提供标准化的数据服务。（3）调度：云-端之间调度，面向海量差异化设备需要提供个性化的部署服务，支持按人群、设备、功能等多维度进行发布；端内多任务间调度，算法任务运行与移动App前台用户操作存在竞争，需要选择合适时机运行，避免影响App前台用户体验。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/09195eabdc444002a001108130276e22.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272138469.webp" />   
     </p>
 <p>图5 端智能系统方案</p>
 <p>针对上述问题，淘系端智能团队构建了由MNN工作台、MNN运行时和MNN服务端组成的系统方案，如图5所示，基本设计思路是：</p>
@@ -287,7 +287,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>目前，手淘天猫美妆等已构建“AR试”产品矩阵，包括AR试妆、AR试鞋、AR手表和眼镜试戴等15项能力（如图6所示），累计近5000万用户参与，帮助品牌带来明显转化提升，用户停留时长明显增长。“AR试”给消费者带来有趣好玩、具有真实感的购物体验，让用户可以体验商品上身的逼真效果，打造“先试后买”的购物新体验，提高用户购买决策效率。</p>
 <p>AR试的基本方案是“端上实时检测+端上实时渲染”，由于产品交互的强实时需求，AR试的技术难点主要是，手淘在超过300种不同手机型号上解决人脸检测、脚检测、手腕检测等算法的实时性问题。针对这个问题，MNN推理引擎进行极致的性能优化，最终实现AR试妆人脸检测算法耗时小于5ms，AR试鞋检测算法耗时10~50 ms，有效保障了产品方案的实时交互体验。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1d856f1dd173414d98fb567b7092f3e6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272138320.webp" />   
     </p>
 <p>图6 典型应用场景示例</p>
 <h1 id="总结与展望">总结与展望</h1>
@@ -431,6 +431,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -464,10 +468,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -846,6 +846,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

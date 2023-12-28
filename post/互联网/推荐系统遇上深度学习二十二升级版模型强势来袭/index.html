@@ -202,7 +202,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>因此自动学习特征间的交互关系是十分有意义的。目前大部分相关的研究工作是基于因子分解机的框架，利用多层全连接神经网络去自动学习特征间的高阶交互关系，例如FNN、PNN和DeepFM等。其缺点是模型学习出的是隐式的交互特征，其形式是未知的、不可控的；同时它们的特征交互是发生在元素级（bit-wise）而不是特征向量之间（vector-wise），这一点违背了因子分解机的初衷。来自Google的团队在KDD 2017 AdKDD&amp;TargetAD研讨会上提出了DCN模型，旨在显式（explicitly）地学习高阶特征交互，其优点是模型非常轻巧高效，但缺点是最终模型的表现形式是一种很特殊的向量扩张，同时特征交互依旧是发生在元素级上。</p>
 <p>我们用下图来回顾一下DCN的实现：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/db1e92f378914a909b0b9010eb897879.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271958756.jpeg" />   
     </p>
 <p>下面是我对文中提到的两个重要概念的理解：</p>
 <p>bit-wise VS vector-wise</p>
@@ -215,53 +215,53 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="21-compressed-interaction-network">2.1 Compressed Interaction Network</h1>
 <p>为了实现自动学习显式的高阶特征交互，同时使得交互发生在向量级上，文中首先提出了一种新的名为压缩交互网络（Compressed Interaction Network，简称CIN）的神经模型。在CIN中，隐向量是一个单元对象，因此我们将输入的原特征和神经网络中的隐层都分别组织成一个矩阵，记为X^0 和 X^k。CIN中每一层的神经元都是根据前一层的隐层以及原特征向量推算而来，其计算公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/521ffb0a668c49d984d2fa5861287582.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271958698.jpeg" />   
     </p>
 <p>其中点乘的部分计算如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fc15711d74e14fc3a18a7924c6ec2dd4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271958249.png" />   
     </p>
 <p>我们来解释一下上面的过程，第k层隐层含有H_k条神经元向量。隐层的计算可以分成两个步骤：（1）根据前一层隐层的状态X^k 和原特征矩阵 X^0，计算出一个中间结果 Z^k+1，它是一个三维的张量，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/735c7c1d588e4619b93ae15ec6c7481b.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271958843.jpeg" />   
     </p>
 <p>在这个中间结果上，我们用H^k+1 个尺寸为 m*H^k 的卷积核生成下一层隐层的状态，该过程如图2所示。这一操作与计算机视觉中最流行的卷积神经网络大体是一致的，唯一的区别在于卷积核的设计。CIN中一个神经元相关的接受域是垂直于特征维度D的整个平面，而CNN中的接受域是当前神经元周围的局部小范围区域，因此CIN中经过卷积操作得到的特征图（Feature Map）是一个向量，而不是一个矩阵。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b6233e3408384690b8197a9eca83f253.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271958503.jpeg" />   
     </p>
 <p>如果你觉得原文中的图不够清楚的话，希望下图可以帮助你理解整个过程：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/92dec5a6398a4deb8a9cc2a6bf74dfcd.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271958476.jpeg" />   
     </p>
 <p>CIN的宏观框架可以总结为下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e014de2c84484995b69c49104e6d2139.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271958452.jpeg" />   
     </p>
 <p>可以看出，它的特点是，最终学习出的特征交互的阶数是由网络的层数决定的，每一层隐层都通过一个池化操作连接到输出层，从而保证了输出单元可以见到不同阶数的特征交互模式。同时不难看出，CIN的结构与循环神经网络RNN是很类似的，即每一层的状态是由前一层隐层的值与一个额外的输入数据计算所得。不同的是，CIN中不同层的参数是不一样的，而在RNN中是相同的；RNN中每次额外的输入数据是不一样的，而CIN中额外的输入数据是固定的，始终是X^0。</p>
 <p>可以看到，CIN是通过（vector-wise）来学习特征之间的交互的，还有一个问题，就是它为什么是显式的进行学习？我们先从X^1 来开始看，X^1 的第h个神经元向量可以表示成：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5e60075693e846fbb3d809b5c7a30d84.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271958193.png" />   
     </p>
 <p>进一步，X^2的第h个神经元向量可以表示成：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/61e01a961130492caf701daab68c4ec0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271958753.png" />   
     </p>
 <p>最后，第k层的第h个神经元向量可以表示成：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/895c05d1dbfd462fb283bc8a8d2191eb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271958488.png" />   
     </p>
 <p>因此，我们能够通过上面的式子对特征交互的形式进行一个很好的表示，它是显式的学习特征交叉。</p>
 <h1 id="22-xdeepfm">2.2 xDeepFM</h1>
 <p>将CIN与线性回归单元、全连接神经网络单元组合在一起，得到最终的模型并命名为极深因子分解机xDeepFM，其结构如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/19434fb830a24744a7a011e662e2b682.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271958343.jpeg" />   
     </p>
 <p>集成的CIN和DNN两个模块能够帮助模型同时以显式和隐式的方式学习高阶的特征交互，而集成的线性模块和深度神经模块也让模型兼具记忆与泛化的学习能力。值得一提的是，为了提高模型的通用性，xDeepFM中不同的模块共享相同的输入数据。而在具体的应用场景下，不同的模块也可以接入各自不同的输入数据，例如，线性模块中依旧可以接入很多根据先验知识提取的交叉特征来提高记忆能力，而在CIN或者DNN中，为了减少模型的计算复杂度，可以只导入一部分稀疏的特征子集。</p>
 <h1 id="3tensorflow充电">3、Tensorflow充电</h1>
 <p>在介绍xDeepFM的代码之前，我们先来进行充电，学习几个tf的函数以及xDeepFM关键过程的实现。</p>
 <p>首先我们要实现第一步：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/abbdc942b9774d0b8d50dc0b77ecc3df.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271958350.jpeg" />   
     </p>
 <p>如何将两个二维的矩阵，相乘得到一个三维的矩阵？我们首先来看一下tf.split函数的原理:</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">tf.split(
@@ -281,11 +281,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 arr2 = tf.convert_to_tensor(np.arange(1,25).reshape(2,4,3),dtype=tf.int32)
 </code></pre><p>生成的矩阵如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b5d9ea167e934033967c22763ffded4c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271958172.png" />   
     </p>
 <p>在经过CIN的第一步之后，我们目标的矩阵大小应该是2(batch) * 3(embedding Dimension) * 4(X^k的field数) * 4(X^0的field数)。如果只考虑batch中第一条数据的话，应该形成的是 1 * 3 * 4 * 4的矩阵。忽略第0维，想像成一个长宽为4，高为3的长方体，长方体横向切割，第一个横截面对应的数字应该如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://ask.qcloudimg.com/http-save/yehe-1622140/dwg0xakvc7.jpeg?imageView2/2/w/1620" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271958331.jpeg" />   
     </p>
 <p>那么想要做到这样的结果，我们首先按输入数据的axis=2进行split：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">split_arr1 = tf.split(arr1,[1,1,1],2)
@@ -295,14 +295,14 @@ print(sess.run(split_arr1))
 print(sess.run(split_arr2))
 </code></pre><p>分割后的结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5821137de4b14601a41ee7bf80a7c325.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271958280.png" />   
     </p>
 <p>通过结果我们可以看到，我们现在对每一条数据，得到了3个4 * 1的tensor，可以理解为此时的tensor大小为 3(embedding Dimension) * 2(batch) * 4(X^k 或X^0的field数) * 1。</p>
 <p>此时我们进行矩阵相乘：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">res = tf.matmul(split_arr1,split_arr2,transpose_b=True)
 </code></pre><p>这里我理解的，tensorflow对3维及以上矩阵相乘时，矩阵相乘只发生在最后两维。也就是说，3 * 2 * 4 * 1 和 3 * 2 * 1 * 4的矩阵相乘，最终的结果是3 * 2 * 4 * 4。我们来看看结果：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9a53db3ea6a245f0bbac0c3446e1a0a4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271958254.png" />   
     </p>
 <p>可以看到，不仅矩阵的形状跟我们预想的一样，同时结果也跟我们预想的一样。</p>
 <p>最后，我们只需要进行transpose操作，把batch转换到第0维就可以啦。</p>
@@ -345,7 +345,7 @@ dot_result_o = tf.reshape(dot_result_m, shape=[hparams.dim, -1, field_nums[0]*fi
 dot_result = tf.transpose(dot_result_o, perm=[1, 0, 2])
 </code></pre><p>接下来，我们需要进行CIN的第二步，先回顾一下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/71f7bc3ecc8d4257bb475879144a2e26.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271958990.jpeg" />   
     </p>
 <p>这里我们用1维卷积实现，假设X^K的field的数量我们起名为layer_size:</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">filters = tf.get_variable(name=&#34;f_&#34;+str(idx),
@@ -357,7 +357,7 @@ curr_out = tf.nn.conv1d(dot_result, filters=filters, stride=1, padding=&#39;VALI
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">curr_out = tf.transpose(curr_out, perm=[0, 2, 1])
 </code></pre><p>接下来就是最后一步，进行sumpooling，如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://ask.qcloudimg.com/http-save/yehe-1622140/w0sd49h4jj.jpeg?imageView2/2/w/1620" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271958153.jpeg" />   
     </p>
 <p>代码中有两种选择方式，direct方式和非direct方式，direct方式，直接把完整curr_out作为最后输出结果的一部分，同时把完整的curr_out作为计算下一个隐藏层向量的输入。非direct方式，把curr_out按照layer_size进行均分，前一半作为计算下一个隐藏层向量的输入，后一半作为最后输出结果的一部分。</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">if direct:
@@ -519,6 +519,10 @@ b_nn_output = tf.get_variable(name=&#39;b_nn_output&#39;,
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -552,10 +556,6 @@ b_nn_output = tf.get_variable(name=&#39;b_nn_output&#39;,
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -934,6 +934,8 @@ b_nn_output = tf.get_variable(name=&#39;b_nn_output&#39;,
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

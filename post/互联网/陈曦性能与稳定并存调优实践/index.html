@@ -198,74 +198,74 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>以下为分享内容：</p>
 <p>我今天分享的是Elassticsearch调优实践，首先自我介绍一下，我资历比较浅，我是腾讯TEG基础架构部后台开发工程师，虽然我不是项目经理，但是我们项目负责人就在下面，我还是很有压力的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/faede4054ead4c12807720f5027f4be6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281940994.webp" />   
     </p>
 <p>今天分享一下使用ES的经验以及我们对ES内核的改动，在此之前介绍一下ES的功能，首先来看ES的基础概念，这部分介绍一下Elastic Stack。在场有多少用过ES的？还是挺多的，ES首先是一个搜索引擎，我总结了一下特点，高性能，它是通过Lucene实现搜索引擎，在此之上增加了分布式集群。可扩展，系统支持多分片存储，高并发写入、查询。第二是高可靠。第三是易于管理，节点可以弹性伸缩。第四是易使用，具有很强大的综合分析能力，比如说分桶聚合，桶内的运算都可以支持，甚至通过脚本进行复杂的运算。</p>
 <p>Elastic Stack提供数据采集、清洗、存储、可视化完整解决方案。Beats负责数据采集，Logstash负责数据清洗转发，ES本身就是存储和搜索，第四个Kibana就是把你的数据作可视化展示，是比较完整的工具链。ES有比较广泛的应用领域，对内部和外部系统都有广泛的使用。主要有日志分析是一个场景，再有数据分析统计，还有搜索，全文检索都可以做的。功能比较强大。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7e0c37e1ff5a4a1eaac6133160e7e8d9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281941227.webp" />   
     </p>
 <p>我们再来看一下Elassticsearch的基础概念-数据模型，第一张图把ES数据模型概念和传统数据库做了对比。ES本身是schema less的，有比较特殊的字段需要通过Mapping设置一下，每个数据点就是一行数据Document，ES数据分类通过Index这层完成的。这是逻辑的概念，我们再来看物理实际存储的架构，首先分为两层，一个是ES，下面是Lucene，一个ES集群有多个node组成的。一个ES实例会承载一些Shard，多个shard会落到不同机器上面，P1和P2是两个不同的Shard，并且shard有主从的概念，对于ES每个Shard落地下来是一个Lucene Index。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fd01bf6347dd4ceb871a8558d8640231.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281941141.webp" />   
     </p>
 <p>Lucene基于节点宕掉的考虑会写Translog，每次写入会产生这个Translog，对你的每次操作都会产生Disk的IO，对Lucene有三个不同的过程，第一个是Refresh，先缓存内存里面，过一段时间，默认情况是每秒一次，把它整理成一个Lucene的Segment，当一秒钟一次刷成Refresh的时候数据就可以搜索了。第二就是Flush，这个时候会把Lucene内存结构实际刷盘下去。再有一个就是第三个过程是Merge，把一些小的segment不断合成大的segment。</p>
 <p>第二部分就是Elassticsearch的调优，通用的方案，这个地方列了几个点。有没有同学分享一下拿ES存储的什么东西，跟大家分享一下你们的方案。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/702721e5c2b147c196ec16a4ef9a7103.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281941133.webp" />   
     </p>
 <p>ES的调优第二部分主要是从三个层面分享，存储成本、集群稳定性和集群性能。存储成本是字段存储选项和为字符串字段选择合适的格式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f11a33c698ec46a784d77e8aee92774b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281941164.webp" />   
     </p>
 <p>首先看字段存储选项，ES里面的数据有三份数据，倒排索引、行存和列存。行存是我们写入ES的数据，把整个结构体存下来，以便于你日后拉取数据。列存通常情况下用于聚合和排序，这个是把你写入的每个字段按列存储，这样方便快速拿到一列的数据。对于这三种存储我们其实并不是对于很多的使用场景中都用得到，比如说ES可以存储数据，我存很多数据的监控。最后想查某个IP的CPU曲线，我只需要拿到数据看曲线就可以了，这种场景可以把cpu字段的index关掉。比如说我的数据同样是统计分析的场景，我之后只是想拿这个数据看曲线，其是拿列存就可以了，原始数据没必要保存。打开最佳压缩后，经过我们发现最优的行存的成本能降40%。</p>
 <p>日志场景之类的，要保存日志的话，有一个docvalues，我存的日志就想看文本，或者我存的评论，我对于字段聚合的要求不是特别高，我只是想放进去，我要的时候把整个结构体拿出来。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/df2618acf3d04efeaeea32dcfba5aeaa.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281941206.webp" />   
     </p>
 <p>降低成本的第二方面：字符串。一个是text，一个是keywork。text做分词，然后对每个词都可以建倒排索引，拿一个词可以搜到一整段话。如果仅仅是想把这个文本存进去并且取出来的话，后面都是可以去掉的。</p>
 <p>第二种存储格式就是keywork，你可以模糊匹配，但不能拿一个词搜索整段话，由于它不需要做分词，所以速度比较高。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/26d192b41eca42febb69b3af28625358.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281941456.webp" />   
     </p>
 <p>集群的稳定性，要控制index的分片数，一个index是多个shard组成的，这个图中一个index有三个shard，分布不同节点上，一个请求写几百个几千个文档在里面，当你的请求到达ES某个节点的时候会计算对于几千个文档里面分别属于哪个shard，以shard为粒度分组。然后放到BulkQueue存储，BulkQueue的默认值是100，shard数量过大的问题这个Queue就很容易被打满。但是shard数过小的话，就无法充分利用节点资源，我们给的建议并不适用于每个场景，具体看业务，100GB以下的index设置3-5个shard。大的Index单shard不超过50GB。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/294e21f6ebf04a2c865d836c7ee0167f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281941694.webp" />   
     </p>
 <p>提高集群性嫩控制index的副本数，每个shard可以指定多个副本，这个查询时，找到shard所在的节点，既可以主shard也可以从shard。这是一种很常见的做法。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/da8c2b04e47d45c19d2b76e81b64a79b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281941713.webp" />   
     </p>
 <p>提高集群性能的持久化参数，就是我们之前讲了，默认情况下是ES每1秒产生一个新的segment，如果我们对数据的可见性要求不是特别大的话，可以把这个放大一点。默认情况下translog是每写一次就刷盘一次，可以改成异步刷新。Merge策略，底层的不断把小的合并成大的，但是默认情况下ES默认配置跟你这个节点CPU个数是相关的，CPU个数越大，占的资源就越多，对于有几十个CPU的要控制一下，避免占用更多的资源。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/250f39d4f66e47cf945747af081a94bf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281941825.webp" />   
     </p>
 <p>还有提高性能的第三方面是写入方式。批量写入，我们通常推荐一般场景下在1000-10000之间都是可以的，可以根据业务的不同进行调整。写入的时候不指定ID，你如果指定ID，Lucene首先会考虑你这个ID是否已经存在，如果有的话，就把原来的删掉，把现在的加进去，你每次都是写入和查询。若不指定ID，ES通过算法保证产生一个唯一的ID，就免去了前面的查询，提高了集群效率。</p>
 <p>另外就是routing，避免小的查询过去轮询很多shard，显著降低调度开销，提升查询效率。还有一个是让index压力分摊。最后一个是综合考虑index上的shard的数量，调度开销过大，可能会产生过程中有拒绝。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bd379f38ff1c4cc588b1a56d19310bfb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281941979.webp" />   
     </p>
 <p>提高集群性能的查询方式，默认查询是ES，会有打分逻辑，把你数据搜到以后，根据数据元信息计算分数出来，根据这个分数做一个排序，就是你这个数据和你的查询条件的相关性，类似于推荐的功能，如果说我们对于想要查询的数据，我们认为相关信息都是一样的，我只是精确的查到某条信息而已，通过下面的方式避免了打分的过程，提高了效率，Filter的结果集是可以做缓存的，以后再使用就可以利用了。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fbe632d84fa0445a99b03fd2736a11b3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281941935.webp" />   
     </p>
 <p>最后一部分分享一下我们在ES内核的改进和我们增加的功能，主要是四个方面，一个是运管平台，每个系统都有。ES优化方面有三个，降低索引成本，集群稳定性和集群性能。存储成本，一个是内存优化、冷热分离降低磁盘。提升集群稳定性。最后一个是提高集群的性能，做查询计划的优化，我们的优化不仅于此。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dc2751e6573c448fb8bb6c40dd6e8459.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281941915.webp" />   
     </p>
 <p>运管平台，各个业务的运管平台都差不多，首先有一个自动化的系统，提供集群的管理，官方的升级方案不允许新建index，我们是支持的，你的集群在异常情况下，我们可以支持你升级。</p>
 <p>插件管理，我们本身可以预装一些插件。Index管理，数据过期，index Rollover就是说我可以做一个逻辑表的概念，直接往这个逻辑表里面每天写就可以了，我会自动按照一定时间间隔创建index，你不需要关心里面有多少index。还有Kibana、跨机房容灾、Dedicated Master，提升集群的稳定性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bc1007631e5a48c8aa3dcf25b0423985.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281941618.webp" />   
     </p>
 <p>ES存储成本的倒排索引内存优化，倒排索引有一个词典和一个倒排表，ES为了加速查询过程，把词典划分成一个一个的block，前缀相同的词可以放到block里面，前缀相同的前缀树指向block，在这个小范围内一个个匹配词典就可以了，这样可以快速加大性能，这个东西快是因为常驻内存。FST虽然做了前缀和后缀的收敛，它是常驻在JVM里面的。我们为了利用压缩技术，通常JVM的配置在32G以下，对比较大的节点，Disk比较大的情况下，普通场景1T数据需要2GB的内存，有很多人拿JVM索引，这个地方就更严重了。</p>
 <p>我们目前初期方案调整了这个大小，内存使用率降低了50%，我们现在正在考虑大容量的节点，降低使用成本，我们一个节点会大20个T这种，这种情况下，你的JVM就装不下了。LRU，我只存一部分，其他的放到磁盘，或者我们把这个东西拿到堆外，这是我们后面会做的事情，现在还在调研这块。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1d478813941f46408979a5b3378014bd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281941785.webp" />   
     </p>
 <p>降低存储成本的另一个方法就是冷热分离，ES本身可以对于每个NODE加一些属性在里面，你通过ES的一个命令可以强制把一个表所有数据搬迁到指定的一个属性的节点上面，所以我们在机器上架的时候可以同时加上两个属性，用户可以在前面WEB界面配置哪类的index多久之后迁移到冷机器，降低你的使用成本。我们后台就有一个调度器，会发送命令，从而降低你的使用成本。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0f51165fea964c209f8892a005abf45e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281941988.webp" />   
     </p>
 <p>稳定性优化，集群均衡策略，通常情况下我们随着业务的增长，比如一开始购买了三个节点，业务增长上来之后，你的磁盘使用率也好，慢慢增长，增长一定情况下，70-80%的时候要做扩容，这里讲的是横向扩容，增加一个新的节点，之后ES本身的Rebalance逻辑会把大容量节点数据开始往小的节点上搬，这个没有问题，Rebalance通过参数控制可以控制速度，问题在哪呢？问题是你此时新建index，默认情况下，新增了shard绝大部分都会放在新的节点上，ES认为这些磁盘使用率比较高，默认把大量的Shard放在小的节点上面，新增的shard读写压力比较大，这种情况下就造成单点过热的问题，这个默认就是跟ES算法有关，ES算法里面会综合考虑当前节点上有多少Shard以及index的shard当前的集群分布，最后的结果，因为你新增的index在各个节点上没有shard存在，所以主要考虑了每个节点所有shard的分布，这样就会把新增的shard放在新增节点上面�</p>
 
@@ -391,6 +391,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -424,10 +428,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -806,6 +806,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

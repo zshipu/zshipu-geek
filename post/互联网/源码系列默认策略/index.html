@@ -310,24 +310,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="流程图">流程图</h1>
 <p>图 1：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/1-de57dc64.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221127.png" />   
     </p>
 <h2 id="开始">开始</h2>
 <p>图 2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/2-b7236703.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221352.png" />   
     </p>
 <p>   当 IndexWriter 对索引有任意的更改都会调用合并策略。</p>
 <h2 id="段集">段集</h2>
 <p>图 3：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/3-b364002a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221190.png" />   
     </p>
 <p>   IndexWriter 会提供一个段集(段的集合)提供给合并策略。</p>
 <h2 id="预处理">预处理</h2>
 <p>图 4：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/4-2996f54e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221801.png" />   
     </p>
 <p>   预处理的过程分为 4 个步骤，分别是排序、过滤正在合并的段、过滤大段、计算索引最大允许段的个数。</p>
 <h3 id="排序">排序</h3>
@@ -341,7 +341,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="段集中可以得到-onemerge">段集中可以得到 OneMerge？</h2>
 <p>图 5：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/5-1e9d9e3f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272221692.png" />   
     </p>
 <p>  如果同时满足下面三个条件，那么说明无法段集中可以得到 OneMerge：</p>
 <ul>
@@ -353,7 +353,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="找出一个-onemerge-并打分">找出一个 OneMerge 并打分</h2>
 <p>图 6：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/6-761190a2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272222528.png" />   
     </p>
 <p>  在这个流程中，需要做两个处理：找出一个 OneMerge、OneMerge 打分。</p>
 <h3 id="找出一个-onemerge">找出一个 OneMerge</h3>
@@ -373,12 +373,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div><p>  假设我们有以下的数据，其中 maxMergedSegmentBytes = 80，mergeFactor = 5：</p>
 <p>图 7：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/7-a5dbb219.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272222979.png" />   
     </p>
 <p>  从段 1 开始，逐个添加到 OneMerge 中，当遍历到段 5 时发现，如果添加段 5，那么 OneMerge 的大小，即 19 (段 1) + 18 (段 2)+ 16 (段 3) + 15 (段 4) + 15 (段 5) = 83，该值大于 maxMergedSegmentBytes (80)，那么这时候需要跳过段 5，往后继续找，同理段 6、段 7 都不行，直到遍历到段 8，OneMerge 的大小为 19 (段 1) + 18 (段 2)+ 16 (段 3) + 15 (段 4) + 7 (段 8) = 75，那么可以将段 8 添加到 OneMerge 中，尽管段 9 添加到 OneMerge 以后，OneMerge 的大小为 19 (段 1) + 18 (段 2)+ 16 (段 3) + 15 (段 4) + 7 (段 8) + 4 (段 9) = 79，还是小于 maxMergedSegmentBytes (80)，但是由于 OneMerge 中段的个数会超过 mergeFactor (5)，所以不能添加到 OneMerge 中，并且停止遍历，如下图：</p>
 <p>图 8：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/8-96647ba2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281605999.png" />   
     </p>
 <p>  在这里我们可以看到了 TieredMergePolicy 跟 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F0513%2F58.html">LogMergePolicy</a> 另一个差异，那就是 LogMergePolicy 每次合并的段的个数都是固定的。而 TieredMergePolicy 中则不是，所以为什么在上文中介绍 mergeFactor 的概念时，对&quot;最多&quot;两个字进行加黑操作。</p>
 <h3 id="onemerge-打分">OneMerge 打分</h3>
@@ -394,18 +394,18 @@ mergeScore = \begin{cases} \frac {1.0}{mergeFactor} * totAfterMergeBytes^{0.05} 
 <p>  再贴个图，怕上面的公式显示不出来，不过在我家 27 寸 4K 显示器上看的蛮清楚的~😄</p>
 <p>图 9：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/9-29af2c1f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272222566.png" />   
     </p>
 <h3 id="替换次优-onemerge">替换次优 OneMerge</h3>
 <p>图 10：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/10-9ae2c027.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272223686.png" />   
     </p>
 <p>  当前层中只允许选出一个 OneMerge，即 mergeScore 最低的 OneMerge。</p>
 <h3 id="没有新的-onemerge">没有新的 OneMerge？</h3>
 <p>图 11：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/11-5d199dc1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272223592.png" />   
     </p>
 <p>  在图 9 中，我们遍历的对象是 段 1 段 12，并且选出了一个 OneMerge，接着我们需要再次从 段 2 段 12 中选出一个 OneMerge 后，再从段 3~段 12 中再找出一个 OneMerge，如此往复直到找不到新的 OneMerge，没有新的 OneMerge 的判定需要同时满足三个条件：</p>
 <div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
@@ -545,6 +545,10 @@ mergeScore = \begin{cases} \frac {1.0}{mergeFactor} * totAfterMergeBytes^{0.05} 
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -578,10 +582,6 @@ mergeScore = \begin{cases} \frac {1.0}{mergeFactor} * totAfterMergeBytes^{0.05} 
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -960,6 +960,8 @@ mergeScore = \begin{cases} \frac {1.0}{mergeFactor} * totAfterMergeBytes^{0.05} 
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

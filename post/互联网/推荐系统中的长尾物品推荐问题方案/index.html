@@ -212,12 +212,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>长尾物品（Tail Items）在推荐系统中是非常常见的，长尾的存在导致了样本的不均衡，对于热门头部物品（Head Items）的样本量多，模型学习这部分的效果越好，而长尾物品的样本量少，导致模型对该部分Item的理解不够充分，效果自然也就较差。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/53bc2cff21884622be0a359480dab37c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271942008.png" />   
     </p>
 <p>那么，针对长尾物品的推荐，有哪些较好的解决方法呢？本文从几个角度来聊一下这个问题。长尾问题，可以看成是推荐系统倾向于推荐热门商品，而忽略了非热门物品，即推荐系统如何解决纠偏问题？</p>
 <h2 id="biasdebias思路"><strong>Bias/Debias思路</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c8214a3d3d974f0285f359c4aa16ff8a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271942891.png" />   
     </p>
 <p>在实践中，做推荐系统的很多朋友思考的问题是如何对数据进行挖掘？大多数论文致力于开发机器学习模型来更好地拟合用户行为数据。然而， <strong>用户行为数据是观察性的，而不是实验性的</strong>。这里面带来了非常多的偏差,典型的有： <strong>选择偏差</strong>、 <strong>位置偏差</strong>、 <strong>曝光偏差</strong> 和 <strong>流行度偏差</strong> 等。如果不考虑固有的偏差，盲目地对数据进行拟合，会导致很多严重的问题，如线下评价与在线指标的不一致，损害用户对推荐服务的满意度和信任度等。下面我们聊一下与长尾问题相关的两个偏差。</p>
 <h3 id="01-曝光偏差">01 曝光偏差</h3>
@@ -234,7 +234,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="02-流行度偏差">02 流行度偏差</h3>
 <p>热门商品的 <strong>推荐频率甚至超过了它们的受欢迎程度</strong>。长尾现象在推荐数据中很常见：在大多数情况下，一小部分受欢迎的商品占了大多数用户交互的比例。当对这些长尾数据进行训练时，该 <strong>模型通常会给热门项目的评分高于其理想值</strong>，而只是简单地将不受欢迎的商品预测为负值。因此，推荐热门商品的频率甚至比数据集中显示的原始受欢迎程度还要高。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/424bbaf21587465599c3d901904f9d41.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271942442.webp" />   
     </p>
 <p>忽略流行度经常会带来非常多的问题：</p>
 <p>(1) <strong>降低个性化</strong> 的程度影响，影响用户的体验;</p>
@@ -254,28 +254,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>通过引入其它side information来降低流行度的偏差, propensity score也可以被用来做popularity的bias。通过降低流行项对模型训练的影响，可以减轻流行偏差。</p>
 <h2 id="迁移学习思路"><strong>迁移学习思路</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a0d1afe6625b4a62bbcaa3e4b133d938.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271942303.png" />   
     </p>
 <p>由于大多数现有推荐系统中的的长尾模型只关注尾部，而没有考虑与头部们的联系—头部包含丰富的用户反馈信息和与尾部相关的可转移上下文信息。为了改进长尾问题，谷歌进行了 <strong>将知识从头部转移到尾部</strong> 的研究，提出了一个新的对偶迁移学习框架，它可以从模型层和物品层协同学习知识迁移，利用了头部中丰富的用户反馈以及头尾部之间的语义联系。</p>
 <h3 id="01-对偶迁移学习方法">01 对偶迁移学习方法</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ee2e484540ca487f819b4ea98017f1fc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271942025.png" />   
     </p>
 <p>（1）橙色部分学习通用的元迁移器；</p>
 <p>（2）绿色部分学习Item之间的语义关系；</p>
 <h3 id="02-模型结构">02 模型结构</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b1182bfca90c44feb4bc0dde876065c1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271942180.png" />   
     </p>
 <p>模型探究 <strong>使用少量训练样本学习的模型</strong> 与相同物品 <strong>使用足够训练样本学习的模型</strong> 之间的联系。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c1b8a37b8ab6417e8687185df0b88071.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271942358.png" />   
     </p>
 <p><strong>Base-Learner</strong>: 通过双塔模型得到的user embedding和item embedding，然后使用内积的方式得出预测的Score。</p>
 <p><strong>Meta-Learner</strong>：通过基学习器得到few-shot模型和many-shot模型之后，利用元学习器映射两个模型的参数，从而捕捉元级知识。</p>
 <h2 id="kdd-cup-冠军思路"><strong>KDD Cup 冠军思路</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d834adc0b2714d208486cbbef3402f21.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271942343.png" />   
     </p>
 <p>在KDD Cup2020中，美团技术团队给出了基于时间加权和图的解决方案，大概思路如下：</p>
 <p>针对选择性偏差和�</p>
@@ -402,6 +402,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -435,10 +439,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -817,6 +817,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

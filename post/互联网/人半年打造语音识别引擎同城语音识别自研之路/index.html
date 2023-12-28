@@ -215,7 +215,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>数据标注：</strong></p>
 <p>语音识别模型强依赖语音数据，训练一个好的语音识别模型需要有充足、高质量的语音标注数据，即人工标注好的语音片段和对应文字，一般情况下，标注的语音数据字准率需要在98%以上。初期，我们使用开源语音数据集来做模型实验，如AIShell-1、AIdatatang_500zh、THCHS30等。2019年11月底，我们上线了一套基于Wavesurfer.js插件开发的语音数据标注系统，如下图所示，并搭建了4人标注团队来标注我们业务场景下的语音数据。标注系统有标注员、质检员、管理员等多种角色，支持标注任务分配、标注、质检、数据统计等功能。为提高标注效率，我们利用第三方语音识别接口（也可使用大厂免费语音识别接口）对语音文件进行转写，将转写文本展示在系统中，标注人员标注时只需要对文本进行改写，而不是从零开始听录音写文字，标注员人均单日可标注1小时左右的有效录音，标注的录音会交由质检员做质检以保证准确率，质检员人均单日可质检1.5小时左右的有效录音。在我们的场景下，有效录音指仅包含主叫与被叫的可听清人声，可以包括轻口音的方言，或背景中清晰干净的人声等。除此之外，还需要标注员标注上说话人标签，例如说话人性别、说话人角色（用户、坐席）等，说话人标签标注准确率不可低于98%。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/adfa3691697c4e1abb5bbfbc04b0f681.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271537961.webp" />   
     </p>
 <p>我们标注团队每天仅能标注3~4个小时的语音数据，而训练一个较好的语音识别模型往往需要数千甚至上万有效小时的语音数据，我们预估我们的场景下初期需要3500+小时有效录音，自主搭建标注团队标注成本过高，且标注周期长，业界有众多第三方语音数据标注厂商，成本相对较低，1小时有效录音价格为数百元，我们决定将语音数据标注工作外包给第三方厂商来做。</p>
 <p>我们从2020年2月初就开始筹备语音数据标注外包工作，但由于疫情原因，直至2020年4月初，我们才成功招标一家语音数据标注厂商，我们要求其在3个月内完成3500小时语音数据的标注，以支持我们在7月份上线自研语音识别。我们的场景繁杂，总计有17个细分场景，包括房产、招聘、黄页、车四大业务线销售、客服人员在呼叫中心的电话录音，四大业务线C端用户和B端用户在58同城平台的电话沟通录音，这些都是8kHz的语音数据，此外还包括四大业务线C端用户和B端用户在微聊中的沟通语音，这是16kHz的语音数据。我们的目标是在所有场景都要超越第三方，我们不能盲目标注语音数据，需要覆盖所有场景，因此我们根据场景优先级将3500小时的任务进行拆分，重点场景标注多，其余场景标注少，此外，我们还制定了一个批次计划，分批次将语音数据给到标注厂商，我们在拿到每个批次的数据后就会训练模型，评测效果，若某个场景超越第三方，我们可以灵活调整后续批次中各场景的数据分布，例如在效果较差的场景多标数据，通过这种方式我们可以灵活把控我们的算法迭代节奏。值得一提的是，2020年6月初，我们基于外包标注的1700小时语音数据训练了语音识别模型，整体效果超过了第三方语音厂商，17个细分场景中仅3个非重点场景比第三方略低。</p>
@@ -228,53 +228,53 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>58场景下的语音数据主要来源于8K的电话录音和16K的网络音频，为了保证语音识别系统的通用性，我们在训练和识别时，统一将所有音频转为16K的采样率，以实现混合带宽场景下的语音识别。</p>
 <p>语音识别系统主要模块可以分为语音活性检测（Voice Activity Detection，VAD）、说话人分离（Speaker Diarizition，SD）、语音识别（Automatic Speech Recognition，ASR）和后处理模块。以下主要介绍各个算法模块的功能，以及迭代过程中遇到的困难和解决方案。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bccc2e1e075a4e7aaa44b07341763cba.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271537527.webp" />   
     </p>
 <p>语音识别（ASR）模块将输入的音频转为对应的文字，为整个系统的核心。我们选择Kaldi的Chain Model 作为语音识别框架，模型主要分为声学模型、语言模型和发音词典。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/79b8005ac46d476aa2ee69ce59011f2d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271537422.png" />   
     </p>
 <p>模型迭代前期，主要是针对声学模型进行迭代，我们采用CNN + TDNN-F作为主要的语音识别模型。在模型的冷启动阶段，主要是通过各场景数据积累使字错率（Character Error Rate，CER）绝对下降10%左右，而在数据积累到一定程度后，各场景的CER呈现细微波动而很难进一步下降，这个阶段主要通过特征和模型的大量调优实验获得进一步的性能提升。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f67a9c3b3bdd4c6db633db0ce2d2909d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271537664.webp" />   
     </p>
 <p>由于语音数据积累和声学模型的迭代周期较长，因此针对特定场景的识别效果优化，我们主要依靠语言模型和发音词典的快速迭代。我们开发了G2P（Grapheme-to-Phoneme，文字转音素）服务，实现了中英文音素的标准化、数字标准化，使用seq2seq模型实现对多音字的处理，借助新词发现算法构造了大量的业务发音词典，增加了业务专有词汇在解码图中的概率。从语言模型角度，使用不同场景数据训练多个语言模型插值，通过调整插值系数可以优化不同场景下的识别效果，对于数据少的场景，通过 rnnlm 扩充训练数据，可以有效弥补数据的不足，最终成功优化了语音标注数据少的场景下的识别效果，如招聘面试机器人（神奇面试间）、智能外呼场景。在电话音频数据中，存在很多噪音，通过噪音分析，整理了业务场景的噪音类型，针对性的进行训练数据加噪，结合变速、谱增强等数据增强方法，有效的提高了模型在复杂环境下的鲁棒性。</p>
 <p>后处理模块的主要功能是为识别文本加标点，增加了识别结果的可读性，我们使用实体识别对标点任务建模，通过自标注数据的训练，达到了很好的效果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ae4f85c96dd54501ac725cf61f4c60b7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271537851.webp" />   
     </p>
 <p>在端到端语音识别上，我们尝试了多种方案，其中基于ESPNet实现的Transformer + CTC的方法整体效果最优，如下图所示。ESPNet中解码速度较慢，我们通过实现批量解码、实现预测时的动态batchsize分配、优化下采样策略、调整beam-size、实现Attention辅助对齐等方法使端到端解码效率绝对提升60倍。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/875a2a1df6284ab0885951421e13bcb0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271537668.webp" />   
     </p>
 <p>VAD模块的任务是从一段录音或者语音流中找到并提取人声部分，VAD在录音文件识别和实时语音识别中都会应用到，所有的音频数据首先经过VAD模块处理，只有被VAD判别为“人声”的音频才会流转至ASR模块转译成文字，它是语音识别系统的第一道关口。能否精确的判断人声的起始位置，并在复杂场景中有效过滤噪音等非人声片段是VAD的核心任务。电话场景的环境音非常复杂，除了常规的噪音之外，还有机器人的回声、背景电视音乐声等等。我们最开始使用webrtc中的VAD模块配合合适的平滑策略实现，webrtc的效率高、效果稳定，但对噪音的过滤效果较差。因此，后期采用了深度学习的方法，通过自有训练数据提升对特定噪音类别的过滤能力。为了兼顾性能和效率，经过大量实验，VAD模型最终使用双层单向lstmVAD对每一帧音频进行打标（即判断是否为人声），如下图所示，与webrtcVAD相比在很大程度上提升了噪音过滤能力，同时可以识别并过滤掉录音中的机器人声、以及回声消除的“残留物”。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6fa9e16c6a694cfd841b80a21cc334cc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271537329.webp" />   
     </p>
 <p>作为语音识别系统的第一道关口，VAD的预测耗时要求很高，我们针对VAD耗时做了优化。在录音文件识别场景下，主要问题就是每个录音的长度较长，对于lstm来说耗时较高，我们应用了分段延时预测LSTM，同时使用CUDNN加速，实现对长录音的并行预测，同时又保证了识别效果与整段预测相同。在实时语音识别场景下，VAD则通过窗口切分后，记忆对话内的上下文状态信息，同时有效的控制了传输耗时，在降低整体预测耗时的同时保证识别效果不受影响。</p>
 <p>SD（说话人分离）模块应用于分离单声道录音中的两个说话人，为了分离不同说话人的发音片段，SD在拿到VAD的人声片段后，根据说话人特征进一步切分、聚类和平滑。SD的主要难点在于强噪音干扰、说话人音量差别太大以及背景人声较多等问题，优化SD模块主要就是优化说话人身份向量的提取，再由KMeans根据通话中说话人数量完成聚类。说话人向量表示方面，我们从IVector迭代到深度学习版本，网络方面使用ResNet在VoxCeleb数据上的预训练模型，结合DSSM、Triplet等方式在自有数据上微调，增大实际场景下不同说话人之间的区分度，最终获得了大幅度提升。</p>
 <p>VAD和SD的级联方式最初使用 webrtcVAD + IVector PLDA + KMeans的方式，但分离效果受到说话人音量、噪音、环境音等因素影响严重。使用基于ResNet的说话人向量表示模型与lstmVAD级联后，与webrtcVAD+IVector的方案相比，分离错误率（DER，Diarization error rate）绝对降低10%。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/816c8815046443bf8aaba24f05100266.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271538008.webp" />   
     </p>
 <p>未来我们会进一步在多场景、多方言、多口音的场景下进行深度优化，持续跟进业界前沿技术。本文由于篇幅限制，未详细描述相关技术细节，未来会持续输出相关文章。</p>
 <h2 id="工程架构"><strong>工程架构</strong></h2>
 <p>语音识别引擎在工程架构上主要包括录音文件识别服务、实时语音识别服务。录音文件识别服务将批量录音文件作为输入，识别完成后，将整段录音的识别结果回传。实时语音识别服务将语音数据流作为输入，实时返回识别结果，达到边说边识别的效果。</p>
 <p>语音识别引擎架构如下图所示：在接入层上，对于录音文件识别服务，我们提供了接收请求的RPC接口，以及查询识别结果的HTTP接口，对于实时语音识别服务，我们提供了Java/IOS/Android版本的SDK，供业务方调用。在逻辑层上，录音文件识别服务、实时语音识别服务提供核心的文字转写功能；接入了日晷ABTest平台，用于线上模型分流，对比线上效果；接入了WPAI人工智能平台，用于非Kaldi框架模型的训练、推理。在数据层上，我们使用各类存储系统，完成服务配置、数据存储、数据统计。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/666c6d1347ed47aab85d5c7149be85bb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271538746.webp" />   
     </p>
 <p><strong>录音文件识别服务：</strong></p>
 <p>录音文件识别服务对录音文件进行批量转写，一般包括回调、轮询两种设计方式。在回调方式下，由调用方将HTTP服务的回调地址作为参数发送给服务方，服务方转写完毕后将结果返回。在轮询方式下，调用方发送转写任务请求后，不断请求服务方是否转写完毕，如果转写完毕，则将结果取回。我们采用了回调的设计方式，这样的好处是避免了无效的请求和服务端资源的浪费，异步提交的方式对调用方的服务设计也是友好的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4a732d4756054f409d7667e9c2ae0e9f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271538755.webp" />   
     </p>
 <p>录音文件识别服务包括预处理服务、音频处理服务、语音解码服务以及后处理服务。录音文件识别服务流程如上图所示：录音文件请求发送至预处理服务（RPC）上，由预处理服务进行鉴权、有效性检查、时长监控及消息备份。在音频处理服务上，对音频进行转换，统一转换为16k/16bit pcm格式文件，进行声道判断，如果是双声道录音，则先进行声道分离再进行VAD，将语音切分为说话人语音片段，如果是单声道录音，则进行说话人分离（SD），再进行vad人声检测，切分为说话人语音片段。语音解码服务处理输入的说话人语音片段，进行解码，再调用后处理服务添加标点，将结果回传给调用方，在语音解码中，我们使用批量解码器，对人声语音片段进行批量转写。</p>
 <p>我们使用了Kaldi中的解码器，CPU机器上使用nnet3-latgen-faster-parallel解码器，1小时可以解码20小时音频，GPU机器上使用batched-wav-nnet3-cuda解码器。</p>
 <p><strong>实时语音识别服务：</strong></p>
 <p>实时语音识别服务可以实现边说话边返回识别结果，服务包含客户端SDK、实时语音接入服务、实时解码服务三个部分。如果要提供实时的流式服务，就需要客户端和服务间建立全双工的长连接以流式的方式交互数据。SDK和服务间约定了事件、回调函数、以及返回转写状态。相应的，我们开发了Java/IOS/Android版本的SDK，适用于不用的调用需求。语音接入服务还包括鉴权、限流等功能。实时语音解码服实现对接收的语音片段进行实时解码，后处理服务对转写出的结果添加标点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ff3d16732b064c14b2573d7468fef6e5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271538686.webp" />   
     </p>
 <p>实时语音识别场景下客户端和服务端交互流程如上图所示，首先进行握手鉴权，服务端根据token和签名来判断是否为合法请求，然后开始识别，定义了识别开始、识别进行中、识别结束、识别失败四种状态来控制整个流程。值得一提的是，该交互流程实际为云厂商中的一句话识别流程，基于该流程加上VAD即可实现云厂商的实时语音识别。</p>
 <p>我们对kaldi原生的解码器online2-wav-nnet3-latgen-faster进行了改造， Kaldi原生的语音解码器性能差，没有并发处理能力，无法在生产环境中直接使用。我们对解码器进行了一系列优化改造使得单机解码性能提升一倍，并构建了基于多线程的流式语音识别服务，同时优化了在边说边识别过程中获取中间识别结果的耗时，最终流式识别服务在生产环境中正常上线。</p>
@@ -301,7 +301,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>附语音技术团队照片一张，欢迎加入我们！</strong></p>
 <p><strong>欢迎联系：zhankunlin@58.com</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cb8c4b870f4e4f77a22008bbfcec2355.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271538935.webp" />   
     </p>
 <h2 id="作者简介"><strong>作者简介</strong></h2>
 <p>詹坤林，58同城AI Lab负责人、算法资深架构师、技术委员会AI分会主席。2015年5月加入58，目前主要负责AI相关产品规划和技术研发，致力于推动AI技术在58同城的落地，打造AI中台能力，以提高前台业务人效、收入和用户体验。目前负责的主要产品包括智能客服、语音机器人、语音分析平台、语音识别、智能写稿、AI算法平台、CRM商机智能分配系统等。曾任腾讯高级工程师，从事推荐算法研发。2012年硕士毕业于中国科学院大学。</p>
@@ -432,6 +432,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -465,10 +469,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -847,6 +847,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

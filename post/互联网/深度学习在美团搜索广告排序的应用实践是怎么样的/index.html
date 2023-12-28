@@ -303,25 +303,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>GBDT又叫MART（Multiple Additive Regression Tree），是一种迭代的决策树算法。它由多棵决策树组成，所有树的结论累加起来作为最终答案。它能自动发现多种有区分性的特征以及特征组合，并省去了复杂的特征预处理逻辑。Facebook实现GBDT ＋ LR[5]的方案，并取得了一定的成果。</p>
 <p><strong>LR</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9b696aa8a2c346b1956d132210d707b0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157946.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/57c1001b0a1a4d3fb934840b9ad1a44e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157214.webp" />   
     </p>
 <p>LR可以视作单层单节点的“DNN”, 是一种宽而不深的结构，所有的特征直接作用在最后的输出结果上。模型优点是简单、可控性好，但是效果的好坏直接取决于特征工程的程度，需要非常精细的连续型、离散型、时间型等特征处理及特征组合。通常通过正则化等方式控制过拟合。</p>
 <p><strong>FM &amp; FFM</strong></p>
 <p>FM可以看做带特征交叉的LR，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b825466f4710497dbcb90e97022d6e48.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157820.webp" />   
     </p>
 <p>从神经网络的角度考虑，可以看做下图的简单网络搭建方式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/54c006b035394821a6d813adadbe4cee.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157449.webp" />   
     </p>
 <p>模型覆盖了LR的宽模型结构，同时也引入了交叉特征，增加模型的非线性，提升模型容量，能捕捉更多的信息，对于广告CTR预估等复杂场景有更好的捕捉。</p>
 <p>在使用DNN模型之前，搜索广告CTR预估使用了FFM模型，FFM模型中引入field概念，把n个特征归属到f个field里，得到nf个隐向量的二次项，拟合公式如下：
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2d7c32ab97a7400298797b1f1f2b0518.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157450.webp" />   
      上式中，fj 表示第j个特征所属的field。设定隐向量长度为k，那么相比于FM的nk个二次项参数，FFM有nkf个二次项参数，学习和表达能力也更强。</p>
 <p>例如，在搜索广告场景中，假设将特征划分到8个Field，分别是 <strong>用户、广告、Query、上下文、用户－广告、上下文－广告、用户－上下文及其他</strong>，相对于FM能更好地捕捉每个Field的信息以及交叉信息，每个特征构建的隐向量长度8*k, 整个模型参数空间为8kn+n+1。</p>
 <p>Yu-Chin Juan实现了一个C++版的FFM模型工具包，但是该工具包只能在单机训练，难以支持大规模的训练数据及特征集合；并且它省略了常数项和一次项，只包含了特征交叉项，对于某些特征的优化需求难以满足，因此我们开发了 <strong>基于PS-Lite的分布式FFM训练工具</strong>（支持亿级别样本，千万级别特征，分钟级完成训练，目前已经在公司内部普遍使用），主要添加了以下新的特性：</p>
@@ -334,14 +334,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/833f328ff7324bddb460a483e9515e96.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157854.webp" />   
     </p>
 <ul>
 <li>支持多种优化算法。</li>
 </ul>
 <p>从GBDT模型切到FFM模型，积累的效果如下所示，主要的提升来源于对大规模离散特征的刻画及使用更充分的训练数据：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a90e427f44a94b7daef464fe91567b20.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157587.webp" />   
     </p>
 <p><strong>DNN</strong></p>
 <p>从上面的介绍大家可以看到，美团场景具有多样性和很高的复杂度，而实验表明从线性的LR到具备非线性交叉的FM，到具备Field信息交叉的FFM，模型复杂度（模型容量）的提升，带来的都是结果的提升。而LR和FM/FFM可以视作简单的浅层神经网络模型，基于下面一些考虑，我们在搜索广告的场景下把CTR模型切换到深度学习神经网络模型：</p>
@@ -361,19 +361,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>首先尝试的是Google提出的经典模型Wide &amp; Deep Model[6]，模型包含Wide和Deep两个部分，其中Wide部分可以很好地学习样本中的高频部分，在LR中使用到的特征可以直接在这个部分使用，但对于没有见过的ID类特征，模型学习能力较差，同时合理的人工特征工程对于这个部分的表达有帮助。Deep部分可以补充学习样本中的长尾部分，同时提高模型的泛化能力。Wide和Deep部分在这个端到端的模型里会联合训练。</p>
 <p>在完成 <strong>场景与特征</strong> 部分介绍的特征工程后，我们基于Wide &amp; Deep模型进行结构调整，搭建了以下网络：
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/86c28fc6c568492892912c70558365ee.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157362.webp" />   
     </p>
 <p>在搜索广告的场景中，上图的Part_1包含离散型特征及部分连续型特征离散化后的结果 （例如 <strong>用户ID、广告ID、商圈ID、品类ID、GEO、各种统计类特征离散化结果</strong> 等等）。离散化方式主要采用等频划分或MDLP[7]。每个域构建自己的embedding向量 （缺失特征和按照一定阈值过滤后的低频特征在这里统一视作Rare特征），得到特征的Representation，然后通过Pooling层做采样，并拼接在一起进行信息融合。</p>
 <p>右侧的Part_2部分主要包含我们场景下的统计类特征及部分其他途径建模表示后输入的特征 （例如 <strong>图片特征、文本特征</strong> 等），和Part_1的最后一层拼接在一起做信息融合。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fad41f3cdbc146a69984227747df5674.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157087.webp" />   
      Part_3为多个全连接层，每个Layer后面连接激活函数，例如ReLu, Tanh等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ffa31e0bfe4f4252b700dc3533dd6f2b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157802.webp" />   
     </p>
 <p>右上的Part_4部分主要包含 <strong>广告曝光位次</strong> （Position Bias）及部分离散特征，主要为了提高模型的记忆性，具有更强的刻画能力。Wide和Deep部分结合，得到最终的模型：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/71886adaaf714be38b24e3a68af367bd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157751.webp" />   
     </p>
 <p>深度学习模型在图像语音等数据上有显著作用的原因之一是，我们在这类数据上不太方便产出能很好刻画场景的特征，人工特征+传统机器学习模型并不能学习出来全面合理的数据分布表示，而深度学习end-to-end的方式，直接结合Label去学习如何从原始数据抽取合适的表达（representation）。但是在美团等电商的业务场景下，输入的数据形态非常丰富，有很多业务数据有明确的物理含义，因此一部分人工特征工程也是必要的，提前对信息做一个合理的抽取表示，再通过神经网络学习进行更好的信息融合和表达。</p>
 <p>在美团搜索广告的场景下，用户的实时行为有非常强的指代性，但是以原始形态直接送入神经网络，会损失掉很多信息，因此我们对它进行了不同方式描述和表示，再送入神经网络之中进行信息融合和学习。另一类很有作用的信息是图像信息，这部分信息的一种处理方式是，可以通过end-to-end的方式，用卷积神经网络和DNN进行拼接做信息融合，但是可能会有网络的复杂度过高，以及训练的收敛速度等问题，也可以选择用CNN预先抽取特征，再进行信息融合。</p>
@@ -411,22 +411,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>从FFM模型切到Wide &amp; Deep模型，积累到目前的效果如下所示，主要的提升来源于模型的非线性表达及对更多特征的更充分刻画。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/93206f6f9c844f6ab898b1cf717be73d.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157092.jpeg" />   
     </p>
 <h4 id="deepfm">DeepFM</h4>
 <p>华为诺亚方舟团队结合FM相比LR的特征交叉的功能，将Wide &amp; Deep部分的LR部分替换成FM来避免人工特征工程，于是有了DeepFM[8]，网络结构如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8a10717637134bbab878f2faab0793d8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157866.webp" />   
     </p>
 <p>比起Wide &amp; Deep的LR部分，DeepFM采用FM作为Wide部分的输出，在训练过程中共享了对不同Field特征的embedding信息。</p>
 <p>我们在部分业务上尝试了DeepFM模型，并进行了超参的重新调优，取得了一定的效果。其他业务也在尝试中。具体效果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2a06dc02c787434796daa58514f560df.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157832.webp" />   
     </p>
 <p><strong>Multi-Task</strong></p>
 <p>广告预估场景中存在多个训练任务，比如CTR、CVR、交易额等。既考虑到多个任务之间的联系，又考虑到任务之间的差别，我们利用Multi-Task Learning的思想，同时预估点击率、下单率，模型结构如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8f05511f081b4a048eda9a5e5f69a1ab.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157560.webp" />   
     </p>
 <ul>
 <li>
@@ -441,17 +441,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>
 <p>离线训练和线上预估流程减半，性能提升；效果上相对于单模型，效果基本持平：
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/837d90570fc94a89bb2f8ec859207c4c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157438.webp" />   
     </p>
 </li>
 </ul>
 <p>近期，阿里发表论文“Entire Space Multi-Task Model”[9]，提出目前CVR预估主要存在Sample Selection Bias（SSB）和Data Sparsity（DS）两个问题，并提出在全局空间建模（以pCTCVR和pCTR来优化CVR）和特征Transform的方法来解决。具体的Loss Function是：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f9a9ff6f99294cf8861e273ecac6e657.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157053.webp" />   
     </p>
 <p>网络结构是：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/70815fc0ea4a4d87ad372e7399667fc1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157822.webp" />   
     </p>
 <h4 id="超参调优">超参调优</h4>
 <p>除了以上对网络结构的尝试，我们也进行了多组超参的调优。神经网络最常用的超参设置有：隐层层数及节点数、学习率、正则化、Dropout Ratio、优化器、激活函数、Batch Normalization、Batch Size等。不同的参数对神经网络的影响不同，神经网络常见的一些问题也可以通过超参的设置来解决：</p>
@@ -502,7 +502,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们在实际调参过程中，使用的是第3种方式，在根据经验参数初始化超参数之后，按照隐层大小-&gt;学习率-&gt;Batch Size-&gt;Drop out/L1/L2的顺序进行参数调优。</p>
 <p>在搜索广告数据集上，不同超参的实验结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4602528040c947028c0bdea53f0ba7d6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157762.webp" />   
     </p>
 <p><strong>2.3 小结</strong></p>
 <p>搜索广告排序模型经历了从GBDT &ndash;&gt; FFM &ndash;&gt; DNN的迭代，同时构建了更加完善的特征体系，线下AUC累积提升13%＋，线上CTR累积提升15%＋。</p>
@@ -528,7 +528,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/47ffa4dbd1d44dbdae4ed347cd67a4a6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157629.webp" />   
     </p>
 <ol start="3">
 <li>将原始数据转换为TensorFlow Record。</li>
@@ -596,7 +596,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>TF Serving服务端的性能差强人意。在典型的五层网络（512 <em>256</em> 256 <em>256</em> 128）下，单个广告的预估时延约4800μs，具体见下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3e4509e9585f4827be901d0eb1c93e62.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157616.webp" />   
     </p>
 <ul>
 <li>定制的模型计算实现</li>
@@ -624,7 +624,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
    arrayIndex = nextArrayIndex;
 </code></pre><p>优化后的单个广告预估时延约650μs，见下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/452cc4f22fbd4a92a979242adaca2476.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272157352.webp" />   
     </p>
 <p>综上，当前线上预估采取“两条腿走路”的策略。利用TF Serving快速实验新的模型结构，以保证迭代效率；一旦模型成熟切换主流量，我们会开发定制实现，以保证线上性能。</p>
 <p><strong>模型效果</strong></p>
@@ -776,6 +776,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -809,10 +813,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1191,6 +1191,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

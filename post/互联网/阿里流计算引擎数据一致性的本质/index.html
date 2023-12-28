@@ -204,7 +204,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/89ef16a2c091424290c2937bada0ff1f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281932494.webp" />   
     </p>
 <p>作者 | 齐光 阿里云云栖号 微信号 yunqiinsight</p>
 <p>流计算的应用与实践在大数据领域越来越常见，其重要性不言而喻，常见的流计算引擎有 Google DataFlow、Apache Flink，Apache Kafka Streams，Apache Spark Streaming 等。流计算系统中的数据一致性一般是用消息处理语义来定义的，如某引擎声称可以提供「恰好一次（Exactly-once Processing Semantics）流处理语义，表示（或暗示）引擎具备保证数据一致性的能力。事实上，「恰好一次（Exactly-Once）」并不等价于流计算的输出数据就符合一致性的要求，该术语存在很多理解和使用上的误区。</p>
@@ -212,12 +212,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="一-流计算中的一致性"><strong>一 流计算中的一致性</strong></h3>
 <p>在认识流计算系统一致性之前，我们需要精确定义流计算。流（Streaming）计算是一种在无边界数据（unbounded data）上进行低延迟计算的数据处理过程。相应的，批计算更准确的说法是有界数据（bounded data）的处理，亦即有明确边界的数据处理，流和批只是两种不同数据集的传统数据计算方法，它们并不是泾渭分明的，譬如也可以通过批量的方式（e.g. Spark Streaming 中的 micro-batch）来实现无界数据上的流处理过程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/05cecca6f81347d3b04387fea94e0df8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281932376.webp" />   
     </p>
 <h4 id="1-一致性定义及挑战"><strong>1 一致性定义及挑战</strong></h4>
 <p>如果我们将流计算的过程（获取输入数据、处理数据、输出计算结果）视为数据库的主从同步过程，抑或视为一种从流数据生成衍生数据集（表）的过程，则流计算中的数据一致性同关系型数据库事务 ACID 理论中的 Consistency 有异曲同工之妙，后者指的是在事务开始或结束时，数据库中的记录应该在一致状态，相应地，流计算中的一致性可以定义为：流计算系统在计算过程中，或是出现故障恢复计算后，流系统的内部状态和外部输出的数据应该处在一致的状态。譬如，当故障恢复后开始重新计算，计算的结果是否满足数据的一致性（即用户无法区分恢复前和恢复后的数据）？记录是否会重复/丢失，第三方系统对同一条计算结果的多次获取，是否会存在值上的不一致？对一致性有了清晰的认知和定义后，我们来看看为什么实现一致性这么难。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c57fa44a555546daa0cb6d161d5bedb0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281932150.webp" />   
     </p>
 <p>在定义一中我们可以看到，流计算输入的数据是无边界的，所以系统中会存在消息抵达流计算系统延迟、顺序错乱、数量/规模未知等不确定因素，这也是流计算系统一致性复杂性远远大于批处理系统的原因：批处理系统中的输入是确定的，计算过程中可以通过计算的原子性来保证数据的一致性（如 Spark 中的 RDD 血缘）。此外，同其他分布式应用一样，流计算系统经常也会受到各类意外因素的影响而发生故障，比如流量激增、网络抖动、云服务资源分配出现问题等，发生故障后重新执行计算，在存在不确定输入的前提下设计健壮的容错机制难度很大。</p>
 <p>除了数据输入带来的挑战，流计算输出的数据会被实时消费，类似这样不同于批处理的应用场景，也给数据的一致性带来的诸多挑战，如出现 FO 后，是撤回之前发出的数据，还是是同下游进行协商实现一致性，都是需要考虑的。</p>
@@ -241,7 +241,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>4.表 -&gt; 表：不存在这样的数据处理逻辑。</p>
 <p>在这个统一的理论框架下，批处理过程的一致性也可以纳入本文讨论的范畴中来。但无论是纯粹的流计算，还是上面统一的数据处理模型，我们都可以将流（批）数据处理的过程抽象为「读取数据-处理数据-输出数据」这样的三个部分，可用下面的无向图来表达，其中点代表数据加工逻辑，边表示数据流向，数据处理过程中的中间状态（State）一般需要做持久化存储。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/560038e6696544b8acd82e903f1c09cb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281932939.webp" />   
     </p>
 <h4 id="2-确定性非确定性计算"><strong>2 确定性/非确定性计算</strong></h4>
 <p>流计算中的确定性指的是，给定相同的一组数据，重复运行多次或者打乱数据进入引擎的顺序，计算完成后将会输出相同的结果，否则就是非确定性计算。常见的非确定性计算包括使用了随机数、使用系统时间、字符串拼接等。如果流计算中存在非确定性的计算，则会给端到端一致性的实现造成很多困难，部分引擎并不能很好地支持此类场景。</p>
@@ -256,7 +256,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>R(E(t), O(t)) = O&rsquo;(t+1)，且 O&rsquo;(t+1) = O(t+1)</p>
 <p>我们在这里将引擎状态作为一种特殊输出的考虑有两点。其一，引擎的状态一般也是输出到外部存储如 RocksDB/HDFS，这和计算下游的输出别无二致。其二，通过屏蔽引擎内部的容错机制实现，简化端到端一致性问题的抽象过程，便于更好地理解问题本身。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e3654665269144508a04d1faa1831411.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281932713.webp" />   
     </p>
 <h3 id="三-一致性的通用解法"><strong>三 一致性的通用解法</strong></h3>
 <h4 id="1-通用解法的推导"><strong>1 通用解法的推导</strong></h4>
@@ -276,7 +276,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Google在2013年发了一篇名为《MillWheel: Fault-Tolerant Stream Processing at. Internet Scale》的文章，论述了在 Google 内部实现低延迟数据处理的编程模型和工程实现，后面 Google 在此基础上抽象出了 DataFlow 流处理模型（具体参考论文《The Dataflow Model: A Practical Approach to Balancing Correctness, Latency, and Cost in Massive-Scale,Unbounded, Out-of-Order Data Processing》），后者对流计算流域的影响堪比20世纪初 GFS，BigTable 以及MapReduce 三篇论文对大数据的影响，后面 Google 又在 MillWheel 之上继续发展，开源了 Apache Bean 这个系统级的流批一体数据解决方案，因为 MillWheel 是更纯粹的「流计算」，所以我们重点来分析 MillWheel。</p>
 <p>MillWheel 使用了一种名为「Strong production」的机制将每个算子的输出在发送至下游之前都进行了持久化存储，一旦发生了故障，当需要恢复时，引擎可以直接将存储后的结果发出去。回头再看端到端一致性数据处理语义的充分必要条件，显然 MillWheel 是符合「实时存储每一条中间和最终计算结果」这个条件的。对于存在不确定性计算的流计算场景，当 FailOver 时，引擎会从源头重新发送消息进行重算，多次计算可能会产生的不一致的结果，但由于「Strong Production」会对计算进行去重，因此即便进行了多次重算，但有且仅有一次重算的结果被输出给下游（下游算子或结果接受端），从整体上来看数据是满足一致性的，这也被称之为「Effective Determinism」。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c6b7e006e30d4baf8256167b833e4474.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281932542.webp" />   
     </p>
 <p>MillWheel 会对每一条记录赋予一个唯一 ID，同时基于此 ID 维护一份是否处理过当前记录的目录。对于每一条流入当前算子的记录，引擎查找此 ID 目录以确定此记录是否是已经处理过。这里会有很多技术上的挑战，这里稍微举几个例子。</p>
 <p>譬如，需要有稳定且高吞吐的存储后端用于结果存储，Google 内部的 BigTable 发挥了其作用。流任务执行前后，引擎会对执行流做若干优化，如合并多个逻辑算子至单个算子（类似 Flink 中的 chain 化）、节点内先执行部分合并（count / sum）后再 shuffle等等，种种手段均是为了降低算子间 IO 的数据规模。</p>
@@ -284,7 +284,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="2-apache-flink"><strong>2 Apache Flink</strong></h4>
 <p>MillWheel 作为一个内部系统可以存储每一个中间结果，但是对于开源系统的 Apache Flink 来说，毕竟不是每一个公司都有这么完备的技术基建。Flink 会定期把结果以事务的方式进行批量存储，这里的「结果」如上面分析，由源状态 SourceState(t)、算子状态 OperatorState(t) 、输出的结果 Sink(t) 组成，其中 Flink 把源状态和算子状态进行了打包，统称为「分布式一致性快照」（基于 Chandy-Lamport 分布式快照算法来实现），数据会持久化在 RocksDB 中。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/583c784f64984f08812128d6a6992534.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281932440.webp" />   
     </p>
 <p>如上图所示，Flink 引擎会定时（每个周期称之为一个 epoch）以 2PC 的方式提交结果。事实上，即便不考虑结果输出，Flink 「分布式一致性快照」的快照的实现也是一个 2PC 的过程：算子的状态快照存储类似于 2PC 的 Prepare 阶段，但 Commit 的确认仅需 Coordinator（ Flink JobManager） 根据「是否收到了完整算子的 ACK 」来推出是否 Commit 或 Abort。将结果输出纳入快照生成的 2PC 后，端到端一致性数据处理语义的充分必要条件在这里也得到了满足：在流计算过程中，定期（epoch）以事务（2PC）的方式进行批量存储结果（分布式一致性快照 + 写外部存储）。需要注意的是，由于 Flink 会以 epoch 为周期输出结果，因此基于此构建的流处理系统会存在一定的端到端延迟。</p>
 <h4 id="3-apache-kafka-streams"><strong>3 Apache Kafka Streams</strong></h4>
@@ -295,7 +295,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>3.输出结果 Sink(t) ：即用户配置的实际的输出队列，用于存放计算结果。</p>
 <p>Kafka Streams 将上述结果定期以事务的方式进行批量存储，上述事务在 Kafka 这被称之为 Transactions API，使用这个 API 构建的流处理应用，可以在一个事务中将多个主题消息进行同时提交，如果事务终止或回滚，则下游消费不会读取到相应的结果（当然下游消费者也需要配置相应的一致性级别），其过程如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/443967b6627842a39b4ead2a08491435.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281932278.webp" />   
     </p>
 <p>如果稍微回顾一下 Flink 一致性的实现逻辑，会发现这两者有很多相似点，因此 Kafka Streams 的输出结果也会存在一定的端到端延迟。因为在提交结果时创建了新的事务，所以平均事务大小由提交间隔确定，当流量相同时，较短的提交间隔将导致较小的事务，但太小的间隔将导致吞吐下降，因此吞吐量与端到端处理延迟之间需要有一个折衷。</p>
 <p>同时，我们需要注意到的是，Flink 和 Kafaka 中的「事务」提交，和我们常规的操作关系型数据库中的事务还是有所不同的，后者的事务提交对象一般就一个（e.g. MySQL Server），但在流计算中，由于结果有下游输出、消费进度、算子状态等，因此流计算引擎需要设计一个全局的事务协议用于和下游待提交的各个存储后端进行交互。举例：Kafka Streams 的输出后端需要是 Kafka，以配合在事务提交过程中，屏蔽部分已输出至下游（被 Kafka Broker 持久化），但还不满足事务隔离性的消息（read_committed 级别），从流计算输出的角度来看，这些消息已被成功处理同时输出至下游，但从端到端的一致性来看，它们依然属于不一致的数据。又如，使用 Flink 处理 CDC（Change Data Capture） 的场景，如果下游是 MySQL，在 Flink 2PC 完成之前，来自不同 Flink 节点的数据输出后其实已经被 commit，类似 Kafka Broker 中的消息无法撤回，MySQL 提交的事务也无法回滚，因此输出数据中也需要有类似的字段实现隔离（isolation）语义，以屏蔽这种不一致的数据。</p>
@@ -304,14 +304,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Spark Streaming 只能保证引擎内部的处理逻辑是一致的，但是对于结果输出，则并没有做特别的抽象，因此如果我们希望实现端到端的一致性语义，则需要对自行维护和判断一些信息。同传统的批处理系统类似，流处理中也是以 RDD 构建出整个的数据血缘，当发生 FailOver 时，则重新计算整个 RDD 就可以了。如果 Spark Streaming 存在非确定性的计算，则不能实现端到端一致，原因是：1、不满足条件一「实时存储每一条结果」。如果能记录下每个 RDD 分区下的执行情况，避免重复执行（幂等），也一定程度上能实现端到端一致，但这需要进行大量的改造工作，最终形态会和 MillWheel 比较类似；2、不满足条件二「事务方式存储」，需要保证每个 RDD 产出环节的事务性（如最终结果写 HDFS 就不是原子的）。</p>
 <p>考虑一种比较简单的场景：不存在非确定计算的流计算应用。如果不存在非确定计算，根据端到端的一致性语义的充分必要条件，只需要接受端实现幂等，则 Spark Streaming 就可以实现端到端的一致性。背后的原因是，当将形式化的结果定义与 Spark Streaming 进行映射，会发现当以「微批」的形式存储结果时，源状态和算子状态以 RDD 血缘的方式天然地和输出结果进行了绑定，即当输出最终结果时，我们其实也一并输出了源和算子状态，操作符合一致性条件。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e62acbdf058445a79869df911126f737.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281932331.webp" />   
     </p>
 <p>更进一步，当把仅有确定性计算（幂等输出）的 Spark Streaming 和 仅有确定性计算（幂等输出）的的 Flink 进行对比时，会发现二者非常相似。RDD 血缘类比分布式一致性快照，批量输出类比一致性快照后的结果输出，微批类比 epoch。不同之处在于：1、Spark Streaming 在计算过程中的每一个 RDD 生成阶段都会有延迟，而 Flink 在计算过程中可以进行实时处理；2、Spark Streaming 只有一个「epoch」，而 Flink 可以有多个 「epoch」并行存在。基于上述两点原因，Flink 的数据处理的端到端延迟要小得多，但这两种引擎幂等输出能实现一致性的本质是相似的。</p>
 <h4 id="5-各引擎一致性实现总结"><strong>5 各引擎一致性实现总结</strong></h4>
 <p>上面我们简述了目前主流的几种流计算引擎的一致性实现机制。从整体来看，如果实现端到端的一致性，则均需要满足我们上面从形式化定义推导出来的充分必要条件：实时存储每一条中间和最终计算结果，如果考虑吞吐率不能存储每一条，则需定期以事务的方式进行批量存储，这里的结果包含流计算引擎中的状态。上面的充分必要条件还可以进一步简化，即实时存储结果或定期事务，均可以视为当前处理逻辑单元（算子或最终存储）对上游的输入（引擎状态+输出结果）进行的幂等化处理：引擎 FailOver -&gt; 输入源的事件会进行重发 -&gt; 前期存储的结果会用于去重/事务回滚让结果（引擎状态+输出结果）回到上一次的一致性状态 -&gt; 下一批结果输出 -&gt; 结果接受端只影响一次 -&gt; 实现了端到端的一致。</p>
 <p>下面的图列举出各引擎实现端到端一致性的路线图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9d8c621fb0244bfbba811364d8dfe39a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281932203.webp" />   
     </p>
 <p>前面分析端到端一致性的实现中，重点在分析引擎处理（算子）和输出端行为，没有提及对数据源的要求，数据源需具备重播（repaly）和消息去重的功能即可，属于基础要求，这里不再展开。</p>
 <h3 id="五-总结与展望"><strong>五 总结与展望</strong></h3>
@@ -449,6 +449,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -482,10 +486,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -864,6 +864,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

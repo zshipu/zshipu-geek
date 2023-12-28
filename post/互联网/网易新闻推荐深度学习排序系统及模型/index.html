@@ -192,7 +192,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2f58387c60b94afda6f7624539706363.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651834.webp" />   
     </p>
 <blockquote>
 <p>文章作者：薛海霞 网易传媒</p>
@@ -205,26 +205,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>大家好，今天分享的主题是：网易新闻客户端信息流的个性化推荐中，深度学习排序系统及模型，这也是我们团队在研发实践中的一些经验总结。</p>
 <p>首先看一下在信息流场景中，个性化推荐的产品形态。左边是网易新闻的头条频道，右边是短视频频道，在经过召回、排序、重排之后信息流的最终呈现。作为流量较大的两个频道，我们在对它构建排序系统和排序模型的时候，通常会根据文章、视频、图像相关的内容特征，用户画像，场景，关注关系等对内容候选集进行排序。接下来，问题来了，如何衡量排序的效果呢？线上优化指标通常包括：CTR、阅读时长、留存、刷新次数等，其中最容易建模的就是点击率了，如果要用一个范式进行表示，就是图中这个概率公式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/75812a4d090a491fbb2af9a07f867da3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651671.webp" />   
     </p>
 <p>接下来考虑一个问题，当面临一个具体的推荐业务场景时，如何高效地构建排序系统和排序模型？</p>
 <p>一般来说，排序系统由三部分构成：pipeline、排序模型、模型计算服务。</p>
 <p>线下阶段，pipeline 将客户端传过来的实时反馈日志，按照不同 session 进行聚合，曝光和点击数据进行 label match，然后经过特征填充生成原始样本，接着特征预处理后，生成用于模型训练所需的训练样本。线上阶段的 pipeline 跟线下基本相同，不同之处在于各自依赖的上游数据源，一个来自客户端的实时反馈，一个来自召回请求及预测候选集。</p>
 <p>下图为排序系统的基本流程。然而，在具体实践中，处于对各模块的计算平台、流程一致性、组件通用性以及模型训练性能等各方面的考虑，我们需要对这个 basic 的排序系统做对应的改造。而我们的改造主要集中在两块：特征预处理 &amp; 模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7ee4cf354d684bd3a419d3dfec5c8e3e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651633.webp" />   
     </p>
 <p>为什么要对基础流程进行改造以及具体如何改造？这里需要了解一下整个排序系统研发过程中我们所面临的核心问题和挑战。</p>
 <p>首先关于 pipeline，我们知道，排序模型在训练和预测之间的差异会对模型的准确性产生很大的影响。而差异的产生来源于：特征、特征处理。只有保证 pipeline 线上线下的一致性，才能保证线上模型能够得出正确的预测结果。特征方面，我们将进行在线预测时的特征保存下来，然后填充到线下的训练样本中，这样就保证了训练和预测阶段的特征是一致的；特征处理方面，实践中一般采用 tf.data 和 feature_column 进行读取样本数据和特征处理，这种做法虽然避免了线上线下一致性的问题，但是这种基于原生 TensorFlow 的实现也带来了线上计算和线下训练的性能问题。如何在特征处理模块即保证线上线下的一致性又能同时保障系统整体的性能，这是我们所面临的一个挑战。</p>
 <p>然后对于深度学习排序模型，我们需要支持网易新闻不断增多的业务需求，这就要求排序模型框架有足够的通用性和可扩展性，以支持模型的快速迭代和迁移。同时要求模型有足够好的灵活性，以支持业务定制化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/051395f0dac74c86bd37d6ee66793927.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651484.webp" />   
     </p>
 <p>针对 pipeline 中的特征处理模块以及排序模型框架，我们做了如下优化：</p>
 <p>首先特征处理库，将模型训练阶段跑在 CPU 上的特征处理任务转移到 pipeline 阶段的大规模计算集群上 ( Haddop Streaming )，以免影响模型训练阶段对 GPU 计算的影响，同时也避免了训练阶段的重复计算。基于这样的思想，我们将特征处理库从模型中独立出来，线下阶段在 pipeline 中而非模型中调用此库，线上阶段在模型中调用此库，但是这样会带来线上线下不一致的问题。我们的解决方案是将特征处理库独立出来之后，线上和线下调用对应的我们自定义 OP ( 样本读取和数据处理模块 ) 即可。</p>
 <p>关于自定义 OP，我们主要对样本读取和数据处理模块进行了对应的改造。原生 TensorFlow 通常使用 tf.data 进行数据读取，通过 feature_column 进行数据预处理，但是在大规模数据场景中，存在性能瓶颈，因此我们重新实现了数据读取和预处理模块，并优化了性能；另外，为了支持多值带权的特征，我们使用了自定义的样本格式，而原生接口对样本格式的解析也并不友好，所以自定义了解析模块；或者想要手动融合一些操作或 TensorFlow 原生不支持的一些操作，也需要我们通过自定义 OP 来实现。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/493976b1339e40928f2912564ec8f312.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651493.webp" />   
     </p>
 <p>完成 pipeline 的底层改造之后，如何快速使用特征处理框架呢？很简单，在配置文件中将特征处理流程描述出来即可。</p>
 <p>在配置文件中，对于每个特征，描述它对应的特征处理流程。如下图，圆形代表原始特征值和经过各个算子处理后的特征中间值，方形表示特征处理库内的算子，所以特征处理流程可以视为各个 DAG 图。右边的两个例子是用 DAG 图来描述特征处理流程的相关配置。</p>
@@ -233,19 +233,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>以上经过一系列算子处理后的特征将作为排序模型的输入。若在训练样本中增加特征，只需要在特征处理框架中实现对应的算子，并在配置文件来描述新增特征的处理流程。</p>
 <p>我们使用 DAG 图来描述特征处理过程的思想，源自于 TensorFlow，先实现底层算子 API，然后将对特征的处理流程构建 Graph，再通过上层 API 接口 session.run 启动运行 Graph。而解析配置文件的过程就相当于解析 DAG 图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a3b0fc5506724c54926f268b5870d09b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651377.webp" />   
     </p>
 <p>至此，完成 pipeline 的优化。回看一下，排序系统经过改造之后的模样。排序系统变成由一个特征处理框架进行特征处理，而这个框架既可以跑在线下阶段的 hadoop streaming 上，也可以跑在线上 TensorFlow 深度学习框架之上。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0ceb8f6ab3fe4a15beac0ea33de8463a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651444.webp" />   
     </p>
 <p>深度学习排序模型方面，同样面临一系列的问题。如何构建通用 &amp; 可扩展的推荐算法库框架，来支持新的业务场景，保证模型的快速迭代？如何保证框架的灵活性，根据变化的业务需求对模型做定制化？如何通过高度可配置的方式来构建模型？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cd88d7327e6b4c43b25014e89601f2d5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651394.webp" />   
     </p>
 <p>先看几个经典的深度学习排序模型的网络结构，左边是 DNN，右边为它的几种变体：FNN、PNN、Wide&amp;Deep。虽然4种模型结构各异，但抽象一下会发现共通之处，基本单元包括：linear、cross、deep 模块，从层次结构来看包括: 特征表征层、特征交叉层、全连接层，其中特征交叉既可以通过人工方式 ( Wide 部分 ) 也可以通过内积或矩阵乘法的方式来进行。经过以上分析，其实提供了一种思路：我们可以将深度学习模型的各个基本单元进行模块化来构建模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/287d500f22b443b2a3ab6c18d21ff423.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281651221.webp" />   
     </p>
 <p>沿着以上的抽象和分析，接下来用两个网络结构相对�</p>
 
@@ -377,6 +377,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -410,10 +414,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -792,6 +792,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -194,7 +194,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <h1 id="前言">前言</h1>
 <p>我们小伙伴应该都听说够消息中间件MQ，如：RabbitMQ，RocketMQ，Kafka等。引入中间件的好处可以起到抗高并发，削峰，业务解耦的作用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/70f979c7242f4e4cbaabea7ea0358faa.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911187.png" />   
     </p>
 <p>如上图：</p>
 <blockquote>
@@ -204,14 +204,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="分析问题">分析问题</h1>
 <p>小伙伴们对此会有些疑问，订单服务发起消息服务，返回成功不就成功了吗？如下面的伪代码：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1afbac4d9ce846c7a8696219b97cb227.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911432.png" />   
     </p>
 <p>上面代码中，一般发送消息就是这么写的，小伙伴们觉得有什么问题吗？</p>
 <p>下边说一个场景，如果MQ服务器突然宕机了会出现什么情况？是不是我们订单服务发过去的消息全部没有了吗？是的，一般MQ中间件为了提高系统的吞吐量会把消息保存在内存中，如果不作其他处理，MQ服务器一旦宕机，消息将全部丢失。这个是业务不允许的，造成很大的影响，关注公众号码猿技术专栏，获取更多面试资源。</p>
 <h1 id="持久化">持久化</h1>
 <p>有经验的小伙伴会说，我知道一个方法就是把消息持久化，RabbitMQ中发消息的时候会有个durable参数可以设置，设置为true，就会持久化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6b51a92831f3472ba5b2a3f4fb3e74ad.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911687.png" />   
     </p>
 <p>这样的话MQ服务器即使宕机，重启后磁盘文件中有消息的存储，这样就不会丢失了吧。是的这样就一定概率的保障了消息不丢失。</p>
 <p>但还会有个场景，就是消息刚刚保存到MQ内存中，但还没有来得及更新到磁盘文件中，突然宕机了。（我靠，这个时间这么短，也会出现，概率太低了吧），这个场景在持续的大量消息投递的过程中，会很常见，关注公众号码猿技术专栏，获取更多面试资源。</p>
@@ -219,7 +219,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="confirm机制">confirm机制</h1>
 <p>上面问题出现在，没有人告诉我们持久化是否成功。好在很多MQ有回调通知的特性，RabbitMQ就有confirm机制来通知我们是否持久化成功？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/023b74150b574b36877de18ae8b8b4d9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911746.png" />   
     </p>
 <p>confirm机制的原理：</p>
 <blockquote>
@@ -227,7 +227,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>（2）如果消息接收不成功，MQ会返回一个nack消息给生产者；</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/126eebeeb0a4431a82a9fffac4bbfe67.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911186.png" />   
     </p>
 <p>上面的伪代码，有两个处理消息方式，就是ack回调和nack回调。</p>
 <p>这样是不是就可以保障100%消息不丢失了呢？</p>
@@ -238,7 +238,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="消息提前持久化--定时任务">消息提前持久化 + 定时任务</h1>
 <p>其实本质的原因是无法确定是否持久化？那我们是不是可以自己让消息持久化呢？答案是可以的，我们的方案再一步的演化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/99b555b737684a619ab829dc27431634.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911776.png" />   
     </p>
 <p>上图流程：</p>
 <blockquote>
@@ -258,24 +258,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="为什么要有幂等这种场景">为什么要有幂等这种场景？</h1>
 <p>为什么要有幂等这种场景？因为在大的系统中，都是分布式部署，如：订单业务 和 库存业务有可能都是独立部署的，都是单独的服务。用户下订单，会调用到订单服务和库存服务。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e20ceb3488da467da141fd62d4914dda.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911029.png" />   
     </p>
 <p>因为分布式部署，很有可能在调用库存服务时，因为网络等原因，订单服务调用失败，但其实库存服务已经处理完成，只是返回给订单服务处理结果时出现了异常。这个时候一般系统会作补偿方案，也就是订单服务再次放起库存服务的调用，库存减1。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/622319761eb74b118a0333cd9372094d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911948.png" />   
     </p>
 <p>这样就出现了问题，其实上一次调用已经减了1，只是订单服务没有收到处理结果。现在又调用一次，又要减1，这样就不符合业务了，多扣了。</p>
 <p>幂等这个概念就是，不管库存服务在相同条件下调用几次，处理结果都一样。这样才能保证补偿方案的可行性。</p>
 <h1 id="乐观锁方案">乐观锁方案</h1>
 <p>借鉴数据库的乐观锁机制，如：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/97c46ee40322487a8770f9755f0220cf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911000.png" />   
     </p>
 <p>根据version版本，也就是在操作库存前先获取当前商品的version版本号，然后操作的时候带上此version号。我们梳理下，我们第一次操作库存时，得到version为1，调用库存服务version变成了2；但返回给订单服务出现了问题，订单服务又一次发起调用库存服务，当订单服务传递的version还是1，再执行上面的sql语句时，就不会执行；因为version已经变为2了，where条件就不成立。这样就保证了不管调用几次，只会真正的处理一次。</p>
 <h1 id="唯一id--指纹码">唯一ID + 指纹码</h1>
 <p>原理就是利用数据库主键去重，业务完成后插入主键标识</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b8cf3672c1d54d4d8309868f77993d2f.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281911784.jpeg" />   
     </p>
 <ul>
 <li>唯一ID就是业务表的唯一的主键，如商品ID</li>
@@ -408,6 +408,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -441,10 +445,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -823,6 +823,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

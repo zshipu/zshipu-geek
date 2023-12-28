@@ -205,7 +205,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>一、传统实时 ETL 模式的问题</strong></p>
 <p>在实时技术发展初期，大团队为各业务提供的是单纯的日志数据的实时解析服务。通过 Flink ETL 程序，将用户端上报日志、后台服务器日志、数据库 binlog 日志，解析成 key-value 组装的 json 形态的结构化数据，发送到 Kafka 中供各业务使用。其中，ETL 逻辑可以由外部配置平台注入，方便在解析逻辑修改时可以动态加载，减少 Flink 任务的重启频率。这个实时 ETL 的体系如下图所述：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5b9d092c7723455eb37ee08cb62977df.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235736.png" />   
     </p>
 <p>随着实时大数据业务的发展，它的弊端不断出现：</p>
 <ol>
@@ -215,7 +215,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>为了解决这些问题，爱奇艺大数据团队开始建设实时大数据体系，推出管理 Kafka 的流数据服务平台、基于 Flink 的实时数据生产平台、基于 Kafka 的实时数仓等组件，打通实时数据流程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e0044a12ceb1476987ae28baf136296d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235827.png" />   
     </p>
 <p><strong>二、实时数仓与传统数仓的区别</strong></p>
 <p>在传统的 BI 体系中，基于离线大数据构建数据仓库的过程，大部分是 T+1 的隔日离线计算。即每天凌晨开始从原始日志数据构建数仓，将多层级的离线计算任务，通过工作流系统进行串联。数仓构建任务失败后可以有由工作流系统触发任务重跑。一般来说，离线数仓构建任务的失败重跑，只影响数据生产出来的时间，不影响数据的完整性、正确性。</p>
@@ -228,7 +228,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>在实时数仓中，这几个约束条件发生了巨大的变化：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/26454d76c1dc4a7295b5bdb0f7518a40.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272235135.png" />   
     </p>
 <p>基于这些变化，构建实时数仓的时候，切记不能照搬离线数仓的分层模型和构建逻辑，需要结合实时大数据业务的需求，按照实时业务的特点进行构建。实时数仓的构建，核心有以下几个特点：</p>
 <p><strong>1、重视数仓的水平拆分</strong>。在离线数仓中，数据的载体是 Hive 表，借助 Hive 的分区字段和谓词下推机制，我们可以在各个层级构建一些稍大的表，而将关键的维度字段设置成分区，使用户在查大表的时候达到查小表的效果。在实时数仓中，数据的载体是 Kafka 队列，如果向用户提供一个大流，需要用户在消费数据实时过滤出其中的一小部分数据进行使用，那么对 Kafka 的带宽资源和 Flink 的计算资源都是极大的浪费。因此，我们需要尽量将常用的维度进行水平拆分构建，例如“移动端用户行为”“PC 端用户行为”可以拆分到两个流供用户使用。</p>
@@ -238,7 +238,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>实时数仓的载体是 Kafka 服务，然而，Kafka 作为一个分布式消息队列，它原生的组织和管理方式仍然是一个资源型服务，向用户交付的是 Kafka 集群。这种管理组织方式对于开展实时大数据业务而言，有一些显著的缺点，例如难以注册和管理数据的输入和输出，无法构建数据血缘链路和高可用体系等等。</p>
 <p>为了更好地支持实时数仓等业务的开展，爱奇艺大数据团队建设了流数据服务平台，以一种面向数据的角度，重新组织和管理 Kafka 服务。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ecbe09eb5d9340d7b735f33d0bbb53bc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272236364.png" />   
     </p>
 <p>流数据服务平台，自下而上分为三层：</p>
 <p><strong>1、运维管理层</strong>：负责 Kafka、Pulsar、RocketMQ 等消息队列集群的资源和运维管理，包括资产登记、容量管理、集群监控、自动化运维、工单审批体系等。</p>
@@ -252,7 +252,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>依托流数据的元数据中心，提供数据地图的产品，供用户方便的查询检索数据及其 Schema 相关信息，提高流数据的复用性。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e8bc8828f4064a878aff392d6d6e83d1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272236678.png" />   
     </p>
 <p>附图：Kafka 故障时，通过 SDK 使读写两侧流量请快速切换到备集群</p>
 <p>**四、实时数据生产分发平台</p>
@@ -260,11 +260,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Kafka 服务的高度治理化是实时数仓工作的基础，下一步要建设的是构建实时数仓的工具平台，通过平台降低用户开发管理实时数据处理任务的成本。</p>
 <p>爱奇艺大数据团队建设了实时数据生产分发平台 Talos。Talos 平台兼具实时数据处理和数据集成分发功能，支持用户通过自定义数据处理逻辑，将实时数据加工处理后分发到下游数据流或其他异构存储中。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/94b14a794a874cd59db86b4dda4d38c7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272236159.png" />   
     </p>
 <p>Talos 平台上，用户可以通过简单拖拽生成 DAG 图的方式构建自己的数据处理逻辑，也可以通过 SQL 算子来表达处理逻辑。对于实时计算的新手用户，使用 DAG 图可以直观看到数据的处理逻辑和含义。在调试任务时，Talos 平台支持查看数据在 DAG 图中每一步的变化值，非常有利于排查复杂数据处理逻辑中的问题，解决了传统 Flink SQL 任务调试不便的痛点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9cdfed833fac46f5984f1b72ff9c6b0f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272236581.png" />   
     </p>
 <p>附图：通过拖拽算子形成 DAG 图的方式构建数据处理逻辑</p>
 <p>在爱奇艺的实时数仓体系中，实时数据的接入、处理、分发任务都通过 Talos 平台构建和维护，数仓建设者只需要关心数仓模型的定义和设计，无需撰写 Flink 代码，也不用关心 Flink 实时计算任务的提交管理和运维监控等工作，极大的简化了数仓的开发和维护成本。</p>
@@ -275,13 +275,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在 RAP 平台中，我们将实时数仓中生成的 Kafka 流，通过 Druid 的 Kafka Index Service (简称 KIS) 直接导入 Druid。用户通过平台提供的 Web 向导配置，自动建立 OLAP模型、查询统计条件，即可生产对应的实时报表。同时，平台也提供了如 Ad-hoc 分析、实时指标报警、实时数据发布、Grafana 图表输出等功能，方便用户快速接入使用。</p>
 <p>更多关于 RAP 平台的介绍，可以阅读 <a href="https://zshipu.com/t?url=https%3A%2F%2Fmp.weixin.qq.com%2Fs%3F__biz%3DMzI0MjczMjM2NA%3D%3D%26mid%3D2247486112%26idx%3D1%26sn%3Dab9ab3189d8793931a5517153fccd8b4%26scene%3D21%23wechat_redirect">《爱奇艺大数据实时分析平台的建设与实践》</a>。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fb10cf05696c4a20af488e75b18d37e6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272236868.png" />   
     </p>
 <p><strong>六、爱奇艺实时大数据的主要应用</strong></p>
 <p>依托以上这些平台建设，实时大数据技术在爱奇艺各个业务线都实现了落地。主要有三种典型的应用场景，即实时监控、实时数据分析、在线学习训练等。</p>
 <p>在实时监控场景中，用户可以依托实时大盘进行指标观察，或者将关键指标配置成实时监控报警，也可以将实时日志流灌入 Elasticsearch 等系统中进行实时日志查询等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/494db9319c7546568c13b65f15ebd1ad.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272236895.png" />   
     </p>
 <p>在实时数据分析场景中，比较典型的是实时运营。通�</p>
 
@@ -409,6 +409,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -442,10 +446,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -824,6 +824,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -225,12 +225,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="一从网卡接收数据说起"><strong>一、从网卡接收数据说起</strong></h2>
 <p>下图是一个典型的计算机结构图，计算机由CPU、存储器（内存）、网络接口等部件组成。了解epoll本质的 <strong>第一步</strong>，要从 <strong>硬件</strong> 的角度看计算机怎样接收网络数据。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f390ad55b4ee476ba8091745ccb48a69.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271815299.jpeg" />   
     </p>
 <p>计算机结构图（图片来源：linux内核完全注释之微型计算机组成结构）</p>
 <p>下图展示了网卡接收数据的过程。在①阶段，网卡收到网线传来的数据；经过②阶段的硬件电路的传输；最终将数据写入到内存中的某个地址上（③阶段）。这个过程涉及到DMA传输、IO通路选择等硬件有关的知识，但我们只需知道： <strong>网卡会把接收到的数据写入内存。</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1e69ecd4ac394436a1babebd608c265c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271816375.jpeg" />   
     </p>
 <p>网卡接收数据的过程</p>
 <p>通过硬件传输，网卡接收的数据存放到内存中。操作系统就可以去读取它们。</p>
@@ -239,12 +239,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>计算机执行程序时，会有优先级的需求。比如，当计算机收到断电信号时（电容可以保存少许电量，供CPU运行很短的一小段时间），它应立即去保存数据，保存数据的程序具有较高的优先级。</p>
 <p>一般而言，由硬件产生的信号需要cpu立马做出回应（不然数据可能就丢失），所以它的优先级很高。cpu理应中断掉正在执行的程序，去做出响应；当cpu完成对硬件的响应后，再重新执行用户程序。中断的过程如下图，和函数调用差不多。只不过函数调用是事先定好位置，而中断的位置由“信号”决定。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d6d60a97a7ac47bfbad09987c0414a8c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271816543.jpeg" />   
     </p>
 <p>中断程序调用</p>
 <p>以键盘为例，当用户按下键盘某个按键时，键盘会给cpu的中断引脚发出一个高电平。cpu能够捕获这个信号，然后执行键盘中断程序。下图展示了各种硬件通过中断与cpu交互。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d22d4c55318d4e97a4361d900f3d8b63.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271816128.jpeg" />   
     </p>
 <p>cpu中断（图片来源：net.pku.edu.cn）</p>
 <p>现在可以回答本节提出的问题了：当网卡把数据写入到内存后， <strong>网卡向cpu发出一个中断信号，操作系统便能得知有新数据到来</strong>，再通过网卡 <strong>中断程序</strong> 去处理数据。</p>
@@ -276,18 +276,18 @@ printf(...)
 <p>操作系统为了支持多任务，实现了进程调度的功能，会把进程分为“运行”和“等待”等几种状态。运行状态是进程获得cpu使用权，正在执行代码的状态；等待状态是阻塞状态，比如上述程序运行到recv时，程序会从运行状态变为等待状态，接收到数据后又变回运行状态。操作系统会分时执行各个运行状态的进程，由于速度很快，看上去就像是同时执行多个任务。</p>
 <p>下图中的计算机中运行着A、B、C三个进程，其中进程A执行着上述基础网络程序，一开始，这3个进程都被操作系统的工作队列所引用，处于运行状态，会分时执行。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f0fbe2f2cd3140b1a4ee66e963d1d656.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271816802.jpeg" />   
     </p>
 <p>工作队列中有A、B和C三个进程</p>
 <p><strong>等待队列</strong></p>
 <p>当进程A执行到创建socket的语句时，操作系统会创建一个由文件系统管理的socket对象（如下图）。这个socket对象包含了发送缓冲区、接收缓冲区、等待队列等成员。等待队列是个非常重要的结构，它指向所有需要等待该socket事件的进程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e4de9c55c4d24e58a82da48e6c220325.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271816601.jpeg" />   
     </p>
 <p>创建socket</p>
 <p>当程序执行到recv时，操作系统会将进程A从工作队列移动到该socket的等待队列中（如下图）。由于工作队列只剩下了进程B和C，依据进程调度，cpu会轮流执行这两个进程的程序，不会执行进程A的程序。 <strong>所以进程A被阻塞，不会往下执行代码，也不会占用cpu资源</strong>。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ceafded7c75c458ebd8429e2d195fb30.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271816540.jpeg" />   
     </p>
 <p>socket的等待队列</p>
 <p>ps：操作系统添加等待队列只是添加了对这个“等待中”进程的引用，以便在接收到数据时获取进程对象、将其唤醒，而非直接将进程管理纳入自己之下。上图为了方便说明，直接将进程挂到等待队列之下。</p>
@@ -297,12 +297,12 @@ printf(...)
 <p><strong>这一步，贯穿网卡、中断、进程调度的知识，叙述阻塞recv下，内核接收数据全过程。</strong></p>
 <p>如下图所示，进程在recv阻塞期间，计算机收到了对端传送的数据（步骤①）。数据经由网卡传送到内存（步骤②），然后网卡通过中断信号通知cpu有数据到达，cpu执行中断程序（步骤③）。此处的中断程序主要有两项功能，先将网络数据写入到对应socket的接收缓冲区里面（步骤④），再唤醒进程A（步骤⑤），重新将进程A放入工作队列中。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2bc059654a8045f093c4c3af9c3cadb5.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271816409.jpeg" />   
     </p>
 <p>内核接收数据全过程</p>
 <p>唤醒进程的过程如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/63a058619440460899394a0eaac7b71c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271816315.jpeg" />   
     </p>
 <p>唤醒进程</p>
 <p><strong>以上是内核接收数据全过程</strong></p>
@@ -334,7 +334,7 @@ while(1){
 </code></pre><p><strong>select的流程</strong></p>
 <p>select的实现思路很直接。假如程序同时监视如下图的sock1、sock2和sock3三个socket，那么在调用select之后，操作系统把进程A分别加入这三个socket的等待队列中。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c774c4d7a3374f09be99310ca23c759f.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271816040.jpeg" />   
     </p>
 <p>操作系统把进程A分别加入这三个socket的等待队列中</p>
 <p>当任何一个socket收到数据后，中断程序将唤起进程。下图展示了sock2接收到了数据的处理流程。</p>
@@ -342,12 +342,12 @@ while(1){
 <p>ps：recv和select的中断回调可以设置成不同的内容。</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2be4e04a922b4481a62505726704c5e4.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271816745.jpeg" />   
     </p>
 <p>sock2接收到了数据，中断程序唤起进程A</p>
 <p>所谓唤起进程，就是将进程从所有的等待队列中移除，加入到工作队列里面。如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b384a286aa264934a809f13e61e3e3d6.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271816454.jpeg" />   
     </p>
 <p>将进程A从所有等待队列中移除，再加入到工作队列里面</p>
 <p>经由这些步骤，当进程A被唤醒后，它知道至少有一个socket接收了数据。程序只需遍历一遍socket列表，就可以得到就绪的socket。</p>
@@ -364,7 +364,7 @@ while(1){
 <p><strong>措施一：功能分离</strong></p>
 <p>select低效的原因之一是将“维护等待队列”和“阻塞进程”两个步骤合二为一。如下图所示，每次调用select都需要这两步操作，然而大多数应用场景中，需要监视的socket相对固定，并不需要每次都修改。epoll将这两个操作分开，先用epoll_ctl维护等待队列，再调用epoll_wait阻塞进程。显而易见的，效率就能得到提升。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bf0477498a9845dea5be9360c2ec84a1.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271816118.jpeg" />   
     </p>
 <p>相比select，epoll拆分了功能</p>
 <p>为方便理解后续的内容，我们先复习下epoll的用法。如下的代码中，先用epoll_create创建一个epoll对象epfd，再通过epoll_ctl将需要监视的socket添加到epfd中，最后调用epoll_wait等待数据。</p>
@@ -385,7 +385,7 @@ while(1){
 <p><strong>措施二：就绪列表</strong></p>
 <p>select低效的另一个原因在于程序不知道哪些socket收到数据，只能一个个遍历。如果内核维护一个“就绪列表”，引用收到数据的socket，就能避免遍历。如下图所示，计算机共有三个socket，收到数据的sock2和sock3被rdlist（就绪列表）所引用。当进程被唤醒后，只要获取rdlist的内容，就能够知道哪些socket收到数据。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7c05e861795b48a288f9fb75e16b0b44.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271816712.jpeg" />   
     </p>
 <p>就绪列表示意图</p>
 <p>作者：罗培羽</p>
@@ -397,21 +397,21 @@ while(1){
 <p><strong>创建epoll对象</strong></p>
 <p>如下图所示，当某个进程调用epoll_create方法时，内核会创建一个eventpoll对象（也就是程序中epfd所代表的对象）。eventpoll对象也是文件系统中的一员，和socket一样，它也会有等待队列。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6c81b5ac3a404368b1f4bb904ad71e16.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271816326.jpeg" />   
     </p>
 <p>内核创建eventpoll对象</p>
 <p>创建一个代表该epoll的eventpoll对象是必须的，因为内核要维护“就绪列表”等数据，“就绪列表”可以作为eventpoll的成员。</p>
 <p><strong>维护监视列表</strong></p>
 <p>创建epoll对象后，可以用epoll_ctl添加或删除所要监听的socket。以添加socket为例，如下图，如果通过epoll_ctl添加sock1、sock2和sock3的监视，内核会将eventpoll添加到这三个socket的等待队列中。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a3e34b7552fa495a9dd2d207f3c514bd.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271816146.jpeg" />   
     </p>
 <p>添加所要监听的socket</p>
 <p>当socket收到数据后，中断程序会操作eventpoll对象，而不是直接操作进程。</p>
 <p><strong>接收数据</strong></p>
 <p>当socket收到数据后，中断程序会给eventpoll的“就绪列表”添加socket引用。如下图展示的是sock2和sock3收到数据后，中断程序让rdlist引用这两个socket。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f03eee68c32841399910cb3458ada3cf.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271816056.jpeg" />   
     </p>
 <p>给就绪列表添加引用</p>
 <p>eventpoll对象相当于是socke</p>
@@ -542,6 +542,10 @@ while(1){
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -575,10 +579,6 @@ while(1){
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -957,6 +957,8 @@ while(1){
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

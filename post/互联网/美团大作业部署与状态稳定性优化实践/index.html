@@ -201,7 +201,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <p><strong>摘要</strong> ：本篇内容整理自美团数据平台工程师冯斐、王非凡在 Flink Forward Asia 2021 生产实践专场的演讲。主要内容包括：</p>
 <h2 id="一相关背景"><strong>一、相关背景</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0fa278447cbd46a99d57bca62f6d489a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702178.jpeg" />   
     </p>
 <p>美团 Flink 的应用场景覆盖了社区定义的三种场景：</p>
 <ul>
@@ -210,16 +210,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>事件驱动场景，目前主要应用于安全风控、系统监控告警。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c367533cd67c487eb8bba0333e567a0c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702391.jpeg" />   
     </p>
 <p>随着业务的发展和实时计算的迭代，业务对实时计算的应用越来越广泛，也越来越深入。当前我们有将近 5 万个作业部署在超过 15,000 台机器上，高峰期处理的流量达到了 5.4 亿条/秒，这几个指标相比往年都有了很大的增长。除了整体的规模增长，今年我们也遇到了单作业规模大幅增长的情况，目前我们的大作业并发度达到 5000，状态达到了 10 TB。单作业规模的增长也给我们带来了新的问题和挑战。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/354a2b23c6864bb3959967453f276dd5.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702656.jpeg" />   
     </p>
 <p>首先是作业启动的问题。以往在小规模作业上不那么明显的问题，在大作业部署启动流程中暴露了出来，比如 Task 启动慢部署慢、分布不均，大作业对 HDFS 的影响等。另外在状态方面，状态很大的时候同样给作业带来了不可忽略的影响，主要是 Savepoint 的制作开销和恢复效率，以及状态的容灾等问题。</p>
 <h2 id="二大作业部署优化"><strong>二、大作业部署优化</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/45b7e7c9e4c6456593efdbf989c1bb01.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702875.jpeg" />   
     </p>
 <p>我们当前的大作业算子并发达到了 5000，拓扑复杂度上算子数量达到了 8000，有两层的数据 shuffle 交换，资源上作业需要超过 1000 个 TaskManager，在这样的规模下，我们遇到了一些之前没有遇到过的问题。</p>
 <ul>
@@ -228,7 +228,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>另外，大作业做 Checkpoint 期间，会给 HDFS 带来瞬时压力，也会影响其他作业使用 HDFS。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b5436e744bb54f35a39ad025dc068bd1.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702019.jpeg" />   
     </p>
 <p>针对上述问题我们进行了以下优化：</p>
 <p>我们首先分析了 JobManager 视角的作业部署流程，希望能搞清楚各个环节有哪些因素影响部署，以及他们是如何影响部署的，然后对症下药去解决问题。</p>
@@ -239,28 +239,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>部署和启动 Task 环节主要受 Task 数量、TaskManager 数量、拓扑复杂度、user jar 大小的影响。作业规模很大的时候，JobManager 作为一个 master 节点，可能会遇到一些处理瓶颈，就有可能出现 Task 部署慢或部署失败的情况。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0f8b6a4f66e84d2ebd58f29b80a312b4.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702077.jpeg" />   
     </p>
 <p>当我们重点关注部署和启动 Task 步骤的时候，我们发现了以下几个现象：首先 JobManager 所在的机器的网卡在部署期间会被打满；从 TaskManager 日志中也可以看到，下载 userjar 操作花的时间比较长；经过对比测试，我们发现 userjar 缩小体积之后就没有 RPC 请求超时的现象了，部署耗时也有所减少。所以我们研究了 userjar 的下载流程，每个 Task 线程在启动的时候需要从用户的 jar 包中加载用户代码的类加载器，这一步需要从 JobManager 的 BlobServer 中下载 userjar。</p>
 <p>Flink 当前的实现中，每个 TaskManager 都需要下载一次 userjar，TaskManager 的多个 Task 会解析同一个 jar 包。当作业开启 ha 的时候，TaskManager 会从 HDFS 中读取 userjar，从而减轻 JobManager 的分发压力。当 userjar 比较大，数量又比较多，且没有开启 ha 的情况下，JobManager 分发 userjar 的压力就会很大，会导致阻塞网络甚至打满网卡。</p>
 <p>明确了原因，我们就可以对 userjar 的分发进行优化。我们当前部署是 yarn session 模式，为了提交作业时能复用 session cluster 达到快速部署的目的，也为了同一个 session cluster 中提交多个 job 的时候都能有优化效果，我们没有利用 yarn 的机制来分发 userjar，而是在 Flink 层面做了优化。</p>
 <p>我们让同一个节点上的 TaskManager 只下载一次 userjar，该节点上所有 TaskManager 共享这次下载结果，因为 userjar 的下载次数从 TaskManager 粒度下降到了机器粒度，降低了一个数量级，大幅减小了 JobManager 的分发压力。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a9b504e3eb9e4738be1895c329b9adb8.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702231.jpeg" />   
     </p>
 <p>优化了 userjar 的分发问题，我们还发现，在有 shuffle 而且并发度比较大的作业上，部署过程中仍然有存在一些 RPC 超时的情况，而且 JobManager 上有大量的 requestPartitionState 请求。这是因为下游 Task 启动的时候会检查上游 Task 的 partition 是否就绪，如果还没有就绪，下游会请求 JobMaster 去询问上游 Task 的状态，判断是否需要继续请求上游 Task 的 partition。当作业规模很大的时候，很容易出现不同 Task 启动速度不一致的情况，导致 JobMaster 上出现大量的 requestPartitionState 请求。</p>
 <p>对于这个问题我们做了一个简单的优化。下游 Task 请求 partition 失败的时候，先自己尝试重试几次，而不是立即请求 JobMaster。通过这个调整，大幅减少了 JobMaster 上 requestPartitionState 的 RPC 请求量，使得 JobMaster 可以有更多时间去处理其他的 RPC 请求。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/69fc82a372a848d7a9e87e482735db8e.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702655.jpeg" />   
     </p>
 <p>经过以上两步优化，JobManager 的分发压力大幅减小。上图是分发 userjar 的优化效果图，可以看到作业规模越大，优化效果越明显。此外在当前规模下，我们也消除了 RPC 超时的异常，使得大作业可以成功部署。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ccf244a81ea44e28a1640cc513497cf5.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702903.jpeg" />   
     </p>
 <p>我们再来看下 Task 分布不均的问题。</p>
 <p>我们发现，在大作业部署过程中，Task 没有均匀分布在所有 TaskManager 中，这会导致部分 TaskManager 出现 Network Buffer 不足的情况，导致作业启动失败。我们虽然能够通过增加总内存、调整不同内存的占比来临时解决这个问题，但是这种方法并不能解决本质的问题，反而会加剧资源的浪费。因为不同 TaskManager 中的 Task 数量和类型不同，实际所需要的资源量也不同的，但是 TaskManager 都是统一按照最大的资源量来申请的，这会导致很多 TaskManager 申请了比实际需要更多的资源。另一方面 Task 比较集中的 TaskManager 计算压力更大，也更容易成为整个作业的计算瓶颈。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a0a31090bd3b4d5abde1fb68273bfb18.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702192.jpeg" />   
     </p>
 <p>我们总结了两类 Task 分布不均的问题：</p>
 <ul>
@@ -268,31 +268,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>另一类是 Task 类型分布不均，也就是相同算子的不同 Task 集中在一个 TaskManager 中，例如右图中 source 的两个 Task，sink 的两个 Task 都集中在第一个 TaskManager 中。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0e9f3c6d8e554d9ab55f6aafc30a90b3.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702258.jpeg" />   
     </p>
 <p>Task 的数量分布不均，主要是因为 SlotSharing 机制允许不同算子的不同 Task 使用同一个 Slot，但是在 Task 选择 Slot 的时候，并没有考虑 Slot 里 Task 数量的分布情况，导致多个 Task 集中在一个 Slot 里，进而导致 Task 集中在同一个 TaskManager 中。出现这种情况通常是业务有一些多 source 多 sink 的作业来做一些流量分发、汇聚的操作。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2a991184dd884e578200dd51f72d1908.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702525.jpeg" />   
     </p>
 <p>针对数量分布不均的问题，我们对 Task 选择 Slot 的策略做了一些优化，新的选择策略如下：对于无上游的 Task，尽量把它分配到新的 Slot 上，直到 Slot 数达到上限；对于有上游的 Task，优先选择把它放在与上游 Task 相同的 Slot 里，减少不必要的数据分发；有多个可选 Slot 的时候，优先选择 Task 数量少的 Slot。经过这样的优化，Task 在 Slot 间的分布就比较均匀了。上图可以看到之前集中在 1 个 Slot 里面的 4 个 source 算子，现在已经比较均匀地分布在不同的 Slot 里面了。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/65acf1d1fcd945d2b9529a5c5edf4f06.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702860.jpeg" />   
     </p>
 <p>再来看下 Task 类型分布不均的问题。我们知道，一个 Slot 内不可能有多个相同类型的 Task，只有包含相同类型 Task 的多个 Slot 集中在某个 TaskManager 中，才会导致 Task 类型集中，而 Slot 选择 TaskManager 受申请顺序的影响。当前，Slot 申请顺序是随机的，并没有考虑 Task 类型的分布情况，这就会导致相同类型的 Task 集中在同一个 TaskManager 中。这个问题也比较普遍，只要作业不同算子的并发度不一致，就有可能出现这个问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b469b37ae2ec4525807d962793620a0e.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702949.jpeg" />   
     </p>
 <p>针对类型分布不均的情况，我们对当前 Slot 的申请顺序做了优化。按照 Slot 中 Task 类型组合的情况，对 Slot 申请顺序进行调整，包含相同 Task 类型组合的 Slot，尽量分布在不同的 TaskManager 中，比如包含 Source、Process、Sink 的这三个算子的 Slot，被我们均匀的分散到了不同的 TaskManager 中。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dd23b7851fb1446c94b00cd0b77ffeeb.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702054.jpeg" />   
     </p>
 <p>上述两个优化是独立的，组合使用可以得到更好的优化效果，如上图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1a6d99a15aea4d828219e28c301bb569.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702379.jpeg" />   
     </p>
 <p>以我们线上的大作业来验证，可以看到在 Task 的数量分布方面，优化后每个 TaskManager 统一都有 6 个 Task，分布很均匀；资源和负载方面，因为 Task 数量和类型的均衡，TaskManager 中 Network Buffer、数量和 CPU 使用率，从之前的有高有低变得比较一致了。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ee96886c3b5a49ccbdd6da7a699ae3f0.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702586.jpeg" />   
     </p>
 <p>最后我们再来看下 HDFS 的压力问题。导致 HDFS 压力的原因有两个：</p>
 <ul>
@@ -301,20 +301,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>可以看出，HDFS 的压力主要来自于 NameNode。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bb7344c09abd4b8d95b706cf530d7a20.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702747.jpeg" />   
     </p>
 <p>我们应对 NameNode 压力的方法也很直接。首先在底层部署了多组 HDFS NameNode，这样可以在底层资源上做到水平扩展。在引擎层，我们提供了多组任务的均衡策略，来决定作业使用哪一组 NameNode。之后，再通过动态指定相关的路径，使作业真正使用不同的 NameNode。最终使得 HDFS 的服务能力可水平扩展，大作业的部署运行也不再影响其他作业。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9266c7063c0b4e039d2498ff5ff10e63.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702771.jpeg" />   
     </p>
 <p>除了上面的优化，我们还做了一些其他方面的优化项来帮助大作业更好地部署运行。我们向用户开放了 Flink 的运行参数，用户可以针对自己作业的运行特点做个性化的调优、我们限制了 Checkpoint 最小制作间隔来避免不合理的高频 Checkpoint 制作影响集群上的其他作业。</p>
 <h2 id="三checkpoint-跨机房副本"><strong>三、Checkpoint 跨机房副本</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1ddce9933909405b96350edc7388409b.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702981.jpeg" />   
     </p>
 <p>在美团，我们的 Flink 计算资源会有多机房交互，同一个项目组可能在不同的机房都有计算资源，因此作业有换机房启动的场景。基于过往的经验，我们更倾向于使用 Retained Checkpoint 而不是 Savepoint 去重启作业。因为我们主要使用 RocksDBStateBackend 的增量 Checkpoint，相对于 Savepoint，它的制作和恢复效率会更高，间隔配置更短，从状态恢复时需要回溯的数据也更少。此外，一些业务的重要作业要求具备更高的状态容灾能力，整个机房故障时也要能够切换到其他机房运行。最后，虽然我们在 2020 年支持的 Savepoint 跨机房副本能够解决部分上面提到的问题，但由于业务越来越倾向于使用 Retained Checkpoint 来恢复作业，这个功能也就无法再满足需求。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d60fd3f3f93d4bec9357b26779602d2c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702137.jpeg" />   
     </p>
 <p>从上述背景中我们可以提炼出两个目标：</p>
 <ul>
@@ -322,7 +322,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>第二是关键作业的 Checkpoint 需要支持跨机房容灾，这就意味着需要随着 Checkpoint 的不断完成，实时地将新产生的 Checkpoint 复制到备份机房，以防止原机房突然故障。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e4b256e88a1c442f9cc818255ba31766.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702139.jpeg" />   
     </p>
 <p>通过分析，我们需要分两步来完成上述目标。</p>
 <ol>
@@ -331,24 +331,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>Checkpoint self contained &amp; relocatable 特性主要是为了让 Checkpoint 能够被移动和复制。其实 Flink 在 1.11 版本已经在 Savepoint 上支持了这个特性，但 Checkpoint 的情况比较复杂所以还没有支持。为了讲清楚这个问题，需要先了解 Checkpoint 目录结构。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/49e1eadbcb4b400982b3ba4af9b94754.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702404.jpeg" />   
     </p>
 <p>首先是 checkpoints/{job-id} 目录，也称为 exclusive 目录，每个 Checkpoint 的 id 会对应一个 exclusive 目录，用于存放每个 checkpoint 的独有的文件。其次是 shared 目录，用于存放各个 Checkpoint 之间会共享的文件。最后是 taskowned 的目录，用于存放永远不能由 JM 删除的文件。</p>
 <p>每个 Checkpoint 都拥有一个 metadata 文件，里面保存了 Checkpoint 元数据。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/469c81a9c22549d6a22a21e8dc19cc04.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702589.jpeg" />   
     </p>
 <p>另外就是独有的状态文件和 Checkpoint 间共享的文件，如上图橘红色的线条表示，Checkpoint 文件中包含了对 exclusive 文件和 shared 文件的引用，通过 metadata 文件，就能找到一个 Checkpoint 所需要的所有文件。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2183a45f1ff84338a85b50de8922b017.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702760.jpeg" />   
     </p>
 <p>至此，就可以说明 Checkpoint 不是 self-contained 的含义了。如上图，在一些情况下一个 Checkpoint 的 metadata 文件引用了其他作业实例的 Checkpoint 的 shared 文件，这里不同的作业实例可能是同一个作业的代码多次部署，每个 Flink job 的 id 对应一个作业实例。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8d6e684bd53f4c51aed17db0493a9ca7.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702037.jpeg" />   
     </p>
 <p>这种情况常发生在作业从增量的 Checkpoint 恢复时，如图 job1、job2、job3 是同一个作业代码多次启动，job3 启动时从 job2 留下的 Checkpoint 恢复，job2 启动时又是从 job1 留下的 Checkpoint 恢复，结果就是形成一个长长的引用链。实际生产应用中这种情况非常常见，我们经常会在调整作业参数、修改代码等操作之后，再从 retained Checkpoint 重启作业。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f65cc283e4174d19a9506f6bf1d852cc.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281702130.jpeg" />   
     </p>
 <p>上述情况会带来两个问题：</p>
 <ul>
@@ -358,7 +358,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>那么如何让 Checkpoint 实现 self-contained？</p>
 <p>首先需要说明的是，上述讨论虽然没有局限于某一个具体的 StateBackend，但实际上这种问题主要是 RocksDBStateBackend 的增量 Checkpoint 导致的，这是我们在生产环境中默认使用的 Backend 和 Checkpoint 方式。所以我们先来看看 RocksDBStateBackend 的增量 Checkpoint。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c0fe82bce5c94ce49324a89935fa60c6.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281703312.jpeg" />   
     </p>
 <p>RocksDB 是一个基于 LSM Tree 的 KV 存储引擎，它会将持久化数据写到磁盘文件中。上图是一个 RocksDB 实例的文件目录结构，可以分为两类：</p>
 <ul>
@@ -366,33 +366,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>另一类是 SST 文件，这是 RocksDB 的数据文件，里面包含数据内容、索引等。这类文件一旦产生就不会再修改，只会随着数据的不断写入和 compassion 而不断地产生和删除。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0dba22b4b90948e38470de946a07e1a6.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281703360.jpeg" />   
     </p>
 <p>开始制作 Checkpoint 时，RocksDBStateBackend 会先将数据刷盘，然后将 DB 实例中所有文件上传到指定的 Checkpoint storage 中，在我们的场景里就是上传到 HDFS。如左图，假如在制作 Checkpoint3 时，DB 中有 123 这三个 SST 文件，这些 SST 文件由于不会被修改，就有可能会被后续的增量 Checkpoint 直接使用，因而会被放到 shared 目录下。而所有的 meta 文件都会被放到 exclusive 目录下。</p>
 <p>如果过了一段时间，我们开始基于 Checkpoint3 去制作后面的 Checkpoint5。这里会存在一个疑问，Checkpoint3 之后为什么是 Checkpoint5，而不是 Checkpoint4？这是因为这里可能会插入一个 Savepoint，而 Savepoint 要占用 Checkpoint 序号。</p>
 <p>制作 Checkpoint5 时，DB 实例下的文件情况如上图右边所示，新增了 04.sst 减少 01.sst。由于是增量 Checkpoint，这时候只需要将 metadata 文件和 04.sst 进行上传，而 02.sst 和 03.sst 只需要在 metadata 中记录文件引用，不需要重复上传。</p>
 <p>那么制作 Checkpoint5 的时候是如何知道 02.sst 和 03.sst 已经上传过了？其实是通过一个 previous-sst-list 来记录的，里面记录了上次成功的 Checkpoint 中所有 sst 文件信息，这样就可以不断基于 previous-sst-list 来进行增量的 Checkpoint 制作。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/221e0ea81cb940f0852c0366a7cd0c1e.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281703331.jpeg" />   
     </p>
 <p>当作业基于增量 Checkpoint 恢复时，如上图所示首先会根据 Checkpoint 信息去恢复 previous-sst-list，然后去构造 RocksDB 实例，就是将 meta 文件和 sst 文件下载到对应的位置。这样即使是启动后的第一个 Checkpoint，也可以基于 restored Checkpoint 进行增量制作。</p>
 <p>但这也就意味着新启动作业的 Checkpoint 可能会引用它所 restore 的 Checkpoint 中的文件， 这正是前面提到的 Checkpoint 跨作业实例文件引用的根本原因。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/87c0e8185a3b47a581bb551dba89fe0f.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281703373.jpeg" />   
     </p>
 <p>清楚了原理以后，改动方式也就变得清晰了，只需要在恢复 previous-sst-list 之前，判断 restore Checkpoint 所属的作业是不是当前作业，如果是，就恢复 previous-sst-list；如果不是，就说明是新作业从 retained Checkpoint 启动，不恢复 previous-sst-list。不恢复的话，作业启动之后的第一个 Checkpoint 就会上传所有文件，再之后的 Checkpoint 才会基于前面的 Checkpoint 进行增量制作，这也就不会存在跨作业文件引用的问题了。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ec62d2fccde04f0581f4080d35c15e8e.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281703419.jpeg" />   
     </p>
 <p>新的问题是如何知道 restore 的 Checkpoint 所属的作业 ID 呢？上图描述了 Checkpoint metadata 结构，从中我们无法获取到作业 ID，那就要想办法把作业 ID 放进去。关键就在于红框中的 keyed state handle，它有多种不同的实现，每种不同的实现代表一种 Checkpoint 或者 Savepoint 的方式。</p>
 <p>如果是 IncrementalRemoteKeyedStateHandle，说明这是一个 RocksDBStatebackend 的增量 Checkpoint，所以只要给 IncrementalRemoteKeyedStatehandle 增加一个 jobID 字段，在制作 Checkpoint 时把 ID 字段也序列化到 meta 文件中，这样在 restore 的时候就可以知道 Checkpoint 所属的 job ID 了。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cc3b8d93382941cfa72b1dded72a6df9.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281703475.jpeg" />   
     </p>
 <p>再来看一下 relocatable 的问题， 如上图，metdata 中会记录 exclusive 文件和 shared 文件的引用，其实就是记录了一个文件的绝对路径。而当 Checkpoint 被整个复制到其他目录时，这些引用就失效了。解决的方法也很简单，就是将绝对路径换成相对路径，这样就能根据 Checkpoint 的 exclusive 目录和文件的相对路径计算出文件的具体位置，这样 Checkpoint 就不怕被移来移去了。到这里，Checkpoint relocatable 的问题就解决了。</p>
 <p>有了 self-contaiend &amp; relocatable，我们的 Checkpoint 就支持把副本制作到任何地方了，这样我们也才能开始 Checkpoint 跨机房副本制作能力的支持。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/76cb2a1309064d61be79e2929c4adf0b.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281703588.jpeg" />   
     </p>
 <p>最初在评估如何完成副本跨机房制作能力的时候，有几个备选方案：</p>
 <ul>
@@ -402,17 +402,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>最后就是改造 Flink 的 Checkpoint coordinator，使其在制作 Checkpoint 完成后触发一次 distcp，在 distcp 完成前不触发后续的 Checkpoint 制作。这种方式可以避免方案 1 中提到的 distcp 复制过程中文件变动的问题，但也是由于 distcp 效率原因而被放弃。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c5fb1029250347fabf87325e147bb471.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281703674.jpeg" />   
     </p>
 <p>Checkpoint Replicate Service 的实现方式如下：每一个节点会持有多个 HDFS client，上图中以橘色和紫色来区分两个 HDFS 集群和 HDFS client，分别是运行的集群和副本要制作的集群。在进行副本制作时，通过原集群的 HDFS client 读取文件，传给目标集群的 HDFS client，将文件写入目标集群。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4d08633baabf400db1b46cc238910cf4.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281703767.jpeg" />   
     </p>
 <p>如图我们要对 Checkpoint5 进行副本制作时，首先读取 Checkpoint5 的 metadata 文件，解析出引用的所有文件得到 referencedFiles，再加上 metadata 文件，就是我们要复制到目标集群的所有文件。通过 replicate service 将这些文件复制到目标集群的对应位置上，再加上前面介绍的 Checkpoint self-contained&amp;relocatable 特性，我们就在目标集群上得到了一个可用的 Checkpoint 副本。</p>
 <p>这里有一个疑问，运行过程中 Checkpoint 不断完成，后续的副本制作是否也能够像 Checkpoint 一样进行增量制作，答案是肯定的。</p>
 <p>如图我们假设制作 Checkpoint5 的副本时，目标集群对应位置上已经存在了 Checkpoint3，这时我们就可以根据 Checkpoint3 的副本来进行增量副本制作。先读取 metadata 文件，解析出引用文件列表 referenceFiles3，然后对这两个文件列表进行集合运算，就知道如何进行增量的副本制作了。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4de56e379ceb402397fc051f481e3b95.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281703898.jpeg" />   
     </p>
 <ul>
 <li>第一部分，只存在于 Checkpoint5 中的文件是新增的文件，需要复制到目标集群中去；</li>
@@ -420,7 +420,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>最后是相交的部分，这些文件虽然被 Checkpoint5 所需要，但已经被上传过了，因此可以忽略。通过这种方式，我们就能像 Checkpoint 增量制作一样去进行增量的副本制作。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ccfcf7c3e9ad4820af61945200dcf98f.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281703037.jpeg" />   
     </p>
 <p>我们在实际工程实践上也获得了不少的经验：</p>
 <ul>
@@ -436,7 +436,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="四状态稳定性相关其他优化"><strong>四、状态稳定性相关其他优化</strong></h2>
 <p>状态稳定性方面，我们还进行了另外三个方面的优化：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/093a310e80654a9a9949f82328238fcf.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281703429.jpeg" />   
     </p>
 <p>第一，修复了一个 RocksDBStateBackend 的内存泄露问题，这个问题触发的条件是作业发生了 restart，并且 restart 之后会复用没有退出的 TM。同时 TM 的 heap 内存又很充足，full gc 很不频繁。上图可以看到我们定位的一个 TM 的内存变化，图中两次 restart 之后，该 TM 的内存都增长了 4G</p>
 
@@ -566,6 +566,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -599,10 +603,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -981,6 +981,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

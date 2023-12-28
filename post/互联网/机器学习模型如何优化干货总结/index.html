@@ -236,7 +236,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>赛后，CLUE【26】就将各个选手的方案进行总结归拢，提取出各种对任务有效的 方案方法。大体上，各种优化方法根据机器学习的三要素来划分：模型、策略（loss）、算法（优化方法），再加上前期的数据，后期后处理跟其他正则化方法。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fd06039646c24fd993f12c377b740186.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272047113.webp" />   
     </p>
 <p>总的来说，对任务最有增益的还是大数据与大预训练模型，能够提高4%左右的指标，其他的各种trick也都可以锦上添花，可以提高0.5-1%左右的指标。下面我们就直接介绍各种方法。</p>
 <h2 id="数据">数据</h2>
@@ -249,17 +249,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>EDA【3】：简单数据增广，通过随机增删字词，替换随机词或近义词，以及调整字词顺序来实现。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8c298c478217499ab5f14fdf67f2e8a0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272047024.webp" />   
     
 2. 回译【4】：将样本翻译成第二种语言，然后再翻译回来，形成新样本。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/03562925f71a48d982986bfe968e3391.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272047974.webp" />   
     </p>
 <p>比赛中，有选手使用EDA的方式进行数据增广，跟数据预处理一起，提高了0.2%左右的指标。【5】中提供了很多数据增广的方法，可用来快速生成大量训练数据。</p>
 <h4 id="外部数据">外部数据</h4>
 <p>数据既然对模型的最终结果无比重要，那么就要通过各种方式来获取数据。最直接的，通过人工标注等方式获取更多的数据，但这种方法成本较高耗时也长，所以可以在网上寻找相似的公开带标签数据集，如果缺少此类数据，则可以获取相似的无标签数据，通过self-training的方式来训练模型；进一步如无标签数据也难以获得，则可以使用测试数据来做半监督学习。比赛中，选手通过大量相似的带标签数据以及大量无标签数据来做self-training【6】，整体提高1.5%左右的指标，也有选手使用测试数据做半监督学习，提高了0.8%左右。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0f0169c5bb61407584d157359644ea62.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272047799.webp" />   
     </p>
 <h2 id="模型">模型</h2>
 <p>不同的任务，不同的数据，都可能需要不同的模型来处理。本次比赛是关于预训练的多任务学习（baseline模型结构可参考【7】），所以选择不同的预训练模型【8】，不同的多任务模型框架，改变细小的模型结构，都会对最终效果有影响。</p>
@@ -272,17 +272,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>有选手则将多任务模型结构全部表示为共享形式，所有任务共享一种结构，只是对不同任务选择独立的query来获取当前任务的内容【11】；</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/55836313314c442cbba06f68becc5c97.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272048833.webp" />   
     
 3. 有选手则根据不同的任务，选手lstm/transformer等结构来学习下游任务，提高了0.5%左右；
 4. 有选手并不使用cls的向量来学习下游任务，而是用整个句子的平均池化结果来训练，这比cls的方法提高了0.5%左右；
 5. 有选手则是先对三个任务分别训练，然后将三个模型的参数进行融合，再一起训练，该方法带来了1%左右的提高；</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/51df7293c74944d085fe278b5603267a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272048666.webp" />   
     
 6. 还有选手不把赛题看作是多任务学习问题，将各个任务混合在一起铺平，进行25分类训练，并在输入时新增了task type的embedding以区分任务。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4e3eae25d4ff4abfaaa661f1ff5b8029.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272048218.webp" />   
     </p>
 <h2 id="loss">LOSS</h2>
 <p>学习不同的任务，需要不同的loss，比如分类任务通常使用交叉熵，预测问题通常使用均方误差等等。loss函数，可以体现任务标签的分布情况，样本的比例，学到的信息大小与学习难度等等。所以一个更贴近数据情况的loss，能够让模型学习得更加鲁棒。在本次比赛中，选手也更具具体情况选择了不同的loss，但也并不是所有的策略都有效。比如像经典的focal loss【12】，或者根据F1指标修改的soft F1 loss【13】，或者是针对多任务学习的一些（动态）权重loss等等，在本次比赛中并没有起到明显效果。而有选手则使用了label smoothing【14】的方式对标签进行了平滑，提高了模型的鲁棒行，最终与emb mixup【21】（在后续正则化讲到）策略一起，将指标提高了0.5%左右。</p>
@@ -291,34 +291,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="学习率">学习率</h4>
 <p>当前最主流的神经网络学习方法是基于梯度下降的算法，如sgd,adma等。梯度下降方法中，学习率是个比较重要的超参数【15】，其控制着每次更新参数变化量的大小，不同的模型结构，不同的训练阶段，甚至不同的参数层，都可以通过调整学习率来获得更好的表现。大的学习率能够让模型学得更快，在一定程度上能让参数跳过某些局部值，但也容易引起模型的不稳定，容易过拟合等等；小的学习率可以让模型学习得更稳定，学习到一个较好的可行解，但也容易陷入局部值而不能跳出，且训练相对较慢。本次比赛中，有选手对bert之后的几层选用不同的学习率【10】，但并没有带来明显收益；而在使用较复杂的下游任务网络模型的时候，通常的学习率并不能让模型学习到有效信息，而更小的学习率则让模型学到了有效信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c1e9bfc3850a4fdf84fc9356e4026ead.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272048836.webp" />   
     </p>
 <h4 id="对抗训练">对抗训练</h4>
 <p>对抗训练【16】是提高神经网络鲁棒性的利器，如下图所示，减少了随机干扰对模型结果的影响，其思想是，在训练过程中，通过对输入进行扰动，而使神经网络适应这种改变，从而提高对对抗样本的鲁棒性。本次比赛中，选手也尝试了不同的对抗训练方法，有选手通过FGM【17】对抗训练获得了0.5%左右的提高，更有选手通过PDG【18】对抗训练提高了1.8%左右的成绩。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/edba1907a131472d9c89e3c691e7378f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272048771.webp" />   
     </p>
 <h4 id="训练手段">训练手段</h4>
 <p>通常训练神经网络都是使用梯度下降之类的方法训练至收敛，不过因为一些随机因素（随机初始化、随机训练样本、不确定的学习率等等）甚至是梯度下降本身的因素，这样的模型参数经常会有较大的随机性，所以一些研究人员通过参数平滑的方式，来降低模型参数的随机性，以及提高模型的泛化能力。比赛中，有选手使用EMA【19】算法（滑动平均），降低了参数的随机性，从而提高了模型准确性；也有同学使用SWA【20】算法（随机权重衰减），类似与集成模型的思想，将多个模型参数合并一起，从而提高模型的泛化能力，比赛中该方法提高了1%左右的成绩。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/89529fd8802c471cbdafe4df9c35fa77.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272048908.webp" />   
     </p>
 <h2 id="正则化">正则化</h2>
 <p>过拟合一直是模型训练中的一大难题，正则化就是针对处理过拟合的一些手段。狭义的正则化主要是对模型做约束，如L1/L2正则，dropout等等；广义的正则化则是一切能让模型降低测试误差的方法，如数据增广、调整loss、early_stop甚至是调整模型结构。从这个角度看，本文中的大部分内容，都可以认为是正则化手段。</p>
 <h4 id="word-mixup">word mixup</h4>
 <p>word mixup【21】可以认为是一种数据增广的方式，这种方法可以大量构造虚拟样本，其思路是随机抽取两个样本，将两个样本的word embedding按比例混合作为新的样本，新样本的标签也是这两个样本的标签按比例的集合。比赛中，选手用该方法与label smoothing一起，将指标提高了0.5%左右。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/df2c58ab22304429b6a595fe4504fa51.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272048886.webp" />   
     </p>
 <h4 id="dropout">dropout</h4>
 <p>dropout【22】是常用的正则化手段之一，其主要思想是随机丢弃一些计算单元或通道，从而让各个计算单元或通道都能学到有效的信息，其思想也类似于bagging，减少了模型的方差。本次比赛中，选手使用dropout的方法，让指标提高了0.5%左右。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c633eee19c3048b3bd96f297c91c71f4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272048838.webp" />   
     </p>
 <h4 id="early-stop">early stop</h4>
 <p>随着模型的不断训练，可能导致模型在训练数据集上过拟合，从而降低在测试集上的表现，如下图所示，随着训练次数的增加，测试误差先变小后变大。所以一个有效的early stop策略【23】，可以提高模型的泛化能力。本次比赛中，有效地利用early stop策略，可以提高1.8%左右的指标。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/865cb23c32a74c7ead49797542cf4d50.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272048788.webp" />   
     </p>
 <h2 id="后处理">后处理</h2>
 <h4 id="阈值优化">阈值优化</h4>
@@ -331,7 +331,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="自知识蒸馏">自知识蒸馏</h4>
 <p>自知识蒸馏【24】在很多任务上也能提高模型的的效果（本次比赛中，并没有选手使用），因为其相对于原始的硬标签提供的信息，可以额外提供各个类别之间关系的信息。比如分类任务中，原始标签只会对某个样本标记为第一类/第二类，但自知识蒸馏可以把某个样本标记为80%的第一类20%的第二类，这样就提供了更多的标签之间的信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7ed7eb60cfd34f108f5fd3add6f716dc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272048571.webp" />   
     </p>
 <h2 id="参考">参考</h2>
 <p>【1】如何对文本数据进行预处理？： <a href="https://zshipu.com/t?url=https%3A%2F%2Fblog.csdn.net%2Fweixin_36711901%2Farticle%2Fdetails%2F79523698">https://blog.csdn.net/weixin_36711901/article/details/79523698</a></p>
@@ -474,6 +474,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -507,10 +511,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -889,6 +889,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

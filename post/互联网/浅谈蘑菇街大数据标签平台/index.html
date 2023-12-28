@@ -242,7 +242,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="什么是标签平台">什么是标签平台</h3>
 <p>在狭义的理解中，标签平台就是做标签圈选的。以某电商标签平台为例，可以给用户打标签(年龄，职业，收入&hellip;)，也可以给商品打标签(颜色，尺寸，类型&hellip;)，当然也可以给商家打标签(星级, 排名)。但是特征从哪里来？标签怎么组装？标签怎么存储？如何进行标签分析？数据如何回流？这些都是在标签平台的范畴之内。先整理了一个标签从特征生产，特征组装成标签, 查询引擎一整个流程。给大家一个直面的认识。如下图：
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/604066a5bf62435fa8bf5a286f835c0c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121668.webp" />   
     </p>
 <blockquote>
 <p>标签平台包含特征，标签，查询三个大块，这几大块组合起来就是一个标签平台。但是从狭义上来讲，特征平台又是单独的，查询引擎可以归属到数据平台统一数据服务中。所以标签平台其实是多个系统的整合。</p>
@@ -281,7 +281,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="标签平台核心功能的解析">标签平台核心功能的解析</h3>
 <p>标签平台是一个融合的系统，包含了离线特征平台，实时特征平台，标签调度平台，标签组装与分析平台，查询引擎几部分组成，具体如图
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/071510549ab94dbb9b80e856371d8ca1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121467.webp" />   
     </p>
 <ul>
 <li>最低层的数据源包含了hive，中间表存储放到hbase中，实时数据通过消息报获取。</li>
@@ -297,19 +297,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>在我们的场景下，特征存储到es，中间表使用hbase，使用hbase的原因是宽表的join在hive里面其实是有点困难的，我们这边使用了一个取巧的方式hbase的buckload, 按天生成新的特征表hbase，每天去更新es。这样效率会很高。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cdce08a11c064a948102eea70b0e260b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121519.webp" />   
       一般来说，es数据一般是全量，这个全量可以使用全量join增量数据得到。这种场景下es有自己的缺陷，无法使用历史的数据。所以有历史需求的，可以考虑自定义sql。</p>
 <h3 id="实时特征平台">实时特征平台</h3>
 <p>实时特征主要依赖flink实时数仓来实现，实时数仓负责进行ETL和口径的梳理，平台只负责批量导入到kv即可。在最终存储这块，我们做了多数据源存储的方式，在最初的模型里面，我们使用kv，tidb，hbase三种存储。做了存储，分析，高可用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0671b362dac34393bc89a2c3b251c6f3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121610.webp" />   
       实时特征导入到kv会有历史数据的追溯的问题，这个在以往的经验，找个相同口径离线sql然后导入到kv。这个是要和实时特征一块维护起来的。万一kv挂了之后可以通过任务来找回历史(当然你可以存储到hbase里面，不过高并发的场景不一定适合。)。</p>
 <h3 id="标签组装和调度">标签组装和调度</h3>
 <p><strong>标签的组装</strong>，主要是标签的关系，特征的拼装。特征的类型和前端展示。下面列出的是字段类型和页面的显示类型。</p>
 <p>字段类型前端展示类型boolean等于/不等于字符串枚举包含/不包含字符串手工输入数字枚举包含/不包含数字手工输入数字偏好类多输入框日期普通日期/动态日期</p>
 <p><strong>特征的关系</strong> 标签的关系，其实就是且或非。且或可以自己实现一套解析和反解析的逻辑。非的逻辑其实挺有意思的。有些需要在特征的时候就要做非。有些可以通过运算符来做。比如实时的特征（ag: 是否是平台的vip会员，一般在kv里面只存储一种特征值，我们在筛选非平台会员的时候就是这种场景）
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1e13c3d90b6944799e2fa8e9ad8b6fc5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121571.webp" />   
     </p>
 <p><strong>标签的调度</strong> 这个主要是涉及到标签状态机的转换。具体的状态根据业务的不同也有所不同。</p>
 <blockquote>
@@ -337,10 +337,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>查询引擎在数据平台中，其实应该算是统一数据服务层的逻辑，不过因为查询引擎涉及具体的逻辑计算，所以单独拎出来。在我们的场景下，一般只用kv做存储。所以并发量是很可观的。而现在kv又做了主备。其实并不用太关心kv挂掉的情况，如果你实在担心，只能再多存储一份到hbase了。其实也是可以的。</p>
 <p>表达式匹配的话，我用的是googlecode aviator来做的。相对旧版本匹配效率提升了不少。不过这里面有个坑，在这就不展开说了。
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/da231b95faee4993b2ccf7617ed91ac6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121131.webp" />   
      在整个离线/实时数据存储上，hdfs，kv是两个相对重要的存储。kv存储引擎的数据结构如下：
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/95da086ad3454d618f9926cfeb6a6ed1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121919.webp" />   
     </p>
 <ul>
 <li>离线标签都是N+1的数据，批量生成，存储的都是离线标签数组，在查询的时候直接根据用户查询匹配即可。</li>
@@ -350,7 +350,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="数据流的走向">数据流的走向</h3>
 <p>离线特征一般存储在hive，经过hbase中转导入到es作为查询服务，实时特征一般经过kafka存储到kv。在整个标签组装存储过程中，数据流转到hdfs和kv，并且把标签的数据回流到hive。并且最终通过查询服务暴露给第三方业务系统。第三方业务系统把使用后的数据和效果反馈给离线数仓和标签的数据结合起来进行进一步的数据效果分析。这是一整套数据的链路。最重要的一点就是数据的回流。数据只有流转起来标签平台的价值才会体现出来。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/92b71b9f741a4ee898158084a6ebb7ac.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272121520.webp" />   
     </p>
 <p>在整个平台的建设中，我们发现数据的流转和回流是最困难的。数据来源很多(外部数据，业务系统数据，其他等)，整合到一起，并且沉淀到分析模型中，形成数据流转。所以我们在整合整个系统架构，以及在存储的选择上，都是根据这些已有的业务场景选择一个折中的方案。这个需要和业务有着很深的联系。</p>
 <h3 id="结尾">结尾</h3>
@@ -484,6 +484,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -517,10 +521,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -899,6 +899,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

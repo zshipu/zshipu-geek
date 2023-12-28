@@ -221,16 +221,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>导读</strong>： 天下武功，无坚不摧，唯快不破。近些年，深度学习如玄铁重剑在推荐系统中无坚不摧，给搜索/推荐/广告等业务场景带来巨大的收益，而在线学习则如唯快不破的独孤九剑，也在推荐算法中以快制胜，创建巨大的业务价值。</p>
 <p>前些年流行的FTRL等在线学习算法在深度学习中已不太适用，为此信息流推荐算法团队从2019年开始探索在线学习的下一式——在线深度学习（Online Deep Learning, ODL），在首页商品信息流全量小时级在线深度学习，使得在线排序模型可以学习到1小时前平台上的用户和商家最新流行的数据模式。2020年团队又继续探索分钟级在线深度学习，把排序模型发现平台用户和商家最新流行的数据模式的延迟降低到分钟级。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/85b50564907c40e3bf35883e1e729173.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272135522.png" />   
     </p>
 <p>图1 在线学习应用场景：首页商品信息流（左图）, 视频信息流（右图）</p>
 <h1 id="在线学习的重要性">在线学习的重要性</h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2a7c5c78de634ca9934d8ce6eaefdd90.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272135592.webp" />   
     </p>
 <p>图2 首页商品信息流CTR模型时效性效果分析(日常)</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9b1934199cf44ea99560876b28186fc0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272135199.webp" />   
     </p>
 <p>图3 双十一期间首页商品信息流CTR（左图）和CVR（右图）的label mean随时间变化</p>
 <p>图2展示了首页商品信息流CTR模型效果随着时效性的变化趋势图，其中横轴代表模型训练结束到模型在线打分的时间间隔，纵轴是AUC提升的绝对值（相对于模型训练结束到模型在线打分的时间间隔为2天的批模型）。从图中可以看着，模型的效果与模型的时效性成正相关，模型更新得越频繁，实时性越好，AUC越高，效果越好。图3展示了双十一前后用户和商品行为发生了剧烈的变化，尤其是CVR在双十一当天是预热期的5倍，同一天内不同时间段CTR和CVR也不同，传统离线批训练天级更新的模型不能技术捕获到用户和商品行为的实时变化。</p>
@@ -240,17 +240,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>样本特征的实时性包括在线系统实时计算和更新模型的输入特征，使得模型总能使用最新的特征进行预测和推荐，以及日志采集和样本构建系统实时采集用户行为并生成实时流式训练样本。其中我们把在线系统实时特征（实时行为序列、实时交叉统计特征等等）的计算和更新归类为模型结构优化的工作，不在本文介绍的工作范畴；本文着重介绍我们在实时流式样本构建和利用实时流式样本就是流式训练上的探索。</p>
 <h4 id="-实时流式样本生成"><strong>▐ 实时流式样本生成</strong></h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/738e1163e8b344f89d86f897895b1482.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272135540.webp" />   
     </p>
 <p>图4 实时流式样本生成</p>
 <p>图4展示了实时流式训练样本的生成过程，样本生成平台通过统一的Event解析对应的用户行为数据流，包括曝光曝光（PV）、点击（Click）、预售付定金（subPay）、加购（Cart）、成交（Trade）等行为；通过blink与埋点特征流以及存储在Holo上的非埋点特征等Entity进行实时join，从而生成实时样本，最后实时样本通过Swift消息队列进行存储。</p>
 <h4 id="延迟反馈建模"><strong>▐、延迟反馈建模</strong></h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2708dda30e584ee79120514c5bd944aa.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272135546.webp" />   
     </p>
 <p>图5 CTR和CVR延迟反馈</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d2689b7d2a8e45f781b4d796ba2d9d12.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272135408.webp" />   
     </p>
 <p>图6 窗口Join和Retraction机制</p>
 <p>在实时流式样本中，通常正例会延迟于负例到达，如图5所示，在首页商品信息流推荐中，CTR模型有4%的点击会在曝光10min后到达，甚至还有2%的点击会在曝光20min后到达；CVR模型中正样本延迟的问题更加严重，该问题我们称之为延迟反馈问题。</p>
@@ -258,50 +258,50 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们采用的是一种在等待更准确label与使用新鲜数据之间的折中方案，如图6所示，我们在平台上设置了一个等到窗口T，让每一个到达的负例都等待T时间，如果T时间窗口内有正例到达，则下发一条正样本，否则下发一条负样本；此外我们进一步引入Retraction机制来对T窗口之外到达的正例补发正样本，同时打上Retraction的标。</p>
 <p>对于打上Retraction的标的补发正样本，我们采用PU Loss对其训练进行修正，核心思想就是对于这部分Retraction的样本，除了使用正样本进行梯度下降，还会对相应的负样本进行一个反向的梯度下降，抵消之前观察到为负样本对loss的影响。其中等待时间窗口T的设定对模型效果有一定的影响，通过实验来选择合适的窗口。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/026b09fb57334969a244c79dd11ae13a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272135407.webp" />   
     </p>
 <h4 id="-特征独立同分布"><strong>▐ 特征独立同分布</strong></h4>
 <p>机器学习算法有一个独立同分布的基本假设，即模型训练的数据分布要与预测时的数据分布独立同分布。一些时间特征比如week和hour，在离线批样本中由于被充分shuffle过，使用这些特征训练出来的模型依然能保障训练和预测独立同分布，但是在实时流式训练中，样本实时顺序到达的，这类特征无法被充分shuffle，使得模型训练一直在训练同一个时刻的特征值，而预测时可能切换到下一个时刻的特征值，导致模型泛化能力差。</p>
 <p>图6是我们实验的对同一批样本修改hour的特征值对CTR批模型和流模型预估值的影响，可以看到在流模型中使用不同的hour特征值，模型预估值波动非常大，模型对hour特征过拟合，对下一个时刻没有泛化能力。在我们的实践中，我们在流模型中统一将这类特征的值和梯度置0（批模型不改），以保障模型的稳定性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/badd43cc30b146dbafdaa472144a606e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272135885.webp" />   
     </p>
 <p>图7 同一批样本hour特征不同取值对模型预估值的影响</p>
 <h1 id="模型训练更新的实时性">模型训练更新的实时性</h1>
 <p>模型训练时流模型首先通过restore离线批训练最新的模型版本作为实时流式训练的初始化模型，读取消费Swift消息队列的训练样本流式训练模型。训练平台上的模型会定时生成模型版本（checkpoint）到HDFS上，然后发布至在线打分平台，在线打分平台上接收到模型版本之后会先通过BuildService转换成在线打分的模型表，并load到在线机器的内存中进行在线打分服务。</p>
 <h4 id="-批流结合训练"><strong>▐ 批流结合训练</strong></h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e417f1d7a96b4d21b6b32a04f4e24c4f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272135958.png" />   
     </p>
 <p>实时流式训练的在线学习模型具有时效性强，能捕捉数据分布的实时变化，更快发现人群的偏好和最新的流行趋势；然而由于上一章节介绍的延迟反馈问题以及特征独立同分布问题，流模型的训练样本label存在一定比例的错误，并且丢失了类似week和clock等时间特征，模型相比于离线批训练模型处于欠拟合状态。</p>
 <p>而离线批训练模型由于样本是天级组织，label准度高，而且数据被重复shuffle过，可以弥补流模型存在的问题。因此我们结合批模型和流模型的有点，设计了批流结合的在线学习方案：定期从最新的批模型恢复重新流式训练流模型。</p>
 <p>图8展示了每周从批模型重启一次的批流结合模型和持续流式训练的流模型在一个月的效果对比，可以看到批流结合的训练方式效果要优于持续流式训练的方式，持续流式训练的方式由于延迟反馈问题以及特征独立同分布问题会损失一定的效果，但是损失的该部分效果会趋向于稳定。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/252992f1d5a845038f9615b00c1687cf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272135113.webp" />   
     </p>
 <p>图8 批流结合效果对比</p>
 <h4 id="小时级模型更新"><strong>▐小时级模型更新</strong></h4>
 <p>由于大规模深度排序模型的规模非常大（checkpoint大小 &gt; 500G），按照传统模型更新的方式：生成checkpoint-&gt;推送到在线打分平台-&gt;BuildService生成模型表-&gt;在线打分平台加载模型表到内存，这整个过程需要1个多小时，因此最多只能做到小时级别的模型更新。2019年我们在深度排序模型做在线学习时，采用的就是这种更新方式，训练平台小时级定时的生成checkpoint和自动推送到在线打分平台来完成流式训练模型的在线更新。</p>
 <h4 id="-ps直发分钟级模型更新"><strong>▐ PS直发分钟级模型更新</strong></h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b2b8e125cfd44c5ea3347bfa3089c55b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272135136.png" />   
     </p>
 <p>2020年信息流算法团队通过与算法工程团队同学合作，构建了PS直发的分钟级在线学习方案。深度排序的规模大主要是模型中包含一些大规模的Sparse参数，比如UserId、ItemID、PID等的embedding。与Dense参数不同，Sparse参数虽然总体规模庞大，但是不是每一次的训练迭代都会更新所有的Sparse参数，比如ItemID的embedding参数，每个训练的batch中涉及的到ItemID就只有几万个，占整个参数空间的一小部分。</p>
 <p>在首猜的CTR大模型中，checkpoint大小&gt;500G，但是每15min被更新的参数只有30多G的Sparse参数被更新（不包括梯度等在线推理不需要的参数），在线模型只需要在每15min更新这个窗口内更新的特征，就可以大大减少每次更新的参数规模，提升在线模型更新的效率，从而提高模型的时效性。</p>
 <p>模型参数的增量更新有通过Diff Checkpoint的参数Diff收集更新的参数、在PS中维护HashMap记录更新的参数并通过PS直发等多套技术方案，最终我们采样更新效率最高的PS直发技术。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3800b7d89bc744cf991f8b12cbcb96cc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272135793.png" />   
     </p>
 <p>PS直发的具体实现是：对于SparseTensor会在每个PS上分别维护一个HashMap记录更新的ID和频次，每隔一定的时间间隔，由每个PS各种收集在这个时间间隔内更新的ID对应的参数，并行的写入到Swift Topic中；而对应非SparseTensor的参数，比如MLP权重和非Sparse的特征，由于其基本都是全部更新，由Chief Worker统一从各个PS上拉取这些参数并拼装成完整的参数再写入到Swift Topic中。</p>
 <p>虽然SpareTensor是在PS上直发，但是Chief Worker在整个发送过程中起了协调和触发的作用，Chief 每次发送之前都会向Swift发送一个开始写的信号，在PS和Chief都完成参数发送后再发送一个写结束的信号。Swift会将这个写信号开始（startTime）和结束（endTime）之间的参数当作一个整体来看待，从而保证了参数的一致性。首猜商品CTR模型的分钟级更新采用了15min的时间间隔，每15min进行一次PS参数直发，发送参数规模在30G左右，在半分钟左右就能完成全部参数的发送。</p>
 <p>在线打分平台上的Processor会读取Swift Topic上的参数，并将参数直接发送到Searcher，在Searcher上开辟一段实时内存来让参数实时生效；与此同时还会进一步将参数发送到BuildServer，构建出一个增量的索引，再次发送到Searcher上，Searcher收到这个索引之后会清掉实时内存中的这部分参数，以降低实时内存的消耗。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/950a6737914a4008b17397683e43087e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272135369.webp" />   
     </p>
 <p>图8 PS直发分钟级模型更新</p>
 <h1 id="在线学习质量保障">在线学习质量保障</h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8201c89aeddd4c24a9b1a23a4644df47.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272135520.webp" />   
     </p>
 <p>图9 首页信息流在线学习全貌</p>
 <h4 id="-样本质量"><strong>▐ 样本质量</strong></h4>
@@ -467,6 +467,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -500,10 +504,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -882,6 +882,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

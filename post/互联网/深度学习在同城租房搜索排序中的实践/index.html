@@ -207,40 +207,40 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>分享嘉宾：</strong> 崔凌云，58同城TEG搜索排序部算法架构师。专注于58同城垂类搜索排序的优化，主要负责58各业务场景下排序策略的落地与迭代，08年硕士毕业于哈尔滨工业大学。</p>
 <h2 id="01-背景介绍">01 <strong>背景介绍</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a16b3cd0416543579b20dc2d3f114dfe.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272152230.webp" />   
     </p>
 <p>58是一个多业务的平台，包括租房、二手房、招聘、本地生活服务和二手车。我们部门作为中台部门，负责所有的搜索相关的业务。今天将以租房为例，介绍深度学习在搜索排序中的应用。</p>
 <p>首先看下在租房场景，进入58APP之后，我们选择租房，然后进入到租房的列表页，上面两幅图就是租房的列表页。可以看到有两种搜索方式，第一种方式是通过输入关键词进行搜索，第二种是通过筛选项进行搜索。在租房场景下我们的优化目标有两个，一个是CTR，一个是CTCVR。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/28b8f741e52e4081a16db77cd1773b0f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272152001.webp" />   
     </p>
 <p>58搜索排序的整个的发展在2015年之前，我们主要以时间序为主，加一些业务策略。在这个阶段我们认为越新的帖子用户越感兴趣。2015年之后我们开始引入机器学习模型，包括LR/FM/Xgboost等。在这个阶段我们推崇的是千人千面，认为每个人的兴趣是不一样的，所以我们希望捕获到每个人的兴趣给用户推荐他感兴趣的帖子，在这个阶段用户兴趣的捕捉主要是通过一些统计的方式来实现。从2018年之后开始引入深度学习模型，目前我们实现的主要有DeepFM/DIN/DIEN/Bert等。在深度学习阶段，我们期望的是用深度学习来解决在传统机器学习模型中不能解决的问题。这是我们搜索排序的整个发展情况。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d89b3128453d4657be638d1c092eac30.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272152804.webp" />   
     </p>
 <p>下面我们介绍一下搜索排序的核心架构，整个架构分为线下部分和线上部分。线下部分有日志收集、日志解析、特征平台（生成各个维度的特征）、关联样本，然后进行线下的模型的训练调优。最后经过一定的验证和测试，把模型推到线上库。另一个模块就是效果报表系统，用报表系统来评估模型上线后的ABtest情况。</p>
 <p>再看下线上部分，一个用户请求过来进行列表请求，首先进行ABtest的分流，然后进行模型加载，紧接着进行召回，然后进入初排、精排，最后经过业务策略层，把帖子按照打分由高到低展现给用户，这就是我们的整个架构。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0df35d9a85e94c57ba5387aa9fc64f42.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272152803.webp" />   
     </p>
 <p>在传统的机器学习阶段，特征决定了模型的上限，在这个阶段我们也积累了很多的特征，包括用户维度的特征，用户ID、访问时间等等。这阶段有个比较重要的特征就是用户的偏好特征，基于用户的行为统计用户的偏好。另外一个维度就是帖子维度的特征，就是要排序的帖子的维度，包括帖子ID、点击、转化等，以租房为例，包括房源的基本信息，价格、面积等等，然后还有一些上下文的特征，包括曝光时间，还有一些类目相关的特征。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1620971210914bbda44c6dcd33decf96.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272152846.webp" />   
     </p>
 <p>前面我们已经对传统机器学习的架构和特征方面做了介绍，这里总结一下，在传统机器学习阶段，我们还有哪些没有解决的问题，或者还有哪些难点。</p>
 <p>第一是特征开发人力成本非常高，我们需要对业务某一个维度的信息进行分析，然后最终把它形成特征。难以利用多模态的信息，假如说文本特征，图形特征，这个是非常难做到的。第二是从训练目标上来讲，仅支持单目标，难以实现多目标的融合。第三是从用户兴趣学习上来说，我们无法模拟兴趣的形成过程，只是通过一些简单的统计方法来获得用户兴趣。第四是从特征交叉方面来说，我们很难学习多特征的交叉信息。以上传统机器学习面临的一些问题。</p>
 <h2 id="02-深度学习实践之路">02 <strong>深度学习实践之路</strong></h2>
 <p>下面我们进入深度学习的实践之路。前面已经介绍了传统机器学习面临的很多问题，我们寄希望于深度学习去解决这些问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/76e710f5d5944a339ec8dc0c6d9a0689.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272152614.webp" />   
     </p>
 <p>首先介绍下我们的优化路径。分为两个方向，一个方向是通过模型调优，通过模型结构的一些优化来进行优化。另一个方向是通过调整多目标的组合方式来进行效果的优化。最初我们训练的是单目标模型，然后是传统多目标方式，最后参考ESMM进行优化多目标优化。后面会逐步进行介绍。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/90840b7c89c84d8c9111d64ff35b8beb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272152086.webp" />   
     </p>
 <p>首先看下我们尝试的第一个模型DeepFM。这里的模型结构只是给了一个简化的图，DeepFM整个结构分为FM部分和Deep部分。FM部分负责学习因为低维的交叉特征， Deep部分学习高维的交叉特征。他们共享了embedding层，这就是DeepFM特点。可以看出在高维交叉特征学习的过程中，我们并没有增加特征开发的工作，全部交给模型来学习，这也是我们为什么要引入深度学习的一个原因。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bfbb15536ddf428abe6277c20701af55.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272152839.webp" />   
     </p>
 <p>下面介绍下我们实践过的第二个模型DIN模型。从模型的命名（Deep Interest Network）来看，在这个模型的网络结构中加入了用户兴趣的学习。为了比较清晰的介绍DIN模型，我们把整个模型拆分几个部分来讲。</p>
 <p>首先看下输入层。输入层包含三部分的信息。第一部分就是用户维度的特征，包含两部分，一是User Profile，可以是我们前面介绍的一些用户维度特征。二是用户行为序列。用户行为序列怎么解释，以租房为例，我点击了帖子Item1，就把帖子Item1对应的帖子维度的特征加到第一个位置。然后紧接着我点击了帖子Item2，我就把帖子Item2的它对应的帖子维度的特征加到第二个位置，以此类推。第三个维度的特征是候选帖子（要打分的帖子）对应的特征。帖子维度的特征和我们的行为序列中的帖子维度的特征相对应。最后一部分是上下文特征。</p>
@@ -250,39 +250,39 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们再仔细看一下整个兴趣学习的结构。我们的输入的行为序列，其实输入的时候是有一个时间顺序的，从左到右是行为发生的顺序，但是从整个模型的结构来看，没有加入帖子的位置信息，也就是并没有使用时序信息。</p>
 <p>我们总结一下DIN模型的创新点，引入用户的历史行为序列来学习用户信息，同时加入了attention机制，使学习更加集中。简化网络结构使学习的效率更高。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d6cb5cd3c4f047fea662d5a03857fb51.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272152283.webp" />   
     </p>
 <p>下面我们看下DIEN（Deep Interest Evolution Network）模型,DIEN模型是在DIN模型基础上进一步优化。重点介绍下它的创新点。它的创新点在用户兴趣学习模块，把用户兴趣学习拆成了两个阶段，第一个阶段兴趣抽取。它抽取了每一个行为点处的兴趣，并在这个兴趣抽取过程中加入了位置关系，也可以说加入了时序关系。兴趣抽取完成以后，是兴趣发展层，在兴趣发展层同样也加入了位置信息，同时它加入了attention机制来指导使兴趣演进过程的学习，使得学习更加集中与目标帖子相关的兴趣。另外值得一提的是在兴趣提取层加入了一个辅助损失函数，在整个行为序列不光有正样本（点击的帖子）的序列，也加了负样本（未点击的帖子）。从损失函数来看，辅助损失函数它的如图所示，对负样本进行了一定的惩罚。最后整个模型的一个损失函数是原随时函数加上辅助损失，而这就是 DIN的整个的结构。以上就是关于模型方面的优化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cd647e60f12f46d7ab41ca68aa98cd82.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272152253.webp" />   
     </p>
 <p>在介绍多目标优化之前，我们先看下这两个目标之间的关系。这是一个租房的列表，我们首先需要产生一个点击行为，然后进入帖子的详情页，进入详情页后，才能产生例如电话、微聊这样的连接行为，也就是说业务场景是先有点击再有连接。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6cc50a3b9e60427e95df238850a3c32b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272152199.webp" />   
     </p>
 <p>下面介绍下多目标优化。传统的多目标结构在网络的上层分了CTR-task和CTCVR-task，把这块的参数分开训练，网络结构从 concat层往下是共享的。从损失函数上来看，是CTR和CTCVR的一个加权损失函数。</p>
 <p>我们前面说的业务背景，是连接行为的产生必须依赖于点击行为。从概率计算的关系上来看是 pCTCVR等于pCTR乘以pCVR。在模型结构上我们怎么做？我们是参考了ESMM模型，就是在pCTCVR的节点中间加入了CTR，即是它是pCVR和CTR的乘积的结果.然后从损失函数的计算是CTR损失加上CTCVR损失，但是值得注意的是在计算CTCVR的损失函是使用的目标预测值是CTR和CVR概率的乘积。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/776ef0719f524ec09abb64a1f80f5fda.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272152410.webp" />   
     </p>
 <p>该表是我们前面所述的各种优化的上线效果，融合了单目标，多目标，以及不同的组合方式的效果。从效果上来看，多目标的效果优于单目标。DIEN多目标的效果是最显著的。DIEN加ESMM这种结构，相比于的传统的多目标方式CTCVR提升+3.25%。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c09fbd4cc87440cba7848dfea5370827.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272152355.webp" />   
     </p>
 <p>前面介绍的是我们已经上线的一些优化策略。除此之外，我们线下还做了一些其他的实验。一个是加入用户的聚类信息， 58面对的是短期低频的用户需求，假如用户找房子，他主要是集中在某一段时间，之后很长一段时间就没有这个需求了。另外58的用户的量特别大。我们之前做DIEN和DIN的时候，也加入了用户的ID特征，但是因为用户基数大，加入用户ID后模型训练也压力增大。我们对用户ID做了分桶处理，但是处理的时候没有考虑用户兴趣，所以上线效果并不是很好。在这里我们加入了用户的一个聚类信息，通过用户兴趣对用户进行聚类。从线下效果来说， GAUC有千分之3.7个点的提升。</p>
 <p>另外一个优化就是对位置特征进行建模，在模型结构里加入了位置特征（如图所示），线下训练的时候使用位置特征，但线上打分的时候，不用位置特征。线下的GAUC在千分位有7.5个点的提升，后边我们准备推到线上去做ABtest。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9390a1b3dc7b4a4fb586db812b449772.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272152090.webp" />   
     </p>
 <p>接下来介绍下工程方面做的一些工作。前边已经说过，在传统的机器学习期间，我们已经积累了很多的特征。在深度学习的实践过程中，我们并没有在加入更多的信息，只是为了学习用户兴趣加入了用户的历史行为序列。线下样本中我们加入了用户的行为序列，然后在线上打分预测的时候也加入了用户的行为序列。对用户的一个行为序列情况做了下分析，分别以3天、5天、7天的用户序列统计分析，得出的结论是80%以上的用户一周之内的序列长度是小于50的，最终我们在线上是使用的序列长度最大为50。接下来再看下我们在工程方面的一些优化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f4692a64422e497caedc0f45457893b3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272152884.webp" />   
     </p>
 <p>第一是TensorFlow组件的使用优化，首先介绍的就是Batch Normalization的优化。当我们喂给模型的是一个Batch的样本数据， Batch之间的数据分布是不一样的，这样就容易造成训练的抖动，导致迭代速度降低。因此，我们对每个Batch的数据进行归一化。从理论上讲，我们希望拿到是整个训练集的均值和方差的期望值，然后用这个期望均值和房产对样本进行归一化。但对所有样本计算均值和方差，需要增加计算量，所以在实际的应用中，我们是使用了这样的经验的方法，即是当前均值，是当前Batch的一个均值乘以0.1加上上一个均值乘以0.9，算出来的是一个移动均值和移动方差。在训练阶段是生成移动均值和方差。那在预测阶段我们是不是能这样做呢？在预测阶段是不可以的。因为在预测阶段，一个Batch的量是非常小的，一般是几十个，甚至是几个。这样算出来的Batch均值和方差就有可能跟整个样本的差距比较大，所以我们希望使用训练时候保存下来的移动均值和移动方差。在TensorFlow的原始实现里，并没有自动保留这些参数，我们需要手动保存。另外在BN模块里，我们需要增加一个参数，来表示是在训练阶段还是在预测阶段。训练阶段的时候，我们需要不断的更新移动均值和一定的发展，但是在测试阶段是不需要更新的，这是在使用上的一些差异。</p>
 <p>同样Dice激活函数，也使用了BN层，也会有上面的这些问题，所以我们在这提醒大家使用的时候要注意一下。</p>
 <p>第三个就是Dropout。我们引入Dropout的目的是为了避免过拟合，我们希望在训练阶段通过随机的抛掉一些神经元来减小过拟合。训练阶段是一个在大量样本空间的学习过程，所以Dropout是没有问题的。但是在预测的时候是对一个个例进行打分，这个时候我们不能丢弃掉一些神经元，每一个神经元都对最后的预测结果有影响，所以需要手动的在预测阶段把Dropout的参数给关掉。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3440ea17f9a84d3988dd0bdeafac1ee4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272152644.webp" />   
     </p>
 <p>第二方面，在面对用户序列长度不等的问题�</p>
 
@@ -414,6 +414,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -447,10 +451,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -829,6 +829,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

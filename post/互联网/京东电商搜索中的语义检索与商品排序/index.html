@@ -212,7 +212,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-30b6389afa6d4faa8a4ba3708b785c02.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271532740.webp" />   
     </p>
 <blockquote>
 <p>文章作者：王松林、唐国瑜 京东算法工程师</p>
@@ -224,7 +224,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="01-背景介绍"><strong>01 背景介绍</strong></h2>
 <p>电子商务搜索是京东等电商重要组成部分，用户通过搜索找到自己需要的商品，然后下单购买。一个典型电商搜索引擎的架构，包括三个重要组成部分： <strong>query 理解、召回和排序。</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5aa42500eb6d44328059a79c614d9635.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271532099.webp" />   
     </p>
 <ul>
 <li>Query 理解：包括 query 的纠错、改写、扩展、分词等。</li>
@@ -235,14 +235,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="02-向量召回"><strong>02 向量召回</strong></h2>
 <p>向量检索作为一种信息检索方式在工业界已经被广泛应用，它能解决传统倒排检索不能解决的问题。倒排通过字面匹配方式召回商品，这种方式存在一种缺陷，不能召回字面不匹配但语义层面相近的商品， 如 query=&lsquo;2-3 周岁宝宝玩具&rsquo;是无法召回 sku=&lsquo;托马斯小火车&rsquo;的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-a1636ae52cc843f48d803e61652fd0d5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271532783.webp" />   
     </p>
 <p>通俗的讲就是训练一个模型，该模型通过将 query 和 sku 映射到统一维度空间，在该空间中，相似的商品距离近，不相近的商品距离较远。如上图例子，query= 奶粉，在高纬空间里，相对鞋子、服装、手机，奶粉商品距离 query 更近。这是建模过程，生成 query 和 sku 的向量数据。</p>
 <p>我们得到了 query 和 sku 的向量，接下来就是做检索，返回与 query 距离近的 topK 个 sku。而数据库的商品量非常多，通常是十亿级，不可能做线性遍历，考虑到时效性，会引入快速向量近似检索方法，如 KDTree、TDM、LSH、PQ、HNSW 等等，我们采用的是 PQ 算法，这里不再赘述，网上有很多材料介绍其算法。下面重点介绍我们的模型及在线检索框架。</p>
 <p>模型方面不仅要考虑 query-sku 的相关性，我们也对用户行为进行建模，同一 query 针对不同用户、同一用户不同时刻检索出更具有个性化的商品。我们使用的是 DPSR ( Deep Personalized and Semantic Retrieval ) 算法，模型融合个性化和搜索语义信息，我们的论文已被 SIGIR2020 收录。</p>
 <h3 id="1-检索系统-overview"><strong>1. 检索系统 overview</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-1e37e8d4aff04c45b76f4e133c5f18de.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271533543.webp" />   
     </p>
 <p>从整体看，离线模型是一个双塔模型结构，query 和 sku 分别有一个 model tower。Query 端包括了 query 包括 query tokens、user profile、user history events 等特征。Sku 端包括 title tokens、brand、category、shopid 等特征。</p>
 <p>离线索引 ( offline indexing )，使用的是 sku tower，导出 sku 的 embedding 构建 QP 索引。</p>
@@ -258,26 +258,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>② Query tower with multi heads</strong></p>
 <p>我们看到左侧的 tower 和右侧有两点不一样：Projection layer 和 mutli heads，目的是为了丰富 query 侧的信息。如下图所示，不同的 head 可以捕获 query 不同的语义 ( query= 苹果，语义可以是手机和水果 )，捕获不同的品牌属性 ( query= 手机，品牌可以是华为、小米 )，捕获不同的产品属性 ( query= 三星，产品属性可以是笔记本、手机 ) 等等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-21a1a495793e447fb823ccd79666999a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271533138.webp" />   
     </p>
 <p><strong>③ Attention Loss</strong></p>
 <p>Multi heads 让 query 可以生成多个 embedding 与 sku embedding 计算 score。我们采用 attenion loss 做模型优化。</p>
 <p>我们标记 query 的多个 embeding 为 Q(q)={e_1,e_2,&hellip;,e_m}，其中 e_i∈R_d，Sku 的 embedding 为 S(s)=g，g∈R^d，Query 和 sku 的打分计算如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-78b43fd9cd5947428fd285a674dde72d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271533736.webp" />   
     </p>
 <p>其中 β 是 softmax heat 参数。假设 D 表示训练预料，r(q_i,s_i^+) 为正样本，r(q_i,s_i^-) 为负样本，模型优化的 loss 可表示为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-51b9d12b58ef497f83f1eac491238c8e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271533426.webp" />   
     </p>
 <p><strong>④ Negative Sampling</strong></p>
 <p>我们采用的是用户点击数据，数据量在 10 亿级作为正样本。负样本并未使用同 session 未点击的样本，因为搜索手机，展示了小米和华为手机，不能说未点击就是不相关商品。负例分为两部分：random negatives、batch negatives。我们增加了一组超参来调整两者的比例，观察发现 random negatives 越多，召回商品的 popularity 越高，更能吸引用户点击下单，但会降低商品与检索 query 的相关性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-cb9f10ac8e8b43ee98d56c44472a033f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271533449.webp" />   
     </p>
 <p>模型训练算法具体如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-33c978c776a145aba7db9f5c6795689d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271533878.webp" />   
     </p>
 <h3 id="3-训练优化"><strong>3. 训练优化</strong></h3>
 <p>我们也尝试过更强大的神经网络，如 RNN、transform 等，得到的效果类似或稍好一些。然而一个短延时的模型更适用于工业生产建模，这样可以使用更少的服务器做有效的离线训练和在线服务。</p>
@@ -287,19 +287,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>训练数据压缩，修改训练数据格式，把共用的特征数据加载内存，训练时展开从而降低数据存储。也便于训练时做负例采样。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-91ba614b20244517bbef397b3670fe7b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271533188.webp" />   
     </p>
 <ul>
 <li>可伸缩分布式，切分大的 embedding，并将 sum up 放到 ps 以解决 worker/ps 带宽瓶颈。</li>
 <li>模型 servable 服务，我们将向量检索和 tfs 合成一个服务，不仅减少一次网络访问，降低系统 3-5ms 的平响，而且将模型分片部署，从而可以支持上百个模型同时服务或者 A/B 实验。同时 servable 服务是 CPU 和 gpu 混合部署。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-042a177569554a359d3cd5641c8a1584.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271533271.webp" />   
     </p>
 <h3 id="4-语义检索效果展示"><strong>4. 语义检索效果展示</strong></h3>
 <p>语义检索上线后获得了很好的体验效果，不仅提升了转化，长尾流量降低了近 10% 的 query 改写率，也就是说用户不需要多次改写 query，就能获得想要的商品结果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-7601cdc63119473a95cd1b76642da73e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271533467.webp" />   
     </p>
 <h2 id="03-商品排序"><strong>03 商品排序</strong></h2>
 <p>下面介绍下商品排序：</p>
@@ -308,7 +308,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们的训练数据来自于用户的搜索日志，通过将同一个 session 中用户购买的商品 ( 商品 a ) 和没有购买的商品 ( 商品 b ) 配对起来，并把购买未购买作为最终学习的 label，从而构造了用户查询-商品对训练集。</p>
 <p>根据训练数据，我们首先设计了双胞胎网络结构：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b0f0b53f3ce844dcb0a9ebd608e80f1e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271534085.webp" />   
     </p>
 <p>双胞胎网络结构有两个共享参数的模块，每个模块分别输入用户、查询和商品特征，每个模块采用 ReLU 作为激活函数，最终层的输出一个分数，两个模块的差值和数据 label 作为交叉熵损失函数的输入。</p>
 <p>在特征方面，我们使用以下几种不同类型的特征：</p>
@@ -323,7 +323,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在第一版双胞胎模型中，我们简单的对用户的历史行为做 sum pooling，但是这样缺乏和搜索商品的交互，无法精准的表示用户的兴趣；为了加强用户的交互，我们升级了模型的结构，用候选商品和用户历史商品做 attention，从而将静态的 user embedding 升级为随 query 和当前商品变化的 user embedding。</p>
 <p>我们还加入了 Graph 学习方法对 id 类特征 embedding 进行 pretrain，然后加入到模型训练中。具体方法使用用户的高质量点击行为生成商品 graph，通过 Random Walk 生成训练数据，然后利用 Skip-gram 进行训练，加入 id embedding 可以提高模型离线指标和收敛速度。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-8b064bf9afb74f399782a733150ad6e2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271534985.webp" />   
     </p>
 <h3 id="3-时效性优化"><strong>3. 时效性优化</strong></h3>
 <p>值得一提的是，为了增强排序捕捉变化的能力，提升排序的流动性，我们从三个方面：特征时效性、模型时效性、线上预估校准进行了优化。</p>
@@ -471,6 +471,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -504,10 +508,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -886,6 +886,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

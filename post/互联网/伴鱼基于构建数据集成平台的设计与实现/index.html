@@ -221,7 +221,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>二者的关系如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9862898c668540f99db9b7bfe7ad89a4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280911618.webp" />   
     </p>
 <ul>
 <li><strong>「数据同步平台」</strong> 提供基础能力，不掺杂具体的业务逻辑。</li>
@@ -241,18 +241,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="31-stat-log"><strong>3.1 Stat Log</strong></h3>
 <p>日志的集成并未接入平台，而是烟囱式的开发方式，数据集成的链路如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0212dee5c2d1416ba00215333fc9b2bb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280911312.webp" />   
     </p>
 <p>Kafka 中的数据先经过 Flume 同步至 HDFS，再由 Spark 任务将数据从 HDFS 导入至 Hive 并创建分区。整体链路较长且引入了第三方组件（Flume）增加了运维的成本，另外 Kafka 的原始数据在 HDFS 冗余存储也增加了存储的开销。</p>
 <h3 id="32-db"><strong>3.2 DB</strong></h3>
 <p>DB 数据的集成主要是基于查询的方式（批的方式，通过 Select 查询进行全表扫描得到快照数据）实现，其链路如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/be4a4b9bb1e3459eb68e4db46948e475.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280911289.webp" />   
     </p>
 <p>用户通过平台提交集成任务，由 Airflow 定时任务扫描集成平台元数据库，生成对应的取数任务 (TiDB 的数据通过 Sqoop 工具，MongoDB 的数据则通过 Mongoexport 工具)。可以看到 V1 版本并没有获取数据库的变更的日志数据，不能满足对数据变更过程的分析诉求。</p>
 <p>由于 Sqoop 任务最终要从 TiDB 生产环境的业务数据库获取数据，数据量大的情况下势必对业务数据库造成一定的影响。Mongoexport 任务直接作用在 MongoDB 的隐藏节点 (无业务数据请求)，对于线上业务的影响可以忽略不计。基于此，DBA 单独搭建了一套 TiDB 大数据集群，用于将体量较大的业务数据库同步至此 (基于 TiDB Pump 和 Drainer 组件)，因此部分 Sqoop 任务可以从此集群拉群数据以消除对业务数据库的影响。从数据流的角度，整个过程如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dc488ced9cbf4175877baef206064a79.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280911817.webp" />   
     </p>
 <p>是否将生产环境 TiDB 业务数据库同步至 TiDB 大数据集群由数仓的需求以及 DBA 对于数据量评估决定。可以看出，这种形式也存在着大量数据的冗余，集群的资源随着同步任务的增加时长达到瓶颈。并且随着后续的演进，TiDB 大数据集群也涵盖一部分数据应用生产环境的业务数据库，集群作用域逐渐模糊。</p>
 <h1 id="四数据集成-v2"><strong>四、数据集成 V2</strong></h1>
@@ -260,7 +260,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="41-stat-log"><strong>4.1 Stat Log</strong></h3>
 <p>借助 Flink 1.11 版本后对于 Hive Integration 的支持，我们可以轻松的将 Kafka 的数据写入 Hive，因此 Stat Log 的集成也就变得异常简单 (相比 V1 版本，去除了对 Flume 组件的依赖，数据冗余也消除了)，同时 Flink Exactly-Once 的语义也确保了数据的准确性。从数据流的角度，整个过程如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9b7951694ccb4091a8a7748f75d63588.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280911724.webp" />   
     </p>
 <p>目前按照小时粒度生成日志分区，几项 Flink 任务配置参数如下：</p>
 <blockquote>
@@ -275,7 +275,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>基于日志的方式对 DB 数据进行集成，意味着需要采集 DB 的日志数据，在我们目前的实现中 TiDB 基于 Pump 和 Drainer 组件（目前生产环境数据库集群版本暂不支持开启 TICDC），MongoDB 基于 MongoShake 组件，采集的数据将输送至 Kafka。</p>
 <p>采用这种方式，一方面降低了业务数据库的查询压力，另一方面可以捕捉数据的变更过程，同时冗余的数据存储也消除了。不过由于原始数据是日志数据，需要通过一定的手段还原出快照数据。新的链路如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/22042622513d4ab6b299e34d9da234f5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280911311.webp" />   
     </p>
 <p>用户提交集成任务后将同步创建三个任务：</p>
 <ul>
@@ -286,7 +286,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>「存量任务」和「Merge 任务」由离线调度平台 Dolphinscheduler (简称 DS) 调度执行，任务执行过程中将从集成任务的元数据库中获取所需的信息。目前「Merge 任务」按小时粒度调度，即每小时还原快照数据。</p>
 <p>从数据流的角度，整个过程如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/292730ff92c841c7875fda287e3af56b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280912308.webp" />   
     </p>
 <p>DB 的数据集成相较于 Stat Log 复杂性高，接下来以 TiDB 的数据集成为例讲述设计过程中的一些要点 (MongoDB 流程类似，区别在于存量同步工具及数据解析)。</p>
 <h4 id="-421-需求表达"><strong>■ 4.2.1 需求表达</strong></h4>
@@ -299,14 +299,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>存量任务虽然有且仅执行一次，但为了完全消除数据集成对业务数据库的影响，我们选择数据库的备份-恢复机制来实现。公司内部数据库的备份和恢复操作已经平台化，集群将定期进行备份 (天粒度)，通过平台可以查询到集群的最新备份，并且可由接口触发备份恢复操作，故存量的获取可直接作用于恢复的数据库。</p>
 <p>由于数据库备份的时间点与集成任务提交的时间点并不一定是同一天，这之间存在着一定的时间差将导致存量快照数据不符合我们的预期，各时间点的关系如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6d1e44d0ee634b5a9f551ca7f391ca35.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280912242.webp" />   
     </p>
 <p>按照我们的设定，存量快照数据应当是包含 T4 之前的全部数据，而实际备份的快照数据仅包含 T1 之前的全部数据，这之间存在这 N 天的数据差。</p>
 <p><strong>注：</strong> 这里之所以不说数据差集为 T1 至 T4 区间的数据，是因为增量的 Binlog 数据是以整点为分区的，在 Merge 的时候也是将整点的分区数据与存量数据进行聚合，并支持了数据去重。因此 T1 时刻的存量数据与 T0-T3 之间的增量数据的 Merge 结果等效于 T0 时刻的存量数据与 T0-T3 之间的增量数据的 Merge 结果。所以 T1 至 T4 的数据差集等效 T0 至 T3 的数据差集，即图示中的 N 天数据。</p>
 <p>对于缺失的这部分数据实则是可以在「存量任务」中进行补全，仔细分析这其实是可以通过执行的 「Merge 任务」的补数操作实现。</p>
 <p>整个「存量任务」的工作流如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1ecbf0b953da4c4fabeabadcb22c9e82.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280912115.webp" />   
     </p>
 <ul>
 <li>同步触发数据库平台进行备份恢复，产生回执 ID；</li>
@@ -317,7 +317,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="-423-merge-任务"><strong>■ 4.2.3 Merge 任务</strong></h4>
 <p>Merge 任务的前提是存量数据与增量数据都已经 ready，我们通过 _SUCCESS 文件进行标记。整个「Merge 任务」的工作流如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/caf3353fa9584cb4bbefc01250f6f74e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312280912393.webp" />   
     </p>
 <ul>
 <li>校验文件标记是否存在，若不存在说明数据未 ready ，进行报警并退出工作流等待下次调度；</li>
@@ -501,6 +501,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -534,10 +538,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -916,6 +916,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

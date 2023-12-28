@@ -216,24 +216,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="fixmatch-背后的直觉">FixMatch 背后的直觉</h2>
 <p>假设我们正在对猫与狗进行分类，但是我们的标签数据有限，并且有很多未标签的猫狗图像。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-78944b2bc0c742eebc4b7813f17f1732.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734093.png" />   
     </p>
 <p>我们通常的“监督学习”方法将是仅在标注图像上训练分类器，而忽略未标注的图像。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-4412c460161944c3bbd04fa643db1a88.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734115.png" />   
     </p>
 <p>除了忽略未标注的图像，我们还可以应用以下方法。我们知道模型也应该能够处理图像的扰动，从而提高泛化能力。</p>
 <blockquote>
 <p>如果我们对未标注的图像进行图像增强，并让监督模型预测这些图像会怎么样？由于是同一张图片，因此两者的预测的标签应该相同。</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-db819378a8804f2e94b16e64a359caef.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734739.png" />   
     </p>
 <p>因此，即使不知道其正确的标签，我们也可以将未标注的图像用作训练流水线的一部分。这是 FixMatch 及其之前的许多论文背后的核心思想。</p>
 <h2 id="fixmatch-的-pipeline">FixMatch 的 Pipeline</h2>
 <p>凭直觉，让我们看看如何在实践中实际应用 FixMatch。下图总结了整个 pipeline：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-93592c49f1db48c684ea38e21ad6fde0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734565.png" />   
     </p>
 <p>如图所示，我们使用交叉熵损失在标注的图像上训练了监督模型。对于每个未标注的图像，使用弱增强和强增强获得两个图像。弱增强图像被传递到我们的模型中，我们得到了关于类的预测。将最有信心的类别的概率与阈值进行比较。如果它高于阈值，那么我们将该类作为 ground truth 的标签，即伪标签。然后，将经过强增强的图像传递到我们的模型中，获取类别的预测。使用交叉熵损失将此概率分布与 ground truth 伪标签进行比较。两种损失组合起来进行模型的更新。</p>
 <h2 id="pipeline-的组件">Pipeline 的组件</h2>
@@ -245,7 +245,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>Random Horizontal Flip</strong></li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-8315da8098194d17aa7f31324be6ce1e.gif" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734505.gif" />   
     </p>
 <p>应用此增强的概率为 50％。对于 SVHN 数据集，将跳过此步骤，因为那些图像包含与水平翻转无关的数字。在 PyTorch 中，可以使用 transforms 执行以下操作：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">from PIL import Image
@@ -255,7 +255,7 @@ im = Image.open(&#39;dog.png&#39;)
 weak_im = transforms.RandomHorizontalFlip(p=0.5)(im)
 </code></pre><p><strong>随机水平和垂直移动</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0f61f7e920fc492c95de4f557f5af510.gif" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734854.gif" />   
     </p>
 <p>12.5％，在 PyTorch 中，可以使用以下代码来实现，其中 32 是图像的大小：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">import torchvision.transforms as transforms
@@ -270,7 +270,7 @@ translated = transforms.RandomCrop(size=32,
 <p>其中包括输出严重失真的输入图像的增强版本。FixMatch 应用 RandAugment 或 CTAugment，然后应用 CutOut 增强。</p>
 <p><strong>1. Cutout</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-8f808b4e644144a48804c8b9dbc964bc.gif" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734705.gif" />   
     </p>
 <p>这种增强会随机删除图像的正方形部分，并用灰色或黑色填充。PyTorch 没有内置的 Cutout 函数，但是我们可以重用其 <code>RandomErasing</code> 函数来达到 CutOut 的效果。</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">import torch
@@ -299,31 +299,31 @@ cutout_im = transforms.RandomErasing(p=1,
 <li>首先，你有一个 14 种可能的增强的列表，以及一系列可能的幅度。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b11c058bf3b14788ab86fb3ee28d87df.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734505.png" />   
     </p>
 <ul>
 <li>你从这个列表里随机选出 N 个增强，这里我们从列表里选出两种。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-9f4e9abf1061416fb9a3f96139c8401e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734285.png" />   
     </p>
 <ul>
 <li>然后我们选择一个随机的幅度 M，从 1 到 10。我们可以选择一个幅度 5，这意味着以百分比表示的幅度为 50％，因为最大可能的 M 为 10，所以百分比 = 5/10 = 50％。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-6f5d7205c9c745f19a2ec85bc503fb3a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734722.webp" />   
     </p>
 <ul>
 <li>现在，将所选的增强应用于序列中的图像。每种增强都有 50％的可能性被应用。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-74d03e8e9cc14086b5824aa06f946745.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734205.webp" />   
     </p>
 <ul>
 <li>N 和 M 的值可以通过在验证集上使用网格搜索的超参数优化来找到。在本文中，在每个训练步骤使用预定义范围内的随机幅度，而不是固定幅度。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-e481a8d858524d1980a678198e89f0a2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271734767.webp" />   
     </p>
 <p><strong>b. CTAugment</strong></p>
 <p>CTAugment 是 ReMixMatch 论文中引入的一种增强技术，它使用控制理论中的思想来消除对 AutoAugment 中增强学习的需求。运作方式如下：</p>
@@ -347,38 +347,38 @@ cutout_im = transforms.RandomErasing(p=1,
 </ul>
 <p>我们准备了批大小为 B 的标记图像和批大小为μB 的未标记图像。μ是一个超参数，它决定批中未标注图像的相对大小。例如，μ=2 意味着我们使用的未标注图像数量是标注图像的两倍。</p>
 <p>
-        <img class="mx-auto" alt="" src="http://rna.6aiq.com/image-4a9b50d9b28a40efb2cca42bdcb37862.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271735438.webp" />   
     </p>
 <p>该论文尝试增加μ的值，发现随着我们增加未标注图像的数量，错误率会降低。本文将μ=7 用于验证数据集。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-a31f9d063ec14559a36e7d55f0091822.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271735266.webp" />   
     </p>
 <ul>
 <li><strong>步骤 2: 监督学习</strong></li>
 </ul>
 <p>对于在标注图像上训练的监督部分，我们将常规的交叉熵损失 H()用于分类任务。batch 的总损失由 l_s 定义，并通过取 batch 中每个图像的交叉熵损失的平均值来计算。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-6da40d21ad2b4055891b1855f0e58c18.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271735743.png" />   
     </p>
 <ul>
 <li><strong>步骤 3: 伪标签</strong></li>
 </ul>
 <p>对于未标注的图像，首先我们对未标注的图像应用弱增强，并通过 argmax 获得最高概率的预测类别。这就是伪标签，将与强增强图像上的模型输出进行比较。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5213640d994847478a3d1dac5508cccf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271735642.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-4efbf97f1c19416aa0ae80f2ef9133f9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271735354.png" />   
     </p>
 <ul>
 <li><strong>步骤 4: 一致性正则化</strong></li>
 </ul>
 <p>现在，同一张未标注的图片进行了强增强，并将其输出与我们的伪标签进行比较以计算交叉熵损失 H()。未标注的总 batch 损失由 l_u 表示，并由下式给出：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-300a905bedb14a4cbe411de82b60fd42.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271735002.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-2450944b9d684daba0a9725afec51492.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271735702.png" />   
     </p>
 <p>这里τ表示阈值，在该阈值之上我们采用伪标签。该损失类似于伪标签损失。不同之处在于，我们使用弱增强来生成标签，而强增强则用于损失。</p>
 <ul>
@@ -390,7 +390,7 @@ cutout_im = transforms.RandomErasing(p=1,
 </ul>
 <p>loss=l_s + \lambda_u l_u</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-e7df1559ac604c4eb2e9feff9555ec1d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271735373.webp" />   
     </p>
 <p>有趣的结果来自 l_u。以前的工作表明，在训练过程中增加权重是很好的。但是，在 FixMatch 中，这是自动内置的。由于最初，该模型对标注的数据没有把握，因此其对未标注的数据的输出预测将低于阈值。这样，将仅在标注的数据上训练模型。但是随着训练的进行，模型对标注的数据变得更加自信，因此，对未标注数据的预测也将开始超过阈值。这样，损失将很快也开始包含对未标注图像的预测。这为我们提供了一种免费的课程学习形式。</p>
 <p>从直觉上讲，这类似于我们在儿童时期的教学方式。在早期，我们先学习一些简单的概念，例如字母表及其代表的含义，然后再继续学习复杂的主题，例如构词，句子和文章。</p>
@@ -527,6 +527,10 @@ cutout_im = transforms.RandomErasing(p=1,
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -560,10 +564,6 @@ cutout_im = transforms.RandomErasing(p=1,
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -942,6 +942,8 @@ cutout_im = transforms.RandomErasing(p=1,
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

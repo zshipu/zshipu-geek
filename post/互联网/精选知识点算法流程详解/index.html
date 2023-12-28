@@ -233,7 +233,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>当然一般HOG特征都不是对整幅图像取的，而是对图像中的一个滑动窗口取的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bfd3010330d84a6e898a63345b911eea.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281638796.png" />   
     </p>
 <p>DPM改进后的HOG特征取消了原HOG中的块(Block)，只保留了单元（Cell），如上图所示，假设一个8*8的Cell，将该细胞单元与其对角线临域的4个细胞单元做归一化操作，所以效果和原HOG特征非常类似。计算梯度方向时可以计算有符号（0-360°）或无符号（0-180°）的梯度方向，有些目标适合使用有符号的梯度方向，而有些目标适合使用无符号的梯度，作为一种通用的目标检测方法，DPM与原HOG不同，采用了有符号梯度和无符号梯度相结合的策略。</p>
 <p>提取有符号的HOG梯度，0-360度将产生18个梯度向量，提取无符号的HOG梯度，0-180度将产生9个梯度向量。如果直接将特征向量化，一个8*8的细胞单元将会产生（18+9）*4=108，维度有点高 。</p>
@@ -241,7 +241,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>具体来说：首先，只提取无符号的HOG梯度，将会产生4 <em>9=36维特征，将其看成一个4</em> 9的矩阵，分别将行和列分别相加，最终将生成4+9=13个特征向量，得到13维特征，基本上能达到HOG特征36维的检测效果。为了提高那些适合使用有符号梯度目标的检测精度，作者再对18个有符号梯度方向求和得到18维向量，也加进来，这样，一共产生13+18=31维梯度特征。实现了很好的目标检测。</p>
 <p><strong>DPM的检测模型</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/882832582f47424dade841b7c31ab511.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281638601.png" />   
     </p>
 <p>DPM V3版本的目标检测模型由两个组件构成，每一个组件由一个根模型和若干部件模型组成。上图（a）和（b）是其中一个组件的根模型和部件模型的可视化的效果(这个只是可视化的结果，不要认为是用这个当做模板与原图特征图做卷积！！，真正与原图特征图做卷积计算的是检测算子，即SVM分类模型系数W) ，每个单元内都是SVM分类模型系数w对梯度方向加权叠加，梯度方向越亮的方向可以解释为行人具有此方向梯度的可能性越大。</p>
 <p>上图（a），根模型比较粗糙，大致呈现了一个直立的正面/背面行人。</p>
@@ -251,7 +251,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>DPM采用了传统的滑动窗口检测方式，通过构建尺度金字塔在各个 尺度搜索。下图为某一尺度下的行人检测流程，即行人模型的匹配过程。某一位置与根模型/部件模型的响应得分，为该模型与以该位置为锚点（即左上角坐标）的子窗口区域内的特征的内积。也可以将模型看作一个滤波算子，响应得分为特征与待匹配模型的相似程度，越相似则得分越高。</p>
 <p>左侧为根模型的检测流程，跟模型响应的图中，越亮的区域代表响应得分越高。右侧为各部件模型的检测过程。首先，将特征图像与模型进行匹配得到部件模型响应图。然后，进行响应变换：以锚点为参考位置，综合考虑部件模型与特征的匹配程度和部件模型相对理想位置的偏离损失，得到的最优的部件模型位置和响应得分。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/df60dc3f4efc4dee8b76524c5ef50d40.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281638223.png" />   
     </p>
 <p>如上图所示，对于任意一张输入图像，提取其DPM特征图，然后将原始图像进行高斯金字塔上采样放大原图像，然后提取其DPM特征图（2倍分辨率）。将原始图像的DPM特征图和训练好的Root filter做卷积操作，从而得到Root filter的响应图。对于2倍图像的DPM特征图，和训练好的Part filter做卷积操作，从而得到Part filter的响应图。然后对其精细高斯金字塔的下采样操作。这样Root filter的响应图和Part filter的响应图就具有相同的分辨率了。然后将其进行加权平均，得到最终的响应图，亮度�</p>
 
@@ -383,6 +383,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -416,10 +420,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -798,6 +798,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

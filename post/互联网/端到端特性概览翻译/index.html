@@ -239,7 +239,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Flink对端到端的Exactly-Once语义不仅仅局限在Kafka，你可以使用任一输入输出源（source、sink），只要他们提供了必要的协调机制。例如 <a href="https://zshipu.com/t?url=http%3A%2F%2Fpravega.io%2F">Pravega</a>
 ，来自DELL/EMC的流数据存储系统，通过Flink的TwoPhaseCommitSinkFunction也能支持端到端的Exactly-Once语义。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0fd35de80332480fb6eeeef1207851c0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281625078.png" />   
     </p>
 <p>在这个示例程序中，我们有：</p>
 <ul>
@@ -253,22 +253,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在checkpoint开始的时候，即两阶段提交中的预提交阶段。首先，Flink的JobManager在数据流中注入一个checkpoint屏障（它将数据流中的记录分割开，一些进入到当前的checkpoint，另一些进入下一个checkpoint）。</p>
 <p>屏障通过operator传递。对于每一个operator，它将触发operator的状态快照写入到state backend。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/677d54589fb54af1bd35a0e4a1325f02.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281625255.png" />   
     </p>
 <p>data source保存了Kafka的offset，之后把checkpoint屏障传递到后续的operator。</p>
 <p>这种方式仅适用于operator有他的内部状态。内部状态是指，Flink state backends保存和管理的内容-举例来说，第二个operator中window聚合算出来的sum。当一个进程有它的内部状态的时候，除了在checkpoint之前将需要将数据更改写入到state backend，不需要在预提交阶段做其他的动作。在checkpoint成功的时候，Flink会正确的提交这些写入，在checkpoint失败的时候会终止提交。 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a03b611d937347c3bbc8deda3d6e673a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281625326.png" />   
     </p>
 <p>然而，当一个进程有外部状态的时候，需要用一种不同的方式来处理。外部状态通常由需要写入的外部系统引入，例如Kafka。因此，为了提供Exactly-Once保证，外部系统必须提供事务支持，借此和两阶段提交协议交互。</p>
 <p>我们知道在我们的例子中，由于需要将数据写到Kafka，data sink有外部的状态。因此，在预提交阶段，除了将状态写入到state backend之外，data sink必须预提交自己的外部事务。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f56bbfa62be04533ab0b684063d67286.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281625567.png" />   
     </p>
 <p>当checkpoint屏障在所有operator中都传递了一遍，以及它触发的快照写入完成，预提交阶段结束。这个时候，快照成功结束，整个程序的状态，包括预提交的外部状态是一致的。万一出错的时候，我们可以通过checkpoint重新初始化。</p>
 <p>下一步是通知所有operator，checkpoint已经成功了。这时两阶段提交中的提交阶段，Jobmanager为程序中的每一个operator发起checkpoint已经完成的回调。data source和window operator没有外部的状态，在提交阶段中，这些operator不会执行任何动作。data sink拥有外部状态，所以通过事务提交外部写入。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/12f249ad66ad480f9584e47a1edeb838.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281625810.png" />   
     </p>
 <p>让我们对上述的知识点汇总一下：</p>
 <ul>
@@ -422,6 +422,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -455,10 +459,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -837,6 +837,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

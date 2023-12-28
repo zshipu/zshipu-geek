@@ -234,14 +234,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>Levenshtein Distance，参考维基百科上Levenshtein Distance （来自参考文献1）给出的定义如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bfcfd785fdcb422ab7ee06450b810afe.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271704561.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5ac8a150713e4c808e8f120573190d9c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705128.png" />   
     </p>
 <p>维基百科对Damerau Levenshtein Distance（来自参考文献2） 给出的定义如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d066ec1e4a9744e98b3bb4187a629b8a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705028.png" />   
     </p>
 <p>通过维基百科上关于Levenshtein Distance和Damerau Levenshtein Distance的描述可知DLD与LD的区别仅在于：如果字符串a和b的某处前后两个相邻字符前后互换位置后相同时， LD认为是经过2次变化，编辑距离是2；然后DLD认为这是一次变化，编辑距离是1。</p>
 <p>本文接下来将由浅入深地从如下3个层次依次讨论利用编辑距离LD或DLD解决搜索引擎中查找相似字符串问题的实践技术细节：</p>
@@ -381,7 +381,7 @@ public static void main(String[] args) {
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3026478e595c474bb47b4d629804c63b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705086.png" />   
     </p>
 <ol>
 <li>
@@ -391,7 +391,7 @@ public static void main(String[] args) {
 </li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d3c7e46c55a94c7a8532602acbf13493.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705330.png" />   
     </p>
 <ul>
 <li>S：有穷状态集</li>
@@ -458,7 +458,7 @@ CHECK-SIMILAR-STRINGS (dfa,b) //判断b是否与a相似
 <li>依次迭代列出b串和a串的所有前缀子串。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/02/image-af219f2d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705284.png" />   
     </p>
 <p>如上方表格示意，第一行为目标字符串a自底向上的每一个前缀子串,第一列为待检查字符串b自底向上的每一个前缀子串。（注意空串也是前缀子串,不能省略，因为动态规划方法自底向上解决问题的一个重要基础就是空，空串或空集合）。</p>
 <ol>
@@ -479,7 +479,7 @@ for i &lt;- 0 to length[b]
   { 3,2,1,1,1 }
 }
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/02/image-49fc9ddd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705908.png" />   
     </p>
 <p>因此结论是：Levenshtein DFA的状态可定义为：任意待判断字符串与目标字符串a的依序前缀子串间编辑距离值的集合。</p>
 <p>初始状态s0 应该就是prev-substr(b) 前缀子串为空时的状态，即 { 0,1,2,3,4 }。推而广之，对于目标字符串a ,初始状态s0应为：{0,1,2,…,length[a]}。 于是形成计算初始状态函数 Start 伪代码如下：</p>
@@ -613,23 +613,23 @@ for i &lt;- 0 to length[b]
 9    return resultChars
 </code></pre><p>注意：一些网络上公开的介绍的Levenshtein DFA构造的文章，比如其中一篇比较流行的文章&lt; &lt; Levenshtein automata can be simple and fast &gt; &gt; （来自参考文献3）中给出的解释是如下图截图红色框中所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/10a12a752c444735a744ced0140ebbd3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705616.png" />   
     </p>
 <p>该文作者认为：如果某一个位置出现了状态值3，也就是编辑距离值3，（作者说这句话的上下文是最大编辑距离阈值maxEdit是2），我们就不需要再去尝试目标字符串中相应位置的字符了，原因是它从此再也不会导致一个满足最终编辑距离&lt;=maxEdit的相似匹配了。事实真是如此吗？本文作者经过充分深入的思考，最终发现该文章中此处的解释其实是错误的。为什么呢？接下来将给出一个反例以证明该文中解释是错误的，如下：</p>
 <p>假定要构造目标字符串a = ‘abc’, Levenshtein Distance 编辑距离阈值为1的Levenshtein DFA，构造过程可如下表格演示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/02/image-5d982279.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705739.png" />   
     </p>
 <p>第一行为目标字符串a, 第一列依次为假定遇到的输入符号，先是字符‘a’,再是字符’b’。可以看到当依次读入了字符’a’和’b’以后，状态转化为 s = {2,1,0,1}。此时对照定理4的内容，s[0] = 2 &gt; maxEdit (本例子中maxEdit 为1)，位置是0。于是 目标字符串a的第0号位置的字符a[0] = &lsquo;a’就不用被纳入考虑 基于上一个状态s = {2,1,0,1}的Step函数步进过程去计算新的状态，为什么呢？如果按照上面改文章的解释，因为这个位置的字符a[0] = &lsquo;a’不会再导致一个满足最终编辑距离&lt;=maxEdit为1的相似匹配了。是这样吗？我们如下表格验证一下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/02/image-720c82c8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705528.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/217f44e9ab3744369319b7eab59ff15b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705214.png" />   
     </p>
 <p>看到最终的编辑距离值是 1。1 满足小于等于maxEdit。所以其实该位置字符a[0] =‘a’ 是完全可以导致生成一个最终编辑距离&lt;=maxEdit的相似匹配的。因此该文章的解释是完全错误的。那么到底该如何解释证明定理5呢？ <strong>本文接下来创造性地给出定理4 的解释论证过程。这也是本文体现独创性的重要方面，因为相关的公开文献资料较少有能清晰且正确地阐述为什么Levenshtein DFA的求解输入符号集合Σ的Transitions()函数按照如下红框中所示这么写的：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d897fa96f84648ccaa3cf5694603c8de.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705829.png" />   
     </p>
 <p>下面给出定理5证明过程</p>
 <p>定理5证明：</p>
@@ -662,7 +662,7 @@ for i &lt;- 0 to length[b]
 <p>由以上定理5的证明过程可知，并不是像上述引用的文章中给出的解释那样：一旦生成了&gt;maxEdit的编辑距离的位置字符再次转换生成的新的最终的编辑距离就不会减小了。事实是完全可能再次减小的，之所以可以不考虑该位置的字符，是因为有等价的c0字符已经被考虑了。仅此而已。定理5虽然是很不起眼的一处代码，实则背后有着耐人寻味的理论依据。</p>
 <p>最后说一下，为什么要如此大的篇幅来实施定理5所表达的处理逻辑，即：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0f58ec8beea8444580f47afa63316637.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705826.png" />   
     </p>
 <p>原因是为了减少不必要的计算Levenshtein DFA中所有状态的次数，提高构建Levenshtein DFA的效率。</p>
 <p>至此，我们终于把 Leveshtein DFA的三大类要素：状态、转换函数和输入符号细节全部分析完毕。接下来我们给出Levenshtein DFA的伪代码实现，并给出效果图，最后分析时间复杂度。</p>
@@ -790,7 +790,7 @@ bool LevenshteinDFA::CanMatch(State s)
 </li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f3aad73aa6f744468188f5e83f81d0d8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705592.png" />   
     </p>
 <h4 id="44-创新点damerau-levenshtein-dfa">4.4 创新点：Damerau Levenshtein DFA</h4>
 <p>关于Damerau Levenshtein DFA，网络上很多实现过程都是错误的，缺乏正确理论论证支撑。本文创造性地提出了一种高效的Damerau Levenshtein DFA的构建技术，同时独创性地给出了严密的正确性论证过程。</p>
@@ -801,7 +801,7 @@ bool LevenshteinDFA::CanMatch(State s)
 <p>注意：为了便于表述，我们将下面红色方框中伪代码处理 特别地 成为 ”Damerau 条件分支”。 后文定理表述中会提到“Damerau 条件分支”表述。</p>
 <p>容易分析得出，DLD的蛮力法和动态规划法时间复杂度都与LD完全一致。此处不再展开。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bb191b1c25ae4b53a9ff2e64bf83e2dc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705447.png" />   
     </p>
 <p>下面分析Damerau Levenshtein DFA确定有穷自动机的构建技术。</p>
 <h5 id="442-分析-damerau-levenshtein-dfa">4.4.2 分析 Damerau Levenshtein DFA</h5>
@@ -884,7 +884,7 @@ public:
 </ol>
 <h5 id="443-构建damerau-levenshtein-dfa和性能分析">4.4.3 构建Damerau Levenshtein DFA和性能分析</h5>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/67dd214032864671892690c3cde3e29c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705325.png" />   
     </p>
 <p>上图给出了目标字符串a=“北京南”,最大编辑距离阈值maxEdit=1的DamerauLevenshtein DFA的示意图。图中方形框 表示状态可以被接受，即满足字符串相似性。图中方框中文本表示状态来源关系，如：s3:2122from1122:北 含义是：当前状态s3,DLD序列值是{2,1,2,2}, 它的上一个状态的DLD序列值是：{1,1,2,2}，经过字符是北。容易分析出图中大量状态被等价归一化了，减小了内存消耗和处理时间消耗。</p>
 <p>DamerauLevenshtein DFA的类定义，构建方法以及查找字符串是否满足DamerauLevenshtein相似性的伪代码基本同前文Levenshtein DFA差别不大。主要的差异是状态State相关的逻辑，前文已经论述过。</p>
@@ -1018,6 +1018,10 @@ public:
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -1051,10 +1055,6 @@ public:
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1433,6 +1433,8 @@ public:
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

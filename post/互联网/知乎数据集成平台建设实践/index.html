@@ -198,7 +198,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/582ff0e32fe5422b8c98c118a1f2c9d3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281607294.webp" />   
     </p>
 <blockquote>
 <p>分享嘉宾：孙晓光 知乎 技术平台负责人</p>
@@ -216,7 +216,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们首先来看一下在 <strong>知乎内部数据集成的业务场景</strong>。同许多互联网公司相似，过去知乎的在线存储系统主要以 MySQL 和 Redis 为主，同时对于部分数据量级较大的业务也使用了 HBase。近年来随着技术的演进，我们开始了从 MySQL 向 TiDB 的迁移。与此类似，我们也开始将 HBase 向基于 TiKV 技术栈研发的 Zetta 演进。在离线存储方面绝大多数的场景则是以 Hive 表来支撑的。</p>
 <p>从在线存储到离线存储，期间有着非常强的数据同步需求。除此以外也存在着大量的流式数据，比如消息系统中的数据，我们也希望它能够同各种在线或离线存储系统打通。过去知乎主要使用 Kafka 支撑流式数据，近期也开始引入 Pulsar。这两套消息系统同存储系统之间的数据交换存在着较强的需求。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/374f10633d2a4dcfa4569f17c06e5e00.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281607134.png" />   
     </p>
 <p>在知乎的业务场景和当前发展状态下，数据集成工作在技术和流程管理上都存在着一些 <strong>挑战</strong>。</p>
 <ul>
@@ -224,7 +224,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>另外从流程管理角度看</strong>，我们需要理解并整合散落在不同业务团队的数据，做好管理并确保数据访问的安全，所以整个数据整合的流程是相对复杂的。虽然平台化能够将复杂的流程自动化起来，但数据集成工作所固有的高成本并不能完全以平台化的方式消除。因此尽最大的可能提升流程的可复用性和可管理性也是数据集成系统需要持续应对的挑战。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/094658b7e33e49afaf03162061c11842.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281607391.png" />   
     </p>
 <p>基于这两个方向上的挑战，我们对数据集成平台的 <strong>设计目标</strong> 进行了规划。</p>
 <ul>
@@ -233,13 +233,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>从提升任务可管理性的角度看</strong>，我们还要维护好数据的血缘关系。让业务更好的去度量数据产出之间的关系，更有效的评估数据产出的业务价值，避免低质量和重复性的数据集成工作。最后我们需要对所有任务提供系统化的监控和报警能力来保障数据产出的稳定性。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e156405ee0f144b0b6b88d7a4b953e2f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281607827.png" />   
     </p>
 <h2 id="02-历史设计"><strong>02 历史设计</strong></h2>
 <p>在知乎的第一代数据集成平台成型前，大量的任务散落在各个业务方自己维护的 crontab 或者自行搭建的各种调度系统中。在这样的无管理状态下，各项集成任务的可靠性和数据质量都很难得到有效的保障。因此在这个阶段我们要最迫切解决的是管理上的问题，让数据集成的流程可管理可监控。</p>
 <p>因此，我们整合了各种存储系统的元数据系统，让大家可以在统一的地方看到公司所有的数据资产。然后在调度中心统一管理这些数据的同步任务，由调度中心负责任务的依赖管理。同时调度中心对任务的关键指标进行监控并提供异常告警能力。在这个阶段我们沿用了从前大家广泛使用的 Sqoop 来实现 MySQL 和 Hive 之间数据的同步。且在平台建设后期，随着流数据同步需求的出现，我们又引入了 Flink 来同步 Kafka 数据到 HDFS。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/00688d5f3ab54bb9b22d81cb8475e872.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281607276.png" />   
     </p>
 <p>在建设初代集成平台时我们做过一次技术选型的选择，是继续使用已经得到广泛验证的 Sqoop 还是迁移到其它可选的技术方案。同 Sqoop 相比，阿里开源的 DataX 是这个领域一个非常有竞争力的对手。如果把这两个产品进行横向对比，可以发现他们在不同的方面互相有对方所不具备的优势。</p>
 <ul>
@@ -248,7 +248,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>在当时的状态下这两个产品相互比较起来没有一款产品具有绝对的优势。所以我们选择了继续使用 Sqoop，而维持使用 Sqoop 在验证环节上也为我们节约了许多投入，所以第一代的数据集成平台在非常短的时间内就完成了开发和验证并完成上线。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/21880b89b27a4700b38b231d4a192119.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281607547.png" />   
     </p>
 <p>随着初代数据集成平台的上线和成熟，它很好的支撑了公司的数据集成业务需求并获得了显著的收益。到目前为止平台上一共有大约 4000 个任务，每天运行超过 6000 个任务实例，同步大约 82 亿条共计 124TB 的数据。</p>
 <p>在平台的帮助下，数据接入流程得到了极大的简化，为用户提供了自助解决数据集成需求的能力。并且，平台在关键的流程节点上能够辅以必要的规范约束和安全审查，在提升了管理水平的同时，整体的安全性和数据质量也得到了显著的提升。</p>
@@ -260,7 +260,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>Sqoop 代码设计不理想导致的可扩展性和可管理性弱的问题。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9f0b311a93a04a359b8c20289fd64d7a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281607945.png" />   
     </p>
 <h2 id="03-转向-flink"><strong>03 转向 Flink</strong></h2>
 <p>与 Sqoop 相对的，是用于支持 Kafka 消息到 HDFS 数据集成任务的 Flink，它以优秀的可靠性和灵活的可定制性获得了大家更多的信任。基于流式数据集成任务为 Flink 建立的信心，我们开始尝试全面转向 Flink 来建设下一代的数据集成平台。</p>
@@ -271,24 +271,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>最后基于我们对批流一体目标的认同，未来在知乎完成 <strong>大数据计算引擎技术栈的统一</strong> 也是一个极具吸引力的目标。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a719c78734a84b54ad732bec3a0b0bed.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608351.png" />   
     </p>
 <p>基于这些考量，在本轮迭代中我们选择了全面使用 Flink 替代 Sqoop，基于 Flink 完整实现了之前 Sqoop 的功能并重新建设了全新的集成平台。</p>
 <p>如下图所示，橙色部分是本轮迭代中发生了变化的部分。除了作为主角出现的 Flink 之外，在本轮迭代的过程中我们还开发了 TiDB、Redis 和 Zetta 三种存储系统的数据集成功能。在消息系统这边则直接从社区获得了 Pulsar 的支持。在我们开始开发工作的时候，Flink 已经演进到了比较成熟的阶段，对 Hive 内建了原生的支持，整个迁移过程没有遇到过多的技术困难，非常顺畅。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2ab79f0356fd4e90839919b99cc1860b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608608.png" />   
     </p>
 <p><strong>Flink 的迁移为我们带来了许多收益。</strong></p>
 <p><strong>1. 首先从可维护性上看，</strong> 相比 Sqoop 有了非常显著的改善。如下图所示，左边是过去使用 Sqoop 时的任务定义，这里是一大堆非结构化的容易出错的原始命令。而 Flink 则只需使用 SQL 定义一个源表和一个目标表再配合写入命令来定义任务。任务的可理解性、可调试性远好于从前，变成最终用户也能够理解的模式。很多问题不再需要平台开发者配合排查，用户就能够自助的解决许多常见的任务异常。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/73461580c6834836a7f351b4691b9cbc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608934.png" />   
     </p>
 <p><strong>2. 在性能角度方面，</strong> 我们也有针对性的做了许多优化。</p>
 <p><strong>2.1 调度策略</strong></p>
 <p>首先是调度策略上的优化，在第一代集成平台中我们只使用 Flink 同步流式数据，所以任务调度完全使用 Per Job。现在平台同时支持了 Session 和 Per Job 的混合调度模式，于是，对于从消息系统接入数据的 <strong>流式任务</strong> 会继续使用 Per-Job 模式运行，而 <strong>批同步的任务</strong> 则采用 Session 模式复用集群从而避免集群启动的耗时提升同步效率。</p>
 <p>当然，在这样的场景中使用 Session 集群也存在着一系列的挑战，比如工作负载随着任务提交不停变化而带来的资源需求变化问题。所以我们建设了自动的扩缩容机制来帮助 Session 集群应对变化的负载。除此以外，为了简化计费机制和隔离风险，我们还为不同的业务线创建了私有 Session 集群用于服务对应业务线的数据集成任务。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5c41206350df4b639138ca9c7da13329.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608441.png" />   
     </p>
 <p><strong>2.2 数据库</strong></p>
 <p>在关系数据库方面，我们采用了常见的 JDBC 方式对 MySQL 进行数据同步，但这种方式也会存在一些固有难以解决的问题。</p>
@@ -423,6 +423,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -456,10 +460,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -838,6 +838,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

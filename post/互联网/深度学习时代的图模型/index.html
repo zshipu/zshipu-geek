@@ -201,49 +201,49 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>为了解决这些挑战，研究人员付出了大量努力，因此该领域有大量相关论文和方法的文献。之前研究采用的架构也是变化万千，从监督式方法到无监督方法，从卷积网络到递归网络都有。但是，几乎没有什么研究系统性概述这些方法之间的区别和联系。</p>
 <p>本研究尝试通过对图深度学习方法的综述填补这一空白。如图 1 所示，该研究将现有方法分为三个大类：半监督方法、无监督方法和近期进展。具体来说，半监督方法包括图神经网络（GNN）和图卷积网络（GCN），无监督方法主要包括图自编码器（GAE），近期进展包括图循环神经网络和图强化学习。这些方法的主要区别如表 1 所示。大体上，GNN 和 GCN 是半监督方法，因为它们利用节点属性和节点标签端到端地训练模型参数，而 GAE 主要使用无监督方法学习表征。近期的先进方法使用其它独特的算法（不归属前两个类别）。除了这些高层次的区别外，在模型架构上也存在很大不同。本论文主要按照这些方法的发展史和如何解决图问题进行详细综述。本研究还分析了这些模型的区别，以及如何合成不同的架构。文章最后，简单概述了这些方法的应用和潜在方向。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c637820792d84274b9b70c8bcdebf09e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272201227.webp" />   
     </p>
 <p><em>图 1：图深度学习方法分类。</em></p>
 <p>_</p>
 <p>_</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/10d7b4b940c1446f89b10723acb0edd4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272201493.webp" />   
     </p>
 <p><em>表 1：图深度学习方法的主要区别。</em></p>
 <p>_</p>
 <p>_</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b93a5e559d984d10acab16e9033bbc14.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272201271.webp" />   
     </p>
 <p><em>表 2：常用符号表。</em></p>
 <p><strong>图神经网络（GNN）</strong></p>
 <p>这部分介绍适用于图数据的最初半监督方法——图神经网络（GNN）。</p>
 <p>GNN 的来源可以追溯到「前深度学习」时代。GNN 的思路很简单：为了编码图的结构信息，可以用低维状态向量 s_i（1 ≤ i ≤ N）表示每个节点 v_i。受递归神经网络的启发，这里采用状态的递归定义：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bb6bce72b97949b6a565946424f0b18a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272201112.webp" />   
     </p>
 <p>其中 F(·) 是待学习的参数函数。得到 s_i 以后，使用另一个参数函数 O(·) 获取最终输出：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4eb02c2f7c7840d9b5418c42c160fcfd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272201946.webp" />   
     </p>
 <p>对于图任务，这些研究建议添加一个对应整个图独特属性的特殊节点。为学习模型参数，可采用以下半监督方法：在使用雅各比方法迭代地求解 Eq. (1)，使之达到稳定点之后，使用 Almeida-Pineda 算法执行一个梯度下降步，以最小化任务特定的目标函数（例如回归任务的预测值和真值之间的平方误差）；然后，重复该过程直到收敛。</p>
 <p>在 Eqs. (1)(2) 这两个简单公式的帮助下，GNN 扮演了两个重要角色。GNN 结合了处理图数据的一些早期方法，如递归神经网络和马尔可夫链。GNN 的理念也为未来研究提供了一些启发：未来我们会发现，一些当前最优的 GCN 实际上具备与 Eq. (1) 类似的公式，同时也遵循与近邻交换信息的框架。事实上，GNN 和 GCN 可以被统一成一个框架，GNN 等同于使用相同层到达稳定状态的 GCN。</p>
 <p>尽管 GNN 理论上很重要，它也有一些缺陷。首先，要确保 Eq. (1) 有唯一解，F(·) 必须是「压缩映射」（contraction map），这严重限制了建模能力。其次，由于梯度下降步之间需要很多次迭代，GNN 的计算成本高昂。由于这些缺陷、算力的缺乏（那时候 GPU 并未广泛用于深度学习）以及缺乏研究兴趣，当时 GNN 并不为社区所熟知。</p>
 <p>GNN 的一个重大改进是门控图-序列神经网络（Gated Graph Sequence Neural Network，GGS-NN）[26]。其作者将 Eq. (1) 的递归定义换成了门控循环单元（GRU）[27]，从而移除了对「压缩映射」的需求，并且该网络支持使用现代优化技术。Eq. (1) 被替换成：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8c829f4029c5452498410b5722b803d6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272201665.webp" />   
     </p>
 <p>GNN 及其扩展有很多应用。如 CommNet [29] 使用 GNN 学习 AI 系统中的多智能体沟通，它将每个智能体作为一个节点，并在执行动作前先与其他智能体进行多个时间步的沟通来更新智能体状态。Interaction Network (IN) [30] 使用 GNN 进行物理推理，它将对象表示为节点、将关系表示为边、使用伪时间作为模拟系统。VAIN [31] 引入了注意力机制来衡量不同的交互，从而改进了 CommNet 和 IN。关系网络 (RN) [32] 使用 GNN 作为关系推理模块，来增强其他神经网络，在视觉问答任务上取得了不错的结果。</p>
 <p><strong>图卷积网络（GCN）</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/09486c02073d4db2a3e45584024fc3cc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272201419.webp" />   
     </p>
 <p><em>表 3：不同图卷积网络（GCN）的对比。</em></p>
 <p><strong>图自编码器（GAE）</strong></p>
 <p>自编码器（AE）及其变体在无监督学习中得到广泛使用，它适合在没有监督信息的情况下学习图的节点表征。这部分首先介绍图自编码器，然后介绍图变分自编码器和其他改进版变体。</p>
 <p>GAE 的主要特征见下表：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9b1629c0a69644fab60c16cd275595f3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272201221.webp" />   
     </p>
 <p><em>表 4：不同图自编码器（GAE）的对比。</em></p>
 <p><strong>自编码器</strong></p>
@@ -251,73 +251,73 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>**</p>
 <p>用于图的 AE 来源于稀疏自编码器（Sparse Autoencoder，SAE）。其基本思路是，将邻接矩阵或其变体作为节点的原始特征，从而将 AE 作为降维方法来学习低维节点表征。具体来说，SAE 使用以下 L2 重建损失：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6d265ee579934167be40a531dfbd8111.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272201994.webp" />   
     </p>
 <p>实验证明 SAE 优于非深度学习基线模型。但是，由于其理论分析不正确，支持其有效性的底层机制尚未得到解释。</p>
 <p>结构深度网络嵌入（Structure Deep Network Embedding，SDNE）[76] 解决了这个难题，它表明 Eq. (35) 中的 L2 重建损失对应二阶估计，即如果两个节点具备类似的近邻，则它们共享类似的隐藏表征。受表明一阶估计重要性的网络嵌入方法的启发，SDNE 修改了目标函数，添加了一个类似于拉普拉斯特征映射的项：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1c95b84bcb5a4e968a402fe3060718c3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272201899.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/eab9d1f355c444e9a837aad83cf914eb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272201494.webp" />   
     </p>
 <p><em>图 7：SDNE 框架图。节点的一阶估计和二阶估计都使用深度自编码器来保存。</em></p>
 <p>受到其他研究的启发，DNGR [77] 将 Eq. (35) 中的转换矩阵 P 替换成随机 surfing 概率的正逐点互信息（PPMI）矩阵。这样，原始特征可以与图的随机游走概率关联起来。但是，构建这样的输入矩阵需要 O(N^2 ) 的时间复杂度，无法扩展到大规模图。</p>
 <p>GC-MC [78] 进一步采取了不同的自编码器方法，它使用 [36] 中的 GCN 作为编码器：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ab7826d68ace4fe88b875a17d67915c2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272201250.webp" />   
     </p>
 <p>解码器是简单的双线性函数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cef6def1e385401bb8df611b390fd359.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272201209.webp" />   
     </p>
 <p>DRNE [79] 没有重建邻接矩阵或其变体，而是提出另一种修改：使用 LSTM 聚合近邻信息，从而直接重建节点的低维向量。具体来说，DRNE 最小化以下目标函数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7367e9a61064408e9aa3cd286c3d840f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272201894.webp" />   
     </p>
 <p>与之前研究将节点映射到低维向量的做法不同，Graph2Gauss (G2G) [80] 提出将每个节点编码为高斯分布 h_i = N (M(i, :), diag (Σ(i, :)))，以捕获节点的不确定性。具体来说，作者将从节点属性到高斯分布均值和方差的深度映射作为编码器：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/56f97c0bad9d43b1af9ae4b6acbed7ab.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272201594.webp" />   
     </p>
 <p><strong>变分自编码器</strong></p>
 <p>与之前的自编码器不同，变分自编码器（VAE）是另一种将降维与生成模型结合的深度学习方法。VAE 首次在 [81] 中提出用于建模图数据，其解码器是一个简单的线性乘积：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b4677c5a166e4bcca970587c0eadc83d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272201176.webp" />   
     </p>
 <p>至于均值和方差矩阵的编码器，作者采用 [36] 中的 GCN：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5c4a3b317f2c46ea95f3f25383926892.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272201850.webp" />   
     </p>
 <p>由于完整图需要重建，其时间复杂度为 O(N^2)。</p>
 <p>受 SDNE 和 G2G 的启发，DVNE [82] 提出另一个用于图数据的 VAE，它也将每个节点表示为高斯分布。但与之前使用 KL 散度作为度量的研究不同，DVNE 使用 Wasserstein 距离来保留节点相似度的传递性。与 SDNE 和 G2G 类似，DVNE 也在目标函数中保留一阶估计和二阶估计：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1ea12221e48b498e8661bc1f385109d3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272202602.webp" />   
     </p>
 <p>重建损失为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ab449b274be14d2d9c4720b465ee0856.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272202196.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8163c7ddedff4333aa825993167045cc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272202993.webp" />   
     </p>
 <p><em>图 8：DVNE 框架图。DVNE 使用 VAE 将节点表示为高斯分布，并采用 Wasserstein 距离来保留节点相似度的传递性。</em></p>
 <hr>
 <p><strong>其他改进</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7ccb1f6465d543bbb0596a982be47829.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272202909.webp" />   
     </p>
 <p><em>图 9：ARGA/ARVGA 框架图。该方法向 GAE 添加了对抗训练机制。（图中的符号与本文主题略有不同，图中的 X 和 Z 分别对应 F^V and H。</em></p>
 <p><strong>近期进展</strong></p>
 <p>下表展示了近期进展中多种方法的特征。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d8e3ad28c9e64bfa817a509e380cb461.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272202824.webp" />   
     </p>
 <p><strong>图循环神经网络（Graph RNN）</strong></p>
 <p>You et al. [94] 将 Graph RNN 应用到图生成问题中。他们使用两个 RNN，一个用于生成新节点，另一个自回归地为新添加的节点生成边。他们展示了这种分层 RNN 架构可以从输入图中高效学习，且时间复杂度也是可接受的。</p>
 <p>动态图神经网络（Dynamic Graph Neural Network，DGNN）[95] 使用时间感知 LSTM [100] 来学习动态图中的节点表征。在建立新的边之后，DGNN 使用 LSTM 更新两个交互节点（interacting node）及其直接近邻的表征，即考虑一步传播效应（one-step propagation effect）。作者展示了时间感知 LSTM 可以很好地建模边结构的已建立顺序以及时间间隔，这反过来惠及大量图应用。</p>
 <p>也可以将 Graph RNN 结合其他架构，如 GCN 或 GAE。例如，RMGCNN [96] 将 LSTM 应用于 GCN 的结果，以渐进地重建图（如图 10 所示）。该方法旨在解决图稀疏性问题。动态 GCN [97] 使用 LSTM 收集动态网络中不同时间片的 GCN 结果，旨在捕获时空图信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7e6739ffa0994eedbeb57aad7f459bb8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272202635.webp" />   
     </p>
 <p><em>图 10：RMGCNN 架构图。RMGCNN 将 LSTM 添加到 GCN 中，以渐进地重建图。</em></p>
 <p><strong>图强化学习</strong></p>
@@ -461,6 +461,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -494,10 +498,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -876,6 +876,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

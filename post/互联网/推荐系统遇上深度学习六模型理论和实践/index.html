@@ -203,106 +203,106 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="1原理">1、原理</h1>
 <p>PNN，全称为Product-based Neural Network，认为在embedding输入到MLP之后学习的交叉特征表达并不充分，提出了一种product layer的思想，既基于乘法的运算来体现体征交叉的DNN网络结构，如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/2aa7c87076fd46dc94c7f488970a158f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001293.png" />   
     </p>
 <p>按照论文的思路，我们也从上往下来看这个网络结构：</p>
 <p><strong>输出层</strong></p>
 <p>输出层很简单，将上一层的网络输出通过一个全链接层，经过sigmoid函数转换后映射到(0,1)的区间中，得到我们的点击率的预测值：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/ae39fc9a1a444b79900c937e53a9f7d1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001666.png" />   
     </p>
 <p><strong>l2层</strong></p>
 <p>根据l1层的输出，经一个全链接层 ，并使用relu进行激活，得到我们l2的输出结果：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/71ee082e26e54758890cb314aa0e6d03.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001449.png" />   
     </p>
 <p><strong>l1层</strong></p>
 <p>l1层的输出由如下的公式计算：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/de4b2ac1cc1a437490ffc56daa39f9f0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001350.png" />   
     </p>
 <p>重点马上就要来了，我们可以看到在得到l1层输出时，我们输入了三部分，分别是lz，lp 和 b1，b1是我们的偏置项，这里可以先不管。lz和lp的计算就是PNN的精华所在了。我们慢慢道来</p>
 <p><strong>Product Layer</strong></p>
 <p>product思想来源于，在ctr预估中，认为特征之间的关系更多是一种and“且”的关系，而非add&quot;加”的关系。例如，性别为男且喜欢游戏的人群，比起性别男和喜欢游戏的人群，前者的组合比后者更能体现特征交叉的意义。</p>
 <p>product layer可以分成两个部分，一部分是线性部分lz，一部分是非线性部分lp。二者的形式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/3ff7b951dd01440eac8fceaa0c4a34cc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001214.png" />   
     </p>
 <p>在这里，我们要使用到论文中所定义的一种运算方式，其实就是矩阵的点乘啦：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/247ba9e0642645aba906ffa9ffe64e6c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001974.png" />   
     </p>
 <p>我们先继续介绍网络结构，有关Product Layer的更详细的介绍，我们在下一章中介绍。</p>
 <p><strong>Embedding Layer</strong></p>
 <p>Embedding Layer跟DeepFM中相同，将每一个field的特征转换成同样长度的向量，这里用f来表示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/3c41e2c859ab4d4da332c5011c2a1e7d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001583.png" />   
     </p>
 <p><strong>损失函数</strong></p>
 <p>使用和逻辑回归同样的损失函数，如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/fab164bf2e8d4df3a97f818b2d0a30a3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001211.png" />   
     </p>
 <h1 id="2product-layer详细介绍">2、Product Layer详细介绍</h1>
 <p>前面提到了，product layer可以分成两个部分，一部分是线性部分lz，一部分是非线性部分lp。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/8a12fefa00aa4d5aa798c765fbb8e65b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001995.png" />   
     </p>
 <p>看上面的公式，我们首先需要知道z和p，这都是由我们的embedding层得到的，其中z是线性信号向量，因此我们直接用embedding层得到：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/5dd32817bc48409998a0dbdf4d0873e3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001964.png" />   
     </p>
 <p>论文中使用的等号加一个三角形，其实就是相等的意思，你可以认为z就是embedding层的复制。</p>
 <p>对于p来说，这里需要一个公式进行映射：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/576b50dd4a064fe9b720d03d9ad0cb4e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001904.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/60f4abd4c32341669f4e25c976ae83ec.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001639.png" />   
     </p>
 <p>不同的g的选择使得我们有了两种PNN的计算方法，一种叫做Inner PNN，简称IPNN，一种叫做Outer PNN，简称OPNN。</p>
 <p>接下来，我们分别来具体介绍这两种形式的PNN模型，由于涉及到复杂度的分析，所以我们这里先定义Embedding的大小为M，field的大小为N，而lz和lp的长度为D1。</p>
 <h2 id="21-ipnn">2.1 IPNN</h2>
 <p>IPNN的示意图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/d832bef0aa8b497fbae9f410e1a760c7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001623.png" />   
     </p>
 <p>IPNN中p的计算方式如下，即使用内积来代表pij：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/b5af93bc06a246cabd520bb5d73dcb94.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001627.png" />   
     </p>
 <p>所以，pij其实是一个数，得到一个pij的时间复杂度为M，p的大小为N <em>N，因此计算得到p的时间复杂度为N</em> N <em>M。而再由p得到lp的时间复杂度是N</em> N <em>D1。因此 对于IPNN来说，总的时间复杂度为N</em> N(D1+M)。文章对这一结构进行了优化，可以看到，我们的p是一个对称矩阵，因此我们的权重也可以是一个对称矩阵，对称矩阵就可以进行如下的分解：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/8d4f6915282248a88799ffa18d4070da.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001239.png" />   
     </p>
 <p>因此：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/61b5e7c54f54424d95582ba6ce7a077c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001886.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/9b914b36c01c4a69a920941be81338d2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001709.png" />   
     </p>
 <p>因此：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/e38f0ad612354d93be06c63833d51f6c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001742.png" />   
     </p>
 <p>从而得到：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/ba3e8995678f4be7a2f121e827af056c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001086.png" />   
     </p>
 <p>可以看到，我们的权重只需要D1 * N就可以了，时间复杂度也变为了D1 <em>M</em> N。</p>
 <h2 id="22-opnn">2.2 OPNN</h2>
 <p>OPNN的示意图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/f4f27ead82ea44f1babe881c1fbe9685.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001467.png" />   
     </p>
 <p>OPNN中p的计算方式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/4b4d531c77914f22b5b421e14ac704b0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001542.png" />   
     </p>
 <p>此时pij为M <em>M的矩阵，计算一个pij的时间复杂度为M</em> M，而p是N <em>N</em> M <em>M的矩阵，因此计算p的事件复杂度为N</em> N <em>M</em> M。从而计算lp的时间复杂度变为D1 * N <em>N</em> M*M。这个显然代价很高的。为了减少负责度，论文使用了叠加的思想，它重新定义了p矩阵：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/fff513f91616460288761e8587036779.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001245.png" />   
     </p>
 <p>这里计算p的时间复杂度变为了D1 <em>M</em>(M+N)</p>
 <h1 id="3代码实战">3、代码实战</h1>
@@ -527,6 +527,10 @@ else:
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -560,10 +564,6 @@ else:
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -942,6 +942,8 @@ else:
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

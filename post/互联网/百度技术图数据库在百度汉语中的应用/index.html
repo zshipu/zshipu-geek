@@ -208,7 +208,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2a71491bf5f1470a9900f250fe76d638.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272313674.webp" />   
     </p>
 <blockquote>
 <p>揽月 百度Geek说</p>
@@ -220,11 +220,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="21-图数据库介绍"><strong>2.1 图数据库介绍</strong></h3>
 <p>图数据库（graph database，GDB）是一个使用图结构进行语义查询的数据库，它使用节点、边和属性来表示和存储数据。该系统的关键概念是图，它直接将存储中的数据项，与数据节点和节点间表示关系的边的集合相关联。这些关系允许直接将存储区中的数据链接在一起，并且在许多情况下，可以通过一个操作进行检索。图数据库将数据之间的关系作为优先级。查询图数据库中的关系很快，因为它们永久存储在数据库本身中。可以使用图数据库直观地显示关系，使其对于高度互连的数据非常有用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/53335b6c47004862b26218bba6833261.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272313926.webp" />   
     </p>
 <p>图一为db-engines网站各类数据库的趋势图，可以看出从2014年开始，图数据库一直处于领先地位。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/27d97a0237b44775af084553b0693363.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272313063.webp" />   
     </p>
 <p>图二 是不同种类数据库系统数量，可以看出，常见的关系型数据库、kv型数据库占比最高，除此之外，图数据库占比也非常大。</p>
 <h3 id="22-图数据库选型"><strong>2.2 图数据库选型</strong></h3>
@@ -244,13 +244,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="31-汉语服务部署"><strong>3.1 汉语服务部署</strong></h3>
 <p>HugeGraph的部署十分简单，百度汉语内部使用统一的虚拟化技术加PaaS平台直接部署。对于汉语类这种高读极低写的使用场景，为了保证业务的低耗时与高可用，我们并没有采用分布式的部署方式，而是直接采用多主的的方式进行部署，每份实例上存储全量的数据，这样可以在同机房的图数据库中快速获取数据；当然这种部署方式最大的缺点是可能存在数据不一致，为了解决这一问题，百度汉语采用数据统一干预平台来保证整个集群数据的一致性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7f8a55331ac94637b577ba45e365e98f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272313439.webp" />   
     </p>
 <p>对于汉语搜索这种场景，对内容召回的耗时有着极高的要求，为了避免一些长尾耗时，我们没有将HugeGraph的接口直接对外暴露，而是在上层添加一层Nginx转发服务，主要有以下两个作用：1）灵活控制业务的超时时间，避免上层业务未主动断开造成影响 2）使用nginx proxy_cache来缓存数据，加速结果的返回。因为汉语类检索的实体内容并不多，在数据库层使用缓存，可以直接返回30%左右的热点数据。各个服务器之间通过Afs云盘实现数据文件共享。</p>
 <h3 id="32-汉语干预平台"><strong>3.2 汉语干预平台</strong></h3>
 <p>上面介绍了百度汉语使用HugeGraph的部署方式:采用横向冗余的方式进行部署，这就对数据更新时，多个集群数据一致性提高了要求。汉语类的的一些数据错误、网络新词出现时，都需要手动更新原数据，百度汉语为了支持快速的数据干预，为此搭建了数据统一干预平台，此平台可以对线上数据进行实时干预，同时为了能够将数据进行离线分析，为此数据平台还需要支持批量数据的导入和导出。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a0eb3704d28d4699b8a7950e749eb21c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272313777.webp" />   
     </p>
 <p>目前干预平台支持实时数据干预、批量数据干预和数据导出三种基本功能。在服务层，干预平台会记录每次的操作内容，会定期检查干预的结果是否符合预期，同时对于历史的操作能够进行数据回溯。为了保证HugeGraph集群的同时更新成功的“事务性”，这里增加了N次重试的机制，当重试仍然失败时，会主动触发报警进行人工干预。</p>
 <p>在集群未部署前，需要我们先把数据准备好，由于百度汉语使用的是RocksDb引擎，所以我们把准备好的数据打包之后上传到Afs云盘上，当HugeGraph服务开始部署时，从Afs中拉取数据包，按照我们配置好的目录加载数据，启动HugeGraph服务。</p>
@@ -378,6 +378,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -411,10 +415,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -793,6 +793,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

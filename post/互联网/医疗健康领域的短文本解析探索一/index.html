@@ -216,13 +216,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>对于上下文特征来说最简单的方式，使用 high-quality pattern 去匹配[1]，韩家炜老师在 17 年提到一篇文章 MetaPAD，详细的阐述了如何利用实体周围丰富的上下文信息，去确定模版边界，和抽取内容。如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-3d61605858a4498d962e2bb8518dcd5a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641435.jpeg" />   
     </p>
 <p><strong>President Barack Obama&rsquo;s government of United States reported that&hellip;</strong> 对于这句话来说，实体替换后 <strong>President [&amp;Politician] government of [&amp;Country] reported that</strong> -&gt; 抽取模版 <strong>[&amp;Politician] government of [&amp;Country]</strong> 。大规模文本统计模版信息，根据模版质量函数，对生成模版进行过滤，保留高质量模版[2]。这种模版方式抽取实体的准确率还是比较高的。对于抽取来说，一份高质量的模版可以为我们提供准确的实体信息，而且准确的实体信息和比较好的质量检测方法可以为我们提供一份质量很棒的高质量模版，这是一个 bootstrapping 的过程，不断的迭代不断的获取新的数据。</p>
 <p><strong>phrase 内部特征</strong>，最简单的使用字词向量的 one-hot encoder，统计 n-gram 信息，其实 phrase 内部特征也或多或少的包含着上下文相关信息，传统的 word2vec，使用 CBOW 和 skip-gram 方式构建，其实就是对当前词或上下文进行预测时隐藏层的权重。Pos-Tag 词性标注，使用上下文相关信息，构建隐马尔可夫模型，对文本进行序列标注，判断词性。其实也完全可以用字的 n-gram 去计算信息熵和 PMI 等信息，例如在 2012 年 Matrix67 提出了《互联网时代的社会语言学：基于 SNS 的文本数据挖掘》计算左右临字信息熵和 PMI 进行新词挖掘时，用到的就是字的统计结果，但是在大量的文本下，字排列组合的结果太多了，当 n 取到 7 的时候信息量和计算量已经异常的大了，所以利用 pos pattern 作为代替字或词的 n-gram 统计，在计算量上还是可以接受的，而这也在 <strong>AutoPhrase</strong> 和 <strong>Segphrase</strong> 中见到了一些明显的效果。</p>
 <p>举一个上述两种方式在丁香园搜索日志中常见的几个例子：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-8c16fb850ce9498184fab54a0fa7dce3.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641148.jpeg" />   
     </p>
 <p>上图可以看到，在做 Phrase Mining 时其实我们考虑的主要是这两方面的特征，一种是模板抽取，一种是内部结构的排列组合。其实这些是很普通的方法，在工业界也取得一个很好的效果，可以在项目初期获得一大批的 high-quality pattern 和 high-quality phrase，关于内部特征的应用我们之后介绍。</p>
 <h3 id="实现自动化抽取和评估">实现自动化抽取和评估</h3>
@@ -234,7 +234,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>于是之后 <strong>AutoPhrase</strong> 使用 wiki 百科的专业领域内的主题词作为外部知识引入进行了优化。</p>
 <p>2019 年腾讯发了一篇关于可解释性推荐的论文[3-4]，其中提到了使用三种方法构建 Concept Mining System，并实现了自动化抽取和评估的整个过程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-076a13c209864388b5eb8c2c76a65b50.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641568.jpeg" />   
     </p>
 <ol>
 <li>Bootstrapping：使用一些优质种子模版（Pre-defined/Seed Pattern）,对用户 query 和点击帖子的 title 进行抽取，之后过分类器模型，使用构建好的 Discriminator 进行分类，打分，过滤。使用过滤后的 concept 生成新的模版，再对模版进行规则过滤的方式获取高质量模版加入到 Pre-defined Pattern 中之后反复迭代。</li>
@@ -243,13 +243,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>这篇文章的前期构建 Concept Mining System 其实主要是抽取一些上层的概念，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-20a5a7e5fb7f4157987b276d23d1b8be.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641530.webp" />   
     </p>
 <p>根据出现的概念和搜索的实体进行连接，进行可解释性推荐。这篇论文中对于 Concept Mining System 构建的过程中，起到实现自动化抽取的是 Discriminator 的分类器模型，其中文中说的是使用 300 个样本作为训练数据，并且使用 GBDT 进行分类。</p>
 <p>在复现这篇论文时踩了很多坑，最大的坑在于构建这个分类器模型，因为三种不同的抽取方式，抽取的结果会有很大的不同，同时过分类器时会有很多细节上的问题。比方说 N-gram 抽取时给定 N=5，如果 Bootstrapping 抽取的结果 N&gt;5 时怎么办？对于 N-gram 和 Sequence Labeling 来说抽取后的结果也可以将模版抽取出来，那么这个模版是否可以应用到 Bootstrapping 中呢？还有在工业化实现整个抽取系统时，如何节约成本？如何定义 concept，例如：肺炎看似实体，但是在构建层级结构时，获得性肺炎是肺炎的下层实例，而且肺炎的治疗应该属于肺炎的属性，那么肺炎算不算 concept？这些都是在复现这篇论文要考虑的事情。</p>
 <p>踩了很多坑，加了一些改进的方案，Concept Mining System 基本复现完成，展示部分抽取结果，其中评分在 0.6 以上的结果还是可以接受的：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-eacd438bb1ec4f04ac9c0af3c022fccb.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641283.jpeg" />   
     </p>
 <p>这篇论文主要的目的是做一种可解释性的推荐，给帖子一个 concept，感兴趣的同学可以 <strong>关注</strong>， <strong>收藏</strong>， <strong>点赞</strong> 😁。后续出 short query understanding 的相关内容时会细说。</p>
 <p>刚才我们提到一个 phrase 内部特征这个概念，那么这个应该如何应用呢？举一个简单的例子，在医疗领域中比较棘手的一个概念叫做 <strong>症状</strong>，症状其实是由一些存在实体类型的原子词构成的，比方说：</p>
@@ -260,7 +260,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="前方开始进阶">⚠️前方开始进阶</h3>
 <p>刚才提到了一些都是工业化的规则方式抽取，在一个从无到有的过程中，这些也算是应该趟一趟的路。当然了如果财大气粗找一批领域内专家，建立一个小目标，先标一个亿的数据，训练一个泛化能力极强的模型肯定是最好的方法(☠️前提标注人员标注的数据质量需要保证。可以理解标注工作繁重枯燥，失常会出现漏判、误判的情况，比如“ <strong>手里剑</strong>”被误标注为 <strong>手术器械）</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0040bc4816cf44cc95ecda599c4b7a61.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641147.webp" />   
     </p>
 <p>18 年华东理工的学生发了一篇结构化电子病历数据的文章[5]，其对症状词做了拆分，将症状切分为原子症状、身体部位、中心词等等。这篇文章的内容很简单，主要是使用 POS 特征，使用 Bidirectional LSTM-CRF 进行序列标注的方式进行拆分。数据方面他将症状组合词分为 11 类：</p>
 <p>Atomsymptom:症状原子词，不可再分的症状词，比方说：疼痛，酸痛</p>
@@ -276,36 +276,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Modifier:修饰词，下降，上升等文章主要描述对电子病历中的症状进行拆分，使用细粒度拆分的方式结构化电子病历中的症状，模型也是序列标注中通用的模型，在应用方面没有介绍太多信息。</p>
 <p>这个组还有一篇文章[6]很有意思，相当于在上篇文章对应用方面做了拓展。使用知识图谱去构建一个症状词的上下位关系，对症状数据标准化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5aad5d75301f41b5ae41300da7667574.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641728.jpeg" />   
     </p>
 <p>左右两侧分别是两种症状词，首先对左侧候选集进行标准化，其中标准化流程包括，细粒度分割，细粒度标准化替换（ <strong>头</strong> 替换为 <strong>头部</strong>），去停用词等操作， <strong>头疼</strong> 标准化为 &lt; 头部，疼痛 &gt;， <strong>头部左侧存在阵发性头疼</strong> 可以整理为 &lt; 头部，阵发性，疼痛 &gt;。因为一些包含关系，我们可以将 <strong>头疼</strong> 作为 <strong>头部左侧存在阵发性头疼</strong> 的上位词。这里用到的细粒度类型只有三种 Atomsymptom，Body，Head。其实这篇文章好的一点是可以在做实体链接的时候对发现的新症状词进行实体对齐提供一个方案，如果是库中不存在的词，我们也可以根据其上位词进行推断用户意图。使用切分的方式有效的将数据细粒度结构化，构建知识图谱上下位关系进行存储和推理。这种方法也可以有效的帮我们解决刚才提到的 <code>胸骨上部</code>—&gt; <code>胸骨上裂</code> 和 <code>心功能检测</code>—&gt; <code>肺功能检测</code> 这个问题。</p>
 <p>简单拓展一下，今年 2019 ACL 刘知远老师团队[7]中提到最小语义单位——》义原（sememe），义原是最基础的不宜在分割的最小语义单位，这篇论文中将 Sememe Knowledge 作为外部知识的方式应用，其证明了义原知识在语义构成实验中的有效性。反观原子词分割这件事情，其实就是一个垂直领域中的最小义原的分割，后续我们有考虑将一些义原知识作为外部特征的方式优化我们的抽取和连接的结果。有兴趣的童鞋也可以看看其 2017 年的一篇使用义原知识进行词的表示学习的文章[8]。</p>
 <p>那么既然细粒度分割在理论上是对我们进行实体抽取和实体链接是有益处的，那么让我们愉快的搞事情吧，转身看了看 ner 抽取的几十万的症状…&hellip;还有几十万的疾病…&hellip;</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-83623543ce87414ab27f6cf246b86924.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641449.webp" />   
     </p>
 <p>细粒度分割是一个长期迭代的过程，需要不断更新，然后不断的优化补全，所以看来没办法一口吃成一个胖子了，但是一些普适化的东西还是可以搞一搞的，比方说根据用户日志的搜索频率找一些高频的症状和疾病，简单拆分一下还是可以进行下去的。</p>
 <h3 id="继续-踩坑">继续 ⚠️踩坑</h3>
 <p>说到结构化电子病历这件事，其实目前是一个比较细的一个研究方向，刚提到用序列标注，知识图谱构建上下位关系进行标准化。其实还可以用表示学习[9]进行标准化统一。</p>
 <p>首先需要了解一下 International Classification of Disease 10th revision （ICD-10）这个数据集，此数据集是根据疾病的某些特征，按照规则疾病进行分类，并用编码进行表示。其中收录了大概 2w 多的疾病。如下图所示</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-57d4ad5728814f6a83bb180fc9db1fbd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641014.webp" />   
     </p>
 <p>18 年 Yizhou Zhang 提出一种 multi-view attention based denoising auto-encoder(MADAE)模型[9]。模型结构如下所示</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-8684a894626743568f6124bfa95a98e5.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641800.jpeg" />   
     </p>
 <p>基于一种多视图注意力网络的降噪自编码器进行病历数据的标准化流程。DAE 本身是为了学习到较鲁棒性的特征，在网络的 embedding 层引入随机噪声，可以说是破坏了输入数据并重构出了原始数据，所以其训练出来的特征会更鲁棒，Multi-view encoders 根据加入噪音后的原始文本进行 embedding，根据其词，字，音三种向量表示结果过一层 attention 再 decoder 回到最初的输入数据 。与之前提到的拆分标准化方法不同，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-89eb1c2196e5446db713753a161220f6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641433.webp" />   
     </p>
 <p>对于 C2a，C2b，C2c 来说我们可以使用标准化拆分的方式，将其拆分为 &lt; 不稳定性，心绞痛 &gt;，之后可以推出 C2a，C2b，C2c 在描述同一个内容。而在 MADAE 模型中其实是以一个为标准，比方说 C2a 为库中关于 <code>不稳定性心绞痛</code> 标准的写法，而 C2b，C2c 可以说是其别名或 mention。我们使用 MADAE 模型的 encoder 层输出的向量结果与知识库中所保存标准化写法进行相似度计算，就可以解决一些同音字和写法结构上的不统一的问题，再按照 Denoising Network Emdedding 中根据 co-occur 统计上下文信息，对 Denoising Text Embedding 进行相似度加权的方式，我们也可以找出一些同义词。Denoising Text Embedding 的方法的结果：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-1e70f75c152743928eb9fa2e0c9c523e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641260.webp" />   
     </p>
 <p>这么做的优点是，首先我们数据库中不用存储太多的节点信息。可以将图的节点信息减少，节省了部分空间，并且我们可以使用这种方式挖掘同义词。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-3be75b5036ea4ee19600b2052fad390b.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271641938.jpeg" />   
     </p>
 <p>如果 ner、phrase mining 等等挖掘出了与数据库中无法完全匹配的新词时我们可以摒弃那种用于字层面的相似度计算方法，例如 bm25、编辑距离</p>
 
@@ -435,6 +435,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -468,10 +472,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -850,6 +850,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

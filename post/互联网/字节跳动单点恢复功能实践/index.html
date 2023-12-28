@@ -236,7 +236,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>注：我们的实现基于 Flink-1.9，1.11 后的网络模型加入了 Unaligned Checkpoint 的特性，可能会有所变化。</strong></p>
 <p>我们先将 Flink 的上下游 Task 通信模型简单抽象一下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/72302a5a8075416d93c986e35c679a0e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271818327.webp" />   
      Figure. 上下游通信模型上下游 Task 感知彼此状态的逻辑，分三种情况考虑：</p>
 <ul>
 <li>Task 因为逻辑错误或 OOM 等原因 Fail，Task 自身会主动释放 network resources，给上游发送 channel close 信息，给下游发送 Exception。</li>
@@ -247,7 +247,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="优化方案">优化方案</h2>
 <p>根据我们的解决思路，我们来绘制一下单个 Task 挂了之后，整个 Job 的通信流程：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/92413ba548d2421ea670afd6702d8b9c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271818018.webp" />   
      Figure. 单点恢复流程Map(1) 失败之后：</p>
 <ol>
 <li>将 Map(1) 失败的信息通知 Source(1) 、Sink(1) 和 JobManager。</li>
@@ -258,7 +258,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="上游发送端的优化">上游发送端的优化</h3>
 <p>我们再细化一下上游发送端的相关细节，</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2ff249c206024f42aebcd77a021dcd34.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271818491.webp" />   
      Figure. 上游数据发送流程(1) Netty Server 收到 Client 发送的 Partition Request 后，在对应的 Subpartition 注册读取数据的 SubpartitionView 和 Reader。</p>
 <p>(2) RecordWriter 发送数据到不同的 Subpartitions，每个 Subpartition 内部维护一个 buffer 队列，并将读取数据的 Reader 放入到 Readers Queue 中。（Task 线程）</p>
 <p>(3) Netty 线程读取 Readers Queue，取出对应的 Reader 并读取对应 Subpartition 中的 buffer 数据，发送给下游。（Netty 线程）</p>
@@ -267,7 +267,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="下游接收端的优化">下游接收端的优化</h3>
 <p>同样，我们来细化一下下游接收端的细节：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f66b6e48735f48068f112c84da052b2d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271818141.webp" />   
      Figure. 下游数据接收流程仔细来看，其实和上游的线程模型颇有类似之处：</p>
 <p>(1) InputGate 初始化所有的 Channel 并通过 Netty Client 和上游 Server 建立连接。</p>
 <p>(2) InputChannel 接收到数据后，缓存到 buffer 队列中并将自己的引用放入到 Channels Queue 里。（Netty 线程）</p>
@@ -276,7 +276,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>简单的方案是说，我们在 InputChannel 中直接调用 InputGate 或者 InputProcessor，做 buffer 清空的操作，但是这样引入一个问题，由于 InputChannel 收到 Error 是在 Netty 线程，而 InputProcessor 的操作是在 Task 线程，这样跨线程的调用打破了已有的线程模型，必然会引入锁和调用时间的不确定性，增加架构设计的复杂度，并且因为 InputProcessor 会对每一条 record 都有调用，稍有不慎就会带来性能的下降。</p>
 <p>我们沿用已有的线程模型，Client 感知到上游 Task 失败的消息之后告知对应的 Channel，Channel 向自己维护的 receivedBuffers 的末尾插入一个 UnavailableEvent，并等待 InputProcessor 拉取并清空对应 Channel 的 buffer 数据。示意图如下所示，红色的模块是我们新增的部分：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7e28e442f6ad4fffbdacf19b1141313e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271818727.webp" />   
      Figure. 下游改动示意图### JobManager 重启策略的优化</p>
 <p>JobManager 重启策略可以参考社区已有的 RestartIndividualStrategy，比较重要的区别是，在重新 deploy 这个失败的 Task 后，我们需要通过 ExecutionGraph 中的拓扑信息，找到该 Task 的下游 Tasks，并通过 Rpc 调用让下游 Tasks 和这个新的上游 Tasks 重新建立连接。</p>
 <p>这里实现有一个难点是如果 JobManager 去 update</p>
@@ -403,6 +403,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -436,10 +440,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -818,6 +818,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

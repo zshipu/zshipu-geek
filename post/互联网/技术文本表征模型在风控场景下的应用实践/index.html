@@ -206,7 +206,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>周思丞 58技术</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f05fc213864c43778ec7511a75fa4249.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271934507.webp" />   
     </p>
 <h2 id="01-导语">01 导语</h2>
 <p>本文介绍了文本表征算法在58信安场景下的探索和实践。信息安全场景下业务种类繁多，在对用户发帖内容进行审核时，通过对文本建模得到其表征，既可以用于对文本的直接分类算法，也可以通过聚类算法快速得将文本信息归类。</p>
@@ -215,29 +215,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="03-基于词向量的文本语义表征模型">03 <strong>基于词向量的文本语义表征模型</strong></h2>
 <p>利用词向量加权得到文本表征的方法是一种非常简单但是有效的句子向量表示算法。基于词向量的方法的主要计算流程如图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d6d88e43c1c34ef483463784e9ac8c27.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271934260.png" />   
     </p>
 <p>图1 基于词向量的文本表征计算流程</p>
 <p>首先，通过分词算法将文本预料切分成词的集合，去除掉句子中存在的停用词，并计算每个词算的bm25权重分值。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/54a71a2f378c46e0973698caedf8822b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271934095.png" />   
     </p>
 <p>拿到bm25分值后，选择分值topn的token，然后利用word2vec[1]、GloVe[2]和fastText[3]等词向量对单词进行表征训练，但考虑到词向量的表征能力与训练语料的丰富程度有关，因此采用了腾讯开源的词向量表征数据，该词向包括了800w条200维的中文词条，涵盖了绝大部分业务中出现的单词。最终文本表征的计算方式下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d6d1af76d19e4b8baa5eac9ae8b62714.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271934187.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2cbcb3f7ffe64f8fa7c751c615f13921.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271935118.png" />   
     </p>
 <p>表1 招聘业务场景下文本表征示例</p>
 <p>表1为基于词向量的文本表征的示例。在获取句子表征之后，我们在文本涉黄招聘数据集上进行分类实验评测，结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d6fb7c705af54166afb89ba06605318f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271935087.png" />   
     </p>
 <p>表2 基于词向量文本表征在分类场景下的效果</p>
 <p>采用词向量表征的方式相较于训练的TextCNN[4]模型效果有略微的下降，由于算法的结构简单，在其他的业务场景下直接修改训练目标即可完成分类模型构建。但在风控场景下，除了对发帖数据直接进行判别之外，另一个重要的场景是对用户发帖内容进行聚类。考虑到基于词向量的建模比较粗糙，文本表征可能会受到部分非关键信息的词语影响，例如：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/25ba34fd30ea47288569e56cc899fa89.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271935024.png" />   
     </p>
 <p>表3 基于词向量文本表征的badcase分析</p>
 <p>这类的badcase由于个别词发生变化，导致原本语义比较相似的query计算得到的相似度并不高，因此在我们用户发帖内容聚类的业务场景下，当前的表征能力十分有限。如果想要能够得到包含语义信息更丰富的文本表征，我们需要考虑通过采用更加细粒度的模型进行建模。</p>
@@ -247,19 +247,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="1-基于simbert的文本语义表征模型">1. 基于SimBert的文本语义表征模型</h4>
 <p>根据通常的预训练模型的使用流程，我们第一时间会想到的采用有监督数据来微调模型，但在处理文本表征任务时，如何设计合理的下游任务则成为了关键。simbert[7]是目前通过有监督方式获取语义相似度的一种有效的解决方案，同时我们将bert模型换成了效果更好的roberta模型。训练语料是基于业务标注的相似句对，通过一句来预测另一句的相似句生成任务来构建Seq2Seq部分，然后[CLS]的向量事实上就代表着输入的句向量，所以可以同时用它来训练一个检索任务，如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3f4da737b0034f9bb859bf063f43fcf4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271935832.png" />   
     </p>
 <p>图2 SimBert模型输入示例</p>
 <p>为了能够训练出更加精准的文本语义表征模型，需要审核人员根据业务治理需求标注100k的相似发帖数据。首先，在同一个batch中，将相似句“副驾出差月九千可新手” 和 “副驾送货月九千不拖欠”按照[CLS]SENT_a[SEP]SENT_b[SEP]和[CLS]SENT_b[SEP]SENT_a[SEP]分别加入进去。设计两个训练任务，相似句生成任务和相似句分类任务。</p>
 <p>相似句生成任务是通过Seq2Seq模型，从SENT_a生成SENT_a。SENT_a内部做self-attention学习到句子本身的表征，SENT_a和SENT_b之间做attention，学习额外的句子信息。句子分类任务则是把batch中[CLS]向量拿出来得到一个句子向量的矩阵，然后对d维度做归一化，然后和转置后的矩阵做内积得到的相似矩阵，并mask对角线上的位置，作为一个分类任务训练，每个样本的目标标签是它的相似句。本质上是将batch内所有的非相似样本都当作负样本，借助softmax来增加相似样本的相似度，降低其余样本的相似度。</p>
 <p>最终我们采用招聘发帖相似内容召回作为验证方案，同时对roberta最后一层(last-avg)和最后一层加第一层(last-first-avg)得到的mean-pooling句向量进行了对比实验，得到结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/82f1bdaa517f420792c3fd68c051851b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271935819.png" />   
     </p>
 <p>表4 招聘发帖内容召回准确率在SimBert的模型效果</p>
 <p>相对于加权词向量的方式，有监督的simbert明显能够学习到一些相似文本间的特征，效果更好。但我们也发现了问题，simbert的开源的训练预料明显内容更为相似，可以进行Seq2Seq的文本生成任务。而在我们业务上难以标注这样相似的数据，例如图2中的相似句子，让模型去做生成任务确实存在着极高的难度，很可能只有检索任务对模型的效果。因此，我们把生成任务去掉后进行试验：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ebab74f888534b4983c53d0c7f8804a2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271935027.png" />   
     </p>
 <p>表5 招聘发帖内容召回准确率在SimBert-without-Seq2Seq的模型效果</p>
 <p>实验证明去掉Seq2Seq任务后，文本召回准确率仅有小幅下降，这就说明的确生成任务并不适合我们的业务，simbert模型中只有检索式任务发挥了功效。那么如何才能进一步提升呢？</p>
@@ -388,6 +388,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -421,10 +425,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -803,6 +803,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

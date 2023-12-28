@@ -203,11 +203,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>语言是复杂的。每一门语言都经历了几百年，甚至几千年的长期演变和发展，形成了一套复杂的文法和句法规则。这些文法和句法规则复杂多变，例如一些词或者短语存在多音、多意、多用等现象，对语言的使用者提出了较高的要求；一旦语言使用者对语言掌握不够或者粗心大意时，则很容易发生用词不当、张冠李戴等错误。虽然这些错误看起来微不足道，但正所谓“差之毫厘，谬以千里”，特别是在某些场景（比如外交场合），即使很小的语言错误也可能带来非常恶劣的影响。</p>
 <p>自然语言处理常见的任务包括词法分析，句法分析，语义计算等，这些任务要取得理想的结果，输入数据的准确性是基本前提，因此从NLP的整体技术角度来说，文本纠错起着保驾护航的作用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/abaa19f4169c4fefb42b1b7f0f36f35b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272309642.webp" />   
     </p>
 <p>纠错技术相对于词法分析，句法分析等受到的关注一直较小，一方面是因为文本出错的比例比较小，在一些重要场合，也有专门人员进行校验；另一方面本身问题也相对较难，其要求计算机对语言规则以及文本语义有深刻的理解。在2000年以前，业界主要依靠长期积累的纠错规则和纠错词典来进行纠错，比如微软的文档编辑产品WORD即采用这种方法。随着机器学习技术的发展，纠错问题受到了学术界和工业界越来越多的关注，其中有两大主流方法：一种解决思路是将语言错误归类，然后采用Maxent、SVM等分类方法对这些类别进行重点识别；另外一种思路是借鉴统计机器翻译（SMT）的思想，将语言纠错等价为机器翻译的过程，即错误文本翻译为正确文本，并随之出现了一系列的优化方法。最近几年，随着神经机器翻译（NMT）技术的快速发展，人们逐步将SMT与NMT技术结合起来解决纠错问题。最近几年中文纠错的研究也得到较多的关注和发展，并陆续举办了几届中文纠错评测，例如CGED与NLPCC等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1bc524125309416e91050b39a0c40af2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272309471.webp" />   
     </p>
 <p>目前，基于机器翻译的方法已经成为文本纠错的主流技术，主要思想是把纠错看成同种语言中错误句子翻译为正确句子的过程，如上图中的公式所示，其核心由语言模型和翻译模型组成。语言模型学习语言规则、语言知识；翻译模型从平行语料中学习用户的纠错行为。SMT纠错一般的典型做法：首先基于平行语料训练对齐模型，得到多粒度（字、词、音、形、短语）的混淆矩阵（Phrase Table）；针对具体的纠错实例，基于句子中的错误点从Phrase Table中召回可能的正确候选，然后基于句子语义理解，对这些纠错候选进行排序，从而得到正确的结果。</p>
 <p>而NMT方法主要依赖于大规模的监督语料，忽略掉中间的各种步骤，直接实现端到端的学习。NMT方法相对于SMT方法的优势在于避免了SMT每一步过程中导致的错误传递，同时具有更强大的学习能力。</p>
@@ -217,7 +217,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>▪ <strong>技术目标</strong></p>
 <p>为了满足以上的需求，百度中文纠错一方面需要支持多种类型的错误识别，另一方面需要支持不同模态的输入数据，同时还需要提供快速的场景迁移以及深度定制能力。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0f174a43137f48b397e774cce84622ef.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272309188.webp" />   
     </p>
 <p>我们把中文常见错误总结分为三类：</p>
 <ol>
@@ -232,12 +232,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/45940c7d54854b55b83be59bbef4d248.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272309224.webp" />   
     </p>
 <p>▪ <strong>整体架构</strong></p>
 <p>百度中文纠错的整体架构如下图所示。整体上，将纠错流程，分解为错误检测、候选召回、纠错排序三个关键步骤。通过引入语言知识、上下文理解和知识计算的核心技术，提升不同类型错误的解决能力。最后，支持SMT based和NMT based两套Framework，形成完整的系统架构。下面分别进行详细介绍。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7cc5c602d70c4ba3a39bba73ff161bfb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272309356.webp" />   
     </p>
 <p>▪ <strong>关键步骤</strong>（错误检测-&gt;候选召回-&gt;纠错排序）</p>
 <p>错误检测的目标是识别输入句子可能存在的问题，采用序列表示（Transformer/LSTM）+CRF的序列预测模型，这个模型的创新点主要包括：</p>
@@ -253,32 +253,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b4576c4eca3546cd863a9463dbf3b907.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272309212.webp" />   
     </p>
 <p>候选召回指的是，识别出具体的错误点之后，需要进行错误纠正，为了达到更好的效果以及性能，需要结合历史错误行为，以及音形等特征召回纠错候选。主要可分为两部分工作：离线的候选挖掘，在线的候选预排序。离线候选挖掘利用大规模多来源的错误对齐语料，通过对其模型，得到不同粒度的错误混淆矩阵。在线候选预排序主要是针对当前的错误点，对离线召回的大量纠错候选，结合语言模型以及错误混淆矩阵的特征，控制进入纠错排序阶段的候选集数量与质量。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/50993099cae54890bd3956369bf7727e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272309059.webp" />   
     </p>
 <p>纠错排序解决的是，由于纠错的正确结果具有唯一性，如何在召回的纠错候选中将正确的结果排在第一位。百度中文纠错采用的是Deep&amp;Wide的混合模型结构，Deep部分学习当前错误点上下文表示，Wide部分基于形音、词法、语义、用户行为等特征学习原词与候选词的多维度距离表示，另外通过GBDT&amp;LR模型学习到更好的特征组合。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/97ab95df696b4b7588dcfdf46f0c2bbf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272309955.webp" />   
     </p>
 <p>▪ 核心技术（语言知识-&gt;上下文理解-&gt;知识计算）</p>
 <p>中文纠错需要在错误检测、候选召回、纠错排序的策略层面上取得较好效果，最关键的因素仍然在于解决最基本的自然语言处理问题：语言知识、上下文理解、知识计算。语言知识完成对语言规则的学习，对语言结构的理解，具体包括词法分析、句法分析以及语言模型；上下文理解是指需要理解错误点上下文所表示的内容或语义，百度中文纠错主要通过Contextual-DNN模型来学习，并通过AOA attention机制解决长依赖问题，帮助错误纠正。知识计算方面，从知识（客观规律）的维度考虑问题，重点是做好文本理解与知识关联。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/152f2ab96b714f5cbe0ead59a96be104.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272309965.webp" />   
     </p>
 <p>语言知识方面，词/句法分析不详细展开，主要介绍语言模型的训练和使用。传统的语言模型，主要是根据前面一串词预测下一个词的概率，直接应用于纠错的主要问题在于忽略了原词的信息。因此，我们提出了一种受限词表的语言模型，该受限词表基于原词生成，通过基于受限词表的训练和预测，能够对易错词进行更好的区分，具体例子如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/24a19f8291cd423ca0ccf81b7a450a1f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272309816.webp" />   
     </p>
 <p>关联知识方面，看下图中的例子“邓论因档期问题提出爸爸去哪儿”，可以通过原始错误标题在标准语料中基于检索（IR）或者上下文context Memory的方式，补充到大量同原始标题相关的精准局部知识。利用这些精准的局部知识来辅助纠错排序。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5d288d1c76e24025a79bcf8f3494cbc0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272309464.webp" />   
     </p>
 <p>文本理解方面，以用户与智能音箱的交互句子“小度小度，请帮我导航到深圳市学府路百度国籍大厦”为例，可能会出现低频的道路或POI，如果采用统计得到的语言模型来纠错而不去理解句子表达的内容，显然是不恰当的。需要从全局理解句子内容以及理解句子的每个成分，解决低频领域知识的泛化问题。具体做法是通过对文本进行语义分析得到语义特征，应用到纠错排序模型中，得到更好的纠错结果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e4bd7ff157134487a4b7d235d0c8d2e9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272309543.webp" />   
     </p>
 <p>▪ 系统框架</p>
 <p>中文纠错在策略层面涉及错误检测、候选召回、纠错排序，核心技术层面涉及语言知识、上下文理解、知识计算，那如何来构建一个完整的中文纠错系统呢？百度的中文纠错系统支持两种纠错系统框架：ECNet和Restricted-V NEC。ECNet系统把纠错任务分成很多步骤、多个模型，每个模型解决具体的特定问题，然后通过Pipeline的方式串联，得到最后结果；这种方式的优点在于方便分析问题，能够针对各个问题进行重点突破，但是也存在两个明显问题：</p>
@@ -291,10 +291,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6a9c17b757e146f7baebf70f9f8a087a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272309383.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/232d80c5df9d434d8bd1b9d3696c80bb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272309068.webp" />   
     </p>
 <h1 id="三纠错应用">三． 纠错应用</h1>
 <p>▪ 开放域纠错</p>
@@ -302,7 +302,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>写作辅助：在用户编辑文章的过程中，纠错服务能够及时发现用户错误行为，提升内容创作者的创作质量和效率。</p>
 <p>内容审核：对于完稿的文章，纠错服务会对其标题和内容进行错误检测，由专业人员进行二次审核，保证文章质量，提升用户的阅读体验。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c72d67582a7d4446834c6ae449c0492c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272309765.webp" />   
     </p>
 <p>▪ 场景纠错</p>
 <p>场景纠错，与开放域纠错的主要区别在于领域知识的使用，场景纠错除了做好语言规则的刻画和上下文理解外，还需要对场景中的领域知识有充分的学习。场景纠错的重点是针对输入数据做文本的理解、基于场景语料获取关联知识、基于大规模语料学习语言规则。场景纠错的应用点比如地图检索和语�</p>
@@ -435,6 +435,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -468,10 +472,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -850,6 +850,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

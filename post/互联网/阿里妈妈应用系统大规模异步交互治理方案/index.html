@@ -197,7 +197,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>阿里妈妈广告应用团队在平台化支撑业务发展的思路下，启动了对应用系统架构、研发模式、组织阵型各个维度的改革和升级，以期通过打造全新的“广告业务平台”来提升应用系统的工程建设能力、沉淀广告业务资产、建设专业的人才梯队、赋能营销业务的创新发展。</p>
 <p>其中，业务中心化是推进应用平台化建设最重要的工作之一，我们将广告业务按照领域进行抽象划分，建成了多个业务中心组成的业务平台，每个中心负责该领域的相关业务，多个中心互相配合横向支撑各业务线的需求。业务中心化后，之前单体的推广服务系统变成了微服务架构下的多个业务中心，之前系统内部的调用变成了系统和系统之间的调用，如何管理好由此带来的大量复杂异构系统间的异步调用和通信，是我们亟需抽象和解决问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/92419789833041cf8aca14ce6688f001.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281917752.png" />   
     </p>
 <h1 id="-1-问题分析">▐ 1. 问题分析</h1>
 <p>在微服务架构下，中心之间为了配合完成复杂的业务，系统和系统之间的“耦合”变的不可避免。系统间的调用方式大体分为同步和异步两类，由于中心对外以HSF（RPC）服务的方式暴漏，故同步调用问题已经很好的由HSF（RPC）中间件解决，因此我们需要重点关注异步交互方式。</p>
@@ -214,19 +214,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>问题排查难：</strong> 一旦出现问题，排查人员需要把异步链路中涉及到的各个节点从头到尾熟悉一遍，且由于各个系统日志记录的方式、格式、详细程度各不相同，存储的位置分散，这大大影响了问题排查效率。</p>
 <p>上述异步链路存在的问题，最根本原因还是链路处于不可见不可管不可控的状态。那么，如何做到可见可管可控呢？我们应该都了解ESB（企业服务总线）的思想，ESB采用了“总线”这样一种模式来管理和简化应用之间的集成拓扑结构，以广为接受的开放标准为基础来支持应用之间在消息、事件和服务级别上动态的互连互通，是一种在松散耦合的服务和应用之间标准的集成方式。我们的异步链路正是缺少了这样一个集中的点来进行配置、管理和问题排查，借鉴ESB的思想，我们希望整个异步链路的交互应该由网状结构调整成更便于管理的总线型结构。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fa1147703e1b48e7b846570ee752ea2f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281917468.webp" />   
     </p>
 <h1 id="-2-方案设计">▐ 2. 方案设计</h1>
 <p>本着这个目标，我们打造了工具平台：AMB应用消息总线（以下简称AMB)，来解决应用内部、应用之间基于消息的异步处理请求，由AMB完成消息转换、路由、处理等功能，并提供统一的监控、报警、重试、流控等机制。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7f84421af99e47aca6c2d975922d54de.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281917874.png" />   
     </p>
 <p>AMB的系统架构如下图，主要分为控制台和后端。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/630e90f81c604eb19ef3a77151414da1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281917213.png" />   
      控制台主要面向异步链路的开发运维同学，包含“创建任务”和“任务管理”两块。“创建任务”模块可以在上面进行链路的可视化、拖拽式配置，我们抽象了一组标准组件，基于这些组件可以完成流程的配置；</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/44c959840d7149a78415a9466e53138b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281917794.webp" />   
      “任务管理”模块主要负责链路的启停管理，链路运行状态及日志的查看。</p>
 <p><strong>AMB的后端采用分层的思想进行设计（如下图所示）:</strong></p>
 <ul>
@@ -236,12 +236,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>最底层是我们的执行引擎，AMB的运行时是跑在我们另一个任务托管的工具平台鹊桥上的。一条AMB流程占用一个Jstorm的拓扑，流程和流程之间做到了完全隔离。利用Jstorm的扩容缩容机制，我们可以快速响应流程压力的变化。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c0671f74bba8451a91d39dc662eab435.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281917045.png" />   
     </p>
 <h1 id="-3-技术亮点">▐ 3. 技术亮点</h1>
 <p>从目前实际场景出发，AMB建设有以下几方面亮点：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/44dfaa501d9c49e486108f881f1c814c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281917619.png" />   
     </p>
 <p><strong>易用性：</strong> AMB的用户是我们的研发同学，在日常研发场景中，用户对于易用性和效率有很高的要求，需要让用户感知到配置流程比开发流程更快更方便。为此，我们研发了自助化的流程配置控制台，基于我们预定义的标准组件，用户通过拖拽式的所见即所得的方式就可以完成一条流程的配置。</p>
 <p><strong>丰富的流程组件：</strong> 组件相当于搭建一条流程的原子积木，组件之间相互配合来完成一条流程的业务逻辑。目前平台已经抽象了一系列的通用组件，基本能够满足大部分的研发需求，对于组件库不能满足的，我们还支持自定义组件，来扩展组件库的能力。同时标准组件库本身也在随着业务需求的演进而不断的丰富。</p>
@@ -370,6 +370,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -403,10 +407,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -785,6 +785,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

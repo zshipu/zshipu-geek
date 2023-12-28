@@ -255,7 +255,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="lucene-查询过程">Lucene 查询过程</h2>
 <p>在lucene中查询是基于segment。每个segment可以看做是一个独立的subindex，在建立索引的过程中，lucene会不断的flush内存中的数据持久化形成新的segment。多个segment也会不断的被merge成一个大的segment，在老的segment还有查询在读取的时候，不会被删除，没有被读取且被merge的segement会被删除。这个过程类似于LSM数据库的merge过程。下面我们主要看在一个segment内部如何实现高效的查询。为了方便大家理解，我们以人名字，年龄，学号为例，如何实现查某个名字（有重名）的列表。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2018/10/45fd584c3fcd44a296d3d660c6a6ab9d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272104297.png" />   
     </p>
 <p>在lucene中为了查询name=XXX的这样一个条件，会建立基于name的倒排链。以上面的数据为例，倒排链如下：</p>
 <p>姓名</p>
@@ -274,13 +274,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>插入“Alan”</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2018/10/84d0e38402754835a3985791be2d1ec9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272104125.png" />   
     </p>
 <ol>
 <li>插入“Alice”</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2018/10/f21878f0312c45f0a2b79fdcef4df250.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272104088.png" />   
     </p>
 <p>这样你就得到了一个有向无环图，有这样一个数据结构，就可以很快查找某个人名是否存在。FST在单term查询上可能相比hashmap并没有明显优势，甚至会慢一些。但是在范围，前缀搜索以及压缩率上都有明显的优势。</p>
 <p>在通过FST定位到倒排链后，有一件事情需要做，就是倒排链的合并。因为查询条件可能不止一个，例如上面我们想找name=&ldquo;alan&rdquo; and age=&ldquo;18&quot;的列表。lucene是如何实现倒排链的合并呢。这里就需要看一下倒排链存储的数据结构</p>
@@ -292,19 +292,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>SkipList的层次，这个是指整个SkipList有几层</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2018/10/5a43b19155694fa3a10ef87ec472fd2d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272104911.png" />   
     </p>
 <p>有了这个SkipList以后比如我们要查找docid=12，原来可能需要一个个扫原始链表，1，2，3，5，7，8，10，12。有了SkipList以后先访问第一层看到是然后大于12，进入第0层走到3，8，发现15大于12，然后进入原链表的8继续向下经过10和12。</p>
 <p>有了FST和SkipList的介绍以后，我们大体上可以画一个下面的图来说明lucene是如何实现整个倒排结构的：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2018/10/6631ee4072ac45eeba4b04e84dc05af8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272104987.png" />   
     </p>
 <p>有了这张图，我们可以理解为什么基于lucene可以快速进行倒排链的查找和docid查找，下面就来看一下有了这些后如何进行倒排链合并返回最后的结果。</p>
 <p><strong>倒排合并</strong></p>
 <p>假如我们的查询条件是name = “Alice”，那么按照之前的介绍，首先在term字典中定位是否存在这个term，如果存在的话进入这个term的倒排链，并根据参数设定返回分页返回结果即可。这类查询，在数据库中使用二级索引也是可以满足，那lucene的优势在哪呢。假如我们有多个条件，例如我们需要按名字或者年龄单独查询，也需要进行组合 name = &ldquo;Alice&rdquo; and age = &ldquo;18&quot;的查询，那么使用传统二级索引方案，你可能需要建立两张索引表，然后分别查询结果后进行合并，这样如果age = 18的结果过多的话，查询合并会很耗时。那么在lucene这两个倒排链是怎么合并呢。</p>
 <p>假如我们有下面三个倒排链需要进行合并。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2018/10/cdbdf82fddbd47f2b1e0b66804c8eac3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272104290.png" />   
     </p>
 <p>在lucene中会采用下列顺序进行合并：</p>
 <ol>
@@ -323,7 +323,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>BKDTree</strong></p>
 <p>在lucene中如果想做范围查找，根据上面的FST模型可以看出来，需要遍历FST找到包含这个range的一个点然后进入对应的倒排链，然后进行求并集操作。但是如果是数值类型，比如是浮点数，那么潜在的term可能会非常多，这样查询起来效率会很低。所以为了支持高效的数值类或者多维度查询，lucene引入类BKDTree。BKDTree是基于KDTree，对数据进行按照维度划分建立一棵二叉树确保树两边节点数目平衡。在一维的场景下，KDTree就会退化成一个二叉搜索树，在二叉搜索树中如果我们想查找一个区间，logN的复杂度就会访问到叶子结点得到对应的倒排链。如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2018/10/dce377af43444bf089608d108a0dd860.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272104224.png" />   
     </p>
 <p>如果是多维，kdtree的建立流程会发生一些变化。</p>
 <p>比如我们以二维为例，建立过程如下：</p>
@@ -334,7 +334,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>下图是一个建立例子：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2018/10/abb21a2e8c2448cc846b82df16107a78.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272105308.png" />   
     </p>
 <p>BKDTree是KDTree的变种，因为可以看出来，KDTree如果有新的节点加入，或者节点修改起来，消耗还是比较大。类似于LSM的merge思路，BKD也是多个KDTREE，然后持续merge最终合并成一个。不过我们可以看到如果你某个term类型使用了BKDTree的索引类型，那么在和普通倒排链merge的时候就没那么高效了所以这里要做一个平衡，一种思路是把另一类term也</p>
 
@@ -464,6 +464,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -497,10 +501,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -879,6 +879,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

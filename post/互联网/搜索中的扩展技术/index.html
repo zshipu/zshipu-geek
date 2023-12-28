@@ -210,7 +210,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>总的来说， <strong>召回</strong> 于搜索是满足检索内容的大概范围，排序是次要的，需要关注的是 Query 与召回列表的相关度（字词层面和主题层面）。我们需要 <strong>Query 扩展技术</strong> 的原因这里大致将它们归纳为 <strong>三</strong> 个方面。 <strong>首先</strong>，用户输入的 Query 普遍较短，平均 2-3 个词，可能无法很好命中需要找的内容； <strong>其次</strong>，Query 中的词通常会与多个主题关联，搜索引擎根据简短的几个词检索返回的内容可能不是用户所关心的那个主题； <strong>另外</strong>，用户可能对自己找的东西只有一个大致的概念（举个栗子，假设用户想要找“黑人抬棺”的视频，但是并不知道这个词的准确表述，转而使用“棺材”、“黑人” 这些词来搜索），Query 扩展此时可理解为类似联想的功能，或者可以理解为将某个“罕见”搜索词改写成“常见”搜索词。</p>
 <p>完整的 <strong>Query 扩展</strong> 技术路线可见下图</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-1d3a4c32551e47db98c7e8422419c049.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272014683.png" />   
     </p>
 <p>对原始 Query 首先需要做若干预处理，包括必要的 <strong>纠错、补全</strong>，从 Query 中筛选出需要进行扩展的 <strong>主题词或实体词</strong>，对最终的目标词完成扩展。这里我们着重关注 <strong>Expansion Terms</strong> 部分。</p>
 <h4 id="从哪里扩展">从哪里扩展</h4>
@@ -218,20 +218,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h5 id="一业务场景语境">一、业务场景语境</h5>
 <p>从用户的搜索 log 中可以挖掘出大量搜索词的固定搭配</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-58ce58aaf74649dd869765623128f663.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272014814.png" />   
     </p>
 <p>这些词首先保证了与原始 Query 较高的匹配度（都包含“知识”这个词），在业务上也满足大多数用户关注的话题。缺点是这一类扩展词仅来自于统计学层面，与语义无关，无法满足语义层面上的相关性。</p>
 <h5 id="二文档语料">二、文档语料</h5>
 <p>除了来自用户的搜索 Query，文档库也是扩展词的重要来源。丰富的语境能够提供词之间的相互关系</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-86ac6ea7f8de4642a01e83f7572126fd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272014775.png" />   
     </p>
 <p>这类扩展词的缺点也比较明显，它与原始 Query 存在文本上的差异较大，增加召回的同时，可能会牺牲一定的匹配度。</p>
 <h5 id="三构建领域知识库">三、构建领域知识库</h5>
 <p>最后一个途径是构建特定的领域知识库，优点是对语义相关度可以做更精准的控制，但是构建成本较高，同时如何将知识信息融入到原统计机器学习的算法中也有不小难度。</p>
 <p>当然，理想的形态必然是混合以上三种来源，取其优点，可以观察谷歌的相关搜索：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-00e8326b5354416f8e1b94d130287692.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272014678.png" />   
     </p>
 <p>融合了字面、语义、知识多方面的相关性。</p>
 <h4 id="扩展模型思路">扩展模型思路</h4>
@@ -241,15 +241,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h6 id="probabilistic-query-expansion-using-query-logs">《Probabilistic Query Expansion Using Query Logs》</h6>
 <p>作者提出需要做 Query 扩展的原因是认为用户输入的 Query 词与实际文档集中的词存在差异，所以在传统 BM25 算法搜索的过程中很有可能无法命中。下图是作者做的验证工作，将文档和 Query 都使用词袋向量表示，向量中元素值为 TF-IDF，可以看到峰值区间对应的相似度并不高。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-df8084fd2aaa4471a7b1b2d24075f4f6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272014668.png" />   
     </p>
 <p>需要构建这种联系很自然的方式就是利用用户行为日志数据，用贝叶斯模型构建概率分布：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-8eee58040e1d43d683758c98f6e8e06b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272014432.png" />   
     </p>
 <p>最终公式可以表示为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-a71bc5a7ed05441084129d7a75937e2b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272014246.png" />   
     </p>
 <p>式子右侧括号中分别融合了扩展词在文档集中的 <strong>先验概率</strong>、Query 词与文档在交互 session 中的 <strong>共现频数</strong> 以及 Query 词在交互 session 中的 <strong>频数</strong>。</p>
 <p>虽然这篇文章过去了将近 20 年，但是后续的利用相关模型的算法都逃不出这个套路，方法简单却有效，在刚着手做该任务时不妨可以选它作为 baseline。</p>
@@ -257,39 +257,39 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h5 id="context-aware-query-suggestion-by-mining-click-through-and-session-data">《Context-Aware Query Suggestion by Mining Click-Through and Session Data》</h5>
 <p>比如类似这篇文章中，因为 Query 中出现的 term 与它们对应的主题是多对多的，作者通过 Query 聚类挖掘出潜在的几种意图 concept 词，结合考虑 Query Session 的问题再进行后续扩展。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-489f364ab57e46459f3021443b9068ea.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272014282.png" />   
     </p>
 <h5 id="二翻译模型">二、翻译模型</h5>
 <p>除了挖掘出扩展词的方案，另一个方向是对 Query 词进行直接改写。仍然从最简单的开始，各种复杂模型的起点其实都源自符合人类直觉的简单假设。</p>
 <h5 id="the-mathematics-of-statistical-machine-translation-parameter-estimation">《The Mathematics of Statistical Machine Translation: Parameter Estimation》</h5>
 <p>这是篇年代更加久远的文章，发表于 1993 年，它就是著名的 <code>&lt;span&gt;IBM算法&lt;/span&gt;</code>。本身与 Query 扩展无关，主要工作是做机器翻译，但是它阐述了翻译模型最原始的假设：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-c58f476da42243b88e61e6b63acb1d09.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272014301.png" />   
     </p>
 <p>完成翻译，我们要完成的无非是两件事：1）给定一个待翻译的句子，返回目标语言表达这个句子各个词意思的词；2）将原始语言的词与目标语言的词一一对应（alignment）。</p>
 <p>而 <code>&lt;span&gt;IBM算法&lt;/span&gt;</code> 的核心就是把这个问题抽象成“对齐”分布式是一个隐变量的概率问题：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-54b6fbd4f4694add941d85c2065fde51.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272014999.png" />   
     </p>
 <p>利用 <code>&lt;span&gt;EM算法&lt;/span&gt;</code> 完成求解即可。</p>
 <h5 id="towards-concept-based-translation-models-using-search-logs-for-query-expansion">《Towards concept-based translation models using search logs for query expansion》</h5>
 <p>做 Query 扩展时，这一思想也被迁移过来：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ee8916007c424718817a11fb85ef44b2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272014586.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-19b9b7c991de4bdeb95332600ac4883e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272014558.png" />   
     </p>
 <p>连公式的形式都与原 <code>&lt;span&gt;IBM算法&lt;/span&gt;</code> 是一致的，式子中 theta 就是改写操作中原始词与目标词的对齐概率参数。文章中，作者也进一步实验了 phrase 和 concept 词的结果。同时，配合 term weighting 一起食用，效果更好喔！</p>
 <h5 id="learning-to-rewrite-queries">《Learning to Rewrite Queries》</h5>
 <p>再后续，大家会考虑进一步优化 alignment 分布的学习以及融入更多的语义特征进去，毕竟 <code>&lt;span&gt;IBM算法&lt;/span&gt;</code> 仅从统计词频的角度估算分布还是太过单薄。近年来深度学习的发展自然就带动一些传统模型向神经网络向的方法上迁移：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-31e1195e442a42e5918edd1f174a27bd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272014272.png" />   
     </p>
 <h5 id="ask-the-right-questions-active-question-reformulation-with-reinforcement-learning">《Ask the Right Questions: Active Question Reformulation with Reinforcement Learning》</h5>
 <p>谷歌在 2018 ICLR 上发表的工作合并了使用序列模型完成 Query 改写，考虑使用强化学习来进一步增强</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ad3cf0a01dd94f4ca3a0f5b8184f4c29.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272014159.png" />   
     </p>
 <p>这个方案的大致思路是，模型与索引系统连接，若改写后的 Query 可以索引出排序更靠前的内容，则给予强化模型正向的激励。而且，train 好的强化模型也可以倒过来 finetune 改写模型。</p>
 <h4 id="增强语义相关性">增强语义相关性</h4>
@@ -297,17 +297,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>说到这里，我们对语义相关性的增强就可以利用在往期标签生成的文章中提到的方法</p>
 <h5 id="a-user-centered-concept-mining-system-for-query-and-document-understanding-at-tencent">《A User-Centered Concept Mining System for Query and Document Understanding at Tencent》</h5>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5d11061d4f6c47e69da4a6a60ec8fd7e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272014010.png" />   
     </p>
 <p>利用大量 Query 的点击数据，挖掘出该场景下的各种 concept 词。进一步，我们将 concept 词与医学知识图谱形成关联，从而替代了前面提到的 Query 聚类方案。</p>
 <h4 id="简单实践">简单实践</h4>
 <p>挖掘出高质量的 Concept 词后，由上文提到的关联模型就可以获得不错的效果：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0719199e87f94be6a51d81e997fc959d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272014347.png" />   
     </p>
 <p>当遇到多个实体，使用关联打分即可：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-7880a0725be64505acd2d73492e12e00.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272014036.png" />   
     </p>
 <h4 id="总结">总结</h4>
 <p>总的来说，Query 扩展本身并不算一个复杂的工作，想要最终效果做得好，我们的建议是： <strong>把复杂的工作向后撤</strong>。生成模型或者强化模型看起来很 fancy，操作门槛以及工程上的支持难度都较大。踏踏实实做好数据结构化（知识图谱构建、知识表示学习、长文本标签化等等），在下游应用里，用简单模型就能看到效果。有了 baseline 之后，我们会考虑用复杂的方案把关联性构建得更好。</p>
@@ -443,6 +443,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -476,10 +480,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -858,6 +858,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

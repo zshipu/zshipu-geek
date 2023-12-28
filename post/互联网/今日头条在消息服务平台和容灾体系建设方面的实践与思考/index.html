@@ -220,14 +220,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>RocketMQ 在头条的落地实践</strong></p>
 <p>下面简单介绍下，今日头条的部署结构，如图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f52210182f084a2d92f62ff7b12821aa.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271555255.webp" />   
     </p>
 <p>由于生产者种类繁多，我们倾向于保持客户端简单，因为推动 SDK 升级是一个很沉重的负担，所以我们通过提供一个 Proxy 层，来保持生产端的轻量。Proxy 层是由一个标准的 gRpc 框架实现，也可以用 thrift ,当然任何 RPC 都框架都可以实现。</p>
 <p>Producer 的 Proxy 相对比较简单，虽然在 Producer 这边也集成了很多比如路由管理、监控等其他功能， SDK 只需实现发消息的请求，所以 SDK 的非常轻量、改动非常少，在迭代过程中也不需要一个个推业务去升级 SDK 。</p>
 <p>SDK 通过服务发现去找到一个 Proxy 实例，然后建立连接发送消息， Proxy 的工作是根据 RPC 请求的消息转发到对应的 Broker 集群上。Consumer Proxy 实现的是 pull 和二次 reblance 的逻辑，这个后面会讲到，相当于把 Consumer 的 pull 透传给 Brokerset ， Proxy 这边会有一个消息的 cache ，一定程度上降低对 broker page cache 的污染。这个架构和滴滴的 MQ 架构有点相似，他们也是之前做了一个 Proxy ，用 thrift 做 RPC ，这对后端的扩容、运维、减少 SDK 的逻辑上来说都是很有必要的。</p>
 <p><strong>在容器以及微服务场景下为什么要做这个 Porxy ?</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/db5adf2430cb4f108cc57371dbfcdd59.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271556913.webp" />   
     </p>
 <p>有以下几点原因：</p>
 <ol>
@@ -262,12 +262,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>下面看下 Consumer 这边的逻辑，如下图所示，</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f1a7042fe5ac4511a4e06393d0ab1f22.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271556234.webp" />   
     </p>
 <p>比如上面部署了两个 Proxy , Broker，左边有 6 个 Queue ，对于顺序消息来说，左边这边 rebalance 是一个相对静态的结果， Consumer 的上下线是比较频繁的。对于顺序消息来说，左边和之前的逻辑是保持一致的， Proxy 会为每个 Consumer 实例分配到合适的数量的 Queue ；对于不关心顺序性的消息，Proxy 会把所有的消息都放到一个队列里，然后从这个队列 dispatch 到各个 Consumer ，对于乱序消息来说，理论上来说 Consumer 数量可以无限扩展的；相对于和普通 Consumer 直连的情况，Consumer 的数量如果超过了Consume Queue的数量，其中多出来的 Consumer 是没有办法分配到 Queue 的，而且在容器部署环境下，单 Consumer 不能起太多线程去支撑高并发；在容器这个环境下，比较好的方式是多实例，然后按照 CPU 的核心数，启动多个线程，比如 8C 的启动 8 个线程，因为容器是有 Quota 的，一般是 1C,2C,4C,8C 这样，这种情况下，如果线程数超过了 CPU 的核心数，其实对并发度并没有太大的意义。</p>
 <p>接下来，分享一下做这个接入方式的时候遇到的一些问题，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ebcd7aad57404618a7b6912ada6e44c5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271556652.webp" />   
     </p>
 <ol>
 <li>
@@ -421,6 +421,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -454,10 +458,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -836,6 +836,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

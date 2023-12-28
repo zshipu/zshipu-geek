@@ -227,25 +227,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>其次，部分业务基于 RPC 做水平分拆，原则上 RPC 的演进要保持向前兼容，而项目前期需求不稳定阶段，难免引进相当多的 break change，发包、上线、联调成本居高不下，也引进了额外的发布风险：上层服务和下层服务两者务必同时发布，但不能回滚其中之一。这在重要的功能开发中，成为了我们快速迭代的一个绊脚石。</p>
 <p>拆分为 RPC 之后，通信介质发生了不同，而访问模式的适应不一定准备好。对有缓存覆盖的数据访问对象而言，N+1 式的访问模式不算问题，但是 N+1 query 对 RPC 却不能接受。服务的调用压力经常出乎维护者的意料，RPC 放大使得下层服务的波动放大，风险增加之余也增加了对资源的需求，而资源占用更多的同时，性能仍远低于过去对缓存的访问。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/193a49ac83ec43f7868dcaee0cad619c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272104966.webp" />   
     </p>
 <h2 id="基于-sso-的分拆"><strong>基于 SSO 的分拆</strong></h2>
 <p>RPC （远程过程调用）是服务化体系中基础的基础，但是慢慢的我们发现 RPC 并非分拆的唯一选择。基于 RPC 的水平分拆会引入中间层次，增加联调的环节，对于快速开发的新业务而言，无法忽视额外的联调成本。联调中发现问题时不得不在各个层次定位，难以自动化测试。经过今年几个快速迭代的新项目从主站的分拆，我们发现基于 SSO （单点登录）机制对 HTTP 接口做垂直拆分是一条可行的路，可灰度控制风险、对客户端透明。新项目对主站的耦合往往较低，只需要 get_member 等少量几个 RPC 接口，对外暴露的接口也非常少。新项目的迭代速度快，经过拆分，能够使服务与后端团队的完整业务相匹配，降低了主站联动的发布频率，某种程度上也减少了出于部署积压而堆积的发布风险。</p>
 <p>这里我们得到的启发是，服务的分拆并非 RPC 不可。相反，我们希望看到更少的 RPC，更多的内聚。更少的 RPC 接口意味着更小的服务边界，更稳定的接口，更少的 break change。内聚意味着允许功能需求的独立演进，对其他业务的影响降到最低，也意味着内聚的业务模块内部，可以充分利用缓存来优化性能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0eff7d69d3054071b89912c598190125.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272104647.webp" />   
     </p>
 <h2 id="桌面端怎么拆"><strong>桌面端怎么拆？</strong></h2>
 <p>新项目之所以拆分顺利，也得益于它们当前只面向客户端，HTTP API 的拆分仍较为简单。然而桌面端的情形有所不同，一个页面往往不能单纯对应到一个服务上，比如问答页，除了问答服务，还需要评论、收藏、内容推荐等信息需要展现，这些页面组件背后的服务会趋于不同的工程师或团队维护。</p>
 <p>这里可以注意到一件有意思的事情，在后端社区 buzzword 「服务化」 的同时，前端社区更加如火如荼地 buzzword 着 「前后端分离」 和 「组件化」。出于内容展现的复杂性，页面并不能成为分拆的好单位，但页面内的组件无疑更容易与后端的功能模块相匹配。「服务化」 和 「组件化」 是一对孪生子，分别允许后端团队和前端团队去隔离业务模块、独立演进。</p>
 <p>知乎也正在进行着桌面端的前后端分离改造。随后桌面端不再特殊，允许后端面向 iOS / Android / Web 三端按同一套接口进行对接，也就可以像移动端 API 同样的方式，基于单点登录进行拆分了。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6f5af8c2c10e4ef3b4ef6df6af387b73.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272104259.webp" />   
     </p>
 <h2 id="垂直拆分的风险"><strong>垂直拆分的风险</strong></h2>
 <p>当前感受到垂直拆分的主要风险在于保证不同垂直业务对同类型实体展现逻辑的一致性。其中 feed 对这点要求最高，因为它对所有实体类型都有引用。为此在拆分 feed 流之前，先行补充了所有实体的 swagger 文档，通过中心的 swagger 文档约束住同一实体在不同服务中的字段展现。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a8247c3aecf44a1eb4b3a01da7448167.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272104821.webp" />   
     </p>
 <p><strong>如何划分服务边界</strong></p>
 <p>理想的世界里，服务边界恰好匹配于业务边界。然而工程师首先要承担业务需求的压力，只能抽时间重构拆分，业务边界也并不总是如新项目那样明晰。</p>
@@ -405,6 +405,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -438,10 +442,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -820,6 +820,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

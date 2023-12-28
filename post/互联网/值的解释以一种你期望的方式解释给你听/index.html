@@ -199,7 +199,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p><strong>导读</strong>： <a href="https://www.6aiq.com/article/1587956125005">上一篇文章</a> 我们说到 SHAP 值可以用来对黑盒模型进行解释，具备比简单的逻辑回归更好的实际意义，那么 SHAP 值到底是什么？有什么实际意义？如何计算？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ea0324032da7454485078dbf09a69381.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281552410.webp" />   
     </p>
 <h1 id="揭开神秘的面纱">揭开神秘的面纱</h1>
 <p>在上次的文章中，我们看到 SHAP 值可以用来解释机器学习方法的决策。换句话说，我们使用 SHAP 来揭开黑箱模型的神秘面纱。</p>
@@ -218,7 +218,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Shapley 值是基于这样一种想法，即应该考虑每个玩家可能的组合的结果来决定单个玩家的重要性。在我们的例子中，这对应于 <em>f</em> 特征的每个可能组合( <em>f</em> 从 0 到 <em>F</em>， <em>F</em> 是所有可用特征的数量)。</p>
 <p>在数学中，这被称为“power set”，可以用树表示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ffbbc1ac0b07450f8bcecc5509387461.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281552219.png" />   
     </p>
 <p>特征的Power set</p>
 <p><strong>每个节点代表一个特征组合，每条边代表包含一个在前一个组合中不存在的特征</strong>。</p>
@@ -226,7 +226,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>现在， <strong>SHAP 需要为幂集中的每个不同的组合训练一个不同的预测模型，这意味着有 2^F^ 个模型</strong>。当然，这些模型在涉及到它们的超参数和训练数据时是完全等价的。唯一改变的是模型中包含的一组特征。</p>
 <p>假设我们已经在相同的训练数据上训练了 8 个线性回归模型。我们可以用一个新的观察样本(我们称之为 x ₀)，看看同样的 8 种不同的模型对这个观察样本的预测。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-165175db00e9461a914d1aceb6ee29a2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281552946.png" />   
     </p>
 <p>用不同模型预测 x ₀。在每个节点上，第一行表示特征的组合，第二行为 x ₀的模型预测收入。</p>
 <p>这里， <strong>每个节点代表一个模型</strong>。但是边代表什么呢？</p>
@@ -235,7 +235,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>因此， <strong>每条边代表一个特征对模型的边际贡献</strong>。假设我们在节点 1 中，节点 1 是一个没有任何特征的模型。该模型将简单地预测所有训练观察样本值的平均收入(50k 美元)。如果我们到了节点 2，这是一个模型只有一个特征(年龄)，现在对 x ₀的预测为 40k 美元。这意味着知道 x ₀的年龄降低了我们的预测 10k 美元。</p>
 <p>因此，年龄对只包含年龄作为特征的模型的边际贡献是-10k$。公式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b79f25b976714dbaa9fcd917776c982e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281552795.png" />   
     </p>
 <p>当然，获得年龄对最终模型的整体效果(即 x ₀的年龄的 SHAP 值)，有必要考虑年龄在所有出现过模型的边际贡献。在我们的树表示中，这意味着要考虑连接两个节点的所有边：</p>
 <ul>
@@ -244,12 +244,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>在下面的图中，这些边已经用红色突出显示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-2862251653494074afc87464974f83a3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281552678.png" />   
     </p>
 <p>年龄的边际贡献</p>
 <p>所有这些边际贡献然后通过加权平均数加以汇总。公式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-4e2c4bef087644b18119ca0cc70d031f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281552512.png" />   
     </p>
 <p>其中 <em>w ₁+w ₂ +w ₃+w ₄</em> =1</p>
 <h1 id="构建-shap-公式22--边际贡献的加权">构建 SHAP 公式(2/2) — 边际贡献的加权</h1>
@@ -272,22 +272,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>每个 <em>f</em> 个特征的模型都有 <em>f</em> 个边际贡献(每个特征一个)，因此，计算可能的 <em>f</em> 个特征的模型的数量并将其乘以 <em>f</em> 就足够了。因此，问题归结为计算可能的具有 <em>f</em> 个特征的模型的数量，给定 <em>f</em> 并知道特征的总数是 <em>F</em>。这就是二项式系数的定义。</p>
 <p>把所有的东西放在一起，我们得到了所有的具有 <em>f</em> 个特征的模型的所有边际贡献的数量，换句话说，每“行”的边的数量是：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-9b1d05defd164694b7197ccb69d6d377.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281552269.png" />   
     </p>
 <p>取它的倒数就行了，我们就有了具有 <em>f</em> 个特征的模型边际贡献的权重。</p>
 <p>如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-dc5a61c0f5a248549d585ea989ddb472.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281552906.png" />   
     </p>
 <p>如何从边的数量中获得权重</p>
 <p>现在，我们已经有了计算 <em>x ₀</em> 的 Age 的 SHAP 值所需的所有元素：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-de864ae05e0d4f5f8c2ec934ef83ee1e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553907.png" />   
     </p>
 <h1 id="整理一下">整理一下</h1>
 <p>我们建立了具有 3 个特征的模型来计算年龄的 SHAP 值。推广到任何特征和任何 <em>F</em>，我们得到了由 Slundberg 和 Lee 在文章中描述的公式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ffaa0887fa634f81b88b8949fc96dc68.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281553829.png" />   
     </p>
 <p>应用到我们的例子中，得到：</p>
 <ul>
@@ -423,6 +423,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -456,10 +460,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -838,6 +838,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

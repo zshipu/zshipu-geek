@@ -208,7 +208,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e114d5fa165e493e8c10bce26993bf3d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271447057.webp" />   
     </p>
 <p>作者：Eric He</p>
 <p>编译：ronghuaiyang</p>
@@ -261,14 +261,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>如果不首先理解LambdaMART在做什么，就很难扩展这些要点，所以我们将简要地介绍一下模型的结构。</p>
 <h1 id="对lambdamart了解的更清楚一些">对LambdaMART了解的更清楚一些</h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b6dfd3c8d0bc44ba8ece16e1b1cee901.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271447644.webp" />   
     </p>
 <p>是时候把我的“去神秘化”也加到这一堆里了</p>
 <p>因为LambdaMART方法经过了多年的改进，所以符号是不一致的，并且很大程度上集中在高效计算上，我们把这个问题留给了 <code>xgboost</code>。因此，我们的解释从头开始，重点放在对我们的用例很重要的核心思想上。</p>
 <h2 id="lambdamart中的mart非常简短">LambdaMART中的MART，非常简短</h2>
 <p>在它的核心，LambdaMART是一个损失函数(“Lambda”)附加到一个梯度提升森林(“MART” — 多重加法回归树)上。梯度提升森林通过训练一棵新树来预测之前出现的树的误差(损失函数的“梯度”)来改进它的预测。预测是通过将第一棵树的原始估计值与后续树的所有修正值相加而得出的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2623eab681044da78fe6adb004ddf322.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271447792.webp" />   
     </p>
 <p>提升森林中的每一棵新树都能在集成之前提前预测出误差。</p>
 <p>由于树不会像线性回归那样对模型函数空间施加强大的结构，LambdaMART实现良好排名的能力几乎完全取决于其“Lambda”误差的质量。由于这个原因，损失函数可以被详细的解释。</p>
@@ -276,11 +276,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Lambda损失要求某些搜索结果的得分高于其他搜索结果。例如，预订的酒店应该比只被点击的酒店得分高，而被点击的酒店应该比完全被用户忽略的酒店得分高。使这些 <strong>pairwise</strong> 的比较是Lambda梯度函数的核心。</p>
 <p>更精确地说，给定酒店和分数I，酒店和分数J，Lambda梯度估计的酒店优于酒店的概率为 <strong>σ</strong>( <em>J-I)</em>，其中 <strong>σ</strong> 是sigmoid函数。sigmoid通常使用e=2.7182818…，但是Lambda训练过程实际上对sigmoid的base是不变的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/449c87eed50b413f9d869dafe624d068.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271447330.webp" />   
     </p>
 <p>◁ 运算符表示优于，比如，a◁b 表示a优于b</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b7aa64a71d1c4448af3dba67d0306be9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271448693.webp" />   
     </p>
 <p>σ(x)的图</p>
 <p>_x_i_比 _x_j_的优先的概率代表什么？以下是几种解释：</p>
@@ -294,7 +294,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>我们希望将我们估算的pairwise偏好概率与我们排名中所有酒店对( <em>x_i, x_j</em>)的真实偏好概率之间的距离最小化：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5d7a139096634e26b659625a73e90f9c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271448186.webp" />   
     </p>
 <p>这对应的是关于x_i是否优于x_j的标准交叉熵损失。</p>
 <p>使用这样的pairwise损失，我们就能训练出一个像样的模型。然而，我们可以考虑两个额外的效应来获得更好的性能：</p>
@@ -304,12 +304,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="使用ndcg-weighting调整listwise损失">使用NDCG-weighting调整listwise损失</h2>
 <p>高排名的结果相比低排名的结果的重要性通过NDCG来进行度量。下面显示了NDCG的一个表达式，其中IDCG是排序所能达到的理想或最大DCG， rel__i_是排在第i个的搜索结果的相关性标签值。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a7114e00297743c4b72cb05a08695d9e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271448298.webp" />   
     </p>
 <p>NDCG是唯一的排名指标，可以区分出两个排序中哪个是更好的一个。除此之外，它对你的直觉几乎毫无用处。随着搜索结果数量的增加，搜索请求的预期NDCG收敛到0，因此用不同的基数比较两个搜索请求的NDCGs是不合适的。</p>
 <p>我们可以看到，当相关结果的排名较差时，DCG分数会下降，因为贡献的分数被一个对数因子打折了。NDCG为99个不相关的结果(相关标签为0)和1个相关的结果(相关标签为1)的搜索请求进行评分，下面是每一个可能的排序的相关结果图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6b563927ef3748f98c86db98448ec2c6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271448874.webp" />   
     </p>
 <p>这个特殊的NDCG曲线对应于方程1/log2(x+1)</p>
 <p>给于高排名对比低排名对更高的权重，每一对( <em>x___i, x_j</em>)通过ΔNDCG来加权，这个差值为NDCG分数和交换之后的NDCG分数之间的绝对差。</p>
@@ -326,27 +326,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>p+( <em>i</em>) 和 p-( <em>i</em>) 对于所有的排序位置i在LambdaMART训练过程中都是可迭代估计的，使用下面一组方程。其中，*L(i, j) <em>是原始（有偏差的）的pairwise损失函数，p</em> 这一项是在前一次迭代中估计出来的，然后对所有的查询q和搜索结果j加起来。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/57bfe7acca344e08b6b0b119fc634a56.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271448109.webp" />   
     </p>
 <p>表现偏差的影响可以通过简单地用损失除以偏差来逆转。这个修正给了我们一个一致的和无偏的pairwise的损失。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4984b4a4b96340e8af64134b21b30244.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271448928.webp" />   
     </p>
 <h2 id="把所有的组合起来">把所有的组合起来</h2>
 <p>搜索结果_x_i_的Lambda梯度很简单，就是这些加权的NDCG全部加起来，就是对于每一对 ( <em>x_i, x_j</em>)的修正了偏差的pairwise误差。注意，使用了相同的label的结果在交换的时候在NDCG上没有变化，所以，大部分的值是0.方程如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1254bf38ce1444bf9eb6f4da1059b266.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271448406.webp" />   
     </p>
 <h2 id="偏好概率的校准度量">偏好概率的校准度量</h2>
 <p>我之前说过LambdaMART估计了i优于j的偏好概率。这是一个相当强的声明，特别是当loss函数包含NDCG-weighting的时候。然而，下面的图表显示，该模型是根据经验进行了概率估计校准的。为了进行校准，酒店i，模型估计有p%的概率优于某个酒店j被选中(在x轴上)，需要实际被选中的概率为p%(在y轴上)。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fc70807825504c34b5c313e75660db1c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271448827.webp" />   
     </p>
 <p>原始Lambda论文还对使用Lambda梯度训练的神经网络模型参数的小扰动导致训练集上的期望NDCG较低进行了数值观察，表明该模型在拟合偏好概率的同时，联合最大化了NDCG。同时做两件事情的能力都意味着NDCG最大化和最小化的目标偏好概率损失没有强烈的相互冲突，所以我们可以鱼（校准概率）和熊掌（NDCG加权）兼得。</p>
 <h2 id="从pairwise偏好概率到querywise偏好分布">从pairwise偏好概率到querywise偏好分布</h2>
 <p>给定生成校准的两两偏好概率的分数，我们可以在整个搜索请求上找到一个类似的校准的偏好分布，通过多维sigmoid，称为softmax，在搜索请求的所有分数上进行操作。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9de8a0439826402d87c59e9f64b2052c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271448250.webp" />   
     </p>
 <p>对pairwise概率的解释可以很好地扩展到querywise概率:</p>
 <ol>
@@ -360,29 +360,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>这里的逻辑相当简单：如果酒店_x_i_每被选中_i_次，酒店_x_j_被选中_j_次，酒店_x_h_被选中_h_次，那么酒店_x_i_在这三个里被选中的概率由_i / i+j+h_给出。</p>
 <p>因为这个归一化是通过对分数进行指数运算来实现的，这只是将softmax函数和应用在任意数量的酒店上的逻辑。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/042794836e3243aabd4034a9859ca1ab.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271448896.webp" />   
     </p>
 <p>我说逻辑很简单，但实际上我花了一周的时间来考虑如何计算querywise分布。想象一下我的失望，当我把数学写出来，却发现解决方案只是个softmax函数。</p>
 <h1 id="用几何平均来对排序目标进行组合">用几何平均来对排序目标进行组合</h1>
 <p>我们如此关注querywise概率分布的原因是，这些相关概率可以乘以酒店的盈利能力，根据预期盈利能力为我们排序：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/57e184b6ec94424e8bb0778b528f0b3c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271449247.webp" />   
     </p>
 <p>考虑到用户订购了一家酒店，最终得分代表酒店的预期利润。这个值一般与酒店的预期利润成比例。我们“希望”，通过按预期利润而非相关性排序，我们可以让客户更倾向于更有利可图的酒店，而不会对他们的转化率产生很大的负面影响。在前一篇文章中，我们实际上认为这种做法增加了排名的多样性，并可能提高转换概率，而不是降低！</p>
 <p>将相关性与盈利能力相乘，暗示了一种更普遍的方式，我们在衡量盈利能力时明确使用了这一指标，即利润和利润率的平方根。我们提出了各种非正式的理由来说明为什么这种组合是有意义的，但是没有一个是真正严格的理由。在此，我认为，对这两个排序分数R和P的合理的组合应该对于加权几何平均是单调的，由以下公式给出：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dbcb00fd581a4f878b4276caa1a84e97.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271449620.webp" />   
     </p>
 <p>首先，请注意，利润率和利润的几何平均，就是_α_=0.5。然后相关性和盈利能力相乘和它们的几何平均数也是单调的，所以我们可以去掉平方根和α指数。</p>
 <p>接下来，考虑两个随机向量 <strong>r</strong> 和 <strong>p</strong> 作为搜索请求的相关性和盈利能力的度量。搜索结果集{i}按照预期盈利能力r[i]p[i]来排序。假设你想要给予相关性度量 <strong>r</strong> 增加权重，以便排序系统对盈利能力不那么敏感。可以通过增加r的方差来实现，你可以通过增加α。如果 <strong>r</strong> 的(归一化)方差高于 <strong>p</strong>，那么(松散地说)它对组合排名的影响更大。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0ae62da02d414099bf66efe382c70cfd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271449992.webp" />   
     </p>
 <p>上面的图给出了不同的_α_的能力，三个搜索结果的2种不同的排序：r，排序为(3,2,1)，p排序为 (1,2,3)。对r和p归一化得到的排序为 (1,2,3)，和通过p排序是一样的。简单的乘以c和其他的r和p的单调函数也不会改变排序结果。把_α_增加到2/3，得到的排序为(3,1,2)，和使用r的排序(3,2,1)变得接近了。 <em>α =</em> 4/5，排序为(1,2,3)，变得和r一样了。</p>
 <h1 id="特征工程中的花絮">特征工程中的花絮</h1>
 <p>我们已经完成了对模型的训练过程，获取它的分数输出，并将其转换为预期的盈利能力的度量。然而，此度量的质量仅与提供的数据集的质量相同。我们会简要地强调一些我们所做的对模型性能有意义的特征工程的决策。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/345f279de1074a4381d4a83f890bbdb9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271449480.webp" />   
     </p>
 <p>要了解更多关于这个特征重要性图的信息，请查看前面的文章中的SHAP值讨论</p>
 <h2 id="历史特征过去可以给现在最有力的指导">历史特征：过去可以给现在最有力的指导</h2>
@@ -399,7 +399,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>“老兄，你的顶级酒店有一堆红灯区属性…”</p>
 <p>原来，由于该用户此前曾点击过一家廉价酒店，他的 <code>user_preferred_price</code> 值(客户价格水平的随机估计数)很低。结果，这种模式把所有便宜的酒店都推到了顶上，而这恰好包括了大量的红灯区酒店。显然，这是模型过拟合的一个实例，因此我们将该特征改为总体的平均偏好价格_P_和用户的估计平均_U_的加权平均值，与用户的点击次数_c_加上一个偏差项_b_相对应：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/56989cc80a754392b178cfa4b76ab9ff.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271449819.webp" />   
     </p>
 <p>这一发现也推动了利润重排序的强劲增长，这将为排序引入一些多样性，尤其是对更便宜的用户。考虑到这两个变化，排序从主观角度看要好得多。尽管如此，如果客户愿意，我们还是有可能在现实世界中重现这个排序，我认为这是可以的。我可能对哪些酒店应该排在前面有自己的看法(比如滨海湾金沙酒店)，但我对哪些酒店……不应该排在前面的规定较少。</p>
 <h1 id="为什么我们不选择使用嵌入">为什么我们不选择使用嵌入</h1>
@@ -409,7 +409,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>出于这个原因，我们选择了LambdaMART，它完全依赖于元数据。然而，放弃嵌入是一个有意义的损失。通过删除一个酒店的个体的ID，只通过它的特征来描述它，任何超出我们的特征集范围的概念都不能被模型理解，就像隐语义模型那样。例如，如果我们只有价格，LambdaMART就不可能获得酒店的品牌价值或当地的声誉，因为它们不是价格的函数。</p>
 <p>在未来的迭代中，将单独训练的嵌入作为LambdaMART的特征，或者甚至从一个提升树切换到一个可以联合学习嵌入的神经网络，都可以极大地提高模型性能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b587b904076b45408532348fddaef4b5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271449124.webp" />   
     </p>
 <p>在数学中，“基”是一个对象的词典，它描述了同一“空间”中的其他对象。我们的“价格”等特征集构成了描述酒店空间的基。嵌入是一个更自然的基，因为在在它们上面进行操作是有意义的。当我们放弃特定于酒店的嵌入，而只根据它们的特征来描述它们时，我们就认为实体只不过是它们各部分的总和。这在多大程�</p>
 
@@ -541,6 +541,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -574,10 +578,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -956,6 +956,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -220,7 +220,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>命名实体识别（Named Entity Recognition，简称NER），又称作“专名识别”，是指识别文本中具有特定意义的实体，主要包括人名、地名、机构名、专有名词等。NER是信息提取、问答系统、句法分析、机器翻译、面向Semantic Web的元数据标注等应用领域的重要基础工具，在自然语言处理技术走向实用化的过程中占有重要的地位。在美团搜索场景下，NER是深度查询理解（Deep Query Understanding，简称 DQU）的底层基础信号，主要应用于搜索召回、用户意图识别、实体链接等环节，NER信号的质量，直接影响到用户的搜索体验。</p>
 <p>下面将简述一下实体识别在搜索召回中的应用。在O2O搜索中，对商家POI的描述是商家名称、地址、品类等多个互相之间相关性并不高的文本域。如果对O2O搜索引擎也采用全部文本域命中求交的方式，就可能会产生大量的误召回。我们的解决方法如下图1所示，让特定的查询只在特定的文本域做倒排检索，我们称之为“结构化召回”，可保证召回商家的强相关性。举例来说，对于“海底捞”这样的请求，有些商家地址会描述为“海底捞附近几百米”，若采用全文本域检索这些商家就会被召回，显然这并不是用户想要的。而结构化召回基于NER将“海底捞”识别为商家，然后只在商家名相关文本域检索，从而只召回海底捞品牌商家，精准地满足了用户需求。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/22c50979c01449109cc81331f9fd1a34.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281704475.png" />   
     </p>
 <p>图1 实体识别与召回策略</p>
 <p>有别于其他应用场景，美团搜索的NER任务具有以下特点：</p>
@@ -245,7 +245,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>答：</strong> 目前我们采用训练好的CRF权重网络作为打分器，来对实体词典匹配、模型预测两路输出的NER路径进行打分。在词典匹配无结果或是其路径打分值明显低于模型预测时，采用模型识别的结果，其他情况仍然采用词典匹配结果。</p>
 <p>在介绍完我们的技术选型后，接下来会展开介绍下我们在实体词典匹配、模型在线预测等两方面的工作，希望能为大家在O2O NER领域的探索提供一些帮助。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/320b19dbc43d4aa7895b1276ed4975ed.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281704057.png" />   
     </p>
 <p>图2 实体识别整体架构</p>
 <h2 id="3-实体词典匹配">3. 实体词典匹配</h2>
@@ -255,7 +255,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>现有的新词挖掘技术主要分为无监督学习、有监督学习和远程监督学习。无监督学习通过频繁序列产生候选集，并通过计算紧密度和自由度指标进行筛选，这种方法虽然可以产生充分的候选集合，但仅通过特征阈值过滤无法有效地平衡精确率与召回率，现实应用中通常挑选较高的阈值保证精度而牺牲召回。先进的新词挖掘算法大多为有监督学习，这类算法通常涉及复杂的语法分析模型或深度网络模型，且依赖领域专家设计繁多规则或大量的人工标记数据。远程监督学习通过开源知识库生成少量的标记数据，虽然一定程度上缓解了人力标注成本高的问题。然而小样本量的标记数据仅能学习简单的统计模型，无法训练具有高泛化能力的复杂模型。</p>
 <p>我们的离线实体挖掘是多源多方法的，涉及到的数据源包括结构化的商家信息库、百科词条，半结构化的搜索日志，以及非结构化的用户评论（UGC）等。使用的挖掘方法也包含多种，包括规则、传统机器学习模型、深度学习模型等。UGC作为一种非结构化文本，蕴含了大量非标准表达实体名。下面我们将详细介绍一种针对UGC的垂直领域新词自动挖掘方法，该方法主要包含三个步骤，如下图3所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8f683cbf00e2492d92a660b85ec7acb6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281704662.png" />   
     </p>
 <p>图3 一种适用于垂直领域的新词自动挖掘方法</p>
 <p><strong>Step1：候选序列挖掘</strong>。频繁连续出现的词序列，是潜在新型词汇的有效候选，我们采用频繁序列产生充足候选集合。</p>
@@ -282,7 +282,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>基于Pattern正则表达式的强修复规则。最后，输出基于实体库匹配的成分识别结果。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6be5cb1554e544239bb3779c16cf93b2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705304.png" />   
     </p>
 <p>图4 实体在线匹配</p>
 <h2 id="4-模型在线预测">4. 模型在线预测</h2>
@@ -294,7 +294,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>针对性能要求高的问题，我们的线上模型在升级为BERT时进行了一系列的性能调优；针对NER领域相关问题，我们提出了融合搜索日志特征、实体词典信息的知识增强NER方法；针对训练数据难以获取的问题，我们提出一种弱监督的NER方法。下面我们详细介绍下这些技术点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/aee054cf7b8f47b4aefc4453612f562e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705608.png" />   
     </p>
 <p>图5 NER模型演进</p>
 <h3 id="41-bert模型">4.1 BERT模型</h3>
@@ -311,7 +311,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>根据无标注数据的规模，蒸馏使用的约束可以不同</strong>。如图7所示，如果无标注数据规模小，可以采用值（logits）近似进行学习，施加强约束；如果无标注数据规模中等，可以采用分布近似；如果无标注数据规模很大，可以采用标签近似进行学习，即只使用Teacher Model的预测标签来指导模型学习。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e5c7f612e12c4643985b8138275f0759.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705970.png" />   
     </p>
 <p>有了上面的结论，我们如何在搜索NER任务中应用模型蒸馏呢？ 首先先分析一下该任务。与文献中的相关任务相比，搜索NER存在有一个显著不同：作为线上应用，搜索有大量无标注数据。用户查询可以达到千万/天的量级，数据规模上远超一些离线测评能够提供的数据。据此，我们对蒸馏过程进行简化：不限制Student Model的形式，选择主流的推断速度快的神经网络模型对BERT进行近似；训练不使用值近似、分布近似作为学习目标，直接使用标签近似作为目标来指导Student Model的学习。</p>
 <p>我们使用IDCNN-CRF来近似BERT实体识别模型，IDCNN（Iterated Dilated CNN）是一种多层CNN网络，其中低层卷积使用普通卷积操作，通过滑动窗口圈定的位置进行加权求和得到卷积结果，此时滑动窗口圈定的各个位置的距离间隔等于1。高层卷积使用膨胀卷积（Atrous Convolution）操作，滑动窗口圈定的各个位置的距离间隔等于d（d&gt;1）。通过在高层使用膨胀卷积可以减少卷积计算量，同时在序列依赖计算上也不会有损失。在文本挖掘中，IDCNN常用于对LSTM进行替换。实验结果表明，相较于原始BERT模型，在没有明显精度损失的前提下，蒸馏模型的在线预测速度有数十倍的提升。</p>
@@ -329,43 +329,43 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>4.2.1 融合搜索日志特征的Lattice-LSTM</strong></p>
 <p>在O2O垂直搜索领域，大量的实体由商家自定义（如商家名、团单名等），实体信息隐藏在供给POI的属性中，单使用传统的语义方式识别效果差。Lattice-LSTM[10]针对中文实体识别，通过增加词向量的输入，丰富语义信息。我们借鉴这个思路，结合搜索用户行为，挖掘Query 中潜在短语，这些短语蕴含了POI属性信息，然后将这些隐藏的信息嵌入到模型中，在一定程度上解决领域新词发现问题。与原始Lattice-LSTM方法对比，识别准确率千分位提升5个点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cd2e8dfa203f48a092a7c5651c7aea7a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705446.png" />   
     </p>
 <p>图8 融合搜索日志特征的Lattice-LSTM构建流程</p>
 <p><strong>1) 短语挖掘及特征计算</strong></p>
 <p>该过程主要包括两步：匹配位置计算、短语生成，下面详细展开介绍。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2a5cf015b0c443e69c88bea468b93f85.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705070.png" />   
     </p>
 <p>图 9 短语挖掘及特征计算</p>
 <p><strong>Step1：匹配位置计算</strong>。对搜索日志进行处理，重点计算查询与文档字段的详细匹配情况以及计算文档权重（比如点击率）。如图9所示，用户输入查询是“手工编织”，对于文档d1（搜索中就是POI），“手工”出现在字段“团单”，“编织”出现在字段“地址”。对于文档2，“手工编织”同时出现在“商家名”和“团单”。匹配开始位置、匹配结束位置分别对应有匹配的查询子串的开始位置以及结束位置。</p>
 <p><strong>Step2：短语生成</strong>。以Step1的结果作为输入，使用模型推断候选短语。可以使用多个模型，从而生成满足多个假设的结果。我们将候选短语生成建模为整数线性规划（Integer Linear Programmingm，ILP）问题，并且定义了一个优化框架，模型中的超参数可以根据业务需求进行定制计算，从而获得满足不用假设的结果。对于一个具体查询Q，每种切分结果都可以使用整数变量xij来表示：xij=1表示查询i到j的位置构成短语，即Qij是一个短语，xij=0表示查询i到j的位置不构成短语。优化目标可以形式化为：在给定不同切分xij的情况下，使收集到的匹配得分最大化。优化目标及约束函数如图10所示，其中p：文档，f：字段，w：文档p的权重，wf：字段f的权重。xijpf：查询子串Qij是否出现在文档p的f字段，且最终切分方案会考虑该观测证据，Score(xijpf)：最终切分方案考虑的观测得分，w(xij)：切分Qij对应的权重，yijpf : 观测到的匹配，查询子串Qij出现在文档p的f字段中。χmax：查询包含的最大短语数。这里，χmax、wp、wf 、w(xij)是超参数，在求解ILP问题前需要完成设置，这些变量可以根据不同假设进行设置：可以根据经验人工设置，另外也可以基于其他信号来设置，设置可参考图10给出的方法。最终短语的特征向量表征为在POI各属性字段的点击分布。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a272e502d2964bffa4e8009d61ed9de3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705480.png" />   
     </p>
 <p>图10 短语生成问题抽象以及参数设置方法</p>
 <p><strong>2) 模型结构</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9c6a7f559b8e48458bc57a374a891a4d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705708.png" />   
     </p>
 <p>图11 融合搜索日志特征的Lattice-LSTM模型结构</p>
 <p>模型结构如图11所示，蓝色部分表示一层标准的LSTM网络（可以单独训练，也可以与其他模型组合），输入为字向量，橙色部分表示当前查询中所有词向量，红色部分表示当前查询中的通过Step1计算得到的所有短语向量。对于LSTM的隐状态输入，主要由两个层面的特征组成：当前文本语义特征，包括当前字向量输入和前一时刻字向量隐层输出；潜在的实体知识特征，包括当前字的短语特征和词特征。下面介绍当前时刻潜在知识特征的计算以及特征组合的方法：（下列公式中，σ表示sigmoid函数，⊙表示矩阵乘法）</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7dbd940f56dd4a6e8babf8793a6b5b84.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705918.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3c1a8bb718de411ab7cd014a9f8d24b9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705423.png" />   
     </p>
 <p><strong>4.2.2 融合实体词典的两阶段NER</strong></p>
 <p>我们考虑将领域词典知识融合到模型中，提出了两阶段的NER识别方法。该方法是将NER任务拆分成实体边界识别和实体标签识别两个子任务。相较于传统的端到端的NER方法，这种方法的优势是实体切分可以跨领域复用。另外，在实体标签识别阶段可以充分使用已积累的实体数据和实体链接等技术提高标签识别准确率，缺点是会存在错误传播的问题。</p>
 <p>在第一阶段，让BERT模型专注于实体边界的确定，而第二阶段将实体词典带来的信息增益融入到实体分类模型中。第二阶段的实体分类可以单独对每个实体进行预测，但这种做法会丢失实体上下文信息，我们的处理方法是：将实体词典用作训练数据训练一个IDCNN分类模型，该模型对第一阶段输出的切分结果进行编码，并将编码信息加入到第二阶段的标签识别模型中，联合上下文词汇完成解码。基于Benchmark标注数据进行评估，该模型相比于BERT-NER在Query粒度的准确率上获得了1%的提升。这里我们使用IDCNN主要是考虑到模型性能问题，大家可视使用场景替换成BERT或其他分类模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/23d7d630b5714886826a5a8323d66d50.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705815.png" />   
     </p>
 <p>图12 融合实体词典的两阶段NER</p>
 <h3 id="43-弱监督ner">4.3 弱监督NER</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b92613605a9848c1b7005c077703a1ff.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705642.png" />   
     </p>
 <p>13 弱监督标注数据生成流程</p>
 <p>针对标注数据难获取问题，我们提出了一种弱监督方案，该方案包含两个流程，分别是弱监督标注数据生成、模型训练。下面详细描述下这两个流程。</p>
@@ -376,11 +376,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>预测结果校正：实体词典中实体精度较高，理论上来讲模型预测的结果给出的实体类型至少有一个应该是实体词典中给出的该实体类型，否则说明模型对于这类输入的识别效果并不好，需要针对性地补充样本，我们对这类输入的模型结果进行校正后得到标注文本。校正方法我们尝试了两种，分别是整体校正和部分校正，整体校正是指整个输入校正为词典实体类型，部分校正是指对模型切分出的单个Term 进行类型校正。举个例子来说明，“兄弟烧烤个性diy”词典中给出的实体类型为商家，模型预测结果为修饰词+菜品+品类，没有Term属于商家类型，模型预测结果和词典有差异，这时候我们需要对模型输出标签进行校正。校正候选就是三种，分别是“商家+菜品+品类”、“修饰词+商家+品类”、“修饰词+菜品+商家”。我们选择最接近于模型预测的一种，这样选择的理论意义在于模型已经收敛到预测分布最接近于真实分布，我们只需要在预测分布上进行微调，而不是大幅度改变这个分布。那从校正候选中如何选出最接近于模型预测的一种呢？我们使用的方法是计算校正候选在该模型下的概率得分，然后与模型当前预测结果（当前模型认为的最优结果）计算概率比，概率比计算公式如公式2所示，概率比最大的那个就是最终得到的校正候选，也就是最终得到的弱监督标注样本。在“兄弟烧烤个性diy”这个例子中，“商家+菜品+品类”这个校正候选与模型输出的“修饰词+菜品+品类”概率比最大，将得到“兄弟/商家 烧烤/菜品 个性diy/品类”标注数据。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9423a1040f234a8fa2f4adf73c7a4256.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705274.png" />   
     </p>
 <p>图 14 标签校正</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d39e4300c58f4adb84df074c7e06cba8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705472.png" />   
     </p>
 <p>公式 2 概率比计算</p>
 <p><strong>Step2：弱监督模型训练</strong></p>
@@ -532,6 +532,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -565,10 +569,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -947,6 +947,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

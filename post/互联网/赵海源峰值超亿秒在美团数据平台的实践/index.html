@@ -212,7 +212,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4e5cc359b80e4f059a767bd92aea4ccd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849978.webp" />   
     </p>
 <blockquote>
 <p>分享嘉宾：赵海源 美团 流存储工程师</p>
@@ -224,7 +224,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="1-现状"><strong>1. 现状</strong></h2>
 <p>首先了解一下Kafka在美团数据平台的现状。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b2a0ccb70dff422b828edab54c74fe53.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281849112.webp" />   
     </p>
 <p>图1-1 Kafka在美团数据平台的现状</p>
 <p>如图1-1所示，蓝色部分描述了Kafka在数据平台定位为数据存储层。主要的职责是做数据的缓存和分发，它会将收集到的binlog日志分发到不同的数据系统里，这些日志来源于业务日志、用户行为日志以及业务的数据库。这里的数据系统包括通过ODS入仓提供离线计算使用、直接供实时计算使用、通过DataLink同步到日志中心，以及OLAP做分析使用。</p>
@@ -232,7 +232,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>随着集群规模的增大，数据量的增长，Kafka面临的挑战也是愈发的严峻。下面看一下具体的挑战有哪些。</p>
 <h2 id="2-挑战"><strong>2. 挑战</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a597db873add4dbeaf0fe694136dc728.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850110.webp" />   
     </p>
 <p>图1-2 Kafka在美团数据平台面临的挑战</p>
 <p>如图1-2所示，具体的挑战可以概括为两部分：</p>
@@ -242,7 +242,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>接下来介绍一下针对读写延迟问题，美团的数据平台做了哪些优化。首先从宏观上将受影响因素分为应用层和系统层，然后详细介绍应用层和系统层存在的问题，并给出对应的解决方案，包括流水线加速、fetcher隔离、迁移取消和cgroup资源隔离等，下面具体来看一下各种优化方案是如何实现的。</p>
 <h3 id="1-概览"><strong>1. 概览</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b1ddc58c44284050923921010d8fc0eb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850144.webp" />   
     </p>
 <p>图2-1 Kafka概览图</p>
 <p>如图2-1，这张图是针对读写延迟碰到的问题，以及对应优化方案的一个概览图。我们把整个受影响的因素分为应用层和系统层。</p>
@@ -253,7 +253,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="2-应用层"><strong>2. 应用层</strong></h3>
 <p><strong>① 磁盘均衡</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c5473054e2994a94ab8fc9aa5891c37e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850168.webp" />   
     </p>
 <p>图2-2 Kafka应用层磁盘均衡</p>
 <p>下面介绍一下读写延迟在应用层遇到到的问题，磁盘热点导致磁盘利用率不均衡，它会带来两个问题：</p>
@@ -268,13 +268,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>② 迁移优化</strong></p>
 <p><strong>优化一，流水线加速</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9e1e5ec125a7462f9fece0ce4fa6f9b3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850249.webp" />   
     </p>
 <p>图2-3 流水线加速</p>
 <p>针对长尾分区问题，我们主要是做了流水线加速，如图2-3所示，箭头以上原生Kafka版本只支持按组提交，比如说一批提交了四个分区，当tp4这个分区一直卡着无法完成的时候，后续所有分区都无法继续进行。采用流水线加速之后，即使tp4这个分区还没有完成，当其它三个分区已经完成的时候，后续就可以继续提交新的分区。可以看出在相同的时间内，原有的方案受阻于tp4没有完成后续所有分区都没办法完成，但是在新的方案中，tp4分区已经迁移到tp11分区了。图中虚线代表了一个无序的时间窗口，主要用于控制并发，目的是为了和原有的按组提交的个数保持一致，避免过多的迁移影响读写请求服务。</p>
 <p><strong>优化二， 迁移取消</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/01b3087e103b4e06a96d9df1bde741e0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850210.webp" />   
     </p>
 <p>图2-4 迁移取消</p>
 <p>如图2-4所示，箭头左侧描述了因为迁移影响的三种线上类型。第一种是因为迁移会触发最旧读，同步大量的数据，在这个过程中会首先将数据回刷到pagecache上，那么可能会污染pagecache，进而导致某个实时读的分区发生cache miss，就会导致实时读触发磁盘度进而影响读写请求；第二类和第三类分别描述的是当存在某些异常节点导致迁移hang住的时候，想对topic做某些操作，比如对topic扩容，例如在午高峰时由于流量上涨想对topic扩容，实际上这个时候扩容是无法完成的。因为在Kafka迁移过程中这些操作都被限制住。第三个和第二个有些类似，它的主要问题是当目标节点挂了，这个时候topic扩容也是无法完成的，用户可能一直忍受读写请求受影响，直到迁移完成。针对这种场景，线上无法忍受由于长时间迁移导致读写延迟变高的。</p>
@@ -282,64 +282,64 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>迁移取消必须要删除那些还没有完成的分区，大量的删除会导致磁盘IO，称为性能瓶颈进而影响读写，因此在这里我们针对迁移取消做了平滑删除，避免因大量删除影响性能问题。</p>
 <p><strong>优化三，</strong> <strong>fetcher隔离</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ce93ae95b036403a94d332b2c7957cfc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850334.webp" />   
     </p>
 <p>图2-5 fetcher隔离</p>
 <p>如图2-5，绿色代表实时读，红色代表延时读。当某一个follower的实时读和延时读共享同一个fetcher时，延时读会影响实时读。因为每一次延时读的数据量是显著大于实时读的，而且延时读容易触发磁盘读，可能数据已经不在pagecache中了，显著的拖慢了fetcher的拉取效率。</p>
 <p>针对这种问题我们做的策略叫fetcher隔离。也就是说所有isr的follower共享fetcher，所有非isr的follower共享fetcher，这样就能保证所有isr中的实时读不会被非isr的回溯读所影响。</p>
 <p><strong>③ Consumer异步化</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dbb777df627c4b1b8ac20b7fef826357.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850412.webp" />   
     </p>
 <p>图2-6 Kafka-broker分阶段延时统计模型</p>
 <p>首先来了解一下Kafka-broker分阶段延时统计模型，当一个Kafka的producer或consumer请求进入到Kafka-broker时，首先由processor将请求写入RequestQueue里面，然后RequestHandler就会从RequestQueue源源不断地去拉取请求进行处理，在RequestQueue中的等待时间是RequestQueueTime，RequestHandler具体的执行时间为LocalTime，当RequestHandler执行完毕后会将请求扔到DelayedPurgatory组件中，这个实际上就是一个延时队列。这个延时队列当触发某一个延时条件完成了以后会把请求塞到ResponseQueue中，在DelayedPurgatory队列持续的时间为RemoteTime，processor会不断的从ResponseQueue中将数据拉取出来发往客户端，标红的ResponseTime是可能会被客户端影响的，因为如果客户端接收能力不足，那么ResponseTime就会一直持续增加，从Kafka-broker角度，每一次请求总的延迟叫RequestTotalTime包含了刚才所有流程分阶段计时总和。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ed8ad4ca1c704f3a85e5a9513f6159a5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850366.webp" />   
     </p>
 <p>图2-7 Consumer异步化</p>
 <p>主要问题是因为Kafka原生consumer基于NIO的单线程模型存在缺陷。如图2-7所示，在phase1，user首先在调用poll请求时，当本地无数据时，同时向broker1、broker2和broker3发送请求，实际上broker1的数据先回来了，Kafka Client立即将数据写入CompleteQueue，这个时候立即返回，不会再拉取broker2和broker3的数据，此时user线程会直接从CompleteQueue中读取数据，然后直接返回。此时broker2和broker3服务端可能已经处理好，数据已经准备就绪。user线程会继续调用poll，访问下一批请求，可是因为CompleteQueue依然存在broker1上次拉取的数据，这时user线程直接返回了，这样就会导致broker2和broker3中已就绪的数据一直得不到拉取。如图中phase2，因为单线程模型存在缺陷导致waitFetch这部分时长变大，导致Kafka-broker延时指标不断升高。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1a4ddf641bd64db7a713f250d01ba210.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850387.webp" />   
     </p>
 <p>图2-8 引入异步拉取线程</p>
 <p>针对这个问题我们的改进是引入异步拉取线程。异步拉取线程会及时的拉取就绪的数据，避免服务端延时指标受影响，而且原生Kafka并没有限制同时拉取的分区数，我们在这里做了限速，避免GC和OOM的发生。异步线程在后台持续不断地拉取数据放到CompleteQueue中。</p>
 <h2 id="3-系统层"><strong>3. 系统层</strong></h2>
 <p><strong>① Raid卡加速</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a25991a369624f41add381547afdc85b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850596.webp" />   
     </p>
 <p>图2-9 Raid卡加速</p>
 <p>众所周知，Kafka的写入借助了Zero Copy技术将数据直接写入pagecache，但是随着随机读写并发量的提升，随机写导致的性能不足问题就会显现出来。表现是随机写入的延时会显著升高，针对这个问题我们引入了Raid卡。Raid卡有一个好处是自带缓存，而且Raid卡使用的是Raid-0模式，并没有冗余，与pagecache类似，在这一层会继续做merge，把数据merge成更大的block写入disk。更加充分利用顺序写HDD的带宽，借助Raid卡保证了随机写的性能是比较稳定的。</p>
 <p><strong>② cgroup隔离优化</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/12a54c4d9d5741e1a1d649776c0a8064.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850529.webp" />   
     </p>
 <p>图2-10 cgroup隔离</p>
 <p>在介绍cgroup的隔离优化之前需要提到的背景是，为了提高资源利用率，美团数据平台将IO密集型应用和CPU密集型应用混布。IO密集型应用在这里指的就是Kafka，CPU密集型应用在这里指的是Flink和Storm，但是原有的隔离策略存在两个问题：首先是物理核本身会存在资源竞争，在这个物理核下，共享的L1cache和L2cache都存在竞争，当实时平台CPU飙升时会导致Kafka读写延时受到影响；另外，Kafka的HT跨NUMA，增加内存访问耗时，如图2-10所示，跨NUMA节点是通过QPI去做远程访问，而这个远程访问的耗时是40ns。</p>
 <p>针对这两个问题我们改进了隔离策略，针对物理核的资源竞争，我们新的混布策略Kafka是独占物理核的，也就是说在新的隔离策略中，不存在同一个物理核被Kafka和Flink同时使用；然后是保证Kafka的所有超线程处于同一侧的NUMA，避免Kafka跨NUMA带来的访问延时。通过新的隔离策略，Kafka的读写延时不再受Flink CPU飙升的影响。</p>
 <h2 id="4-混合层-ssd新缓存架构"><strong>4. 混合层-SSD新缓存架构</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c721eaed9724455e85f4222561b9e5ca.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850747.webp" />   
     </p>
 <p>图2-11 混合层SSD新缓存架构</p>
 <p>首先来了解一下Kafka的数据消费模型，Kafka利用操作系统提供的ZeroCopy技术处理数据读取请求，pagecache容量充裕时数据直接从pagecache拷贝到网卡，有效降低了读取延时。但是实际上往往pagecache的的容量是不足的，因为它不会超过一个机器的内存，容量不足时，ZeroCopy就会触发磁盘读，磁盘读不仅显著变慢，还会污染pagecache影响其他读写。</p>
 <p>如图2-11中左半部分所示，当一个延迟消费者去拉取数据时，发现pagecache中没有它想要的数据，这个时候就会触发磁盘读，磁盘读后会将数据回写到pagecache，导致pagecache污染，自己读写延迟变慢同时也会导致另一个实时消费受影响，因为对于实时消费而言，它一直读的是最新的数据，最新的数据按正常来说时不应该出发磁盘读的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7a41b01d39a84b989bb2fcd6209ae3d3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850054.webp" />   
     </p>
 <p>图2-12 SSD新缓存架构方案选型</p>
 <p>针对这个问题，我们这边在做方案选型时有两种方案，</p>
 <p><strong>方案一</strong> ，读磁盘时不回写pagecache，比如使用DirectIO，不过Java并不支持；</p>
 <p><strong>方案二</strong> ，在内存和HDD之间引入中间层，比如SDD，如图2-12所示，随着读取并发的增加，SSD的性能并不会显著降低，非常适合我们的使用场景。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a6347919119b499e938d49804896b0ff.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850266.webp" />   
     </p>
 <p>图2-13 SSD新缓存架构决策</p>
 <p><strong>针对SSD的方案也有两种选型:</strong></p>
 <p><strong>方案一</strong> ，可以基于操作系统的内核实现，这种方案SSD与HDD存储空间按照固定大小分块，并且SSD与HDD建立映射关系，同时会基于数据局部性原理，cache miss后数据会按LRU和LFU替换SSD中部分数据，业界典型方案包括OpenCAS和FlashCache。优势是数据路由对应用层透明，对应用代码改动量小，并且社区活跃可用性好；但是问题是局部性原理并不满足Kafka的读写特性，而且缓存空间污染问题并未得到根本解决，因为它会根据LRU和LFU去替换SSD中的部分数据。</p>
 <p><strong>方案二</strong> ，是基于Kafka的应用层去实现，具体就是Kafka的数据按照时间维度存储在不同设备上，对于近实时数据直接放在SSD上，针对较为久远的数据直接放在HDD上，然后leader直接根据offset从对应设备读取数据。这种方案的优势是他的缓存策略充分考虑了Kafka的读写特性，确保近实时的数据消费请求全部落在SSD上，保证这部分请求处理的低延迟，同时从HDD读取的数据不回刷到SSD防止缓存污染，同时由于每个日志段都有唯一明确的状态，因此每次请求目的明确，不存在因cache miss带来的额外性能开销。同时劣势也很明显，需要在server端代码上进行改进，涉及的开发以及测试工作量较多。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8d96356980694045ad788a8ce803c150.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850465.webp" />   
     </p>
 <p>图2-14 SSD新缓存架构具体实现</p>
 <p>下面来介绍一下SSD新缓存架构的 <strong>具体实现</strong> 。</p>
@@ -351,7 +351,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>从HDD读取的数据是不会回刷到SSD上的，防止缓存污染。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8a63216f408548459620b329dd4796cc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850496.webp" />   
     </p>
 <p>图2-15 SSD新缓存架构细节优化</p>
 <p>介绍了具体实现之后，再来看一下 <strong>细节优化</strong> 。</p>
@@ -363,7 +363,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>了解了读写延迟优化之后，下面来看一下Kafka在美团数据平台是如何保证大规模集群的稳定性的。</p>
 <h2 id="1-隔离优化"><strong>1. 隔离优化</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6fca4f077e02405895daece306491fdf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850400.webp" />   
     </p>
 <p>图3-1 隔离优化</p>
 <p>由于Kafka服务于多个业务，这些业务的topic混布在一起的话很有可能造成不同业务的不同topic之间相互影响。例如broker如果和controller混布在一起，当broker负载明显变高的时候，会导致controller无法及时处理请求，从而可能会造成整个集群发生故障，因为元数据的变更请求无法发送出去。</p>
@@ -375,14 +375,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h2 id="2-全链路监控"><strong>2. 全链路监控</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8023164c49a343a685bc7f8dc4f3488f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850441.webp" />   
     </p>
 <p>图3-2 全链路优化</p>
 <p>随着集群规模的增大分区数变多，读写的客户端也会变多，Kafka当前提供的broker端粒度的延时指标在很多情况下无法真实反映某些客户端是否慢，还有一类问题是当集群发生故障时，如何能及时得到感知和处理。</p>
 <p>针对这两个问题，我们做了全链路监控这样一个项目。把Kafka核心组件以及指标全部收集起来做了一个全链路的追踪，通过分析上报上来的日志和指标，我们就可以建立细粒度的日志大盘。当某一个读写请求变慢时，我们通过日志大盘很容易就知道他具体是慢在哪个环节。日志和指标的解析服务可以自动实时感知故障还有一些慢节点，这两类故障有一部分我们可以做到自动处理，我们会把他通过事件的方式通知到Kafka manager，然后Kafka manager会根据这个事件自动去处理这些故障。还有一类故障是无法得到自动处理的，比如说僵尸节点，僵尸节点指的是zookeeper的临时节点还没有掉线，但是这个节点不管是controller也好还是客户端也好，都已经无法访问了，访问就会报错或者超时，这一类故障需要人工介入处理，会直接发给具体的管理员。</p>
 <h2 id="3-服务生命周期管理"><strong>3. 服务生命周期管理</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b9410465c921460cb8c30e1724f10bfe.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281850644.webp" />   
     </p>
 <p>图3-3 服务生命周期管理</p>
 <p>首先介绍一下当集群规模增大以后存在的一系列问题。之前版本的Kafka也有一套自动化运维的系统，但是它存在一些问题，首先是状态语义存在歧义，无法真实反映系统状态，往往需要借助日志和指标去找到真实系统是否健康或者异常；然后是状态不全面，异常case需人工介入处理，误操作风险极大。</p>
@@ -516,6 +516,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -549,10 +553,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -931,6 +931,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

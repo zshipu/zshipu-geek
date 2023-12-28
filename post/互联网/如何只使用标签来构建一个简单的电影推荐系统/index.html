@@ -203,10 +203,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>所以你决定建立一个电影推荐系统。由于你的服务是新的，所以你还没有足够的数据来了解哪些用户正在观看哪些电影。这就是所谓的冷启动问题，它不能让你仅根据用户的历史收视记录来推荐电影。</p>
 <p>幸运的是，即使没有足够的观看数据，我们仍然可以建立一个像样的电影元数据推荐系统。这就是 MovieLens 的作用所在。MovieLens 提供了一个公共数据集，其中包含每个电影的关键字标签。这些标签信息量很大。例如，看看 Good Will Hunting 的最重要的社群标签。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/da39f14a27784447b37f1c201c1b9837.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271810288.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-87ca47c7cce0405fab95b768a81d43d6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271810957.webp" />   
     </p>
 <p>在这篇文章的其余部分，我将回答三个业务问题，这三个问题对于构建一个简单的基于内容的推荐系统非常关键，其中的标签来自 MovieLens：</p>
 <ol>
@@ -220,21 +220,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>MovieLens 标签数据集中大约有 10K 个不一样的电影和 1K 个不一样的标签。每部电影的每个标签都有一个相关分数，所以大约有 1000 万个电影标签对。相关性得分范围为 0 到 1。</p>
 <p>并不是每个标签都与电影相关，所以我们只需要保留最相关的标签。首先，我们可以根据相关评分对每部电影的标签进行排序。例如，下面是 Remember the Titans 的 top10 标签。请注意，相关性评分远远高于 0.9，这表明它们是非常相关的标签。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-a7c1b71edcfa4e26811ff0b593e29346.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271810781.webp" />   
     </p>
 <p>基于相关性得分的前 10 个标签(降序排列)</p>
 <p>接下来，我们在下面的图中确认，电影的高排名标签往往具有较高的中值相关性得分。电影的排第一个的标签的中值相关度几乎是 1。我们可以看到，当我们下降到第 50 位时，中值相关性得分逐渐下降。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b651469b9c0549ac8ee4ca1dfc86dd8d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271810469.webp" />   
     </p>
 <p>为了找到与电影最相关的标签，我们可以根据相关性评分保留电影的前 <strong>N</strong> 个标签。在这里，我们需要仔细挑选。如果 <strong>N</strong> 很小，我们有非常相关的但是很少的标签。如果 <strong>N</strong> 很大，我们有很多标签，但是其中很多可能是无关的。</p>
 <p>下面的图显示了从第 1 个标签到第 100 个标签的中值的变化百分比。当相关性得分开始变得更稳定时，我们看到在第 50 位附近有一个拐点。因此，我们可以选择 <strong>N</strong> =50 作为每个电影保留的合理数量的标签。注意，这是一个相当简单的“拐点方法”风格的方法，可以在以后进行优化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-de2b8f95285c4046ae74ff7e79aee9ed.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271810171.webp" />   
     </p>
 <p>现在我们可以得到每个电影的前 50 个标签的列表，我们将在下一节中使用它们。例如，Toy Story 的前 50 个标签如下。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-297be124e42148dd875babe94fa26474.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271810979.webp" />   
     </p>
 <h1 id="2-我们如何使用标签来度量电影之间的相似度">2) 我们如何使用标签来度量电影之间的相似度？</h1>
 <p>在为用户生成电影推荐之前，我们需要一种基于电影的前 50 个标签的相似性度量方法。在基于内容的推荐系统中，用户将被推荐与他们已经看过的电影相似的电影。</p>
@@ -266,17 +266,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>直观上，我们可以看出电影 <strong>A</strong> 与 <strong>B</strong> 更相似，而不是 <strong>C</strong>。这是因为电影 <strong>A</strong> 和 <strong>B</strong> 共享两个标签(空间，友情)，而电影 <strong>A</strong> 和 <strong>C</strong> 不共享任何标签。</p>
 <p>下面是基于 Jaccard Index 的与 Good Will Hunting 相似的 10 部电影。对于 Good Will Hunting 的观众来说，这些建议似乎是合理的。注意，我在列表中包括了 Good Will Hunting，以显示在比较电影本身时 Jaccard Index=1。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-c4b4eff3fd08423b805060843c0d1484.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271810892.webp" />   
     </p>
 <p>基于 Jaccard Index 的标签集的类似 Good Will Hunting 的电影</p>
 <p>以下是 10 部与 Interstellar 相似的电影。对于 Interstellar 的观众来说，这些建议似乎也很合理。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-1d567160153f446d916fe6fa02ee905f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271810662.webp" />   
     </p>
 <p>基于 Jaccard Index 的标签集的类似 Interstellar 的电影</p>
 <p>为了进一步说明 Jaccard Index 的有效性，请看下面基于和 Interstellar 相似的电影的标签频率的词云。在这里，我们可以看到哪些标签在相似性计算中更加突出(例如科幻小说，伟大的结局，反乌托邦的未来，哲学，大脑)。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0cfebfffbeaf4bf686c0ea77a805150a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271810474.webp" />   
     </p>
 <p>基于和 Interstellar 相似的电影的标签频率的词云</p>
 <hr>
@@ -297,7 +297,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>直观上，我们可以再次看到电影 <strong>A</strong> 与 <strong>B</strong> 更相似，而不是 <strong>C</strong>。这是因为电影 <strong>A</strong> 和 <strong>B</strong> 在每个维度上有更接近的数字(例如第一个维度是 1.1 vs 1.3)。</p>
 <p>为了找到一个好的向量表示的电影，我使用了 Doc2Vec (PV-DBOW) 技术，我们拿到一个电影(文档)，并基于标签（文档中的词）学习一个到潜在 <strong>K</strong> 维空间的映射。我不会在这里深入讨论细节，但这是我们如何基于标签将电影表示为向量的方法。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5e34ca5072ae4803b034ee0e81fb17be.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271810364.webp" />   
     </p>
 <p>Doc2Vec 论文中对 PV-DBOW 技术的可视化，对于每个段落 ID (movie)，我们训练一个模型来预测该段落中某个单词(movie tag)的共现性</p>
 <p>一旦我们可以把每一部电影表示成一个向量，我们就可以计算向量之间的余弦相似度来找到相似的电影。我不会在这里详细介绍余弦相似度，但是在一个较高的层次上，它告诉我们电影向量彼此之间有多么相似，我们可以使用它来生成推荐。</p>
@@ -429,6 +429,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -462,10 +466,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -844,6 +844,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

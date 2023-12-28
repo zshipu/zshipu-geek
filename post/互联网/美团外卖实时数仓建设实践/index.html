@@ -219,7 +219,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-f32e2db3190d48d5962d43a575bc8071.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281700502.webp" />   
     </p>
 <blockquote>
 <p>文章作者：朱良 美团外卖 技术专家</p>
@@ -229,7 +229,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>导读：</strong> 本文主要介绍一种通用的实时数仓构建的方法与实践。实时数仓以端到端低延迟、SQL标准化、快速响应变化、数据统一为目标。在实践中，我们总结的最佳实践是：一个通用的实时生产平台 + 一个通用交互式实时分析引擎相互配合同时满足实时和准实时业务场景。两者合理分工，互相补充，形成易于开发、易于维护、效率最高的流水线，兼顾开发效率与生产成本，以较好的投入产出比满足业务多样需求。</p>
 <h2 id="01-实时场景"><strong>01 实时场景</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-636f42a6c6204b49931d9771f1ac6255.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281700460.webp" />   
     </p>
 <p>实时数据在美团外卖的场景是非常多的，主要有以下几点：</p>
 <ul>
@@ -241,7 +241,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="02-实时技术及架构"><strong>02 实时技术及架构</strong></h2>
 <h3 id="1-实时计算技术选型"><strong>1. 实时计算技术选型</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-a5bff09880f34fc8a7fe250b89c47b58.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281700494.webp" />   
     </p>
 <p>目前开源的实时技术比较多，比较通用的是Storm、Spark Streaming以及Flink，具体要根据不同公司的业务情况进行选型。</p>
 <p>美团外卖是依托美团整体的基础数据体系建设，从技术成熟度来讲，前几年用的是Storm，Storm当时在性能稳定性、可靠性以及扩展性上是无可替代的，随着Flink越来越成熟，从技术性能上以及框架设计优势上已经超越Storm，从趋势来讲就像Spark替代MR一样，Storm也会慢慢被Flink替代，当然从Storm迁移到Flink会有一个过程，我们目前有一些老的任务仍然在Storm上，也在不断推进任务迁移。</p>
@@ -249,25 +249,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="2-实时架构"><strong>2. 实时架构</strong></h3>
 <p><strong>① Lambda架构</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-73714db469a2445ea7838090ddabdbde.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281700537.webp" />   
     </p>
 <p>Lambda架构是比较经典的架构，以前实时的场景不是很多，以离线为主，当附加了实时场景后，由于离线和实时的时效性不同，导致技术生态是不一样的。Lambda架构相当于附加了一条实时生产链路，在应用层面进行一个整合，双路生产，各自独立。这在业务应用中也是顺理成章采用的一种方式。</p>
 <p>双路生产会存在一些问题，比如加工逻辑double，开发运维也会double，资源同样会变成两个资源链路。因为存在以上问题，所以又演进了一个Kappa架构。</p>
 <p><strong>② Kappa架构</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-01354e57d4fd4ecf8cfd4d8fb1d997c0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281700655.webp" />   
     </p>
 <p>Kappa架构从架构设计来讲比较简单，生产统一，一套逻辑同时生产离线和实时。但是在实际应用场景有比较大的局限性，在业内直接用Kappa架构生产落地的案例不多见，且场景比较单一。这些问题在我们这边同样会遇到，我们也会有自己的一些思考，在后面会讲到。</p>
 <h2 id="03-业务痛点"><strong>03 业务痛点</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b0fbb412f61241be8cb1c158eb6edb43.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281700870.webp" />   
     </p>
 <p>在外卖业务上，我们也遇到了一些问题。</p>
 <p>业务早期，为了满足业务需要，一般是拿到需求后case by case的先把需求完成，业务对于实时性要求是很高的，从时效性来说，没有进行中间层沉淀的机会，在这种场景下，一般是拿到业务逻辑直接嵌入，这是能想到的简单有效的方法，在业务发展初期这种开发模式比较常见。</p>
 <p>如上图所示，拿到数据源后，会经过数据清洗，扩维，通过Storm或Flink进行业务逻辑处理，最后直接进行业务输出。把这个环节拆开来看，数据源端会重复引用相同的数据源，后面进行清洗、过滤、扩维等操作，都要重复做一遍，唯一不同的是业务的代码逻辑是不一样的，如果业务较少，这种模式还可以接受，但当后续业务量上去后，会出现谁开发谁运维的情况，维护工作量会越来越大，作业无法形成统一管理。而且所有人都在申请资源，导致资源成本急速膨胀，资源不能集约有效利用，因此要思考如何从整体来进行实时数据的建设。</p>
 <h2 id="04-数据特点与应用场景"><strong>04 数据特点与应用场景</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-9272490745414082832ca549a270ce63.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281700874.webp" />   
     </p>
 <p>那么如何来构建实时数仓呢？</p>
 <p>首先要进行拆解，有哪些数据，有哪些场景，这些场景有哪些共同特点，对于外卖场景来说一共有两大类，日志类和业务类。</p>
@@ -285,7 +285,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="05-实时数仓架构设计"><strong>05 实时数仓架构设计</strong></h2>
 <h3 id="1-实时架构流批结合的探索"><strong>1. 实时架构：流批结合的探索</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-a451686e1b20453fb0927a30a6fb3d31.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281700968.webp" />   
     </p>
 <p>基于以上问题，我们有自己的思考。通过流批结合的方式来应对不同的业务场景。</p>
 <p>如上图所示，数据从日志统一采集到消息队列，再到数据流的ETL过程，作为基础数据流的建设是统一的。之后对于日志类实时特征，实时大屏类应用走实时流计算。对于Binlog类业务分析走实时OLAP批处理。</p>
@@ -294,7 +294,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>这种想法在业内也已经有实践，且成为一个重要探索方向。阿里基于ADB的实时OLAP方案等</p>
 <h3 id="2-实时数仓架构设计"><strong>2. 实时数仓架构设计</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-107b65e47bea4c0ca466cded4dec03a5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281700868.webp" />   
     </p>
 <p>从整个实时数仓架构来看，首先考虑的是如何管理所有的实时数据，资源如何有效整合，数据如何进行建设。</p>
 <p>从方法论来讲，实时和离线是非常相似的，离线数仓早期的时候也是case by case，当数据规模涨到一定量的时候才会考虑如何治理。分层是一种非常有效的数据治理方式，所以在实时数仓如何进行管理的问题上，首先考虑的也是分层的处理逻辑，具体如下：</p>
@@ -306,7 +306,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>总结起来，从整个实时数仓的建设角度来讲，首先数据建设的层次化要先建出来，先搭框架，然后定规范，每一层加工到什么程度，每一层用什么样的方式，当规范定义出来后，便于在生产上进行标准化的加工。由于要保证时效性，设计的时候，层次不能太多，对于实时性要求比较高的场景，基本可以走上图左侧的数据流，对于批量处理的需求，可以从实时明细层导入到实时olap引擎里，基于olap引擎自身的计算和查询能力进行快速的回撤计算，如上图右侧的数据流。</p>
 <h2 id="06-实时平台化建设"><strong>06 实时平台化建设</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-6bdaefa97dcb46e7a692f8796ee85037.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281700974.webp" />   
     </p>
 <p>架构确定之后，后面考虑的是如何进行平台化的建设，实时平台化建设完全附加于实时数仓管理之上进行的。</p>
 <p>首先进行功能的抽象，把功能抽象成组件，这样就可以达到标准化的生产，系统化的保障就可以更深入的建设，对于基础加工层的清洗、过滤、合流、扩维、转换、加密、筛选等功能都可以抽象出来，基础层通过这种组件化的方式构建直接可用的数据结果流。这其中会有一个问题，用户的需求多样，满足了这个用户，如何兼容其他的用户，因此可能会出现冗余加工的情况，从存储来讲，实时数据不存历史，不会消耗过多的存储，这种冗余是可以接受的，通过冗余的方式可以提高生产效率，是一种空间换时间的思想应用。</p>
@@ -314,14 +314,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>当这些功能都有了以后，元数据管理，指标管理，数据安全性、SLA、数据质量等系统能力也会逐渐构建起来。</p>
 <h3 id="1-实时基础层功能"><strong>1. 实时基础层功能</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-f276828e9eaa47f8a87a218fe7352a9b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281700113.webp" />   
     </p>
 <p>实时基础层的建设要解决一些问题。</p>
 <p>首先是一条流重复读的问题，一条Binlog打过来，是以DB包的形式存在的，用户可能只用其中一张表，如果大家都要用，可能存在所有人都要接这个流的问题。解决方案是可以按照不同的业务解构出来，还原到基础数据流层，根据业务的需要做成范式结构，按照数仓的建模方式进行集成化的主题建设。</p>
 <p>其次要进行组件的封装，比如基础层的清洗、过滤、扩维等功能，通过一个很简单的表达入口，让用户将逻辑写出来。trans环节是比较灵活的，比如从一个值转换成另外一个值，对于这种自定义逻辑表达，我们也开放了自定义组件，可以通过java或python开发自定义脚本，进行数据加工。</p>
 <h3 id="2-实时特征生产功能"><strong>2. 实时特征生产功能</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-449c3e0719014b61a09aad97e2fad45e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281700224.webp" />   
     </p>
 <p>特征生产可以通过sql语法进行逻辑表达，底层进行逻辑的适配，透传到计算引擎，屏蔽用户对计算引擎的依赖。就像对于离线场景，目前大公司很少通过代码的方式开发，除非一些特别的case，所以基本上可以通过sql化的方式表达。</p>
 <p>在功能层面，把指标管理的思想融合进去，原子指标、派生指标，标准计算口径，维度选择，窗口设置等操作都可以通过配置化的方式，这样可以统一解析生产逻辑，进行统一封装。</p>
@@ -329,13 +329,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>所以在实时平台建设过程中，更多考虑的是如何更有效的利用资源，在哪些环节更能节约化的使用资源，这是在工程方面更多考虑的事情。</p>
 <h3 id="3-sla建设"><strong>3. SLA建设</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-97d8fa1b1ee245e887e230cd2a27be72.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281700163.webp" />   
     </p>
 <p>SLA主要解决两个问题，一个是端到端的SLA，一个是作业生产效率的SLA，我们采用埋点+上报的方式，由于实时流比较大，埋点要尽量简单，不能埋太多的东西，能表达业务即可，每个作业的输出统一上报到SLA监控平台，通过统一接口的形式，在每一个作业点上报所需要的信息，最后能够统计到端到端的SLA。</p>
 <p>在实时生产中，由于链路非常长，无法控制所有链路，但是可以控制自己作业的效率，所以作业SLA也是必不可少的。</p>
 <h3 id="4-实时olap方案"><strong>4. 实时OLAP方案</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-46a212898e2542e8bfa1db16085c3575.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281700180.webp" />   
     </p>
 <p>问题：</p>
 <ul>
@@ -348,7 +348,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>这种模式重在解决业务回撤计算，比如业务状态改变，需要在历史的某个点将值变更，这种场景用流计算的成本非常大，olap模式可以很好的解决这个问题。</p>
 <h2 id="07-实时应用案例"><strong>07 实时应用案例</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-286a8878502e415bb62d8e81f39ef920.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281700155.webp" />   
     </p>
 <p>最后通过一个案例说明，比如商家要根据用户历史下单数给用户优惠，商家需要看到历史下了多少单，历史T+1的数据要有，今天实时的数据也要有，这种场景是典型的Lambda架构，可以在doris里设计一个分区表，一个是历史分区，一个是今日分区，历史分区可以通过离线的方式生产，今日指标可以通过实时的方式计算，写到今日分区里，查询的时候�</p>
 
@@ -476,6 +476,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -509,10 +513,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -891,6 +891,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

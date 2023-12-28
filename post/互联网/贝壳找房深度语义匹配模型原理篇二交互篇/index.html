@@ -216,7 +216,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="二交互型深度语义匹配模型">二、交互型深度语义匹配模型</h2>
 <p>交互型模型摒弃后匹配的思路，假设全局的匹配度依赖于局部的匹配度，在输入层就进行词语间的先匹配，并将匹配的结果作为灰度图进行后续的建模，其基本模型结构如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-1c53d1388e734c5ba3d76e8df26a013b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281840971.png" />   
     </p>
 <p>交互型匹配模型的特点是：</p>
 <ol>
@@ -228,21 +228,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="21-arc-ii">2.1 ARC-II</h3>
 <p>ARC-I,ARC-II 2014年由华为诺亚方舟实验室提出, ARC-I 是表示型匹配模型，上篇有讲解，ARC-II是交互型匹配模型，中文名是 <strong>卷积网络深度匹配模型</strong>，通过中文名称就可以get到两个点：卷积、深度，所以可以理解为多次应用卷积计算来建模，原文传送门 <code>https://papers.nips.cc/paper/5550-convolutional-neural-network-architectures-for-matching-natural-language-sentences.pdf</code>.</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-958b346ad1884159ac9b7ef94a39784e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281840049.png" />   
     </p>
 <p>句子中每个词表示为词向量后，每个句子构成一个矩阵，用滑动窗口来选择词向量组作为基本单元进行卷积操作。假设有两个句子x和y，首先从sentence x中选取一个向量a，再从sentence y中将每一个向量和a进行卷积操作，通过这种操作，将两个句子中的向量进行两两组合，构成2D矩阵，该矩阵作为两个句子交互作用的一个初步表示。随后的卷积以这个2D矩阵为基础进行“卷积＋池化”的操作若干次，最后得到一个描述两个句子整体关联的向量，最终由一个MLP来综合这个向量的每个维度得到匹配值。</p>
 <p>ARC-II模型考虑了句子中词的顺序和交互信息，从而可以对两个句子的匹配关系进行相对完整的描述；然而还缺乏对于细微匹配关系的捕捉，在精确匹配上面还存在缺陷。</p>
 <h3 id="22-paircnn">2.2 PairCNN</h3>
 <p>这篇文章2015年出自University of Trento，也是用CNN模型对文本进行语义表示。原文传送门： <code>https://dl.acm.org/doi/pdf/10.1145/2766462.2767738</code>.</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-98eb67acbf6f4fdd8f6c8979dae3c362.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281840398.png" />   
     </p>
 <p>模型先分别对 query 和 document 做卷积和max池化，得到文本的语义向量，接着通过 M 矩阵变换得到语义向量的相似度，然后把 query 语义向量、query&amp;document 的语义相似度、document 语义向量、外部特征拼接成n维向量，外部特征的加入是作者考虑到可能无法在词表中找到某些专有名词，从而会造成信息缺失，因此文中使用word overlap(单词重叠)和IDF word overlap(IDF加权后的单词重叠)作为外部特征，以加强query和document之间的关联关系。将拼接好的n维向量输入一个非线性变换隐层，最终用 softmax做概率归一化。用softmax 的输出作为监督信号，采用 cross-entropy 作为损失函数进行模型训练。</p>
 <p>本文的改进点包括：1. 将 query 和 document 的语义向量及其相似度拼接成新的特征向量输入MLP；2.可以在模型的输入向量中方便地融入外部特征。</p>
 <h3 id="23-matchpyramid">2.3 MatchPyramid</h3>
 <p>虽然ARC-II和PairCNN更早地让两段文本进行了交互，但是这个交互的意义其实并不明确，层次化的过程也比较模糊。MatchPyramid重新定义了两段文本交互的方式&mdash;- <strong>匹配矩阵</strong>，该模型2016年由中科院提出，原文传送门 <code>https://arxiv.org/abs/1602.06359</code>。作者基于此模型，在2017.3-2017.6 Kaggle的Quora Question Pairs 比赛上，取得了全球第四的好成绩。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b582285fded94bcd93aabe4001743d1e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841034.png" />   
     </p>
 <p>MatchPyramid模型的核心思想是层次化的构建匹配过程，借鉴了CNN在处理图像时的原理，因为CNN就是在提取像素、区域之间的相关性，进而提取图像的特征。我们看看文中举的例子：Query1：down the ages dumplings and noodles were popular in China. Query2: down the ages noodles and dumplings were famous Chinese food. 作者将每个单词看成一个像素，那么对于两个单词数为M,N的句子，构建相似度矩阵的大小就是M*N。</p>
 <h4 id="231匹配矩阵的构造">2.3.1匹配矩阵的构造</h4>
@@ -254,7 +254,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <h4 id="232卷积层细节">2.3.2卷积层细节</h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-1cbecc2d989c4bc2906dbff289d5446a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841641.png" />   
     </p>
 <p>利用两层的CNN对相似度矩阵进行特征抽取，这里要注意的是由于上一层的相似度矩阵shape不一致，在第一层CNN后面进行maxpool的时候，要使用动态pool。最后用两层的全连接对CNN的结果进行转换，使用sigmoid激活，使用softmax函数得到最终分类概率。</p>
 <p>总的来说，通过多层的卷积，MatchPyramid可以在单词或者句子级别自动捕获重要的匹配模式。</p>
@@ -262,107 +262,107 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>AB为Attention-Based，即基于注意力机制的卷积神经网络。这篇文章来自于慕尼黑大学信息语言处理中心，原文传送门： <code>https://www.transacl.org/ojs/index.php/tacl/article/view/831/194</code>。本文的作者也采用了CNN的结构来提取特征，并用attention机制进行进一步的特征处理，作者一共提出了三种attention的建模方法。</p>
 <p>ABCNN的基础是BCNN(Bi-CNN)，BCNN的网络结构如下图所示，四层分别是：输入层、卷积层、池化层和输出层。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-6627b988ee1746188866a3fe7520aa57.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841059.png" />   
     </p>
 <p>BCNN方式就是正常的一个CNN网络架构，并没有进行交互产生交互信息，因此引入了Attention机制，文章提了三种结构:ABCNN-1, ABCNN-2和ABCNN-3.</p>
 <h4 id="241-abcnn-1">2.4.1 ABCNN-1</h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-c59e9ddaf86c417bb3b297a3a328756f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841169.png" />   
     </p>
 <p>ABCNN-1是在输入层之后，卷积层之前添加注意力矩阵A，A用来定义两个句子之间词的关系。图中红色矩阵与BCNN的输入层一致，表示word级别的词向量，蓝色矩阵为phrase级，是高一级的词向量表示。蓝色矩阵是由注意力矩阵A和红色词向量矩阵计算生成。注意力矩阵A的计算方式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-37dc4f66acca42d4943c61b32131f318.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841582.png" />   
     </p>
 <p>即Matrix A中数值Ai,j的计算是由sentence1第i个单词的向量与sentence2中第j个单词的距离度量。作者使用的是两个向量的欧几里德距离。得到了attention矩阵A，则可以计算句子的attention特征：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-8861646cb27145e68b0634c091636870.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841410.png" />   
     </p>
 <p>接下来将句子的原始词向量表示和Attention特征表示叠加，输入到卷积层进行计算。</p>
 <h4 id="242-abcnn-2">2.4.2 ABCNN-2</h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-f4a29e5bc744477aaefee0c08ad358a9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841309.png" />   
     </p>
 <p>ABCNN-2 是在卷积层之后，池化层之前添加注意力矩阵A。其计算方式与ABCNN-1 相同，sentence0第j个词的词权重为a0j，sentence1第j个词的词权重为a1j。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-8140451618da48f1ba81f8fdef7cfc1d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841503.png" />   
     </p>
 <p>ABCNN-2 模型中的pooling 方法，是根据计算出的Attention权重向量加权求和计算得到的。公式如下:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-62eeba9baa0d488dbf2edd4a9ff4d753.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841242.png" />   
     </p>
 <p>其中表示第i个sentence中第r个词池化后的特征，表示第i句话第r个词卷积后的词向量。剩余层操作和BCNN相同。</p>
 <h4 id="243-abcnn-3">2.4.3 ABCNN-3</h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-4c42026a9ed94e7a978b1572fb22c4fb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841044.png" />   
     </p>
 <p>从图中可以看出，ABCNN-3是ABCNN-1和ABCNN-2的结合，卷积层和池化层都添加了attention机制，这里就不再多说了。</p>
 <h3 id="25-esim">2.5 ESIM</h3>
 <p>2017年提出的ESIM, 全称为Enhanced Sequential Inference Model，该模型本身是用来文本推理的，给定前提p和假设h，判断p和h是否有关联，也可以用来作文本匹配。该模型综合应用了BiLSTM 和注意力机制，在文本匹配中效果十分强大，号称 <strong>短文本匹配神器</strong>。原文传送门 <code>https://arxiv.org/abs/1609.06038</code>，下图中左侧为ESIM 的模型结构。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-7e978e28d4c34c52820422b26d146e20.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841453.png" />   
     </p>
 <p>ESIM一共包含四部分，输入层、交互层、聚合层和预测层。</p>
 <h4 id="251-输入层">2.5.1 输入层</h4>
 <p>输入一般可以采用预训练好的词向量或者添加embedding层，接下来就是一个BiLSTM，作用是为embedding做特征提取，最后把其隐藏状态的值保留下来。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-8feb14c742fa48e4a93aeb87d8f4d9f6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841837.png" />   
     </p>
 <h4 id="252-交互层">2.5.2 交互层</h4>
 <p>接下来就是需要分析这两个句子之间的联系了，这层是ESIM的点睛之笔, 主要在句子基础上表征了两个句子词语之间的关系，并凸显了某一句中的单词对另一句各单词之间的产生的影响。首先，使用点积的方式计算a句中第i个词和b句中第j个词之间的attention权重。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-dabe7ee5248a497581b2ffc16021377c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841539.png" />   
     </p>
 <p>然后对两句各单词之间进行交互性计算，该词与另一句子联系越大，则计算出的值也会越大：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-776028d737ed42d1880691b76c455ae4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841352.png" />   
     </p>
 <p>上述两步称为Local Inference Modelling，相当于先用attention机制计算出a句某一单词和b句中各个单词的权重，然后再将权重赋予b句各个单词，用来表征a句中的该单词，形成一个新的序列，b句亦然。简单来说可以这样理解：a句中有个单词“boy”，首先分析这个词和另一句话中各个词之间的联系，计算得到的结果标准化之后作为权重，用另一句话中的各个词向量按照权重去表示&quot;boy&quot;。</p>
 <p>得到了新的序列之后进行差异分析，判断两个句子之间的联系是否足够大，将每句话的原BiLSTM序列和新序列进行差和积操作，并将所有序列拼接起来形成一个序列。这步称为Enhancement of local inference information。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-df0bd0acf09e4eff923f39287ebe77bd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841102.png" />   
     </p>
 <h4 id="253-聚合层">2.5.3 聚合层</h4>
 <p>在综合所有信息之后进行一个全局分析，使用一个组合层来合成增强的局部推断信息。此处再用BiLSTM进行一次编码，将新序列信息内容在内部进行一个融合，使用relu函数降低模型复杂度。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-784a0fc256544b468988a9182f684bf4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841887.png" />   
     </p>
 <h4 id="254-预测层">2.5.4 预测层</h4>
 <p>对聚合层输出进行一个pooling操作，并将pooling后的结果简单拼接为最后进入分类器的向量。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5fb2b3266a0b497fb7fec0dbff85978b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841638.png" />   
     </p>
 <p>将向量V放入一个多层感知器进行分类，输出层使用softmax，得到最后的预测结果。</p>
 <h3 id="26-bimpm">2.6 Bimpm</h3>
 <p>Bimpm(Bilateral Multi-perspective Matching) 即 <strong>双向多角度匹配</strong>，2017年由IBM提出，原文传送门： <code>https://arxiv.org/pdf/1702.03814.pdf</code>。 相信在阅读了ESIM之后对“双向”有了一定的理解，该模型的亮点在于如何“多角度”进行匹配。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-252e4dd7a23942ac938472e78e498de7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841462.png" />   
     </p>
 <h4 id="261-输入层">2.6.1 输入层</h4>
 <p>该模型的输入层与ESIM略有差别：字向量经过一层LSTM，取最后一个time作为char embedding ，然后与预训练好的词向量进行拼接，拼接之后经过BiLSTM，保存两个query(P,Q)的每个time-step值。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-a0c0a05976634e2eb7c824e0befd569f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841946.png" />   
     </p>
 <h4 id="262-匹配层">2.6.2 匹配层</h4>
 <p>在匹配层，模型采用了4种方法进行匹配BiLSTM输出的上下文向量，每种都是双向的，下面仅从一个方向P-&gt;Q解释匹配算法，另一方向与其相同。</p>
 <p><strong>1. full-matching</strong>：在这种匹配策略中，用P中每一个time step的上下文向量（包含前向和后向）分别与句子Q中最后一个time step的上下文向量（包含前向和后向）计算匹配值，即</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5e08f130901740869cecd6dbfc066ea6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841928.png" />   
     </p>
 <p><strong>2. maxpooling-matching</strong>：在第一种匹配方法中选取最大的匹配值，即</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ec456037d5f44df79f57654c7a896e32.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841689.png" />   
     </p>
 <p><strong>3. attentive-matching</strong>：先对P和Q中每一个time step的上下文向量（包含前向和后向）计算余弦相似度，得到相似度矩阵</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-57423c8d31b64dcc8ac2d3a93f912ec0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841504.png" />   
     </p>
 <p>然后将相似度矩阵作为Q中每一个time step权重，通过对Q的所有上下文向量（包含前向和后向）加权求和，计算出整个句子Q的注意力向量</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-245387823cbb4312a7e3fa8b6ad0d753.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841567.png" />   
     </p>
 <p>最后，将P中每一个time step的上下文向量（包含前向和后向）分别与句子Q的注意力向量计算匹配值</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-29d9344e1e73423fab30dec7af3879a0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281841456.png" />   
     </p>
 <p><strong>4. max-attentive-matching</strong>：与attentive-matching的匹配策略相似，不同之处在于选择句子Q所有上下文向量中余弦相似度最大的向量作为句子Q的注意力向量。</p>
 <h4 id="263-聚合层与输出层">2.6.3 聚合层与输出层</h4>
@@ -511,6 +511,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -544,10 +548,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -926,6 +926,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

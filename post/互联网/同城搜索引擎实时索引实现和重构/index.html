@@ -220,7 +220,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>第二种的形式倒排索引提供了更多的兼容性（比如短语搜索）和计算能力，但是需要更多的时间和空间来创建。为了简化、清晰的说明问题，这里我们只讨论第一种倒排索引形式，也是最主要的索引形式。</p>
 <p>以如下需要被索引的文本为例：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e571b9d880eb42c9bbcc19bbf906c655.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705146.png" />   
     </p>
 <p>可以构建出以下的反向索引：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">&#34;a&#34;:      {2}
@@ -244,16 +244,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="五八索引系统实现"><strong>五八索引系统实现</strong></h2>
 <p>五八搜索是基于内部自研的搜索引擎实现，其索引构建系统整体如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f85079ca37c341ffa88f29e8d2411915.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705667.png" />   
     </p>
 <p>在离线阶段，批量获取所有的文档并进行数据分片，通过索引程序”indexer“，生成静态倒排索引文件，然后把倒排索引文件推送给在线检索程序去加载。检索程序加载倒排文件后，对外提供检索服务。同时，在检索服务内部，启动了一个文档接收线程（启动一个服务端口）和一个动态索引更新线程，索引更新线程取到更新文档，在内存中创建增量倒排索引。增量倒排索引是在内存中建立的倒排索引，增量倒排索引的结构与全量静态倒排索引基本一致，主要差异是索引大小不同。静态倒排索引结构如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b3d1e00b5d07473aaae0884d06839bc3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705608.webp" />   
     </p>
 <p>倒排索引结构看似复杂，但经过梳理后可简单分为三个部分，第一部分是meta信息，第二部分是文档ID列表（docid数组），第三部分是词在文档内部出现的位置信息。设计成三个部分分开存储可以获取更高的检索性能且节省空间：文档ID列表以数组形式存储访问效率高，对CPU cache line友好。另外，位置信息单独存放，是因为大部分情况下位置信息都不会访问到，只有在求交完成后做相关性计算时才会用到，召回计算阶段不需要位置信息，所以单独存放需要用到时再去访问效率更高。另外相同类型数据连续存放可以做索引压缩，节省空间、提升cache hit。</p>
 <p>如前所叙，该索引结构采用了固定长度的数组方式进行存储，它的问题是一旦构建完成后不能再新增元素。为了解决这个问题，引入了增量索引来支持新增/更新文档。增量索引和全量的静态倒排索引结构本质是一样的，增量索引也是累积一段时间数据后触发小批量构建，相当于一个小的静态索引。为了让新增文档能被快速检索到，小批量构建索引的时间间隔需要比较短，我们内部配置通常是3秒。也就是说每3秒会建一个增量索引段，但这样的话内存中就会有很多小的增量索引。为了解决增量索引量太多的问题引入了索引段合并策略，最小的索引段是3秒，每个索引段的数目最大是1，超过最大数目就会往下一个索引段合并，下一个索引段是15分钟段。当15分钟段超过最大数目会往6小时段合并。6小时段往天段合并，天段往月段合并，月段往永久段合并，永久段不会再合并（各个段的时间大小是可以自由配置）。各个索引数据段的合并过程如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ab7c52c980834adaa8dbe5b7abe0f0af.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705457.png" />   
     </p>
 <p>静态倒排索引是对初始文档集合建立的索引结构，一般存储在磁盘文件中，而动态索引是对新增数据实时建立的倒排索引，一般存储在内存中。当有新文档进入索引系统时，对其进行解析并将解析结果加入到动态索引中。而为了实现倒排索引的动态更新，还需要另外一个数据结构辅助，即删除文档列表。删除文档列表是由已经被删除的文档数据形成的一个文档ID列表。在每个倒排索引数据段上，都有一个删除列表用来记录本段中哪些文档ID被删除了。当一篇文档内容被更改，实现过程是旧文档先被删除，然后系统再增加一篇新的文档。通过这种间接的方式，实现对内容更改的支持。另外，如果一个文档被删除，也只是在删除列表中增加该文档的ID，并不会在倒排索引中真正删除，即标记删除。</p>
 <p>倒排索引按文档量大小分段，增加数据时不断产生小的增量数据段，小段不断往大段合并，整体策略清晰完整。但还存在更新延迟问题，在实时性要求特别高的场景下，无法满足需求。</p>
@@ -265,7 +265,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>实时索引的倒排数据结构如下图所示，每个term（即词）的倒排结构是一个链表，链表中每个元素是一个指针，指向的是一个数组的首地址，而数组中存储的才是真正的倒排数据，即docid 列表。链表中每个节点对应的数组，其长度并不相同：第一个数组大小为4，第二个数组大小为8，呈二倍关系，以此类推。</p>
 <p>假如完全使用链表记录实时更新文档中term对应的docid列表，每个docid均为一个链表节点；查询时需要对多个term对应的倒排链进行求交集运算，链表的访问过程CPU cache line很不友好，在线查询性能会很差，同时较多的next指针也会造成很大的空间浪费。而数组在查询时的运算性能较好，节省空间。考虑到空间和性能的平衡，采用链表和数组二者结合的方式，上层使用链表进行动态扩展，下层使用数组存储真正的docid信息，则可以获得较低的空间占用率和较好的查询性能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/05e795d6912e4736aa0db1ee05fa9397.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705205.png" />   
     </p>
 <p>为什么第一个节点对应的数组大小默认为4？请看下面表格，这是统计一个线上典型的业务，3秒钟内平均新增的文档量是204个，包含的term个数是28284，88.7%的term的倒排链（doc list）长度不大于4，95%的term的倒排链（doc list）长度不大于8。所以首节点数组大小设置为4，88.7%的情况下可满足业务需求。若组数size设置太大，在绝大多数情况下会造成数组空间浪费；若数组size设置太小，则会生成较多的链表节点，造成指针空间浪费。所以，首节点数组大小折中取4，即可大致满足需求。若默认大小的数组不够使用，则可按照大小翻倍的策略动态的进行数组扩充。</p>
 <p>doc list长度term 数目均值term占比(0, 4]25091.188.7%(4, 6]1242.14.3%(6, 8]567.92%(8, 10]323.21.1%(10, 100]1003.683.5%(100, 500]55.70.2%(500, 1000]0.280%(1000, +)0.00030%</p>
@@ -274,7 +274,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="实时索引正排结构设计">实时索引正排结构设计</h4>
 <p>下面再介绍下正排数值字段的数据结构设计。在只读段中，单值的正排字段只需用一个固定大小的数组表示即可。在写段中，如果直接使用数组，则会存在更新问题：若初始设置的数组太小，新增文档则会频繁的重新申请空间；若初始设置的数组太大，在大部分场景下就会导致空间浪费。所以采用了下图所示的”动态数组“的来解决该问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f360fd20dd964e7c8fd3835bbeb61efc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271705083.webp" />   
     </p>
 <p>采用两级数组的方式来�</p>
 
@@ -402,6 +402,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -435,10 +439,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -817,6 +817,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

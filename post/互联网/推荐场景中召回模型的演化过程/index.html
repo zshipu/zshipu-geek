@@ -215,16 +215,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>训练方式：三层ReLU神经网络之后接softmax层，去预测用户下一个感兴趣的视频，输出是在所有候选视频集合上的概率分布。训练完成之后，最后一层Relu的输出作为user embedding，softmax的权重可当做当前预测item的embedding表示。</p>
 <p>线上预测：通过userId找到相应的user embedding，然后使用KNN方法（比如faiss）找到相似度最高的top-N条候选结果返回。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f14a5bf98aef480fa7ea8d9819b076de.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939852.jpeg" />   
     </p>
 <p>2. 双塔模型召回</p>
 <p>双塔模型基本是：两侧分别对user和item特征通过DNN输出向量，并在最后一层计算二个输出向量的内积。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cd00fa55102a4eaea6610d0a12a5d6b1.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939805.jpeg" />   
     </p>
 <p>例如YouTube今年刚发的一篇文章就应用了经典的双塔结构：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e5ffb5b4859d4e0d80de24595a966bd3.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939550.jpeg" />   
     </p>
 <h2 id="三-多embedding向量召回-用户多兴趣表达">三. 多embedding向量召回-用户多兴趣表达</h2>
 <ol>
@@ -232,21 +232,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>背景：电商场景下用户行为序列中的兴趣分布是多样的，如下图用户A和B的点击序列商品类别分布较广，因此如果只用一个embedding向量来表示用户的兴趣其表征能力是远远不够的。所以需要通过一种模型来建模出用户多个embedding的表示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a1d798070f4c4900a99658b3e2e04624.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939177.jpeg" />   
     </p>
 <p>MIND模型通过引入capsule network的思想来解决输出多个向量embedding的问题，具体结构如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f9c4238e0c3c4d63a9421d5481bbeded.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939002.jpeg" />   
     </p>
 <p>如上图：</p>
 <p>训练：Multi-Interest抽取层负责建模用户多个兴趣向量embedding，然后通过Label-aware Attention 结构对多个兴趣向量加权。这是因为多个兴趣embedding和待推荐的item的相关性肯定不同（这里的思想和DIN模型如出一辙）。其中上图中的K，V都表示用户多兴趣向量，Q表示待推荐item的embedding表示，最终用户的embedding表示为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/654df311fc8740cb991ada39a8f0b9a4.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939909.jpeg" />   
     </p>
 <p>公式中的ei表示item embedding，Vu表示Multi-Interest抽取层输出的用户多个兴趣向量embedding。</p>
 <p>然后使用Vu和待推荐item embedding，计算用户u和商品i交互的概率，计算方法和YouTube DNN一样：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/76f8310d22234261a008b50ea2e63c3f.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939558.jpeg" />   
     </p>
 <p>线上serving：在线计算用户的多个兴趣向量后，每个兴趣向量embedding通过KNN检索得到最相似的Top-N候选商品集合。这里有个问题大家思考下？得到多个兴趣向量后通过权重将这些向量的embedding累加起来成为一个（表示为多个向量的加权和），然后只去线上检索这一个embedding的Top-N相似，大家觉得这样操作可以吗？不可以的原因又是什么呢？</p>
 <h2 id="四-graph-embedding">四. Graph Embedding</h2>
@@ -255,25 +255,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>传统的graph embedding过程如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/72a7e93c00264ce29f88cbf207790213.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939170.jpeg" />   
     </p>
 <p>其实就是通过 构图-随机游走得到序列-word2vec训练 三部曲得到每个item的embedding表示。但是这样训练出来的模型会存在冷启动问题。就是那些出现次数很少或者从来没在序列中出现过的item embedding无法精确的表征。本文通过添加side information（比如商品的种类、品牌、店铺id等）等辅助类信息来缓解该问题，如下图SI 1 - SI n表示n-1个辅助id特征的embedding表示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f8bdad74b6b04525afc94aac890e58e0.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939077.jpeg" />   
     </p>
 <p>该模型的亮点是考虑了不同的side information在最终的aggregated embeddings中所占的权重是不同的，最后aggregated embeddings计算公式如下，其中分母用来归一化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cff8e7b8d93649a9b49d6fac39765614.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939989.png" />   
     </p>
 <p>2. GraphSAGE： <a href="https://zshipu.com/t?url=https%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttps%253A%2F%2Farxiv.org%2Fabs%2F1706.02216">Inductive representation learning on large graphs</a></p>
 <p>经典的图卷积神经网络GCN有一个缺点：需要把所有节点都参与训练才能得到node的embedding，无法快速得到新node的embedding。这是因为添加一个新的node，意味着许多与之相关的节点的表示都应该调整。所以新的graph图会发生很大的变化，要想得到新的node的表示，需要对新的graph重新训练。</p>
 <p>GraphSAGE的基本思想：学习一个node节点的信息是怎么通过其邻居节点的特征聚合而来的。 算法如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ef501457ad72414d9f578deeefa8772e.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939511.jpeg" />   
     </p>
 <p>大致流程是：对于一个node需要聚合K次，每次都通过聚合函数aggregator将上一层中与当前node有邻接关系的多个nodes聚合一次，如此反复聚合K次，得到该node最后的特征。 最下面一层的node特征就是输入的node features。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/89df1a0225664d4d8a4a656561926947.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939323.jpeg" />   
     </p>
 <h2 id="五-结合用户长期和短期兴趣建模">五. 结合用户长期和短期兴趣建模</h2>
 <ol>
@@ -281,82 +281,82 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>背景：在电商场景中，用户都会有短期兴趣和长期兴趣，比如在当前的浏览session内的一个点击序列，用户的需求往往是明确的，这属于用户短期的兴趣。另外用户还有一些长期的兴趣表达，比如品牌、店铺的偏好。因此通过模型分别建模用户的长、短期兴趣是有意义的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7bed8f952e1046f58e2e403ad420c930.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939328.jpeg" />   
     </p>
 <p>上图中 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/15efb4bf023e43bc93a2052aec0cf21c.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939206.svg&#43;xml" />   
     
 表示用户短期兴趣向量， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f347cae50a754bbea25cc2d70e5ba16e.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271939851.svg&#43;xml" />   
     
 表示用户的长期兴趣向量，这里需要注意的是，在求长期和短期用户兴趣向量时都使用了Attention机制，Attention的Query向量 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/df99cdfe60d44cd58f3a011fdc8d403b.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271940457.svg&#43;xml" />   
     
 表示user 的embedding，用的是基本的用户画像，如年龄区间、性别、职业等。得到长期和短期用户向量后，通过gru中的gate机制去融合两者：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f11b75dc7b2b436d9c5c7b4b193a4bc4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271940034.png" />   
     </p>
 <p>上面的公式输出表示用户的embedding表示，而item的embedding表示和YouTube DNN一样，可以拿softmax层的权重。其实也可用graph embedding先离线训练好item的embedding表示。</p>
 <p>线上预测：通过user id找到相应的user embedding，然后使用KNN方法（比如faiss）找到相似度最高的top-N条候选结果返回。</p>
 <p>2. Next Item Recommendation with Self-Attention</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0143b321fff04fe9ae452d31aced40c5.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271940887.jpeg" />   
     </p>
 <p>本文亮点是同时建模用户短期兴趣（由self-attention结构提取）和用户长期兴趣。其短期兴趣建模过程：使用用户最近的L条行为记录来计算短期兴趣。可使用X表示整个物品集合的embedding，那么，用户u在t时刻的前L条交互记录所对应的embedding表示如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d20430e31d36438ca6539244c7a0546d.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271940815.jpeg" />   
     </p>
 <p>其中每个item的embedding维度为d，将 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f4ecb488c5a849089f7ac1408923f185.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271940518.svg&#43;xml" />   
     
 作为transformer中一个block的输入：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a8267bcd1cf248d99cc5e2a1f5129fc5.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271940975.jpeg" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b8861ca7250848758119f46ce9fe1c9c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271940578.jpeg" />   
     </p>
 <p>这里需要注意和传统transformer的不同点：</p>
 <ul>
 <li>计算softmax前先掩掉 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3472a3bfd5e34e9c8198a434ab917315.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271940123.svg&#43;xml" />   
     
 矩阵的对角线值，因为对角线其实是item与本身的一个内积值，容易给该位置分配过大的权重。</li>
 <li>没有将输入 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4495e2be073749c2b729a166ff88f310.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271940670.svg&#43;xml" />   
     
 乘以 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9e8e2f2fff414c37bc601148dfd87666.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271940504.svg&#43;xml" />   
     
 得到 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bd633fec0edf48c4bf617653eda43d60.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271940106.svg&#43;xml" />   
     
 ，而是直接将输入
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1ac70fa461954d1da81b6df5dd48e49f.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271940701.svg&#43;xml" />   
      乘以softmax算出来的score。</li>
 <li>直接将embedding在序列维度求平均，作为用户短期兴趣向量。</li>
 </ul>
 <p>self-attention模块只使用用户最近的L个交互商品作为用户短期的兴趣。那么怎么建模用户的长期兴趣呢？可认为用户和物品同属于一个兴趣空间，用户的长期兴趣可表示成空间中的一个向量，而某物品也可表示为成该兴趣空间中的一个向量。那如果一个用户对一个物品的评分比较高，说明这两个兴趣是相近的，那么它们对应的向量在兴趣空间中距离就应该较近。这个距离可用平方距离表示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c52afb6da7f3416e8a0f470a34d57ead.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271940402.jpeg" />   
     </p>
 <p>其中U是用户的兴趣向量，V是物品的兴趣向量</p>
 <p>综合短期兴趣和长期兴趣，可得到用户对于某个物品的推荐分，推荐分越低，代表用户和物品越相近，用户越可能与该物品进行交互。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4b4766872a9046c79f75e3b2fa3fe750.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271940080.png" />   
     </p>
 <h2 id="六-tdm深度树匹配召回">六. TDM深度树匹配召回</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1ed27b9025d9448796814cf7fc3ccddf.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271940928.jpeg" />   
     </p>
 <p>详细讲解可以参考我之前的一篇文章： <a href="https://zshipu.com/t?url=https%3A%2F%2Fzhuanlan.zhihu.com%2Fp%2F78941783">https://zhuanlan.zhihu.com/p/78941783</a></p>
 <p>参考文献：</p>
@@ -495,6 +495,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -528,10 +532,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -910,6 +910,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -214,51 +214,51 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="一-兴趣搜索概述">一. 兴趣搜索概述</h1>
 <p>推荐与搜索是人与内容交互的一体两面，其中推荐基于对用户兴趣的精准刻画，通过“投喂”的方式不断满足用户的兴趣“high”点。但人拥有极强的主观能动性，即使在沉浸式消费中亦会激发出新的兴趣并进行探索，而此时搜索则成了最有效率的探索方式，业界经典案例如抖音在自然增长下搜索QV轻松达到上亿。随着内容平台在新时期的不断演进，在用户兴趣刻画技术不断精进的润滑下搜索与推荐这两个飞轮会更加快速飞转，而如何更好的满足和承接用户兴趣搜索也将会是新一代搜索技术的重要内核。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5a86dec2319242d1b4f9fc604e588b67.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281558353.webp" />   
     </p>
 <p>另一方面，用户兴趣的表达往往是多模态的，不仅有显示的文字表达如搜索query词，也有隐式的视觉刻画如选中的图像。针对复杂的多模兴趣输入，通过两年的技术积累，我们在腾讯看点业务场景下对兴趣搜索进行了比较细致的探索与实践。对于显示表达的文字搜索，通过建设全面的兴趣刻画知识体系，我们实现了对搜索query词进行语义解析和兴趣精准识别，并通过兴趣点聚合搜索结果页的形式满足用户主需求。对于隐式刻画的视觉兴趣搜索，我们则通过图像理解以及图片向量检索技术手段，实现以图搜剧以及视频合集满足用户对于泛娱乐类内容的兴趣消费。注：本文所讲述的兴趣搜索主要针对短视频领域，但技术框架仍适用于各种内容形态（图文、直播、商品等）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/02f39e84c22e4be0b47044ec5422e598.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281558203.webp" />   
     </p>
 <h1 id="二-文字域搜索">二. 文字域搜索</h1>
 <h3 id="兴趣的定义与挖掘">兴趣的定义与挖掘</h3>
 <p>作为用户的主动输入，搜索query词往往蕴含用户的兴趣点，但如何从中识别抽取出准确的兴趣点，仍然存在不小的技术难度。通过对线上搜索流量分析以及融合知识图谱先验知识，我们预定义了一种兴趣描述schema，即领域 (domain)、兴趣点 (interest)、槽位 (slot)，简称DIS；其中槽位用来对兴趣点进行更细致的分面刻画。例如当搜索query词为“王者荣耀李白五杀”，基于前述的DIS schema，可以映射成：domain&ndash;游戏、interest&ndash;游戏攻略、slot&ndash;{‘游戏名’：王者荣耀，‘角色’：李白，‘技巧’：五杀}，非常清晰且精准地完成对用户搜索兴趣的刻画。如下图，我们也详细对比了兴趣搜索与通用搜索的差异。在统一的兴趣点刻画体系下，需要分别对搜索词以及视频资源进行兴趣点槽位理解，并通过兴趣槽位域精准召回的方式完成兴趣搜索功能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d38be3201d9d4f7ca5617185171490d3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281558989.webp" />   
     </p>
 <h3 id="槽位理解">槽位理解</h3>
 <p>通过对搜索词进行理解和分析，精准识别出其中蕴含的兴趣点在技术层面并无成熟方案。根据结构化粒度粗细进行分类，兴趣槽位理解技术方案可以分为如下图所示几类。此处我们选用序列标注融合模版匹配的技术方案，并且在序列标注方案的选型上，采用了机器阅读理解框架（MRC）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7bc2c905346b4987a1532008da7daf0c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281558808.webp" />   
     </p>
 <p>为何采用MRC模型进行兴趣槽位理解呢？首要原因是MRC模型在融合大规模预训练语言模型后在知识抽取和语义理解方面表现出强大的性能以及对于下游任务的高泛化性，除此之外，MRC模型还优雅地解决了在实践中遇到的兴趣点槽位嵌套问题，比如在美食领域，菜名与食材槽位交叉重叠比例为57%；菜名与做法槽位交叉重叠比例为13.3%。例如“山药炒木耳怎样做才好吃”，其中的“山药炒木耳”是美食兴趣点&ndash;菜名，而“山药”和“木耳”是美食兴趣点&ndash;食材，“炒”则是美食兴趣点&ndash;做法，如此嵌套的短文本，对于通用序列标注模型难以同时应对。因此，我们把序列标注抽象为一种阅读理解任务，通过构造问题query，识别出对应兴趣点的槽位词；比如对于“食材”，我们通过百科定义以及举例的方式构造出对应query，对“做法”同样如此。对于不同兴趣点的槽位序列可通过回答不同问题query来进行标注，对嵌套序列问题非常有效，同时问题query的构造可以融合更多先验知识，有助于提升模型泛化性以及减轻对标注数据的依赖。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0a20c71e95434e5da9143529378f4571.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281558724.webp" />   
     </p>
 <h3 id="视频多模理解">视频多模理解</h3>
 <p>相对于图文资源，视频内容理解的难度更大，需要融合音频、视觉等各个模态信号，才能突破视频元数据的限制，同时也能覆盖更多优质UGC内容。通过对比分析，我们发现ASR，也就是音频转文本能够获得段落/篇章级别的语义信息；OCR则适用于视频主题挖掘以及段落内容分析；视觉分析则能够获取更为细粒度的内容特征，包括人物和目标物体识别。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/67c22c6640f5408ca775385d9b95a73a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281558942.webp" />   
     </p>
 <p>用户兴趣点对于影视、游戏等泛娱乐类内容，一般还包含动作、场景和风格类型，而此类兴趣槽位则需要对视频进行片段级理解才能完成精准挖掘。例如，用户在消费影视类短视频时，对于视频资源会有“高甜”、“吻戏”、“鬼畜”等兴趣点。通过多模态视频理解能力，融合视频标题、音频以及抽帧内容，可实现对此类兴趣点标签精准分类。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b2694fd1237c49719fb5d694a77c2293.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281558631.webp" />   
     </p>
 <h3 id="精准帧搜索产品应用">精准帧搜索产品应用</h3>
 <p>通过对搜索流量下钻分析，发现影视综IP关联的query包含丰富的经典台词及剧情消费需求。在视频多模态理解技术基础上，结合腾讯系优质版权长视频资源，我们打造了业界独具特色的视频智能化搜索产品&ndash;视频精准帧搜索。基于对长视频的多模语义结构化理解，融合台词、人物、场景以及知识图谱，并结合对影视搜索query槽位理解能力，通过精准跳转长视频对应剧情片段来智能化满足泛娱乐搜索需求。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/241eba6a72414c8e8f8e6931658a2cac.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281558598.webp" />   
     </p>
 <p>剧情精准帧搜索（打开QQ浏览器搜索“雍正王朝八王议政”）</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b0a0ddff1edf4740a80398a81904989f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281558153.webp" />   
     </p>
 <p>台词精准帧搜索（打开QQ浏览器搜索“伪装者经典台词”）</p>
 <h1 id="三-视觉域搜索">三. 视觉域搜索</h1>
 <h3 id="看图识剧"><strong>看图识剧</strong></h3>
 <p>除了通过输入文字的方式显示表达兴趣外，在信息流场景中用户还可以通过选择或关注图像的方式来刻画自己的兴趣，例如在浏览信息流文章时，看到某张感兴趣的图则会激发出查看图片出处视频或相关视频的延伸阅读兴趣。通过搭建大规模以图搜图检索系统，集成多种粒度的视觉语义特征，最终实现看图识剧top1召回准确率98%+。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f20899f68c4a4cb98c2cc7406c9fb966.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281558154.webp" />   
     </p>
 <p>看点图搜视频最大挑战在于视频帧索引规模大，且对检索结果准确率要求高。小数据集下比较有效</p>
 
@@ -390,6 +390,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -423,10 +427,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -805,6 +805,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

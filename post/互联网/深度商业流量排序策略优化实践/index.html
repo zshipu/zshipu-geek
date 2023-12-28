@@ -204,7 +204,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="优化前排序策略介绍">优化前排序策略介绍</h2>
 <p>在介绍上述4个部分升级前，先简要介绍一下优化前的基础模型情况。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6c882684e30b4704a9c5e87d4ee1d400.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272150865.webp" />   
     </p>
 <p> 图 1  优化前排序策略情况</p>
 <p>如图1所示，也从4个部分来阐述基础模型：</p>
@@ -222,7 +222,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>（1）实时样本流：</p>
 <p>实时样本流采用实时拼接展现点击数据的方式，从kafka中读取展现点击数据，采用spark streaming，对日志进行实时清洗/反作弊处理，提取关键字段，实时拼接在线特征库中的特征，在集群稳定的情况下，相比线上的真实请求，实时流生成样本的延时约在1分钟左右，在如此短暂的时延下，样本中获取的特征数据跟线上请求中获取的特征数据，产生diff的情况会极大减少。实时样本流上线后，特征diff率从5%下降到1%以内。同时，实时样本流也为支持实时模型训练打下基础。实时样本流请见图2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/23427e89459349e3bc33439ebe03d4fa.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272150834.webp" />   
     </p>
 <p>图 2 实时样本数据流</p>
 <p>这里需要注意的一个点是展现日志和点击日志的实时拼接上，在常见的业务场景中，展现日志会远多于点击日志，使用streaming去处理同一个时间窗口的展现日志和点击日志时，点击日志的处理往往会快很多，一旦出现集群资源紧张，展现日志的处理压力就会变大，处理速度变慢，出现展现日志积压，这样就会产生很多点击日志因为拼接不上展现数据而丢弃的情况，在这里，我们进行了一个优化处理，就是将所有处理后的点击日志，存放在redis中，定期（72小时）清理，然后用展现日志去redis中进行点击日志查找，这样就算是展现日志出现延迟的情况，对拼接率的影响也不大。</p>
@@ -231,12 +231,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在深度学习出现以后，其强大的表征能力，能对人工特征工程进行有效补充，对于一些之前较难处理的特征，例如上述离散类型特征，能进行较好的表征，我们采用其embedding的能力，再结合attention机制，对部分离散类似特征进行了升级，取得了较好的效果，以二手车业务线两类特征为例：</p>
 <p>（1）用户兴趣类特征处理</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a87c47684de44c6ebe4cef3c3c5d7593.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272150862.webp" />   
      图 3 用户兴趣类特征处理</p>
 <p>用户兴趣类特征向量的生成流程相对其他特征要复杂一些，如图3所示输入的信息是用户对某些属性的累积操作数量，先对属性的离散值进行embedding（这里使用的TensorFlow自带的api：tf.nn.embedding_lookup，其原理本身是可以训练的全连接层），然后使用累积操作的数量，对embedding结果进行加权（标量乘以向量，attention），形成兴趣矩阵，最后进行pooling操作，使其变成固定长度的兴趣向量。</p>
 <p>（2）用户跟当前帖子属性的交叉特征处理</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/34bb67fea39e40c5b49bd06afde6ed7e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272150647.webp" />   
     </p>
 <p>图 4 交叉类特征处理</p>
 <p> 以用户对当前品牌的累积转化行为特征为例如图4所示，属于用户跟当前帖子属性的交叉特征，跟用户兴趣特征向量的区别在于，直接输出embedding后的加权向量即可。</p>
@@ -266,7 +266,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>一般神经网络的输入层，会对特征进行embedding，其作用是把一些高维度的id特征，映射成低维向量，是特征更好的表达方式，能有效提升模型效果，但是进行embedding层的参数训练，需要大量的训练样本，ESMM里面对于cvr的子任务，其跟ctr子任务共享embedding表达，这种共享机制，能使得cvr子任务能够从只有展现没有点击的海量样本中，对embedding进行充分的学习，极大缓解训练数据稀疏问题。</p>
 <p>我们在二手车上使用的升级后的模型如下图，底图来自ESMM原论文[1]：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://mmbiz.qpic.cn/mmbiz_png/2VY3NksPSaEw9HsTy76oibdDvFv4icmNfSXlsichHCNc4mJ8yzH4NVftt44JJQnOdzUYGOr3Zw4RB36AFfSgg1oog/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272150752.webp" />   
      图 5  二手车业务使用的多任务模型</p>
 <p>在二手车上实际落地ESMM的过程中，我们还是遇到了ctr子任务正常收敛，cvr任务基本不收敛的情况，后面整体分析，还是由于转化的正样本过于少导致，这里我们目前采用对转化进行重采样来进行解决，重采样后，cvr子任务能正常收敛，但该处理方式会导致cvr预估值和真实值有偏，但不影响序，在部分只依赖cvr序的场景下可以正常使用，在部分需要跟其他影响因子融合的场景下需要对cvr预估值进行校准后使用，后续这部分会考虑更优雅的解决方案。</p>
 <p>c)
@@ -275,7 +275,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>相关性打分 = ʎ*强意图  +   (1-ʎ)*弱意图</p>
 <p>其中强意图指的用户搜索/筛选行为，因为这些行为能定位到具体帖子属性上，可以明确知道用户的关注点；弱意图指的是用户的点击/电话/微聊行为，因为这些行为只能定位到帖子上，无法明确知道用户是对该帖子中哪些属性比较关注。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f49587eee48d40c4abb934e97bf61fbb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272151819.webp" />   
     </p>
 <p>        图 6  二手车业务使用的多任务模型</p>
 <p>这里强意图部分我们采用了一个线性加权的方式，其中X：θ1 <em>w1 + θ2</em> w2 +&hellip;+ θi*wi（当前帖子的属性在用户历史筛选/搜索行为中的加权和，其中θi：1/sqrt(1+dayi)（当前属性的时间衰减因子），wi：1 （当前属性的权重，第一版中都暂定为1）），将输出结果使用sigmod函数进行归一化；弱意图部分采用用户向量和帖子向量的余弦距离，这里计算用户向量和帖子向量，使用的模型有dssm[2]（深度语义匹配模型）和item2vec[3]模型。用户向量和帖子向量简要数据处理流程请见下图：</p>
@@ -409,6 +409,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -442,10 +446,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -824,6 +824,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

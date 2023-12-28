@@ -227,14 +227,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="21-云端排序痛点">2.1 云端排序痛点</h3>
 <p>我们以一次完整的搜索行为，来看一下整个前后端执行的过程。如图 1 所示，用户在手机端搜索入口发起检索请求后，触发云端服务器执行，包括查询理解、多路召回、模型排序与展示信息合并等处理，最终返回给客户端进行渲染呈现给用户。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f16f2f8feb2e4964ac4484444c5934d6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281625280.png" />   
     </p>
 <p>图1 搜索执行链路示意图</p>
 <p>由于整个系统的每秒查询数（QPS）的限制，以及前后端请求通信、传输包体影响，通常会采用分页请求机制。这种客户端分页请求，云端服务检索排序返回给用户最终展示列表的 Client-Server 架构，对于大众点评 LBS 场景、类推荐的搜索产品来说，存在以下两个问题。</p>
 <p>① <strong>列表结果排序更新延迟</strong></p>
 <p>分页请求限制会导致排序结果的更新不及时。在下一个分页请求之前，用户的任何行为都无法对当前页内的搜索排序结果产生任何影响。以大众点评搜索结果页为例，一次请求返回 25 个结果到客户端，每屏展示约 34 个，那么用户需要滑动 68 屏左右，才能触发新的分页请求到云端获取下一页结果（以美食频道列表页为例，有 20% 以上的搜索浏览超过一页结果）。云端的排序系统无法及时感知用户的兴趣变化，并调整已下发到客户端的结果顺序。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9edbdc880397470ab40f03b4a42c6b42.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281625903.png" />   
     </p>
 <p>图2 分页浏览决策示意图</p>
 <p>② <strong>实时反馈信号感知延迟</strong></p>
@@ -248,14 +248,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>端智能重排在大众点评搜索和美食频道页上线后，均取得显著效果，其中搜索流量点击率提升了 25BP（基点），美食频道页点击率提升了 43BP，Query 平均点击数提升 0.29%。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/57f8e90cc4a34427929f3debb7ca2f8b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281625067.png" />   
      图3 端智能重排流程示意图</p>
 <h2 id="3-端上重排序算法探索与实践">3 端上重排序算法探索与实践</h2>
 <p>重排序任务在搜索、推荐领域已有不少研究工作和落地实践，核心解决的问题是从 N 个结果候选中，生成 Top-K 个结果的排列。具体到端上的重排序场景，我们要做的主要工作是：根据用户对前面排序结果的反馈行为，生成候选商户上下文的排列，使得列表页整体的搜索点击率达到最优。下面将详细介绍，针对端上重排序场景，我们在特征工程、实时反馈序列建模以及模型结构做的一些探索与实践。</p>
 <h3 id="31-特征工程">3.1 特征工程</h3>
 <p>在端上建设特征工程的思路和云端搜索排序系统基本一致，User/Item/Query/Contextual 各个维度的基础、交叉特征可以快速复用到端上，当然需要考虑传输和存储优化，以及端、云特征系统的一致性，做到端云“无感”的开发部署，这部分内容会在后面架构&amp;部署优化章节详细介绍。除此以外，还有一部分端上特色的用户实时反馈信号，包括更多细粒度的交互行为等，这些特征也是前文所分析的端上实时反馈决策优势的关键信号。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8a51b2f7664c407ea79bdc25d0b85efc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281625614.png" />   
      表1 特征体系</p>
 <p>具体来说，在端上建设的重排模型特征体系如表 1 所示，主要包括以下几个方面：</p>
 <ol>
@@ -280,18 +280,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>由于实时反馈序列中曝光未点击的隐式负反馈信号占了较大的比例，作为一个整体序列进行建模，对稀疏的正反馈信号存在较大的主导影响。阿里巴巴在淘宝首页信息流推荐场景下也提出了一种基于对抗的方式，来挖掘曝光、点击行为序列之间的联系，从而寻找当前曝光序列当中有哪些行为是真正的负反馈，而哪些行为与点击有更相近的关系。微信团队提出了深度反馈网络 DFN^[4]^ ，通过引入正负反馈信号的交互作用关系，进行一定程度的去噪、纠偏。</p>
 <p>首先，基于 DFN 的优化思路，我们对反馈序列进行拆分，生成正负反馈序列，利用 Transformer 进行正负反馈信号的 Cross Attention 交互作用。具体来说，以曝光序列和点击序列为例，曝光行为序列作为 Query，点击行为序列作为 Key 和 Value，得到曝光行为序列对点击行为序列的 Attention 结果。同理，再调换一下得到点击行为序列对曝光行为序列的 Attention 结果。考虑到正反馈信号的稀疏性，当仅有负反馈序列时，会计算得到一些平均的无关噪音权重。因此，我们参考^[7]^ 的做法，在负反馈序列中引入全零的向量，来消除这种潜在的噪音。具体模型结构如下图 4 所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/de40acb2e7d343738fd6d653b4d45115.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281625637.png" />   
      图4 正负反馈交叉 Attention 结构图</p>
 <p><strong>提升负反馈信号的信噪比</strong></p>
 <p>初版模型在美食频道列表页上线后，相比 Base 取得 0.1% 的稳定提升，但是和离线的收益对比还有一些差距，不太符合我们的预期。经过消融实验分析发现，主要原因是负反馈信号中存在大量噪音，而噪音产生的根源是因为部分曝光商户的点击行为可能发生在特征收集的时刻之后。因此，为了提高负反馈信号的信噪比，我们对于负反馈信号的曝光时间进行了限制，长时间曝光但未点击的商户更有可能是真实负反馈信号。如下图 5 所示，更长的停留可以关联到更稳定的反馈信号，线上效果更优。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/27b25057fede4b659e0a4595b76f55ec.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281625831.png" />   
      图5 停留时长-点击率效果对比</p>
 <p><strong>多视角的正负反馈序列交叉建模</strong></p>
 <p>在初版正负反馈序列模型的基础上继续迭代，我们关注到在调整 Transformer 中 Multi-Head 的数目时，并没有预期的增量收益，相比仅使用一个 Head 指标无明显变化。经过分析，我们怀疑这种通过随机初始化的生成的多头表征，很大程度上只是单纯参数量上的扩充。</p>
 <p>另外，在大众点评搜索场景下，同 Query 下商户列表整体的相关度比较高，尤其对页内的结果来说，同质度更高。差异性主要体现在比如价格、距离、环境、口味等细粒度的表征上面。因此，我们设计了一种多视角的正负反馈序列交叉建模方式 Multi-View FeedBack Attention Network (MVFAN)，来强化曝光、点击行为在这些感知度更高的维度上的交互作用。具体网络结构如下图 6 所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/84c873ccbade4bd9b1838f2a9018da18.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281625669.png" />   
      图6 Multi-View FeedBack Attention Network 结构图</p>
 <p>用户行为序列按反馈类型切分为点击正反馈和曝光未点负反馈，序列除了 shopid 本身，还补充了更多泛化的属性信息（包括类目、价格等），以及上下文相关的特征（比如经纬度、距离）。这些序列 Embedding 后叠加，形成最终正负反馈序列的表征。接下来会使用多级的 Transformer 进行编码，输入多个维度的信号去解码，激活用户在不同商户维度上的偏好：</p>
 <ol>
@@ -300,20 +300,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>使用当前搜索上下文相关的信号作为Q，激活得到注意力权重，增强实时反馈行为对于不同上下文环境的自适应地表达。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2022/02/image-5c678774.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281625763.png" />   
     </p>
 <p>通过消融对比实验发现，相比于随机初始化的 Multi-Head Attention，这种显式使用多种商户上下文特征的 Transformer 激活方式效果更显著。</p>
 <p><strong>Match&amp;Aggregate 序列特征</strong></p>
 <p>对于端上的用户实时反馈特征，除了各种常用的基于 Attention 的序列建模方式，还有一种采用显式交叉的兴趣提取方式。如图 7 所示，相比于一般基于 Embedding 内积计算“Soft”权重的 Attention 建模，它可以理解为一种“Hard”的 Attention 方式，提取的形式包括：Hit（是否命中）、Frequency（命中多少次）、Step（间隔多久）等等，除了单变量序列的交叉，还可以组合多个变量进行交叉，来提升行为描述的粒度和区分度。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4b8e652085064f899a47c16d58b2355a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281625959.png" />   
     </p>
 <p>图7 Attention、Match&amp;Aggregate 序列特征提取对比图</p>
 <p>这种基于先验知识引入的反馈序列交叉特征，可以一定程度上避免“Soft” Attention 方式引入的一些噪音信息，同时也具有更好的可解释性。比如，用户在搜索“火锅”时，没有选择附近的商户，而点击了常住地附近的历史偏好商户，这种场景下存在明显的信号说明用户提前决策的意图。这时，加入一些显式的强交叉特征（例如，待排商户距实时点击商户的距离等）就能非常好的捕捉这种意图，从而把距离远但和用户意图更匹配的相关商户排上来。在大众点评搜索的场景下，我们基于该方式引入了大量的先验交叉特征，也取得了较为显著的效果。</p>
 <h3 id="33-重排模型设计">3.3 重排模型设计</h3>
 <p>关于重排序的研究，目前业界也有不少相关的工作，包括：基于贪心策略优化多目标的 MMR(Maximal Marginal Relevance) ^[8]^ ，直接建模上下文作用关系的 Context-aware List-wise Model^[2,3]^ 以及基于强化学习的方案^[9]^ 等。在搜索端智能重排场景上，我们采用了基于 Context-aware List-wise 的模型进行构建，通过建模精排模型生成的 Top-N 个物品上下文之间的互相影响关系，来生成 Top-K 结果。整体模型结构如下图 8 所示，主要包括端云联动的训练方案，以此来引入更多云端的交互表征；以及基于 Transformer 的上下文关系建模，下面将分别进行介绍。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9283e2e1cbfa46078142a42ae9bd5ef6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281625137.png" />   
     </p>
 <p>图8 整体模型结构图</p>
 <p><strong>端云联合训练</strong></p>
@@ -324,13 +324,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>仅接入最后一层的 Dense 输出，大大损失了云端特征与端上特征的交叉能力，因此，需要通过特征选择方式，选取头部特征加入到云端进行使用。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e57f8013f3154c699afe8ddabf2d7236.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281625198.png" />   
     </p>
 <p>图9 端云联合训练模型结构图</p>
 <p><strong>重排商户上下文建模</strong></p>
 <p>商户上下文重排建模结构参考 PRM^[3]^ ，结合端上应用场景做了一些调整，具体结构如下图 10 所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f52d5aba28354f33a3e8da6c094d0318.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281625463.png" />   
     </p>
 <p>图10 重排算法模型结构图</p>
 <p>主要由以下几个部分构成：</p>
@@ -346,12 +346,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="34-多场景应用效果">3.4 多场景应用效果</h3>
 <p>综合上述特征&amp;模型优化举措，相关的离线实验指标效果对比如表 2 所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/32cee00f7f4143c38c7590c1534121a7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281625671.png" />   
     </p>
 <p>表2 实验迭代指标对比数据表</p>
 <p>端智能重排序在点评主搜和美食频道列表页上线 AB 实验，核心业务指标 QV_CTR 均在高位基础上取得显著提升。如图 11 所示，上半部分，主搜列表页 QV_CTR 提升 0.25%，美食频道列表页 QV_CTR 提升 0.43%，分端表现稳定正向。另外，从下半部分分位置的点击率对比曲线，可以看出，端上重排能够一定程度上缓解固定分页请求的点击衰减效果，尤其在靠后的几屏展示上都有比较显著的提升。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8c0532c6019a44d6856aac38f529c29d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281625713.png" />   
     </p>
 <p>图11 线上 AB 实验 QV_CTR 指标效果 &amp; 分位置点击率对比</p>
 <h2 id="4-系统架构与部署优化">4 系统架构与部署优化</h2>
@@ -375,7 +375,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/60bfc7a71d6245f79c86585937f5d929.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281626040.png" />   
     </p>
 <p>图12 端智能重排系统架构</p>
 <h3 id="42-端上大规模深度模型部署优化">4.2 端上大规模深度模型部署优化</h3>
@@ -389,7 +389,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>经过上一步拆分处理，模型大小可以控制在 10MB 以内，为了进一步减少模型在手机端的空间占用，以及功耗/性能影响，我们采用了美团视觉智能部提供的压缩方案。该方案针对现有的神经网络模型压缩技术没有考虑要契合部署的端智能设备、压缩后的模型往往不能适配特定的设备、输出结果对齐度差等问题，设计了能更好用于移动端上部署的神经网络压缩工具，更好地在端上推理框架上发挥了性能。</p>
 <p>压缩优化后从下面的测试对比数据可以看到，模型大小进一步减小到 1MB 以内，同时精度损失在十万分位差距。采用 Sysdiagnose 进行耗电分析，开启推理功能，重复动作：从首页搜索“火锅/五角场”，进入搜索列表页进行首次重排推理，滑动列表再次计算后，退出页面（测试时间为 10 分钟，间隔 20 秒采用一次），相关的能耗指标均无显著的变化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5b2d2538442f47dea359e4f5e756938e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281626446.png" />   
     </p>
 <p>图13 模型压缩数据、能耗相关指标对比</p>
 <h3 id="43-端智能模型训练预估平台">4.3 端智能模型训练预估平台</h3>
@@ -522,6 +522,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -555,10 +559,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -937,6 +937,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

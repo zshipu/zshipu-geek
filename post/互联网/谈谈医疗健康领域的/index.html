@@ -208,19 +208,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="前言">前言</h2>
 <p><strong>短语挖掘</strong>（ <strong>Phrase Mining</strong>）的目的在于从大量的文本语料中提取出高质量的短语，是 NLP 领域中基础任务之一。短语挖掘主要解决专业领域的专业词典不足的问题，减少人工整理成本，如图所示 Phrase Mining 在以下几个任务中非常重要。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-2c2b0aad7e4e41f6bdf937d4b9147759.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281829727.webp" />   
     </p>
 <p><strong>jieba</strong> 分词是中文分词领域比较好的工具[1,2]，其在分词时使用的方法是根据已统计的词库，利用前缀词典对句子切分，根据所有切分的结果构建有向无环图的方式寻找最优的切分路径。对于存在未登录词其使用的方式是根据序列标注的结果，使用 <strong>Viterbi 算法</strong> 计算最优的状态序列。从 jieba 分词方法中可以解决一些普适化的需求，但是对于某些特定的专业领域，需要整理一批质量较高的专业领域词典，而可用到的数据往往是大量无标注的文本。如果人工去整理成本比较高，那么是否可以通过一些方法自动提取一些高质量的短语呢？</p>
 <p>2018 年 8 月 <strong>“神策杯”2018 高校算法大师赛</strong> 中给出任务构建个性化推荐系统，根据上千篇资讯文章及其关键词，构建 <strong>关键词提取模型</strong> 提取 10 万资讯文章关键词。其中存在两个问题，问题一：如何抽取短语词，直接使用 jieba，可能很多新的网络用语或者专业词汇无法提取。问题二：如何对抽取的短语进行排序选择 TopK 关键词。</p>
 <p>同年在 2018 年 10 月 ** “AIIA”杯-国家电网-电力专业领域词汇挖掘比赛** 中给出任务整理电力行业专用词汇，电力行业积累了大量的文本数据，这些数据包括电力科技论文，项目报告，电力操作手册等等，根据这些无标注数据挖掘一些特定领域内的词汇，整理一份电力行业主题词典。</p>
 <p>丁香园大数据团队中也存在这样的问题，每天都会产生大量的文本数据，例如论坛文本，医学论文，诊断报告等等，抽取的高质量的短语可以用于优化检索内容，并且可以优化 taxonomy construction 构建上下位的层次结构等等如下图所示，相对 taxonomy construction 更多了解，移步到 <a href="https://zshipu.com/t?url=https%3A%2F%2Fmp.weixin.qq.com%2Fs%3F__biz%3DMzUyMDY0OTg3Nw%3D%3D%26mid%3D2247483803%26idx%3D1%26sn%3D95318832711e96ff31c18ac21f7e29c2%26scene%3D21%23wechat_redirect">知识图谱构建技术综述与实践</a>，因此抽取高质量短语将是目前要解决的重要问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-6f3a66dc0fbb497494859593779a8fae.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281829569.webp" />   
     </p>
 <h2 id="无监督抽取方法">无监督抽取方法</h2>
 <p>在早期，丁香园 log 数据汇总时发现，很多疾病词和症状词来源于一些特定词的排列组合，比方说牛奶过敏，急性鼻炎，是一些 NN 和形容词/动词的组合，其实就是浅层句法分析的结果，例如： <strong><code>&quot;新生儿急性鼻炎应该如何治疗&quot;</code></strong>，coreNLP 给出的结果如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-8d955a1787734490aa20b96982638bfa.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281829448.webp" />   
     </p>
 <p>其中 <strong>新生儿急性鼻炎</strong> 是一个 <strong>名词短语(NP)</strong> ，是由 <strong>NN + JJ + NN</strong> 组成的，因此传统的方式是根据 POS 规则模版[3]对 phrase 进行提取，但是实际操作中存在一些问题，如果直接使用 corenlp 的浅层句法分析的结果并不是很好，比方说 <strong><code>&quot;如何治疗花粉过敏&quot;</code></strong> 这句话中的 Phrase 应该是 <strong>花粉过敏</strong>，但是 <strong>治疗</strong> 和 <strong>花粉</strong> 合并成了动词短语。但是如果要穷尽所有的 POS pattern，并不是一件容易的事情，而且 pattern 之间可能会存在一些冲突，于是 pattern 之间排序又成了另一个坑。</p>
 <p>2012 年 Matrix67 提出了《互联网时代的社会语言学：基于 SNS 的文本数据挖掘》一种基于统计学角度的新词挖掘算法，通过计算凝固度和左右临字信息熵抽取新词，效果不错</p>
@@ -244,15 +244,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>2014 年韩家炜团队的学生 Ahmed El-Kishky 提出一种基于频繁模式挖掘和统计的方法 TopMine，无监督的对语料进行 Phrase Mining。这项工作的主要目的是对文本进行主题挖掘，在这篇论文中将主题挖掘分为两个步骤，第一步根据 Phrase Mining 抽取的结果对文本进行分割，第二部根据分割后的文本约束 Topic 模型。</p>
 <p>在 Phrase Mining 中，根据上下文信息衡量合并后的 score，判断是否对 token 进行合并，伪代码如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-35b4b1ad1754476ebad53dc29d3db339.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281829486.webp" />   
     </p>
 <p>通过给定阈值的方式进行迭代，其中 score 作为判断合并条件计算公式如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-9490e81a9a304666831cdb594fac2839.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281829531.webp" />   
     </p>
 <p>其举了一个很有意思的例子，比方说： <strong>Markov Blanket Feature Selection for Support Vector Machines</strong> 这句话来说如果只根据 <strong>Vector</strong> 可能只会把文章划分为 <strong><code>数学</code>或者 <code>物理</code>Topic 中，但是显然 Support Vector Machines</strong> 是一个整体，根据支撑向量机可以将其划分为** <code>计算机</code>**的主题下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-3dc4b3633f224c0aac7a0095e2c06352.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281829344.webp" />   
     </p>
 <p>Kavita Ganesan2018 年提出《How to incorporate phrases into Word2Vec – a text mining approach》和 2019 年苏神给出了一个无监督挖掘方案《分享一次专业领域词汇的监督挖掘》有相似之处，只不过苏神再基础上加入一些平行语料，根据停用词确定 phrase 边界，用 PMI 等设定阈值方式抽取新词，进行分词，并构建词向量模型。选取一些种子词汇作为初始词，根据抽取新词的词向量计算种子词之间的相似度，设定阈值的方式将相似度高的词加入到候选集中，对于无监督短语挖掘是一种比较新颖的思路，因为词向量包含丰富的上下文语义信息，通过上下文信息计算相似度，将新词进行聚类，这种方式可以较好的筛选出一些高质量的 phrase。但是在第一步分词时，根据阈值所发现的新词边界不好控制，会存在大量噪音，比方说，在《西游记》中会抽取出， <code>行者笑道，那妖精，的和尚</code> 等词汇，所以在最后一步需要加入了一些规则进行过滤。</p>
 <h2 id="弱远程监督抽取方法">弱/远程监督抽取方法</h2>
@@ -260,13 +260,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="segphrase">SegPhrase</h4>
 <p>韩教授的学生刘佳硉认为 <strong>TopMine</strong> 的方法是完全无监督的，那么是不是选用一些少量的带标签的数据，可能会在很大程度上提高抽取结果。其认为高质量的短语是可以优化分词结果的，而高质量的分词结果也可以优化 phrase 抽取的结果，将分词和高质量短语相结合。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5e901d0c26524b5091ad95e1b82516ba.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281829325.webp" />   
     </p>
 <p>原始计算频率时，并没有考虑真正分词的结果，只是统计词出现的频率，例如 <strong>support vector machine</strong> 出现了在预料中出现了 100 次，但是根据分词结果进行修正(rectified)后，其只出现了 80 次，同样的 vector machine 修正后只出现了 6 次。那么 vector machine 不算是一个 phrase。</p>
 <p>例如： <strong>A standard feature vector machine learning setup is used to describe</strong> 在这句话中，存在 <strong><code>vector machin</code></strong> 但是根据上下文语义进行分词时，其分词结果应该是 <strong><code>feature vector</code></strong> 和 <strong><code>machine learning</code></strong></p>
 <p>于是接下来的工作中，根据频繁短语监测生成短语候选集，再根据人工筛选出的高质量的短语使用 RandomForest 构建分类器模型，实验中发现选择 200-300 个数据就可以满足分类结果。其中特征选取如下表所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-b29d056c8fcb41938443bf37abe2bbb8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281829160.webp" />   
     </p>
 <p>这篇论文在当时的效果不错，但是存在一个缺点，文中说 300 个标记词汇足矣，那么这 300 个标记数据应该如何选取？需要人工的去选择一些高质量的短语去构造分类器，如果在一些特定的领域则需要一些专业领域人士对领域内的数据进行筛选。所以韩教授的学生商静波提出了一种远监督方法 AutoPhrase 自动的对短语进行挖掘。</p>
 <h4 id="autophrase">AutoPhrase</h4>
@@ -274,15 +274,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>Robust Positive-Only Distant Training</strong> ：使用 wiki 和 freebase 作为显眼数据，根据知识库中的相关数据构建 Positive Phrases,根据领域内的文本生成 Negative Phrases，构建分类器后根据预测的结果减少负标签带来的噪音问题。</p>
 <p><strong>POS-Guided Phrasal Segmentation</strong>：使用 POS 词性标注的结果，引导短语分词，利用 POS 的浅层句法分析的结果优化 Phrase boundaries。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-fc4ac9ceaf544e898c4202b4c640a5ae.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281829163.webp" />   
     </p>
 <p>如上图所示，根据 frequent n-gram 抽取 phrase Candidates 根据远程监督的方式，根据 wikipedia 进行过滤筛选出 Positive Pool 和 Noisy Negative Pool，对于 Positive Pool 来说，其信源比较准确，于是 Positive Pool 的抽取结果肯定是置信度极高的，而 Negative Pool 是存在噪音的，因为可能有一些 Phrase 不存在 WikiPedia 中，因此文中提到用一种集成学习的方式降低噪音。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-76719787e64f415f9db82e86891a1656.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281829171.webp" />   
     </p>
 <p>构建多组基本的分类器，分别从 Positive Pool 和 Negative Pool 中随机抽取出 K 个 candidates 全部，而在负样本中存在 <em><strong>perturbed training set</strong></em> 见图中的δ，为了尽可能低的降低训练误差的基础分类器，构建一颗未进行剪枝的决策树的方式，当在 <em><strong>perturbed training set</strong></em> 中没有两个 positive 和 negative phrase 共享相同的特征值时，我们认为此时的决策树可以达到 100% 的训练准确率。最后通过 ranking 的方式输出排序的结果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0f4d1dc026d94b908e1977f3b0e299ca.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281829080.webp" />   
     </p>
 <p>这种方法的结果 Segphrase 相比有着显著的提升。</p>
 <h2 id="开始搞事情">开始搞事情</h2>
@@ -414,6 +414,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -447,10 +451,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -829,6 +829,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -214,7 +214,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e6e4ae859a6d468f95a61680aa96c69c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281848229.webp" />   
     </p>
 <p>1.引言</p>
 <p>Elasticsearch(简称ES)是一个基于Lucene的搜索引擎，使用java语言进行开发，RESTful web接口进行交互，不同语言很容易开箱即用。同时ES完整生态中包含了elasticsearch、logstash、kibana(3个组合简称ELK)、Beats、APM等多个组件。ES的简单快捷部署、成熟的生态、稳定的服务为搜索引擎与日志分析带来了极大的便利。在贝壳搜索架构的技术迭代中，也从Solr Cloud迁移到了ES上。</p>
@@ -652,17 +652,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>安装kibana，安装后，每个Node节点的CPU、内存、QPS、查询队列、segment数目等信息都可在界面中看到。</p>
 <p>如下图所示</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5e807d77c630417e9bb765d14ba1dfa6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281848066.webp" />   
     </p>
 <p><strong>5.1.2通过grafana监控报警</strong></p>
 <p>kibana虽然对每个节点都有详细的监控，但是无法在一个界面中展现出整个集群的状态，而且kibana的报警机制并不完善。通过grafana读取ES中内置索引 <code>.monitoring-es-6-*</code> 数据，索引中包含了对整个集群的监控信息。可对整个集群甚至多个集群的状态进行监控与报警。在grafana中配置阈值，超过阈值时候讲报警信息发送到指定API进行微信、短信、邮件等报警处理。
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/eb1095b599e840e68c339cc01efb5c19.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281848155.webp" />   
     </p>
 <h4 id="52慢查询监控">5.2慢查询监控</h4>
 <p>对搜索引擎来说，查询所花费的时间是至关重要的，因此对于每个索引可设置慢查询阈值，目前线上设置的为100ms，超过100ms时候会打印出所有的慢查询请求，随着集群cluster数目与节点node数目增多，对于慢查询的监控也是非常有必要的。通过使用rsyslog+kafka+logstash+Elasticsearch+Grafana对慢查询日志进行统计收集后进行监控报警
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a5a288c36a3745859015ed606fc06082.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281848217.webp" />   
     </p>
 <p>至此，一个完整的高可用集群搭建完毕！！！</p>
 <h3 id="6性能测试">6.性能测试</h3>
@@ -672,24 +672,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>index索引：</strong> 500万左右Document，1个shard，5个replica</p>
 <p><strong>客户端：</strong> 使用6台直接连接ES的搜索客户端
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/69d26ad9964f45c783bdd7f9cd340386.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281848267.webp" />   
     </p>
 <h4 id="62压力测试">6.2压力测试</h4>
 <p>复制贝壳找房线上搜索请求，结论如下：</p>
 <p>请求总数408错误错误率QPS响应时间1200000次60条0.005%5402.3618.21ms</p>
 <p>成功率统计
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4cdd70e5ab2a41e1b1504e1acd61668a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281848199.webp" />   
      速率监控
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/44a306902815447f8c8ac0a48f681a02.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281848435.webp" />   
     </p>
 <h4 id="63小结">6.3小结</h4>
 <p>对集群进行更高压力测试，超时错误增多，响应时间也同比上升。为保证搜索时效性，并且20ms以内将数据返回与集群的稳定性，因此选择了资源与效果的权衡，使用当前3+6节点提供5000QPS线上搜索。当然不同的集群也要根据应用场景的不同，进行集群规模与参数的一些调整，例如日志集群多用于写可适当调整写入队列等参数。</p>
 <p>在线上使用的时候，客户端可以使用sniffer[3]与集群中每个节点获得连接，采用轮询的方式与集群进行数据交互，既可以防止配置中只连接的某几个节点而导致压力过大，又可以动态的添加节点后直接与新增节点获得连接。</p>
 <h2 id="4高可用集群架构">4.高可用集群架构</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/16d577c975724c78a106c169902757d9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281848470.webp" />   
     </p>
 <h3 id="41跨机房部署">4.1跨机房部署</h3>
 <p>为了保证数据的安全性与集群容错性，采用冷备跨集群部署。通过index模块，双写到不同机房的ES集群，保持主备集群都可用，对外提供搜索服务，正常情况下，同一机房读取模块使用当前机房的集群提供服务，一旦当前机房网络出现问题，则降级切换到远程其他机房。有跨机房备份之后，大大提高了集群的安全性与可用性。</p>
@@ -824,6 +824,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -857,10 +861,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1239,6 +1239,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

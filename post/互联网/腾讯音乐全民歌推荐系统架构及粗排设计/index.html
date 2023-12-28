@@ -236,7 +236,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h2 id="01-业务背景"><strong>01 业务背景</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/76d2c6c7df9e466aac6132369eb09927.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281751729.webp" />   
     </p>
 <p>全民K歌涉及多样化的推荐场景，涵盖内容、直播、歌房、用户等多种形态。</p>
 <p>具体的推荐功能如上图所示，主要包括以下几类：</p>
@@ -252,7 +252,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="1-召回层"><strong>1. 召回层</strong></h3>
 <p>召回层的作用主要是从海量的item中筛选小量级的用户可能感兴趣的内容。在这个模块中最重要、大家了解最多的肯定就是召回模块本身。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/55d4b53ccd2746729bf1e279860adb76.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281751654.webp" />   
     </p>
 <p>一般来说，我们线上的召回方法会分为索引类的召回、泛社交的召回以及模型的召回。</p>
 <ul>
@@ -279,7 +279,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>第二个部分是多样性控制部分，作为一个UGC平台，我们需要考量内容在整个内容生态中的分发状况，以及均衡的考量生产者跟消费者之间的关系。我们是通过多样性调节算法来间接实现这个目的的。</p>
 <p>让我们再回顾下前面所提到的整个召回系统架构，我们可以看到它其实是一个典型的节点架构，从内容发现到召回，到粗排到精排，然后重排，最后把合适的内容推荐给用户。由于我们是一个比较大的UGC生产平台，从一个UGC平台的角度来考虑，我们倾向于分发较为新的作品，因为新的作品的分发会为那些活跃的创作者带来一定的流量激励，使得生产端跟消费端产生联动，促进了一种正向的循环。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5318d516bd0546e8b63d439581caa2e4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281751466.webp" />   
     </p>
 <p>我们以三个月内的站内发布作品为例，三个月内的站内发布作品大概会到十的九次方量级，然后我们通过一些内容挖掘跟优质内容发现的方式，从中找到更为优质的一部分内容，这部分内容仍然有十的七次方量级，相当于从百万量级的作品库做兴趣的召回。这是一个非常大的候选集场景，从优质内容的发现到召回，是整个UGC平台和推荐系统的连接，背后承载着我们对整个UGC的分发、内容生态的理解。这一部分我们会在第三个环节去做进一步详细的介绍。召回可以看到有十的七次方的候选集召回，通常完成召回过程之后仍然有十的五次方候选集，而精排通常只能去处理一个千级别的规模，所以我们看到这中间存在一个比较大的漏斗，很多时候会成为我们在效果或者一些收益上的瓶颈。这时，粗排模块的重要性就体现出来了。粗排模块的一个重要的作用就是防止召回到精排之间的漏斗过大，导致过多的信息损失。</p>
 <p>大家可能比较了解的是，召回跟精排召回更像是一个集合，选择的过程更侧重于选择效率最高的方法，至于topk中item之间的先后顺序，其实不是最关心的因素；而精排环节相对来说它更强调次序，也就是说item A跟item B的先后顺序是非常敏感和关键的。</p>
@@ -289,7 +289,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>接下来，介绍下粗排双塔模型实战相关细节。</p>
 <h3 id="2-粗排双塔模型实践"><strong>2. 粗排双塔模型实践</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/034d05a1832e4e2787498822707cf71d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281751449.webp" />   
     </p>
 <p>我们通过把user和item的feature进行结构解耦与分开建模，然后完成整个架构的设计，在模型训练完毕之后，我们会通过user serving实时的产出user embedding，再通过索引服务把该用户所有的候选集合的ID给取出来，最后在user embedding跟item embedding之间做內积的运算，得到一个粗排的预估值，作为整个粗排阶段的排序依据。</p>
 <p>这么做的优势是user/item 结构是解耦的，内积计算的算力消耗小。</p>
@@ -311,7 +311,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>关于logits：它是teacher模型层层映射后的一个抽象度很高且信息浓度很大的结果，是整个知识传递的媒介。在logits后，通常会接一个softmax，但是softmax会放大logits的两极差异，造成细节损失，而这些细节恰恰是帮助student模型更好学习的关键。为了克服以上问题，我们选用了改进的softmax，即softmax with temperature</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/03/image-17eb62b0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281751547.png" />   
     </p>
 <ul>
 <li>这里，引入一个超参数T控制整个softmax分布的陡峭或平滑程度，间接控制蒸馏的强度。通常，T要设置成多少没有一个定论，与实际场景相关，依赖相应场景下的一些实验设计。</li>
@@ -320,7 +320,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>整个模型蒸馏的收益表现如下：</p>
 <p>引入soft labels的概念，不再是原本的非零即一状况，需要考虑正样本有多正和负样本有多负。这看起来类似把分类问题转换成回归问题，但实质并不是。如果构建样本时，用回归的方式构建，通常会基于作品的完播率或规则组合等，人工敲定样本的回归值，这种方式过于主观，没有一个非常合理或可矫正的指标进行后续比对；而模型蒸馏的soft labels是基于teacher 模型，即由teacher 模型对真实样本进行充分训练后给出，包含更多的隐含信息且不受人为主观因素影响。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b66bd5a723004019b08a4a58bb37175f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281751434.webp" />   
     </p>
 <p>具体的，来看看我们如何做粗排模块的蒸馏，主要是分为两个大的方向：</p>
 <ul>
@@ -335,7 +335,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h3 id="3-线上的粗排双塔模型"><strong>3. 线上的粗排双塔模型</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/62a2a3a7ee0944539555c9f609811a07.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281751562.webp" />   
     </p>
 <p>实践中，粗排模型训练时，依赖的精排输出结果来自上报精排日志。如果在离线重新对样本进行预估再输出，其实是对线下资源的浪费，所以通常在线上精排预估时，就把一些结果作为日志进行上报。粗排模型异步训练，产出模型提供给Serving。</p>
 <p>Serving环节主要包括异步Serving和User Serving两部分，具体功能如下：</p>
@@ -345,14 +345,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h3 id="4-粗排的线上收益"><strong>4. 粗排的线上收益</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/99eccdd11f5f4e76a0615e8a6badc18b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281751472.webp" />   
     </p>
 <p>整个粗排模块上线后，我们关注的两类指标：互动类指标和播放类指标，都有非常明显的正向提升，具体的指标提升幅度可以参考上图的在线实验结果。</p>
 <p>一般，粗排模块的表现和实际场景有较大的相关性：在候选集非常大的推荐场景下，粗排到精排间的漏斗有好几个量级，这时粗排模块会带来非常显著的收益；在候选集比较小的推荐场景下，从召回到精排间的漏斗不是很大，这时粗排的收益可能就比较有限。</p>
 <p>进而，考虑做进一步优化。</p>
 <h3 id="5-还有哪些需要考虑"><strong>5. 还有哪些需要考虑？</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8ec449db24074b1f8654a29097a31657.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281751518.webp" />   
     </p>
 <p>首先，上述粗排蒸馏过程本质上是pointwise，但通过上报精排日志可以拿到精排模型给出的完整再推荐列表，用pairwise学习精排排出来的序，可以进一步逼近精排结果，能更多的提取精排传递出的信息。</p>
 <p>其次，前面虽然不断地用teacher模型和student模型描述整个过程，但实际效果上student模型不一定低于teacher模型。换一个角度，student模型其实是基于teacher模型做进一步训练，所以student模型的表征能力有可能超过teacher模型。事实上，如何让student模型通过反复的蒸馏，效果超过teacher模型，在模型蒸馏领域也有许多相关方法。</p>
@@ -360,7 +360,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="04多样性调节算法设计"><strong>04多样性调节算法设计</strong></h2>
 <h3 id="1-推荐多样性的意义"><strong>1. 推荐多样性的意义</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c80622497d81410aa5f35be77d193662.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281751285.webp" />   
     </p>
 <p>多样性的概念在推荐系统里常被提到，在不同视角下，推荐多样性对应着不同的问题。</p>
 <ul>
@@ -369,7 +369,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h3 id="2-多样性控制的方案路线"><strong>2. 多样性控制的方案路线</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/306a20489aaf48fcbcc4ec8573ac1822.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281751262.webp" />   
     </p>
 <p>在具体实现上，多样性有三个主流的技术方案：规则打散、embedding打散和DPP，下面会详细介绍：</p>
 <ul>
@@ -380,7 +380,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>通常，从平台生态控制的角度，类似DPP的控制算法需要贯穿整个推荐链路。在粗排和精排之后，都需要DPP环节，后续会介绍DPP算法的具体实现。</p>
 <h3 id="3-dpp-技术细节"><strong>3. DPP 技术细节</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e6db7c1d98ef451e9711046216a227cc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281751240.webp" />   
     </p>
 <p>DPP算法的具体实现比较复杂，这里主要介绍两个关键点：</p>
 <p>①基于多样性和相关性构建矩阵L，该矩阵的行列式等价于最终要度量的目标。如何去定义相关性和多样性？</p>
@@ -397,7 +397,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>由此，行列式的求解过程由三阶降低到一阶，满足了线上的性能，上图最下方给出的paper就是相关方向的论述。</p>
 <h3 id="4-线上收益"><strong>4. 线上收益</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/42243c0a254c432597fdeca8863a67e7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281751236.webp" />   
     </p>
 <p>在线上做多样性的相关实验，我们较关注的系统和数据两部分，都有明显收益：</p>
 <ul>
@@ -406,7 +406,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h3 id="5-关于dpp还能做更多的是什么"><strong>5. 关于DPP还能做更多的是什么？</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3259d498addd42a5a089e6635614a095.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281751276.png" />   
     </p>
 <p>针对上述基于多样性和相关性构建矩阵L的过程，有两方面可以做进一步优化：</p>
 <ul>
@@ -548,6 +548,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -581,10 +585,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -963,6 +963,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

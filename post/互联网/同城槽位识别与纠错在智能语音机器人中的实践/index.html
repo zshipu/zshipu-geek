@@ -210,11 +210,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>语音机器人中很多话术需要提取用户回答中的关键信息，比如新车的话术，系统对咨询过二手车的用户进行回访，并从中了解用户是否想购买新车及具体想购买什么车，需要识别出槽位：车品牌、车系、车型、新车/二手车，便于对用户进一步的跟进。</p>
 <p>槽位识别是一种序列标注问题，序列标注就是对给定文本的每一个字符打上标签，然后提取出我们关心的关键词，通常采用实体识别[1,2]方式实现。标签的格式通常使用两种标准：IOB2和IOBES，标签含义如下 ：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-cc2f724c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271707299.png" />   
     </p>
 <p>识别结果如下图所示，标签包含实体类型和位置两个部分，图中“大众”和“帕萨特”即为实体。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9f11158ca87344abb395a553ee02a32e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271707559.png" />   
     </p>
 <p>槽位识别的开发主要分两步：数据标注和模型训练。数据标注又分为如下几步：1）定义本体库，即定义需要识别的实体类型，比如car_brand（车品牌）；</p>
 <ol>
@@ -224,14 +224,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>数据标注完成后，训练实体识别模型。我们采用IDCNN+CRF [3]和BiLSTM+CRF [4~6]两种模型进行实验。IDCNN通过空洞卷积增大模型的感受野，通常以多个卷积核为一个网络单元，再重复多次以学习上下文的特征；BiLSTM通过双向的LSTM学习到输入文本序列之间的依存关系；两种模型都是对输入文本进行特征提取，得到标签数量维度的特征向量，再作为CRF的特征，从而将标签之间的依存关系也学习到，最终得到每个字对应的实体标签, 合并操作后得到槽位词。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3d88374b61c2490784f5c59f7dc5aa33.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271707378.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-d7985997.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271707718.png" />   
     </p>
 <p>在12000条评测数据上，采用BiLSTM+CRF模型，相比IDCNN+CRF模型车品牌槽位的准确率和召回率分别提升5.22%、2.86%，车系槽位的准确率和召回率分别提升3.6%、3.39%，整体来看，采用BiLSTM+CRF槽位识别效果更好。以下结合几个例子具体分析。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-c959ca32.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271707250.png" />   
     </p>
 <p>BiLSTM对句子整体和当前位置的特征比较敏感，IDCNN对周边局部比较敏感。比如，句子“在北京通盈。”， 关键词“北京”是地址也是车品牌，在本句话中表达的应该是一个地址，BiLSTM会考虑“北京”的上下文特征，倾向于识别成地址槽位，而IDCNN更多地考虑局部特征，会将“北京”识别成车品牌，在车品牌“北京”后面的“通盈”识别成车系。</p>
 <p>且在该场景下，通常用户回复较短，很容易语音识别错误严重，IDCNN可能会抓住错误的局部特征导致槽位识别错误，比如，“欧元版的面包车”（用户真实表达是“货运版的面包车”），语音识别错误的词“元”本身是比亚迪的一个车系，IDCNN对局部特征较敏感识别出车系“元”。</p>
@@ -242,7 +242,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>由于采用第三方通用的ASR服务，针对很多特定场景中的专业名词识别，容易出现谐音词错误（同音不同字，仪器大众与一汽大众）和混淆音词错误（拼音相似词不正确，江宁福特与江铃福特）的问题。</p>
 <p>比如用户回复文本：“我想买那个别克7268”，槽位模型识别出车系：7268，直接将此错误车系回传给业务方无法入库，识别出的车系没有价值，因此我们需要对识别出的槽位实体词进行纠错，得到正确的槽位词（GL8）才能入库。如下表列出部分错误类型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-9b8a71a2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271707509.png" />   
     </p>
 <p>基于我们已有的领域知识（车品牌库、车系库及车品牌与车系的映射关系），首先对领域知识中的词进行预处理（去空格、去特殊符号、车系需要去掉车品牌前缀、大小写统一等），并将预处理后的词与原始领域词进行映射（chr海外&ndash;&gt;丰田C-HR(海外)），后续所有与领域知识词进行比较，都采用预处理后的领域知识词，最终再映射到原始的领域知识词输出。</p>
 <p>例如，如果识别出的槽位词与相应领域知识中预处理过的词完全匹配，则返回映射的原始领域词，如果不匹配，那么认为槽位词错误，需要纠正，如何纠正呢？</p>
@@ -375,6 +375,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -408,10 +412,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -790,6 +790,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

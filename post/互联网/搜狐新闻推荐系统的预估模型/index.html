@@ -222,14 +222,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>最开始做点击率预估的模型为LR(Logistic Regression)，将上述特征代入LR模型可以得到一个简单的点击率预估模型。然而，在推荐情景中，用户的行为是稀疏的，即一个用户能看到的新闻是有限的，如何从用户有限的浏览中推测出用户可能喜欢的新闻，就是推荐工作的重点，在这里使用LR如果只是简单的对上述特征进行建模，是无法得到特别好的效果的，原因是LR模型本身无法对特征进行泛化，它只能对某特征直接计算其相应的权重?，如果想使得LR具备泛化能力，则需要我们在数据端&quot;手动泛化&quot;，例如：</p>
 <p>将用户的兴趣与待估新闻的类别进行组合，得到一个interact特征，假如用户喜欢看科比相关的新闻，则待排新闻为体育类别的新闻应该比娱乐类别的新闻的值应该更高，因此我们能构造出特征 <code>用户喜欢科比且待排新闻为体育类</code>，并且通过业务理解，我们能知道这个特征一定比 <code>用户喜欢科比且待排新闻为娱乐类</code> 在LR模型中得到的权重高。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f156e9f837124cd882cf02042abb1a41.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272009272.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/634198ec9c9a4732b52c31d358a486c3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272009921.webp" />   
     </p>
 <p>则模型收敛后理应可得到：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d8035224f5174d7f8b5b47168d0c5ef5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272009678.webp" />   
     </p>
 <p>通过这种特征工程的方法，我们使得LR能预测用户对没看过的新闻的偏好程度，即具备了一定的泛化能力，同时由于LR模型的简单构造，我们可以由业务理解去判断模型训练是否正确，特征提取是否正确，即提高了我们的debug能力。</p>
 <h4 id="22-更强的泛化能力"><strong>2.2 更强的泛化能力</strong></h4>
@@ -237,18 +237,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h5 id="211-fmfactorization-machine">2.1.1 FM(Factorization Machine)</h5>
 <p>逻辑回归的F(x)的计算方式只包含线性关系，限制了模型的表达能力，可以通过增加非线性关系来增强模型的表达能力，具体地，FM模型公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/265338507f424754b913c262d4065884.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272009191.webp" />   
     </p>
 <p>FM模型使用了一个矩阵
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/796b2dfe4075491398531135a9453af6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272009846.webp" />   
      作为隐含特征 ，每个特征?都会对应一个?维的?向，通过计算两两特征的隐含向量?的内积，得到了两个特征间的相关性。如果用户喜欢科比，而新闻标签含有NBA，则在模型收敛后，这两个特征的隐含向量内积应该比较大。</p>
 <p>通过梯度下降方法更新?,?收敛得到模型参数。相比于LR，增加了一个隐含矩阵来表示特征的两两交叉关系，如果特征有?个，隐含矩阵维度为?，则矩阵空间复杂度为?(?✱?)，通过简化计算可知计算的时间复杂度为?(?✱?)，其中?为特征非0的个数，并没有增加很大的运算量。内积的方式可以使模型具有预测能力：即便有两个特征在训练数据中从未在一个样本中同时出现，我们也可以通过隐含向量知道两个特征的相关性。</p>
 <p>FM模型实际可扩展为高阶，然而只有二阶可以简化计算，三阶及以上计算复杂度过高，实际业界基本不会使用，但FM阐述了一个重要思想，通过引入隐含矩阵，以内积的方式表示特征之间的关系，由此提升了模型的泛化能力，鉴于其泛化的思想及模型简洁而有效的能力，FM模型在实际使用中大受欢迎，而后续发展的DNN相关的ctr预估模型也有不少借鉴了FM的思想。</p>
 <h5 id="212-dnn">2.1.2 DNN</h5>
 <p>随着近年计算能力的提升，DNN重新回到大众视野，由于DNN具备非常强的拟合能力，在各个领域都取得了优秀的性能提升。人们首先通过研究DNN在NLP、图像领域的应用，进而发展到推荐领域，2016年Google提出的 <strong>Wide &amp; Deep Learning for Recommender Systems⁽¹⁾提供了一种思路，将多层全连接网络定义为Deep Model</strong>， 额外增加一个形似LR的 <strong>Wide Model</strong>，利用两者各自的优势得到一个融合模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/70950333f8e8491fa8b2f9a97d4595e3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272009443.webp" />   
     </p>
 <p>由于DNN参数数量庞大，而推荐情景下大部分特征为稀疏特征，如果将原始特征拼接(concatenate)起来作为输入层直接输入DNN，会出现训练参数规模过大而无法训练的问题，因此需要一个嵌入层(Embedding)将大规模稀疏特征首先映射到一个低维密集(dense)的空间中，再与其他特征拼接到一块作为输入层输入DNN。</p>
 <p>除了DNN，wide&amp;deep模型额外添加了一个wide模型，实际上就是将上文中LR的特征组合过程作为一个独立模块加入模型中，例如上图所示，将用户安装过的App与当前曝光展现的App做一个组合特征作为wide model的其中一个特征，这里又可以结合业务知识去做特征组合，获得一些强泛化能力的特征。</p>
@@ -259,120 +259,120 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Deep &amp; Cross Network(DCN)⁽²⁾是由Google于2017年提出的推荐模型，相比于普通的多层全连接网络，多出一个Cross Netork，乍一听很唬人，实际是通过矩阵来进行特征交叉，利用残差思想构造深层网络的一个模型模块，通过模型而不是人工组合得到高阶组合特征，下面我们具体介绍DCN模型。</p>
 <h4 id="31-模型结构"><strong>3.1 模型结构</strong></h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/31c021e1f1034f80951c7d0010ec9dc8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272009321.webp" />   
     </p>
 <p>DCN模型结构如上图所示，其基本结构和wide&amp;deep网络类似，输入层对稀疏类别型特征采用Embedding的方式映射到一个低维密集向量，与数值型特征直接拼接起来作为网络输入特征。由于这是一个CTR预估模型，样本是0/1的二分类监督问题，所以输出层采用sigmoid将输出限定在[0,1]之间表示模型预估点击率。</p>
 <p>网络中间分为两块：Cross network与Deep network。其中deep网络就是多层的全连接网络，而cross网络则是cross layer通过一系列计算输出结果。</p>
 <p><strong>3.2 Cross Network</strong></p>
 <p>Cross Network的具体计算公式为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/16ae9bd16d654e6088afc7e26fa0f44f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272009118.webp" />   
     </p>
 <p>用图来表示这个公式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/88ea728f986445ce82cd067cf1bf636b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272009646.webp" />   
     </p>
 <p>公式中
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3f354153dd55422ba281ef93dfa14261.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272009448.webp" />   
      ，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/099b1bc6a23b4d1ba3e8df015b5f9704.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272009090.webp" />   
      作为列向量，表示cross层的第
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/758754faf3c143059ca6c0e065583142.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272009108.webp" />   
      层，第
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ac0cb5df4b694c528a0553f0e096a6c3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272009698.webp" />   
      层输出，则函数
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d7cc30e6ae2f470ca43065401cbf155d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272009307.webp" />   
      可以看作拟合第
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f1608fc6641547af9b06a3206bb8e762.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272009906.webp" />   
      层与第
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0ccd1470afeb46e7aee93705e07f7649.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272009999.webp" />   
      层的残差。</p>
 <p>这种特殊的结构可以使得交叉特征的阶(degree)随着cross层增加，对于第
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9f3d96ef360c49599304364f16f07095.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272009471.webp" />   
      层，交叉特征相对于?₀的阶为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a307f2ffd47946aab7c494eeb0faa247.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272009073.webp" />   
      。整个cross网络的参数量为：?✕?✕2，这里?为输入列向量?₀的维度，?为cross network的网络层数，每一层包含一组?,?，因此乘2。DNN由于全连接，隐含层的第一层的权重?就需要与输入层做笛卡尔积，而相对于全连接网络，cross网络引入的参数量非常小，与输入层特征维度呈线性关系。</p>
 <h5 id="321-深入理解cross-network">3.2.1 深入理解Cross Network</h5>
 <p>我们可以将cross网络理解为每一个cross层
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7d8cb0daa2dd46f18bd2068c0625c5f7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272009738.webp" />   
      ，都将
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6e7d6bb5a2b54a1a81a61e63c5090766.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272010391.webp" />   
      与?₀了一次pairwise交互，然后再通过高效的方式转回输入层的特征维度。分析一下上图的 <code>Feature Crossing</code> 的过程，令
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7621da0f67ab49108a7fe298fa46f7a7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272010156.webp" />   
      ，其中
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b972a8a172e24201b46a585a6c833f79.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272010766.webp" />   
      ，这个公式实际可以这么看：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6a842c25be764cdd95342124f539b5f3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272010369.webp" />   
     </p>
 <p>我们将原式的前两项相乘，这里面得到的每一个值都可以看作当前cross层特征与输入特征做了一次bit-wise的乘积，并且我们可以看作得到了一个?²的行向量，再乘以一个块对角矩阵，其中列向量
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d16884cedde04f2cb5e03f9509f57be0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272010070.webp" />   
      ，将结果投影回了
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/44d792e64aa14dc9b9eeb76d28017f4f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272010598.webp" />   
      维，这个过程做了一次特征交叉，特征维度通过压缩回输入特征的大小?²→?，大大减少了空间复杂度。</p>
 <h5 id="322-dcn与fm">3.2.2 DCN与FM</h5>
 <p>FM模型内每个特征
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/95e3cf0c748846fb8a229b8b3d59cac1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272010034.webp" />   
      有一个隐含向量
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8623135755bc4b63a77c5b99d36e5b95.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272010590.webp" />   
      ，两个特征的交叉关系是通过向量内积
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4f07d6a65b0741a5a3030bcf28e7c095.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272010207.webp" />   
      得到的；而在DCN里，每个特征
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/eee3678b1ad146c5b57a80cfb024c239.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272010743.webp" />   
      与标量
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f75ab83607eb4ddc8a8fedee469a6487.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272010404.webp" />   
      相关联，特征
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bdf4a78afb274fafb54a91c277f0f9f9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272010944.webp" />   
      的关系是集合
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fed752833ec648a587af10e918ec3a45.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272010548.webp" />   
      和
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/edf0cdba35ea4d5b85c992321dfead0d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272010105.webp" />   
      的乘积，两者都具备特征交叉泛化的能力。</p>
 <p>这种参数共享的方式不但能让模型泛化得出一些训练样本未出现过的特征交互，而且能使得模型鲁棒性更强，噪音数据的影响更小。在我们推荐的情景下特征十分稀疏，假如两个特征
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1a7147e311574be78e9143e3caf4b206.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272010667.webp" />   
      几乎从未在训练样本里共同出现过，则直接组合特征
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/95bd433946344166af4ca5cbcdcc6e82.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272010100.webp" />   
      并不会带来收益，但通过参数共享的方式，我们仍能从参数乘积得到特征组合的效果。</p>
 <p>另外，通常我们说的FM限制了模型只能得到二阶组合，超过二阶计算量会以
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/541ccd90c25e4bb786de98628f99cd23.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272010669.webp" />   
      次方增长，而DCN通过巧妙的设计，将特征交叉从单层变成了多层，获得多阶交互的同时计算量仍为线性增长。</p>
 <h5 id="323已经最好了吗">3.2.3 已经最好了吗？</h5>
 <p>从上文描述的 <code>Feature Crossing</code> 计算方式，我们看到了一种既能高效计算特征间的高阶交叉，又没有带来庞大计算量的特征交叉方法，那这个方法已经完美了吗，是否还有能够改进完善的地方？首先，在推荐情景中，我们会出现许多稀疏特征，例如用户id、物品id等等，这类稀疏的id型特征在DNN模型通常都需要通过embedding转为低维密集特征，然后我们把各个特征拼接到一起得到了输入特征?₀，即我们的特征?₀内会有好几个都属于用户的embedding特征，他们共同表示了一个用户的属性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/babff23d4eeb427fbcd78183ff74d0de.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272010205.webp" />   
     </p>
 <p>回到cross network的计算， <code>Feature Crossing</code> 可以表示为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e351d8b8ed5146b8afba1fac6a89b49c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272010951.webp" />   
      ，即?₀与
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e078b43751a2498f8d5db848065bf9ae.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272010568.webp" />   
      两个向量内每个元素都做乘积**(bit-wise) <strong>，然而我们知道内的embedding特征是</strong> 共同表示一个域(field) <strong>的，则他们内部的乘积组合并没有太大作用，我们更需要的是不同域的embedding进行交叉组合，在这一方面，FM是做的更好的，我们可以将FM的隐含向量看作特征的embedding，两个隐含向量的内积实际就是两个域的embedding向量乘积</strong>(vector-wise)**，并不会让embedding内的元素进行交叉组合。</p>
 <p><strong>04</strong></p>
 <p><strong>总结</strong></p>
@@ -507,6 +507,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -540,10 +544,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -922,6 +922,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -198,110 +198,107 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>研究方向丨机器学习、数据挖掘</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/09a89448e19f4ce6a97c81ad2199b5c4.webp" />   
-    </p>
-<p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6fee2cc8e47949bbbc6e4beb187ce5cc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608821.webp" />   
     </p>
 <h1 id="模型结构">模型结构</h1>
 <p><strong>该多任务学习的推荐模型架构可分为两个部分：</strong></p>
 <p>第一部分为利用 <strong>对抗式的 Seq2Seq 模型</strong> 学习生成用户对 item 的相关的个性化评论，将此评论作为模型推荐的潜在特征模型生成的可解释依据；</p>
 <p>第二部分为一种 <strong>内容敏感型 PMF 模型</strong> 通过评论文本学习合并的潜在 item 特征，最终通过一种妥协的同步学习方式完成目标，整体结构如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/910e48ab5dd549fe93f3601e2bc19e0c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608515.webp" />   
     </p>
 <p><strong>对抗式Seq2Seq</strong></p>
 <p>这部分模型的输入可分为两部分，一部分为 <strong>用户的评论数据</strong>，例如用户 i 的评论文章定义为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ee7e939c112048d68df2d8e54fd2c06d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608407.webp" />   
      ，这部分数据用来表示用户的偏好。另一部分为** item 的评论数据**，item j 的评论数据定义为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/702c21b28d854dee9c5d30be8c126afe.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608193.webp" />   
      ，这部分数据则表示为 item 的情况。</p>
 <p>模型结构方面，针对用户的 Seq2Seq 与针对 item 的 Seq2Seq 结构一致，但其参数略有不同。经典的 <em><strong>Seq2Seq</strong></em> [2] 会存在先验的标注情况，但是这种方式会导致 exposure bias 这样的问题。exposure bias 就是说后一项预测依赖于前一项的预测情况，随着时间的推测，这种方式导致错误会逐渐发生积累和偏移。</p>
 <p>这篇文章中提出的 Seq2Seq 的方式与经典的 Seq2Seq 不同。文章首创一种 <strong>对抗式 Seq2Seq 模型</strong>，与常见的 GAN 方式一样包括判别网络和生成网络。</p>
 <p>生成模型部分，该部分与经典的 Seq2Seq 基本一致，用来生成相关评论。首先将一条评论中的一系列词汇利用预训练的 Word2Vec 的方式表征为 k 维的向量，然后利用双向 GRU 单元得到潜在的向量
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d8609e518f874e11900be9e56d2519de.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608747.webp" />   
      ，该向量为双向
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/eff1312ce6194214842ec5539db3f302.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608491.webp" />   
      的 concat 结果。将用户 i 发布的所有评论向量 h 进行平均计算得出关于用户的特征
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/096f7067dc6449b2b149bddae1b57787.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608241.webp" />   
      。</p>
 <p>在 t 时刻，首先将预测的词
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bd5a6eb23f7748e582d29bd4de0d3f70.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608862.webp" />   
      映射为对应的
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cf3f73eb1be04159ae7b6c0e7b2efd70.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608455.webp" />   
      然后与用户特征
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f66353a7ba1c4be9b69d43224edfd8db.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608161.webp" />   
      进行 concat 组成 decoder 的 GRU 部分的输入，获得的隐藏层向量 h 经过一层矩阵相乘处理后，利用 Softmax 函数进行概率预测得出 t 时刻的预测词
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/20ad9ab4088646fa962c2dcd7a71e9b2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608767.webp" />   
      。其概率预测方式如下公式所示。此外，初始化时为隐藏层向量为 0 向量。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d7d2f4a7c05a41e6a18d9e3b952daa14.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608355.webp" />   
     </p>
 <p>判别模型部分，这篇论文的判别的模型目的与常见的判断文本是不是由人生成的不同，这篇轮的判别目的不仅在于是不是由人生成的，还在于生成的文本与观察的内容主题是不是一致。该部分模型借鉴经典的 <strong><em>TextCNN</em></strong> [3] 结构进行判别，将评论词汇向量与用户特征向量进行 Concat 处理后作为输入，模型结构如下所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/935052139bca47a8b07d685d9626b36c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608305.webp" />   
     </p>
 <p>利用强化学习训练对抗结构。论文将生成模型 G 作为强化学习的 agent，而判别模型 D 的置信概率作为奖励，生成的评论越能欺骗 D 奖励越多，因此其训练函数如下所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/450d7831688942249ac1c18233ef4923.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608172.webp" />   
     </p>
 <p>该函数不利于使用梯度上升法进行前反馈训练，因此将利用策略梯度的方式得出梯度，梯度公式如下所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e6b29ab1d66446b8ae7fdfbbd879d1b0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608952.png" />   
     </p>
 <p>此外模型为了实现多任务训练的目的，利用 L1 正则对 MF 模型学习到的特征向量与 Seq2Seq 产生的特征向量进行正则化，最终该对抗 Seq2Seq 网络的损失函数定义如下所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1a5e5a5b71624f7cae7283c0d9aff26a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608770.webp" />   
     </p>
 <p><strong>内容敏感型PMF模型</strong></p>
 <p>这部分模型与 2008 年在 NIPS 发表的 <em><strong>PMF 模型</strong></em> [4] 基本一致。评价概率计算公式如下所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b6a9be28000444d28dbc15c0fde3d456.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608493.webp" />   
     </p>
 <p>其中，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c4ba76eccd8b4ff1a85551631d703bea.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608232.webp" />   
      表示用户 i 对 item j 有评论，否则为 0。此外论文还定义了与用户和 item 的潜在特征向量的先验概率分布，公式如下。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c23587053d814d46b7af514e0ebbf1a9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608843.png" />   
     </p>
 <p>公式右侧的 U、V 分别为对抗 Seq2Seq 中生成的潜在特征向量。</p>
 <h1 id="优化方式">优化方式</h1>
 <p>由于在内容敏感的 PMF 阶段，利用到了 Seq2Seq 部分生成的中间结果，因此无法用常见的随机梯度下降的方式同步进行参数优化。论文借鉴了经典的 EM 算法，保证部分参数不变的情况下进行最优化，反复迭代直至收敛的过程。</p>
 <p>首先，先将 Seq2Seq 得到的用户与 Item 的潜在向量作为先验知识，关于 U、V 的后验分布概率可以定义如下。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/99cde1e2bfd0421c96db38965d08dd16.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608470.webp" />   
     </p>
 <p>而相关的损失函数可已转化为如下公式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0e399fa2a97c4344aed99709005cdb12.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608284.webp" />   
     </p>
 <p>然后，将 U、V 固定对抗式 Seq2Seq 算法按照上述的损失函数定义，进行最优化，反复迭代直至收敛。整个模型的算法优化过程的伪代码如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f7c9c62bcd0e47a6b5c735c36d7f0ddc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608130.webp" />   
     </p>
 <h1 id="模型实验效果">模型实验效果</h1>
 <p>论文使用均方误差（MSE）作为对预测评分的评价指标。对 Yelp 2013、Yelp 2014 等 5 个国际通用数据集进行试验，结果如下所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/625e79c068b24a73a624cd900b6d446b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608154.webp" />   
     </p>
 <p>MT 为本论文所提出的的多任务学习的推荐算法模型，由实验结果所示，该算法模型的 MSE 的结果最多个数据集的结果中都表现最优。</p>
 <p>对于推荐系统的算法解释效果如何，最佳的评价方式就是线上与用户进行互动调研。但目前论文还没有这样做，论文采用了一种妥协的方式评价生成的评论质量如何。</p>
 <p>利用 <strong><em>P</em></strong> <em><strong>erplexity</strong></em> [5] 的评价指标对比其他生成模型的生成效果以及 tf-idf 的相似性计算方式评价生成的评论与真实评论的近似性，结果如下所示，本论文模型生成的评论效果最佳。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9c8baa1423814fa3b2e1b9b51889644c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608168.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c7f74de17c974a2f981c6accf2d4ecb4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281608121.webp" />   
     </p>
 <h1 id="论文评价">论文评价</h1>
 <p>这篇论文发表于 2018 年的推荐系统顶级会议 RecSys，论文尝试用生成评论的方式解决推荐算法的解释合理性难题，并将预测评分率的效果达到了 state-of-the-art。评论生成的方式作为推荐解释的方式虽然存在争议，但不失为一条路径。</p>
@@ -437,6 +434,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -470,10 +471,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -852,6 +849,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

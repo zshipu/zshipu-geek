@@ -373,16 +373,16 @@ assertThat(results).containsExactly(
 <p>Reactor属于Pivotal旗下。对于Pivotal可能很多人比较陌生，顺便提一下Pivotal旗下赫赫有名的Spring项目。Reactor是Pivotal推出的支持响应式流规范的Web实现，同样具有非阻塞的基础和背压的支持。</p>
 <p>响应式编程中的模型类似发布/订阅模式，但是该模式有个弊端，即当订阅者消费速度较发布者生产速度慢的情况下，容易产生消息堆积，而响应式编程的背压概念就是针对该问题提出的。简单地说，背压（BackPressure）指的是一种反向反馈的方式，订阅者声明其能够处理的消费数量，发布者根据该数量生产消息直至下一次反馈。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/96f2369c2d9d4512a68b51425eebb43a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281848741.webp" />   
     </p>
 <p>同时，需要掌握两个数据流Publisher：Mono、Flux。其中，Mono指的是0个或1个元素的异步序列，Flux则表示0个到N个元素的异步序列。它们都提供了丰富的操作符，可以像Stream API一样使用map、flatmap、filter、zip等Operator，当然也有onErrorReturn、onErrorResume、onErrorMap等错误处理方式。</p>
 <p>下图是Flux处理数据的示意图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a67500f2c74e40538aa6f64d6643aee2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281848517.webp" />   
     </p>
 <p>下图是Mono处理数据的示意图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6041e727143145d9a04c96f8fc6c6de5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281848473.webp" />   
     </p>
 <p>那么，如何创建一个Flux或Mono并消费呢？可以参考下面的例子：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">Flux&lt;String&gt; seq1 = Flux.just(&#34;foo&#34;, &#34;bar&#34;, &#34;foobar&#34;);
@@ -397,24 +397,24 @@ Mono&lt;String&gt; data = Mono.just(&#34;foo&#34;);
 </blockquote>
 <p>WebFlux是Spring Framework 5.0中引入的新的响应式Web框架，与Spring MVC不同，它是一套完全异步非阻塞的Web框架，并且通过Reactor项目实现了Reactive Streams规范。适合使用事件驱动的风格构造Web应用。运行于Netty、Undertow、及Servlet 3.1 以上版本容器中。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/25b1fc5d8abd4b94ab54b1a56e92a001.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281848671.webp" />   
     </p>
 <h3 id="并发模型"><strong>并发模型</strong></h3>
 <p>提到WebFlux，首先对它的并发模型做下简单介绍。</p>
 <p>请求线程模型：</p>
 <p>这种模型下，用户对于Web服务器的请求由不同线程处理，而在很多数据库请求和网络I/O中是阻塞的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5c653ab3cc4447f59014620c29a7cb75.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281848834.webp" />   
     </p>
 <p>事实上，这种并发模型是主流的实现方式，当然，它有一个弊端：随着请求越来越多，一些阻塞的操作令整体模型表现低于预期。</p>
 <p>事件循环模型：</p>
 <p>我们反复强调，异步是响应式编程的基础。因此，在这种模型下，编程风格大幅转变，程序结构基于异步事件流进行。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/af79ac666f1f433181097586ca098b04.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281848577.webp" />   
     </p>
 <p>这种并发模型使用了较少的线程处理较多的请求，在每个处理线程中并不会阻塞，而是立即注册回调事件并让出资源。这便是前文提到的事件驱动（Event Driven）</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fdac650a09d44defa696560f7846eeea.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281848552.webp" />   
     </p>
 <p>图片给出了事件循环的设计图，可以看出：事件循环依赖少量的线程（通常和实际内核相关，甚至是单线程）进行处理，通过不断的像平台注册事件并立即返回充分利用资源，当触发完成的回调事件后，通知原调用方。</p>
 <p>通过这种模型，可以大幅节省处理线程。</p>
@@ -623,11 +623,11 @@ public Executor setThreadPoolExecutor() {
 <p>服务语言栈引擎使用Go语言；策略系统使用Java语言。本篇文章改造的目标是策略系统这部分Java语言的应用。</p>
 <h2 id="架构简介">架构简介</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/580bea5364704261b8486aca156e64d0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281848541.webp" />   
     </p>
 <h2 id="效果回收">效果回收</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/513811c75df94384be12f5d4a728c99d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281848548.webp" />   
     </p>
 <p>在测试项目进行了迁移实验，可以看到使用了WebFlux+Quasar的TPS提升明显，可以达到此前的294%；平响、错误率、95线几乎持平。</p>
 <p>尽管根据预估还有提升空间，但目前的效果已经非常显著，后续将进一步思考如何优化模型调用的性能表现及尽快完成迁移。</p>
@@ -764,6 +764,10 @@ public Executor setThreadPoolExecutor() {
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -797,10 +801,6 @@ public Executor setThreadPoolExecutor() {
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1179,6 +1179,8 @@ public Executor setThreadPoolExecutor() {
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

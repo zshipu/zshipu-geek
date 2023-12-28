@@ -233,7 +233,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="获取封装后的-directory">获取封装后的 Directory</h2>
 <p>图 3：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/3-812d25e8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100696.png" />   
     </p>
 <p>  该流程中我们需要对 Directory 通过 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FStore%2F2019%2F0615%2F67.html">LockValidatingDirectoryWrapper</a> 对象进行再次封装， 使得在对索引目录中的文件进行任意形式的具有&quot;破坏性&quot;（destructive）的文件系统操作（filesystem operation）前尽可能（best-effort）确保索引文件锁是有效的（valid）。</p>
 <p>  索引目录中的&quot;破坏性&quot;的文件系统操作包含下面几个内容：</p>
@@ -248,14 +248,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="获取-indexcommit-对应的-standarddirectoryreader">获取 IndexCommit 对应的 StandardDirectoryReader</h2>
 <p>图 4：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/4-d8fb7f28.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100782.png" />   
     </p>
 <p>  如果 IndexWriter 的配置信息 IndexWriterConfig 设置了 IndexCommit 配置，那么我们需要获得描述 IndexCommit 中包含的信息的对象，即 StandardDirectoryReader，生成 StandardDirectoryReader 的目的在后面的流程中会展开介绍，这里只要知道它的生成时机即可。</p>
 <p>  IndexCommit 的介绍可以查看文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F1111%2F106.html">构造 IndexWriter 对象（一）</a>，而 StandardDirectoryReader 的介绍可以查看 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F0916%2F93.html">近实时搜索 NRT</a>、 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F1014%2F99.html">SegmentReader</a> 系列文章，这里不赘述。</p>
 <h2 id="根据不同的-openmode-执行对应的工作">根据不同的 OpenMode 执行对应的工作</h2>
 <p>图 5：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/5-a8731d71.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100577.png" />   
     </p>
 <p>  从图 5 中可以看出，尽管 Lucene 提供了三种索引目录的打开模式，但实际上只有 CREATE 跟 APPEND 两种打开模式的逻辑，三种模式的介绍可以看文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F1111%2F106.html">构造 IndexWriter 对象（一）</a>，这里不赘述。</p>
 <p>  在源码中，使用一个布尔值 indexExists 来描述图 5 中的流程点 <code>索引目录中是否已经存在旧的索引？</code>，如果存在，那么 indexExists 的值为 true，反之为 false。indexExists 在后面的流程中会被用到。</p>
@@ -263,12 +263,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="执行-create-模式下的工作的流程图">执行 CREATE 模式下的工作的流程图</h3>
 <p>图 6：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/6-2117526d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100694.png" />   
     </p>
 <h4 id="配置检查-1">配置检查 1</h4>
 <p>图 7：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/7-04f774af.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100660.png" />   
     </p>
 <p>  该流程会检查用户是否正确设置了 IndexCommit 跟 OpenMode 两个配置，由于代码比较简单，故直接给出：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">if (config.getIndexCommit() != null) {
@@ -282,7 +282,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="初始化一个新的-segmentinfos-对象">初始化一个新的 SegmentInfos 对象</h4>
 <p>图 8：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/8-36a8e459.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100344.png" />   
     </p>
 <p>  该流程只是描述了生成 SegmentInfos 对象的时机点，没其他多余的内容。</p>
 <p><strong>SegmentInfos 是什么：</strong></p>
@@ -292,7 +292,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="同步-segmentinfos-的部分信息">同步 SegmentInfos 的部分信息</h4>
 <p>图 9：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/9-9f2da883.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100196.png" />   
     </p>
 <p>  如果索引目录中已经存在旧的索引，那么 indexExists 的值为 true，那么我们先需要获得旧的索引中的最后一次提交 commit 中的 SegmentInfos 中的三个信息，即 version、counter、generation：</p>
 <ul>
@@ -422,6 +422,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -455,10 +459,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -837,6 +837,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

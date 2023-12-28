@@ -211,11 +211,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ol>
 <li>时间片 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4324de2daaf44d8893c20d05bffb3058.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281818561.svg&#43;xml" />   
     
 的计算依赖 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3417fd451fe84ddd8c2f92ae79c047ef.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281818281.svg&#43;xml" />   
     
 时刻的计算结果，这样限制了模型的并行能力；</li>
 <li>顺序计算的过程中信息会丢失，尽管LSTM等门机制的结构一定程度上缓解了长期依赖的问题，但是对于特别长期的依赖现象,LSTM依旧无能为力。</li>
@@ -223,66 +223,66 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Transformer的提出解决了上面两个问题，首先它使用了Attention机制，将序列中的任意两个位置之间的距离是缩小为一个常量；其次它不是类似RNN的顺序结构，因此具有更好的并行性，符合现有的GPU框架。论文中给出Transformer的定义是：Transformer is the first transduction model relying entirely on self-attention to compute representations of its input and output without using sequence aligned RNNs or convolution。</p>
 <p>遗憾的是，作者的论文比较难懂，尤其是Transformer的结构细节和实现方式并没有解释清楚。尤其是论文中的 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9cc8a805cf9347f1bef74fbb5b2cbb43.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281818090.svg&#43;xml" />   
     
 ， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/104faf7e38d54ed49716252127376432.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281818923.svg&#43;xml" />   
     
 ， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3b8c452796f9462783eaa87d70b1e469.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281818569.svg&#43;xml" />   
     
 究竟代表什么意思作者并没有说明。通过查阅资料，发现了一篇非常优秀的讲解Transformer的技术 <a href="https://zshipu.com/t?url=https%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttp%253A%2F%2Fjalammar.github.io%2Fillustrated-transformer%2F">博客</a>[4]。本文中的大量插图也会从该博客中截取。首先感谢Jay Alammer详细的讲解，其次推荐大家去阅读原汁原味的文章。</p>
 <h2 id="1-transformer-详解">1. Transformer 详解</h2>
 <h2 id="11-高层transformer">1.1 高层Transformer</h2>
 <p>论文中的验证Transformer的实验室基于机器翻译的，下面我们就以机器翻译为例子详细剖析Transformer的结构，在机器翻译中，Transformer可概括为如图1：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8b09f1d23fca448d9e88c9f924b8e473.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281818390.jpeg" />   
     </p>
 <p>图1：Transformer用于机器翻译</p>
 <p>Transformer的本质上是一个Encoder-Decoder的结构，那么图1可以表示为图2的结构：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/079f3db7e23742a2ba55fbec3247ee8e.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281818409.jpeg" />   
     </p>
 <p>图2：Transformer的Encoder-Decoder结构</p>
 <p>如论文中所设置的，编码器由6个编码block组成，同样解码器是6个解码block组成。与所有的生成模型相同的是，编码器的输出会作为解码器的输入，如图3所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7df71b3efcd74dfe8932f3d78cd37e08.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281818336.jpeg" />   
     </p>
 <p>图3：Transformer的Encoder和Decoder均由6个block堆叠而成</p>
 <p>我们继续分析每个encoder的详细结构：在Transformer的encoder中，数据首先会经过一个叫做‘self-attention’的模块得到一个加权之后的特征向量 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/07d1d3f12b004ae9a546affeb232cc07.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281818433.svg&#43;xml" />   
     
 ，这个 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ee0c9fb63f74454e9ac6ba119518e46d.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281818227.svg&#43;xml" />   
     
 便是论文公式1中的 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f3026f99165f4fac8f1155f07b9a123d.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281818103.svg&#43;xml" />   
     
 ：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5b0d5bdbd8ee4020a7845803ffbace63.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819776.svg&#43;xml" />   
     </p>
 <p>第一次看到这个公式你可能会一头雾水，在后面的文章中我们会揭开这个公式背后的实际含义，在这一段暂时将其叫做 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d4655e2efba04397b51018f0435d7964.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819763.svg&#43;xml" />   
     
 。</p>
 <p>得到 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/973a973575ba41f9a77a82ae058806d8.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819552.svg&#43;xml" />   
     
 之后，它会被送到encoder的下一个模块，即Feed Forward Neural Network。这个全连接有两层，第一层的激活函数是ReLU，第二层是一个线性激活函数，可以表示为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ad5b343edb6d42f9b405ebe7017d6e41.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819303.svg&#43;xml" />   
     </p>
 <p>Encoder的结构如图4所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5e28a487dc744c899d45e58df3a76d32.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819089.jpeg" />   
     </p>
 <p>图4：Transformer由self-attention和Feed Forward neural network组成</p>
 <p>Decoder的结构如图5所示，它和encoder的不同之处在于Decoder多了一个Encoder-Decoder Attention，两个Attention分别用于计算输入和输出的权值：</p>
@@ -291,25 +291,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>Encoder-Decnoder Attention：当前翻译和编码的特征向量之间的关系。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/50f4d9d61dc74d5783d1bb57a7dee84a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819079.jpeg" />   
     </p>
 <p>图5：Transformer的解码器由self-attention，encoder-decoder attention以及FFNN组成</p>
 <h2 id="12-输入编码">1.2 输入编码</h2>
 <p>1.1节介绍的就是Transformer的主要框架，下面我们将介绍它的输入数据。如图6所示，首先通过Word2Vec等词嵌入方法将输入语料转化成特征向量，论文中使用的词嵌入的维度为</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/5/3feca4dbab994e4793b053fc1dfb88f9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819902.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9ac349c207294b18a7f11feb9514aba8.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819615.jpeg" />   
     </p>
 <p>图6：单词的输入编码</p>
 <p>在最底层的block中， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4c4b6efdd3a64c3992b4b4cc98bc9974.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819408.svg&#43;xml" />   
     
 将直接作为Transformer的输入，而在其他层中，输入则是上一个block的输出。为了画图更简单，我们使用更简单的例子来表示接下来的过程，如图7所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bc91f947203a453d852ca70ef52b6db8.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819227.jpeg" />   
     </p>
 <p>图7：输入编码作为一个tensor输入到encoder中</p>
 <h2 id="13-self-attention">1.3 Self-Attention</h2>
@@ -317,44 +317,44 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><code>The animal didn't cross the street because it was too tired</code></p>
 <p>通过加权之后可以得到类似图8的加权情况，在讲解self-attention的时候我们也会使用图8类似的表示方式</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fbe3e1d7171c41d1987df7e5f1c09e6c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819080.jpeg" />   
     </p>
 <p>图8：经典Attention可视化示例图</p>
 <p>在self-attention中，每个单词有3个不同的向量，它们分别是Query向量（ 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1a9304972b924644ba999b4eaf9ad03d.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819150.svg&#43;xml" />   
     
 ），Key向量（ 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d3d289c478af422e8d0fca43e3f7afa0.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819973.svg&#43;xml" />   
     
 ）和Value向量（ 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e3bc9d2610384ab5abad91338c954707.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819678.svg&#43;xml" />   
     
 ），长度均是64。它们是通过3个不同的权值矩阵由嵌入向量 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/19af5b206cca4d0fb1e38679b0692d0e.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819471.svg&#43;xml" />   
     
 乘以三个不同的权值矩阵 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8e134fce963b44cbad078a867358b65f.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819152.svg&#43;xml" />   
     
 ， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f84441f4b4f54500968121c236a4633d.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819921.svg&#43;xml" />   
     
 ， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/37633ed4dc8943bc9b08c7cae45b1cba.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819717.svg&#43;xml" />   
     
 得到，其中三个矩阵的尺寸也是相同的。均是 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2ba7d8d54e8342739b249432ef8967ba.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819372.svg&#43;xml" />   
     
 。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b058063dadec47c8af2a9544aa508480.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819051.jpeg" />   
     </p>
 <p>图9：Q，K，V的计算示例图</p>
 <p>那么Query，Key，Value是什么意思呢？它们在Attention的计算中扮演着什么角色呢？我们先看一下Attention的计算方法，整个过程可以分成7步：</p>
@@ -362,95 +362,95 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>如上文，将输入单词转化成嵌入向量；</li>
 <li>根据嵌入向量得到 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b2cccfe0569a437f966bce8668d5204b.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819454.svg&#43;xml" />   
     
 ， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e8c2fb74a4594b34bcb8d33f3d8554d6.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819276.svg&#43;xml" />   
     
 ， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2419041a0f294c9982806855fabde6c0.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819097.svg&#43;xml" />   
     
 三个向量；</li>
 <li>为每个向量计算一个score： 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e44f0d8b0fbe4ac89de4eaea89725bc0.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819000.svg&#43;xml" />   
     
 ；</li>
 <li>为了梯度的稳定，Transformer使用了score归一化，即除以 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/94612511301c4131836d12c06e7aeb1d.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819851.svg&#43;xml" />   
     
 ；</li>
 <li>对score施以softmax激活函数；</li>
 <li>softmax点乘Value值 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3e000d4648d3455a875201b998881d97.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819586.svg&#43;xml" />   
     
 ，得到加权的每个输入向量的评分 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/060afcd79c414688b23d0972dc872600.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819380.svg&#43;xml" />   
     
 ；</li>
 <li>相加之后得到最终的输出结果 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/521382bb1cf14191b9187e9a62aded54.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819183.svg&#43;xml" />   
     
 ： 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/88aeadc1e2ea4e77b5082594383ed344.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819984.svg&#43;xml" />   
     
 。</li>
 </ol>
 <p>上面步骤的可以表示为图10的形式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7d8016b3ce604a1296893cfd2058a64b.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819825.jpeg" />   
     </p>
 <p>图10：Self-Attention计算示例图</p>
 <p>实际计算过程中是采用基于矩阵的计算方式，那么论文中的 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cbc7b09832304eb98876088c03863cc4.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281819902.svg&#43;xml" />   
     
 ， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6518639edf9a4ec29532996449c69f0a.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820699.svg&#43;xml" />   
     
 ， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/579304c8adc44e1c90fdd96f4cc35965.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820473.svg&#43;xml" />   
     
 的计算方式如图11：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/92d34f1c9e8b4501ae35bd9be2686d28.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820358.jpeg" />   
     </p>
 <p>图11：Q，V，K的矩阵表示</p>
 <p>图10总结为如图12所示的矩阵形式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7b83b0b8d43a4aeea988d452f5bc8053.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820277.jpeg" />   
     </p>
 <p>图12：Self-Attention的矩阵表示</p>
 <p>这里也就是公式1的计算方式。</p>
 <p>在self-attention需要强调的最后一点是其采用了 <a href="https://zshipu.com/t?url=https%3A%2F%2Fzhuanlan.zhihu.com%2Fp%2F42706477">残差网络</a>
 [5]中的short-cut结构，目的当然是解决深度学习中的退化问题，得到的最终结果如图13。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/49a285d8ac6841e59808c0bfb82db058.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820148.jpeg" />   
     </p>
 <p>图13：Self-Attention中的short-cut连接</p>
 <h2 id="13-multi-head-attention">1.3 Multi-Head Attention</h2>
 <p>Multi-Head Attention相当于 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a55990fe0a9a408897e889e5634cbeea.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820302.svg&#43;xml" />   
     
 个不同的self-attention的集成（ensemble），在这里我们以 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bca0039f55384eafa8de10409f685fb5.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820088.svg&#43;xml" />   
     
 举例说明。Multi-Head Attention的输出分成3步：</p>
 <ol>
 <li>将数据 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b14951b527114a5db083d36c91edb2a1.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820771.svg&#43;xml" />   
     
 分别输入到图13所示的8个self-attention中，得到8个加权后的特征矩阵 
 
@@ -459,57 +459,57 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 。</li>
 <li>将8个 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/72864c688f3540ecb98b7f65c747813f.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820118.svg&#43;xml" />   
     
 按列拼成一个大的特征矩阵；</li>
 <li>特征矩阵经过一层全连接后得到输出 
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=Z" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820233.svg&#43;xml" />   
     
 。</li>
 </ol>
 <p>整个过程如图14所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cc834f785f7c41bc8b2b1742a525e475.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820021.jpeg" />   
     </p>
 <p>图14：Multi-Head Attention</p>
 <p>同self-attention一样，multi-head attention也加入了short-cut机制。</p>
 <h2 id="14-encoder-decoder-attention">1.4 Encoder-Decoder Attention</h2>
 <p>在解码器中，Transformer block比编码器中多了个encoder-cecoder attention。在encoder-decoder attention中， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/264f30229a7b4646a5ce465f5c8bf98d.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820000.svg&#43;xml" />   
     
 来之与解码器的上一个输出， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1a4932f7ccec4a9f92e1ef8a6ba00721.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820813.svg&#43;xml" />   
     
 和 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/76935aab28514eb7b0cb49a0f1accf82.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820622.svg&#43;xml" />   
     
 则来自于与编码器的输出。其计算方式完全和图10的过程相同。</p>
 <p>由于在机器翻译中，解码过程是一个顺序操作的过程，也就是当解码第 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1ffe2f4fff7a4533889eb60b147b6e2b.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820385.svg&#43;xml" />   
     
 个特征向量时，我们只能看到第</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5616f670523948538073d0981899b06d.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820208.svg&#43;xml" />   
     
 及其之前的解码结果，论文中把这种情况下的multi-head attention叫做masked multi-head attention。</p>
 <h2 id="15-损失层">1.5 损失层</h2>
 <p>解码器解码之后，解码的特征向量经过一层激活函数为softmax的全连接层之后得到反映每个单词概率的输出向量。此时我们便可以通过CTC等损失函数训练模型了。</p>
 <p>而一个完整可训练的网络结构便是encoder和decoder的堆叠（各 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f3a52928c58d42acaea277997ac038a7.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820930.svg&#43;xml" />   
     
 个， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/229948340eda4c3294d3082a39b79541.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820673.svg&#43;xml" />   
     
 ），我们可以得到图15中的完整的Transformer的结构（即论文中的图1）：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bbcaa37f9d1c45599c32be542dc47935.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820510.jpeg" />   
     </p>
 <p>图15：Transformer的完整结构图</p>
 <h2 id="2-位置编码">2. 位置编码</h2>
@@ -517,43 +517,43 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>为了解决这个问题，论文中在编码词向量时引入了位置编码（Position Embedding）的特征。具体地说，位置编码会在词向量中加入了单词的位置信息，这样Transformer就能区分不同位置的单词了。</p>
 <p>那么怎么编码这个位置信息呢？常见的模式有：a. 根据数据学习；b. 自己设计编码规则。在这里作者采用了第二种方式。那么这个位置编码该是什么样子呢？通常位置编码是一个长度为 
 
-        <img class="mx-auto" alt="" src="https://www.zhihu.com/equation?tex=d_%7Bmodel%7D" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820522.svg&#43;xml" />   
     
 的特征向量，这样便于和词向量进行单位加的操作，如图16。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/88f53c4a353947b3bbeae159a032d311.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820330.jpeg" />   
     </p>
 <p>图16：Position Embedding</p>
 <p>论文给出的编码公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/aaf11506dc774738a419b99153112e32.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820246.svg&#43;xml" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/805242cd9c9b41bdb9c290d6ca15cd15.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820180.svg&#43;xml" />   
     </p>
 <p>在上式中， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7474b9d747d8406bbd9611ee93f56c81.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820019.svg&#43;xml" />   
     
 表示单词的位置，</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2d960c38d4ff4f5cbed7471f1a7e47f7.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820757.svg&#43;xml" />   
       表示单词的维度。关于位置编码的实现可在Google开源的算法中 <a href="https://zshipu.com/t?url=https%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttps%253A%2F%2Fgithub.com%2Ftensorflow%2Ftensor2tensor%2Fblob%2F23bd23b9830059fbc349381b70d9429b5c40a139%2Ftensor2tensor%2Flayers%2Fcommon_attention.py">get_timing_signal_1d()</a> 函数找到对应的代码。</p>
 <p>作者这么设计的原因是考虑到在NLP任务重，除了单词的绝对位置，单词的相对位置也非常重要。根据公式</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b92ae1061bcd421fb9609bc441bb9e89.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820421.svg&#43;xml" />   
     
 以及</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0836ca11cf4c454a87abdcc44fbd5a76.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820276.svg&#43;xml" />   
     
 ，这表明位置</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/27b5273f1b744cdd989c6938584365b4.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820964.svg&#43;xml" />   
     </p>
 <p>的位置向量可以表示为位置
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d30905f687fe4ca7ab4a7b37073d9578.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281820716.svg&#43;xml" />   
     
 的特征向量的线性变化，这为模型捕捉单词之间的相对位置关系提供了非常大的便利。</p>
 <h2 id="3-总结">3. 总结</h2>
@@ -688,6 +688,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -721,10 +725,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1103,6 +1103,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

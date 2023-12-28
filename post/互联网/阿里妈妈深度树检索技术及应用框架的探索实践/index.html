@@ -192,7 +192,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/15f0eeb15e474577acec91df88c88ce4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281921306.png" />   
     </p>
 <blockquote>
 <p>分享嘉宾：何杰 阿里妈妈 高级算法专家</p>
@@ -208,7 +208,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>4. 我们对下一代检索技术未来发展的思考</p>
 <p><strong>▌从互联网推荐业务看检索技术发展现状</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/40d579064a134da495ae8145da644b63.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281921681.webp" />   
     </p>
 <p>检索技术，是互联网推荐、搜索、广告的通用底层技术组成。</p>
 <p>一提到检索技术，大家首先会想到搜索引擎，但是从另外一个视角来看，搜索、推荐、广告实际上是一脉相承的，他们的检索可以**统一定义为：****从全量的物品里面，挑选出来用户感兴趣的物品。**不同的是，搜索中 Query 词显式表达了用户意图，而在推荐中往往利用的是用户隐式表达如历史行为、用户属性等，而广告则是在搜索/推荐上进一步施加了广告出价的影响。</p>
@@ -218,7 +218,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>怎么办？在如此大规模数据下，算力和算法如何适应性设计呢？我们首先来看一下算力的发展，在十几年前我们的算力主要还是以 CPU 通用计算为主的算力体系，算力相对比较有限。大数据+有限算力，就要求我们对算法进行适应性设计，于是 Match+Rank 分段漏斗的算法架构被引入：从超大规模候选集中，先 Match 出小规模候选集，再通过 Rank 的方式排序出最终用户最感兴趣的 Items。逐渐地，Match+Rank 的模式成为了如今检索体系的主流架构。</p>
 <p>数据在发展，算力体系也在发展，尤其是随着近十年来 GPU 大规模应用的兴起，形成了 CPU+GPU 异构计算的算力大融合。在大数据+大算力的现状下，我们开始思考，检索算法架构是不是可以再升级？类似于历史中的“合久必分，分久必合”：我们是不是可以突破 Match+Rank 的分段漏斗模式，将检索问题作为一个端到端整体去设计和联合优化？这就是我们今天要探讨和思考的问题，也是 TDM 的由来。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6eb8a517c23c4f5f9b1962a17f9097df.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281921723.webp" />   
     </p>
 <p>我们怎么来思考检索架构升级呢？首先需要对检索本身进行深入分析，而作为检索的第一阶段，我们先从 Match 入手。Match 的核心任务是从全量的超大规模的候选集中高效的检索相关 TopK，然后交给后链路比如 Rank 做进一步处理。比如在电商场景，我们有大规模商品库，大概是十亿量级，我们会做 Match 召回千到万级别的 TopK，送给后链路做 Rank。</p>
 <p>类似于受算力局限下检索 Match+Rank 两阶段的设计，Match 本身也受到算力局限的影响，所以它的经典实现也是两段式的，比如：</p>
@@ -232,17 +232,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>这里存在的问题是两段式相互隔离，比如我们对 User 到 Query-rewrite 进行优化形成各种匹配算法，然后对 Query-rewrite 到 Doc 优化形成倒排索引。这种两段式缺少联合优化，并且受限于线上性能影响，两段式的各个阶段的标签数量是有截断的，效果（如全量发现能力）上就存在局限。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cfc086f4f67843b2b9d0f3d28fdcd7e6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281921841.webp" />   
     </p>
 <p>Match 两段式的经典实现如图中 Item-CF 所示，这里不做过多论述。如前述说的，它的优势是模型比较简单，实现成本较低，劣势是两段式无法联合优化，各阶段的标签截断导致效果受限。由此，我们自然会想到一个问题：两段式有缺陷，那我们是否可以改为一段式？</p>
 <p>答案是肯定的，那么一段式要怎么做？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cd2735d4ccac49fbb0e7ba7cdd76d0ff.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281921020.webp" />   
     </p>
 <p>在推荐和相关领域，简单的一段式全库检索的经典代表，其实借鉴了图像检索的算法，即：内积模型的向量检索。它通过各种方式学到了 Item 的 Embedding，然后通过 PQ 方式构建分库索引，检索时实时计算 User Embedding，做最近邻 TopK Item 检索。内积模型向量检索在 Facebook 17年开源了 FAISS 库后，得到了广泛的应用。这种一段式全库检索，在发现能力上具有一定优势，但缺点是模型比较简单，能力有限。这里以 PCTR 预估为例，内积模式的 DQM、Attention 的 DIN、Attention+GRU 的 DIEN 做比较来看，内积模式的 AUC 是最低的，间接证明了内积模型是存在能力局限的。</p>
 <p>另外，这种模式下索引构建和模型优化的目标存在不一致。积量化索引的优化目标是最小化近似误差，而向量检索（召回问题）的优化目标是最大化 TopK 召回率。所以由于两者优化的目标不一致，这会导致最终效果并不是最优的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f779c7b440144bc3aea2be98486b2529.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281921985.webp" />   
     </p>
 <p>我们总结一下 Match 中检索技术的发展历程，不难发现， <strong>检索技术是模型能力和索引效能的融合：</strong></p>
 <ul>
@@ -277,7 +277,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>BeamSearch 检索方式如图中右侧流程所示：假设要寻找最优 Top2 个 Item，第一层有两个子节点，打分排序选出 Top2（只有2个，全取）；扩展出第二层四个子节点，打分排序选出 Top2；扩展出第三层四个子节点，打分排序选出 Top2，达到叶子层，最终返回 Top2 个 Items，查找复杂度为 O(2 <em>K</em> log2N)，K 为返回个数，N 为叶子个数。</p>
 <p>衍生问题：为什么该检索策略检索出来的 Top2，一定会是用户感兴趣的 Top2呢？即 BeamSearch 的有效性要如何保证？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a92eaafe5bf34442ab180ef4b33a7db4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281923102.webp" />   
     </p>
 <p>有效的检索背后蕴藏了有效的兴趣建模，也即，要如何建模，使得 BeamSearch 检索有效。</p>
 <p>为此我们提出了兴趣最大堆树的概念：用户对 n 节点兴趣的偏好，是用户对 n 节点的孩子节点们的兴趣偏好，取 max 后，在 n 所在的节点层做归一化。如图中右侧树所示，SN4 的兴趣偏好：</p>
@@ -314,7 +314,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fefe1a28349846b3b3ebb1483dcf5fcf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281924023.webp" />   
     </p>
 <p>树结构在 TDM 算法中所扮演的关键角色：树不仅决定了检索的索引结构，更是决定了用于模型学习的样本分布，所以树结构的“好坏”直接决定了最大堆树模型学习的效果上界。</p>
 <p><strong>不失一般性</strong>**，**假定我们的树仍为完全二叉树，叶子节点为 n 个，那树的本质其实就是如何将 n 个商品一一投射到 n 个叶子上去，也即树的形式化定义是找个一个 π 映射实现 n 对 n 的二部完美映射。那怎么样的树是好的树呢？也即何种 π 映射是最优的呢？从左下图可以看出来，右侧的树结构更优，因为它隐含了性别分类，可以使得 TDM 模型学习得更好（上限更高）。</p>
@@ -323,7 +323,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Q：前几页的最大堆树学习里有正负采样，为什么“统一的全局经验损失函数”里面没有负样本项了？</p>
 <p>A：为了实现统一 Loss，我们这里对 TDM 模型进行了建模变换，从之前的二分类转换到了多分类，即将层上用户兴趣建模成用户对当前层上的全部树节点做多分类问题。上述统一 Loss 即为多分类建模下的标准交叉熵 Loss，其中的 p 为归一化概率。在实际实现方式上，我们采用了负采样 + NCE 的方法来近似多分类 Softmax。所以上述统一 Loss 里面确实没有了负样本项，“负样本”是以 NCE 方法中的负采样方式表现了。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9566dd9b346043538baf04460489b860.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281924428.webp" />   
     </p>
 <p>TDM 在 AmazonBooks 和 TaobaoUserBehavior 两个公开数据集上进行了测试。相对于基线的 ItemCF 和 Youtube 内积模型，TDM 的提升非常显著。我们也对 TDM 各种优化做了单项拆分分析，Attention、HierarchicalRep. 和联合学习的效果如之前所说，其中三者的联合效果达到了1+1+1&gt;3。</p>
 <p>
@@ -332,7 +332,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>回到最初的图中，我们再次发现：检索技术是模型能力和索引效能的融合。</p>
 <p>从这个角度，大家思考一下，TDM 为什么可以解决这个融合呢？我们实现了对更先进模型，即深度学习模型的融合；其次，我们实现了更先进索引，采用了树结构来做索引，有别于常用的倒排索引，并且我们的树结构是一个与模型适配且联合学习的树。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d35a733b348a4bef90248f19e7618ae6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281924246.webp" />   
     </p>
 <p>总结一下 TDM 提出、设计和实现的脉络：</p>
 <ul>
@@ -348,7 +348,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p><strong>▌深度树检索技术对于线上业务场景的适配应用</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d61c9b38dbcf45fa9087bcbc8f873901.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281924271.webp" />   
     </p>
 <p>原生 TDM 是兴趣最优的检索方案，但是在实际业务中，有些业务目标不一定是兴趣最优。例如在广告业务中，我们要考虑 ECPM 最优。那么，我们要如何改造 TDM，使得其可以满足不同的业务目标？</p>
 <p>这里面有如下挑战：</p>
@@ -361,31 +361,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e7ed0c88bb284852ad8a966104494a34.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281924456.webp" />   
     </p>
 <p>“兴趣最大堆”改造成“任意指标最大堆”的过程中，也存在一些问题，比如：“兴趣”是二值问题，即感兴趣/不感兴趣，可以抽象成分类问题；而在广告中，“ECPM”是一个连续问题，即 ECPM 是一个连续的数字，更适合抽象成回归问题。基于这个现状，我们需要思考，如何构建这样的 TDM 模型。</p>
 <p>仍然以广告为例：由于叶子层是每一个具体的 Item，那么这些 Item 的 ECPM 是可以计算的（由于 ECPM=PCTR <em>BID</em> 1000，我们可以通过其他的模型计算 Item 的 PCTR，BID 通过查找/统计的方式可以得到），所以我们有叶子层的所有 Item 的 ECPM 值。所以我们可以通过 max 上溯的方式，将其引入到我们的最大堆树中来，也即：</p>
 <p>PParent1= max(PItem1, PItem2)</p>
 <p>上一层的节点值为该节点的孩子节点的最大值，此处不需要归一化。并以此方式递归上溯生成整棵树，并在检索的时候递归往下完成 TopK 检索。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/34955ed3a8134351b2186e2210842f96.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281924567.webp" />   
     </p>
 <p>由于一个模型并不能适配所有的场景，满足所有目标（例如：广告业务考虑广告收入的最大化；电商业务考虑电商成交最大化等），因此，我们对检索模型做了另外一个改造，也即：分模型联合检索框架，上层是公共部分，对通用的功能做抽象，下层是业务部分，根据业务现状做设计，两部分实现并行调用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/772c3837b04744c49704113b09a80a59.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281924854.webp" />   
     </p>
 <p>虽然 TDM 理论上可以支持任意深度模型，但实际应用中，我们仍然需要考虑在线检索 Bound 的约束。在一开始上线之初，TDM 的 RT 增量达到了 60ms，对于阿里妈妈的在线广告链路完全不可用。但通过后续的包括通信、计算、链路等优化，最终 TDM 实现了上线后 RT 增加接近于 0ms 的良好性能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6e7e7dd532894cbc91a822db0812e563.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281924946.webp" />   
     </p>
 <p>现阶段 TDM 主要接入了阿里妈妈定向广告的 Match 阶段，包括 Shop/Node/Item 已经全量上线，覆盖了阿里妈妈定向广告主要场景的大部分流量，CTR 和 RPM 的效果提升都达到了两位数。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d4887b43155e45f5a3dd58c1abefa35c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281924231.webp" />   
     </p>
 <p>最后，从学习树全库索引的检索，我们进一步把 TDM 扩展到了通用的业务应用框架。左边纵向为基于学习树全库索引的超大规模检索是如何设计的，右边纵向为如何应用 TDM 到线上业务，包括改造成业务最大堆树，然后面向业务的高性能优化和多层多模型的设计，最后真正应用于实际。</p>
 <p><strong>▌我们对下一代检索技术未来发展的思考</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c50d766da3d24056ad100a857a3f0c49.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281924388.webp" />   
     </p>
 <p>对于未来，我们希望将创新推向一个新的高度，当然这只靠我们一个团队是很难做到的。结合当前 TDM 在阿里妈妈的应用，我们希望能在下一个阶段，可以将 TDM 与现有技术做更深层的融合，比如在图检索、搜索业务等领域上面做一些优化和探索。</p>
 <p>我们也一直坚持</p>
@@ -518,6 +518,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -551,10 +555,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -933,6 +933,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

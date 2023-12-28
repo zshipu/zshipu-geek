@@ -211,7 +211,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0396c0a11ed54897993ed769f4bab86e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272134254.webp" />   
     </p>
 <blockquote>
 <p>文章作者：龙楚、丹鸥、晨宁、元涵</p>
@@ -233,7 +233,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>从行为内容维度上，直接行为反馈商品和曝光商品分别被用来显式和隐式的表达用户意图，与此同时，我们也将用户行为数据从传统的电商商品，延伸到一些泛内容信息。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4651890fc490473d8d00d79b111bd8c4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272134112.webp" />   
     </p>
 <p>用户行为建模也是推荐，广告等很多团队在研究的方向（比如广告团队的DIN,DIEN,Practice on Long Sequential User Behavior Modeling，推荐团队的MIND,DSIN，等等非常好的工作），我们力求从实际应用出发，和大家分享我们在搜索场景中用户建模的一些实践经验。同时将我们所观察到的现象、问题写出来，欢迎大家多讨论交流。本文后续包含的内容如下：</p>
 <ul>
@@ -244,14 +244,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h2 id="02模型结构"><strong>02模型结构</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/57102c63900040da8e3fc24d90d2c7e2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272134054.webp" />   
     </p>
 <p>我们的模型结构大致所图所示，用户画像、多个用户行为序列特征、待打分的商品特征和一些其他的实时上下文特征（天气、网络、时间等特征），最终concat之后，进入DNN的分类器。用户行为序列建模是模型中最重要的部分之一，对于实时刻画用户兴趣尤其重要。我们这里采用self atten和atten pooling的方式来做序列建模，self atten刻画行为之间的相互关系，atten pooling对行为进行匹配激活并实现combine。这是我们一个通用化的序列建模组件。下面将基于该模型框架，进一步介绍我们今年的优化工作及其实现细节。</p>
 <h2 id="03用户数据与模型"><strong>03用户数据与模型</strong></h2>
 <p>user profile 仅仅是一些比较静态的用户特征，这些静态特征作为对user_id的补充和泛化。近来以session-based recommendation为代表的理解用户实时兴趣的模型，越来越受到广泛的研究，大量实验表明其能够显著提升推荐的准确率。特别是用户当前越短期的行为，越能代表用户目前的兴趣状态。使用用户有过行为的商品来表征用户，有助于我们实时的捕获用户兴趣的动态性。另外，以Graph的角度来看，由user-item组成的图中，item是稠密结点，user是稀疏结点，稠密结点适合用来对稀疏结点进行表达。</p>
 <p>我们定义统一的行为schema如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/add6b8645a0843a5bfb2f30413191cfd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272134930.png" />   
     </p>
 <p>包含两个部分，商品自身的属性特征和用户对商品的行为特征。属性特征包括item_id, seller_id等一系列对商品进行描述的特征。行为特征包括用户对商品的行为类型，行为时间，序列位置等特征。</p>
 <h3 id="1-中短周期"><strong>1. 中短周期</strong></h3>
@@ -262,14 +262,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>我们采用了cosine + scale up代替原来的点乘+scale down（也可以通过加入layer norm），来计算K和Q的相似度，提升softmax logits输出值的区分度。因为在套用原来的self-atten时，我们发现了一些问题：(1). softmax logits值非常小，导致atten的权重一直处于均值状态；(2). atten结构出现梯度弥散，导致几乎不能被学习。我们的CTR模型embedding从0初始化，而不是随机初始化，过小的梯度导致self atten很难被学习。为此，我们使用cosine值代替点乘，计算K与Q的距离。如下图所示：</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ecc21dd0017e4b0ba1f222d2600e74c6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272134352.webp" />   
     </p>
 <ul>
 <li>对self-atten的输出结果我们进行了一个query_atten_pooling。虽然我们的中短期序列尽量保证了与当前意图的类目一致性，但为了进一步保证query一致性，这里对中短期序列进行一个query_atten_pooling，激活与当前query意图和语义一致的历史行为；后续实验部分也会进一步分析为什么这里不使用通用的target attention。</li>
 </ul>
 <p>整个中短期行为建模的模型结构如下图所示，self atten + query atten pooling：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6cb4cd9566fe43ec876c71a60cab149f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272134104.webp" />   
     </p>
 <p>其中，Context Masked Embedding作e1+c1的操作。</p>
 <h3 id="2-长周期"><strong>2. 长周期</strong></h3>
@@ -283,7 +283,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>这里的atten_pooling是用shortseq_vec来作为查询Query的; Shortseq_vec是一个综合了用户意图和用户实时偏好的表达，比直接用原始搜索词(仅能表达用户搜索意图), 能更加全面评估历史trigger对当前搜索的重要性；同时short seq也属于序列，向量空间上也比较接近。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cabff726e49b44998b2168f6c1610dab.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272134060.webp" />   
     </p>
 <h3 id="3-端上点击"><strong>3. 端上点击</strong></h3>
 <p>前面两部分分别从长、短期捕获用户的行为商品以及对应的上下文信息，但实际用户的行为远远不止点击、购买这些；在搜索结果页面，商品列表曝光，用户发生浏览、滑屏；在商品详情页，用户观看视频，对比参数等；用户有非常丰富的行为没有被我们关注到，一方面某些特征通过服务端日志无法获取，另一方面某些特征通过ut日志延迟很多，使得在线比较难以利用；因此我们利用端计算的优势，在客户端把这些数据特征收集到，传给服务端，同时也能把rt降低到ms以内；后面两部分我们将分别介绍端上的点击序列和端上的曝光序列建模。</p>
@@ -294,20 +294,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>数据与特征：相比于用户的点击和购买，pv曝光数据的体量非常之大，于是我们没有选择将其实时写入igraph，然后进行读取，而是分布在端上存储，由端上请求搜索的时候直接发送，绕开了存储问题，也保证了数据的实时性。具体地，当一个用户搜索“连衣裙”时，客户端会把该用户最近搜索”连衣裙“时，曝光但未点击过的50个商品信息，上传到服务端，例如在进行第二页的排序时，就会拿到第一页的曝光商品。</p>
 <p>模型结构： 曝光序列的建模方式比较简单,通过mean pooling得到曝光表达。但是为了让正向表达和曝光表达有所区分，我们先分别计算正向表达和曝光表达与目标商品的距离d1和d2，并添加辅助loss使得两个距离之间符合以下条件：当目标商品对应是正样本时 d1 + M &lt; d2;当目标商品对应是负样本时 d1 &gt; d2 + M。建模方式类似下图方式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fd72938cca34446daf6a63bd70b5f31c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272134239.webp" />   
     </p>
 <h2 id="04实验与分析"><strong>04实验与分析</strong></h2>
 <p>数据集：以线上的曝光、点击数据为样本，以前N天的样本为训练样本，训练至收敛，以后一天的样本为测试样本。</p>
 <p>评价指标：以后一天的样本为测试样本，主要评比在训练集上的AUC，同时也观测在训练集上的AUC等指标。这里的auc gap都是全量线上模型的auc提高。</p>
 <p>效果比较：我们与一些baseline进行比较实验，其中 LSTM with Q/U/P Attention 为DUPN(kdd &lsquo;18)。结果如下表所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/032c119253214d16874030906b6b9ab9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272134118.png" />   
     </p>
 <p>效果分析：这里的auc gap都是在线上收敛版本上的提高。行为序列模型的优化能带来接近0.3%的auc提高；针对不同问题，引入新的序列特征，并进行对应的建模优化，带来接近0.7%的auc提高。</p>
 <h3 id="1-中短周期序列"><strong>1. 中短周期序列</strong></h3>
 <p>Attention Weight分析：我们在tensorboard中，打印出Atten Map，方格(i, j)表示第i个商品，对第j个商品的atten权重。我们可以观察到以下现象：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/51eb99dd89ef42f6ba5c10b6fbd042c9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272134999.webp" />   
     </p>
 <p>如图所示，方格颜色越浅，表示权重越大，训练的开始并不能体现self atten能够捕获商品序列内部关联的作用，仅仅学到了一些行为信息，即前面的商品（最近行为的商品）重要。随着训练的进行，商品之间的关联性逐渐体现，直接表现为对角线附近权重变大。最终呈现的是同时受到商品关联性和行为信息影响的attention map图。另外，对于atten pooling层，我们监测序列在各个位置上的权重信息，整体看来，商品序列位置从近到远，依次递减，符合预期。</p>
 <p>Self Atten的作用：我们尝试去掉Self Atten层，对seq直接做Atten Pooling，AUC绝对值稳定降0.001。我们理解Self Atten，从两个方面：1. 如一般的解释，它确实对商品序列内部的依赖关系进行了建模，使得商品表达更为准确；2. 在Self Atten过程中，用户最近行为的商品，作为用户意图最贴近的表示，作为Key，对整个序列进行了Atten，其得到的向量成为了在最后Atten Pooling中占比成份最大的信息。</p>
@@ -444,6 +444,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -477,10 +481,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -859,6 +859,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

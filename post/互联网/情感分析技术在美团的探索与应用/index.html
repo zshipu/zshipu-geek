@@ -221,19 +221,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>移动互联网的发展和普及已达到空前规模，亿万用户在互联网上可以获得信息、交流信息，发表自己的观点和分享自己的体验，表达各种情感和情绪，如批评、赞扬以及喜、怒、哀、乐等。作为国内领先的生活服务电子商务平台，美团连接起了百万商户和数亿用户，积累了数十亿真实用户评论。用户评论不仅为消费者选店决策提供了参考，也是商家获取消费者反馈的重要渠道。对用户评论进行情感分析可以帮助美团深入理解商家服务水平和用户偏好，为改进平台服务与获取优质内容提供了最直观的反馈，同时也在美团搜索、个性化推荐、商业智能、内容安全等十多个业务场景中有着广泛的应用。</p>
 <p>以大众点评App为例，用户既可以发表对商家的星级打分（一星到五星），也可以对商家服务或产品发表详细评论。我们对大众点评商户近半年的评论进行了统计分析，用户情感倾向在不同星级商家中的分布如图1所示，商家整体星级打分反映出用户对该商家的整体情感倾向，但同时我们发现高星商户的评论中存在大量负向的情感内容，低星商户的评论中也存在不少正向情感内容。原因在于用户评论中存在大量星级评分与对应评论情感倾向不一致的情况，如图2中展示的两条用户评论，高星级评论中存在负向情感的内容，低星级评论中也存在正向情感的内容。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5ef7a6c4ad644fe989b8eeb27480dd15.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271919743.webp" />   
     </p>
 <p>图1 评论情感倾向在不同星级商家中的分布
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5dad7abd267547719707ca8688a63407.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271920447.webp" />   
     </p>
 <p>图2 用户星级评分与评论情感倾向不一致图3展示了大众点评App上一家「五星级」咖啡厅，用户对口味、环境、服务各项评分都很高。我们对其所有用户评论分析后发现好评主要集中在口味、服务、性价比等属性，但也有不少用户抱怨说咖啡厅的位置难找，不好停车，座位比较拥挤，空间小等。整体星级评分并不能全面体现用户对商家的真实评价。因此，除了对用户评论内容进行整体情感判断外，我们还需要对用户评论进行更细粒度的情感分析，这样才能精准地挖掘用户对商家的反馈，进而改善商家服务，提升用户体验。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c7db57ea6fc64755991c56969295068d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271920165.webp" />   
     </p>
 <p>图3 商家详情页2021年5月，美团NLP中心开源了迄今规模最大的基于真实场景的 <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2FMeituan-Dianping%2Fasap">中文属性级情感分析数据集ASAP</a>[1]，该数据集相关论文[2]被自然语言处理顶会NAACL2021录用，同时该数据集加入中文开源数据计划千言[3]，将与其他开源数据集一起推动中文信息处理技术的进步。借此机会，本文回顾了美团情感分析技术的演进和在典型业务场景中的应用，整体技术框架如下图4所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cfe4375322634e0cb795ec343c64d299.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271920125.webp" />   
     </p>
 <p>图4 美团情感分析整体技术框图</p>
 <h2 id="情感分析介绍">情感分析介绍</h2>
@@ -245,34 +245,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>篇章/句子级情感分析即给定一段文本，通过模型给出该文本整体的情感强度或情感倾向。根据模型输出类型划分，主要分为回归方案和分类方案，其中回归方案的输出为连续的情感强度[0～1]（趋向0代表负向程度，趋向1代表正向程度），分类方案的输出为离散的情感倾向（正向、负向、中立）三分类。调研多个业务场景对情感分析的需求，同时考虑模型在应用中的通用性和灵活性，我们最终采用了回归模型方案。为了建立精准的情感分析能力，在数据标注时我们将情感强度划分为离散的七档评分——[非常负向, 负向, 轻微负向, 中性, 轻微正向, 正向, 强烈正向] ，并采用Min-Max Normalization将标注Label归一化到[0～1]。</p>
 <p>在这个任务上，业界主流技术方案主要有TextCNN[8]、Att-BLSTM[9]以及BERT[10]为代表的预训练模型。其中Att-BLSTM提出利用注意力机制获取句子中最重要的信息，且在学习长距离语义上优于TextCNN，因此第一版模型框架采用了图5所示的Att-BLSTM方案。2018年以来，以BERT（可参阅《 <a href="https://zshipu.com/t?url=http%3A%2F%2Fmp.weixin.qq.com%2Fs%3F__biz%3DMjM5NjQ5MTI5OA%3D%3D%26mid%3D2651750945%26idx%3D1%26sn%3D713f16c46065db1f831a495ffb1d9a78%26chksm%3Dbd125b6c8a65d27adb13bb234f027d619950a979259ae1c035427c4c025c95e26d7485194232%26scene%3D21%23wechat_redirect">美团BERT的探索和实践</a>》一文）为代表的预训练模型在多项NLP任务中取得巨大进展，BERT在特征抽取上具有较强优势，如浅层的句法特征以及深层的语义特征。基于上述考虑，我们用自研MT-BERT[11]模型对Att-BLSTM架构中的编码器进行升级，并在多个业务评测上取得了显著效果提升，部分实验结果见下图6。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2ed2eaa2f299447db6a1d96b23cd3ab6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271920872.webp" />   
     </p>
 <p>图5 篇章/句子级情感分析模型架构</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f01e341ee8d54d9aa3bfef72b4883d2b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271920671.webp" />   
      图6 篇章/句子级情感分析模型迭代效果指标</p>
 <p>篇章/句子级情感分析在美团业务中有着广泛应用，如广告和推荐业务中的文本安全管控和商家运营情感监测等。如图7(a)所示，美团App和大众点评App首页信息流文案大部分抽取自用户真实评论，需要从内容供给上严格控制文本质量，通过句子级情感分析对供给内容中的负向内容进行过滤，提升终端用户体验。此外，在商业智能场景中，句子级情感分析还可以帮助商家优化运营策略，如图7(b)所示，美团商业大脑通过情感分析能力，可以监控用户对商家评价的情感曲线以及评论情感占比等指标，从而来改善商家的运营。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9bfc2d6248e24901a11a0592f5073cc6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271920302.webp" />   
     </p>
 <p>图7 篇章/句子级情感分析在美团业务场景的应用</p>
 <h2 id="属性级情感分析及应用">属性级情感分析及应用</h2>
 <p>篇章/句子级情感分析只是针对文本整体表达或蕴含的情感倾向分析，无法获取针对评价观点对象（属性）上的情感倾向。为了得到更细粒度的情感分析结果，我们需要针对美团业务场景构建属性级情感分析能力，即给定一段文本，通过模型给出该文本在指定属性上的情感倾向。</p>
 <p><strong>数据收集与分析：</strong> 针对大量用户评论进行统计分析，同时参考SemEval数据集[12]，并与业务产品专家沟通美团业务特点后，我们将餐饮业务下的属性设计为菜品、环境、价格、服务、位置，共5类。数据分析中发现美团业务下的用户评论趋于多样化和细粒度化。以该真实用户评论“&hellip;装修看起来很高大上的样子，但是因为主厅在举办婚礼非常混乱，感觉特别吵&hellip;”为例，用户对装修和噪声两个环境细分属性表现出相反情感倾向。因此我们将属性从上述5个类别细分到18个子类别，最终设计为两级属性体系，如下图8所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a0b420cbe307460088f5d1a78f5bf5e7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271920088.webp" />   
      图8 两级属性体系</p>
 <p>为了构建高质量数据集，我们进行了详细数据分析和调研业界标准，最终制定了面向用户评论的属性级情感分析标注规则。对于每条评论，标注人员需要先判断预定义的属性是否在该评论中被提及，再判断被提及属性上的情感倾向。因此。对于每个属性共有4种标签——[未提及, 负向, 中立, 正向]。</p>
 <p>我们对ASAP数据集中属性及其对应的情感倾向分布做了统计，如下图9所示。本次标注主要面向餐饮商家下的用户评论，所以94.7%的评论都提及菜品口味这一属性。除此之外，用户们还比较关心服务人员态度、价格水平、装修情况等属性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a2d182a85060459e80bcc823f7f9a09d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271920714.webp" />   
     </p>
 <p>图9 ASAP数据集中属性以及对应的情感倾向分布</p>
 <p>与属性级情感分析开源数据集SemEval RESTAURANT[13]相比，ASAP在数据量上远远超出，可以支撑深度神经网络模型的探索。相对于单句级别的RESTAURANT，包含多子句评论级别的ASAP具有更长的平均长度，因此往往包含更丰富的属性信息。在ASAP数据集中平均每条评论包含5.8个属性，是RESTAURANT数据集的4.7倍，相对于RESTAURANT数据集具有更大的挑战性。</p>
 <p><strong>属性级情感分析多任务学习框架：</strong> 在该类问题上，业界主流技术方案根据模型结构不同可以分为两种，分别为基于非预训练模型的方案和基于预训练模型的方案。基于非预训练模型的方案中，Att-BLSTM[9]需要为每个属性单独训练一个模型，无论模型训练还是模型应用都比较复杂；ATAE-LSTM[14]通过属性向量（Aspect Embedding）引入属性信息，同时提出基于注意力（Attention）机制让模型聚焦到对应的属性相关信息上来提升模型准确率；CapsNet[15]可以用于ABSA任务中学习属性（Aspect）和文本（评论）之间关系。基于预训练模型的方案中，QA-BERT[16]将ABSA任务转化为问答形式的句间分类任务，每个属性都和文本构成句对作为输入，实际应用中属性数量较多时，计算量较大；CapsNet-BERT[17]在CapsNet方案的基础上将语义编码层（Encoder）从Bi-GRU升级为BERT。上述模型都只考虑了属性与文本的关系，把每个属性都单独处理，没有考虑不同属性间的关系。</p>
 <p>通过数据分析部分可知，ASAP数据集在不同属性上的分布非常不均衡，这会导致模型训练时数据量小的属性上更容易出现过拟合，不同属性上的情感倾向表达有共性同时也有各自特定的表达方式。模型设计时需要结合业务数据特点同时兼顾计算效率，最终我们采用了多任务学习框架来兼顾属性间关系，同时处理一条评论的多个属性，模型整体设计为两层，分别为共享层和任务相关层，如下表所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7b94abd2971f42a8b9fc5f156a2dee19.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271920446.webp" />   
     </p>
 <p>图10 美团属性级情感分析模型架构</p>
 <p>共享层为语义编码层（Encoder），目标是学习文本在不同属性上的上下文深度语义表征。通过参数共享实现知识的迁移可缓解数据不均衡带来的问题，同时对新增属性的扩展具有较好的兼容性。</p>
@@ -280,30 +280,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>其中，H={h_1, h_2, &hellip;, h_Z}为评论R={w_1, w_2,&hellip;, w_Z}经过语义编码层（Encoder）编码后得到的向量，Ζ代表评论的长度。</p>
 <p>任务相关层包括注意力层和分类层，注意力层设计上我们借鉴了ATAE-LSTM中注意力池化的方法，让模型可以聚焦到整条评论中和指定属性最相关的句子或者片段，减少其他属性等无关信息的干扰，提升该属性上的情感倾向判断准确率。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/10/image-557260b5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271920087.png" />   
     </p>
 <p>其中，α_i是注意力权重向量，对句子中不同重要程度的词语给予不同的权重。r_i是评论针对第i个属性经过注意力池化后得到的加权表征。</p>
 <p>最后模型经过Softmax分类器，</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/64efeedbb0b34f3ca688d0b635997cb9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271920965.png" />   
     </p>
 <p>对于给定的评论R属性级情感分析的损失如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/10/image-18d27b65.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271920735.png" />   
     </p>
 <p>其中，N为属性（Aspect）数量，C是分类类别数。</p>
 <p>随着预训练语言模型技术的快速发展，结合团队自研的预训练模型MT-BERT不断迭代，我们在上述多任务框架的基础上，对参数共享层的语义编码（Encoder）部分做了持续的迭代，由最初的Bi-GRU到Google-BERT-Base，再到MT-BERT-Base，以及目前的MT-BERT-Large，模型在Benchmark上的指标得到了进一步的提升，如下图11所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2e9d15a4acd9482e8fba46c3bc5505ff.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271920556.webp" />   
      图11 美团属性级情感分析模型迭代指标</p>
 <p><strong>典型应用：</strong> 属性级情感分析在美团业务中有非常多的应用场景，如精选点评、个性化推荐、智能搜索、商家运营等。大众点评App的精选点评模块是属性级情感分析的典型应用场景之一，如图12所示。精选点评模块作为点评App用户查看高质量评论的入口，其中精选点评标签承载着内容结构化聚合的作用，支撑着用户高效查找目标评论内容的需求。鉴于属性级情感分析能够挖掘用户评论在不同属性上表达的情感倾向，根据其构建的属性级情感标签能够较好的帮助用户筛选查看，同时外露更多的商家信息，帮助用户高效的从评论中获取消费指南。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0dbf317100b546d9a941079de47d554a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271920192.webp" />   
     </p>
 <p>图12 大众点评精选点评模块产品形态</p>
 <p>美团商业大脑运营分析是属性级情感分析在美团商业智能典型应用场景，如下图13所示。美团商业大脑是美团搭建起的面对生活服务业商家提供大数据分析决策支持的知识图谱平台，通过细致刻画商家服务现状、商家竞争力分析，以及商圈洞察等方式，为商户提供精细化经营建议。美团商业大脑通过对用户评论进行全方属性级情感分析与归纳总结，从而可以发现商家在市场上的竞争优势/劣势、用户对于商家的总体印象趋势、商家菜品的受欢迎程度变化，并对商家提供前瞻性经营方向，智能化指导商家精准优化经营模式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cfd2a74351854849b60710955db2bd26.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271920956.webp" />   
     </p>
 <p>图13 美团商业大脑商家运营分析</p>
 <h2 id="观点三元组分析及应用">观点三元组分析及应用</h2>
@@ -311,26 +311,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在学术界，最新的一些工作MTL[7]和GTS[18]等提出了多任务学习的解决方案。结合美团业务特点同时兼顾计算效率的考虑，最终我们选择了多任务学习的方案，模型架构如图14所示。模型整体由四部分组成：Pretrained Language Model、Aspect Tagger、Opinion Tagger、Sentiment Parser，其中Pretrained Language Model为基于预训练语言模型的编码器，兼容BERT、RoBERTa[19]、ELECTRA[20]等主流预训练模型，Aspect Tagger执行属性序列标注任务，Opinion Tagger执行观点描述序列标注任务，Sentiment Parser执行属性与观点描述关系依赖及其情感分析解析任务，主要为一个Biaffine Scorer[21]。</p>
 <p>如图14中的例子所示，Aspect Tagger将“虾滑”和“墨鱼滑”这两个属性抽取出来，而Opinion Tagger则对应地将“很不错”和“并不新鲜”这两个观点描述抽取出来，Sentiment Parser给出句子中的所有字之间的情感依赖关系（即正向、负向、中立、无关）四分类。我们利用抽取出来的属性和观点描述在所有字之间的情感依赖关系上进行索引和记录，最终可以得到“虾滑”和“很不错”之间的2 <em>3=6个情感依赖关系中最多的关系为正向情感，而“虾滑”和“并不新鲜”之间的2</em> 4=8个情感依赖关系中最多的关系为无关。类似地，我们可以推断出“墨鱼滑”和”并不新鲜“之间的关系为负向情感。模型训练时，模型整体对三个子任务损失进行联合优化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f51ef23cb08b416184d30e27c39f3879.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271920770.webp" />   
     </p>
 <p>图14 观点三元组抽取多任务学习模型架构</p>
 <p>此外，我们对Pretrained Language Model模块进行了优化，由最初的Google BERT-Base，到自研MT-BERT-Base，再到目前的MT-BERT-Large，模型在Benchmark上的指标得到了进一步的提升，如下图15所示。由于观点三元组分析既包括分类任务也包括抽取任务，评价指标上我们采用了EM-F1和Fuzzy-F1，其中EM-F1需要任意两个观点三元组（属性，观点描述，情感）中三个元素全部正确整体才算一次命中，Fuzzy-F1会考虑抽取片段的重合度（包括属性和观点描述），EM-F1比Fuzzy-F1更加严格。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/48ddac4f15d5443ca7326f3a6c5c9e13.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271920695.webp" />   
      图15 观点三元组抽取模型指标迭代</p>
 <p>通过观点三元组分析技术可以构建基于属性的情感观点知识库，其中每个属性（商品或服务）节点都会被一个或多个带情感依赖的观点描述指向，如下图16所示。通过【属性+正向观点】的模板方法可以构造推荐文案，例如&quot;酸汤鱼片：酸酸甜甜，妙不可言&quot;，可以用于美团App和大众点评App首页推荐或广告文案场景，同时可以根据用户对属性（商品或服务）的偏好，展示个性化推荐文案，帮助用户更加高效的获取信息。同时这些基于属性（商品或服务）的情感观点信息可以帮助商家更加精细化的运营。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/66f5475ebac74817aea23f1d52c6ad1d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271920328.webp" />   
     </p>
 <p>图16 基于属性（商品或服务）的情感观点知识库样例展示</p>
 <p>情感分析服务化</p>
 <p>很多美团业务场景对情感分析有迫切需求，例如推荐理由、Feeds内容、广告文案、精选评价标签、商家运营、对话系统等场景都需要识别文本在整体或属性上的情感倾向。针对美团业务特点我们构建了在线实时预测服务和离线批量预测服务。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1ef73dd63b414141b0f6d29adb4fdf99.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271920031.webp" />   
     </p>
 <p>图17 在线实时预测</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3a9e74cccac549da9415d1436826be56.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271920734.webp" />   
     </p>
 <p>图18 离线批量预测</p>
 <p>在线实时预测服务主要针对需要实时计算的场景，如对话系统需要实时识别用户对话内容的情感倾向，提供Thrift接口调用方式，方便美团内部业务服务调用；离线批量预测服务主要针对需要离线批量计算的场景，如每日新生产的Feeds内容需要批量进行情感分析后才能进入线上内容供给池。我们依托于美团机器学习平台MLP搭建了情感分析离线计算服务，业务使用方仅需要简单的配置输入/输出数据表以及计算队列即可便捷调用，同时该服务支持了定时调度，可以便捷接入到业务方整体的调度流程中。目前，情感分析服务已经为美团内部十多个业务场景提供了服务。</p>
@@ -496,6 +496,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -529,10 +533,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -911,6 +911,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

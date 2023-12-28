@@ -215,7 +215,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/edb44c4ab7ac46c3bb80337dd1f70a2b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271919342.webp" />   
     </p>
 <blockquote>
 <p>烛衡 阿里云开发者</p>
@@ -224,7 +224,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>和架构选型类似，每引入一个组件，都会导致复杂度的上升。以缓存为例，它带来性能提升的同时，也带来一些问题，需要开发者设计和权衡。</p>
 <p>本文的思维脉络如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3957a23a5ebb45c28c9f587f30dca876.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271919348.webp" />   
     </p>
 <h2 id="一-缓存和多级缓存"><strong>一 缓存和多级缓存</strong></h2>
 <h3 id="1-缓存的引入">1 缓存的引入</h3>
@@ -232,7 +232,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>经过一段时间发展后，业务量迎来了大规模增长，此时DB查询压力和耗时都在增长。此时引入分布式缓存，在减少DB压力的同时，还提供了更高的QPS。</p>
 <p>再往后发展，分布式缓存也成为了瓶颈，高频的QPS是一笔负担;另外缓存驱逐以及网络抖动会影响系统的稳定性，此时引入本地缓存，可以减轻分布式缓存的压力，并减少网络以及序列化开销。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2d5e797e80fb4472bd34b293a91ad82b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271919207.webp" />   
     </p>
 <h3 id="2-读写的性能提升">2 读写的性能提升</h3>
 <p>缓存通过减少IO操作来获得读写的性能提升。有一个表格，可以看见磁盘、网络的IO操作耗时，远高于内存存取。</p>
@@ -241,7 +241,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>写优化：将写操作在缓冲中合并，让IO设备可以批量处理，减小写的成本。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e7d9adba2963433483d4acccdbaef32f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271919878.webp" />   
     </p>
 <p>缓存带来的QPS、RT提升比较直观，不补充介绍。</p>
 <h3 id="3-缓存miss">3 缓存Miss</h3>
@@ -252,7 +252,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>当然严格LRU实现的优化空间还是有的，YY一下，可以通过活跃度分离出活跃Key和待回收Key， 淘汰时只关注待回收key即可;回收算法引入链表或者树的结构，使Key按空闲时间有序，淘汰时直接获取。然而这些优化不可避免的是，在缓存读写时，这些辅助的数据结构需要同步更新，带来的存储以及计算的成本很高。</p>
 <p>在Redis中它采用了近似LRU的实现，它随机采样5个Key，淘汰掉其中空闲时间最长的那个。近似LRU实现起来更简单、成本更低，在效果上接近严格LRU。它的缺点是存在一定的几率淘汰掉最近被访问的Key，即在TTL到期前也可能被淘汰。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a0ce1fa4cf1f4726ab421ccca92602ed.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271919596.webp" />   
     </p>
 <p><strong>避免短期大量失效</strong></p>
 <p>在一些场景中，程序是批量加载数据到缓存的， 比如通过Excel上传数据，系统解析后，批量写入DB和缓存。此时若不经设计，这批数据的超时时间往往是一致的。缓存到期后，本该缓存承担的流量将打到DB上，从而降低接口甚至系统的性能和稳定性。</p>
@@ -263,7 +263,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>缓存设计模式</strong></p>
 <p>业务系统通常使用cache aside 模式，操作系统、数据库、分布式缓存等会使用write throgh、write back。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/530ab8df7b934b73863b1521a52e9372.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271919341.webp" />   
     </p>
 <p><strong>cache aside的缓存不一致</strong></p>
 <p>Cache aside模式大部分时间运行良好，在一些极端场景下，仍可能出现不一致风险。主要来自两方面：</p>
@@ -274,7 +274,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>缓存失效失败很容易理解，不做补充。主要介绍时序引起的不一致问题。</p>
 <p>考虑这样的时间轴，A线程发现cache miss后重新加载缓存，此时读的数据还是老的， 另一个线程B更新数据并失效缓存。若B线程失效缓存的操作完成时间早于A线程，A线程会写入老的数据。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fa80093a4b2e441babde01af7d264cc6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271919972.webp" />   
     </p>
 <p>缓存不一致有一些缓解方法，例如延迟双删、CDC同步。这些方案都提升了系统复杂度，需综合考虑业务的容忍度，方案的复杂度等。</p>
 <ul>
@@ -293,21 +293,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>如何快速找到一个空闲块、如何减少内存碎片、如何快速回收等等，它是一个系统性的问题，也有很多专门的算法。</p>
 <p>Jemalloc是综合能力较好的算法，free BSD、Redis默认采用了该算法，OHC缓存也建议服务器配置该算法。Netty的作者实现了Java版本，感兴趣的可以阅读。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b59415e4d6cb4be0aa4f8bcfd43e75a0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271919551.webp" />   
     </p>
 <h2 id="三-cpu缓存"><strong>三 CPU缓存</strong></h2>
 <p>利用上分布式缓存、本地缓存之后，还可以继续提升的就是CPU缓存了。它虽不易察觉，但在高并发下对性能存在一定的影响。</p>
 <p>CPU缓存分为L1、L2、L3 三级，越靠近CPU的，容量越小，命中率越高。当L3等级的缓存都取不到数据的时候，需从主存中获取。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5e537269f6874c93bd9634b0038a4a5d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271919176.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/32497ae3acb0490387ca0685c72e153d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271919792.webp" />   
     </p>
 <h3 id="1-cpu-cache-line">1 CPU cache line</h3>
 <p>CPU缓存由cache line组成，每一个cache line为64字节，能容纳8个long值。在CPU从主存获取数据时，以cache line为单位加载，于是相邻的数据会一并加载到缓存中。很容易想到，数组的顺序遍历、相邻数据的计算是非常高效的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/31262c4396f44b39a2cc520e70e2248a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271919382.webp" />   
     </p>
 <h3 id="2-伪共享-false-sharing">2 伪共享 false sharing</h3>
 <p>CPU缓存也存在一致性问题，它通过MESI协议、MESIF�</p>
@@ -434,6 +434,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -467,10 +471,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -849,6 +849,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

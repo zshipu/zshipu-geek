@@ -224,7 +224,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>从知乎 <a href="https://zshipu.com/t?url=https%3A%2F%2Fzhuanlan.zhihu.com%2Fp%2F29053940">https://zhuanlan.zhihu.com/p/29053940</a> 上看到了一个关于CTR的流程，如下图所示：</p>
 <h2 id="heading"></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b09f3a614bbf496188dd39a4cf03efbb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281635491.png" />   
     </p>
 <p>如上图，主要包括两大部分：离线部分、在线部分，其中离线部分目标主要是训练出可用模型，而在线部分则考虑模型上线后，性能可能随时间而出现下降，弱出现这种情况，可选择使用Online-Learning来在线更新模型：</p>
 <h4 id="21-离线部分">2.1 离线部分</h4>
@@ -252,16 +252,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>这里的思想与One-hot独热编码类似，事实上，在用GBDT构造新的训练数据时，采用的也正是One-hot方法。并且由于每一弱分类器有且只有一个叶子节点输出预测结果，所以在一个具有n个弱分类器、共计m个叶子结点的GBDT中，每一条训练数据都会被转换为1*m维稀疏向量，且有n个元素为1，其余m-n 个元素全为0。</p>
 <p><strong>3.3</strong> 新的训练数据构造完成后，下一步就要与原始的训练数据中的label(输出)数据一并输入到Logistic Regression分类器中进行最终分类器的训练。思考一下，在对原始数据进行GBDT提取为新的数据这一操作之后，数据不仅变得稀疏，而且由于弱分类器个数，叶子结点个数的影响，可能会导致新的训练数据特征维度过大的问题，因此，在Logistic Regression这一层中，可使用正则化来减少过拟合的风险，在Facebook的论文中采用的是L1正则化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3adc5bb193ca4c02b43885cd2500a757.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281635133.png" />   
     </p>
 <h2 id="4-rf--lr--xgb--lr">4. RF + LR ? Xgb + LR?</h2>
 <p>有心的同学应该会思考一个问题，既然GBDT可以做新训练样本的构造，那么其它基于树的模型，例如Random Forest以及Xgboost等是并不是也可以按类似的方式来构造新的训练样本呢？没错，所有这些基于树的模型都可以和Logistic Regression分类器组合。至于效果孰优孰劣，我个人觉得效果都还可以，但是之间没有可比性，因为超参数的不同会对模型评估产生较大的影响。下图是RF+LR、GBT+LR、Xgb、LR、Xgb+LR 模型效果对比图，然而这只能做个参考，因为模型超参数的值的选择这一前提条件都各不相同。</p>
 <p>顺便来讲，RF也是多棵树，但从效果上有实践证明不如GBDT。且GBDT前面的树，特征分裂主要体现对多数样本有区分度的特征；后面的树，主要体现的是经过前N颗树，残差仍然较大的少数样本。优先选用在整体上有区分度的特征，再选用针对少数样本有区分度的特征，思路更加合理，这应该也是用GBDT的原因。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0c5d6ad1305d4d36acd97cddeff5dc04.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281635330.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/82967d38d8324961b143483226cb7154.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281635345.png" />   
     </p>
 <h2 id="5-gbdt--lr-代码分析">5. GBDT + LR 代码分析</h2>
 <p>在网上找到了两个版本的GBDT+LR的代码实现，通过阅读分析，认为里面有一些细节还是值得好好学习一番的，所以接下来这一小节会针对代码实现部分做一些总结。</p>
@@ -506,6 +506,10 @@ for i in range(0, len(y_pred)):
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -539,10 +543,6 @@ for i in range(0, len(y_pred)):
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -921,6 +921,8 @@ for i in range(0, len(y_pred)):
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

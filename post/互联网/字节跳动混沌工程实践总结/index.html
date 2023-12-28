@@ -254,7 +254,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>第一代可以认为是古早时期，此时字节跳动内部有使用一套容灾演练平台，作为内部故障平台，架构如下：</p>
 <p>容灾演练平台架构图:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/66b656cc40114d11b830cd19f037c602.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819727.png" />   
     </p>
 <p>该平台主要目标是解决故障注入问题，同时提供了基于阈值的简单指标分析与自动停止。故障主要为通过网络干扰模拟下游依赖故障，此阶段帮助部分业务实现了生产环境的部分容灾演练。</p>
 <p>但是该平台存在这样的情况：在故障注入方面，由于早期设计着眼于网络故障，因而其架构与模型不方便扩展至其他故障形态。缺少明确、统一的故障域描述，也因此对于爆炸半径缺乏清晰的描述。另外该平台指标分析比较简单，在实践活动方面也只是以单纯制造故障为主。于是我们开始引入混沌工程理论，重新打造全新混沌工程平台。</p>
@@ -269,7 +269,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>整体设计如下：</p>
 <p>初步阶段整体设计:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/abed78fffa04401d83d71e8df2176d09.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819747.png" />   
     </p>
 <p>其中用户自演练平台无需关心故障实现与故障状态维护，着眼于 chaos 实验计划的管理与编排。所有故障相关实现下沉至故障中心，而平台层只需将任务发给故障中心即可。</p>
 <p>故障中心抽象了故障模型，并提供了一套声明式接口，负责对故障声明进行转化计算，确定发生故障的容器、物理机 或者 中间件，自动化安装 agent 并下发指令。可实现精准控制故障，维护故障状态。</p>
@@ -280,7 +280,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>故我们以某个微服务作为观察目标展开故障的定义。故障模型如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="http://img.6aiq.com/image-d207b2697a2e4b8dbf52667531a975d4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819827.png" />   
     </p>
 <p>故障模型</p>
 <ul>
@@ -308,7 +308,7 @@ spec. //服务application B 的 cluster2集群所依赖的下游application C突
 <p>我们在以上故障模型基础上设计了一套声明式接口。当注入某一故障时，只需按上述模型添加故障声明即生效；若想终止故障，只需删除该声明。</p>
 <p>故障中心在收到上述类似声明后，便开始向内部研发体系平台寻找符合条件的实例，并自动安装故障 agent，通过将相关指令下发给 agent，实现故障注入的目的。故障中心适当借鉴了 Kubernetes 的架构设计与理念，其架构设计如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="http://img.6aiq.com/image-3f156fd2b18246f68faafbb7ee222f8e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819806.png" />   
     </p>
 <p>故障中心架构图</p>
 <p>故障中心由三个核心组件 API Server, Scheduler, Controller，外加一个核心存储 etcd 组成。其中 <strong>API Server</strong> 负责包装 etcd 并对外提供声明式接口； <strong>Scheduler</strong> 则负责将故障声明解析，并根据声明持续寻找 Target 对应的实例，以及 Dependency 对应的下游实例/中间件/物理设备；在这之后， <strong>Controller</strong> 将 action 故障解析为可执行指令，下发至对应实例的 agent，或者调用对应中间件的 API，达到精准的故障注入。</p>
@@ -402,7 +402,7 @@ spec. //服务application B 的 cluster2集群所依赖的下游application C突
 <p>基于以上目的，整体设计如下：</p>
 <p>成熟阶段系统设计:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/729816a494e0466598dc4877daf6430e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819831.png" />   
     </p>
 <p>在原子能力层，添加自动化指标观察能力。通过引入机器学习，我们做到了基于指标历史规律的无阈值异常检测。</p>
 <p>在平台层，添加自动化强弱依赖梳理，与红蓝对抗模块。</p>
@@ -436,26 +436,26 @@ spec. //服务application B 的 cluster2集群所依赖的下游application C突
 <h4 id="流程设计">流程设计</h4>
 <p>在开启红蓝对抗之前，红蓝双方的沟通特别关键。红军(即防守方)需要进行诸多决策，比如评估有信心参与对抗的服务与范围，比如评估近期业务迭代节奏，权衡业务迭代与稳定性建设。我们遵循如下流程进行实践对抗前的活动正在完成平台化沉淀：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dcb8d79ce1e64c87b392e95c13b0d259.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819770.png" />   
     </p>
 <p>红蓝对抗一旦开启后，主要操作将由蓝方主导，除非发生预期外情况（这一般也意味着防守失败）或者需要操作预案开关，否则红方在此过程中，基本处于 stand by 状态。主要流程如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/10d085e4674f465a979a4ee042f7443c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819871.png" />   
     </p>
 <p>在对抗结束后的复盘回顾是关键环节，通过将红蓝对抗过程中所记录的数据汇总。可清晰地看到对抗整体效果，一目了然地了解此次计划中目标业务系统的稳定性建设情况。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b36cec2f615a4b948b0c0692383b77a5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819846.png" />   
     </p>
 <p>另外，我们将过程中发现的问题汇总记录，并保留对抗时候的完整记录。这使得发现问题可追踪，剖析问题有现场。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7b313baa76e54697855cb8cbe577bb37.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819399.png" />   
     </p>
 <h3 id="强弱依赖自动化梳理实践">强弱依赖自动化梳理实践</h3>
 <p>服务的强弱依赖信息对于服务治理，容灾体系的设计都至关重要，而强弱依赖的真实情况只能在故障发生时才能得到验证。故我们开启了强弱依赖的验证工作，并随着实践打磨，不断提高强弱依赖梳理的自动化程度。在通过引入机器学习帮助我们进行无阈值指标异常检测之后，强弱依赖梳理过程已基本实现全自动化。</p>
 <p>目前强弱依赖梳理已基本覆盖抖音与火山的核心场景，为其服务治理与容灾体系设计都提供了巨大的输入。</p>
 <p>强弱依赖自动化梳理的整体流程如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/54540cb9b2e54f538576e7bc6ea44f24.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271819668.png" />   
     </p>
 <h3 id="总结-1">总结</h3>
 <p>在该阶段，我们补齐了指标分析能力，通过引入机器学习，很大程度降低了指标分析成本。</p>
@@ -625,6 +625,10 @@ spec. //服务application B 的 cluster2集群所依赖的下游application C突
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -658,10 +662,6 @@ spec. //服务application B 的 cluster2集群所依赖的下游application C突
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1040,6 +1040,8 @@ spec. //服务application B 的 cluster2集群所依赖的下游application C突
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

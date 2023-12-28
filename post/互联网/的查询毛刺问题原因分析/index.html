@@ -221,7 +221,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h5 id="查询过程需要实时读取哪些文件">查询过程需要实时读取哪些文件</h5>
 <p>es 中的查询是一个复杂的过程，不同的查询类型需要访问不同的 lucene 文件，我将常见类型的查询可能访问的文件整理如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c355476848ac4b9cb7f590a6d97d2c9f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281606539.webp" />   
     </p>
 <p>真正查询过程中，并非所有文件都会实时读取，有些文件已经在 open 索引的时候读取完毕常驻内存，有些元信息文件也是在 open 的时候解析一次。为了验证搜索过程实际访问的文件与预期是否一致，我写了一个 systemtap 脚本来 hook 系统调用的 read 及 pread 函数，并把调用情况打印出来，验证过程样本数据使用 geonames 索引，为了便于演示，将索引 forcemerge 为单个分段，并将 store 设置为 niofs。</p>
 <p><strong>仅查询，不取回</strong></p>
@@ -238,7 +238,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 }
 </code></pre><p>只需要读取 tim 文件。因为tip 是在内存常驻的，而 size=0的时候只需要返回 hit 数量，es 在实现的时候有一个提前终止的优化，直接从 tim 中取 docFreq 作为 hit，不需要访问 postings list。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/89fa4fdb6d774052b6e69126fbcdc922.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281606397.webp" />   
     </p>
 <p>但是当查询含有 post_filter ，自定义的terminate_after等情况时，不会走提前终止的优化过程。再者就是类似如下的多个查询条件时，lucene 需要对每个字段的查询结果做交并集，这就需要拿到 postings list才行：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">_search?size=0
@@ -252,7 +252,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 }
 </code></pre><p>因此会读取 .doc 文件：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/18e490eb12924ab1871269728f9a9ca6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281606940.webp" />   
     </p>
 <p>当 size!=0 时，term 查询和 match 查询需要读取的文件不一样，因此下面单独讨论。</p>
 <p><strong>term查询，加取回</strong></p>
@@ -269,7 +269,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 }
 </code></pre><p>因此，需要相比仅查询的过程，还需要多访问 fdt,fdx文件。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/29467fd1168c47f29976583243738443.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281606861.webp" />   
     </p>
 <p><strong>match查询，加取回</strong></p>
 <p>match 查询由于需要计算评分，需要使用 Norms 信息，因此在 term 查询加取回的基础上还要多访问 Norms 文件</p>
@@ -285,7 +285,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 }
 </code></pre><p>需要读取 Norms中的 nvd 文件：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/73b3fd8c9b2747b69eff2a521cc0f8e8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281606890.webp" />   
     </p>
 <p><strong>数值类型查询</strong></p>
 <p>数值类型的字段使用 BKD-tree 建立索引，不会存储到倒排，因此查询过程需要读取 Point Value。取回过程与 term 查询相同。</p>
@@ -302,7 +302,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 }
 </code></pre><p>查询过程只需要读取 dim 文件：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b4fa3c97016a4446858b44d3bf069a0d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281606076.webp" />   
     </p>
 <p><strong>聚合</strong></p>
 <p>对于 metric 和 bucket 聚合，需要访问的文件相同，当 size=0时，只需要读取 dvd 文件。</p>
@@ -316,14 +316,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 }
 </code></pre><p>以下为部分截图，省略了后面的3万多条记录。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b361582992e74c7cb90c24cec8bd795e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281606302.webp" />   
     </p>
 <p><strong>GET API</strong></p>
 <p>使用 GET API获取单条文档时，与 fetch 过程并不相同</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">_doc/IrOMznAB5onF36XmwY4W
 </code></pre><p>以下结果想必会出乎意料：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e9e145de748d44d19f6f59aafca5616f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281606186.webp" />   
     </p>
 <p>￼_id 字段是被建立了索引的。这个 _id 是 es 层面概念，并非 lucene 倒排表里的 docid，因此根据 _id 单条 GET 的时候，需要先执行一次 lucene 查询（termsEnum.seekExact）来获取 lucene 中数字类型的 docid，查询过程自然需要查找 FST，读取 tim。</p>
 <p>然后根据这个 docid 去 stored field 中读取 _source，因此需要读取 fdx,fdt 文件</p>
@@ -332,7 +332,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h5 id="查询需要几次-io">查询需要几次 io？</h5>
 <p>在了解了查询会涉及到动态读取哪些文件之后，我们还需要知道在 io 上需要多大的代价，为了验证实际搜索过程的 io 情况，我们再编写一个新的 systemtap 脚本，将查询过程对每个文件读取的字节数，耗费时间等信息打印出来：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ede9f33f212d451d8a7a86db255d0246.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281606927.webp" />   
     </p>
 <p>为了观测到查询在 io 上的影响，我们需要排除一些干扰因素：</p>
 <p>无 pagecache 的测试：</p>
@@ -347,7 +347,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>此外，系统环境干净，单节点，没有写入操作，没有其他无关进程影响。然后对几种常见类型的查询进行统计，结果如下表：￼</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7fc98a844c2d408d8a89ab301a69b97f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281606794.webp" />   
     </p>
 <p>你可能不想看这种明细表，我来总结一下：多数查询所需的 read 调用次数及需要读取的数据量都不大，但是有两种情况需要较多的 io，因为他们都与数据量有关：</p>
 <ul>
@@ -495,6 +495,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -528,10 +532,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -910,6 +910,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

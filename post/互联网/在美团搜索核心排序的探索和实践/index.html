@@ -228,7 +228,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="bert简介"><strong>BERT简介</strong></h2>
 <p>近年来，以BERT为代表的预训练语言模型在多项 NLP 任务上都获得了不错的效果。下图1简要回顾了预训练语言模型的发展历程。2013年，Google提出的 Word2vec[4]通过神经网络预训练方式来生成词向量（Word Embedding），极大地推动了深度自然语言处理的发展。针对Word2vec生成的固定词向量无法解决多义词的问题，2018年，Allen AI团队提出基于双向LSTM网络的ELMo[5]。ELMo根据上下文语义来生成动态词向量，很好地解决了多义词的问题。2017年底，Google提出了基于自注意力机制的Transformer[6]模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d787ea40a87a4cecb32a7c82a9874c32.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746092.png" />   
     </p>
 <p>图1 NLP预训练发展历程</p>
 <p>相比RNN模型，Transformer语义特征提取能力更强，具备长距离特征捕获能力，且可以并行训练，在机器翻译等NLP任务上效果显著。Open AI团队的GPT[7]使用Transformer替换RNN进行深层单向语言模型预训练，并通过在下游任务上Fine-tuning验证了Pretrain-Finetune范式的有效性。在此基础上，Google BERT引入了MLM（Masked Language Model）及NSP（Next Sentence Prediction，NSP）两个预训练任务，并在更大规模语料上进行预训练，在11项自然语言理解任务上刷新了最好指标。BERT的成功启发了大量后续工作，总结如下：</p>
@@ -270,7 +270,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>排序模型优化</strong>：核心排序模型（本文记为L2模型）包括LambdaDNN[31]、TransformerDNN[3]、MultiTaskDNN等深度学习模型。给定，我们将基于BERT预测的Query-Doc相关性分数作为特征用于L2模型的训练中。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8dc11e430ca64d21b938136f64ed89e6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746013.png" />   
     </p>
 <p>图2 美团搜索核心排序相关性优化技术架构图</p>
 <h2 id="算法探索"><strong>算法探索</strong></h2>
@@ -293,7 +293,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>经过样本去噪和品牌样本优化后，BERT相关性模型在Benchmark上的Accuracy提升23BP，相应地L2排序排序模型离线AUC提升17.2BP。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/19d785c4e03d4fb49a0a17f0575fea41.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746897.png" />   
     </p>
 <p>图3 POI品牌信息优化样本示意图</p>
 <h3 id="模型优化"><strong>模型优化</strong></h3>
@@ -303,29 +303,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>由于美团搜索多模态的特点，在某些情况下，仅根据Query和Doc标题文本信息很难准确判断两者之间的语义相关性。如&lt;考研班，虹蝶教育&gt;，Query和Doc标题文本相关性不高，但是“虹蝶教育”三级品类信息分别是“教育-升学辅导-考研”，引入相关图谱信息有助于提高模型效果，我们首先基于品类信息做了尝试。</p>
 <p>在相关性判别任务中，BERT模型的输入是对。对于每一个输入的Token，它的表征由其对应的词向量（Token Embedding）、片段向量（Segment Embedding）和位置向量（Position Embedding）相加产生。为了引入Doc品类信息，我们将Doc三级品类信息拼接到Doc标题之后，然后跟Query进行相关性判断，如图4所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0d5157c5398e4b41b9a10ceb1fe2f4de.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746128.png" />   
      图4 BERT输入部分加入Doc（POI）品类信息对于模型输入部分，我们将Query、Doc标题、三级类目信息拼接，并用[SEP]分割，区分3种不同来源信息。对于段向量，原始的BERT只有两种片段编码EA和EB，在引入类目信息的文本信息后，引入额外的片段编码EC。引入额外片段编码的作用是防止额外信息对Query和Doc标题产生交叉干扰。由于我们改变了BERT的输入和输出结构，无法直接基于MT-BERT进行相关性Fine-tuning任务。我们对MT-BERT的预训练方式做了相应改进，BERT预训练的目标之一是NSP（Next Sentence Prediction），在搜索场景中没有上下句的概念，在给定用户的搜索关键词和商户文本信息后，判断用户是否点击来取代NSP任务。</p>
 <p>添加品类信息后，BERT相关性模型在Benchmark上的Accuracy提升56BP，相应地L2排序模型离线AUC提升6.5BP。</p>
 <p><strong>引入实体成分识别的多任务Fine-tuning</strong></p>
 <p>在美团搜索场景中，Query和Doc通常由不同实体成分组成，如美食、酒店、商圈、品牌、地标和团购等。除了文本语义信息，这些实体成分信息对于Query-Doc相关性判断至关重要。如果Query和Doc语义相关，那两者除了文本语义相似外，对应的实体成分也应该相似。例如，Query为“Helens海伦司小酒馆”，Doc为“Helens小酒馆（东鼎购物中心店）”，虽然文本语义不完全匹配，但二者的主要的实体成分相似（主体成分为品牌+POI形式），正确的识别出Query/Doc中的实体成分有助于相关性的判断。微软的MT-DNN[33]已经证明基于预训练模型的多任务Fine-tuning可以提升各项子任务效果。由于BERT Fine-tuning任务也支持命名实体识别（NER）任务，因而我们在Query-Doc相关性判断任务的基础上引入Query和Doc中实体成分识别的辅助任务，通过对两个任务的联合训练来优化最终相关性判别结果，模型结构如下图5所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/78c0e36daa144cd0b1d92c8993e80f3b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746296.png" />   
      图5 实体成分一致性学习模型结构多任务学习模型的损失函数由两部分组成，分别是相关性判断损失函数和命名实体识别损失函数。其中相关性损失函数由[CLS]位的Embedding计算得到，而实体成分识别损失函数由每个Token的Embedding计算得到。2种损失函数相加即为最终优化的损失函数。在训练命名实体识别任务时，每个Token的Embedding获得了和自身实体相关的信息，从而提升了相关性任务的效果。</p>
 <p>引入实体成分识别的多任务Fine-tuning方式后，BERT相关性模型在Benchmark上的Accuracy提升219BP，相应地L2排序模型AUC提升17.8BP。</p>
 <p><strong>Pairwise Fine-tuning</strong></p>
 <p>Query-Doc相关性最终作为特征加入排序模型训练中，因此我们也对Fine-tuning任务的训练目标做了针对性改进。基于BERT的句间关系判断属于二分类任务，本质上是Pointwise训练方式。Pointwise Fine-tuning方法可以学习到很好的全局相关性，但忽略了不同样本之前的偏序关系。如对于同一个Query的两个相关结果DocA和DocB，Pointwise模型只能判断出两者都与Query相关，无法区分DocA和DocB相关性程度。为了使得相关性特征对于排序结果更有区分度，我们借鉴排序学习中Pairwise训练方式来优化BERT Fine-tuning任务。</p>
 <p>Pairwise Fine-tuning任务输入的单条样本为三元组，对于同一Query的多个候选Doc，选择任意一个正例和一个负例组合成三元组作为输入样本。在下游任务中只需要使用少量的Query和Doc相关性的标注数据（有监督训练样本），对BERT模型进行相关性Fine-tuning，产出Query和Doc的相关性特征。Pairwise Fine-tuning的模型结构如下图6所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1df3183857fd433593cf722bf775ff31.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746755.png" />   
      图6 Pairwise Fine-tuning模型结构对于同一Query的候选Doc，选择两个不同标注的Doc，其中相关文档记为Doc+,不相关文档记Doc-。输入层通过Lookup Table 将Query, Doc+以及Doc-的单词转换为 Token 向量，同时会拼接位置向量和片段向量，形成最终输入向量。接着通过BERT模型可以分别得到（Query, Doc+）以及（Query, Doc-）的语义相关性表征，即BERT的CLS位输出。经过Softmax归一化后，可以分别得到（Query, Doc+）和（Query, Doc-）的语义相似度打分。</p>
 <p>对于同一Query的候选Doc，选择两个不同标注的Doc，其中相关文档记为Doc+,不相关文档记Doc-。输入层通过Lookup Table 将Query, Doc+以及Doc-的单词转换为 Token 向量，同时会拼接位置向量和片段向量，形成最终输入向量。接着通过BERT模型可以分别得到（Query, Doc+）以及（Query, Doc-）的语义相关性表征，即BERT的CLS位输出。经过Softmax归一化后，可以分别得到（Query, Doc+）和（Query, Doc-）的语义相似度打分。</p>
 <p>Pairwise Fine-tuning除了输入样本上的变化，为了考虑搜索场景下不同样本之间的偏序关系，我们参考RankNet[34]的方式对训练损失函数做了优化。令为同一个Query下相比更相关的概率，其中和分别为和的模型打分，则：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d26a34a822594405a3254d555a6ea6f7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746937.png" />   
     </p>
 <p>使用交叉熵损失函数，令表示样本对的真实标记，当比更相关时（即为正例而为负例），为1，否则为-1，损失函数可以表示为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/128cab246f92422582f6d4a8a1a9641a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746267.png" />   
     </p>
 <p>其中N表示所有在同Query下的Doc对。</p>
 <p>使用Pairwise Fine-tuning方式后，BERT相关性模型在Benchmark上的Accuracy提升925BP，相应地L2排序模型的AUC提升19.5BP。</p>
@@ -333,7 +333,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>前文所述各种优化属于两阶段训练方式，即先训练BERT相关性模型，然后训练L2排序模型。为了将两者深入融合，在排序模型训练中引入更多相关性信息，我们尝试将BERT相关性Fine-tuning任务和排序任务进行端到端的联合训练。</p>
 <p>由于美团搜索涉及多业务场景且不同场景差异较大，对于多场景的搜索排序，每个子场景进行单独优化效果好，但是多个子模型维护成本更高。此外，某些小场景由于训练数据稀疏无法学习到全局的Query和Doc表征。我们设计了基于Partition-model的BERT相关性任务和排序任务的联合训练模型，Partition-model的思想是利用所有数据进行全场景联合训练，同时一定程度上保留每个场景特性，从而解决多业务场景的排序问题，模型结构如下图7所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c78e2d8a95f94138a2fe0ded6581ea8a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746004.png" />   
      图7 联合训练模型结构 <strong>输入层</strong>：模型输入是由文本特征向量、用户行为序列特征向量和其他特征向量3部分组成。</p>
 <ul>
 <li>文本特征向量使用BERT进行抽取，文本特征主要包括Query和POI相关的一些文本（POI名称、品类名称、品牌名称等）。将文本特征送入预训练好的MT-BERT模型，取CLS向量作为文本特征的语义表示。</li>
@@ -355,12 +355,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>在Query意图分类任务[2]中，我们基于MT-BERT裁剪为4层小模型达到了上线要求。意图分类场景下Query长度偏短，语义信息有限，直接裁剪掉几层Transformer结构对模型的语义表征能力不会有太大的影响。在美团搜索的场景下，Query和Doc拼接后整个文本序列变长，包含更复杂的语义关系，直接裁剪模型会带来更多的性能损失。因此，我们在上线Query-Doc相关性模型之前，采用知识蒸馏方式，在尽可能在保持模型性能的前提下对模型层数和参数做压缩。两种方案的实验效果对比见下表1：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f908ad88214e49c88ca352669c5604d0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746940.png" />   
     </p>
 <p>表1 裁剪和知识蒸馏方式效果对比在美团搜索核心排序的业务场景下，我们采用知识蒸馏使得BERT模型在对响应时间要求苛刻的搜索场景下符合了上线的要求，并且效果无显著的性能损失。知识蒸馏（Knowledge Distillation）核心思想是通过迁移知识，从而通过训练好的大模型得到更加适合推理的小模型。首先我们基于MT-BERT（12 Layers），在大规模的美团点评业务语料上进行知识蒸馏得到通用的MT-BERT蒸馏模型（6 Layers），蒸馏后的模型可以作为具体下游任务Fine-tuning时的初始化模型。在美团搜索的场景下，我们进一步基于通用的MT-BERT蒸馏模型（6 Layers）进行相关性任务Fine-tuning ，得到MT-BERT蒸馏（2 Layers）进行上线。</p>
 <h3 id="排序服务架构优化"><strong>排序服务架构优化</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/de141920b1284dfc838c3d531c0b2440.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746708.png" />   
      图8 核心排序框架图美团搜索线上排序服务框架如上图8所示，主要包括以下模块：</p>
 <ul>
 <li><strong>模型在线预估框架（Augur）</strong>：支持语言化定义特征，配置化加载和卸载模型与特征，支持主流线性模型与TF模型的在线预估；基于Augur可以方便地构建功能完善的无状态、分布式的模型预估服务。为了能方便将BERT特征用于排序模型，Augur团队开发了Model Stacking功能，完美支持了BERT as Feature；这种方式将模型的分数当做一个特征，只需要在Augur服务模型配置平台上进行特征配置即可，很好地提升了模型特征的迭代效率。</li>
@@ -371,7 +371,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="线上效果"><strong>线上效果</strong></h3>
 <p>针对前文所述的各种优化策略，除了离线Benchmark上的效果评测之外，我们也将模型上线进行了线上AB评测，Baseline是当前未做任何优化的排序模型，我们独立统计了各项优化在Baseline基础上带来的变化，由于线上真实环境影响因素较多，为了确保结论可信，我们同时统计了QVCTR和NDCG两个指标，结果如表2所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fba722333911426aa76d8b66a34d13d9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271746539.png" />   
      表2 线上AB效果对比（*表示AB一周稳定正向）从表2可以看出，各项优化对线上排序核心指标都带来稳定的提升。用户行为数据存在大量噪声不能直接拿来建模，我们基于美团搜索排序业务特点设计了一些规则对训练样本进行优化，还借助POI的品牌信息对样本进行映射和过滤。通过人工对样本进行评测发现，优化后的样本更加符合排序业务特点以及“人”对相关性的认知，同时线上指标的提升也验证了我们优化的有效性。知识融合的BERT模型引入大量结构化文本信息，弥补了POI名本身文本信息少的问题，排序模型CTR和NDCG都有明显的提升。对数据样本的优化有了一定的效果。</p>
 <p>为了更加匹配业务场景，我们从模型的角度进行优化，模型损失函数改用排序任务常用的Pairwise Loss，其考虑了文档之间的关系更加贴合排序任务场景，线上排序模型NDCG取得了一定的提升。</p>
 <h2 id="总结与展望"><strong>总结与展望</strong></h2>
@@ -541,6 +541,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -574,10 +578,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -956,6 +956,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

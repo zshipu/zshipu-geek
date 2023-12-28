@@ -230,7 +230,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="美团点评集群管理与调度系统"><strong>美团点评集群管理与调度系统</strong></h2>
 <p>美团点评在集群管理和资源优化这条道路上已经“摸爬滚打”多年。2013年，开始构建基于传统虚拟化技术的资源交付方式；2015年7月，开始建立完善的集群管理与调度系统——HULK，目标是推动美团点评服务容器化；2016年，完成基于Docker容器技术自研实现了弹性伸缩能力，来提升交付速度和应对快速扩缩容的需求，实现弹性扩容、缩容，提升资源利用率，提升业务运维效率，合理有效的降低企业IT运维成本；2018年，开始基于Kubernetes来进行资源管理和调度，进一步提升资源的使用效率。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fdbab810bd044622b47af0c95ea970bb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715709.webp" />   
     </p>
 <p>最初，美团点评通过基于Docker容器技术自研实现了弹性伸缩能力，主要是为了解决基于虚拟化技术的管理及部署机制在应对服务快速扩容、缩容需求时存在的诸多不足。例如资源实例创建慢、无法统一运行环境、实例部署和交付流程长、资源回收效率低、弹性能力差等等。经过调研与测试，结合业界的实践经验，我们决定基于Docker容器技术自研集群管理与调度系统，有效应对快速扩缩容的需求，提升资源的利用效率。我们把它叫做“绿巨人”——HULK，这个阶段可以看作是HULK1.0。</p>
 <p>之后，在生产环境中经过不断摸索和尝试，我们逐渐意识到，仅仅满足于集群的弹性伸缩能力是不够的，成本和效率肯定是未来必将面临且更为棘手的问题。我们吸取了2年来HULK 1.0的开发和运维经验，在架构和支撑系统层面做了进一步优化和改进，并借助于生态和开源的力量来为HULK赋能，即引入了开源的集群管理与调度系统Kubernetes，期望能进一步提升集群管理、运行的效率和稳定性，同时降低资源成本。所以我们从自研平台转向了开源的Kubernetes系统，并基于Kubernetes系统打造了更加智能化的集群管理与调度系统——HULK2.0。</p>
@@ -238,7 +238,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在架构层面，HULK2.0如何能与上层业务和底层Kubernetes平台更好地分层和解耦，是我们在设计之初就优先考虑的问题。我们期望它既要能对业务使用友好，又能最大限度地发挥Kubernetes的调度能力，使得业务层和使用方毋需关注资源关系细节，所求即所得；同时使发布、配置、计费、负载等逻辑层与底层的Kubernetes平台解耦分层，并保持兼容原生Kubernetes API来访问Kubernetes集群。从而可以借助于统一的、主流的、符合业界规范的标准，来解决美团点评基础架构面临的复杂、多样、不统一的管理需求。</p>
 <h3 id="架构介绍"><strong>架构介绍</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7170415cf8824c69ac631ad07abb9482.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715644.webp" />   
     </p>
 <p>自上而下来看，美团集群管理与调度平台面向全公司服务，有各个主要业务线、统一的OPS平台以及Portal平台，HULK不可能针对每个平台定制化接口和解决方案，所以需要将多样的业务和需求抽象收敛，最终统一通过HULK API来屏蔽HULK系统的细节，做到HULK与上层业务方的解耦。HULK API是对业务层和资源需求的抽象，是外界访问HULK的唯一途径。</p>
 <p>解决了上层的问题后，我们再来看与下层Kubernetes平台的解耦。HULK接到上层资源请求后，首先要进行一系列的初始化工作，包括参数校验、资源余量、IP和Hostname的分配等等，之后向Kubernetes平台实际申请分配机器资源，最终将资源交付给用户，Kubernetes API进一步将资源需求收敛和转换，让我们可以借助于Kubernetes的资源管理优势。Kubernetes API旨在收敛HULK的资源管理逻辑并与业界主流对齐。此外，因为完全兼容Kubernetes API，可以让我们借助社区和生态的力量，共同建设和探索。</p>
@@ -246,7 +246,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="kubernetes管理与实践"><strong>Kubernetes管理与实践</strong></h2>
 <p>为什么会选择Kubernetes呢？Kubernetes并不是市面上唯一的集群管理平台（其他如Docker Swarm或Mesos），之所以选择它，除了它本身优秀的架构设计，我们更加看重的是Kubernetes提供的不是一个解决方案，而是一个平台和一种能力。这种能力能够让我们真正基于美团点评的实际情况来扩展，同时能够依赖和复用多年来的技术积累，给予我们更多选择的自由，包括我们可以快速地部署应用程序，而无须面对传统平台所具有的风险，动态地扩展应用程序以及更好的资源分配策略。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/328bdaa859c2473fbee51a7dbd020e34.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715749.webp" />   
     </p>
 <p>Kubernetes集群作为整个HULK集群资源管理与平台的基础，需求是稳定性和可扩展性，风险可控性和集群吞吐能力。</p>
 <h3 id="集群运营现状"><strong>集群运营现状</strong></h3>
@@ -275,7 +275,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们有集群在使用1.6版本的调度器，随着集群规模的不断增长，旧版本的Kubernetes调度器（1.10之前版本）在性能和稳定性的问题逐渐凸显，由于调度器的吞吐量低，导致业务扩容超时失败，在规模近3000台的集群上，一次Pod的调度耗时在5s左右。Kubernetes的调度器是队列化的调度器模型，一旦扩容高峰等待的Pod数量过多就会导致后面Pod的扩容超时。为此，我们对调度器性能进行了大幅度的优化，并取得了非常明显的提升，根据我们的实际生产环境验证，性能比优化前提升了**400%**以上。</p>
 <p>Kubernetes调度器工作模型如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9a23d8eff3ff458489e52a03d33291df.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715828.webp" />   
     </p>
 <p>（Kubernetes调度器，图片来源于网络）</p>
 <h3 id="预选失败中断机制"><strong>预选失败中断机制</strong></h3>
@@ -292,19 +292,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/65f697d1a93d47ee87d7ab8c0fcdc758.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715819.webp" />   
     </p>
 <p>通过深入分析调度过程可以发现，调度器在预选阶段即使已经知道当前 Node不符合某个过滤条件仍然会继续判断后续的过滤条件是否符合。试想如果有上万台 Node节点，这些判断逻辑会浪费很多计算时间，这也是调度器性能低下的一个重要因素。</p>
 <p>为此，我们提出了“ <strong>预选失败中断机制</strong>”，即一旦某个预选条件不满足，那么该 Node即被立即放弃，后面的预选条件不再做判断计算，从而大大减少了计算量，调度性能也大大提升。如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ab190ecbe99c4a6fbdcd95ac400ad9a8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715881.webp" />   
     </p>
 <p>我们把该项优化贡献给了 Kubernetes社区（详见PR文档），增加了 alwaysCheckAllPredicates 策略选项，并在 Kubernetes1.10版本发布并开始作为默认的调度策略，当然你也可以通过设置alwaysCheckAllPredicates=true使用原先的调度策略。</p>
 <p>在实际测试中，调度器至少可以提升40%的性能，如果你目前在使用的Kube-Scheduler的版本低于1.10，那么建议你尝试升级到新的版本。</p>
 <h4 id="局部最优解"><strong>局部最优解</strong></h4>
 <p>对于优化问题尤其是最优化问题，我们总希望找到全局最优的解或策略，但是当问题的复杂度过高，要考虑的因素和处理的信息量过多时，我们往往会倾向于接受局部最优解，因为局部最优解的质量不一定都是差的。尤其是当我们有确定的评判标准，同时标明得出的解是可以接受的话，通常会接收局部最优的结果。这样，从成本、效率等多方面考虑，才是我们在实际工程中真正会采取的策略。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/305c9bff7f954d3cb70579eb49d015d8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715729.webp" />   
     </p>
 <p>（图片来源于网络）</p>
 <p>当前调度策略中，每次调度调度器都会遍历集群中所有的Node，以便找出最优的节点，这在调度领域称之为BestFit算法。但是在生产环境中，我们是选取最优Node还是次优Node，其实并没有特别大的区别和影响，有时候我们还是会避免选取最优的Node（例如我们集群为了解决新上线机器后频繁在该机器上创建应用的问题，就将最优解随机化）。换句话说，找出局部最优解就能满足需求。</p>
@@ -341,7 +341,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h2 id="资源管理与优化"><strong>资源管理与优化</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/88db2ed6edfd42c8b17638418d557cf7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715821.webp" />   
     </p>
 <h3 id="优化关键技术"><strong>优化关键技术</strong></h3>
 <ul>
@@ -532,6 +532,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -565,10 +569,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -947,6 +947,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

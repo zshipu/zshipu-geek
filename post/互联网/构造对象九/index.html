@@ -211,19 +211,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="调用-indexwriter-的构造函数的流程图">调用 IndexWriter 的构造函数的流程图</h1>
 <p>图 1：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/1-354c65dd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100081.png" />   
     </p>
 <h2 id="生成对象-indexfiledeleter">生成对象 IndexFileDeleter</h2>
 <p>  我们紧接上一篇文章，继续介绍剩余的流程点，下面先给出 IndexFileDeleter 的构造函数流程图：</p>
 <h3 id="indexfiledeleter-的构造函数流程图">IndexFileDeleter 的构造函数流程图</h3>
 <p>图 2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/2-9f21b202.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100927.png" />   
     </p>
 <h4 id="更新-segmentinfos-的-metadata">更新 SegmentInfos 的 metaData</h4>
 <p>图 3：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/3-69db9214.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100893.png" />   
     </p>
 <p>  我们先介绍下需要更新 SegmentInfos 的哪些 metaData：</p>
 <ul>
@@ -235,54 +235,54 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>  我们通过下面的例子来介绍上面的 metaData 的用途，图 4 的例子使用的索引删除策略为 NoDeletionPolicy，完整的 demo 见： <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2FLuXugang%2FLucene-7.5.0%2Fblob%2Fmaster%2FLuceneDemo%2Fsrc%2Fmain%2Fjava%2Flucene%2Findex%2FInflateGenerationTest.java">https://github.com/LuXugang/Lucene-7.5.0/blob/master/LuceneDemo/src/main/java/lucene/index/InflateGenerationTest.java</a> 。</p>
 <p>图 4：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/4-c2735fbf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100509.png" />   
     </p>
 <p>  图 4 中的例子描述的是，在代码第 67 行执行 IndexWriter.commitI()之后生成一个段，该段的索引信息对应为索引目录中以_0 为前缀的索引文件，如下所示：</p>
 <p>图 5：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/5-fcfd893c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100018.png" />   
     </p>
 <p>  随后执行了图 4 中的第 70 行的 DocValues 的更新操作，由于以_0 为前缀的段中的文档满足该更新条件，即该段中包含域名为&quot;author&quot;、域值为&quot;Lily&quot;的文档，故在执行完第 72 行的 IndexWriter.commit()操作后，索引目录中的索引文件如下所示：</p>
 <p>图 6：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/6-b6bc63b1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100924.png" />   
     </p>
 <p>  图 6 中的三个索引文件_0_1.fnm、_0_1.Lucene70_0.dvd、_0_1.Lucene70_0.dvm 描述了第一次的 DocValue 更新后以_0 为前缀的段中的 DocValues 信息，随后继续执行图 4 中第 75 行的 DocValues 的更新操作，同样的以_0 为为前缀的段中的文档仍然满足该更新条件，故在执行完第 77 行的 IndexWriter.commit()操作后，索引目录中的索引文件如下所示：</p>
 <p>图 7：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/7-352c00a9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100504.png" />   
     </p>
 <p>  图 7 中的三个索引文件_0_2.fnm、_0_2.Lucene70_0.dvd、_0_2.Lucene70_0.dvm 描述了第二次的 DocValue 更新后以_0 为前缀的段中的 DocValues 信息。</p>
 <p>图 8：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/8-c64a851e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100805.png" />   
     </p>
 <p>  我们以两次生成索引文件。fnm 为例，nextWriteFieldInfosGen 用来命名下次生成索引文件。fnm，图 8 中红框标注的两个值即迭代编号（generation number）通过 nextWriteFieldInfosGen 来命名， <strong>在生成图 8 的两个索引文件。fnm 后，此时 nextWriteFieldInfosGen 的值变为 3，为下一次生成索引文件。fnm 作准备</strong>，nextWriteDocValuesGen 是同样的意思，用来命名索引文件。dvd、.dvm。</p>
 <p>  我们再给出下面的例子来介绍下 nextWriteDelGen，完整 demo 见： <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2FLuXugang%2FLucene-7.5.0%2Fblob%2Fmaster%2FLuceneDemo%2Fsrc%2Fmain%2Fjava%2Flucene%2Findex%2FMultiDeleteTest.java">https://github.com/LuXugang/Lucene-7.5.0/blob/master/LuceneDemo/src/main/java/lucene/index/MultiDeleteTest.java</a> 。：</p>
 <p>图 9：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/9-ed911d59.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100398.png" />   
     </p>
 <p>图 10：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/10-4eff0cb8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100602.png" />   
     </p>
 <p>  图 10 为图 9 的例子执行结束后的索引目录的内容，可以发现它跟 nextWriteFieldInfosGen、nextWriteDocValuesGen 是一样的用法。</p>
 <p>  我们换一个例子来介绍 segments_N 文件跟迭代编号之间的关系，该例子的完整 demo 见 <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2FLuXugang%2FLucene-7.5.0%2Fblob%2Fmaster%2FLuceneDemo%2Fsrc%2Fmain%2Fjava%2Flucene%2Findex%2FMultiDeleteUpdateTest.java">https://github.com/LuXugang/Lucene-7.5.0/blob/master/LuceneDemo/src/main/java/lucene/index/MultiDeleteUpdateTest.java</a> ，本文就不贴出来了，直接给出运行结束后索引目录中的内容：</p>
 <p>图 11：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/11-c0befd76.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100512.png" />   
     </p>
 <p>  我们以图 11 中的 segments_3 为例，介绍生成的索引文件。fnm、.dvd、.dvm 的迭代编号在 segments_N 文件中的描述：</p>
 <p>图 12：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/12-c8e61654.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272100649.png" />   
     </p>
 <p>  图 12 中，DelGen 即图 11 中索引文件_0_2.liv 的迭代编号，FieldInfosGen 即图 11 中索引文件_0_2.fnm 的迭代编号，DocValuesGen 即图 11 中索引文件 _0_2_Lucene70_0.dvd、 _0_2_Lucene70_0.dvm 的迭代编号，而 FieldInfosFiles 中描述的是以_0 为前缀的段的域信息对应的索引文件名，UpdatesFiles 中描述的是以_0 为前缀的段的 DocValues 的信息对应的索引文件名。</p>
 <p>  继续给出 segment_2 的例子，不作多余的介绍：</p>
 <p>图 13：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/13-4f6a3628.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101256.png" />   
     </p>
 <p><strong>接着我们继续介绍为什么要执行更新 SegmentInfos 的 metaData 的操作</strong>：</p>
 <p>  先给出源码中的注释，该流程点对应在源码中的方法为： <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2FLuXugang%2FLucene-7.5.0%2Fblob%2Fmaster%2Fsolr-7.5.0%2Flucene%2Fcore%2Fsrc%2Fjava%2Forg%2Fapache%2Flucene%2Findex%2FIndexFileDeleter.java">IndexFileDeleter.inflateGens(&hellip;)</a> 。</p>
@@ -296,7 +296,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>  该 demo 运行结束后，索引目录中的文件如下所示：</p>
 <p>图 14：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/14-f99da4f4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101771.png" />   
     </p>
 <p>  从图 14 可以看出，IndexWriter 成功的执行了一次 commit()操作，即生成了 segments_1 文件，当再次执行 commit()操作时，只成功执行了二阶段提交的第一阶段，即只生成了 pending_segments_2 文件。</p>
 <ul>
@@ -307,7 +307,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>  我们先给出 SegmentCommitInfo 对象的构造函数：</p>
 <p>图 15：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/15-ac7c670f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101529.png" />   
     </p>
 <p>  我们以图 11 为例，如果我们另 segments_2 中的内容作为 IndexCommit 来构造一个新的 IndexWriter，此时以_0 为前缀的段的 delGen、fieldInfosGen、docValuesGen 都为 1，那么根据图 15 的构造函数，nextWriteDelGen、nextWriteFieldInfosGen、nextWriteDocValuesGen 都会被初始化为 2，也就说如果以_0 为前缀的段在后续的操作中满足删除或者 DocValues 的更新操作，新生成的。fnm、.dvd、.dvm 的迭代编号就是 2，那么就会出现与图 11 中的索引文件有相同的文件名</p>
 <p><strong>问题三：新的 IndexWriter 生成的索引文件的文件名与索引目录中的相同（即 double-write）可能会引起哪些问题</strong>：</p>
@@ -316,7 +316,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="删除计数为-0-的索引文件">删除计数为 0 的索引文件</h4>
 <p>图 16：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/16-a014f40d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101869.png" />   
     </p>
 <p>  该流程用来删除索引目录中那些计数为 0 的索引文件，那么问题就来了：</p>
 <p><strong>索引目录中哪些索引文件的计数会为 0 呢：</strong>：</p>
@@ -444,6 +444,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -477,10 +481,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -859,6 +859,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -282,18 +282,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>所谓分布式系统顾名思义就是利用多台计算机协同解决单台计算机所不能解决的计算、存储等 问题。单机系统与分布式系统的最大的区别在于问题的规模，即计算、存储的数据量的区别。将一 个单机问题使用分布式解决，首先要解决的就是如何将问题拆解为可以使用多机分布式解决，使得 分布式系统中的每台机器负责原问题的一个子集。由于无论是计算还是存储，其问题输入对象都是 数据，所以如何拆解分布式系统的输入数据成为分布式系统的基本问题。</p>
 <h4 id="哈希方式">哈希方式</h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/6ab9b217862a4bc1bff82ab73c882848.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271432894.png" />   
     </p>
 <p>哈希分布数据的缺点同样明显，突出表现为可扩展性不高，一旦集群规模需要扩展，则几乎所 有的数据需要被迁移并重新分布。工程中，扩展哈希分布数据的系统时，往往使得集群规模成倍扩 展，按照数据重新计算哈希，这样原本一台机器上的数据只需迁移一半到另一台对应的机器上即可 完成扩展。</p>
 <p>针对哈希方式扩展性差的问题，一种思路是不再简单的将哈希值与机器做除法取模映射，而是 将对应关系作为元数据由专门的元数据服务器管理.同时，哈希值取模个数往往大于机器个数，这样同一台机器上需 要负责多个哈希取模的余数。但需要以较复杂的机制维护大量的元数据。哈希分布数据的另一个缺点是，一旦某数据特征值的数据严重不均，容易出现“数据倾斜”（data skew）问题。</p>
 <p>哈希分布数据的另一个缺点是，一旦某数据特征值的数据严重不均，容易出现“数据倾斜”（data skew）问题</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/b9a268c2aea649d9afeee9e04252edb7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271432347.png" />   
     </p>
 <h4 id="按数据范围分布">按数据范围分布</h4>
 <p>按数据范围分布是另一个常见的数据分布式，将数据按特征值的值域范围划分为不同的区间， 使得集群中每台（组）服务器处理不同区间的数据。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/d544084d80234b1fba717f19fdc3113f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271432165.png" />   
     </p>
 <p>工程中，为了数据迁移等负载均衡操作的方便， 往往利用动态划分区间的技术，使得每个区间中服务的数据量尽量的一样多。当某个区间的数据量 较大时，通过将区间“分裂”的方式拆分为两个区间，使得每个数据区间中的数据量都尽量维持在 一个较为固定的阈值之下。</p>
 <p>一般的，往往需要使用专门的服务器在内存中维护数据分布信息， 称这种数据的分布信息为一种元信息。甚至对于大规模的集群，由于元信息的规模非常庞大，单台 计算机无法独立维护，需要使用多台机器作为元信息服务器。</p>
@@ -303,7 +303,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="一致性哈希">一致性哈希</h4>
 <p>一致性哈希（consistent hashing）是另一个种在工程中使用较为广泛的数据分布方式。一致性哈 希最初在P2P 网络中作为分布式哈希表（DHT）的常用数据分布算法。一致性哈希的基本方式是使 用一个哈希函数计算数据或数据特征的哈希值，令该哈希函数的输出值域为一个封闭的环，即哈希 函数输出的最大值是最小值的前序。将节点随机分布到这个环上，每个节点负责处理从自己开始顺 时针至下一个节点的全部哈希值域上的数据。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/18ec3bbd2aaa41748321d0e73861f8c3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271432921.png" />   
     </p>
 <p>使用一致性哈希的方式需要将节点在一致性哈希环上的位置作为元信息加以管理，这点比直接 使用哈希分布数据的方式要复杂。然而，节点的位置信息只于集群中的机器规模相关，其元信息的 量通常比按数据范围分布数据和按数据量分布数据的元信息量要小很多。</p>
 <p>为此一种常见的改进算法是引入虚节点（virtual node）的概念，系统初始时就创建许多虚节点， 虚节点的个数一般远大于未来集群中机器的个数，将虚节点均匀分布到一致性哈希值域环上，其功 能与基本一致性哈希算法中的节点相同。为每个节点分配若干虚节点。操作数据时，首先通过数据 的哈希值在环上找到对应的虚节点，进而查找元数据找到对应的真实节点。使用虚节点改进有多个 优点。首先，一旦某个节点不可用，该节点将使得多个虚节点不可用，从而使得多个相邻的真实节 点负载失效节点的压里。同理，一旦加入一个新节点，可以分配多个虚节点，从而使得新节点可以 负载多个原有节点的压力，从全局看，较容易实现扩容时的负载均衡。</p>
@@ -311,7 +311,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>分布式系统容错、提高可用性的基本手段就是使用副本。对于数据副本的分布方式主要影响系统的可扩展性。 一种基本的数据副本策略是以机器为单位，若干机器互为副本，副本机器之间的数据完全相同。 这种策略适用于上述各种数据分布方式。其优点是非常简单，其缺点是恢复数据的效率不高、可扩 展性也不高。</p>
 <p>更合适的做法不是以机器作为副本单位，而是将数据拆为较合理的数据段，以数据段为单位作 为副本。实践中，常常使得每个数据段的大小尽量相等且控制在一定的大小以内。数据段有很多不 同的称谓，segment，fragment，chunk，partition 等等。数据段的选择与数据分布方式直接相关。对 于哈希分数据的方式，每个哈希分桶后的余数可以作为一个数据段，为了控制数据段的大小，常常 使得分桶个数大于集群规模。 一旦将数据分为数据段，则可以以数据段为单位管理副本，从而副本与机器不再硬相关，每台 机器都可以负责一定数据段的副本。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/68b6cd7500654d019a2841da23ec4ddb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271432775.png" />   
     </p>
 <p>一旦副本分布与机器无关，数据丢失后的恢复效率将非常高。这是因为，一旦某台机器的数据 丢失，其上数据段的副本将分布在整个集群的所有机器中，而不是仅在几个副本机器中，从而可以 从整个集群同时拷贝恢复数据，而集群中每台数据源机器都可以以非常低的资源做拷贝。作为恢复 数据源的机器即使都限速1MB/s，若有100 台机器参与恢复，恢复速度也能达到100MB/s。再者， 副本分布与机器无关也利于集群容错。如果出现机器宕机，由于宕机机器上的副本分散于整个集群， 其压力也自然分散到整个集群。最后，副本分布与机器无关也利于集群扩展。理论上，设集群规模 为N 台机器，当加入一台新的机器时，只需从各台机器上迁移1/N – 1/N+1 比例的数据段到新机器 即实现了新的负载均衡。由于是从集群中各机器迁移数据，与数据恢复同理，效率也较高。 工程中，完全按照数据段建立副本会引起需要管理的元数据的开销增大，副本维护的难度也相 应增大。一种折中的做法是将某些数据段组成一个数据段分组，按数据段分组为粒度进行副本管理。 这样做可以将副本粒度控制在一个较为合适的范围内。</p>
 <h4 id="本地化计算">本地化计算</h4>
@@ -325,7 +325,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="中心化副本控制协议">中心化副本控制协议</h4>
 <p>中心化副本控制协议的基本思路是由一个中心节点协调副本数据的更新、维护副本之间的一致 性。图给出了中心化副本协议的通用架构。中心化副本控制协议的优点是协议相对较为简单， 所有的副本相关的控制交由中心节点完成。并发控制将由中心节点完成，从而使得一个分布式并发 控制问题，简化为一个单机并发控制问题。所谓并发控制，即多个节点同时需要修改副本数据时， 需要解决“写写”、“读写”等并发冲突。单机系统上常用加锁等方式进行并发控制。对于分布式并 发控制，加锁也是一个常用的方法，但如果没有中心节点统一进行锁管理，就需要完全分布式化的 锁系统，会使得协议非常复杂。中心化副本控制协议的缺点是系统的可用性依赖于中心化节点，当 中心节点异常或与中心节点通信中断时，系统将失去某些服务（通常至少失去更新服务），所以中心 化副本控制协议的缺点正是存在一定的停服务时间。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/e01de03598db4309ac25ee4ccf05606e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271432652.png" />   
     </p>
 <h4 id="primary-secondary-协议">primary-secondary 协议</h4>
 <p>在primary-secondary 类型的协议中，副本被分为两大类，其中有且仅有一个副本作为primary 副本， 除primary 以外的副本都作为secondary 副本。维护primary 副本的节点作为中心节点，中心节点负 责维护数据的更新、并发控制、协调副本的一致性。</p>
@@ -349,7 +349,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/68a93fc405a94fe0a1de1350ec5623d1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271432572.png" />   
     </p>
 <p>在工程实践中，如果由primary 直接同时发送给其他N 个副本发送数据，则每个 secondary 的更新吞吐受限于primary 总的出口网络带宽，最大为primary 网络出口带宽的1/N。为了 解决这个问题，有些系统（例如，GFS），使用接力的方式同步数据，即primary 将更新发送给第一 个secondary 副本，第一个secondary 副本发送给第二secondary 副本，依次类推。</p>
 <h5 id="数据读取方式">数据读取方式</h5>
@@ -373,7 +373,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>去中心化副本控制协议没有中心节点，协议中所有的节点都是完全对等的，节点之间通过平等协商 达到一致。从而去中心化协议没有因为中心化节点异常而带来的停服务等问题。</p>
 <p>去中心化协议的最大的缺点是协议过程通常比较复杂。尤其当 去中心化协议需要实现强一致性时，协议流程变得复杂且不容易理解。由于流程的复杂，去中心化 协议的效率或者性能一般也较中心化协议低。一个不恰当的比方就是，中心化副本控制协议类似专 制制度，系统效率高但高度依赖于中心节点，一旦中心节点异常，系统受到的影响较大；去中心化 副本控制协议类似民主制度，节点集体协商，效率低下，但个别节点的异常不会对系统总体造成太 大影响。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/87911ed0e5f8446790d5553885ce5b60.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271432401.png" />   
     </p>
 <h3 id="23-lease-机制">2.3 Lease 机制</h3>
 <p>Lease 机制是最重要的分布式协议，广泛应用于各种实际的分布式系统中。</p>
@@ -411,7 +411,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="quorum-定义">Quorum 定义</h4>
 <p>在Quorum 机制下，当某次更新操作wi 一旦在所有N 个副本中的W 个副本上都成功，则就称 该更新操作为“成功提交的更新操作”，称对应的数据为“成功提交的数据”。令R&gt;N-W，由于更新 操作wi 仅在W 个副本上成功，所以在读取数据时，最多需要读取R 个副本则一定能读到wi 更新后 的数据vi 。如果某次更新wi 在W 个副本上成功，由于W+R&gt;N，任意R 个副本组成的集合一定与 成功的W个副本组成的集合有交集，所以读取R 个副本一定能读到wi 更新后的数据vi。如图 2-10， Quorum 机制的原理可以文森图表示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/5ced2939ae4948ac9e713098d7476596.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271432574.png" />   
     </p>
 <p>某系统有5 个副本，W=3，R=3，最初5 个副本的数据一致，都是v1，某次更新操作 w2 在前3 副本上成功，副本情况变成（v2 v2 v2 v1 v1）。此时，任意3 个副本组成的集合中一定包括 v2。 在上述定义中，令W=N，R=1，就得到WARO，即WARO 是Quorum 机制的一种特例。 与分析WARO 相似，分析Quorum 机制的可用性。限制Quorum 参数为W+R=N+1。由于更新 操作需要在W 个副本上都成功，更新操作才能成功，所以一旦N-W+1 个副本异常，更新操作始终 无法在W 个副本上成功，更新服务不可用。另一方面，一旦N-R+1 个副本异常，则无法保证一定 可以读到与W 个副本有交集的副本集合，则读服务的一致性下降。</p>
 <p>再次强调：仅仅依赖quorum 机制是无法保证强一致性的。因为仅有quorum 机制时无法确 定最新已成功提交的版本号，除非将最新已提交的版本号作为元数据由特定的元数据服务器或元数 据集群管理，否则很难确定最新成功提交的版本号。在下一节中，将讨论在哪些情况下，可以仅仅 通过quorum 机制来确定最新成功提交的版本号。</p>
@@ -425,11 +425,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在primary-secondary 协议中，当primary 异常时，需要选择出一个新的primary，之后secondary 副本与primary 同步数据。通常情况下，选择新的primary 的工作是由某一中心节点完成的，在引入 quorum 机制后，常用的primary 选择方式与读取数据的方式类似，即中心节点读取R 个副本，选择 R 个副本中版本号最高的副本作为新的primary。新primary 与至少W 个副本完成数据同步后作为新 的primary 提供读写服务。首先，R 个副本中版本号最高的副本一定蕴含了最新的成功提交的数据。 再者，虽然不能确定最高版本号的数是一个成功提交的数据，但新的primary 在随后与secondary 同 步数据，使得该版本的副本个数达到W，从而使得该版本的数据成为成功提交的数据。</p>
 <p>例：在N=5，W=3，R=3 的系统中，某时刻副本最大版本号为（v2 v2 v1 v1 v1），此时v1 是 系统的最新的成功提交的数据，v2 是一个处于中间状态的未成功提交的数据。假设此刻原primary 副本异常，中心节点进行primary 切换工作。这类“中间态”数据究竟作为“脏数据”被删除，还 是作为新的数据被同步后成为生效的数据，完全取决于这个数据能否参与新primary 的选举。下面 分别分析这两种情况。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/3f6a420acba940fd9ba051e8e4f2052b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271433541.png" />   
     </p>
 <p>第一、如图 2-12，若中心节点与其中3 个副本通信成功，读取到的版本号为（v1 v1 v1），则任 选一个副本作为primary，新primary 以v1 作为最新的成功提交的版本并与其他副本同步，当与第1、 第2 个副本同步数据时，由于第1、第2 个副本版本号大于primary，属于脏数据，可以按照2.2.2.4 节中介绍的处理脏数据的方式解决。实践中，新primary 也有可能与后两个副本完成同步后就提供 数据服务，随后自身版本号也更新到v2，如果系统不能保证之后的v2 与之前的v2 完全一样，则新 primary 在与第1、2 个副本同步数据时不但要比较数据版本号还需要比较更新操作的具体内容是否 一样。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/d48a0433845b4b2abb54784f3ccba18e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271433916.png" />   
     </p>
 <p>第二、若中心节点与其他3 个副本通信成功，读取到的版本号为（v2 v1 v1），则选取版本号为 v2 的副本作为新的primary，之后，一旦新primary 与其他2 个副本完成数据同步，则符合v2 的副 本个数达到W 个，成为最新的成功提交的副本，新primary 可以提供正常的读写服务。</p>
 <h3 id="25-日志技术">2.5 日志技术</h3>
@@ -483,7 +483,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="no-undono-redo-log">No Undo/No Redo log</h4>
 <p>若数据维护在磁盘中， 某批更新由若干个更新操作组成，这些更新操作需要原子生效，即要么同时生效，要么都不生效。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/771bc4c0d42d4c52a35892f57a3b37d1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271433624.png" />   
     </p>
 <p>0/1 目录技术中有两个目录结构，称为目录0(Directory 0)和目录1(Directory 1)。另有一个结构 称为主记录（Master record）记录当前正在使用的目录称为活动目录。主记录中要么记录使用目录0， 要么记录使用目录1。目录0 或目录1 中记录了各个数据的在日志文件中的位置。 0/1 目录的数据更新过程始终在非活动目录上进行，只是在数据生效前，将主记录中的0、1 值 反转，从而切换主记录。</p>
 <p><strong>流程：0/1 目录数据更新流程</strong></p>
@@ -556,7 +556,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>MVCC(Multi-version Cocurrent Control，多版本并发控制)技术。MVCC 技术最初也是在数据库 系统中被提出，但这种思想并不局限于单机的分布式系统，在分布式系统中同样有效。</p>
 <p>MVCC 即多个不同版本的数据实现并发控制的技术，其基本思想是为每次事务生成 一个新版本的数据，在读数据时选择不同版本的数据即可以实现对事务结果的完整性读取。在使用 MVCC 时，每个事务都是基于一个已生效的基础版本进行更新，事务可以并行进行，从而可以产生 一种图状结构。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/efe51e523abb43dba53f31c8dcd68a6d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271433393.png" />   
     </p>
 <p>，基础数据的版本为1，同时产生了两个事务：事务A 与事务B。这两个事务都 各自对数据进行了一些本地修改（这些修改只有事务自己可见，不影响真正的数据），之后事务A 首先提交，生成数据版本2；基于数据版本2，又发起了事务C，事务C 继续提交，生成了数据版 本3；最后事务B 提交，此时事务B 的结果需要与事务C 的结果合并，如果数据没有冲突，即事务 B 没有修改事务A 与事务C 修改过的变量，那么事务B 可以提交，否则事务B 提交失败。 MVCC 的流程过程非常类似于SVN 等版本控制系统的流程，或者说SVN 等版本控制系统就是 使用的MVCC 思想。 事务在基于基础数据版本做本地修改时，为了不影响真正的数据，通常有两种做法，一是将基 础数据版本中的数据完全拷贝出来再修改，SVN 即使用了这种方法，SVN check out 即是拷贝的过 程；二是每个事务中只记录更新操作，而不记录完整的数据，读取数据时再将更新操作应用到用基 础版本的数据从而计算出结果，这个过程也类似SVN 的增量提交。</p>
 <h3 id="28-paxos协议">2.8 Paxos协议</h3>
@@ -595,19 +595,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>初始状态</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/9a3b03ffe00344e99bd724cc1f12642d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271433061.png" />   
     </p>
 <ol>
 <li>Proposer 向所有Accpetor 发送“Prepare(1)”，所有Acceptor 正确处理，并回复Promise(1, NULL)</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/d08ea2af532e441781cc386466617470.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271433875.png" />   
     </p>
 <ol>
 <li>Proposer 收到5 个Promise(1, NULL)，满足多余半数的Promise 的value 为空，此时发送 Accept(1, v1)，其中v1 是Proposer 选择的Value。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/ba13c82b13104fa693d0e3b162ef815f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271433899.png" />   
     </p>
 <ol>
 <li>此时，v1 被超过半数的Acceptor 批准，v1 即是本次Paxos 协议实例批准的Value。如果Learner 学习value，学到的只能是v1</li>
@@ -754,6 +754,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -787,10 +791,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1169,6 +1169,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

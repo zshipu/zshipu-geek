@@ -221,7 +221,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <p>在本系列的上一篇中，我们大致介绍了一下知识图谱在推荐系统中的一些应用，我们最后讲到知识图谱特征学习(Knowledge Graph Embedding)是最常见的与推荐系统结合的方式，知识图谱特征学习为知识图谱中的每个实体和关系学习到一个低维向量，同时保持图中原有的结构或语义信息，最常见的得到低维向量的方式主要有基于距离的翻译模型和基于语义的匹配模型。</p>
 <p>知识图谱特征学习在推荐系统中的应用步骤大致有以下三种方式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/81b482b27b184f3a99377593bbdaab9a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271958396.jpeg" />   
     </p>
 <p>依次训练的方法主要有：Deep Knowledge-aware Network(DKN)</p>
 <p>联合训练的方法主要有：Ripple Network</p>
@@ -241,26 +241,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="基于距离的翻译模型distance-based-translational-models">基于距离的翻译模型（distance-based translational models）</h4>
 <p>这类模型使用基于距离的评分函数评估三元组的概率，将尾节点视为头结点和关系翻译得到的结果。这类方法的代表有TransE、TransH、TransR等；</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b7ff5011b732444bbbc91c70fcbfaeaa.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959313.jpeg" />   
     </p>
 <p>上面三个方法的基本思想都是一样的，我们以TransE为例来介绍一下这些方法的核心思想。在空间中，三元组的头节点h、关系r、尾节点t都有对应的向量，我们希望的是h + r = t，如果h + r的结果和t越接近，那么我们认为这些向量能够很好的表示知识图谱中的实体和关系。</p>
 <h4 id="基于语义的匹配模型semantic-based-matching-models">基于语义的匹配模型（semantic-based matching models）</h4>
 <p>类模型使用基于相似度的评分函数评估三元组的概率，将实体和关系映射到隐语义空间中进行相似度度量。这类方法的代表有SME、NTN、MLP、NAM等。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d5d63ced8e8447ba8802b3e19010225e.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959204.jpeg" />   
     </p>
 <p>上述方法的核心是构造一个二分类模型，将h、r和t输入到网络中，如果(h,r,t)在知识图谱中真实存在，则应该得到接近1的概率，如果不存在，应该得到接近0的概率。</p>
 <h3 id="122-基于cnn的句子特征提取">1.2.2 基于CNN的句子特征提取</h3>
 <p>DKN中提取句子特征的CNN源自于Kim CNN，用句子所包含词的词向量组成的二维矩阵，经过一层卷积操作之后再做一次max-over-time的pooling操作得到句子向量，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f3789182d6614dd1a09d0d983b1f471f.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959260.jpeg" />   
     </p>
 <h2 id="13-问题定义">1.3 问题定义</h2>
 <p>给定义一个用户useri,他的点击历史记为{t1,t2,t3,&hellip;.,tN}是该用户过去一段时间内层点击过的新闻的标题，N代表用户点击过新闻的总数。每个标题都是一个词序列t={w1,w2,w3,&hellip;.,wn},标题中的单词有的对应知识图谱中的一个实体 。举例来说，标题《Trump praises Las Vegas medical team》其中Trump与知识图谱中的实体“Donald Trump”对应，Las和Vegas与实体Las Vegas对应。本文要解决的问题就是给定用户的点击历史，以及标题单词和知识图谱中实体的关联，我们要预测的是：一个用户i是否会点击一个特定的新闻tj。</p>
 <h2 id="14-模型框架">1.4 模型框架</h2>
 <p>DKN模型的整体框架如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0c831a668f39400092da298685ebd7e0.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959178.jpeg" />   
     </p>
 <p>可以看到，DKN的网络输入有两个：候选新闻集合，用户点击过的新闻标题序列。输入数据通过KCNN来提取特征，之上是一个attention层，计算候选新闻向量与用户点击历史向量之间的attention权重，在顶层拼接两部分向量之后，用DNN计算用户点击此新闻的概率。接下来，我们介绍一下DKN模型中的一些细节。</p>
 <h3 id="141-知识提取knowledge-distillation">1.4.1 知识提取（Knowledge Distillation）</h3>
@@ -275,21 +275,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>过程图示如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6631055f230344dbb10cee35be21f2ad.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959148.jpeg" />   
     </p>
 <p>上下文embedding</p>
 <p>尽管目前现有的知识图谱特征学习方法得到的向量保存了绝大多数的结构信息，但还有一定的信息损失，为了更好地利用一个实体在原知识图谱的位置信息，文中还提到了利用一个实体的上下文来进一步的刻画每个实体，具体来说，即用每个实体相连的实体embedding的平均值来进一步刻画每个实体，计算公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/33b000d93f5240c693cdbac4f54dd3f1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959135.png" />   
     </p>
 <p>图示如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f0ce0fb278d3432caeca79fbf2c7b5de.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959849.jpeg" />   
     </p>
 <h3 id="142-新闻特征提取kcnnknowledge-aware-cnn">1.4.2 新闻特征提取KCNN(Knowledge-aware CNN)</h3>
 <p>在知识抽取部分，我们得到了三部分的embedding，一种最简单的使用方式就是直接将其拼接：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f750959e21504ccab2df06d289695482.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959618.png" />   
     </p>
 <p>但这样做存在几方面的限制：</p>
 <ol>
@@ -299,26 +299,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>因此本文使用的是multi-channel和word-entity-aligned KCNN。具体做法是先把实体的embedding和实体上下文embedding映射到一个空间里，映射的方式可以选择线性方式g(e) = Me，也可以选择非线性方式g(e) = tanh(Me + b)，这样我们就可以拼接三部分作为KCNN的输入：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/15a9f451455a469b895f5aee97b332c5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959206.png" />   
     </p>
 <p>KCNN的过程我们之前已经介绍过了，这里就不再赘述。</p>
 <h3 id="143-基于注意力机制的用户兴趣预测">1.4.3 基于注意力机制的用户兴趣预测</h3>
 <p>获取到用户点击过的每篇新闻的向量表示以后，作者并没有简单地作加和来代表该用户，而是计算候选文档对于用户每篇点击文档的attention，再做加权求和，计算attention：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/10801dc075ce4c1295c133d6d8102170.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959191.png" />   
     </p>
 <h2 id="15-实验结果">1.5 实验结果</h2>
 <p>本文的数据来自bing新闻的用户点击日志，包含用户id，新闻url，新闻标题，点击与否（0未点击，1点击）。搜集了2016年10月16日到2017年7月11号的数据作为训练集。2017年7月12号到8月11日的数据作为测试集合。使用的知识图谱数据是Microsoft Satori。以下是一些基本的统计数据以及分布：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5de9636988e1424baeb79850cd7a292e.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959001.jpeg" />   
     </p>
 <p>本文将DKN与FM、KPCNN、DSSM、Wide&amp;Deep、DeepFM等模型进行对比试验，结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ee738688d3cf4e1f81475e8593fdf2a0.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959926.jpeg" />   
     </p>
 <p>随后，本文根据DKN中是否使用上下文实体embedding、使用哪种实体embedding计算方法、是否对实体embedding进行变换、是否使用attention机制等进行了对比试验，结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2c8b184f454140e79d4ad652554fa913.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959280.jpeg" />   
     </p>
 <p>实验表明，在使用DKN模型时，同时使用实体embedding和上下文embedding、使用TransD方法、使用非线性变换、使用attention机制可以获得更好的预测效果。</p>
 <h1 id="2dkn模型tensorflow实现">2、DKN模型tensorflow实现</h1>
@@ -326,7 +326,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>参考的代码地址为： <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2Fhwwang55%2FDKN">https://github.com/hwwang55/DKN</a></p>
 <p>目录的结构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3b7013b87e124847bd7a58cd255cbabb.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271959421.jpeg" />   
     </p>
 <p>可以看到，除代码外，还有news和kg两个文件夹，按照如下的步骤运行代码，就可以得到我们的训练数据、测试数据、单词对应的embedding、实体对应的embedding、实体对应的上下文embedding：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">$ cd news
@@ -542,6 +542,10 @@ else:
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -575,10 +579,6 @@ else:
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -957,6 +957,8 @@ else:
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -198,7 +198,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="post-content">
             <h1 id="16kdd-node2vec">16KDD node2vec</h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-4dd2c6a10623446abd48dc41d0359c2b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281821934.webp" />   
     </p>
 <p>node2vec 是斯坦福男神教授 Jure Leskovec 的代表作之一，网上有非常多关于这篇论文的讨论和解析，所以这里我不再累述。</p>
 <p>node2vec 中提出的网络的 “ <strong>同质性</strong>” 和 “ <strong>结构性</strong>” 是两个比较抽象的概念，之前看论文的时候没有仔细斟酌，但看了王喆大佬的文章之后，惊觉一直以来对 node2vec 理解有误。为了搞清楚这两个概念，我写了一份简单的 node2vec 代码，并进行了一些初步的探索。这篇文章的目的是要理清楚两个问题：</p>
@@ -209,12 +209,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>以下开始分析：</p>
 <h2 id="什么是网络的同质性什么是网络的结构性">什么是网络的同质性？什么是网络的结构性？</h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-04661cd5b8f44c69a29010a4d62cc9c3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281821767.webp" />   
     </p>
 <p>直觉上，我们认为同质性是指微观上，站在结点上来看，相邻的结点应该比较相似，那么 BFS 这种更强调 1 阶邻居的游走方式应该更能表达同质性（比如上图的结点 u 和相邻的 s1, s2, s3, s4）；结构性是指宏观上，俯视整个网络，有着类似连接方式的结点应该比较相似，那么 DFS 这种能探索得更远得游走方式应该对学习结构性更有帮助（比如上图的结点 u 和结点 s6）。</p>
 <p>但事实上，论文中给出的结论却是 <strong>DFS 擅长学习网络的同质性，BFS 擅长学习网络的结构性</strong>。从论文里的 Figure 3 中我们可以直观地进行观察：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-766be5832ff746fb8a43416bb2dbfe79.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281821724.webp" />   
     </p>
 <p>图的上半部分是倾向于 DFS（p=1，q=0.5）的，可以看到，这种方式得到的 embedding 似乎有很好的聚类性质，注意这里要看结点之间的连接而不是在 2D 平面上的距离，每个簇的边界结点跟内部的联系要比跟外部的联系更多一些。作者认为这反映了网络的同质性；</p>
 <p>图的下半部分是倾向于 BFS（p=1，q=2.0），一个很明显的不同就是，这种方式得到的 embedding 似乎是按功能划分的，处于 graph 边缘的结点（黄色）有类似的 embedding，连接 graph 边缘和中心的结点（蓝色，在上半部分中作为簇边界的结点）有类似的 embedding，这些结点并不都是互相连接的，但是 node2vec 得到的 embedding 仍然能学习出这样的信息。作者认为这反映了网络的结构性。</p>
@@ -224,7 +224,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="dfs-是否擅长刻画同质性bfs-是否擅长刻画结构性为什么">DFS 是否擅长刻画同质性，BFS 是否擅长刻画结构性？为什么？</h2>
 <p>前面通过 Figure 3 来重新认识了同质性和结构性。但为什么 DFS 会擅长同质性，BFS 会擅长结构性呢？这就得再回顾一下 Figure 2，了解一下 DFS 和 BFS 到底做了什么：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-2040eb71b6814c83946aa14e79ef4ac5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281821773.webp" />   
     </p>
 <p>图中展示的是一次随机游走的中间过程，当前处于结点 v 上，上一步是从结点 t 到结点 v。</p>
 <ul>
@@ -261,11 +261,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>构造的网络比较小，embed 的维数可以直接设置为 2，这样可以直接 plot 在 2D 平面上直观地通过距离来衡量结点之间的相似度。随机游走序列的长度设置为 10。</p>
 <p>首先，测试一下这个像 bridge 一样的网络：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ea7597f5bd4b4b39b00ea016c1e1a2c2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281821604.webp" />   
     </p>
 <p>这个网络是对称的，有一个中心点 7，左右各有一个三角形局部结构和四边形的密集连接结构。将 node2vec 学到的结点 embedding 画出来：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-60f34e59bf2446fda3de22d4482296ca.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281821744.webp" />   
     </p>
 <p>我们首先分析一下局部结构，可以看到 BFS 对局部结构非常敏感，同处一个局部结构内的结点的 embedding 几乎相同（比如结点 0 和 1），这与之前的分析一致。另外，我们也可以观察到，比起 DFS</p>
 
@@ -393,6 +393,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -426,10 +430,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -808,6 +808,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

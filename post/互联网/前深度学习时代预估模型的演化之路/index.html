@@ -218,7 +218,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>下面，我们用传统CTR模型演化的关系图来正式开始技术部分的内容。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a6a98d2091ec4e4bbcf16de820a54ad3.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637551.jpeg" />   
     </p>
 <p>传统CTR模型的演化关系图</p>
 <p>看到上面的关系图，有经验的同学可能已经对各模型的细节和特点如数家珍了。中间位置的LR模型向四个方向的延伸分别代表了传统CTR模型演化的四个方向。</p>
@@ -237,7 +237,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>与之相比较，线性回归（Linear Regression）作为广义线性模型的另一个特例，其假设是因变量y服从高斯分布，这明显不是点击这类二分类问题的数学假设。</p>
 <p>在了解LR的数学理论基础后，其数学形式就不再是空中楼阁了，具体的形式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d019cab1a8a345a1933fd36123f44842.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637282.jpeg" />   
     </p>
 <p>其中x是输入向量，θ 是我们要学习的参数向量。结合CTR模型的问题来说，x就是输入的特征向量，h(x)就是我们最终希望得到的点击率。</p>
 <p><strong>2. 人类的直觉和可解释性</strong></p>
@@ -250,11 +250,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>但LR的表达能力毕竟是非常初级的。由于LR仅使用单一特征，无法利用高维信息，在“辛普森悖论”现象的存在下，只用单一特征进行判断，甚至会得出错误的结论。</p>
 <p>针对这个问题，当时的算法工程师们经常采用手动组合特征，再通过各种分析手段筛选特征的方法。但这个方法无疑是残忍的，完全不符合“ <strong>懒惰是程序员的美德</strong>”这一金科玉律。更遗憾的是，人类的经验往往有局限性，程序员的时间和精力也无法支撑其找到最优的特征组合。因此采用 PLOY2模型进行特征的“暴力”组合成为了可行的选择。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cabdc11e54e543dea70bacd579854394.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637673.jpeg" />   
     </p>
 <p>在上面POLY2二阶部分的目标函数中（上式省略一阶部分和sigmoid函数的部分），我们可以看到POLY2对所有特征进行了两两交叉，并对所有的特征组合赋予了权重 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f29a47f0d8954d509a41ffcb66ba2988.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637407.svg&#43;xml" />   
     
 。POLY2通过暴力组合特征的方式一定程度上解决了特征组合的问题。并且由于本质上仍是线性模型，其训练方法与LR并无区别，便于工程上的兼容。</p>
 <p>但POLY2这一模型同时存在着两个巨大的缺陷：</p>
@@ -265,11 +265,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="三fm隐向量特征交叉"><strong>三、FM——隐向量特征交叉</strong></h3>
 <p>为了解决POLY2模型的缺陷，2010年德国康斯坦茨大学的Steffen Rendle提出了FM（Factorization Machine）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4a4d7b3c97644e848a1bd53a0a39a82d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637992.png" />   
     </p>
 <p>从FM的目标函数的二阶部分中我们可以看到，相比POLY2，主要区别是用两个向量的内积（ <strong>wj1</strong> **·** <strong>wj2</strong>）取代了单一的权重
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a8df20deccaa4755b4798beb69828393.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637623.svg&#43;xml" />   
      。具体来说，FM为每个特征学习了一个隐权重向量（latent vector），在特征交叉时，使用两个特征隐向量的内积作为交叉特征的权重。</p>
 <p>通过引入特征隐向量的方式，直接把原先n^2级别的权重数量减低到了n <em>k（k为隐向量维度，n&raquo;k）。在训练过程中，又可以通过转换目标函数形式的方法，使FM的训练复杂度进一步降低到n</em> k级别。相比POLY2极大降低训练开销。</p>
 <p><strong>隐向量的引入还使得FM比POLY2能够更好的解决数据稀疏性的问题</strong>。举例来说，我们有两个特征，分别是channel和brand，一个训练样本的feature组合是(ESPN, Adidas)，在POLY2中，只有当ESPN和Adidas同时出现在一个训练样本中时，模型才能学到这个组合特征对应的权重。而在FM中，ESPN的隐向量也可以通过(ESPN, Gucci)这个样本学到，Adidas的隐向量也可以通过(NBC, Adidas)学到，这大大降低了模型对于数据稀疏性的要求。甚至对于一个从未出现过的特征组合(NBC, Gucci)，由于模型之前已经分别学习过NBC和Gucci的隐向量，FM也具备了计算该特征组合权重的能力，这是POLY2无法实现的。也许FM相比POLY2丢失了某些信息的记忆能力，但是泛化能力大大提高，这对于互联网的数据特点是非常重要的。</p>
@@ -277,37 +277,37 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="四ffm引入特征域概念"><strong>四、FFM——引入特征域概念</strong></h3>
 <p>2015年，基于FM提出的FFM（Field-aware Factorization Machine ，简称FFM）在多项CTR预估大赛中一举夺魁，并随后被Criteo、美团等公司深度应用在CTR预估，推荐系统领域。相比FM模型，FFM模型主要引入了Field-aware这一概念，使模型的表达能力更强。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1fcee336e67747b9808a7be409e45f38.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637030.jpeg" />   
     </p>
 <p>上式是FFM的目标函数的二阶部分。其与FM目标函数的区别就在于隐向量由原来的 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3ac78922b35d478790781e6e0d6f6cf3.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637517.svg&#43;xml" />   
     
 变成了 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/14d3f96b5ce84a0a95f3164cfe5d72b8.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637940.svg&#43;xml" />   
     
 ，这就意味着每个特征对应的不是一个隐向量，而是对应着不同域的一组隐向量，当
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d016e58128c14c3d950040625af846bc.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637381.svg&#43;xml" />   
      特征与
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/661d745b23344edeb13d620404734682.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637839.svg&#43;xml" />   
      特征进行交叉时，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9df8e8b2ead04eef9bfcc96517844e01.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637169.svg&#43;xml" />   
      特征会从一组隐向量中挑出与特征
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9c924a2552104bf28bb041716f8e6780.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637577.svg&#43;xml" />   
      的域f2对应的隐向量
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6ab4b8065b9747ae9f845391d5655456.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637986.svg&#43;xml" />   
      进行交叉。同理特征
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d81f5d0524c944ab9b7d4674d6b243c6.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637469.svg&#43;xml" />   
      也会用与
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e064780f06574f6d85d36d1a00713744.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637996.svg&#43;xml" />   
      的域f1对应的隐向量进行交叉。</p>
 <p>这里再次强调一下，上面所说的“域”就代表着特征域，域内的特征一般会采用one-hot编码形成one-hot特征向量。</p>
 <p>FFM模型学习每个特征在f个域上的k维隐向量，交叉特征的权重由特征在对方特征域上的隐向量内积得到，权重数量共n <em>k</em> f个。在训练方面，由于FFM的二次项并不能够像FM那样简化，因此其复杂度为kn^2。</p>
@@ -315,29 +315,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="ctr模型特征交叉方向的演化"><strong>CTR模型特征交叉方向的演化</strong></h3>
 <p>以上模型实际上是CTR模型朝着特征交叉的方向演化的过程，我们再用图示方法回顾一下从POLY2到FM，再到FFM进行特征交叉方法的不同。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b0b78920f7624fedac3a29be9549676b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637605.png" />   
     </p>
 <p>POLY2模型直接学习每个交叉特征的权重，权重数量共n^2个。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cc88fd094b1d41f79f32fcfa96f79c43.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637258.jpeg" />   
     </p>
 <p>FM模型学习每个特征的k维隐向量，交叉特征由相应特征隐向量的内积得到，权重数量共n*k个。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8c3e459e6ef2440796437f041fbffe76.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637768.jpeg" />   
     </p>
 <p>FFM模型引入了特征域这一概念，在做特征交叉时，每个特征选择与对方域对应的隐向量做内积运算得到交叉特征的权重。参数数量共n <em>k</em> f个。</p>
 <h3 id="五gbdtlr特征工程模型化的开端"><strong>五、GBDT+LR——特征工程模型化的开端</strong></h3>
 <p>FFM模型采用引入特征域的方式增强了模型的表达能力，但无论如何，FFM只能够做二阶的特征交叉，如果要继续提高特征交叉的维度，不可避免的会发生组合爆炸和计算复杂度过高的情况。那么有没有其他的方法可以有效的处理高维特征组合和筛选的问题？2014年，Facebook提出了基于GBDT+LR组合模型的解决方案。</p>
 <p>简而言之，Facebook提出了一种利用GBDT自动进行特征筛选和组合，进而生成新的离散特征向量，再把该特征向量当作LR模型输入，预估CTR的模型结构。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bfd9077888eb464792dbac9edf0cf95c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637252.jpeg" />   
     </p>
 <p>GBDT+LR的模型结构</p>
 <p>需要强调的是，用GBDT构建特征工程，和利用LR预估CTR两步是独立训练的。所以自然不存在如何将LR的梯度回传到GBDT这类复杂的问题，而利用LR预估CTR的过程前面已经有所介绍，在此不再赘述，下面着重讲解如何利用GBDT构建新的特征向量。</p>
 <p>大家知道，GBDT是由多棵回归树组成的树林，后一棵树利用前面树林的结果与真实结果的残差做为拟合目标。每棵树生成的过程是一棵标准的回归树生成过程，因此每个节点的分裂是一个自然的特征选择的过程，而多层节点的结构自然进行了有效的特征组合，也就非常高效的解决了过去非常棘手的特征选择和特征组合的问题。</p>
 <p>利用训练集训练好GBDT模型之后，就可以利用该模型完成从原始特征向量到新的离散型特征向量的转化。具体过程是这样的，一个训练样本在输入GBDT的某一子树后，会根据每个节点的规则最终落入某一叶子节点，那么我们把该叶子节点置为1，其他叶子节点置为0，所有叶子节点组成的向量即形成了该棵树的特征向量，把GBDT所有子树的特征向量连接起来，即形成了后续LR输入的特征向量。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8e03dc3128a847598a321702c612e577.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637584.jpeg" />   
     </p>
 <p>GBDT生成特征向量的过程</p>
 <p>举例来说，如上图所示，GBDT由三颗子树构成，每个子树有4个叶子节点，一个训练样本进来后，先后落入“子树1”的第3个叶节点中，那么特征向量就是[0,0,1,0]，“子树2”的第1个叶节点，特征向量为[1,0,0,0]，“子树3”的第4个叶节点，特征向量为[0,0,0,1]，最后连接所有特征向量，形成最终的特征向量[0,0,1,0,1,0,0,0,0,0,0,1]。</p>
@@ -345,7 +345,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>GBDT+LR比FM重要的意义在于， <strong>它大大推进了特征工程模型化这一重要趋势</strong>，某种意义上来说，之后深度学习的各类网络结构，以及embedding技术的应用，都是这一趋势的延续。</p>
 <p>在之前所有的模型演化过程中，实际上是从特征工程这一角度来推演的。接下来，我们从时效性这个角度出发，看一看模型的更新频率是如何影响模型效果的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/40b27bbd252f43ceb5f968125bf8e77c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637037.jpeg" />   
     </p>
 <p>模型实效性实验</p>
 <p>在模型更新这个问题上，我们的直觉是模型的训练时间和serving时间之间的间隔越短，模型的效果越好，为了证明这一点，facebook的工程师还是做了一组实效性的实验（如上图），在结束模型的训练之后，观察了其后6天的模型loss（这里采用normalized entropy作为loss）。可以看出，模型的loss在第0天之后就有所上升，特别是第2天过后显著上升。因此daily update的模型相比weekly update的模型效果肯定是有大幅提升的。</p>
@@ -357,7 +357,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>之前我们已经多次强调，由于one hot等id类特征处理方法导致广告和推荐场景下的样本特征向量极度稀疏，维度极高，动辄达到百万、千万量级。为了不割裂特征选择和模型训练两个步骤，如果能够在保证精度的前提下尽可能多的让模型的参数权重为0，那么我们就可以自动过滤掉这些权重为0的特征，生成一个“轻量级”的模型。“轻量级”的模型不仅会使样本部署的成本大大降低，而且可以极大降低模型inference的计算延迟。这就是模型稀疏性的重要之处。</p>
 <p>而SGD由于每次迭代只选取一个样本，梯度下降的方向虽然总体朝向全局最优解，但微观上的运动的过程呈现布朗运动的形式，这就导致SGD会使几乎所有特征的权重非零。即使加入L1正则化项，由于CPU浮点运算的结果很难精确的得到0的结果，也不会完全解决SGD稀疏性差的问题。就是在这样的前提下，FTRL几乎完美地解决了模型精度和模型稀疏性兼顾的训练问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/32736e8635f54936b0d6c571905b5392.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637827.jpeg" />   
     </p>
 <p>FTRL的发展过程</p>
 <p>但FTRL的提出也并不是一蹴而就的。如上图所示，FTRL的提出经历了下面几个关键的过程：</p>
@@ -384,13 +384,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>本质上，MLR可以看做是对LR的自然推广，它 <strong>在LR的基础上采用分而治之的思路</strong>，先对样本进行分片，再在样本分片中应用LR进行CTR预估。在LR的基础上加入聚类的思想，其动机其实来源于对计算广告领域样本特点的观察 。</p>
 <p>举例来说，如果CTR模型要预估的是女性受众点击女装广告的CTR，显然我们并不希望把男性用户点击数码类产品的样本数据也考虑进来，因为这样的样本不仅对于女性购买女装这样的广告场景毫无相关性，甚至会在模型训练过程中扰乱相关特征的权重。为了让CTR模型对不同用户群体，不用用户场景更有针对性，其实理想的方法是先对全量样本进行聚类，再对每个分类施以LR模型进行CTR预估。MLR的实现思路就是由该动机产生的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0deca416b3c14ed1863066a3a31d8a2c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637366.png" />   
     </p>
 <p>MLR目标函数的数学形式如上式，首先用聚类函数π对样本进行分类（这里的π采用了softmax函数，对样本进行多分类），再用LR模型计算样本在分片中具体的CTR，然后将二者进行相乘后加和。</p>
 <p>其中超参数分片数m可以较好地平衡模型的拟合与推广能力。当m=1时MLR就退化为普通的LR，m越大模型的拟合能力越强，但是模型参数规模随m线性增长，相应所需的训练样本也随之增长。在实践中，阿里给出了m的经验值为12。</p>
 <p>下图中MLR模型用4个分片可以完美地拟合出数据中的菱形分类面。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ed925cfe86344303a5b59b3e9f36209f.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637102.jpeg" />   
     </p>
 <p>MLR算法适合于工业级的广告、推荐等大规模稀疏数据场景问题。主要是由于表达能力强、稀疏性高等两个优势：</p>
 <ol>
@@ -403,7 +403,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>另一边，Alex Krizhevsky 2012年提出了引爆整个深度学习浪潮的AlexNet，深度学习的大幕正式拉开，其应用逐渐从图像扩展到语音，再到NLP领域，推荐和广告也必然会紧随其后，投入深度学习的大潮之中。</p>
 <p>2016年，随着FNN，Deep&amp;Wide，Deep crossing等一大批优秀的CTR模型框架的提出，深度学习CTR模型逐渐席卷了推荐和广告领域，成为新一代CTR模型当之无愧的主流。下一篇文章，我们将继续探讨深度学习CTR模型，从模型演化的角度揭开所有主流深度学习CTR模型之间的关系和每个模型的特点，期待继续与你一同学习讨论。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/474d5d11b16249ebb3c8f1ad152f7597.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271637945.jpeg" />   
     </p>
 <p>最后再次强调一下模型的演化图，希望大家能从更高的角度审视整个CTR模型的发展过程。</p>
 <p>这里是** <a href="https://zshipu.com/t?url=https%3A%2F%2Fzhuanlan.zhihu.com%2Fwangzhenotes">「王喆的机器学习笔记」</a>** ，因为文章的内容较多，水平有限，希望大家能够踊跃指出�</p>
@@ -536,6 +536,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -569,10 +573,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -951,6 +951,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -208,18 +208,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>那我们今天就一起讨论一下Graph Embedding的主要做法和前沿应用。</p>
 <p>word2vec和由其衍生出的item2vec是embedding技术的基础性方法（我在之前的文章中也详细介绍了二者的技术原理， <a href="https://zshipu.com/t?url=https%3A%2F%2Fzhuanlan.zhihu.com%2Fp%2F53194407">王喆：万物皆Embedding，从经典的word2vec到深度学习基本操作item2vec</a>），但二者都是建立在“ <strong>序列</strong>”样本（比如句子、推荐列表）的基础上的。而在互联网场景下，数据对象之间更多呈现的是图结构。典型的场景是由用户行为数据生成的和物品全局关系图（图1），以及加入更多属性的物品组成的知识图谱（图2）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e42ec9fd633847d0ab1c5e2de3db90bd.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272151773.jpeg" />   
     </p>
 <p>图1 由用户行为序列生成的物品全局关系图 (引自阿里论文)</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/87a2ca609eab48cfb53b4154c36689eb.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272151622.jpeg" />   
     </p>
 <p>图2 由属性、实体、各类知识组成的知识图谱</p>
 <p>在面对图结构的时候，传统的序列embedding方法就显得力不从心了。在这样的背景下，对图结构中间的节点进行表达的graph embedding成为了新的研究方向，并逐渐在深度学习推荐系统领域流行起来。</p>
 <h2 id="经典的graph-embedding方法deepwalk"><strong>经典的Graph Embedding方法——DeepWalk</strong></h2>
 <p>早期影响力较大的graph embedding方法是2014年提出的DeepWalk，它的主要思想是在由物品组成的图结构上进行随机游走，产生大量物品序列，然后将这些物品序列作为训练样本输入word2vec进行训练，得到物品的embedding。图3用图示的方法展现了DeepWalk的过程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/22b9e62d064c4a729ada2608ca80b07a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272151629.jpeg" />   
     </p>
 <p>图3 DeepWalk的算法流程（引自阿里论文）</p>
 <p>如图3，整个DeepWalk的算法流程可以分为四步：</p>
@@ -231,7 +231,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>在上述DeepWalk的算法流程中，核心是第三步，其中唯一需要形式化定义的是随机游走的跳转概率，也就是到达节点vi后，下一步遍历vi的临接点vj的概率。如果物品的相关图是有向有权图，那么从节点vi跳转到节点vj的概率定义如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/24e78423931a4611b2b7e81d8a09ac84.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272151551.jpeg" />   
     </p>
 <p>其中N+(vi)是节点vi所有的出边集合，Mij是节点vi到节点vj边的权重。</p>
 <p>如果物品相关图是无相无权重图，那么跳转概率将是上面公式的一个特例，即权重Mij将为常数1，且N+(vi)应是节点vi所有“边”的集合，而不是所有“出边”的集合。</p>
@@ -240,7 +240,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>具体来讲，网络的“同质性”指的是距离相近节点的embedding应该尽量近似，如图4，节点u与其相连的节点s1、s2、s3、s4的embedding表达应该是接近的，这就是“同质性“的体现。</p>
 <p>“结构性”指的是结构上相似的节点的embedding应该尽量接近，图4中节点u和节点s6都是各自局域网络的中心节点，结构上相似，其embedding的表达也应该近似，这是“结构性”的体现。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8d0569f3032b4e87a7c90555bcd87947.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272151555.jpeg" />   
     </p>
 <p>图4 宽度优先搜索（BFS）和 深度优先搜索（DFS）示意图</p>
 <p>为了使Graph Embedding的结果能够表达网络的 <strong>同质性</strong>，在随机游走的过程中，需要让游走的过程更倾向于 <strong>宽度优先搜索（BFS）</strong>，因为BFS更喜欢游走到跟当前节点有直接连接的节点上，因此就会有更多同质性信息包含到生成的样本序列中，从而被embedding表达；另一方面，为了抓住网络的 <strong>结构性</strong>，就需要随机游走更倾向于 <strong>深度优先搜索（DFS）</strong>，因为DFS会更倾向于通过多次跳转，游走到远方的节点上，使得生成的样本序列包含更多网络的整体结构信息。**（通过 **</p>
@@ -248,29 +248,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>** 同学的提醒，这里其实是写反了，BFS应该反映了结构性，DFS反而反应了同质性，大家可以深度思考一下这是为什么，欢迎在评论区讨论）**</p>
 <p>那么在node2vec算法中，是怎样控制BFS和DFS的倾向性的呢？主要是通过节点间的跳转概率。图5显示了node2vec算法 <strong>从节点t跳转到节点v后</strong>，下一步从 <strong>节点v</strong> 跳转到周围各点的跳转概率。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/858fcd2c57034b84959a1fb1d63aba50.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272151315.jpeg" />   
     </p>
 <p>图5 node2vec的跳转概率</p>
 <p>形式化来讲，从节点v跳转到下一个节点x的概率为</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/270b0e0cb5bd435d8b24e367ceda5ead.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272151202.jpeg" />   
     </p>
 <p>其中 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d06f49371f104220a766043f2b133fc9.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272151988.svg&#43;xml" />   
     
 是边vx的权重， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7630d32b5bff480ebdaa560954fc8bb6.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272151994.svg&#43;xml" />   
     
 的定义如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1281f46e32f34f4eb13231fc31a05602.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272151431.jpeg" />   
     </p>
 <p>其中，dtx指的是节点t到节点x的距离，参数p和q共同控制着随机游走的倾向性。参数p被称为返回参数（return parameter），p越小，随机游走回节点t的可能性越大，node2vec就更注重表达网络的同质性，参数q被称为进出参数（in-out parameter），q越小，则随机游走到远方节点的可能性越大，node2vec更注重表达网络的结构性，反之，当前节点更可能在附近节点游走。</p>
 <p>node2vec这种灵活表达同质性和结构性的特点也得到了实验的证实。图6的上图就是node2vec更注重同质性的体现，可以看到距离相近的节点颜色更为接近，而图6下图则是结构特点相近的节点的颜色更为接近。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8c6b9779690f4b6e822f75421e1542cf.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272151364.jpeg" />   
     </p>
 <p>图6 node2vec实验结果</p>
 <p>node2vec所体现的网络的同质性和结构性在推荐系统中也是可以被很直观的解释的。 <strong>同质性相同的物品很可能是同品类、同属性、或者经常被一同购买的物品</strong>，而 <strong>结构性相同的物品则是各品类的爆款、各品类的最佳凑单商品等拥有类似趋势或者结构性属性的物品</strong>。毫无疑问，二者在推荐系统中都是非常重要的特征表达。由于node2vec的这种灵活性，以及发掘不同特征的能力，甚至可以把不同node2vec生成的embedding融合共同输入后续深度学习网络，以保留物品的不同特征信息。</p>
@@ -406,6 +406,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -439,10 +443,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -821,6 +821,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -196,7 +196,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>可能很多同学都不知道，从打开美团App点一份外卖开始，然后在半小时内就可以从骑手小哥手中拿到温热的饭菜，这中间涉及的环节有多么复杂。而美团配送技术团队的核心任务，就是将每天来自祖国各地的数千万份订单，迅速调度几十万骑手小哥按照最优路线，并以最快的速度送到大家手中。</p>
 <p>在这种场景下，骑手的交付时间，即骑手到达用户附近下车后多久能送到用户手中，就是一个非常重要的环节。下图是一个订单在整个配送链路的时间构成，时间轴最右部分描述了交付环节在整个配送环节中的位置。交付时间衡量的是骑手送餐时的交付难度，包括从骑手到达用户楼宇附近，到将餐品交付到用户手中的整个时间。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6eb444a5524c46519cc31d7b01806eb6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716646.webp" />   
     </p>
 <p>交付时间的衡量是非常有挑战的一件事，因为骑手在送餐交付到用户手中时会碰到不同的问题，例如：骑手一次送餐给楼宇内多个用户，骑手对于特定楼宇寻址特别困难，骑手在交付楼宇附近只能步行，老旧小区没有电梯，写字楼无法上楼，或者难以等到电梯等等。交付时间预估需要具备刻画交付难度的能力，在定价、调度等多个场景中被广泛使用。例如根据交付难度来确定是否调节骑手邮资，根据交付难度来确定是否调节配送运单的顺序，从而避免超时等等。总的来说，交付时间预估是配送业务基础服务的重要一环。</p>
 <p>但是，交付时间预估存在如下的困难：</p>
@@ -209,7 +209,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/62ab9fdb384945a182e72a8aed855a3a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716548.webp" />   
     </p>
 <p>上图为部分版本所对应的性能，平响时间均在5ms内，TP99基本在10ms内</p>
 <p>总结起来，交付时间预估的问题，在于需要使用轻量级的解决方案来处理多种数据形式的非数值型数据，并提取有效信息量，得到相对准确的结果。在相同效果的前提下，我们更倾向于性能更优的方案。</p>
@@ -232,7 +232,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>迭代路径</strong></p>
 <p>整个技术路径较为清晰简单，即利用Word2Vec将charLevel字符进行Embedding，获得该地址的向量表示，并且融入GPS位置信息，设计相应兜底策略。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c33ba4fee39a496e86cb573254f9dfb6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716250.webp" />   
     </p>
 <p>向量召回方案决策路径</p>
 <p><strong>最终效果</strong></p>
@@ -250,13 +250,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>迭代路径</strong></p>
 <p>开始采用端到端的深度学习模型，这里首先需要解决的是覆盖率问题，直接采用LSTM读取charLevel的地址数据，经过全连接层直接输出交付时间。作为第一版本的数据，该版本数据基本持平树模型效果，但对于树模型未召回的20%数据，有了较大的提升。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4568372f31bb42e8b2cf986dfbabb138.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716052.webp" />   
     </p>
 <p>地址信息输入charLevel模型</p>
 <p>在采用charLevel的地址奏效后，我们开始采用加入用户地址GPS的信息，由于GPS为经纬度信息，非数值型数据，我们使用一种基于地理位置格点的双线性插值方法进行Embedding。该方案具备一定的扩展性，对不同的GPS均能合理得到Embedding向量，同时具备平滑特性，对于多对偏移较小的GPS点能够很好的进行支持。</p>
 <p>最终方案将地址Embedding后，以及GPS点的Embedding化后，加入下单时间、城市ID、区域ID等特征后，再进行特征融合及变换，得到交付模型的时间预估输出。整个模型是一个端到端的训练，所有参数均为Trainable。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c8fee51fac604f80be6e7f15544665bb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716976.webp" />   
     </p>
 <p>模型结构示意图</p>
 <p><strong>扩展组件</strong></p>
@@ -265,7 +265,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>对于深度学习模型，我们有一系列特征重要性评估方案，这里采用依次进行Feature Permutation的方式，作为评估模型特征重要性的方式。</p>
 <p>考虑GPS经纬度和用户地址存在较大程度的信息重叠，评估结果如下。Shuffle后，用户地址的特征重要性高于GPS经纬度的特征重要性。加入GPS后ME下降不如地址信息明显，主要是地址信息包含一定冗余信息（下文会分析），而其他信息的影响则可以忽略不计。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8dcb36c8d7a84e6a89a55cd7bd837f37.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716025.webp" />   
     </p>
 <p>注：在配送的其他案例中，商户GPS的经纬度重要性&raquo;用户地址重要性&raquo;用户GPS的经纬度重要性，该特征重要性仅仅为本案例特征重要性排序，不同学习目标下可能会有比较明显差别。</p>
 <p><strong>最终效果</strong>\<em>\</em>\**</p>
@@ -280,7 +280,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>Faiss是FaceBook在2017年开源的一个用于稠密向量高效相似性搜索和密集向量聚类的库，能够在给定内存使用下，在速度和精度之间权衡。可以在提供多种检索方式的同时，具备C++/Python等多个接口，也对大部分算法支持GPU实现。</p>
 <p>下图为Faiss测评曲线：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1737ad7c6338409eb8fb97218fda43a8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716784.webp" />   
     </p>
 <p>交付时间模型召回的性能测试如下，可以达到性能需求。</p>
 <ul>
@@ -292,13 +292,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0738abd9e1fd4048b97a196cb727e528.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716591.webp" />   
     </p>
 <p><strong>3.2 序列模块性能</strong></p>
 <p>在TensorFlow系统中，以C API为界限，将系统划分为【前端】和【后端】两个子系统，前端扮演Client角色，完成计算图的构造，然后由Protobuf发送给后端启动计算图计算。计算图的基础单元是OP，代表的是某种操作的抽象。在TensorFlow中，考虑到实现的不同，不同OP算子的选择，对于计算性能具有较大影响。</p>
 <p>为了评测深度学习交付模型的性能瓶颈，首先对整个模型进行Profile，下图即为Profile后的Timeline，其中整个计算大部分消耗在序列模块处理部分，即下图中的蓝色部分。故需要对序列模块的计算性能进行OP算子的加速。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2d7e3fcbb7b94f83873642116b9329d1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716592.webp" />   
     </p>
 <p>考虑到序列处理的需求，评估使用了LSTM/GRU/SRU等模块，同时在TensorFlow中，LSTM也存在多种实现形式，包括BasicLSTMCell、LSTMCell、LSTMBlockCell、LSTMBlockFusedCell和CuDNNLSTM等实现，由于整个交付模型运行在CPU上，故排除CuDNNLSTM，同时设置了全连接层FullyConnect加入评估。</p>
 <p>从评估中可以发现，全连接层速度最快，但是对于序列处理会损失2.3pp效果，其余的序列模型效果差异不大，但不同的OP实现对结果影响较大。原生的BasicLSTM性能较差，contrib下的LSTMBlockFusedCell性能最好，GRU/SRU在该场景下未取得显著优势。</p>
@@ -320,7 +320,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>注：在评估中，不仅仅包括了序列模型，也包括了其他功能模块，故参数量及模型大小按照总体模型而言</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/89cc07717f1f41e1bc33e7bee2a2283e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716594.webp" />   
     </p>
 <p><strong>3.3 向量效果分析</strong></p>
 <p>将向量召回与深度学习模型进行横向比较，二者中间过程均生成了高维向量。不难发现，二者具备一定的相似性，这里就引发了我们的思考：</p>
@@ -335,7 +335,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>首先，我们分析第一个问题，End-to-End模型提升主要来自哪里？</strong></p>
 <p>我们直接将End-to-End模型得到的char embedding抽取出来，直接放入到Word2Vec方案内，取代Word2Vec生成的char embedding，再进行向量召回的评估。结果如下表所示，单独抽取出来的char embedding在向量召回方案中，表现与Word2Vec生成的向量基本一致，并没有明显的优势。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f0b49ea19c9542b3b6508925110a128d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716394.webp" />   
     </p>
 <p>注：</p>
 <ul>
@@ -372,7 +372,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>为了排除第二方面的因素，即b的因素，使用地址主干词作为输入，而不用地址附属信息和其他模型结构的输入，保持模型输入跟Word2Vec一致。在测试集上，模型的效果比完整地址有明显的下降，MAE增大约15s。同时将char embedding提取出来，取代Word2Vec方案的char embedding，效果反而变差了。结合2.3节中的特征重要性，可知，深度学习模型带来的提升主要来自对地址中冗余信息（相较于向量召回）的利用，其次是多个新特征的加入。另外，对比两个End-to-End模型的效果，地址附属信息中也包含着对匹配地址有用的信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ec436cb2097844a491a4576a5159cf55.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281716218.webp" />   
     </p>
 <p><strong>针对第二个问题，有监督的End-to-End学习到的Embedding向量，与自监督的Word2Vec得到的向量在地址相似性计算中有多大差别，孰优孰劣？</strong>\<em>\</em>\**</p>
 <p>采用地址主干词代替完整地址，作为End-to-End模型的输入进行训练，其他信息均保持不变。使用地址主干词训练得到的Embedding向量，套用到向量召回方案中。</p>
@@ -509,6 +509,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -542,10 +546,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -924,6 +924,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

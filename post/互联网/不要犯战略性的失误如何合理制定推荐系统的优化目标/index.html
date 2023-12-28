@@ -204,13 +204,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>YouTube是全球知名的UGC流媒体公司。用户观看YouTube的内容是免费的，YouTube无法通过会员费或者订阅费赚钱，因此其最主要的商业模式就是视频广告的收入。视频广告会阶段性的出现在视频播放之前和视频播放过程中，因此YouTube的广告收入是与用户观看时长成正比的。所以为了完成公司的商业目标，YouTube推荐系统的优化目标并不是点击率、播放率等，而是用户的播放时长。</p>
 <p>不可否认的是，点击率等指标与用户播放时长有相关性，但二者之间仍存在着一些“优化动机”上的差异。如果以点击率为优化目标，那么推荐系统会倾向于推荐“标题党”，“预览图劲爆”的短视频，而以播放时长为优化目标，那么推荐系统则应把视频的长短，视频的质量等特征考虑进来，也许推荐一个高质量的“电影”或“连续剧”就是更好的选择。推荐目标的差异会导致推荐系统倾向性的不同，进而影响到能否完成“增加用户播放时长”这一商业目标。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2020/2/be36e569cfc64f34ad4ea6d36e9deb74-image.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271421680.png" />   
     </p>
 <p>图1 YouTube推荐系统的输出层</p>
 <p>在YouTube的推荐系统模型中，引入播放时长作为优化目标的方式也非常有意思，大家可以参考。YouTube的Ranking模型原本是把推荐问题当作分类问题来对待的，即预测用户是否点击一个视频 。</p>
 <p>既然是分类问题，理论上应很难去预测播放时长，那应该是回归模型做的事情。但YouTube巧妙地把播放时长转换成正样本的权重，输出层利用加权逻辑回归（Weighted Logistic）来进行训练，预测过程中利用
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a1c29719b10a4b49b4772d92f04437b6.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271421751.svg&#43;xml" />   
     
 这一算式计算样本的概率（Odds），这一概率就是模型对播放时长的预测。</p>
 <p>（详细的过程可以参考之前的专栏文章： <a href="https://zshipu.com/t?url=https%3A%2F%2Fzhuanlan.zhihu.com%2Fp%2F61827629">王喆：揭开YouTube深度推荐系统模型Serving之谜</a>）</p>
@@ -218,7 +218,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="模型优化和应用场景的统一性"><strong>模型优化和应用场景的统一性</strong></h2>
 <p>优化目标的制定还应该考虑的要素是模型优化场景和应用场景的统一性，这一点上，阿里的多目标优化模型给了我们一个很好的例子。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/90babc639fdf48d1a9b9336fabcd340b.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271421936.jpeg" />   
     </p>
 <p>图2 训练空间和预测空间的不一致</p>
 <p>在天猫、淘宝等电商类网站上做推荐，用户从登陆到购买的过程可以抽象成两步：</p>
@@ -231,13 +231,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们当然可以换个思路解决问题，即针对第一步的场景，构建CTR预估模型；再针对第二步的场景，构建CVR预估模型，这也是电商或广告类公司经常采用的做法。但这个方案的尴尬之处在于，整个问题最终的优化目标是购买转化，并不是“点击”，在第一步过程中仅考虑点击数据，显然并不是全局最优化转化率的方案。</p>
 <p>为了解决同时优化CTR和CVR模型的目的，阿里提出了一个多目标优化模型ESMM（Entire Space Multi-task Model）。ESMM可以被当作是一个同时模拟曝光到点击 和 点击到转化两个阶段的模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2020/2/893df0df2d2d424fb9fb0db67390a3d0-image.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271421771.png" />   
     </p>
 <p>图3 阿里的多目标优化模型 ESMM</p>
 <p>从模型结构（如图3）上看，最底层的embedding层是CVR部分和CTR部分共享的，共享Embedding层的目的主要是解决CVR任务正样本稀疏的问题，利用CTR的数据生成用户（user）和物品（item）更准确的特征表达。</p>
 <p>中间层是CVR部分和CTR部分各自利用完全隔离的神经网络拟合自己的优化目标，pCVR和pCTR。最终，将pCVR和pCTR相乘得到pCTCVR。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2020/2/4a732e5c557d43c889523a5c67b348a6-image.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271421926.png" />   
     </p>
 <p>这里pCVR，pCTR和pCTCVR的关系如上式所示。其中pCTR指post-view</p>
 <p>click-through rate，即曝光后点击率；pCVR指post-click CVR，即点击后转化率；pCTCVR指曝光后点击转化序列的概率。</p>
@@ -372,6 +372,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -405,10 +409,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -787,6 +787,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

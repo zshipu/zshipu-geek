@@ -214,7 +214,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="11-consumer向broker端发送pull消息请求的主要过程">1.1 Consumer向Broker端发送Pull消息请求的主要过程</h2>
 <p>在RocketMQ的Consumer端，后台独立线程服务—pullMessageService是Pull消息请求的发起者，它不断地尝试从阻塞队列—LinkedBlockingQueue中获取元素PullRequest，并根据pullRequest中的参数以及订阅关系信息调用pullAPIWrapper的pullKernelImpl()方法发送封装后的Pull消息请求—PullMessageRequestHeader至Broker端来拉取消息（具体完成发送一次Pull消息的PRC通信请求的是MQClientAPIImpl中的pullMessage()方法）。这里涉及细节的时序图（ps：时序图中没有涉及PRC异步通信中的callback过程）如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/7/9b04da3b90da414d9bcd46cbd4317c4b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272128665.png" />   
     </p>
 <p>Consumer向Broker端发送长轮询请求的时序图.jpg</p>
 <p>其中， DefaultMQPushConsumerImpl的pullMessage(pullRequest)方法是发送Pull消息请求的关键：</p>
@@ -230,7 +230,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="12-broker端处理pull消息请求的一般过程">1.2 Broker端处理Pull消息请求的一般过程</h2>
 <p>这里先来说下对于一般情况下（即为所要Pull的消息在RocketMQ的Broker端已经是存在，一般可以Pull到的情况），Broker端处理这个Pull消息请求的主要过程。其时序图（ps：图中只是画了大部分的流程，详细细节还需要对照源码看下）如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/7/8da8886373a34a55a54a5761088de6c6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272128769.png" />   
     </p>
 <p>Broker端接受长轮询请求的处理时序图.jpg</p>
 <p>从上面的简易时序图中可以看到Broker端Pull消息的主要关键点如下：</p>
@@ -262,7 +262,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>（2）根据topic和consumerGroup为参数调用mQClientFactory.findConsumerIdList()方法向Broker端发送获取该消费组下消费者Id列表的RPC通信请求（ <strong>Broker端基于前面Consumer端上报的心跳包数据而构建的consumerTable做出响应返回，业务请求码：GET_CONSUMER_LIST_BY_GROUP</strong>）；</p>
 <p>（3）先对Topic下的消息消费队列、消费者Id排序，然后用消息队列分配策略算法（默认为：消息队列的平均分配算法），计算出待拉取的消息队列。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/7/c8769d85405f4ea0923e960e7aa2b75e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272128001.png" />   
     </p>
 <p>这里的平均分配算法，类似于分页的算法，将所有MessageQueue排好序类似于记录，将所有消费端Consumer排好序类似页数，并求出每一页需要包含的平均size和每个页面记录的范围range，最后遍历整个range而计算出当前Consumer端应该分配到的记录（这里即为：MessageQueue）。具体的算法代码如下：</p>
 <p>@Override</p>
@@ -284,7 +284,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>return result;</p>
 <p>（4）然后，调用updateProcessQueueTableInRebalance()方法，具体的做法是，先将分配到的消息队列集合（mqSet）与processQueueTable做一个过滤比对，具体的过滤比对方式如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/7/bc2d3365085942fc9e6d76846231aaac.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272128758.png" />   
     </p>
 <p>RebalancePushImpl负载均衡(分发pullRequest到pullRequestQueue).jpg</p>
 <p>这里可以分如下两种情况来筛选过滤：</p>
@@ -418,6 +418,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -451,10 +455,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -833,6 +833,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

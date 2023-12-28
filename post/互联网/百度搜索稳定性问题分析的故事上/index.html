@@ -215,13 +215,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/89b841068903458b8d461153b407e1d0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272315617.png" />   
     </p>
 <p><strong>导读：</strong> 百度搜索系统是百度历史最悠久、规模最大并且对其的使用已经植根在大家日常生活中的系统。坊间有一种有趣的做法：很多人通过打开百度搜索来验证自己的网络是不是通畅的。这种做法说明百度搜索系统在大家心目中是“稳定”的代表，且事实确是如此。百度搜索系统为什么具有如此高的可用性？背后使用了哪些技术？以往的技术文章鲜有介绍。本文立足于大家所熟悉的百度搜索系统本身，为大家介绍其可用性治理中关于“稳定性问题分析”方面使用的精细技术，以历史为线索，介绍稳定性问题分析过程中的困厄之境、破局之道、创新之法。希望给读者带来一些启发，更希望能引起志同道合者的共鸣和探讨。</p>
 <h2 id="第1章-困境"><strong>第1章 困境</strong></h2>
 <p>在大规模微服务系统下，如果故障未发生，应该归功于运气好。但是永远不要指望故障不发生，必须把发生故障当作常态。从故障发生到解除过程遵循的基本模式抽象如下。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f012d0a9607c4718b99c2c9e4d50fd03.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272315352.png" />   
     </p>
 <p>可用性治理主要从这3个角度着手提升：1. 加强系统韧性；2. 完善止损手段，提升止损有效性，加速止损效率；3. 加速原因定位和解除效率。</p>
 <p>以上3点，每个都是一项专题，限于篇幅，本文仅从【3】展开。</p>
@@ -229,17 +229,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="极其复杂的系统-vs-极端严格的可用性要求">极其复杂的系统 VS. 极端严格的可用性要求</h3>
 <p>百度搜索系统分为在线和离线两部分。离线系统每天从整个互联网抓取资源，建立索引库，形成倒排、正排和摘要三种重要的数据。然后，在线系统基于这些数据，接收用户的query，并以极快的速度为用户找到他想要的内容。如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f904c4c1652b490da8d4103e9ba25879.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272315608.png" />   
     </p>
 <p>百度搜索系统是极其庞大的。让我们通过几个数字直观感受一下它的规模：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0128e284285a4cb1acdb8b23201aa98f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272315181.png" />   
     </p>
 <p>百度搜索系统的资源占用量折合成数十万台机器，系统分布在天南海北的N大地域，搜索微服务系统包含了数百种服务，包含的数据量达到数十PB级别，天级变更次数达到数十万量级，日常的故障种类达到数百种，搜索系统有数百人参与研发，系统每天面临数十亿级的用户搜索请求。</p>
 <p>虽然系统是超大规模，但是百度对可用性的要求是极其严格的。百度搜索系统的可用性是在5个9以上的。这是什么概念呢？如果用可提供服务的时间来衡量，在5个9的可用性下，系统一年不可用时间只有5分钟多，而在6个9的可用性下，一年不可用的时间只有半分钟左右。所以，可以说百度搜索是不停服的。</p>
 <p>一个query到达百度搜索系统，要经历上万个节点的处理。下图展示了一个query经历的全部节点的一小部分，大概占其经历节点全集的几千分之一。在这种复杂的路径下，所有节点都正常的概率是极其小的，异常是常态。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/310d5f8f323542368ff9808666f37228.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272315452.png" />   
     </p>
 <p>复杂的系统，意味着故障现场的数据收集和分析是一项浩大的工程。</p>
 <h3 id="多样的稳定性问题种类">多样的稳定性问题种类</h3>
@@ -254,13 +254,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在2014年以前，故障原因定位和解除都在和数据较劲，当时所能用到的数据，主要有两种。一是搜索服务在线日志（logging）；二是一些分布零散的监控（metrics）。这两类数据，一方面不够翔实，利用效率低，问题追查有死角；另一方面，对它们的使用强依赖于人工，自动化程度低。以一个例子说明。</p>
 <p>拒绝问题的分析首先通过中控机上部署的脚本定时扫描线上服务抓取单PV各模块日志，展现到一个拒绝分析平台（这个平台在当时已经算是比较强大的拒绝原因分析工具了）页面，如下图所示；然后人工阅读抓取到的日志原文进行分析。这个过程虽然具有一定的自动化能力，但是PV收集量较小，数据量不足，很多拒绝的原因无法准确定位；数据平铺展示需要依赖有经验的同学阅读，分析效率极其低下。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f3bf563cd4194df7ae2d841fe83e4439.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272315803.png" />   
     </p>
 <p>在问题追查死角和问题追查效率上，前者显得更为迫切。无死角的问题追查呼吁着更多的可观测数据被收集到。如果在非生产环境，获取这些数据是轻而易举的，虽然会有query速度上的损失，但是在非生产环境都能容忍，然而，这个速度损失的代价，在生产环境中是承受不起的。在理论基石《Dapper, a Large-Scale Distributed Systems Tracing Infrastructure》的指导下，我们建设了kepler1.0系统，它基于query抽样，产出调用链和部分annotation（query处理过程中的非调用链的KV数据）。同时，基于业界开源的prometheus方案，我们完善自己的metrics系统。它们上线后立即产生了巨大的应用价值，打开了搜索系统可观测性建设和应用的想象空间。</p>
 <h3 id="21-kepler10简介">2.1 kepler1.0简介</h3>
 <p>系统架构如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c2c579dbbc324e8e9c397e62ae85d4b0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272315903.png" />   
     </p>
 <p>阶段性使命：kepler1.0在于完善搜索系统的可观测性，基于开源成熟方案结合公司内组件实现从0到1的建设，快速完成可观测性能力空白的补齐，具备根据queryID查询query处理过程的调用链以及途径服务实例日志的能力。</p>
 <p>引进来：从kepler1.0的架构不难发现，它从数据通路、存储架构等方面完整的参考zipkin</p>
@@ -268,7 +268,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="22-通用metrics采集方案初步探索"><strong>2.2 通用metrics采集方案初步探索</strong></h3>
 <p>系统架构如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b76967096fb547f3a37cb1588df9168a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272315949.png" />   
     </p>
 <p>阶段性使命：2015年前后搜索开始探索大规模在线服务集群容器化混部技术，此时公司内的监控系统对多维度指标汇聚支持较弱，基于机器维度指标的传统容量管理方式已经难以满足容器化混部场景的需求。</p>
 <p>引进来：将开源界成熟的metrics方案引入搜索在线服务混部集群，实现了符合prometheus协议的容器指标exporter，并依托prometheus的灵活多维度指标查询接口以及grafana丰富的可视化能力，建设了搜索在线业务混部集群容量管理依赖的底层数据系统。</p>
@@ -284,7 +284,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>阶段性痛点：多维度指标信息不足（缺少容器指标、指标和PaaS系统脱节）；缺少有效的汇聚、加工、组合、对比、挖掘以及可视化手段。</p>
 <p>解决情况：建设了搜索在线的容器层面多维度指标数据采集系统，为容器化的容量管理应用提供了重要的基础输出来源，迈出了指标系统云原生化探索的一步。下图为项目上线后通过容器指标进行消耗审计功能的截图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d11aa23d19d145569e973c951fdb2abd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272315881.png" />   
     </p>
 <h2 id="第3章-创新应用价值的释放"><strong>第3章 创新：应用价值的释放</strong></h2>
 <p>虽然kepler1.0和prometheus打开了可观测性建设的大门，但是受限于能力，已经难以低成本地获取更多的使用价值了。</p>
@@ -297,7 +297,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>（2）公司内部存储服务性价比较低、可维护性不高，通过扩大采样率对上述问题进行覆盖需要的资源成本巨大，实际中无法满足。</p>
 <p>对于这个矛盾，业界当时并没有很好的解决方案。于是，我们通过技术创新实现了kepler2.0系统。系统从实现上将tracing和logging两种数据解耦，通过单一职责设计实现了针对每种数据特点极致优化，以极低的资源开销和极少的耗时增长为成本，换取了全量query的tracing和logging能力，天级别数十PB的日志和数十万亿量级的调用链可实现秒查。让大多数故障追查面临的问题迎刃而解。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c1d2166ae0424900a55372140b025080.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272315043.png" />   
     </p>
 <p>3.2.1 全量日志索引</p>
 <p>首先，我们介绍全量日志索引，对应于上图中日志索引模块。</p>
@@ -305,7 +305,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>北斗中通过一个四元组定义一条日志的索引，我们叫做location，它由4个字段组成：ip（日志所在机器）+inode（日志所在文件）+offset（日志所在偏移量）+length（日志长度）。这四个字段共计20字节，且只和日志条数有关，和日志长度无关，由此实现对海量日志的低成本索引。location由log-indexer模块（部署在搜索在线服务机器上）采集后对原始日志建立索引，索引保存在日志所在容器的磁盘。</p>
 <p>北斗本地存储的日志索引逻辑格式如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0249cd9c614041949de12df8db9f48ff.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272315324.png" />   
     </p>
 <p>查询时，将inode、offset、length发送给索引ip所在的机器（即原始日志所在机器），通过机器上日志读取模块，可根据inode、offset、length以O(1)的时间复杂度定点查询返回日志原文，避免了对文件的scan过程，减少了不必要的cpu和io消耗，减小了日志查询对生产环境服务稳定性的影响。</p>
 <p>同时，除了支持location索引以外，我们还支持了灵活索引，例如将检索词、用户标识等有业务含义的字段为二级索引，方便问题追查时拿不到queryID的场景，可支持根据其他灵活索引中的信息进行查询；在索引的使用方式上，除了用于日志查询以外，我们还通过索引推送方式构建了流式处理架构，用于支持对日志流式分析的应用需求。</p>
@@ -320,7 +320,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>右图：kepler2.0推导式算法，span_id自根节点从0开始，每调用一次下游就累加该下游实例的ip作为其span_id并将其传给下游，下游实例递归在此span_id上继续累加，这样可以保证一个query所有调用的span_id是唯一性。实例只需要保存自己的span_id和下游的ip，即可根据算法还原出一个span的client端和server端。由此可见，只需要写入2条数据且数据中不需要保存parent_span_id，因此存储空间得到了节省，从而实现了全量调用链的采集能力。</p>
 <p>右图中ip1:port1对ip2:port的调用链模拟了对同一个实例ip2:port2访问多次的场景，该场景在搜索业务中广泛存在（例如：一个query在融合层服务会请求同一个排序服务实例两次；调度层面上游请求下游异常重试到同一个实例等），推导式算法均可以保证生成span_id在query内的唯一性，从而保证了调用链数据的完整性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6ea3f23ccda241839be3cd53e8e39c31.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272316982.png" />   
     </p>
 <h5 id="3222-数据压缩">3.2.2.2 数据压缩</h5>
 <p>结合数据特征综合采用多种压缩算法。</p>
@@ -332,19 +332,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>(b) packed repeated：ip和timestamp均为repeated类型，只需要保存一次field number。packed默认是不开启的，导致每个repeated字段都保存一次field number，造成了极大浪费。以平均扇出比为40的扇出链路为例，开启packed可节省了25%的存储空间（40字节的field number）。</p>
 <p>最终，一个span的逻辑格式（上图）和物理格式（下图）如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8635cff425bc4e28956feb1557c32e2a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272316298.png" />   
     </p>
 <h3 id="323-应用场景的受益">3.2.3 应用场景的受益</h3>
 <h4 id="3231-时光穿越历史上任一特定query的关键结果在索引库层面未预期召回问题"><strong>3.2.3.1 时光穿越：历史上任一特定query的关键结果在索引库层面未预期召回问题</strong></h4>
 <p>因为召回层索引库是搜索最大规模的服务集群，kepler1.0在索引库服务上只支持0.1%抽样率，使得由于索引库的某个库种和分片故障导致的效果问题追查捉襟见肘。全量调用链采集较好的解决了这一困境。</p>
 <p>真实案例：PC搜索 query=杭州 未展现百度百科结果，首先通过工具查询到该结果的url所在数据库A的9号分片，进一步通过全量调用链调用链查看该query对数据库A所有请求中丢失了9号分片（该分片因重试后仍超时被调度策略丢弃），进一步定位该分片所有副本均无法提供服务导致失败，修复服务后预期结果正常召回。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/197ef6c5f46b4fc39cb7bcfd2f037d93.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272316593.png" />   
     </p>
 <h4 id="3232-链式分析有状态服务导致误中副车型效果问题"><strong>3.2.3.2 链式分析：有状态服务导致“误中副车”型效果问题</strong></h4>
 <p>有状态服务效果问题分析复杂性：以最常见的cache服务为例。如果没有cache只需通过效果异常的queryID通过调用链和日志即可定位异常原因。但显然搜索在线系统不可能没有cache，且通常cache数据会辅以异步更新机制，此时对于命中了脏cache的query只是“受害者”，它的调用链和日志无法用于问题最终定位，需要时序上前一个写cache的query的调用链和日志进行分析，我们称其为“捣乱者”。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c5b5b3932b904d7b87186c4623da0b75.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272316902.png" />   
     </p>
 <p>kepler1.0的局限性：kepler1.0采样算法是随机比例抽样，“捣乱者”和“受害者”两个query是否命中抽样是独立事件，由于“捣乱者”在先，当“受害者”在受到效果影响时，已无法倒流时间触发前者抽样了，导致两个query在“时序”维度够成的trace链条中断，追查也随之陷入了困境。</p>
 <p>kepler2.0的破解之法：</p>
@@ -473,6 +473,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -506,10 +510,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -888,6 +888,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

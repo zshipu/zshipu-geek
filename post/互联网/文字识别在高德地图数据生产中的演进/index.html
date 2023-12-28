@@ -209,7 +209,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/12ae9d0dbc864dd9bcd38d54d1d8e828.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272032258.webp" />   
     </p>
 <p><strong>导读：</strong> 丰富准确的地图数据大大提升了我们在使用高德地图出行的体验。相比于传统的地图数据采集和制作，高德地图大量采用了图像识别技术来进行数据的自动化生产，而其中场景文字识别技术占据了重要位置。商家招牌上的艺术字、LOGO五花八门，文字背景复杂或被遮挡，拍摄的图像质量差，如此复杂的场景下，如何解决文字识别技术全、准、快的问题？本文分享文字识别技术在高德地图数据生产中的演进与实践，介绍了文字识别自研算法的主要发展历程和框架，以及未来的发展和挑战。</p>
 <h2 id="一-背景"><strong>一 背景</strong></h2>
@@ -242,19 +242,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>高德文字识别技术经过多年的发展，已经有过几次大的升级。从最开始的基于FCN分割、单字检测识别的方案，逐渐演进到现有基于实例分割的检测，再进行序列、单字检测识别结合的方案。与学术界不同，我们没有采用End-to-End的识别框架，是由于业务的现实需求所决定的。End-to-End框架往往需要足够多高质量的文本行及其识别结果的标注数据，但是这一标注的成本是极为高昂的，而合成的虚拟数据并不足以替代真实数据。因此将文本的检测与识别拆分开来，有利于分别优化两个不同的模型。</p>
 <p>如下图所示，目前高德采用的算法框架由文本行检测、单字检测识别、序列识别三大模块构成。文本行检测模块负责检测出文字区域，并预测出文字的掩模用于解决文本的竖直、畸变、弯曲等失真问题，序列识别模块则负责在检测出的文字区域中，识别出相应的文字，对于艺术文本、特殊排列等序列识别模型效果较差的场景，使用单字检测识别模型进行补充。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ae5a095bec9944bca090c5ac9b1b42c9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272032132.webp" />   
     </p>
 <p>文字识别框架</p>
 <p><strong>文本行检测</strong></p>
 <p>自然场景中的文字区域通常是多变且不规则的，文本的尺度大小各异，成像的角度和成像的质量往往不受控制。同时不同采集来源的图像中文本的尺度变化较大，模糊遮挡的情况也各不相同。我们根据实验，决定在两阶段的实例分割模型的基础上，针对实际问题进行了优化。</p>
 <p>文本行检测可同时预测文字区域分割结果及文字行位置信息，通过集成DCN来获取不同方向的文本的特征信息，增大mask分支的feature大小并集成ASPP模块，提升文字区域分割的精度。并通过文本的分割结果生成最小外接凸包用于后续的识别计算。在训练过程中，使用online的数据增广方法，在训练过程中对数据进行旋转、翻转、mixup等，有效的提高了模型的泛化能力。具体检测效果如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8d2e2a1f42d94b4db020de31820808e3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272032950.webp" />   
     </p>
 <p>检测结果示例</p>
 <p>目前场景文本检测能力已经广泛应用于高德POI、道路等多个产品中，为了验证模型能力，分别在ICDAR2013(2018年3月)、ICDAR2017-MLT(2018年10月)、ICDAR2019-ReCTS公开数据集中进行验证，并取得了优异的成绩。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b6aa5e6b5d29492e841ac919eb86e5cf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272032525.webp" />   
     </p>
 <p>文本行检测竞赛成绩</p>
 <p><strong>文字识别</strong></p>
@@ -266,35 +266,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>文本行识别全对率主要评价文字识别在POI名称，道路名称的整体识别能力，文本行识别高置信占比主要评价算法对于拆分出识别高准确率部分的能力，这两种能力与我们的业务需求紧密相关。为了满足业务场景对文字识别的需求，我们针对目前主流的文字识别算法进行了调研和选型。</p>
 <p>文字识别发展到现在主要有两种方法，分别是单字检测识别和序列识别。单字检测识别的训练样本组织和模型训练相对容易，不被文字排版的顺序影响。缺点在某些&quot;上下结构&quot;，&ldquo;左右结构&quot;的汉字容易检测识别错误。相比之下序列识别包含更多的上下文信息，而且不需要定位单字精确的位置，减小因为汉字结构导致的识别损失。但是现实场景文本的排版复杂，&ldquo;从上到下&rdquo;，&ldquo;从左到右&quot;排版会导致序列识别效果不稳定。结合单字检测识别和序列识别各自的优缺点，采用互补的方式提高文字识别的准确率。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e1050b82886d47dc99d0fc354266c64b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272032466.webp" />   
     </p>
 <p>单字检测识别和序列识别结果融合</p>
 <p>1）单字检测识别</p>
 <p>单字检测采用Faster R-CNN的方法，检测效果满足业务场景需求。单字识别采用SENet结构，字符类别支持超过7000个中英文字符和数字。在单字识别模型中参考identity mapping的设计和MobileNetV2的结构，对Skip Connections和激活函数进行了优化，并在训练过程中也加入随机样本变换，大幅提升文字识别的能力。在2019年4月，为了验证在文字识别的算法能力，我们在ICDAR2019-ReCTS文字识别竞赛中获得第二名的成绩（准确率与第一名相差0.09%）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/242c2e7b9edc43e3b1711c316f2f9c7e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272032287.webp" />   
     </p>
 <p>单字检测识别效果图</p>
 <p>2）文本序列识别</p>
 <p>近年来，主流的文本序列识别算法如Aster、DTRT等，可以分解为文字区域纠正，文字区域特征提取、序列化编码图像特征和文字特征解码四个子任务。文字区域纠正和文字区域特征提取将变形的文本行纠正为水平文本行并提取特征，降低了后续识别算法的识别难度。序列化编码图像特征和文字特征解码（Encoder-Decoder的结构）能在利用图像的纹理特征进行文字识别的同时，引入较强的语义信息，并利用这种上下文的语义信息来补全识别结果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6005d4837b034368b4e7fa4c947c4e3d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272032792.webp" />   
     </p>
 <p>通用序列识别结构</p>
 <p>在实际应用中，由于被识别的目标主要以自然场景的短中文本为主，场景文本的几何畸变、扭曲、模糊程度极为严重。同时希望在一个模型中识别多个方向的文本，因此我们采用的是的TPS-Inception-BiLSTM-Attention结构来进行序列识别。主要结构如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cbde6fd402514e429175dbe77f1c5862.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272032735.webp" />   
     </p>
 <p>文本序列识别模型</p>
 <p>对于被检测到的文本行，基于角点进行透视变换，再使用TPS变换获得水平、竖直方向的文本，按比例缩放长边到指定大小，并以灰色为背景padding为方形图像。这一预处理方式既保持了输入图像语义的完整，同时在训练和测试阶段，图像可以在方形范围内自由的旋转平移，能够有效的提高弯曲、畸变文本的识别性能。将预处理完成的图像输入CNN中提取图像特征。再使用BiLSTM编码成序列特征，并使用Attention依次解码获得预测结果。如下图所示，这一模型通过注意力机制在不同解码阶段赋予图像特征不同的权重，从而隐式表达预测字符与特征的对齐关系，实现在一个模型中同时预测多个方向文本。文本序列识别模型目前已覆盖英文、中文一级字库和常用的繁体字字库，对于艺术文本、模糊文本具有较好的识别性能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/853d06dca384489fbe839c57444f710f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272032730.webp" />   
     </p>
 <p>序列识别效果</p>
 <p>3）样本挖掘&amp;合成</p>
 <p>在地图数据生产业务中经常会在道路标志牌中发现一些生僻的地点名称或者在POI牌匾中发现一些不常见的字甚至是繁体字，因此在文字识别效果优化中，除了对于模型的优化外，合理补充缺字、少字的样本也是非常重要的环节。为了补充缺字、少字的样本，我们从真实样本挖掘和人工样本合成两个方向入手，一方面结合我们业务的特点，通过数据库中已经完成制作的包含生僻字的名称，反向挖掘出可能出现生僻字的图像进行人工标注，另一方面，我们利用图像渲染技术人工合成文字样本。实际使用中，将真实样本和人工合成样本混合使用，大幅提升文字识别能力。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/44115b328b6d45da82a492d89e54eb6d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272032694.webp" />   
     </p>
 <p>样本挖掘和合成方案</p>
 <h3 id="文字识别技术小结">文字识别技术小结</h3>
@@ -435,6 +435,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -468,10 +472,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -850,6 +850,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

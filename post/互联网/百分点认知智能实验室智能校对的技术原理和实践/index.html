@@ -268,19 +268,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="21-hanspeller"><strong>2.1 HANSpeller++</strong></h3>
 <p>HANSpeller框架分为检测和纠错两部分，主要包含两个工作：对输入句子生成候选集和对候选集进行排序。框架流程图如下所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e5b4986326b94b729f13343b64e508e0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272308829.webp" />   
     </p>
 <p>图1. HANSpeller框架图</p>
 <p>在数据处理阶段，通过将长句子根据标点切分为短句，并且去掉非汉字内容，基于SIGHAN-2013、SIGHAN-2014数据集构建混淆集。在候选生成阶段，利用混淆集生成相应的候选集。根据同音、近音、形近等特征筛选候选集，保留权重较高的候选。权重计算方法如下，其中P(c)表示在c这个字符可能出错的概率，edit_dist表示编辑距离：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/725500f084834fa7ab8c0a9e9522ef1a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272309270.webp" />   
     </p>
 <p>在候选结果排序阶段，通过初筛、精筛和排序三个步骤完成。初筛时用到的特征有n-gram特征、词典统计特征、编辑距离特征以及分词特征，利用这些特征进行逻辑回归分类预测。精筛时，用外部依赖数据、搜索引擎的搜索结果和英文翻译结果进行筛选。两次筛选后，保留最有可能的top5候选结果。最后采用ngram语言模型进行最终排序。</p>
 <h3 id="22-faspell"><strong>2.2 FASPell</strong></h3>
 <p>传统的中文拼写纠错主要存在两个问题，纠错平行语料不足和混淆集不够充分。</p>
 <p>FASPell提出了一种解决中文拼写错误的新范式，抛弃了传统的混淆集转而训练了一个以BERT为基础的深度降噪编码器DAE(denoising autoencoder)和以置信度-字音字形相似度为基础的解码器CSD(confidence-similaritydecoder)，可以有效缓解以上两点不足。模型架构及用例展示如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/09/image-6848b41f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272309155.png" />   
     </p>
 <p>具体来说，利用预训练模型使用DAE来对BERT进行预训练，mask句子中每个位置的字符获取候选集，通过上下文置信度信息，和字符相似度构建了一个解码器CSD去对句子中的每一个字符的候选集进行筛选。</p>
 <p>对BERT的预训练策略与原始的BERT预训练方法一致，对句子按15%的概率进行掩码。在微调阶段，对存在错误的句子采用两种方式进行FINE-TUNE：①给定句子，将其中的错误字全部使用这个字本身进行掩码，并将预测目标设置为正确字。②对部分正确的字也使用字本身进行掩码，并将预测目标设为字本身。</p>
@@ -292,18 +292,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>基于深度学习的预训练模型往往是建立在字词级别的语言建模上，而中文文本校对需要考虑字音字形等特征，而不仅仅是语义层面特征。为了充分利用错别字中的拼音相似和字形相似的特征，前文所述的FASPell的做法是在后处理阶段利用这些特征信息作为排序依据。而SpellGCN的做法是在预训练阶段将字音字形特征进行融合，使得大规模的无监督预训练过程和中文的校对任务特征能有效结合。模型架构图如下。</p>
 <p>SpellGCN的突出特点在于通过构建图神经网络的方式，构建了拼音相似图和字形相似图。通过卷积操作和注意力机制来实现字音字形的特征动态提取。在经过图卷积和注意力合并的操作后，SpellGCN能够捕获字符相似性的知识。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2f37bda92c064ee1a42f764ce125413a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272309037.webp" />   
     </p>
 <p>图3. SpellGCN模型框架</p>
 <h3 id="25-plome"><strong>2.5 PLOME</strong></h3>
 <p>中文纠错主要有近音错误和形近错误两个类型错误。PLOME为腾讯在ACL会议上提出的建模汉字在发音和字形上的相似性预训练模型。该预训练模型模型架构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6e3524e16d8c4ff5b4bed7043df40aaf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272309124.webp" />   
     </p>
 <p>图4. PLOME框架图</p>
 <p>为了建模汉字在发音和字形上的相似性，模型中引入了两个GRU子网络分别计算汉字的拼音向量和笔画向量，下图展示了这两个子网络的计算过程。模型的编码层和BERT base结构完全相同。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2021/09/image-7622f535.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272309127.png" />   
     </p>
 <h1 id="三-检错-纠错技术方案">三 <strong>检错-纠错****技术方案</strong></h1>
 <p>我们的校对技术方案不同于许多“端到端”的校对方法，为了保证校对的高准确率，整体主要分为两步，即检错步和纠错步。检错步，目的是检测出文章所存在的错误位置，纠错步，旨在将检错步的检错结果予以矫正，其中检错步过程尤为重要，决定着系统整体召回和准确的上限。</p>
@@ -331,7 +331,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="步骤三用混淆对特征构造混淆集"><strong>步骤三：用混淆对特征****构造混淆集</strong></h3>
 <p>依靠步骤一中获得的真实用户错误分布数据集，和步骤二中的特征。利用机器学习对特征和错误分布之间的关系进行建模，其中真实用户错误的混淆对为正例，其它则为负例。机器学习模型训练完成后，对穷举的每个汉字混淆对特征进行预测。预测结果为正例的则加入混淆集合中。具体流程如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5f6f0853ba1445be88c273253c681b43.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272309738.webp" />   
     </p>
 <p>图6. 混淆集构建流程图</p>
 <h2 id="2-检错和纠错技术方案-">****2. 检错和纠错技术方案 ****</h2>
@@ -466,6 +466,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -499,10 +503,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -881,6 +881,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

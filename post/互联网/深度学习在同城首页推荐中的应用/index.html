@@ -238,12 +238,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>从数据算法层来看推荐的核心主要围绕召回算法和排序模型进行，当然算法和策略同等重要，因此需通过理解业务来优化模型、策略之间的冲突。</p>
 <p>其中排序模型的构建则是进一步影响线上用户体验的关键，本文主要围绕深度学习在58首页推荐排序上的应用展开介绍。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3b19ea3782b44c3da0f6302432de055f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153522.webp" />   
     </p>
 <p>图1 58推荐系统架构</p>
 <p>首页推荐场景位于58同城App首页下方的推荐tab，包含招聘、租房、二手房、二手车等多品类业务信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c0dac43ffe764cf5ae816424a9039f8c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153586.png" />   
     </p>
 <p>图2 首页推荐场景tab</p>
 <p>如图2可以看到左图用户兴趣主要为租房，右图用户兴趣为二手房、二手车、租房，这也就体现出首页场景下多业务融合的特点。用户在首页推荐场景下行为特点表现为强兴趣，即用户兴趣明确，但是在多业务信息融合的背景下，用户的兴趣又具有不同的周期性，以及不同的行为等，比如租房周期明显要低于二手车成交周期，这些不同的特性对于多业务融合推荐排序任务提出了重大挑战。</p>
@@ -255,7 +255,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>对于类别特征的Embedding有两种基本处理方式，通过模型生成向量比如Word2Vec，或者采用Embedding层初始化后和DNN一起训练。</p>
 <p>对于图3（左）召回任务，YouTube将目标定义为用户next watch，通过softmax函数得到所有候选视频的概率分布。对于图3（右）排序任务，作者在输入特征部分除了在召回时用到的Embedding之外还加入了一些视频描述特征、用户画像特征、用户观看同类视频间隔时间、当前视频曝光给当前用户次数等体现二者关系的特征。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/115298c7d3024e46aa755131f5739de4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153465.png" />   
     </p>
 <p>图3 YouTube DNN [1]模型结构</p>
 <h3 id="2google-widedeep"><strong>2.Google-Wide&amp;Deep</strong></h3>
@@ -264,28 +264,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>像Logistic Regression图4（左）这样的广义线性模型可以做到Memorization这一点。而对于DNN图4（右）模型则可以通过低纬稠密的Embedding向量学习到之前未出现的特征组合从而减少特征工程的负担并且做到Generalization。</p>
 <p>最终组合之后的Wide&amp;Deep图4（中）模型即便输入特征是非常稀疏的，同样可以得到较高质量的推荐结果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/451f26d61ea74b09936ed33bc26cffb7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153503.png" />   
     </p>
 <p>图4 Google Wide&amp;Deep[2]模型结构</p>
 <h3 id="3华为-deepfm"><strong>3.华为-DeepFM</strong></h3>
 <p>DeepFM[3]模型应用场景为华为应用商店，Wide&amp;Deep模型为之后两种模型左右组合的结构改进提供了基础。</p>
 <p>其中图5 DeepFM则是对W&amp;D模型的Wide部分进行改进的成果，由FM替换LR，原因在于Wide部分仍然需要繁杂的人工特征工程。通过FM则可以自动学习到特征之间的交叉信息，相比W&amp;D模型DeepFM则包含了一阶、二阶、deep三部分组成从而实现不同特征域之间的交叉。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/55455cb2986d424296e7672dc08ae3a7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153732.webp" />   
     </p>
 <p>图5 华为DeepFM[3]模型结构</p>
 <h3 id="4阿里巴巴-din"><strong>4.阿里巴巴-DIN</strong></h3>
 <p>DIN[4]模型应用场景为阿里巴巴在线广告推荐，考虑用户兴趣的多样性，YouTube-DNN模型中也利用了用户历史行为特征，但是将所有视频Embedding进行平均，这样就相当于是所有历史行为对于现在的行为产生相同的影响，这样的设计对于用户体验是不合常理的。因此，考虑引入NLP中的Attention机制，针对每一个历史行为计算不同的权重。</p>
 <p>总的来讲DIN （图6）模型在为当前待排序帖子预测点击率时，对用户历史行为特征的注意力是不一样的，对于相关的帖子权重更高，对于不相关的帖子权重更低。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7d7eb9f858a4446e9c6711c901571cef.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153737.webp" />   
     </p>
 <p>图6 阿里巴巴 DIN[4]模型结构</p>
 <h3 id="5阿里巴巴-dien"><strong>5.阿里巴巴-DIEN</strong></h3>
 <p>DIEN[5]（图7）模型应用场景为阿里巴巴在线广告推荐，该模型是对DIN的改进模型，主要考虑以下两个方面，DIN只考虑了用户兴趣的多样性引入Attention，但是并没有考虑用户兴趣的动态变化。</p>
 <p>因此引入兴趣抽取层，使用GRU序列模型对用户历史行为建模、引入兴趣进化层，使用Attention、GRU对用户兴趣衍化建模。在用户无搜索关键词的情况下捕捉用户兴趣的动态变化将是提升线上点击率的关键。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cb95b098573a485ca0dbf86322f23568.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153569.webp" />   
     </p>
 <p>图7 阿里巴巴DIEN[5]模型结构</p>
 <p>通过分析以上模型我们可以发现深度学习模型可以减少人工特征工程，但减少并不等同于不进行人工特征工程。</p>
@@ -305,7 +305,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>其中Item Embedding是在用户行为数据中应用Word2Vec得到的向量、User Embedding则是根据Word2Vec向量加权得到，具体加权可使用TF-IDF、待排序帖子与用户历史点击帖子相似度等方式。</p>
 <p>在实现模型时特征处理部分需要注意，不建议使用tf.feature_column API，需要在特征工程部分实现处理逻辑，可减少线上推理耗时。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/82a6a77188ed4f2d9ff463ad55194795.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153318.webp" />   
     </p>
 <p>图8 58首页推荐场景下的深度学习模型结构</p>
 <h3 id="基础特征"><strong>基础特征</strong></h3>
@@ -329,14 +329,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>基于对用户行为的分析以及首页推荐场景多业务融合的特点，从用户角度出发，考虑到用户一般对于发布帖子本身以及帖子所在位置关注度比较高，最终将帖子ID、类目ID、区域ID作为用户行为属性进行Embedding编码。</p>
 <p>特征的分布式表示在深度学习特征工程中至关重要，组合以上三类ID特征通过模型Embedding层获得低纬稠密的帖子向量表示，最终可通过Attention或者其他相似度度量方式等计算出当前待排序帖子和用户历史点击帖子的相关程度，从而使得模型学习到用户关注点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d332ad70be85452ba29097b161ca29dc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153303.webp" />   
     </p>
 <p>图10 用户行为特征</p>
 <p>离线用户行为数据是将全站用户行为特征按时间戳排序（如图10所示）保存在HDFS中，其中单个用户行为包含帖子ID、类目ID、区域ID、时间戳等基础信息，最终在离线训练和在线预估中选择使用用户最近N条行为特征，通过模型将这些基础信息进行embedding编码。</p>
 <p>离线向量化特征则是通过用户行为序列中的帖子ID序列使用Word2vec训练所得。对于用户行为中帖子ID的embedding向量可以在模型中通过end2end的方式训练得到，也可以通过加载预训练向量在模型中加载使用。</p>
 <h3 id="离线样本"><strong>离线样本</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3a1e4d6a933a46aea1368818bf2182ed.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153221.webp" />   
     </p>
 <p>图11 样本特征</p>
 <p>整个离线样本处理流程如图11所示，包含用户行为特征，基础特征。由于训练样本数据数量级已达到亿级别，为了加快模型离线训练速度我们对训练样本采用两种负采样方法进行采样：</p>
@@ -348,35 +348,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>模型离线训练优化初期可通过tensorboard监控训练过程中的accuracy、loss等指标（图12），通过监控可以看出模型已收敛，模型正常训练上线之后不再使用tensorflow的summary API可减少部分离线训练时长。</p>
 <p>此外，模型中如果使用到tf.layers.batch_normalization 时应特别注意其中的training参数，并且在训练过程中需要更新moving_mean、moving_variance参数，保存PB模型时则需要将BN层中的均值和方差保存，否则在serving阶段取不到参数时直接使用均值为0、方差为1的初始值预测，出现同一条样本在不同的batch中不同打分的错误结果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3c1c02d0713c481599e073b989e81757.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153705.webp" />   
     </p>
 <p>图12 Accuracy、Loss变化曲线</p>
 <p>下表为GBDT、DIN、DIEN的离线效果，可见DIN、DIEN均已超过传统机器学习模型。接下来我们将介绍线上实验部分。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-cc9b3d40.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153629.png" />   
     </p>
 <h3 id="排序服务"><strong>排序服务</strong></h3>
 <p>用户实时行为数据构建，离线数据已经保存在HDFS，线上则是通过实时解析kafka消息将用户实时行为保存在分片Redis集群中，单天可产生亿级别的用户行为数据，用户行为特征基本解析流程可参考图1。</p>
 <p>图13 实时用户行为特征解析</p>
 <p>特征抽取部分实现了帖子信息、用户兴趣、用户行为的特征并行处理，首页场景线上一次排序请求约120条帖子，为降低Tensorflow-Serving单节点QPS同时考虑单次排序请求的整体耗时，我们将一次排序请求拆分成多个batch并行请求深度学习模型打分服务（图14）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/18aad2fd82d24fabbf5b7ddf2c77ad5c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272153246.webp" />   
     </p>
 <p>图14 多Batch请求Tensorflow-Serving</p>
 <p>在测试环境下我们进行了排序耗时评估，发现batch为2，10，20平均耗时差距约为10ms，随着batch增加，一次可打分帖子量增加，则tensorflow-serving各节点QPS会降低。</p>
 <p>上线后对耗时日志进行统计，通过分析耗时统计结果（图15），99%以上的请求均低于22ms最终权衡排序总耗时之后将线上batch设置为20。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7c544b148b9144759685f0c262c90bdc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272154419.webp" />   
     </p>
 <p>图15 线上单个batch请求耗时分布</p>
 <p>通过线上耗时监控，DIN模型每个batch平均耗时6-9ms（图16左），DIEN每个batch平均耗时19-22ms（图16右）均已满足线上耗时限制。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3d3f8eca129a43489f7de558db466c5f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272154435.webp" />   
     </p>
 <p>图16 DIN/DIEN线上Batch平均耗时</p>
 <p>首页场景下DIN、DIEN模型排序实验阶段，在小流量测试阶段Tensorflow-Serving服务QPS峰值可达几千时，服务请求量及耗时量指标可参考图17。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/eab28e2c08764d048c26e76acc8a582b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272154348.webp" />   
     </p>
 <p>图17 DIN/DIEN线上Tensorflow-serving请求量及耗时</p>
 <h3 id="实验总结"><strong>实验总结</strong></h3>
@@ -384,7 +384,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>模型上线之后发现离线AUC高于线上最优GBDT模型，但是线上点击率却低于GBDT，排查之后定位问题出现在实时行为特征部分。</p>
 <p>离线样本生成过程会使用曝光时间戳去截取用户历史行为特征，但是线上则是通过kafka实时解析用户行为，通过监控解析kafka写入Redis发现存在部分行为数据堆积情况以及实时日志上传kafka存在延迟。用户行为数据达到8000万左右(图 18左)时，大于两分钟写入redis的数据已经存在500万左右(图18右)。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/71445cb551f0445095c4a66f29df9878.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272154276.webp" />   
     </p>
 <p>图18 kafka解析用户实时行为监控</p>
 <p>因此通过线上监控统计后初步断定为行为特征时间穿越问题，因此对线上线下的用户点击行为特征按照统计的时间进行截断并进行线上AB实验，1819（DIN）、1820（DIEN）算法号直接读取线上实时行为特征，1227（DIN）、1796（DIEN）算法号则通过设置时间间隔进行截断。</p>
@@ -392,11 +392,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>通过线上AB实验表明模型使用实时性要求比较高的用户行为特征时对于是否存在时间穿越问题需要重点关注，当然这个问题也可以通过增加处理kafka的线程数来降低消息的堆积量，不过线上线下用户行为特征是否对齐仍需要验证。</p>
 <p>因此用户实时行为特征在58App首页推荐场景下需要根据实际业务数据设置时延，保证线上线下实时用户行为特征一致。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/53b4486053a04030ba62addfe93e54b1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272154228.webp" />   
     </p>
 <p>图19 DIEN-验证行为特征时间穿越</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-77e113b9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272154174.png" />   
     </p>
 <p>图20 DIN-验证行为特征时间穿越</p>
 <h3 id="使用word2vec向量"><strong>使用Word2Vec向量</strong></h3>
@@ -404,16 +404,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>对于Word2Vec向量的使用可分为两种，一种是离线预训练，之后在模型Embedding层中用户行为特征部分的infoid加载预训练向量，一种是将预训练的帖子向量作为连续特征直接输入DNN使用，在接下来的实验中我们优先使用第二种方式进行，后期会继续使用第一种方法进行线上实验。</p>
 <p>图21-22中可见对于使用Word2Vec向量的1209（DIN）、1222（DIEN）比未使用Word2Vec向量的1227（DIN）、1796（DIEN）均有1.5%-4.3%的提升。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f7740fb333fe4babbae55542c5b2ea08.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272154894.webp" />   
     </p>
 <p>图21 DIN-是否使用Word2Vec向量</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/11/image-598f65f4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272154894.png" />   
     </p>
 <p>图20 DIEN-是否使用Word2Vec向量</p>
 <p>以上实验为上线初期的部分数据，目前线上点击率实验中DIN比基线周平均提升13.06%，曝光转化率提升16.16%；DIEN相比基线曝光转化率提升17.32%，均已超过线上最优GBDT模型， DIEN模型已全量部署，目前各模型线上指标可参考下表。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/038099feca6c49c09cfd90ba3f1948f6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272154857.png" />   
     </p>
 <h2 id="总结与展望"><strong>总结与展望</strong></h2>
 <p>通过团队协作打通基于用户兴趣相关的深度学习模型离线训练、线上打分流程，将58App中丰富的用户行为数据成功应用到深度学习模型，并能够提升首页推荐点击率，从而达到提升用户体验，提升平台效率的目的。</p>
@@ -554,6 +554,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -587,10 +591,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -969,6 +969,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

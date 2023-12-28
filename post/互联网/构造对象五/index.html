@@ -213,19 +213,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="调用-indexwriter-的构造函数的流程图">调用 IndexWriter 的构造函数的流程图</h1>
 <p>图 1：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/1-f475b7a4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101120.png" />   
     </p>
 <h2 id="根据不同的-openmode-执行对应的工作">根据不同的 OpenMode 执行对应的工作</h2>
 <p>  在上一篇文章中，我们介绍了执行 APPEND 模式下的工作的部分流程点，故继续对剩余的流程进行介绍。</p>
 <h3 id="执行-append-模式下的工作的流程图">执行 APPEND 模式下的工作的流程图</h3>
 <p>图 2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/2-44a77415.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101449.png" />   
     </p>
 <h4 id="用索引目录中最新的提交初始化一个新-segmentinfos-对象">用索引目录中最新的提交初始化一个新 SegmentInfos 对象</h4>
 <p>图 3：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/3-4f586222.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101682.png" />   
     </p>
 <p>  由于 StandardDirectoryReader 为空，那么就从索引目录中初始化一个新 SegmentInfos 对象（见 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F1118%2F108.html">构造 IndexWriter 对象（三）</a>），即通过找到索引目录中的 segments_N 文件读取索引信息。</p>
 <p><strong>当索引目录中有多个 segments_N 文件时该如何选择</strong>：</p>
@@ -235,7 +235,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="indexcommit-是否为空">IndexCommit 是否为空？</h4>
 <p>图 4：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/4-0d683e37.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101582.png" />   
     </p>
 <p>  在 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F1125%2F109.html">构造 IndexWriter 对象（四）</a> 文章中我们说到，图 2 中 StandardDirectoryReader 为空的情况分为下面两种：</p>
 <ul>
@@ -246,7 +246,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="配置检查-3">配置检查 3</h4>
 <p>图 5：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/5-084b0a88.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101506.png" />   
     </p>
 <p> 如果 IndexCommit 不为空，那么 IndexCommit 必定是 CommitPoint 或者 SnapshotCommitPoint 对象，接着就需要执行下面的配置检查：</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">if (commit.getDirectory() != directoryOrig) {
@@ -256,49 +256,49 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="用-indexcommit-更新-segmentinfos-对象">用 IndexCommit 更新 SegmentInfos 对象</h4>
 <p>图 6：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/6-0d788a72.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101240.png" />   
     </p>
 <p>  通过 IndexCommit 读取对应的索引信息，然后更新到上文中已经完成初始化的 SegmentInfos 对象中。</p>
 <h4 id="更新-segmentinfos-的-version">更新 SegmentInfos 的 version</h4>
 <p>图 7：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/7-df4ada0e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101080.png" />   
     </p>
 <p>  对一个已经初始化的 SegmentInfos 进行更新操作必然需要更新 version，version 的概念在 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F1118%2F108.html">构造 IndexWriter 对象（三）</a> 的文章中介绍，这里不赘述。</p>
 <p>  至此，我们介绍完了分别在 CREATE、APPEND、CREATE_AND_APPEND 模式下的执行流程，接着我们根据图 1 介绍剩余的流程点。</p>
 <h2 id="检查-indexsort-合法性">检查 IndexSort 合法性</h2>
 <p>图 8：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/8-9dbde77e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101973.png" />   
     </p>
 <p>  如果设置了 IndexSort，那么在生成一个段的过程中，Lucene 会根据用户提供的排序规则对段内的文档进行排序，关于 IndexSort 的详细介绍见文章 <a href="https://zshipu.com/t?url=https%3A%2F%2Fwww.amazingkoala.com.cn%2FLucene%2FIndex%2F2019%2F1111%2F106.html">构造 IndexWriter 对象（一）</a>， 如果用户通过 <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2FLuXugang%2FLucene-7.5.0%2Fblob%2Fmaster%2Fsolr-7.5.0%2Flucene%2Fcore%2Fsrc%2Fjava%2Forg%2Fapache%2Flucene%2Findex%2FIndexWriterConfig.java">IndexWriterConfig.setIndexSort(Sort sort)</a> 设置了 IndexSort 配置，那么需要对参数 Sort 进行合法性检查，检查逻辑如下所示：</p>
 <h3 id="检查-indexsort-合法性的流程图">检查 IndexSort 合法性的流程图</h3>
 <p>图 9：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/9-9c98f995.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101184.png" />   
     </p>
 <h4 id="segmentinfos-对象">SegmentInfos 对象</h4>
 <p>图 10：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/10-9ee0ea85.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101356.png" />   
     </p>
 <p><strong>为什么检查 IndexSort 合法性的准备数据是 SegmentInfos 对象</strong>：</p>
 <p>  SegmentInfos 对象是索引文件 segments_N 跟。si 文件在内存中的描述，如下图所示：</p>
 <p>图 11：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/11-486a7a62.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101281.png" />   
     </p>
 <p>  由图 11 可以看出，我们只能通过 SegmentInfos 找到每一个段（图 11 中的 SegmentCommitInfo）的段内排序规则 IndexSort（图 11 总红色标注）。</p>
 <h4 id="是否还有未处理的-segmentcommitinfo">是否还有未处理的 SegmentCommitInfo？</h4>
 <p>图 12：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/12-224166a1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101702.png" />   
     </p>
 <p>  对每一个 SegmentCommitInfo（见图 11）进行 IndexSort 合法性检查，只要有一个段判断为非法，那么就抛出异常，即构造 IndexWriter 对象失败。</p>
 <h4 id="比较-lucene-版本">比较 Lucene 版本</h4>
 <p>图 13：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/13-418098ef.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272101453.png" />   
     </p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma"> 如果通过图 11 的[索引文件。si](https://www.amazingkoala.com.cn/Lucene/suoyinwenjian/2019/0605/63.html)中的 IndexSort 字段来判断出段中没有排序规则，那么需要判断生成该段的 Lucene 版本号，代码如下：
 </code></pre><p>if (segmentIndexSort == null &amp;&amp; info.info.getVersion().onOrAfter(Version.LUCENE_6_5_0)){</p>
@@ -435,6 +435,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -468,10 +472,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -850,6 +850,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

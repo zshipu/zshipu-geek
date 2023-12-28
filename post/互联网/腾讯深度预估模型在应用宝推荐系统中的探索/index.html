@@ -205,7 +205,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="一业务背景"><strong>一、业务背景</strong></h2>
 <p>点击率（click-through rate, CTR）预估的本质是对用户/商品建模，进而计算用户的点击概率。模型的衍变经历了从经典机器学习LR、FM再到深度学习DNN、Wide&amp;Deep、双塔、DIN等的百花齐放。本文将针对应用宝的推荐场景，展开CTR模型探索优化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-de5c551bca454557b2ee1337821c035c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281747564.webp" />   
     </p>
 <p>应用宝推荐业务主要包括首页推荐、游戏推荐等，与常见信息流推荐（新闻/视频）不同，本场景下的数据分布具有明显的差异：</p>
 <ul>
@@ -221,31 +221,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="二基本框架"><strong>二、基本框架</strong></h2>
 <p>应用宝的整体推荐流程如下图所示，从底层数据流抽取特征，经过召回、排序以及重排，最终应用到实际业务场景中。本文主要针对排序模型优化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/115ec90620024fbbbd0c7a3fb03794f8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281747632.webp" />   
     </p>
 <p>排序模型我们以业内广泛使用的Wide&amp;Deep模型作为baseline，其中，Wide侧具有记忆能力，能够记住高频特征组合，达到准确推荐的目的；Deep侧为了弥补交互矩阵稀疏的不足，将特征映射到低维向量表示，经过多层神经网络，使模型具有泛化能力。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8c58acfbc6144b7aa4b0c81a13654aea.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281747369.webp" />   
     </p>
 <h2 id="三多行为融合训练"><strong>三、多行为融合训练</strong></h2>
 <p>在我们的场景中拥有很多appid 相关的行为特征，例如用户历史点击、下载、安装等，基本的Wide&amp;Deep框架会将每个行为特征映射到单独的embedding，并单独更新。</p>
 <p>由于每一类特征的用户行为记录十分稀疏，这种操作会造成低频特征embedding的训练不充分。</p>
 <p>针对于此，我们设计了基于appid embedding共享的多行为融合训练机制，体现在模型中为Deep侧的appid embedding聚合共享。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-72841e78bed74c4f9d79a80476f25977.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281747467.webp" />   
     </p>
 <p>由于appid类的特征较多，在实际选取时，我们主要利用了用户的实时行为特征和短期行为特征，避免了由安装/卸载记录带来的数据噪音。</p>
 <p>Wide&amp;Deep中embedding参数约占总量的95%，通过特征共享，参数量从2800w降低到了2000w，在模型保存和训练速度方面均有一定的优化。</p>
 <p>效果方面，我们主要考虑离线auc和copc（pcvr/cvr，反映模型打分偏差），经过特征共享的模型效果在auc上基本持平，而在copc指标上得到了明显的优化，一定程度上缓解了模型的打分偏差。</p>
 <p>
-        <img class="mx-auto" alt="" src="http://img.6aiq.com/image-806deea922cc4d988e5ce623800f60a0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281747390.webp" />   
     </p>
 <p>由于我们的特征中用户行为只涵盖了15天内近30个app的记录，对于低频app依然没有充足的学习样本，那么应该如何优化呢？</p>
 <h2 id="四引入更长周期用户行为"><strong>四、引入更长周期用户行为</strong></h2>
 <p>一种自然的想法便是引入更长周期的用户行为记录。近年来，以DeepWalk, Graphsage为代表的图模型能够较好地捕捉用户的长周期行为特点。</p>
 <p>我们根据用户过去30天内的下载行为进行构图，考虑到用户在同一天中的下载序列无明显的先后关系，构建了基于共线下载的无向图，接着训练随机游走模型生成预训练的deepwalk appid embedding，作为先验信息指导排序模型优化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-1a284128382f49c5a41e253f027183f3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281748273.webp" />   
     </p>
 <p>在共享appid embedding的基础上，我们尝试了多种训练策略。</p>
 <ul>
@@ -254,49 +254,49 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>特征蒸馏：引入辅助loss，度量学习得到的embedding与预训练embedding的相似度（向量点积）。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-6de8948deb094727929cf9b0ef341a97.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281748449.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-a7fd2e2eb5a04f97ba639161422ca6c5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281748294.webp" />   
     </p>
 <p>从效果来看，只有初始化微调的方式会带来一定的效果提升，说明经过deepwalk训练的embedding和wide&amp;deep训练的embedding在向量分布上是有差异的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-4eddab42f5cc46a6aaf3d6885705a3e5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281748132.webp" />   
     </p>
 <p>但目前为止auc的提升还很微弱，即使我们引入了30天甚至更久的用户行为数据，对于一些低频app依然无法充分学习，那是否还有外部信息可以利用呢？</p>
 <h2 id="五引入app描述文本信息"><strong>五、引入APP描述文本信息</strong></h2>
 <p>Deepwalk的训练本质是从用户行为信息中发掘app间的相似关联，若直接从app自身的属性信息（e.g., 标题、描述文本）出发，是否也能发现相似的规律？</p>
 <p>近年来，以BERT为代表的预训练语言模型在文本表示方面取得了巨大的成功，我们将每个app的标题和描述文本作为输入训练tag分类模型，得到一个高维（768维）的向量表示，尝试指导Wide&amp;Deep中的appid embedding学习。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-d14e5eca9b2043bc90942c1a862a5705.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281748864.webp" />   
     </p>
 <p>由于Wide&amp;Deep模型规模的限制以及前期的经验，我们的embedding size往往很小（30维/60维），更高的维度会导致效果下降，所以需要探索一种有效的降维方式。</p>
 <p>这里我们主要尝试了外部pca降维和内部通过全连层自动学习的降维方式，实验表明，在网络中进行端到端自动学习的降维方式更有效果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-c8585d23b4f84bfa9ea3b8c82bfce78c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281748562.webp" />   
     </p>
 <h2 id="六预训练embedding融合"><strong>六、预训练embedding融合</strong></h2>
 <p>为了更直观地展现embedding分布，我们对deepwalk和bert预训练的embs分别进行了tsne可视化。</p>
 <p>下图中不同的颜色表明不同的一级类目，二者均呈现了明显的类目空间聚集性，同类目的app自然地聚集到了一起。</p>
 <p>同时两者的embedding分布也具有空间差异性，比如，bert可视化图中的左下角部分是视频类app，而deepwalk是出行类app。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0271adfaec324d159fd363542bd2d772.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281748400.webp" />   
     </p>
 <p>鉴于二者的差异性，我们的做法是将其分别做投影变换，投影到同一向量空间中，这里投影变换的参数随网络一起学习。融合embedding的方式则为拼接或相加。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0a83411de0384d458db3c8ab0b0d20a5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281748617.webp" />   
     </p>
 <p>模型的整体框架图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-acd69913808f4242b0fa47a7c1628ba7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281748413.webp" />   
     </p>
 <p>从实验效果来看，向量投影拼接的方式具有更好的表现：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-c746d8d2bc8e400fafd56d26ba3c50ae.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281748583.webp" />   
     </p>
 <p>为了进一步展示加入deepwalk/bert外部预训练embedding的效果，我们接着进行了tsne可视化，其中左边为wide&amp;deep appid embedding的可视化表示，右边是融合embedding的可视化表示，可以发现app的分布从杂乱无序学到了呈现明显的聚簇，具有了一定的可解释性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-0238b95ca5454cbfa99d79269dd973b7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281748535.webp" />   
     </p>
 <p>通过这个实验，我们已经知道app embs的初始化不同会对模型结果产生影响，那么它们分布的具体聚簇是否与模型效果有着严格的相关性，还需要更多的探索求证。</p>
 <h2 id="heading">**�</h2>
@@ -425,6 +425,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -458,10 +462,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -840,6 +840,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

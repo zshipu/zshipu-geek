@@ -248,7 +248,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p><strong>与业界部分开源引擎框架 ElasticSearch，Solr 等不同的是，TurboSearch 更倾向于面向在线 <em>高并发、大规模、低时延</em> 的检索需求，同时能够平行扩展到多模态场景</strong>，并提供完整的搜索运营能力。TurboSearch 在将会分层次和分阶段逐步在公司内部开源。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fd529120e42e441c8c60ec1504363961.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272033646.webp" />   
     </p>
 <p><strong>在 多模态/向量检索 领域</strong>，AI Lab 已经推出 <em>GNES 检索系统</em>，聚焦于内容对象的 Encoding，以及多种算法模型的平台化整合。同样在向量检索领域， <strong>TurboSearch</strong> <strong>会逐步从索引层面，探索针对大规模向量数据集的高性能检索</strong>。并从向量索引、及系统化运营层面为 GNES 提供支持。</p>
 <h2 id="二-引擎框架介绍">二. 引擎框架介绍</h2>
@@ -275,7 +275,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p><strong>TurboSearch 基础框架：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2020/1/aff6fbc448ac49998cd9715fd297e5eb-image.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272033854.png" />   
     </p>
 <h2 id="三-引擎特性">三. 引擎特性</h2>
 <h3 id="1-query-检索召回">1. Query 检索召回</h3>
@@ -294,7 +294,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>然而，单次 Query 召回往往并不能达到搜索预期。比如，搜索 “ <em>吃鸡</em>”，只召回吃饭相关的文章可能难以命中用户意图。将其拓展为 “ <em>和平精英</em>”，或其他热点事件 Query，并将多次拓展结果融合，更容易命中用户意图。因此 TurboSearch 应对这样的 NLP 拓展能力，原生支持多次下发结果融合。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1f67f84bfa7f40158d11198442f8795c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272033592.webp" />   
     </p>
 <h3 id="2-qrw--分层打分排序">2. QRW &amp; 分层打分排序</h3>
 <p>QRW 是 AI Lab 多年积累的 Query 分析 NLP 服务，除了覆盖垂搜所需的 纠错 同义词/非比留/基础相关性等基础能力之外，也涵盖了全网搜索所需具备的全部能力，如 Query 改写/时新性/意图识别/成分分析/文本分档 等等。</p>
@@ -303,24 +303,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>并行检索</strong></p>
 <p><strong>文本检索召回的基础即倒排求交</strong>：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/04332ff4ac9c481d8bac602a9d09fcde.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272033383.webp" />   
     </p>
 <p>最耗时部分集中在 <em>求交+L1 打分</em> 和 <em>L3 打分</em>。在传统的程序设计中，这两部分均在单线程中串行执行。使得在高频词检索求交时， <strong>单次请求耗时难以控制</strong>。</p>
 <p>TurboSearch 针对两个高耗时流程，采用 <strong>多线程并行处理</strong>。将倒排索引切分，来并行化检索求交+L1：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bb31a61b466f4ea98c2e154d6dcca630.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272033027.webp" />   
     </p>
 <p>我们做了一些 <strong>特殊的无锁多线程结果合并设计</strong>，避免合并结果等待导致闲置 CPU 的问题。负载未达 100% 时，平均检索耗时可大幅降低（ <em>数据集为长文本新闻数据 250w</em>）：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0f4609a0fca847029f0ba31d12968d40.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272033657.webp" />   
     </p>
 <p><strong>Weak-AND</strong></p>
 <p>Weak-AND 在广告或推荐等小数据集召回场景下，已经有较多的应用。 <strong>在海量数据检索中</strong>，TurboSearch 正探索其在 <em>长</em> <em>Query</em> <em>召回场景</em> 下的应用。 <strong>通过结合</strong> <strong>Weak-AND 与 AND</strong>，平衡召回率和检索性能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ecdaece394cf4cbd8695a1d1ce68e922.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272033238.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4f9518d2611140fb986ece0bcac28dc0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272033977.webp" />   
     </p>
 <p>Weak-AND 的性能优化和场景探索将持续进行。</p>
 <p><strong>倒排性能优化</strong></p>
@@ -338,7 +338,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p><strong>TurboSearch 对内存倒排索引做以下设计：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f4e6767036794fe7adbe11a90919a032.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272033674.webp" />   
     </p>
 <p>其中：</p>
 <ul>
@@ -354,7 +354,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p><strong>对比老架构固定块倒排索引：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6ac96f7ace6a46a080c25f66068f70ca.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272033567.webp" />   
     </p>
 <h3 id="4-多粒度索引">4. 多粒度索引</h3>
 <p>不同于 N-gram 这种暴力索引方式， <strong>多粒度索引专注于文档与 Query 中的隐性词组发现</strong>，对正常分词补充。检索时先进行粗粒度词召回，如果粗粒度无结果或结果偏少，将再次进行细粒度词召回。通过这个方式来解决松散召回导致的紧邻结果截断问题。</p>
@@ -373,7 +373,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d4a2604d4fc844188f61993a57c41a4a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272034484.webp" />   
     </p>
 <p>根据不用搜索业务数据场景需求，可将各类索引集群组合达到设计目标。</p>
 <h3 id="6-核心逻辑功能插件拓展">6. 核心逻辑功能插件拓展</h3>
@@ -420,7 +420,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2020/1/a0167359b8fb4537a71302642c0f3dfe-image.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272034348.png" />   
     </p>
 <h3 id="2-干预系统">2. 干预系统</h3>
 <p>在现网运营中，检索召回排序无法保证所有 Query 达到最佳。对于一些突发高曝光 Badcase，需要有 <strong>临时干预能力</strong>。TurboSearch 在接入层设计了干预系统，并沉淀积累了大量干预策略，可覆盖现网运营大部分干预需求。**主要支持两大类干预类型：</p>
@@ -433,7 +433,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2020/1/685912eba10f4b17800258957abe94a8-image.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272034627.png" />   
     </p>
 <h3 id="3-全流程检索数据诊断">3. 全流程检索、数据诊断</h3>
 <p>在持续优化的海量数据搜索业务运营过程中，会有持续或突发的 Badcase 需要定位。**而一个海量数据搜索业务中，一般都是 <em>多集群、多机服务、多层逻辑</em> 的复杂系统。在整体系统中定位和诊断 Badcase 是一个复杂而困难的工作。**比如一篇文档未被召回有以下多种可能：</p>
@@ -591,6 +591,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -624,10 +628,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1006,6 +1006,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

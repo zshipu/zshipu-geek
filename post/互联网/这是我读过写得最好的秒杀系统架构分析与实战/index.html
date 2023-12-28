@@ -454,12 +454,12 @@ from Bids where item_id = ?
 <h3 id="441基本概念">4.4.1 基本概念</h3>
 <p><strong>概念一“单库”</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/c18916fdc91b45c8b58aa0467e8eed7d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902983.png" />   
     </p>
 <p>概念一“单库”</p>
 <p><strong>概念二“分片”</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/bcae1ab0e01e4c63bbe8be74cf34da84.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902690.png" />   
     </p>
 <p>概念二“分片”</p>
 <p><strong>分片解决的是“数据量太大”的问题，也就是通常说的“水平切分”</strong>。一旦引入分片，势必有“数据路由”的概念，哪个数据访问哪个库。路由规则通常有3种方法：</p>
@@ -480,13 +480,13 @@ from Bids where item_id = ?
 </blockquote>
 <p><strong>概念三“分组”</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/342760fc704f4e6d8216b80eae1c1e8c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902657.png" />   
     </p>
 <p>概念三“分组”</p>
 <p>分组解决“可用性”问题，分组通常通过 <strong>主从复制</strong> 的方式实现。</p>
 <p><strong>互联网公司数据库实际软件架构是：又分片，又分组（如下图）</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/da617aa1f56c433b992adb2b0b5d8659.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902681.png" />   
     </p>
 <p>又分片，又分组</p>
 <h3 id="442设计思路">4.4.2 设计思路</h3>
@@ -508,7 +508,7 @@ from Bids where item_id = ?
 <p>2. <strong>如何保证数据库“读”高可用？</strong></p>
 <p><strong>冗余读库</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/f219aafc43f5411eba51ce1c82104b8d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902604.png" />   
     </p>
 <p>读高可用</p>
 <p><strong>冗余读库带来的副作用？读写有延时，可能不一致</strong>。</p>
@@ -516,7 +516,7 @@ from Bids where item_id = ?
 <p>3. <strong>如何保证数据库“写”高可用？</strong></p>
 <p><strong>冗余写库</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/3fc2e64436204d4ebbf381cc6bf707bb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902590.png" />   
     </p>
 <p>写高可用</p>
 <p><strong>采用双主互备的方式，可以冗余写库带来的副作用？双写同步，数据可能冲突（例如“自增id”同步冲突）</strong>，如何解决同步冲突，有两种常见解决方案：</p>
@@ -526,7 +526,7 @@ from Bids where item_id = ?
 </blockquote>
 <p><strong>实际中没有使用上述两种架构来做读写的“高可用”，采用的是“双主当主从用”的方式：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/baf48c9375b64d0d9bb887974399ca7d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902537.png" />   
     </p>
 <p>双主当主从用</p>
 <p>仍是双主，但 <strong>只有一个主提供服务（读+写），另一个主是“shadow-master”，只用来保证高可用，平时不提供服务</strong>。</p>
@@ -544,7 +544,7 @@ from Bids where item_id = ?
 <p>4. <strong>如何扩展读性能</strong></p>
 <p>提高读性能的方式大致有三种， <strong>第一种是建立索引</strong>。这种方式不展开，要提到的一点是， <strong>不同的库可以建立不同的索引</strong>。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/a5bf27b230524bc280c74d0cb044f4f4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902314.png" />   
     </p>
 <p>不同的库可以建立不同的索引</p>
 <blockquote>
@@ -559,12 +559,12 @@ from Bids where item_id = ?
 </blockquote>
 <p>实际中没有采用这种方法提高数据库读性能（没有从库）， <strong>采用的是增加缓存</strong>。常见的缓存架构如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/11af2f5803ff4bfd8ef3c08ef94ca838.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902368.png" />   
     </p>
 <p>常见玩法：数据库+缓存</p>
 <p>上游是业务应用，下游是主库，从库（读写分离），缓存。实际的玩法： <strong>服务+数据库+缓存一套</strong>。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/b794e09a2d414b408ef40651701535c0.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902456.png" />   
     </p>
 <p>服务+数据库+缓存一套</p>
 <p>业务层不直接面向db和cache， <strong>服务层屏蔽了底层db、cache的复杂性</strong>。为什么要引入服务层，今天不展开，采用了“服务+数据库+缓存一套”的方式提供数据访问， <strong>用cache提高读性能</strong>。</p>
@@ -575,18 +575,18 @@ from Bids where item_id = ?
 <p>主从数据库的一致性，通常有两种解决方案：</p>
 <p>1. <strong>中间件</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/71a2c3acc7ef4674b56ad16e80e7dc54.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902378.png" />   
     </p>
 <p>    中间件</p>
 <p>    如果某一个key有写操作，在不一致时间窗口内，中间件会将这个key的读操作也路由到主库上。这个方案的缺点是， <strong>数据库中间件的门槛较高</strong>（百度，腾讯，阿里，360等一些公司有）。</p>
 <p>2. <strong>强制读主</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/98b12d74b1eb4fba9370b2b1c583b2d9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902455.png" />   
     </p>
 <p>    强制读主</p>
 <p>    上面实际用的“双主当主从用”的架构，不存在主从不一致的问题。第二类不一致， <strong>是db与缓存间的不一致</strong>：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/97cee25a7f2944b091b7cf84f5cccfd8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902254.png" />   
     </p>
 <p>    常见玩法：数据库+缓存</p>
 <p>    常见的缓存架构如上，此时 <strong>写操作</strong> 的顺序是：</p>
@@ -612,7 +612,7 @@ from Bids where item_id = ?
 <p><strong>如何秒级扩容？</strong></p>
 <p>首先， <strong>我们不做2库变3库的扩容，我们做2库变4库（库加倍）的扩容（未来4-&gt;8-&gt;16）</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/4b16f9b0e13f4ff795a93c5f067b11e2.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902199.png" />   
     </p>
 <p>原来分2库</p>
 <p>服务+数据库是一套（省去了缓存）， <strong>数据库采用“双主”的模式</strong>。</p>
@@ -629,7 +629,7 @@ from Bids where item_id = ?
 <p> 3. 删除多余的数据（余0的主，可以将余2的数据删除掉）；</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/7e5179a189fc4039a660275b60efd722.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902040.png" />   
     </p>
 <p>2库变4库的扩展</p>
 <p>这样，秒级别内，我们就完成了2库变4库的扩展。</p>
@@ -638,7 +638,7 @@ from Bids where item_id = ?
 <p>一个秒杀或者抢购页面，通常分为2个部分，一个是 <strong>静态的HTML等内容</strong>，另一个就是 <strong>参与秒杀的Web后台请求接口</strong>。</p>
 <p><strong>通常静态HTML等内容，是通过CDN的部署，一般压力不大，核心瓶颈实际上在后台请求接口上</strong>。这个后端接口，必须能够支持高并发请求，同时，非常重要的一点，必须尽可能“快”，在最短的时间里返回用户的请求结果。 <strong>为了实现尽可能快这一点，接口的后端存储使用内存级别的操作会更好一点</strong>。仍然直接面向MySQL之类的存储是不合适的， <strong>如果有这种复杂业务的需求，都建议采用异步写入</strong>。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/89b289543e744363bb4ac6001bc1d498.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902151.png" />   
     </p>
 <p>秒杀业务流程设计</p>
 <p>当然，也有一些秒杀和抢购 <strong>采用“滞后反馈”</strong>，就是说秒杀当下不知道结果，一段时间后才可以从页面中看到用户是否秒杀成功。但是，这种属于“偷懒”行为，同时给用户的体验也不好，容易被用户认为是“暗箱操作”。</p>
@@ -654,7 +654,7 @@ from Bids where item_id = ?
 <p>然后，这才是真正的恶梦开始。举个例子，高速路口，1秒钟来5部车，每秒通过5部车，高速路口运作正常。突然，这个路口1秒钟只能通过4部车，车流量仍然依旧，结果必定出现大塞车。（5条车道忽然变成4条车道的感觉）。</p>
 <p>同理，某一个秒内，20*500个可用连接进程都在满负荷工作中，却仍然有1万个新来请求，没有连接进程可用，系统陷入到异常状态也是预期之内。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-331118c0ec704f8c8caf871bbaca4bff.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902213.jpeg" />   
     </p>
 <p>其实在正常的非高并发的业务场景中，也有类似的情况出现，某个业务请求接口出现问题，响应时间极慢，将整个Web请求响应时间拉得很长，逐渐将Web服务器的可用连接数占满，其他正常的业务请求，无连接进程可用。</p>
 <p>更可怕的问题是，是用户的行为特点，系统越是不可用，用户的点击越频繁， <strong>恶性循环最终导致“雪崩”（其中一台Web机器挂了，导致流量分散到其他正常工作的机器上，再导致正常的机器也挂，然后恶性循环）</strong>，将整个Web系统拖垮。</p>
@@ -668,12 +668,12 @@ from Bids where item_id = ?
 <p>部分用户通过浏览器的插件或者其他工具，在秒杀开始的时间里， <strong>以自己的账号，一次发送上百甚至更多的请求</strong>。实际上，这样的用户破坏了秒杀和抢购的公平性。</p>
 <p>这种请求在某些没有做数据安全处理的系统里，也可能造成另外一种破坏，导致某些判断条件被绕过。例如一个简单的领取逻辑，先判断用户是否有参与记录，如果没有则领取成功，最后写入到参与记录中。这是个非常简单的逻辑，但是，在高并发的场景下，存在深深的漏洞。 <strong>多个并发请求通过负载均衡服务器，分配到内网的多台Web服务器，它们首先向存储发送查询请求，然后，在某个请求成功写入参与记录的时间差内，其他的请求获查询到的结果都是“没有参与记录”</strong>。这里，就存在逻辑判断被绕过的风险。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/9a66f0be84ed493598f84689ba529176.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902965.png" />   
     </p>
 <p><strong>应对方案：</strong></p>
 <p>在程序入口处，一个账号只允许接受1个请求，其他请求过滤。不仅解决了同一个账号，发送N个请求的问题，还保证了后续的逻辑流程的安全。 <strong>实现方案，可以通过Redis这种内存缓存服务，写入一个标志位（只允许1个请求写成功，结合watch的乐观锁的特性），成功写入的则可以继续参加</strong>。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/6fc2d7de6d17403b96ab9856581de282.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902085.png" />   
     </p>
 <p>Paste_Image.png</p>
 <p>或者，自己实现一个服务，将同一个账号的请求放入一个队列中，处理完一个，再处理下一个。</p>
@@ -681,7 +681,7 @@ from Bids where item_id = ?
 <p>很多公司的账号注册功能，在发展早期几乎是没有限制的，很容易就可以注册很多个账号。因此， <strong>也导致了出现了一些特殊的工作室，通过编写自动注册脚本，积累了一大批“僵尸账号”，数量庞大，几万甚至几十万的账号不等，专门做各种刷的行为（这就是微博中的“僵尸粉“的来源）</strong>。举个例子，例如微博中有转发抽奖的活动，如果我们使用几万个“僵尸号”去混进去转发，这样就可以大大提升我们中奖的概率。</p>
 <p>这种账号，使用在秒杀和抢购里，也是同一个道理。例如，iPhone官网的抢购，火车票黄牛党。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/e11792ec31f44fd0bc32ce7240c52d48.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902086.png" />   
     </p>
 <p>Paste_Image.png</p>
 <p><strong>应对方案：</strong></p>
@@ -695,7 +695,7 @@ from Bids where item_id = ?
 <p>## 6.3 多个账号，不同IP发送不同请求##</p>
 <p>所谓道高一尺，魔高一丈。有进攻，就会有防守，永不休止。 <strong>这些“工作室”，发现你对单机IP请求频率有控制之后，他们也针对这种场景，想出了他们的“新进攻方案”，就是不断改变IP</strong>。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/84a88d2bda104e3494a397ae00fa380e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902048.png" />   
     </p>
 <p>Paste_Image.png</p>
 <p>有同学会好奇，这些随机IP服务怎么来的。 <strong>有一些是某些机构自己占据一批独立IP，然后做成一个随机代理IP的服务，有偿提供给这些“工作室”使用</strong>。还有一些更为黑暗一点的，就是 <strong>通过木马黑掉普通用户的电脑，这个木马也不破坏用户电脑的正常运作，只做一件事情，就是转发IP包，普通用户的电脑被变成了IP代理出口</strong>。通过这种做法，黑客就拿到了大量的独立IP，然后搭建为随机IP服务，就是为了挣钱。</p>
@@ -707,7 +707,7 @@ from Bids where item_id = ?
 <p>## 7.1 超发的原因##</p>
 <p>假设某个抢购场景中，我们一共只有100个商品，在最后一刻，我们已经消耗了99个商品，仅剩最后一个。这个时候，系统发来多个并发请求，这批请求读取到的商品余量都是99个，然后都通过了这一个余量判断，最终导致超发。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/8/d368f39484454df7aa4b0c2e0ce6e125.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281902088.png" />   
     </p>
 <p>Paste_Image.png</p>
 <p>在上面的这个图中，就导致了并发用户B也“抢购成功”，多让一个人获得了商品。这种场景，在高并发的情况下非常容易出现。</p>
@@ -841,6 +841,10 @@ from Bids where item_id = ?
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -874,10 +878,6 @@ from Bids where item_id = ?
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1256,6 +1256,8 @@ from Bids where item_id = ?
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

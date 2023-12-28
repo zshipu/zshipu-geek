@@ -221,17 +221,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>单从数值上来看，肯定是直接回归坐标点方式好啊，因为直接回归坐标点的话，输出是浮点数，不会丢失精度，而高斯热输出肯定是整数，这就涉及到一个 <strong>理论误差下界</strong> 问题了。假设输入图片是512x512，输出是缩小4倍即128x128，那么假设一个关键点位置是507x507，那么缩小4倍后，即使没有任何误差的高斯热图还原，也会存在最大507-126*4=3个像素误差，这个3就是理论误差下界。如果缩小倍数加大，那么理论误差下界还会上升。所以目前大部分做法折中考虑速度和精度，采用缩小4倍的方式。</p>
 <p>高斯热图回归的loss一般都是mse，这就会出现另一个问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9d00c2145be24a29bc29035290f5e6b3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282000523.webp" />   
     </p>
 <p>第一幅图是target热图，第二副和第三副图是假设预测出来的两种情况，正常情况下，第二副预测的更准，但是实际上如果采用mse loss,那么第三副图的loss比第二副小，这就出现问题了，会导致预测的关键点是不准确的。</p>
 <p>总结一下，虽然高斯热图预测的精度通常高于回归的方法，但是其存在几个非常麻烦的问题：(1) 输出图很大，导致内存占用多、推理和训练速度慢；(2) 存在理论误差下界；(3) mse loss可能会导致学习出来的结果出现偏移；(4) 不是全微分模型；</p>
 <p>作者设计的整体流程如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/25be4d366f22435e90f898c84e31a929.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282000482.webp" />   
     </p>
 <p>(a)是目前主流做法，可以看出梯度流不是端到端的；(b)是在高斯热图后面连接一个全连接层来直接回归关键点坐标，梯度流是端到端的；(c) 作者提出的DSNT模块做法。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/21e951a5e3aa402ebfc1ccba785a7961.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282000518.webp" />   
     </p>
 <p>可以看出， <strong>方式(a)缺点是不是全微分，低分辨率输出情况下精度较低；(b)的缺点是丢失了空间泛化能力，非常容易过拟合，高分辨率情况下精度不行；而(c)具备了全部优点</strong>**，个人觉得最大优点是可以在低分辨率情况下得到近似相同精度的结果。**实验结果表明，如果CNN模型是ResNet-34，在后面接一个DSNT模块和不接情况下，当输出热图是 7 × 7 pixel时，带DSNT的精度优于不带的90.5%，当输出热图是56x56 pix时候，优于2.0%。也就是说本文方法主要优势是可以进行低分辨率高斯热图预测。</p>
 <p>前面分析了半天全卷积的好处，那么自然我们的输出也是采用全卷积方式，并且在全卷积特征图后面接DSNT模块，将空间高斯热图转换为坐标点。 <strong>本文设计和目前高斯热图预测主要区别是我们并不是强制要求一个loss直接作用到高斯预测热图上</strong>，(b)的label就是强制Loss学习到高斯热图，loss直接作用在输出特征图上，而本文采用的是(c)，通过优化整个模型输出的预测坐标的损失来间接学习热图，也就是loss是基于预测关键点和真实关键点的，热图的学习完全是网络自发的(也不算自发，加了正则)，这就是本文和其他常用做法的最主要区别了，后面会细说。</p>
@@ -240,99 +240,99 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>下面开始讨论具体实现。首先明确DSNT模块的输入和输出，假设CNN原图输入是(batch,h,w,3)，输出是(batch,h//4,w//4,17)表示17个关键点回归，用表示，DSNT作用在每一个通道上，输出是(batch,17,2)表示17个关键点的x,y坐标。</p>
 <p><strong>(1) 对每一个通道输出的高斯热图进行normalized</strong>，定义为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/08cc7dcf44914856857b051275835972.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282000476.webp" />   
      。</p>
 <p>忽略归一化分母，可以表示为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/44b90228687b40dc8d7b693083f005a9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282000230.webp" />   
      ，作者设计了4种normalized手段，具体为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cbc9f813c05d41789c2c691ad901294f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282000045.webp" />   
     </p>
 <p>可以看出，选择不同的归一化手段，最终结果差距不大，但是由于表中softmax手段优异一些，故作者选择了softmax作为normalized函数。</p>
 <p>为啥要归一化到0~1呢？是因为作者希望DSNT输入是一个离散概率分布，后面有用。</p>
 <p> (2) 转换为坐标点</p>
 <p>先定义两个矩阵X和Y，其宽高和输入DSNT的宽高一致，其具体数值计算为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f1c3e3ef6889460cb01373514848753e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282000576.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0ec6a4a8a69a40fdb43179b1ab3dffac.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282000479.webp" />   
      ，这里m=宽，n=高，这样的做法可以将X和Y坐标值scale到(-1,1)之间。一个特殊实例如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b01a872d46c64d1888afb360fca23a67.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282000432.webp" />   
     </p>
 <p>可以看出，x坐标实际上就是
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1e0c238806f54bb8bf6f8c2497698ea1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282000492.webp" />   
      和X矩阵进行F范数结果，y坐标实际上就是
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/05a212a0c4a64405b9c2842e19d160a6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282000269.webp" />   
      和Y矩阵进行F范数结果(F范数是欧式空间二范数的推广，计算方法就是逐元素点乘)。可以看出，如果归一化的高斯热图只有一个峰值，那么采用这种变换手段可以直接得到坐标点。这个变换过程就是本文的核心。</p>
 <p>好了，由于
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e049cbcb43fc41dfbf3afe7fbd777669.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282000145.webp" />   
      是0~1，且和为1，那么满足概率分布条件，故可以写成：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ff4722c895514714ac79fc9399f05a4c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282001033.webp" />   
     </p>
 <p>c是某一个通道的输出坐标，2个值，上式就是随机变量X和Y的联合概率分布。仔细观察可以发现，通过DSNT变换后得到的2个坐标点，其实就是上述联合分布的均值，写成：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/05713bab009b43e7aa68966af00362a1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282001905.webp" />   
     </p>
 <p>如果大家忘记了均值咋算，那么我贴一张图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b0e95520ec10451388a7faf290a1fb95.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282001829.webp" />   
     </p>
 <p>总结，经过上述两步骤后，得到如下汇总式子：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8750766fd6ab4ab5a023c126895ee86b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282001083.webp" />   
     </p>
 <p>注意看：虽然我们前面都是假设DSNT的输入是高斯热图，但是实际上目前我们没有加入任何先验，让网络学习到高斯热图性质，但是我们仔细看X和Y值，可以看出，在关键点中心点处，X值关于X轴对称，Y值关于Y轴对称，这样的对称属性对生成高斯热图有一定的帮助，网络会倾向于学习出左右和上下对称的热图。如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0520dd75f9494be08c3e2c5e576060e5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282001853.webp" />   
     </p>
 <p>(a)是输入图片，(b)是常用的高斯热图预测额label，而(c)是本文设计的没有加任何高斯约束自动学习出来的热图，虽然和高斯热图还有些差距，但是基本满足关于中心点对称的属性。</p>
 <p>作者试图分析了一个问题：没有任何高斯约束的网络训练会不会非常容易受到外点影响，导致训练不稳定？因为一旦预测的热图由max外点干扰，那么后面的DSNT模块肯定就变换错误了，作者说不会，因为在训练时候如果出现这种现象，那么就导致一个非常大的Loss，促使网络慢慢去掉外点干扰。</p>
 <p>好了前面基本就讲完了整个网络结构了。下面开始分析Loss。</p>
 <p>loss设计就比较简单了，由于是坐标点回归，那么一个非常自然的loss肯定是误差平方和，即：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/579d8d3535754318a3a25bccb099e33a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282001004.webp" />   
     </p>
 <p>p是label，是DSNT模块输出值。</p>
 <p>我希望大家能知道为何这里的Loss只是两个点之间的二范数而已，但是梯度却是作用在了整个热图上面， <strong>原因是这个输出的预测值其实是均值，而对均值有贡献的位置是整个图，故梯度反向时候会作用在整个热图上。</strong></p>
 <p>如果仅仅上面这个Loss肯定是可以work的，但是如果没有加入任何约束，那么会出现同一个关键点会产生各种形状的热图，虽然对我们的最终结果没有影响，但是总感觉过于自由了。例如网络可能会学出一种非常大方差和非常小方差的高斯热图，从稳定性方面考虑，那么在实际情况下，我们肯定是需要小方差的高斯热图，而且在实验中发现认为引入一些先验是有助于网络训练的。故我们还要探讨如何加入先验。</p>
 <p>加入先验的一种最简单最直接做法就是正则Loss，故我们可以对正则项引入高斯热图先验。总体loss为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ed5e19726e8c4c2f9f4aef322240a92e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282001107.webp" />   
     </p>
 <p><strong>(1) 方差正则</strong></p>
 <p>第一种可以想到的正则是控制方差，前面说过我们希望学出高斯热图，且方差要小，那么很自然我们可以写成：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/027f1373005f465eb4bb766af54b79cb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282001019.webp" />   
     </p>
 <p>第一个式子是计算方差，只和预测出来的坐标有关，第二个是最终的方差正则项，通过给予x和y方向同样大小的方差约束，就有助于学习出高斯热图。</p>
 <p><strong>(2) 分布正则</strong></p>
 <p>其实容易想到另一种更好的正则。你希望的不就是要得到高斯热图吗？那么由于你已经变换到了概率分布中，那么我希望他的输出分布是二元高斯，那么肯定用KL散度啊，KL散度大量用于衡量两个分布相似性上，在GAN中应用超级广泛。那么我们有：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/49be8983231f42ca80f6ee5a2e25fc2c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282001816.webp" />   
     </p>
 <p>是二元高斯分布，这样的设计就可以强制网络学到高斯热图。由于KL散度有：1.永远大于等于0，但是不一定小于1; 2.非对称性，故作者引入了更好的KL散度变种：Jensen-Shannon，其是KL散度的变体，值域范围是0~1，且是对称的。</p>
 <p><strong>其实我们可以换一个角度考虑，例如SVM Loss一样，我们可以认为坐标预测的loss是正则Loss，而分布正则的loss是主Loss，从这个角度来看，那么本论文所提方法其实和原始的直接高斯热图回归做法并无不同，还是直接回归高斯热图，不过额外增加了一个坐标回归正则项，为了能得到坐标点，引入了DSNT模块而已。</strong></p>
 <p>作者通过实验对比，结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e80c77251eb94352bb00836b15c769a6.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282001659.webp" />   
     </p>
 <p>可以看出JS更好一些，故最终最终选择的正则是JS分布正则。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a67496a199d44ef5bdc4ea25184dc012.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282001754.webp" />   
     </p>
 <p>上图是在不同的方差大小情况下学习出的热图形状，可以看出JS正则的效果不错，但是可以看出方差影响很大，这个在具体项目中 <strong>非常关键，需要小心设计</strong>。还可以看出在方差正则中，由于只是限制了方差相等，均值为0，故他无法直接学习出高斯热图，而是将热图分成关节周围的四个斑点。</p>
 <p><strong>04</strong></p>
 <p><strong>实验</strong></p>
 <p>作者设计了2组对比实验，分别是ResNet，通过空洞卷积后，输出热图大小是14x14pix，和Stacked hourglass。输出热图大小是64x64pix。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e728d1f1ee6a4af8ad83bb31aaf845ff.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312282001126.webp" />   
     </p>
 <p>DSNTr是指带正则。先看左图，本文设计的DSNT模块在低分辨率输出情况下有压倒性优势，当高分辨率输出时候依然会好一点，这个好一点应该是弥补理论误差下界导致的，也就是说在高分辨率输出时候优势不大；再看中间图，随着网络深度加深，并不是一直直线上升的，在resnet-50和resnet-101情况下精度几乎没有提升；再看右图，sta</p>
 
@@ -462,6 +462,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -495,10 +499,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -877,6 +877,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

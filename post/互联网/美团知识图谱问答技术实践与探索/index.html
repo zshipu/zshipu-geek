@@ -232,11 +232,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="2-解决方案">2 解决方案</h2>
 <p>KBQA系统的输入为用户Query，输出为答案。总体架构如下图1所示。最上层为应用层，包括对话以及搜索等多个入口。在获取到用户Query后，KBQA线上服务通过Query理解和召回排序模块进行结果计算，最终返回答案文本。除了在线服务之外，知识图谱的构建、存储也十分重要。用户不仅会关心商户的基本信息，也会询问观点类、设施信息类问题，比如景点好不好玩、酒店停车是否方便等。针对上述无官方供给的问题，我们构建了一套信息与观点抽取的流程，可以从商家非结构化介绍以及UGC评论中抽取出有价值的信息，从而提升用户咨询的满意度，我们将在下文进行详细介绍。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d1ca94bb62c04ffba3817dfa304f7736.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715853.webp" />   
      图1 KBQA系统架构图</p>
 <p>对于KBQA模型，目前的主流解决方案有两种，如下图2所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/198ef85656264c759ed25d66e166210c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715117.webp" />   
      图2 KBQA解决方案分类</p>
 <ul>
 <li><strong>基于语义解析（Semantic Parsing-based）</strong> ：对问句进行深度句法解析，并将解析结果组合成可执行的逻辑表达式（如SparQL），直接从图数据库中查询答案。</li>
@@ -245,7 +245,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>基于语义解析的方法可解释性更强，但这种方法需要标注大量的自然语言逻辑表达式，而信息抽取式的方法更偏向端到端的方案，在复杂问题、少样本情况下表现更好，但若子图过大，会显著降低计算的速度。</p>
 <p>因此，考虑到两者的优势，我们采用将两者结合的方案。如下图3所示，整体的流程分为四大步骤，以“故宫周末有学生票吗”为例：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/798a629798234e2fbd1e6f3cedffac3a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715228.webp" />   
      图3 美团KBQA解决方案</p>
 <ol>
 <li><strong>Query理解</strong> ：输入原始Query，输出Query理解结果。其中会对对Query进行句法分析，识别出用户查询的主实体是“故宫” 、业务领域为“旅游”、问题类型为一跳（One-hop）。</li>
@@ -268,15 +268,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>最终，该模块会输出句子中各个重要成分的类型，如下图4所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d73e7e87214b4ad7a1e93473dd8b975b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715201.webp" />   
      图4 Query理解流程及结果</p>
 <p>依存分析是句法分析的一种，它的目的是识别句子中词与词的非对称支配关系，在输出的结果中用有向弧表示，该弧线由从属词（dep）指向支配词（head）。对于KBQA任务，我们定义了五种关系，如下图5所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2de76ada366f4de7999399420aebd2f4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715626.webp" />   
      图5 依存类型定义</p>
 <p>依存分析主要有两种方案：基于转移的（Transition-based）和基于图的（Graph-based）。基于转移的依存分析将依存句法树的构建建模为一系列操作，由模型预测每一步的动作（shift、left_arc、right_arc），不断将未处理的节点入栈并赋予关系，最终构成句法树。基于图的方法则致力于在图中找出一棵最大生成树，也就是句子整体依存关系的全局最优解。考虑到基于图的方法是对全局进行搜索，准确率更高，我们采用较为经典的“Deep Biaffine Attention for Neural Dependency Parsing”模型，它的结构如下图6所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3f32417ba969403f98c75adf6b18ec47.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715631.webp" />   
      图6 依存分析模型结构</p>
 <p>该模型先通过BiLSTM对词与词性的拼接向量进行编码，之后采用对用两个MLP头分别编码出h(arc-head)和h(arc-dep)向量，去除冗余信息。最终将各个时刻的向量拼接起来得到H(arc-head)和H(arc-dep)，且在H(arc-dep)上拼接了一个单位向量，加入中间矩阵U(arc)进行仿射变换，得到dep与head的点积分数矩阵S(arc)，找到每个词依存的head。</p>
 <p>有了依存分析的结果，我们可以更好地识别关系、复杂问题，具体的特征使用方法将在下文进行介绍。</p>
@@ -284,7 +284,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>关系识别是KBQA中另一个核心模块，目的是识别出用户Query所问的关系（Predicate），从而与主实体（Subject）联合确定唯一子图，得到答案（Object）。</p>
 <p>在实践中，考虑到图谱中边关系的数量会不断增加，我们将关系识别建模为文本匹配任务，输入用户Query、Query特征和候选关系，输出关系匹配的分数。为了解决开头提到的多领域问题，我们在输入的特征中加入了领域信息，从而在领域表示中存储一定的领域相关知识，让模型更好地判断。同时，为了提升复杂Query的理解，我们在输入中还融入了句法信息，让模型可以更好地理解带约束、多跳的问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/667e2ed118a44ee384102d99fbe38154.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715452.webp" />   
      图7 关系识别模型结构</p>
 <p>随着大规模预训练语言模型的出现，BERT等大模型在匹配任务上取得了SOTA的结果，通常业界通用的方法主要归类为以下两种：</p>
 <ol>
@@ -301,20 +301,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="23-复杂问题理解">2.3 复杂问题理解</h3>
 <p>在真实场景中，大部分问题可以归为以下四类（绿色为答案节点），如下图8所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6af43d2d566a4327ad447e55810f511f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715432.webp" />   
      图8 复杂问题分类</p>
 <p>问题的跳数根据实体数量决定，单跳问题通常只涉及商户的基本信息，比如问商户的地址、电话、营业时间、政策等，在知识图谱中都可以通过一组SPO（三元组）解答；两跳问题主要是针对商户中某些设施、服务的信息提问，比如酒店的健身房在几层、早餐几点开始、以及接送机服务的价格等，需要先找到商户-&gt;主实体（设施/服务/商品等）的路径，再找到主实体的基本信息三元组，也就是SPX、XPO两个三元组。约束问题指主实体或答案节点上的约束条件，一般为时间、人群或是定语。</p>
 <p>下面介绍针对不同类型的复杂问题，我们所进行的一些改进。</p>
 <h4 id="231-带约束问题">2.3.1 带约束问题</h4>
 <p>通过对线上日志的挖掘，我们将约束分为以下几类，如下图9所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a5836e4232d6462e8943edf3439f60ff.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715308.webp" />   
      图9 约束问题分类</p>
 <p>对于带约束问题的回答涉及两个关键步骤： <strong>约束识别</strong> 和 <strong>答案排序</strong> 。</p>
 <p>通过KBQA系统中的依存分析模块，我们可以识别出用户在实体或关系信息上所加的约束限制，但约束的说法较多，且不同节点的约束类型也不一样，因此我们在构造数据库查询SQL时先保证召回率，尽量召回实体和关系路径下的所有候选节点，并在最终排序模块对答案约束进行打分排序。</p>
 <p>为了提升效率，我们首先在知识存储层上进行了优化。在复合属性值的存储方面，Freebase提出Compound Value Type (CVT) 类型，如下图10所示，来解决这类复合结构化的数据的存储与查询问题。比如欢乐谷的营业时间，对于不同的场次是不一样的。这种复合的属性值可以用CVT的形式去承接。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5bfc9c256d6a41c7a39f8da1ce2b74a5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715253.webp" />   
      图10 CVT类型示例</p>
 <p>但是，CVT存储方式增加查询复杂度、耗费数据库存储。以图“欢乐谷营业时间CVT”为例：</p>
 <ul>
@@ -324,7 +324,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>为了解决上述问题，我们采用Key-Value的结构化形式承载属性信息。其中Key为答案的约束信息，如人群、时间等可以作为该属性值的约束的信息，都可以放在Key中，Value即为要查的答案。对于上文的例子，我们将所有可能的约束维度的信息组成Key，如下图11所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0a459c6da7ae48d88fcb7bc528db105c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715148.webp" />   
      图11 约束问题解决方案</p>
 <p>之后，为了解决约束值说法过多的问题，在实际查询过程中，在找不到完全匹配的情况下，我们用属性值的Key和问题中的约束信息进行匹配计算相关度，相关度最高的Key，对应的Value即为答案。因此，Key的表示方法可以为多种形式：</p>
 <ul>
@@ -338,28 +338,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>多跳问题是天然适合KBQA的一类问题，当用户询问商户中的设施、服务、商品等实体的信息时，我们只需要先在图谱中找到商户，再找到商户下的实体，接着找到下面的基本信息。如果使用FAQ问答的解法，就需要为每个复杂问题都设置一个标准问，比如“健身房的位置”、“游泳馆的位置”等。而在KBQA中，我们可以很好地对这类问题进行压缩，不管问什么实体的位置，都问的是“位置”这条边关系，只是起始实体不同。</p>
 <p>在KBQA系统中，我们先依赖依存分析模块对句子成分间的依赖关系进行识别，之后再通过关系识别模块判断句子所询问的关系跳数以及关系，具体流程如下图12所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8e4e9ba2feb84a598835f6b51859d7f8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715379.webp" />   
      图12 多跳问题解决方案</p>
 <p>借助实体识别的类型，我们可以将句子中的重要成分进行替换，从而压缩候选关系配置的个数、提升关系识别准确率。在对句子进行了充分理解后，系统会基于主实体、关系、跳数对子图进行查询，并输入给答案排序模块进行更细粒度的约束识别和打分。</p>
 <h3 id="24-观点问答">2.4 观点问答</h3>
 <p>除了上述基本信息类的查询Query外，用户还会询问观点类的问题，比如“迪士尼停车方便吗？”、“XX酒店隔音好吗？”等。对于主观观点类问题，可以基于FAQ或阅读理解技术，从用户评论中找出对应的评论，但这种方法往往只能给出一条或几条评论，可能会太过主观，无法汇总群体的观点。因此我们提出了观点问答方案，给出一个观点的正反支持人数，同时考虑到可解释性，也会给出多数观点的评论证据，在App中的实际展示如下图13所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/72f8db37a1ce4c8a89bbc236929ee5e3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715186.webp" />   
      图13 观点问答截图</p>
 <p>为了自动化地批量挖掘用户观点，我们拆解了两步方案：观点发现和Evidence挖掘，如下图14所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/90cec8f066e143f6aa69a788a95b0db2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715139.webp" />   
      图14 观点挖掘步骤</p>
 <p>第一步，先通过观点发现在用户评论中挖掘出多种观点。我们采用基于序列标注的模型发掘句子中的实体和观点描述，并使用依存分析模型对实体-观点的关系进行判断。</p>
 <p>第二步，在挖掘到一定数量的观点后，再深入挖掘评论中的证据（Evidence），如下图15所示。虽然在第一步观点发现时也能找到部分观点的出处，但还有很多用户评论的观点是隐式的。比如对于“是否可以带宠物”，用户不一定在评论中直接指明，而是说“狗子在这里玩的很开心”。这就需要我们对评论语句进行深度语义理解，从而归纳其中的观点。在方案的落地过程中，最初我们使用了分类模型对观点进行分类，输入用户评论，用编码器对句子进行理解，之后各个观点的分类头判断观点正向程度。但随着自动化挖掘的观点增多，为了减少人工标注分类任务的成本，我们将其转换成了匹配任务，即输入观点标签（Tag）和用户评论，判断评论语句对该观点的支撑程度。最后，为了优化速度，我们对12层Transformer进行了裁剪，在速度提升3倍的情况下效果只降了0.8%，实现了大批量的观点离线挖掘。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1bb9219bbff44ee7bb53f2cbc03c3bd1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715108.webp" />   
      图15 观点证据挖掘步骤</p>
 <h3 id="25-端到端方案的探索">2.5 端到端方案的探索</h3>
 <p>在上文中，我们针对多跳、带约束等复杂问题设计了不同的方案，虽然可以在一定程度上解决问题，但系统的复杂度也随之提高。基于关系识别模块的预训练思路，我们对通用的、端到端的解决方案进行了更多的探索， <strong>并在今年的EMNLP发表了《Large-Scale Relation Learning for Question Answering over Knowledge Bases with Pre-trained Language Models》论文</strong> 。</p>
 <p>对于KBQA，目前学术界有很多研究专注于图学习方法，希望用图学习来更好地表示子图，但却忽略了图谱节点本身的语义。同时，BERT类的预训练模型是在非结构化文本上训练的，而没接触过图谱的结构化数据。我们期望通过任务相关的数据来消除两者的不一致性，从而提出了三种预训练任务，如下图16所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4fa29130c5634bf8b32c36864ca9eec7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715968.webp" />   
      图16 关系识别预训练任务</p>
 <ol>
 <li><strong>Relation Extraction</strong> ：基于大规模关系抽取开源数据集，生成了大量一跳（ [CLS]s[SEP]h, r, t[SEP] ）与两跳（ [CLS]s1 , s2 [SEP]h1 , r1 , t1 (h2 ), r2 , t2 [SEP] ）的文本对训练数据，让模型学习自然语言与结构化文本间的关系。</li>
@@ -368,14 +368,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>经过上述任务预训练后，BERT模型对于Query和结构化文本的推理能力显著提升，并且在非完全KB的情况下有更好的表现，如下图17所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3d5ee52827084d858c0132bc02ed5899.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715166.webp" />   
      图17 模型效果</p>
 <h2 id="3-应用实践">3 应用实践</h2>
 <p>经过一年多的建设，当前KBQA服务已经接入美团的旅游、酒店、到综等多个业务，辅助商家及时回答用户问题，并提升了用户的满意度和转化率。</p>
 <h3 id="31-酒店问一问">3.1 酒店问一问</h3>
 <p>酒店是用户出行的必备需求之一，但一些中小商家没有开通人工客服入口，无法及时回答用户信息。为满足用户对详情页内信息的快速查找，智能助理辅助未开通客服功能的酒店商家进行自动回复，提升用户下单转化率。用户可询问酒店以及房型页的各类信息，如下图18所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0ffbb9ec68124cfe91322e934748a77b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281715151.webp" />   
      图18 酒店问一问产品示例</p>
 <h3 id="32-门票地推">3.2 门票地推</h3>
 <p>门票地推致力于帮助旅游商家解决主要的卖票业务，在景区高峰时段，线上购票相比于排队更加便捷，然而仍有很多用户保持着线下购票的习惯。美团通过提过二维码以及简单的交互，提升了商户卖票以及用户购票的便捷程度。同时，我们通过在购票页内置「智能购票助手」，解决用户购票过程中的问题，帮用户更快捷地买到合适的门票，如下图19所示：</p>
@@ -502,6 +502,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -535,10 +539,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -917,6 +917,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

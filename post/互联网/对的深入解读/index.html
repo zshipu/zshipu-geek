@@ -208,7 +208,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6ed3eed8e6874cb281cf4d3780b07073.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271827701.webp" />   
     </p>
 <blockquote>
 <p>作者：Madison May</p>
@@ -224,12 +224,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>为了简单起见，我们只讨论与单头的点积注意力，尽管在实践中使用了多头注意力。</p>
 <p>如果你想要更深入的回顾一下 self-attention 机制，我强烈推荐 Alexander Rush 的 Annotated Transformer，还有 Jay Alammar 的 Illustrated Transformer。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-5853852d5ebc4122aa46520f428f4d9c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271827282.png" />   
     </p>
 <p>我们可以把 self-attention 分为三个主要部分：</p>
 <h3 id="query---key---value-投影">Query - Key - Value 投影</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-aaf51c247b07438bab5860a1ee919572.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271827191.png" />   
     </p>
 <p>QKV 投影。尽管我们将这个操作画成三个独立的线性投影，但为了提高计算效率，它通常被实现为单个矩阵乘法。</p>
 <p>在此阶段，每个 token 的当前隐藏状态通过线性投影分解为三个部分。</p>
@@ -238,7 +238,7 @@ keys = np.matmul(key_weights, hidden) + key_bias
 values = np.matmul(value_weights, hidden) + value_bias
 </code></pre><h3 id="query--key-矩阵乘法">Query / Key 矩阵乘法</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-379b550811b14ab69a377a4c51b06320.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271827640.png" />   
     </p>
 <p><em>self-attention 操作的核心 —— 一个矩阵乘法计算我们的 keys 和 queries 之间的两两相似度得分。</em></p>
 <p>在投影之后，将 queries 和 keys 相乘以计算两两的相似度。这是用矩阵乘法实现的。</p>
@@ -246,14 +246,14 @@ values = np.matmul(value_weights, hidden) + value_bias
 </code></pre><p>如果你的 keys 和 queries 是形状为 <code>(batch, sequence_length, hidden_size)</code> 的张量，那么矩阵乘法的输出就是形状为 <code>(batch, sequence_length, sequence_length)</code> 的张量。</p>
 <p>这种看似无关紧要的矩阵乘法正是这种 self-attention 操作的计算复杂性问题的根源。对于序列长度的线性增加，计算输出所需的乘法次数以平方方式增加，因为我们需要为输入中每一对可能的 token 计算相似性。这 O(L ²)的复杂性意味着序列的长度超过 1024 的 token 使用原始的 transformer 结构是不切实际的。事实上，BERT 和它的继任者 RoBERTa 中所选择的上下文长度只有 512。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-08ffe8283bc7451bb63246ade7dddb41.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271827393.png" />   
     </p>
 <h3 id="softmax--values-的加权和">Softmax + Values 的加权和</h3>
 <p>key / value 协同矩阵中的项除以了一个缩放因子 <code>sqrt(hidden_size)</code>，用来消除 hidden size 这个参数对注意力分布的影响。对于每个 query，我们在所有 keys 上计算一个 softmax，以确保矩阵的每一行和为 1—— 确保新的隐藏状态的大小不依赖于序列长度。最后，我们用我们的注意力矩阵乘以我们的 values 矩阵，为每个 token 生成一个新的隐藏表示。</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">attention_weights = softmax(qk_agreement / qk_agreement.shape[-1])
 attention_outputs = np.matmul(attention_weights, values)
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-17bb7bf72b314ce8b0a0f79f190ba22a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271827153.png" />   
     </p>
 <h2 id="计算复杂度--解决方案">计算复杂度 — 解决方案</h2>
 <p>如前所述，虽然点积注意力方式非常好用，允许任意的 token 在我们的上下文中从任何其他的 token 中聚合信息，这种灵活性是有代价的，一个不幸的 O (L ²)计算复杂度。</p>
@@ -261,12 +261,12 @@ attention_outputs = np.matmul(attention_weights, values)
 <h2 id="the-reformer">The Reformer</h2>
 <p>&ldquo;Reformer: The Efficient Transformer&quot;的作者采用了一种完全不同的方法来处理序列长度问题。首先，他们观察到学习不同的 keys 和 queries 的投影并不是严格必要的。他们丢弃了 query 投影，并将注意力权重替换为 key 的函数。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-8d2f232d2ae74c53839643b8c89d4690.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271827903.png" />   
     </p>
 <p>共享的 QK-Attention</p>
 <p>有点令人惊讶的是，尽管他们从注意力模块中移除了一些参数，他们的模型在 enwiki8 上的性能并没有下降。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-edd64998ce1946208bca148a7df22627.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271827810.jpeg" />   
     </p>
 <p>在 enwiki8 上把 key 和 query 的投影放到一起做可以获得相同的性能。</p>
 <p>现在，注意力块不再包含 queries 的单独投影，我们只有 key 和 value 对。然而，计算 key 的协同矩阵(通过将每个 key 与其他 key 进行比较)仍然是非常昂贵的。</p>
@@ -280,12 +280,12 @@ attention_outputs = np.matmul(attention_weights, values)
 hash_value = np.sign(np.dot(x, lsh_proj.T))
 </code></pre><p>换句话说，我们选择一个随机的向量集合，观察输入向量在每个向量上的投影是正的还是负的，然后使用这个二值向量来表示给定向量的预期存储区。下图说明了 LSH 投影矩阵“u”中单个向量的处理过程。绿色的正号表示与向量 u 点积为正的点，而红色的负号表示与向量 u 点积为负的点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-31a4884e4eb64bdeb5ee2de2d885ee87.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271827452.png" />   
     </p>
 <h2 id="lsh-注意力">LSH 注意力</h2>
 <p>Reformer 的论文选择了局部敏感哈希的 angular 变体。它们首先约束每个输入向量的 L2 范数(即将向量投影到一个单位球面上)，然后应用一系列的旋转，最后找到每个旋转向量所属的切片。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-7cff3cf38afb4989a2b43952df060e8c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271827190.jpeg" />   
     </p>
 <p>该图演示了一个用 4 个桶进行 3 轮哈希的设置。下面的图中的向量映射到了同一个 bucket，因为它们的输入很接近，而上一张图中的向量映射到第一个和最后一个 bucket。</p>
 <p>找到给定的向量选择之后属于哪个桶也可以看成是找到和输入最一致的向量 —— 下面是 Reformer 的代码：</p>
@@ -296,7 +296,7 @@ rotated_vectors = np.hstack([rotated_vectors, -rotated_vectors])
 buckets = np.argmax(rotated_vectors, axis=-1)
 </code></pre><p>在为每个 token 计算一个桶之后，将根据它们的桶对这些 token 进行排序，并将标准的点积注意力应用到桶中的 token 的块上。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-412f88bba1784321bf0a6eac4ccdbc45.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271827953.png" />   
     </p>
 <p>有了足够多的桶，这就大大减少了所有的给定的 token 需要处理的 token 的数量 —— 在实验中，Reformer 的论文运行的模型被配置为使用 128 块大小的块。因此，LSH 操作将昂贵的 key 协同矩阵乘法的上下文大小限制为更易于管理的值。</p>
 <p>我们现在的时间复杂度为 O (L*log(L)) ，而不是时间复杂度成正比 O (L ²)， 这允许我们把注意力操作扩展到更长的序列的时候不会由于运行时间而受到影响。</p>
@@ -439,6 +439,10 @@ buckets = np.argmax(rotated_vectors, axis=-1)
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -472,10 +476,6 @@ buckets = np.argmax(rotated_vectors, axis=-1)
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -854,6 +854,8 @@ buckets = np.argmax(rotated_vectors, axis=-1)
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

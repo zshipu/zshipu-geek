@@ -197,7 +197,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </blockquote>
 <p>今天给大家回顾一篇论文，神经协同过滤，看名字就知道，神经网络版本的协同过滤，推荐算法的经典的方法之一。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d0f0aec41b284291af516af492546b1f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271952995.webp" />   
     </p>
 <p>神经协同过滤(NCF)是新加坡国立大学、哥伦比亚大学、山东大学、德州农工大学于 2017 年共同发表的一篇论文。利用神经网络的灵活性、复杂性和非线性，建立了一个推荐系统。证明了传统的推荐系统矩阵分解是神经协同过滤的一个特例。此外，它还表明 NCF 在两个公共数据集中的表现优于最先进的模型。本文将解释 NCF 的概念，并演示如何在 Pytorch 中实现它。</p>
 <h1 id="必备知识点">必备知识点</h1>
@@ -205,56 +205,56 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="矩阵分解">矩阵分解</h1>
 <p>我们从矩阵分解开始。它将效用矩阵分解为两个子矩阵。在预测过程中，我们将两个子矩阵相乘来重建预测的效用矩阵。对效用矩阵进行因式分解，使两者相乘的损失与真实效用矩阵的损失最小化。一个常用的损失函数是均方误差。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d9bc1d942ce844deb3494e4c2e1d5367.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271952153.webp" />   
     </p>
 <p>本质上，每个用户和物品都被投射到潜空间中，由潜向量表示。两个潜向量越相似，对应的用户偏好越相关。由于我们将效用矩阵分解成相同的潜在空间，所以我们可以用余弦相似度或点积来度量任意两个潜向量的相似度。实际上，每个用户/物品的预测是通过对应的潜向量的点积计算出来的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/38b16a1161cf4d05b75e6543161d312b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271952928.webp" />   
     </p>
 <p>预测等于潜向量的内积</p>
 <p>然而，本文认为点积限制了用户和物品潜向量的表达。让我们考虑下面的情况。我们首先关注效用矩阵的前三行。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d80dfdad1f654bf380f68e2969dbdefd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271952471.webp" />   
     </p>
 <p>设 S{x,y}表示用户 x 与用户 y 之间的相似度，通过计算用户 1、2、3 之间的余弦相似度，可知 S{2, 3} &gt; S{1, 2} &gt; S{1, 3}。在不失一般性的情况下，我们将用户映射到一个二维的潜空间，如下所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/853787f6e85a4483b8e9940dd02fe38f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271952203.webp" />   
     </p>
 <p>现在，我们考虑用户 4。通过与其他算法的相似性比较，我们得到了 S{1,4} &gt; S{3,4} &gt; S{2,4}。但是，无论我们把潜向量 P4 放在 P1 的左右，它都必然会比 P3 更接近 P2。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0ba7e8d19b6441ed8b1d192893cb8c10.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271952788.webp" />   
     </p>
 <p>因此，这个例子显示了内积在充分模拟用户和项目在潜在空间中的交互方面的局限性。</p>
 <h1 id="神经协同过滤">神经协同过滤</h1>
 <p>本文提出了如下图所示的神经协同滤波方法。在输入层，用户和物品是独热编码的。然后，通过相应的嵌入层映射到隐藏空间。神经网络 FC 层可以是任何类型的神经元连接。例如，多层感知器可以放在这里。该模型具有神经 CF 层的复杂连接和非线性，能够较好地估计潜空间中用户与物品之间的复杂交互作用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1be10d830dda4a78ba9cc01887026274.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271952383.webp" />   
     </p>
 <p>NCF结构</p>
 <p>那么，NCF 是如何成为泛化版本的矩阵分解的呢？让我在下图中给你展示。我们首先用乘法层替换神经 CF 层，乘法层对两个输入执行元素级的乘法。然后利用线性激活函数，将乘法层到输出层的权值设为 K×1 维的固定单位矩阵(全一矩阵)。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2d5304b47e1d45f5aa5d89b82e6b37e1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271952114.webp" />   
     </p>
 <p>然后，我们有以下方程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bc8f79abd08748edae0505911dce83b0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271952892.webp" />   
     </p>
 <p>未被发现的交互 ŷ_ui 表示预测值(u, i)进入了重建的效用矩阵。L 为线性激活函数，⊙ 为元素乘操作。p_u 和 q_i 分别是用户和项目的潜在向量，J 是维数(K,1)的单位矩阵。因为 J 是一个单位矩阵，所以在这个线性函数里面变成了潜向量 p_u 和 q_i 的内积。此外，由于线性函数的输入和输出是相同的，所以可以归结为最后一行。预测标签是对应用户和物品的潜向量的内积。这个方程与矩阵分解部分所示的方程相同。从而证明了矩阵分解是 NCF 的一个特例。</p>
 <h1 id="neumf">NeuMF</h1>
 <p>为了引入额外的非线性能力，提出的最终模型 NeuMF 除了广义矩阵分解(GMP)层外，还包括一个多层感知器(MLP)模块。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/854b7af4b92d491fba9bbb19c2d07b6e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271952603.webp" />   
     </p>
 <p>GMF 和 MLP 模块的输出连接到 sigmoid 激活输出层。</p>
 <h1 id="性能">性能</h1>
 <p>本文对 NCF 模型和其他模型进行了评价。也就是说，每个用户的最后一次交互被保留下来进行评估。考虑两个评估指标，命中率@10 和 NDCG@10。命中率@K 表示每个用户获得 10 个推荐的预测命中率。假设我们为每个用户推荐 10 个项目，10 个用户中的 4 个与我们推荐的项目进行交互，然后点击 Ratio@10=0.4。另一方面，NDCG 可以被看作是命中率的扩展，它还考虑了命中的顺序。这意味着如果你的命中发生在较高的推荐上，NDCG 将更高。</p>
 <p>性能比较如下图所示。在所有情况下，NeuMF 的表现都优于其他模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/92b1159a3a504d139bdde2b333e565a2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271952915.webp" />   
     </p>
 <p>此外，本文还证明了对 NeuMF 各个模块进行预训练的有效性。分别训练 GMF 和 MLP 后，将训练后的 GMF 和 MLP 的权重设置为 NeuMF 的初始化。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/188f015bceec4963ba0a474f1953a9f7.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271952812.jpeg" />   
     </p>
 <h1 id="实现">实现</h1>
 <p>在本节中，我将向你展示如何在 Pytorch 中轻松实现 NeuMF。你只需为每个模型实现两个函数， <code>__init__</code> 函数指定模型结构，而 <code>forward()</code> 函数定义如何将输入张量进行前向传播。</p>
@@ -428,6 +428,10 @@ self.sigmoid = torch.nn.Sigmoid()
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -461,10 +465,6 @@ self.sigmoid = torch.nn.Sigmoid()
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -843,6 +843,8 @@ self.sigmoid = torch.nn.Sigmoid()
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

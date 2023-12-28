@@ -208,7 +208,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>举例来说，拿某电商网站双十一的大量促销活动来说。特征的实时性会根据用户最近的行为更快的发现用户可能感兴趣的商品，但绝对不会发现用户相似人群最新的偏好，商品之间最新的相关性信息，新活动的趋势信息等。</p>
 <p>要发现这类全局性的数据变化，就需要更快地更新模型。而影响模型的实时性最重要的因素就是模型的训练方式（如图1）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2cd0f599f6b14fa7a7fcbad9341a1dac.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271810645.webp" />   
     </p>
 <p>图1 模型的实时性与训练方式</p>
 <h2 id="全量更新"><strong>全量更新</strong></h2>
@@ -216,14 +216,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>但全量更新需要训练的样本量大，因此所需训练时间较长；而且全量更新往往在离线的大数据平台上进行，如spark+tensorflow，因此数据的延迟也较长，这都导致了全量更新是“实时性”最差的模型更新方式。</p>
 <p>事实上，对于已经训练好的模型，可以仅对新加入的增量样本进行学习就可以了，这就是所谓的增量更新。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2788d99009dd48309153371998bb34f3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271810106.webp" />   
     </p>
 <h2 id="增量更新--incremental-learning-"><strong>增量更新 ( Incremental Learning )</strong></h2>
 <p><strong>增量更新仅将新加入的样本喂入模型进行增量学习。</strong> 从技术上来说，深度学习模型往往采用随机梯度下降（SGD）以及其变种进行学习，模型对增量样本的学习相当于在原有样本的基础上继续输入增量样本进行梯度下降。因此在深度学习模型的基础上，由全量更新改为增量更新的难度并不大。</p>
 <p>但工程上的任何事情都是tradeoff，永远不存在完美的解决方案，增量更新也不例外。由于仅利用增量样本进行学习，因此模型在多个epoch之后也是收敛到新样本的最优点，而很难收敛到 原所有样本+增量样本 的全局最优点。</p>
 <p>因此 <strong>在实际的推荐系统中，往往采用增量更新与全局更新相结合的方式</strong>，在进行几轮增量更新后，在业务量较小的时间窗口进行全局更新，纠正模型在增量更新过程后中积累的误差。在“实时性”和“全局最优”中间进行取舍和权衡。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cb57b9b5319f41e3a15d428ebe5c71ff.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271810597.webp" />   
     </p>
 <h2 id="在线学习online-learning"><strong>在线学习（online learning）</strong></h2>
 <p>“在线学习“是“增量更新”的进一步改进，“增量更新”是在获得一批新样本时进行增量更新，而在线学习是在每次获得一个新样本的时候就实时更新模型。在线学习在技术上也可以通过SGD类的方式实现。但如果使用general的SGD方法，在线学习会导致一个很严重的问题，就是模型的稀疏性很差，打开过多“碎片化”的不重要特征。</p>
@@ -231,18 +231,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>如果使用SGD的方式进行模型更新，相比batch的方式，容易产生大量小权重的特征，这就增大了模型部署和更新的难度。那么为了在在线学习过程中兼顾训练效果和模型稀疏性，有大量相关的研究，最著名的包括微软的RDA，google的FOBOS和最著名的FTRL等，篇幅原因这里不展开讲在线学习的具体方法，对细节感兴趣的同学推荐参考冯扬的文章 在线最优化求解(Online Optimization)
 。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4efaf37255eb44d095c93c77eba01ec2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271810087.webp" />   
     </p>
 <h2 id="模型局部更新"><strong>模型局部更新</strong></h2>
 <p>提高模型实时性的另外一个改进方向是进行模型的局部更新，大致的思路是 <strong>降低训练效率低的部分的更新频率，提高训练效率高的部分的更新频率</strong>。这种方式比较有代表性的是facebook的GBDT+LR模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e5e9095510f142f5be0f43c78f465599.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271810642.webp" />   
     </p>
 <p>图2 GBDT+LR的模型结构</p>
 <p>我们在之前的文章 王喆：回顾Facebook经典CTR预估模型 中已经介绍过GBDT+LR的模型结构，模型利用GBDT进行自动化的特征工程，利用LR拟合优化目标。由于GBDT是串行的依次训练每一颗树，因此训练效率不高，更新的周期较长，如果每次都同时训练GBDT+LR整个模型，那么GBDT的低效问题将拖慢LR的更新速度。因此为了兼顾GBDT的特征处理能力和LR快速拟合优化目标的能力，Facebook采取的部署方法时每天训练一次GBDT模型，固定GBDT模型后，准实时的训练LR模型以快速捕捉数据整体的变化。那么通过模型的局部更新，做到了GBDT和LR能力的权衡。</p>
 <p>模型局部更新的做法也较多采用在Embedding层+神经网络的深度学习模型（例如图3的W&amp;D模型）中，因为Embedding层负责将高维稀疏输入向量转换为稠密embedding向量，因此Embedding层一层的参数往往占深度学习模型90%以上。因此Embedding层的更新会拖累模型整体的更新速度，因此业界也往往采用embedding层单独训练甚至预训练，embedding层以上的模型部分高频更新的策略。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b065f7fcd1fb4f1ea09a7becbf267ecd.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271810348.webp" />   
     </p>
 <p>图3 Wide&amp;Deep模型是经典的embedding+NN的结构</p>
 <h2 id="客户端模型实时更新"><strong>客户端模型实时更新</strong></h2>
@@ -378,6 +378,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -411,10 +415,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -793,6 +793,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

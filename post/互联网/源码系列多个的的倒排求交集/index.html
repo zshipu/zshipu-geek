@@ -207,35 +207,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>  添加 10 篇文档到索引中。如下图：</p>
 <p>图 1：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/1-2233c3bd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272212385.png" />   
     </p>
 <p>  使用 WhiteSpaceAnalyzer 进行分词。</p>
 <p>  查询条件如下图， <strong>MUST 描述了满足查询要求的文档必须包含&quot;a&quot;、&ldquo;b&rdquo;、&ldquo;c&rdquo;、&ldquo;e&rdquo; 四个关键字。</strong></p>
 <p>图 2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/2-e06d2d25.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272212249.png" />   
     </p>
 <h2 id="文档号合并">文档号合并</h2>
 <p>  将包含各个关键字的文档分别放入到各自的数组中，数组元素是文档号。</p>
 <h4 id="包含a的文档号">包含“a”的文档号</h4>
 <p>图 3：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/3-8fa9db18.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272212708.png" />   
     </p>
 <h4 id="包含b的文档号">包含“b”的文档号</h4>
 <p>图 4：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/4-656118fd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272212671.png" />   
     </p>
 <h4 id="包含c的文档号">包含“c”的文档号</h4>
 <p>图 5：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/5-278e7933.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272212604.png" />   
     </p>
 <h4 id="包含e的文档号">包含“e”的文档号</h4>
 <p>图 6：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/6-725c6617.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272212455.png" />   
     </p>
 <p><strong>由于满足查询要求的文档中必须都包含&quot;a&quot;、&ldquo;b&rdquo;、&ldquo;c&rdquo;、&ldquo;e&rdquo; 四个关键字，所以满足查询要求的文档个数最多是上面几个数组中最小的数组大小</strong>。</p>
 <p>  所以合并的逻辑即遍历数组大小最小的那个，在上面的例子中，即包含&quot;b&quot;的文档号的数组。每次遍历一个数组元素后，再去其他数组中匹配是否也包含这个文档号。遍历其他数组的顺序同样的按照数组元素大小从小到大的顺序，即包含**&ldquo;e&quot;的文档号 &mdash;&gt; 包含&quot;a&quot;的文档号 &mdash;&gt; 包含&quot;c&quot;的文档号**。</p>
@@ -244,22 +244,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>  比较的结果就是 doc1 (1) ≠ doc2 (5)，那么没有必要继续跟其他数组作比较了。因为文档号 1 中不包含关键字&quot;e&rdquo;。</p>
 <p>图 7：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/7-3c5f254e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272212309.png" />   
     </p>
 <p>  接着继续从包含&quot;b&quot;的文档号的数组中取出不小于 doc2 (5)的值（ <strong>在图 7 的比较过程中，我们已经确定文档号 1~文档号 5 中都不同时包含关键字&quot;b&quot;跟&quot;e&quot;，所以下一个比较的文档号并不是直接从包含&quot;b&quot;的文档号的数组中取下一个值，即 2，而是根据包含&quot;e&quot;的文档号的数组中的 doc2(5)的值，从包含&quot;b&quot;的文档号的数组中取出不小于 5 的值，即 9</strong>），也就是 9，doc1 更新为 9，然后再包含&quot;e&quot;的文档号的数组中取出不小于 doc1(9)，也就是 doc2 的值被更新为 9：</p>
 <p>图 8：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/8-a26fb03a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272212426.png" />   
     </p>
 <p>  比较的结果就是 doc1 (9) = doc2 (9), 那么我们就需要继续跟剩余的其他数组元素进行比较了，从包含&quot;a&quot;的文档号数组中取出不小于 doc1 (9)的 文档号 doc3 的值，也就是 9：</p>
 <p>图 9：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/9-249eb389.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272212489.png" />   
     </p>
 <p>  这时候由于 doc1 (9) = doc3 (9)，所以需要继续跟包含&quot;c&quot;的文档号的数组中的元素进行比较，从包含&quot;c&quot;的文档号的数组中取出不小于 doc1 (9)的文档号 doc4 的值，也就是 9:</p>
 <p>图 10：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/2020/04/10-e29209ac.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272212658.png" />   
     </p>
 <p>  至此所有的数组都遍历结束，并且文档号 9 都在在所有数组中出现，即文档号 9 满足查询要求。</p>
 <h2 id="heading">�</h2>
@@ -386,6 +386,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -419,10 +423,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -801,6 +801,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

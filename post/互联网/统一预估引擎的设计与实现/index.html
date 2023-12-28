@@ -219,33 +219,33 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="3-predictor的设计与实现"><strong>3. Predictor的设计与实现</strong></h2>
 <h3 id="31-predictor模块在整个推荐系统中的位置"><strong>3.1 Predictor模块在整个推荐系统中的位置</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9cb337710c1c423c98379045c41cece5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281643503.png" />   
     </p>
 <p>以oppo手机应用市场为类来说明predictor模块在整个系统中的位置， ranker模块负责排序，包括各种分流实验和各种运营策略等。它通过grpc框架与predictor模块进行通信。</p>
 <h3 id="32-predictor模块的主体流程"><strong>3.2 Predictor模块的主体流程</strong></h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f16ad112dcc34c82836f4bcad674180d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281643509.png" />   
     </p>
 <p>图中示意了两个请求的处理流程，图中提特征包括多个特征conf，每个样本、每个特征配置提取一次。预估也会是多个模型，每个样本、每个conf、每个模型会预估多次。特征提取依赖外部字典，预估依赖外部的模型文件，外部字典的更新、双buf切换都是通过字典管理模块来完成的。下面分别就字典管理模块、分task, 提特征，预估，merge进行详细说明。</p>
 <h3 id="33-字典管理模块"><strong>3.3 字典管理模块</strong></h3>
 <p>如下图所示：conf1, conf2, lr_model_x0等表示磁盘上的文件，每个文件名都是通过不同的字典解析类来解析，这个字典解析类负责管理这个文件的加载，双buf切换。例如：FeatureConfDict负责解析conf1，它内部保存两个FeatureConfList类型的buf，当conf1文件发生更新时，就用备的FeatureConfList* 进行加载，加载完成后，在加载过程中，服务使用主的FeatureConfList*指针。加载完成后，进行主从切换，待没有请求使用老的buf，就释放到老的buf内存。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/50aff358afef4094a60c5971624fe6ee.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281643648.png" />   
     </p>
 <h3 id="34-分task逻辑"><strong>3.4 分task逻辑</strong></h3>
 <p>接收到一个请求，这个请求指定了多conf多模型来预估。如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6e66ea88e7c34f9e834218e0007ebe2a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281643886.png" />   
     </p>
 <p>上图表示一共有8条样本，分别用两个conf：conf0, conf1来提取特征，其中conf0的结果由model0，model1来预估，conf1由model2，model3来预估。按照2个样本一个task，拆分完task之后会得到4个task，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/18225f3b83cc48df8cf31db10411f8b7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281643384.png" />   
     </p>
 <p>按照样本维度进行拆分成4个task，丢到线程池去执行。</p>
 <h3 id="35-merge流程"><strong>3.5 Merge流程</strong></h3>
 <p>在预估完成之后，需要按照conf/model这个维度进行组织预估结果给ranker， 最终的response如下图右子图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bb39ad94e96d4a3ebfbb2aa3672a51ab.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281643489.png" />   
     </p>
 <h3 id="36-特征提取框架的设计"><strong>3.6 特征提取框架的设计</strong></h3>
 <p>特征提取框架线上、线下都会用到，这样比较好保证线上线下的一致性。所以设计的时候要同时考虑到线上线下的业务场景。</p>
@@ -254,7 +254,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>特征配置文件包括两部分: schema部分，特征算子部分。</p>
 <h4 id="362-schema部分"><strong>3.6.2 schema部分</strong></h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ddad92542ba6425d81b56fb215683038.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281643964.png" />   
     </p>
 <p>上图中有5个 schema配置</p>
 <p>user_schema：表示当前的用户相关信息，只在在线方式使用，由上游请求带过来。</p>
@@ -264,7 +264,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>all_schema_type: 离线模式才会用到，指定了各个schema的类型，这些类型名都是事先定义好的，在离线模式下，根据schema类型来反序列化各个字段。</p>
 <h4 id="363-特征算子配置部分"><strong>3.6.3 特征算子配置部分</strong></h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8eaa37abf7d94c63954dc275a56fe801.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281643310.png" />   
     </p>
 <p>每个特征包括下面这些字段：</p>
 <p>Name: 特征名字</p>
@@ -277,7 +277,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>一次预估请求里面，所有样本的用户和context信息是一样的， 考虑到有些特征只依赖用户和context信息，这部分特征只需要提取一次，所有样本共用。</p>
 <p>特征配置里面一部分特征会依赖其他的特征（例如组合特征、 cvm特征），所以需要对特征的依赖进行分析，用来判断一个特征最终依赖的字段信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/60c260fd2a134b28b92012cb7207df19.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281643290.png" />   
     </p>
 <p>i_id特征依赖item字段的item_id，所以它是uncommon特征</p>
 <p>u_a/net特征只依赖user_schema或者context字段, 不依赖item字段，所以它是common特征</p>
@@ -288,11 +288,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>前面提到了，一个请求里面指定了用哪个特征配置文件来提取特征，用哪个模型来预估。所有的模型都是有异步字典更新线程来负责更新。目前支持了LR, FM, DSSM， Deep&amp;Wide等模型的预估，并且比较容易扩展。下面大概介绍下两个根据业务场景做了深度优化的模型：</p>
 <h4 id="371-fm模型预估lr类似"><strong>3.7.1 FM模型预估（LR类似）</strong></h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c20141f1a40146bd9a5e39c4a7dac40b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281643622.png" />   
     </p>
 <p>其中</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fef2420f8754419db01794dd3f299b94.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281643217.png" />   
     </p>
 <p>考虑到业务场景，多个样本的user/context信息是一样的，那么线上FM的 预估可�</p>
 
@@ -418,6 +418,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -451,10 +455,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -833,6 +833,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -236,11 +236,11 @@ rdd2 = someOtherRdd.reduceByKey(...)
 rdd3 = rdd1.join(rdd2)
 </code></pre><p>rdd1的一个partition的所有key，都会出现在rdd2的某一个partition中</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/062d736bad574c07b42d053b148bfe9a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271919238.png" />   
     </p>
 <p>如果rdd1 和 rdd2 使用不同的partitioner， 或者有不同的partition数目，， 在这种情况下， 具有更少partition数目的rdd在join之前会被reshuffled</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/7c78f29b847a4007b534a71291f0f4bd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271919445.png" />   
     </p>
 <h2 id="再来看看join时怎么优化shuffle">再来看看join时怎么优化shuffle</h2>
 <p>在写Spark程序时，在我们join操作的性能有问题时， 我们经常会见到这样的错误消息 <code>OOM (java.lang.OutOfMemoryError)</code>， 还有很多挺古怪的概念词出现 <code>shuffling</code>, <code>repartition</code>, <code>exchanging</code>, <code>query plans</code>。我们接下来只考虑工作中常见的单个key join的场景</p>
@@ -267,7 +267,7 @@ join.explain
 </code></pre><p>Spark首先会尝试去除不参与join的数据，nulls或者无用的列， 再将所有数据集进行排序来避免 <code>n*m</code> 复杂度的join。 这种排序会涉及大量的 网络 IO和磁盘IO。了解了默认的join过程，那么接下来我们可以针对业务不同的场景进行优化</p>
 <h4 id="小数据集-vs-小数据集-单机内存完全cover住">小数据集 VS 小数据集 （单机内存完全cover住）</h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/14c55ca870aa4e13afe3b9d810411b13.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271919829.png" />   
     </p>
 <p>这种场景应该没人会在意，可能就是一个单机的spark sql join</p>
 <pre tabindex="0"><code class="language-highlight-chroma" data-lang="highlight-chroma">val oneDF=  sql(&#34;SELECT  * FROM table_one&#34;)
@@ -298,7 +298,7 @@ oneDS.map(r =&gt; {
   JoinResult(r.a, r.value, foundAtTwo.map(_.value))
 }).count()
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/3e7dde9c4de94f8b8b289284c8834720.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271919192.png" />   
     </p>
 <h4 id="中数据集-vs-大数据集">中数据集 VS 大数据集</h4>
 <p>某些时候 中数据集可能太大，只能把key索引到内存：</p>
@@ -313,14 +313,14 @@ val reducedOneDS = oneDS.filter(r =&gt; {
         twoBS.value.search(r.a).isInstanceOf[Found]
 })
 </code></pre><p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/dd8bdee726ff4eb28c284edfd4b677dc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271919944.png" />   
     </p>
 <h2 id="shuffle-性能优化"><strong>shuffle 性能优化</strong></h2>
 <p>大多数 Spark 作业的性能主要消耗在了 shuffle 环节，因为该环节包含了大量的磁盘 IO、序列化、网络数据传输等操作。因此，如果要让作业的性能更上一层楼，就有必要对 shuffle 过程进行调优。但是也必须提醒的是，影响一个 Spark 作业性能的因素，主要还是代码开发、资源参数以及数据倾斜，shuffle 调优只能在整个 Spark 的性能调优中占到一小部分而已。因此务必把握住调优的基本原则，千万不要舍本逐末。下面详细讲解 shuffle 的原理，以及相关参数的说明，同时给出各个参数的调优建议。</p>
 <p><strong>A、未经优化的 HashShuffleManager</strong></p>
 <p>下图说明了未经优化的 HashShuffleManager 的原理，这里先明确一个假设前提：每个 executor 只有 1 个 cpu core，也就是说，无论这个 executor 上分配多少个 task 线程，同一时间都只能执行一个 task 线程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/fea0296b04144c6082fe1a5aec0b6520.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271919338.png" />   
     </p>
 <p>从 shuffle write 说起，shuffle write 阶段，主要就是在一个 stage 结束计算之后，为了下一个 stage 可以执行 shuffle 类的算子（比如 reduceByKey），而将每个 task 处理的数据按 key 进行“分类”。所谓“分类”，就是对相同的 key 执行 hash 算法，从而将相同 key 都写入同一个磁盘文件中，而每一个磁盘文件都只属于下游 stage 的一个 task。在将数据写入磁盘之前，会先将数据写入内存缓冲中，当内存缓冲填满之后，才会溢写到磁盘文件中去。</p>
 <p>那么每个执行 shuffle write 的 task，要为下一个 stage 创建多少个磁盘文件呢？很简单，下一个 stage 的 task 有多少个，当前 stage 的每个 task 就要创建多少份磁盘文件。比如下一个 stage 总共有 100 个 task，那么当前 stage 的每个 task 都要创建 100 份磁盘文件。如果当前 stage 有 50 个 task，总共有 10 个 executor，每个 executor 执行 5 个 Task，那么每个 executor 上总共就要创建 500 个磁盘文件，所有 executor 上会创建 5000 个磁盘文件。由此可见，未经优化的 shuffle write 操作所产生的磁盘文件的数量是极其惊人的。</p>
@@ -329,7 +329,7 @@ val reducedOneDS = oneDS.filter(r =&gt; {
 <p><strong>B、优化后的 HashShuffleManager</strong></p>
 <p>下图说明了优化后的 HashShuffleManager 的原理，这里说的优化，是指可以设置一个参数，spark.shuffle.consolidateFiles。该参数默认值为 false，将其设置为 true 即可开启优化机制。通常来说，如果使用 HashShuffleManager，那么都建议开启这个选项。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/3e16ed5d99a046dcaa448178a77c4b5e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271919710.png" />   
     </p>
 <p>开启 consolidate 机制之后，在 shuffle write 过程中，task 就不是为下游 stage 的每个 task 创建一个磁盘文件了。此时会出现 shuffleFileGroup 的概念，每个 shuffleFileGroup 会对应一批磁盘文件，磁盘文件的数量与下游 stage 的 task 数量是相同的。一个 executor 上有多少个 cpu core，就可以并行执行多少个 task。而第一批并行执行的每个 task 都会创建一个 shuffleFileGroup，并将数据写入对应的磁盘文件中。</p>
 <p>当 executor 的 cpu core 执行完一批 task，接着执行下一批 task 时，下一批 task 就会复用之前已有的 shuffleFileGroup，包括其中的磁盘文件。也就是说，此时 task 会将数据写入已有的磁盘文件中，而不会写入新的磁盘文件中。因此，consolidate 机制允许不同的 task 复用同一批磁盘文件，这样就可以有效地将多个 task 的磁盘文件进行一定程度上的合并，从而大幅度减少磁盘文件的数量，进而提升 shuffle write 的性能。</p>
@@ -337,7 +337,7 @@ val reducedOneDS = oneDS.filter(r =&gt; {
 <p><strong>C、SortShuffleManager 运行原理</strong></p>
 <p>下图说明了普通的 SortShuffleManager 的原理，在该模式下，数据会先写入一个内存数据结构中，此时根据不同的 shuffle 算子，可能选用不同的数据结构。如果是 reduceByKey 这种聚合类的 shuffle 算子，那么会选用 Map 数据结构，一边通过 Map 进行聚合，一边写入内存；如果是 join 这种普通的 shuffle 算子，那么会选用 Array 数据结构，直接写入内存。接着，每写一条数据进入内存数据结构之后，就会判断一下，是否达到了某个临界阈值。如果达到临界阈值的话，那么就会尝试将内存数据结构中的数据溢写到磁盘，然后清空内存数据结构。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/46b39655e7da4519bcc3b0ae41e4e1f1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271919179.png" />   
     </p>
 <p>在溢写到磁盘文件之前，会先根据 key 对内存数据结构中已有的数据进行排序。排序过后，会分批将数据写入磁盘文件。默认的 batch 数量是 10000 条，也就是说，排序好的数据，会以每批 1 万条数据的形式分批写入磁盘文件。写入磁盘文件是通过 Java 的 BufferedOutputStream 实现的。BufferedOutputStream 是 Java 的缓冲输出流，首先会将数据缓冲在内存中，当内存缓冲满溢之后再一次写入磁盘文件中，这样可以减少磁盘 IO 次数，提升性能。</p>
 <p>一个 task 将所有数据写入内存数据结构的过程中，会发生多次磁盘溢写操作，也就会产生多个临时文件。最后会将之前所有的临时磁盘文件都进行合并，这就是 merge 过程，此时会将之前所有临时磁盘文件中的数据读取出来，然后依次写入最终的磁盘文件之中。此外，由于一个 task 就只对应一个磁盘文件，也就意味着该 task 为下游 stage 的 task 准备的数据都在这一个文件中，因此还会单独写一份索引文件，其中标识了下游各个 task 的数据在文件中的 start offset 与 end offset。</p>
@@ -347,7 +347,7 @@ val reducedOneDS = oneDS.filter(r =&gt; {
 <p>lshuffle map task 数量小于 spark.shuffle.sort.bypassMergeThreshold 参数的值；</p>
 <p>l 不是聚合类的 shuffle 算子（比如 reduceByKey）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/dc3990d050e1419095e05588430ab8c3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271919302.png" />   
     </p>
 <p>此时 task 会为每个下游 task 都创建一个临时磁盘文件，并将数据按 key 进行 hash 然后根据 key 的 hash 值，将 key 写入对应的磁盘文件之中。当然，写入磁盘文件时也是先写入内存缓冲，缓冲写满之后再溢写到磁盘文件。最后，同样会将所有临时磁盘文件都合并成一个磁盘文件，并创建一个单独的索引文件。</p>
 <p>该过程的磁盘写机制其实跟未经优化的 HashShuffleManager 是一模一样的，因为都要创建数量惊人的磁盘文件，只是在最后会做一个磁盘文件的合并而已。因此少量的最终磁盘文件，也让该机制相对未经优化的 HashShuffleManager 来说，shuffle read 的性能会更好。</p>
@@ -479,6 +479,10 @@ val reducedOneDS = oneDS.filter(r =&gt; {
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -512,10 +516,6 @@ val reducedOneDS = oneDS.filter(r =&gt; {
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -894,6 +894,8 @@ val reducedOneDS = oneDS.filter(r =&gt; {
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

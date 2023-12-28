@@ -198,37 +198,37 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在CTR预估中，为了解决稀疏特征的问题，学者们提出了FM模型来建模特征之间的交互关系。但是FM模型只能表达特征之间两两组合之间的关系，无法建模两个特征之间深层次的关系或者说多个特征之间的交互关系，因此学者们通过Deep Network来建模更高阶的特征之间的关系。</p>
 <p>因此 FM和深度网络DNN的结合也就成为了CTR预估问题中主流的方法。有关FM和DNN的结合有两种主流的方法，并行结构和串行结构。两种结构的理解以及实现如下表所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/016dc1bfb01f4b939f50a0a54d02bbc9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272000358.png" />   
     </p>
 <p>今天介绍的AFM模型(Attentional Factorization Machine)，便是串行结构中一种网络模型。</p>
 <h1 id="2afm模型介绍">2、AFM模型介绍</h1>
 <p>我们首先来回顾一下FM模型，FM模型用n个隐变量来刻画特征之间的交互关系。这里要强调的一点是，n是特征的总数，是one-hot展开之后的，比如有三组特征，两个连续特征，一个离散特征有5个取值，那么n=7而不是n=3.</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/43518589fa29480c9d9da1fb62979a6c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272000397.png" />   
     </p>
 <p>顺便回顾一下化简过程：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/ef1776f620fa47a7a22e1c23d141dd6a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272000180.png" />   
     </p>
 <p>可以看到，不考虑最外层的求和，我们可以得到一个K维的向量。</p>
 <p>不难发现，在进行预测时，FM会让一个特征固定一个特定的向量，当这个特征与其他特征做交叉时，都是用同样的向量去做计算。这个是很不合理的，因为不同的特征之间的交叉，重要程度是不一样的。如何体现这种重要程度，之前介绍的FFM模型是一个方案。另外，结合了attention机制的AFM模型，也是一种解决方案。</p>
 <p>关于什么是attention model？本文不打算详细赘述，我们这里只需要知道的是，attention机制相当于一个加权平均，attention的值就是其中权重，判断不同特征之间交互的重要性。</p>
 <p>刚才提到了，attention相等于加权的过程，因此我们的预测公式变为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/e2548ab4417f437abb52b1cb03a87b54.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272000290.png" />   
     </p>
 <p>圆圈中有个点的符号代表的含义是element-wise product，即：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/350374dc88fd4ef08af8385def9a4a2e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272000877.png" />   
     </p>
 <p>因此，我们在求和之后得到的是一个K维的向量，还需要跟一个向量p相乘，得到一个具体的数值。</p>
 <p>可以看到，AFM的前两部分和FM相同，后面的一项经由如下的网络得到：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/e5ba770d79f6496590a630968a133a28.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272000563.png" />   
     </p>
 <p>图中的前三部分：sparse iput，embedding layer，pair-wise interaction layer，都和FM是一样的。而后面的两部分，则是AFM的创新所在，也就是我们的Attention net。Attention背后的数学公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/c36dbcc7a7f24a1298c98a07e5b2834e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001575.png" />   
     </p>
 <p>总结一下，不难看出AFM只是在FM的基础上添加了attention的机制，但是实际上，由于最后的加权累加，二次项并没有进行更深的网络去学习非线性交叉特征，所以AFM并没有发挥出DNN的优势，也许结合DNN可以达到更好的结果。</p>
 <h1 id="3代码实现">3、代码实现</h1>
@@ -291,12 +291,12 @@ self.embeddings = tf.multiply(self.embeddings,feat_value) # N * F * K
 </code></pre><p><strong>Attention Net</strong></p>
 <p>Attention部分的实现严格按照上面给出的数学公式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/d4b0a62014314a8489a1243cece35d85.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001338.png" />   
     </p>
 <p>这里我们一步步来实现。</p>
 <p>对于得到的embedding向量，我们首先需要两两计算其element-wise-product。即：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/210074809d7547dc9882d8fcafcb154e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272001375.png" />   
     </p>
 <p>通过嵌套循环的方式得到的结果需要通过stack将其变为一个tenser，此时的维度为(F * F - 1 / 2) * N* K，因此我们需要一个转置操作，来得到维度为 N * (F * F - 1 / 2) * K的element-wize-product结果。</p>
 <pre tabindex="0"><code class="language-highlight-chro" data-lang="highlight-chro"></code></pre>
@@ -428,6 +428,10 @@ self.embeddings = tf.multiply(self.embeddings,feat_value) # N * F * K
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -461,10 +465,6 @@ self.embeddings = tf.multiply(self.embeddings,feat_value) # N * F * K
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -843,6 +843,8 @@ self.embeddings = tf.multiply(self.embeddings,feat_value) # N * F * K
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -201,7 +201,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="回顾">回顾</h2>
 <p>介绍算法之前，我们先简单回顾一下语义分割（semantic segmentation）的历史。众所周知，计算机视觉有三大核心任务——分类、检测、分割，三者号称是深度学习炼丹师的“三大浪漫”。分类针对整张图片，检测针对图片的局部，语义分割则如图1所示，旨在给输入图片上的每个像素赋予一个正确的语义标签。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8385005e6bdf48569f27829f39759903.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825076.jpeg" />   
     </p>
 <p>图 1：PASCAL VOC 2012 图片示例</p>
 <p>传统的分割算法我们先按下不表。时间拨回到 2015 年，语义分割江湖之中，FCN 横空出世，自此 DL/NN 方法席卷了整个语义分割领域。短短几年，各个 Benchmark 的 state-of-the-art 不断刷新，成果喜人。</p>
@@ -210,14 +210,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="介绍">介绍</h2>
 <p>语义分割任务同时需要 Spatial Context 和 Spatial Detail 。今天我们介绍的三种算法都将从这两方面分别提出各自对应的解决方案。整体对比如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ceead2d4503d4e058de2f123edaf3cfb.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281825124.jpeg" />   
     </p>
 <p><strong>Global Convolutional Network</strong></p>
 <p>第一位主角是 CVPR2017 算法 Global Convolutional Network（GCN），江湖人送外号“Large Kernel”。论文 Arxiv 链接请见： <a href="https://zshipu.com/t?url=http%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttps%253A%2F%2Farxiv.org%2Fabs%2F1703.02719">https://arxiv.org/abs/1703.02719</a>。</p>
 <p>——Motivation——</p>
 <p>GCN 主要将 Semantic Segmentation分解为：Classification 和 Localization两个问题。但是，这两个任务本质对特征的需求是矛盾的，Classification需要特征对多种Transformation具有不变性，而 Localization需要对 Transformation比较敏感。但是，普通的 Segmentation Model大多针对 Localization Issue设计，正如图2(b)所示，而这不利于 Classification。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5ccb4961001b49159c4625f274a2f3fe.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826178.jpeg" />   
     </p>
 <p>图2</p>
 <p>所以，为了兼顾这两个 Task，本文提出了两个 Principle：</p>
@@ -228,31 +228,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>——网络结构——</p>
 <p>根据这两条 Principle，本文提出了Global Convolutional Network（GCN）。如图3所示，这个方法整体结构正是背景介绍中提到的U-shape结构，其核心模块主要包括：GCN 和 BR。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d9fb325696ed4b818bb3926bb1e7ee0a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826316.jpeg" />   
     </p>
 <p>图3 网络结构</p>
 <p>此处主要介绍GCN设计。正如图3(b)所示，它采用了较大 Kernel Size的卷积核，来同时解决上述的两个 Issue；然后根据矩阵分解，利用 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7b4d823db6f6419f9274cca8d0bbe13b.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826451.svg&#43;xml" />   
     
 和 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/78bbecec542a473cb439a8656aa7a901.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826223.svg&#43;xml" />   
     
 的卷积来替代原来的 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6291d08e99bb47e0b8fe5c9921836577.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826185.svg&#43;xml" />   
     
 大核卷积。相对于原本的大核卷积，该设计能明显降低参数量和计算量。图4可视化了 Large Kernel Conv 和 普通 Conv网络有效感受野的对比。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/714bd78331564c9bb7f30d8dd65061ee.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826966.jpeg" />   
     </p>
 <p>图4</p>
 <p>可以看到，Large Kernel Conv 的有效感受野显著增大。</p>
 <p>——实验——</p>
 <p>文中为了验证 Large Kernel Conv的有效性，对比了不同 Size的 Kernel，可以看到Kernel Size=15时比 Base Network整整高了 5.5% mean IoU.</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/75213efa78504c179c979fea3846024c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826916.jpeg" />   
     </p>
 <p>此外，文中还对 Large Kernel Conv 进行了一系列讨论。</p>
 <ul>
@@ -262,7 +262,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/334fd397c6cc4fa0964bf3fe58c719d6.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826885.jpeg" />   
     </p>
 <p>通过实验结果可知，随着 Kernel Size的增加，普通 Conv的参数量远大于GCN，但是GCN的性能却持续地优于普通 Conv。</p>
 <ul>
@@ -272,7 +272,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/309f48c8ffef43fab89d63b2c1554493.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826921.jpeg" />   
     </p>
 <p>可以看到 GCN 依然优于普通 Conv 的堆叠，尤其是在较大 Kernel Size 的情况下。笔者认为这是一个很有价值的实验，可以启发我们去思考关于网络感受野的问题。我们以往认为，通过堆叠多个小核 Conv 可以达到和大核 Conv 一样的感受野，同时计算量还更少。最常见的应用比如 VGG-Net。但是，实际上并非如此。</p>
 <p>随着网络深度的提升，理论上网络的感受野大多可以直接覆盖全图，但是实际有效感受野却远小于此。笔者的理解是对同一个 Feature Map 进行卷积，边缘区域进行计算的次数会小于中心区域，所以随着 Conv 的不断堆叠，实际上会导致边缘感受野的衰减，即有效感受野会远小于理论感受野。</p>
@@ -280,11 +280,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>最终 GCN 在 PASCAL VOC 2012 和 Cityscapes 上都取得了不错的结果。</p>
 <p>——PASCAL VOC 2012——</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/93e82fabf9a14202a2a74f9b73dc603a.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826127.jpeg" />   
     </p>
 <p>——Cityscapes——</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/982992b001b34225a4431ca1d60d15c9.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826375.jpeg" />   
     </p>
 <p><strong>Discriminative Feature Network</strong></p>
 <p>接下来出场的是 CVPR2018 算法 Discriminative Feature Network（DFN）。论文Arxiv链接请见： <a href="https://zshipu.com/t?url=http%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttps%253A%2F%2Farxiv.org%2Fabs%2F1804.09337">https://arxiv.org/abs/1804.09337</a>。详细解读请见： <a href="https://zshipu.com/t?url=http%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttps%253A%2F%2Fmp.weixin.qq.com%2Fs%2F4csAftUmJErdA4qn26mO3Q">CVPR 2018 | 旷视科技Face++提出用于语义分割的判别特征网络DFN</a>。</p>
@@ -295,20 +295,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>Inter-class Indistinction（具有不同的语义标签，相似的表观特征的区域）</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ff48dad84e0f4377b97f9853de423e65.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826417.jpeg" />   
     </p>
 <p>图5</p>
 <p>所以，本文从宏观角度出发重新思考语义分割任务，提出应该将同一类的 Pixel考虑成一个整体，也就需要增强类内一致性，增大类间区分性。总结而言，我们需要更具有判别力的特征。</p>
 <p>——网络结构——</p>
 <p>本文提出的DFN主要包括两部分：Smooth Network 和 Border Network，如图6所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2f45becf406d47eba7959a39fa3e8394.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826368.jpeg" />   
     </p>
 <p>图6</p>
 <p>Smooth Network 主要解决类内不一致性问题。文中认为类内不一致性问题主要来自Context 的缺乏。进而，我们需要引入 Multi-scale Context 和 Global Context；但是，不同 Stage 的特征虽然带来了 Multi-scale Context，与此同时也带来了不同的判别能力；因此，我们需要对这些具有不同判别力的特征进行筛选，这就诞生了其中核心的设计——Channel Attention Block（CAB）。</p>
 <p>CAB 利用相邻 Stage 的特征计算 Channel Attention 然后对 Low-stage 的特征进行筛选，如图 7 所示。因为文中认为，High-stage 的特征语义信息更强，更具有判别力。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0465fd64e23b4c72b3b2a85a91bf2a8c.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826577.jpeg" />   
     </p>
 <p>图7</p>
 <p>此外，本文首次在 U-shape 结构中采用 Global Average Pooling，这个设计非常有效。ParseNet 首次在语义分割中使用 Global Average Pooling 提取 Global Context，而之后的 PSPNet，Deeplab V3 将其在 Dilation 阵营发扬光大。而本文将其应用 U-shape 的High-stage，并命名为“V-shape”。我们尝试将其迁移到 Detection 中的 FPN 结构，结果证明同样有效。</p>
@@ -317,28 +317,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>文中进行了丰富的消融实验和可视化分析。</p>
 <p>首先是对 Smooth Network 各部分的消融实验分析。可以看到Smooth Network非常有效，在PASCAL VOC 2012 Validation Set上可以达到 Single Scale 79.54% mean IoU。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a1abea17047745f9b8df3b31508d2e4f.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826008.jpeg" />   
     </p>
 <p>而通过可视化输出，可以看到Smooth Network确实可以将类内区域变得更加一致，如图8所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/187c762d90ba4b41b9051089a85cad51.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826153.jpeg" />   
     </p>
 <p>图8</p>
 <p>同时，文中还对 Smooth Network 和 Border Network 进行了消融实验分析。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/fdcb0055fe8b41608b398373e03119a5.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826151.jpeg" />   
     </p>
 <p>通过可视化Border Network的输出，可以看到Border Network确实可以很好地关注到Semantic Boundary区域，如图9所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7abc6820c2b240c584fca32ce23febae.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826309.jpeg" />   
     </p>
 <p>图9</p>
 <p>最终，DFN在PASCAL VOC 2012和 Cityscapes上性能都达到了当时的state-of-the-art。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5720ce7b21b84da89eaeba5075b02d98.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826807.jpeg" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f1dca28dd54346dcbe6e48a7d52969b3.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826054.jpeg" />   
     </p>
 <p><strong>BiSeNet</strong></p>
 <p>最后出场的主角是 ECCV 2018 算法 Bilateral Segmentation Network（BiSeNet）。前面两个算法主要关注 Accuracy，探索 mean IoU 的极限；而 BiSeNet 关注于做出一个既快又好的实时语义分割算法。最终该算法在 Cityscapes 上能取得 68.4% mean IoU 105 FPS (NVIDIA Titan XP)的好成绩。当然，我们希望这篇工作能抛砖引玉，尝试探讨到底什么架构才更适合 Segmentation 任务，什么框架才能很好地同时获得充足的 Context 和丰富的空间信息？论文 Arxiv 链接请见： <a href="https://zshipu.com/t?url=http%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttps%253A%2F%2Farxiv.org%2Fabs%2F1808.00897">https://arxiv.org/abs/1808.00897</a>。</p>
@@ -347,23 +347,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>本文对之前的实时性语义分割算法进行了总结，发现当前主要有三种加速方法：1) 通过 Crop 或者 Resize 限制输入图片进而减少计算量；2) 减少网络通道数，尤其是 Early Stage；3) 还有像 ENet 类似的方法直接丢掉最后一个 Stage，如图10(a)所示。</p>
 <p>这些提速的方法会丢失很多 Spatial Details 或者牺牲 Spatial Capacity，从而导致精度大幅下降。为了弥补空间信息的丢失，有些算法会采用 U-shape 的方式恢复空间信息。但是，U-shape 会降低速度，同时很多丢失的信息并不能简单地通过融合浅层特征来恢复，如图 10(b) 所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/347e951d36e943db8d0d86d1ea2141bf.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826299.jpeg" />   
     </p>
 <p>图10</p>
 <p>总结而言，实时性语义分割算法中，加速的同时也需要重视空间信息。基于这些观察，本文提出了一种新的解决方案Bilateral Segmentation Network（BiSeNet）。</p>
 <p>——网络结构——</p>
 <p>BiSeNet区别于 U-shape 和 Dilation 结构，尝试一种新的方法同时保持 Spatial Context 和 Spatial Detail 。所以，我们设计了Spatial Path和Context Path两部分。顾名思义，Spatial Path使用较多的 Channel、较浅的网络来保留丰富的空间信息生成高分辨率特征；Context Path使用较少的 Channel、较深的网络快速 downsample来获取充足的 Context。基于这两路网络的输出，文中还设计了一个Feature Fusion Module（FFM）来融合两种特征，如图11所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4100f7ed894f4a5caba7c2b4b8e4178b.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826658.jpeg" />   
     </p>
 <p>图11</p>
 <p>Spatial Path 只包含三个 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dbc0a5b107a34df98da1b8875ba8d0f1.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826039.svg&#43;xml" />   
     
 的 Conv+BN+Relu，输出特征图的尺寸为原图的 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d1b50e640f544132b56a39b43f802537.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826813.svg&#43;xml" />   
     
 。为了访存比考虑，此处并没有设计 Residual结构。</p>
 <p>Context Path 可以替换成任意的轻量网络，比如 Xception，ShuffleNet 系列，MobileNet 系列。本文主要采用 Xception39 和 ResNet-18 进行实验。可以看到，为了准确率考虑，Context Path 这边使用了类似 U-shape 结构的设计。不过，不同于普通的 U-shape，此处只结合了最后两个 Stage，这样设计的原因主要是考虑速度。此外，和 DFN 类似，Context Path 依然在最后使用了 Global Average Pooling 来直接获取Global Context。</p>
@@ -372,29 +372,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>本文从精度和速度两个维度，进行了丰富的分析实验。</p>
 <p>首先文中分析了 Context Path 这边使用不同变体的 U-shape 结构的速度和精度的对比。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/12b65cbf602f4994ba7d83a6c70b41bb.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826647.jpeg" />   
     </p>
 <p>此处，U-shape-8s 就是文中所展示的结构，U-shape-4s 则是普通的 U-shape 设计，即融合了更多 stage 特征。可以看到，U-shape-4s 的速度会明显慢于 U-shape-8s.</p>
 <p>文中还对 BiSeNet 的各个部分进行了消融分析实验。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/073df3b66d324ec682bc672682129aca.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826640.jpeg" />   
     </p>
 <p>文中还给出了 BiSeNet 的 GFLOPS、参数量等信息，以及在不同硬件平台不同分辨率下的速度对比。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/141f55ae05824eb89a5b4bc485c80024.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826779.jpeg" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/753dc7e603664167a14b45e042a5c0a3.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826801.jpeg" />   
     </p>
 <p>文中给出了 BiSeNet 分别与实时性算法和非实时性算法比较的结果。</p>
 <p>与实时性算法比较：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b0655a09b7f3423fa48d5607669e73a7.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281826841.jpeg" />   
     </p>
 <p>虽然 BiSeNet 是实时性算法，但是它的精度甚至比一些非实时性算法还高。</p>
 <p>与非实时性算法比较：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/95b4a39c86014be98d8cc712b0bd2a81.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281827885.jpeg" />   
     </p>
 <p>可以看到，BiSeNet 是一种很有效的设计。当替换上大模型之后，精度甚至高于 PSPNet 等算法。另外，需要注意的是，为了和非实时性算</p>
 
@@ -526,6 +526,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -559,10 +563,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -941,6 +941,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

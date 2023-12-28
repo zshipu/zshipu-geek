@@ -205,12 +205,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="02-基于内容的推荐算法实现原理">02 <strong>基于内容的推荐算法实现原理</strong></h1>
 <p>基于内容的推荐算法的基本原理是根据用户的历史行为，获得用户的兴趣偏好，为用户推荐跟他的兴趣偏好相似的标的物，读者可以直观上从下图理解基于内容的推荐算法。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/50affa803c8e4dd29a49b320e4d6e848.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748596.webp" />   
     </p>
 <p>图1：基于内容的推荐算法示意图</p>
 <p>从上图也可以看出，要做基于内容的个性化推荐，一般需要三个步骤，它们分别是：基于用户信息及用户操作行为构建用户特征表示、基于标的物信息构建标的物特征表示、基于用户及标的物特征表示为用户推荐标的物，具体参考图2：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e958cfa81c77416e8f5871ecb43fda88.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748219.webp" />   
     </p>
 <p>图2：基于内容的个性化推荐的三个核心步骤</p>
 <p>本节我们先简单介绍一下怎么基于上图的步骤1、步骤2为用户做推荐(即步骤3中给用户做推荐的核心思想)，然后分别对这三个步骤加以说明，介绍每个步骤都有哪些方法和策略可供选择。</p>
@@ -229,7 +229,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>（1）用户行为记录作为显示特征</strong></p>
 <p>记录用户过去一段时间对标的物的偏好。拿视频行业来说，如果用户过去一段时间看了A、B、C三个视频，同时可以根据每个视频用户观看时长占视频总时长的比例给用户的行为打分，这时用户的兴趣偏好就可以记录为
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5f5adbfa4337489a8ad4b89eb03bebf7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748917.webp" />   
      ，其中S1、S2、S3分别是用户对视频A、B、C的评分。</p>
 <p>该方案直接将用户历史操作过的标的物作为用户的特征表示，在推荐时可以将与用户操作过的标的物相似的标的物推荐给用户。</p>
 <p><strong>（2）显式的标签特征</strong></p>
@@ -251,7 +251,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>最简单的方式是将将标签按照某种序排列，每个标签看成一个维度，那么每个标的物就可以表示成一个N维的向量了(N是标签的个数)，如果标的物包含某个标签，向量在相应标签的分量上的值为1，否则为0，即所谓的one-hot编码。有可能N非常大(如视频行业，N可能是几万、甚至几十万上百万)，这时向量是稀疏向量(一般标的物只有少量的几个或者几十个标签)，我们可以采用稀疏向量的表示来优化向量存储和计算，提升效率。有了标的物基于标签的向量化表示，很容易基于cosine余弦计算相似度了。</p>
 <p>实际上标签不是这么简单的，有很多业务标签是分级的，比如电商(如淘宝)，有多级的标签(见下面图3)，标签的层级关系形成一颗树状结构，这时该怎么向量化呢？最简单的方案是只考虑叶子节点的标签(也是最低层级的标签)，基于叶子节点标签构建向量表示。更复杂的方法，可以基于层级结构构建标签表示及计算标的物相似度。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8126c09ff69c44ce8895c9813f6c2fab.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748472.webp" />   
     </p>
 <p>图3：标签的层级表示关系</p>
 <p>标签可以是通过算法获取的，比如通过NLP技术从文本信息中提取关键词作为标签。对于图片/视频，它们的描述信息(标题等)可以提取标签，另外可以通过目标检测的方法从图片/视频中提取相关对象构建标签。</p>
@@ -260,18 +260,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>有些行业标的物是具备结构化信息的，如视频行业，一般会有媒资库，媒资库中针对每个节目会有标题、演职员、导演、标签、评分、地域等维度数据，这类数据一般存在关系型数据库中。这类数据，我们可以将一个字段(也是一个特征)作为向量的一个维度，这时向量化表示每个维度的值不一定是数值，但是形式还是向量化的形式，即所谓的向量空间模型（Vector Space Model，简称VSM）。这时我们可以通过如下的方式计算两个标的物之间的相似度。</p>
 <p>假设两个标的物的向量表示分别为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6bde1b5d3113488d9a24a04392220a22.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748109.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a9e3e037caa344139ceb42987fdba259.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748552.webp" />   
     </p>
 <p>这时这两个标的物的相似性可以表示为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/66c6ff6b7bf64656898679b8ebb76f6e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748262.webp" />   
     </p>
 <p>其中代表的是向量的两个分量之间的相似度。可以采用Jacard相似度等各种方法计算两个分量之间的相似度。上面公式中还可以针对不同的分量采用不同的权重策略，见下面公式，其中是第t个分量(特征)的权重，具体权重的数值可以根据对业务的理解来人工设置，或者利用机器学习算法来训练学习得到。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7660490dcd394a95bb0a67b69a58a194.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748676.webp" />   
     </p>
 <p><strong>（3）包含文本信息的标的物的特征表示</strong></p>
 <p>像今日头条和手机百度APP这类新闻资讯或者搜索类APP，标的物就是一篇篇的文章(其中会包含图片或者视频)，文本信息是最重要的信息形式，构建标的物之间的相似性有很多种方法。下面对常用的方法做一些讲解说明。</p>
@@ -279,15 +279,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>TF-IDF通过将所有文档(即标的物)分词，获得所有不同词的集合(假设有M个词)，那么就可以为每个文档构建一个M维(每个词就是一个维度)的向量，而该向量中某个词所在维度的值可以通过统计每个词在文档中的重要性来衡量，这个重要性的度量就是TF-IDF。下面我们来详细说明TF-IDF是怎么计算的。</p>
 <p>TF即某个词在某篇文档中出现的频次，用于衡量这个词在文档中的重要性，出现次数越多的词重要性越大，当然我们会提前将“的”、“地”、“啊”等停用词去掉，这些词对构建向量是没有任何实际价值的，甚至是有害的。TF具体计算公式如下，tk 是第k个词，dj 是第j个文档，下式中分子是 tk 在中出现的次数，分母是 dj 中词的总个数。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e0ef787fac0246e0ae01bdb60ac151f5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748183.webp" />   
     </p>
 <p>IDF代表的是某个词在所有文档中的“区分度”，如果某个词只在少量几个文档中出现，那么它包含的价值就是巨大的(所谓物以稀为贵)，如果某个词在很多文档中出现，那么它就不能很好地衡量(区分出)这个文档。下面是IDF的计算公式，其中N是所有文档的个数，是包含词的文档个数，这个公式刚好跟前面的描述是一致的：稀有的词区分度大。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6a83ad60d59f422781500f58498e40da.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748607.webp" />   
     </p>
 <p>有了上面对TF和IDF的定义，实际的TF-IDF就是上面两个量的乘积：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/586e84bcd0344d74bd36c665846b5ced.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748074.webp" />   
     </p>
 <p>有了基于TF-IDF计算的标的物的向量表示，我们就很容易计算两个标的物之间的相似度了(cosine余弦相似度)。</p>
 <p>b. 利用LDA算法构建文章(标的物)的主题</p>
@@ -301,26 +301,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>这里我们简单描述一下doc2vec的核心思想。doc2vec受word2vec启发，由它推广而来，我们先来简单解释一下word2vec的思路。</p>
 <p>word2vec通过学习一个唯一的向量表示每个词，每个词向量作为矩阵W中的一列(W是所有词的词向量构成的矩阵)，矩阵列可以通过词汇表为每个词做索引，排在索引第一位的放到矩阵W的第一列，如此类推。将学习问题转化为通过上下文词序列中前几个词来预测下一个词。具体的模型框架如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/af73ba05bcc9407ea556f54b93900115.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748010.webp" />   
     </p>
 <p>图4：word2vec算法框架</p>
 <p>(图片来源于参考文献5)</p>
 <p>简单来说，给定一个待训练的词序列，词向量模型通过极大化平均对数概率</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2f3ad4777eb047669426fa2b1e092005.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748639.webp" />   
     </p>
 <p>将预测任务通过softmax变换看成一个多分类问题</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9549c5e6c2a348b9887d1178167a7eeb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748117.webp" />   
     </p>
 <p>上式中是词i的归一化的对数概率，具体用下式来计算，其中U、b是参数，h是通过词向量的拼接或者平均来构建的</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/13e4e7f6ccd34d8e989a617b44fc4f62.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748559.webp" />   
     </p>
 <p>word2vec算法随机初始化词向量，通过随机梯度下降法来训练神经网络模型，最终得到每个词的向量表示。</p>
 <p>doc2vec类似地，每个段落/文档表示为向量，作为矩阵D的一列，每个词也表示为一个向量，作为矩阵W中的一列。将学习问题转化为通过上下文词序列中前几个词和段落/文档来预测下一个词。将段落/文档和词向量通过拼接或者平均来预测句子的下一个词(下图是通过“the”、“cat”、“sat”及段落id来预测下一个词“on”)。在训练的时候我们固定上下文的长度，用滑动窗口的方法产生训练集。段落向量/句向量在上下文中共享。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/054fe47f557f40ce9bfea2148ae98de1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748134.webp" />   
     </p>
 <p>图5：doc2vec模型结构</p>
 <p>(图片来源于参考文献5)</p>
@@ -328,7 +328,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>（4）图片、音频、或者视频信息</strong></p>
 <p>如果标的物包含的是图片、音频或者视频信息，处理起来会更加复杂。一种方法是利用它们的文本信息(标题、评论、描述信息、利用图像技术提取的字幕等文本信息等等，对于音频，可以通过语音识别转化为文本)采用上面(3)的技术方案获得向量化表示。对于图像或者视频，也可以利用openCV中的PSNR和SSIM算法来表示视频特征，也可以计算视频之间的相似度。另外一种可行的方法是采用图像、音频处理技术直接从图像、视频、音频中提取特征进行向量化表示，从而容易计算出相似度。总之，图片、图像、音频都可以转化为NLP问题或者图像处理问题(见下面图6)，通过图像处理和NLP获得对应的特征表示，从而最终计算出相似度，这里不详细讲解。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d2a2e9b6471e4550ad3842e78443c43e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748822.webp" />   
     </p>
 <p>图6：视频/图片问题都可以转化为</p>
 <p>NLP或图像处理问题</p>
@@ -338,12 +338,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>该方法采用基于用户行为记录的显式特征表示用户特征，通过将用户操作过的标的物最相似的标的物推荐给用户，算法原理跟基于物品的协同过滤类似，计算公式甚至是一样的，但是这里计算标的物相似度是基于标的物的自身信息来计算的，而基于物品的协同过滤是基于用户对标的物的行为矩阵来计算的。</p>
 <p>用户u对标的物s的喜好度sim(u,s)可以采用如下公式计算，其中U是所有用户操作过的标的物的列表，是用户u对标的物的喜好度，是标的物与s的相似度。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/eb1e84253b9d4445ba261ac9546724af.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748502.webp" />   
     </p>
 <p>有了用户对每个标的物的相似度，基于相似度降序排列，就可以取topN推荐给用户了。</p>
 <p>除了采用上面的公式外，我们在推荐时也可以稍作变化，采用最近邻方法(K-NearestNeighbor, KNN)。对于用户操作/喜欢过的每个标的物，通过kNN找到最相似的k个标的物。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8faf76c4014142118bdd527959767c8c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748970.webp" />   
     </p>
 <p>其中是给用户u的推荐，是标的物最近邻(最相似)的k个标的物。</p>
 <p><strong>（2）采用跟基于用户协同过滤类似的方法计算推荐</strong></p>
@@ -351,18 +351,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们可以将与该用户最相似的用户喜欢的标的物推荐给该用户，算法原理跟基于用户的协同过滤类似，计算公式甚至是一样的。但是这里计算用户相似度是基于用户的人口统计学特征向量表示来计算的(计算用户向量cosine余弦相似度)或者是基于用户历史行为嵌入获得的特征向量来计算的，而基于用户的协同过滤是基于用户对标的物的行为矩阵来计算用户之间的相似度。</p>
 <p>用户u对标的物s的喜好度sim(u,s)可以采用如下公式计算，其中U是与该用户最相似的用户集合，是用户对标的物s的喜好度，是用户与用户u的相似度。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/947749fa257a4c41938282c7c0ddf7d2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748441.webp" />   
     </p>
 <p>有了用户对每个标的物的相似度，基于相似度降序排列，就可以取topN推荐给用户了。</p>
 <p>与前面一样我们也可以采用最近邻方法(K-NearestNeighbor, KNN)。通过kNN找到最相似的k个用户，将这些用户操作/喜欢过的每个标的物推荐给用户。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8ee48332a01b44b081a0f58aecfea24c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748869.webp" />   
     </p>
 <p>其中是给用户u的推荐，是用户相似的k个用户。是用户操作/喜欢过的标的物的集合。</p>
 <p><strong>（3）基于标的物聚类的推荐</strong></p>
 <p>有了标的物的向量表示，我们可以用kmeans等聚类算法将标的物聚类，有了标的物的聚类，推荐就好办了。从用户历史行为中的标的物所在的类别挑选用户没有操作行为的标的物推荐给用户，这种推荐方式是非常直观自然的。电视猫的个性化推荐就采用了类似的思路。具体计算公式如下，其中是给用户u的推荐，H是用户的历史操作行为集合，Cluster(s)是标的物s所在的聚类。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2e888195b7ae451a8cc88373f2bcaaa9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748312.webp" />   
     </p>
 <p><strong>（4）基于向量相似的推荐</strong></p>
 <p>不管是前面提到的用户的显示的兴趣特征(利用标签来衡量用户兴趣)或者是向量式的兴趣特征(将用户的兴趣投影到向量空间)，我们都可以获得用户兴趣的向量表示。</p>
@@ -375,27 +375,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>该方法在《推荐系统产品与算法概述》这篇文章中也简单做了介绍，这里再简单说一下，并且给出具体的计算公式。基于标的物的标签和用户的历史兴趣，我们可以构建出用户基于标签兴趣的画像及标签与标的物的倒排索引查询表(熟悉搜索的同学应该不难理解)。基于该反向索引表及用户的兴趣画像，我们就可以为用户做个性化推荐了。该类算法其实就是基于标签的召回算法。</p>
 <p>具体推荐过程是这样的(见下面图7)：从用户画像中获取用户的兴趣标签，基于用户的兴趣标签从倒排索引表中获取该标签对应的标的物，这样就可以从用户关联到标的物了。其中用户的每个兴趣标签及标签关联到的标的物都是有权重的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/47fc0782e34d45c48b67508b43bc2eff.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748817.webp" />   
     </p>
 <p>图7：基于倒排索引的电影推荐</p>
 <p>假设用户的兴趣标签及对应的标签权重如下，其中是标签，是用户对标签的偏好权重。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/02ad92fb32b642208a86ebb76ba54d20.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748610.webp" />   
     </p>
 <p>假设标签关联的标的物分别为</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/af26ef825f3a456eb506af44b58a9a4d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748089.webp" />   
     
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/30b10b5c6b7f4cfa8ff7779786da57e8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748621.webp" />   
     </p>
 <p>&hellip;&hellip;</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5f0f45d2d5934d1fbbcc91bd7b59f5e3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748142.webp" />   
     </p>
 <p>其中、分别是标的物及对应的权重，那么</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f36dd6a479b146a8aa56369d2119265f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748654.webp" />   
     </p>
 <p>上式中U是用户对标的物的偏好集合，我们这里将标的物看成向量空间的基，所以有上面的公式。不同的标签可以关联到相同的标的物(因为不同的标的物可以有相同的标签)，上式中最后一个等号右边需要合并同类项，将相同基前面的系数相加。合并同类项后，标的物(基)前面的数值就是用户对该标的物的偏好程度了，我们对这些偏好程度降序排列，就可以为用户做topN推荐了。</p>
 <p>到此我们介绍完了基于内容的推荐算法的核心原理，那么这些算法是怎么应用到真实的产品中的呢？有哪些可行的推荐产品形态？这就是下节的主要内容。</p>
@@ -412,7 +412,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>如果我们有标的物的标签信息，并且基于标签系统构建了一套推荐算法，那么我们就可以将用户喜欢的标签采用主题的方式推荐给用户，每个主题就是用户的一个兴趣标签。通过一些列主题的罗列展示，让用户从中筛选自己感兴趣的内容(见下面图8)。Netflix的首页大量采用基于主题的推荐模式。主题推荐的好处是可以将用户所有的兴趣点按照兴趣偏好大小先后展示出来，可解释性强，并且让用户有更多维度的自由选择空间。</p>
 <p>当然，在真实产品中可以采用比下面图8这种简单标签直接展示更好的方式。具体来说，我们可以为每个标签通过人工编辑生成一句更有表达空间的话(如武侠标签，可以采用“江湖风云再起，各大门派齐聚论剑”这样更有深度的表述)，具体前端展示时映射到人工填充的话而不是直接展示原来的标签。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/12dc506e09c2480093eb317a39351168.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748153.webp" />   
     </p>
 <p>图8：电视猫主题推荐(红色圈圈中就是基于标签的用户兴趣)</p>
 <p><strong>5.  给用户推荐标签</strong></p>
@@ -463,7 +463,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>2.  怎么利用负反馈</strong></p>
 <p>用户对标的物的操作行为不一定代表正向反馈，有可能是负向的。比如点开一个视频，看了不到几秒就退出来了，明显表明用户不喜欢。有很多产品会在用户交互中直接提供负向反馈能力，这样可以收集到更多负向反馈。下面是今日头条和百度APP推荐的文章，右下角有一个小叉叉(见下面图9中红色圈圈)，点击后展示上面的白色交互区域，读者可以勾选几类不同的负向反馈机制。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dc2ba71f9dbe4b269344f72ae41f5720.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271748861.webp" />   
     </p>
 <p> 图9：负向反馈的交互形式：利用用户负向反馈来优化产品体验</p>
 <p>负向反馈代表用户强烈的不满，因此如果推荐算法可以很好的利用这些负向反馈就能够大大提升推荐系统的精准度和满意度。基于内容的推荐算法整合负向反馈的方式有如下几种：</p>
@@ -607,6 +607,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -640,10 +644,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1022,6 +1022,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -202,7 +202,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e02bd2cfd5094d6e8add6348512355ae.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271804836.webp" />   
     </p>
 <blockquote>
 <p>文章作者：肖茁建博士 京东 算法工程师</p>
@@ -220,25 +220,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在介绍多类目MoE 模型之前，首先介绍一下典型的MoE模型结构和Top-K gating的MoE结构。</p>
 <p>MoE 模型是一个经典的神经网络模型，主要包括两个核心组件：一个门网络（gating network）和多个专家网络（expert network）。门网络的输出作为对应的专家网络的权重，用于对专家网络的输出进行加权求和。MoE 模型的输出可以写成下面的公式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/26f860546c8e442087dc159011cb9c1e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271804533.webp" />   
     </p>
 <p>其中，N表示专家网络的个数，E表示专家网络，G表示门网络。</p>
 <p>Google在2017年的一篇文章[1]中，改进了MoE模型中的门网络结构，提出了一种Top-K gating的结构。当模型对一个样本进行预测时，首先会根据门网络的输出，选择最大的K个权重所对应的专家网络，然后只对选中的K个专家网络的输出进行加权求和。具体的计算公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/452eb29bd5b54b5384935472d6150a24.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271804285.webp" />   
     </p>
 <p>从公式可以看出，如果一个专家网络对应的权重值不是最高的K个，则经过softmax之后权重会变成0。在模型训练和预测的过程中，对于这些不在Top K中的专家网络，不会激活，从而降低模型的计算复杂度。</p>
 <h1 id="03-我们的改进"><strong>03 我们的改进</strong></h1>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0b990a54e61648219f8db29e27cea515.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271804967.webp" />   
     </p>
 <p>京东的电商平台有一套完整的多层级的类目结构，并且以树形结构组织。如图，是一个两层级类目结构的示意图。在类目结构上，自顶向下看(从Top-Categories 到Sub-Categories)，不同的Top-Categories 之间，用户的购物行为会有比较明显的差异，但是同一个Top-Categories下的Sub-Categories之间，用户的购物行为一般都比较接近。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7bb4bcec2de64ab39433a01a342a793a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271804407.webp" />   
     </p>
 <p>针对类目差异和小类目学习两个问题，我们利用了现有的层级类目信息，在Top_K MoE 的模型结构上做了相对应的改进，提出了多类目MoE的模型结构，如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/32556439c50548ac9b457837b2340093.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271804233.webp" />   
     </p>
 <p>图中的模型结构分为两部分：专家网络（中间部分）和门网络（右边部分）。首先介绍专家网络，它由一组结构相同的MLP组成，我们将query和item的所有特征都拼接在一起作为专家网络的输入。同时，将Sub-Category 的embedding作为门网络（绿色）的输入，从门网络的输出中选择Top-K计算权重，并且激活相对应的专家网络（绿色部分）。Sub-Category作为门网络的输入，可以让模型对不同的类目，选择激活不同的专家网络，并且给予不同的权重。</p>
 <p>同时，我们在上述Top_K MoE模型框架下，还提出了两个改进结构：</p>
@@ -246,40 +246,40 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>HSC结构可以利用现有的层级类目结构，在模型训练过程中，协助小类目样本更好的学习。具体的做法是：在模型训练时，增加一个HSC门网络（HSC gate，图中蓝色部分），这个gate结构的输入是Top-Category，输出与MoE的gate结构维度一致，代表了不同专家网络对于Top-Category 的重要程度。我们将选择激活的专家网络对应的权重和HSC门网络对应的权重的L2距离作为模型训练的一个损失项，加入到模型的训练过程中。</p>
 <p>HSC loss的具体表示形式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4f7e679987b64d36b969b80517a56ba2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271804020.webp" />   
     </p>
 <p>其中，U_topk 表示激活的K个专家网络的index集合。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6cdad63cc0e741ee819b555ce5fcd4ae.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271804465.webp" />   
     </p>
 <p>这样做可以让相同Top-Category下的所有Sub-Category所激活的专家网络尽量的接近。尤其对于样本量少的小类目，可以利用到相同Top-category下的其他类目信息，能一定程度上解决小样本学习难的问题。</p>
 <h2 id="2-adversarial-regularization"><strong>2. Adversarial Regularization</strong></h2>
 <p>Adversarial Regularization是我们提出的第二个改进结构。由于我们使用的Top_K的门网络结构，所以对于每条样本，专家网络都会分为两部分：激活的专家网络和没有激活的专家网络。Adversarial Regularization的目的是在训练过程中增加不同专家网络之间的区分性，避免专家网络的预测结果趋同。换句话说，我们鼓励没有被激活的专家（disagreeing experts）给出差异较大的预测结果。</p>
 <p>Adversarial Regularization具体计算如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1ada9ebaca7649dbaf81ca93c4ba8b13.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271804376.webp" />   
     </p>
 <p>其中，U_topK 表示激活的专家网络集合，U_d 表示没有被激活的专家网络集合。为了降低计算复杂度，我们在实际模型训练过程中，只从没有被激活的专家网络中随机选择一个，用于计算Adversarial Regularization。</p>
 <p>增加了HSC和Adversarial Regularization之后，模型训练时的损失函数变成下面的形式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/850d1fb2d49e43f88fc586d2a823d3c0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271804852.webp" />   
     </p>
 <h1 id="04-实验结论"><strong>04 实验结论</strong></h1>
 <p>我们在Amazon数据集以及In-house数据集上分别评测了多类目MoE模型的指标。以DNN和传统的MoE模型作为baseline，Adv-MoE和HSC-MoE分别表示只有Adversarial Regularization和HSC loss的两个模型，Adv&amp;HSC-MoE是我们最终的多类目模型。下图是我们在amazon数据集上的AUC指标，同时为了检测指标提升的显著性，我们也计算了对应的p值。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/29dd5675a6be45099d9d1e4a8688796a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271804562.webp" />   
     </p>
 <p>同时，我们在In-house数据集上做了多组实验，分别评测了模型的整体效果、类目差异的效果以及在小样本类目上的提升。下图是模型在AUC和NDCG两个指标上的评测结果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4188fb76740a43ae8dc84f0e23cdac15.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271804234.webp" />   
     </p>
 <p>我们也评测了使用单独类目的训练集训练模型和使用合并多个类目的训练集训练模型两种模型训练方式。下图是具体结果，其中M表示手机类目，B表示图书类目，C表示服饰类目。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/83d0e72afd524d71a944636d77c3c868.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271804969.webp" />   
     </p>
 <p>由于MoE模型的门网络输出表示了不同的专家网络的权重，所以我们分析了不同类目下，门网络的输出，以便观察模型对于类目差异的学习效果。如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/af55afde206343b9a0251888b251f572.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271804820.webp" />   
     </p>
 <p>我们将门网络的输出做T-SNE降维，观察不同类目的聚类效果，图上不同的颜色代表不同的类别（蓝色表示日用百货相关类目，绿色表示电器相关类目，红色表示流行服饰相关类目）。可以从图上明显的看出，我们提出的方法在聚类效果更好，也说明对于相似的类目，我们的模型更倾向于选择相似的专家网络，差异大的类目，更倾向于选择不同</p>
 
@@ -411,6 +411,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -444,10 +448,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -826,6 +826,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

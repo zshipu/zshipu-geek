@@ -234,57 +234,57 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>用统计学模型去分类或预测给定数据的事件概率。预测模型从原来的用简单的linear and logistic regression建模转向了用deep networks。为了处理类别特征，一般采用embeddings，将one-hot或multi-hot vectors转换到抽象空间的dense respresentations。这里的抽象空间其实也就是推荐系统中的latent factors空间。</p>
 <p>本文结合了上边的两种角度，模型使用embeddings处理稀疏特征，MLP处理稠密特征，然后用统计技术进行显示的特征交叉。最后用另一个MLP来处理交差后的特征，得到事件的概率。我们将这个模型称为RLRM，见图1。 <a href="https://zshipu.com/t?url=https%3A%2F%2Flink.zhihu.com%2F%3Ftarget%3Dhttps%253A%2F%2Fgithub.com%2Ffacebookresearch%2Fdlrm">Pytorch&amp;Caffe2开源实现地址</a></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0df61b0a69704a5ca0bea5e0092514c0.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281951543.jpeg" />   
     </p>
 <h2 id="模型设计结构">模型设计&amp;结构</h2>
 <h2 id="components-of-dlrm">Components of DLRM</h2>
 <h3 id="embeddings">Embeddings</h3>
 <p>处理类别特征时，一般使用embedding，实现的时候其实是搞了个lookup table，然后去查对应类别的embedding，所以one-hot vector e_i就相当于是embedding lookup（对位i是1，其他为0）,embedding table W \in \mathbb{R}^{m \times d}</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d825f3303fe34f2da1129e21abd3eacb.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281951681.svg&#43;xml" />   
     </p>
 <p>embedding也可以被理解为是多个items的带权组合，mulit-hot vector 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c8e51760031d4ad4816ead691106ce29.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281951525.svg&#43;xml" />   
     
 ， 
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c8eb285a872a423687f5de835077870c.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281951395.svg&#43;xml" />   
     
 , index i_k 对应items.一个大小为t的mini-batch embedding lookups可以写为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/80ade6c1e3244c4a901e229a7a5a19ee.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281951224.svg&#43;xml" />   
     </p>
 <p>DLRMs利用embedding tables将类别特征映射到稠密表示。但即使embeddings是有意义的，但我们要如何利用它们进行准确的预测呢？ latent factor methods。</p>
 <h3 id="matrix-factorization">Matrix Factorization</h3>
 <p>回顾推荐问题的典型场景，有一组用户S已经给一些产品进行了评价。我们将产品表示为vector w_i，将用户表示为vector v_j，共n个产品，m个用户。(i,j) S</p>
 <p>The matrix factorization approach solves this problem by minimizing</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/922f2967f05d435eabe7fb8142d02e6e.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281951124.svg&#43;xml" />   
     
 （3）</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0bfafefa975d4f0296c7e40c19bb6afc.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281951027.svg&#43;xml" />   
     
 ,R其实就是Reward matrix，W，V是两个embedding tables，每一行分别表示着laten factor space里的user/product. vectors的点积代表对rating的预测。</p>
 <h3 id="factoriation-machine">Factoriation Machine</h3>
 <p>在分类问题中，我们会顶一个预测函数：\phi : \mathbb{R}^{n} \rightarrow T 输入x预测 label y. 我们定义T={+1, -1},+1代表有点击，-1代表每点击，去预测click-through rate。 FM在线性模型上引入了二阶交叉。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b103aac355d642c5902fda8696705812.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281951916.svg&#43;xml" />   
     
 （4）</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a31e567b8f8d4a6fbc3f8160f9de6df3.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281952676.svg&#43;xml" />   
     </p>
 <p>FM明显不同于多项式核函数SVM的是，它将分解二阶交叉矩阵到latent factors(or embedding vectors)就像矩阵分解似的，更高效的处理了稀疏数据。通过仅用不同embedding vectors交叉显著减少了二阶交叉的复杂度。转为了线性计算复杂度。</p>
 <h3 id="multilayer-perceptrons">Multilayer Perceptrons</h3>
 <p>当然，当前许多在机器学习上的成功是源于深度学习的兴起。这里边最基础的模型就是MLP了，一个由FC layers和激活函数组成的预测函数。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/223a925f73664e0382fb9eaeecf1ebcd.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281952440.svg&#43;xml" />   
     
 （5）</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c58142438cf84635aa2939616c14b584.svg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281952315.svg&#43;xml" />   
     </p>
 <p>这些方法备用来捕获更复杂的interactions。比如在有足够的参数下，MLPs有足够的深度和广度来适应数据到任意精度。各种方法的变种被广泛应用到了各种场景下，包括cv和nlp。有一个特别的case， <strong>NCF</strong> 被用来做MLPerf benchmark的一部分，它使用MLP来计算矩阵分解中embeddings直接的interaction，而非dot product。</p>
 <h2 id="dlrm-architecture">DLRM Architecture</h2>
@@ -299,7 +299,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>另一方面，MLP的参数占用内存比较小，但是在计算量上占大头。因此,数据并行适合 MLPs,支持对不同设备上的样本进行并发处理,并且仅在累积更新时需要通信。并行 <code>RLRM</code> 对embeddings用模型并行，对MLP用数据并行，在缓解embeddings的内存瓶颈的同时让MLPs进行前向和反向传播。模型&amp;数据并行的结合是DLRM这样结构和大模型尺寸的一个特别需要。这样组合的并行 <code>Caffe2</code> 和 <code>Pytorch</code> 都不支持，其他流行的深度学习框架也如此，因此我们需要设计一个定制的应用。会在未来的工作中提供详细的性能研究。</p>
 <p>在我们的设置里，top MLP和interaction op需要能连接到bottom MLP和所有embeddings。因为模型并行已经将embeddings分散到各个device上，这就需要个性化的all-to-all的通信。在embedding lookup最后这块，每个设备都驻留着一个embedding tables的向量，用于mini-batch中的所有样本，需要沿着min-batch的维度进行拆分并于对应设备通信，如图2所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6cb653bf58e4468e8c6fbf3024804f46.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281952217.jpeg" />   
     </p>
 <p><code>Pytorch</code> 和 <code>Caffe2</code> 都没有提供原生的模型并行，因此我们通过显示的去不同设备上mapping the embedding op来实现。然后使用butterfly shuffle operator实现个性化的全对所有通信，适当地对所得到的embedding vectors进行切片并将它们传送到目标设备。 在当前版本中，这些传输是显式复制，但我们打算使用可用的通信原语（例如all-gather和send-recv）进一步优化它。我们注意到，对于数据并行的MLP，反向传播中的参数更新是用allreduce一起累积的，并以同步方式将参数复制到每个设备上，确保每次迭代前每个设备上的更新参数一致。 在PyTorch中，数据并行性通过nn.DistributedDataParallel和nn.DataParallel模块在每个设备上复制模型并插入allreduce与必要性依赖。 在Caffe2中，我们在梯度更新之前手动插入allreduce。</p>
 <h2 id="data">Data</h2>
@@ -311,7 +311,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>有很多理由让我们定制化的生成类别特征的indices，比如我们用了个特别的数据集，并因为隐私问题不想共享它。那么我们可以通过分布来表达类别特征。这可能有助于替代应用中使用的隐私保护技术，比如federated learning。同样，如果我们想要研究内存行为，我们synthetic trace中原始trace的基本访问位置。</p>
 <p>假设我们有所有特征的embedding lookups indices的trace。我们可以记录轨迹中的去重后的访问和重复访问的距离频率（算法.1）,生成[14]提的synthetic trace（算法2）。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1713a541d7214da8815c549d860fb743.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281952726.jpeg" />   
     </p>
 <p>请注意，我们只能生成到目前为止看到的s次唯一访问，因此s是控制算法2中分布p的支撑集。 给定固定数量的唯一访问，input trace越长将导致在算法1中分配给它们的概率越低，这将导致算法2要更长的时间取得完整分布支撑集。 为了解决这个问题，我们将唯一�</p>
 
@@ -443,6 +443,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -476,10 +480,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -858,6 +858,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

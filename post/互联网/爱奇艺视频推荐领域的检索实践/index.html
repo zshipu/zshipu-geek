@@ -213,41 +213,41 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="一背景介绍"><strong>一、背景介绍</strong></h2>
 <h3 id="一推荐系统">（一）推荐系统</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/076eb508cd8a45eba90088195f3760f1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240339.webp" />   
     </p>
 <p>推荐系统是现在互联网发展一个比较重要的基石，上图左边是爱奇艺手机端的应用，右边是 PC 端的 Web 页面。可以看到，很多剧都是通过推荐而来的，随着数据量的发展，用户的搜索习惯也改变了。原来用户有目的性搜索，如今更希望系统进行主动的智能推荐，提升用户体验，目前推荐系统在爱奇艺里占据重要地位。</p>
 <h3 id="二推荐系统框架">（二）推荐系统框架</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dbed20a0535c4bfd8c6d8ac17dfffdd6.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240454.png" />   
     </p>
 <p>爱奇艺推荐系统框架分为三段，呈现漏斗型的结构。所有候选集即爱奇艺视频库，先过滤出一些当下热剧，然后建一个索引。通过召回阶段，将数据从百万量级筛选到千量级的规模，接着经过排序阶段，排出十量级的剧最后推送给用户。</p>
 <p>本文主要分享的是基于 ANN 做的召回阶段，对于召回的要求是速度快和数据量大。</p>
 <h2 id="二工程实践"><strong>二、工程实践</strong></h2>
 <h3 id="一算法选型">（一）算法选型</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/966c6c1d94af4b3292d97f341abbfd31.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272240749.png" />   
     </p>
 <p>算法选型选的是 YouTubeNet，做的是 User-Item 的召回，选取它是因为模型召回效果较好。它下边是一些用户的向量，通过拼接用户向量形成分类网络，最后分类出来的这一层对应爱奇艺的视频，最终形成 User-Item 的推荐，在训练阶段就是一个千百万级别的分类器。</p>
 <p>最后的 Serving 阶段比较有挑战，因为召回阶段难以在线计算整个神经网络的推理，因此在Serving 阶段用 ANN 的方式，然后近似地把全连接之后的数据取 Topk 的过程，用 ANN 做近似。</p>
 <p>我们把网络倒数第二层看做用户向量，分类里面矩阵的权重看做视频向量，</p>
 <p><strong>普通召回:</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8a6158d08267412496757e47ffc60923.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272241251.png" />   
     </p>
 <p>把网络倒数第二层看做用户向量，分类里面矩阵的权重看做视频向量，在计算的时候，假如是一个5维的用户向量，然后它跟视频向量做全连接乘法，最后得到的视频向量比如有100万条，则得出100万的视频得分，代表的是100万个视频。这时候再取一个 Topk，最后得到的是希望召回的视频ID，这就是通常情况下召回的推理过程。</p>
 <p><strong>ANN 方式召回:</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/506fb29908cf46319ac9f1b24f02a70e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272241524.png" />   
     </p>
 <p>用 ANN 的方式就比较巧妙，因为向量检索可以选择用内积的形式来做距离度量方式，矩阵层其实也是内积，这两个近似等价。</p>
 <p>也就是说 YouTubeNe t在 Serving 的时候，把全连接全乘完之后的结果再取 Topk 的过程，转化成了一个用内积形式做度量，直接做 ANN 近似召回的过程，所以在 Serving 阶段就使得千百万级别的全连接的效率是得到了一定保证。</p>
 <h3 id="二serving结构">（二）Serving结构</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/13c384624531462ab64ac3acf884c769.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272241338.png" />   
     </p>
 <p>如上图所示，Serving 结构模型分为三段，第一段是 DNN 用户销量的在线推理，第二部分通过用户向量做 ANN 的召回，然后推送给后边排序的是每一个视频的 ID 还有对应的得分。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f7857f3d35eb4202a8cd0d5a595380cf.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272241681.png" />   
     </p>
 <p>我们在做的过程中，面临以下三个问题：</p>
 <p><strong>1） 整体模型如何更新</strong></p>
@@ -259,11 +259,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>基于这三点，我们设计了两个方案。</p>
 <p><strong>方案一：</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4a9f8b34c8fc44a582753504a43c51bb.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272241529.png" />   
     </p>
 <p>第一个方案把整个 ANN 的这部分，相当于对前面的请求方给它屏蔽掉。用 DNN 之后，直接拿到用户向量去 ANN 做向量的检索。DNN 部分选用 Tensorflow，ANN 部分选用 Milvus，Milvus 的优点有文档丰富、封装完善和开箱即用。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5f38e82468d74184b3cbd67582c1dca5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272241787.png" />   
     </p>
 <p>上图为方案一整体结构，Milvus 有 C++ 的 SDK，在用的时候，推荐量大概在百万到千万级别，单个容器下面容量可以满足，因此先都在单个容器里面。</p>
 <p>容器里包含了两个进程，一个是 TF Serving，负责 DNN 的编码，里边有 Milvus 的一个装置，然后 Milvus 请求同一个容器内部的 ANN 服务。对于外部来说，整体的接口还是 TF Serving，并没有改变接口。容器内部减少了一些网络上的开销，整体上性能较为良好。</p>
@@ -272,11 +272,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>Tensorflow Serving 就是一个 Tensorflow Runtime 的封装，主要是做 RPC 的请求处理和模型管理方面的工作。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b56e2779a36c47d4b155f2426fdd7f7c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272241940.png" />   
     </p>
 <p>红框中是整个 Tensorflow Serving 在运行推理时，最核心的函数叫 RunPredict，里边包了一层 Tensorflow Runtime，然后把对应的 Return proto 进行解析，最后再统一回传给请求方。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ee7c415a15f148b6baa10d61c5367a23.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272241050.png" />   
     </p>
 <p>我们在这个函数里边加了一层 Milvus SDK RPC，通过 Tensorflow Runtime 拿出来的用户向量，直接在这边就封装成 Milvus 的请求，然后去请求本地 ANN 服务。然后再返回 Proto 时候，会返回对应的 ID 和得分。</p>
 <p>-改造步骤总结如下：</p>
@@ -290,7 +290,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>模型升级</strong></li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/28dde2312ee84ca18b7d5cea5b9c2164.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272241991.png" />   
     </p>
 <p>如上图所示，2个Version1 是现在正在服务的一些模型。由于我们这是一个只读的场景，相当于在线服务时加载的是已经训练好的索引，Tensorflow 有这个模型动态加载的能力，但是 Milvus 目前没有，所以通过整体进行 AB 切换的方式来升级。</p>
 <p>升级 Version2 的时候，会先启动一个 Version2，当 Version2 就绪时，会把 Version1 摘掉，通过 CONSUL 保证服务的发现性。</p>
@@ -302,7 +302,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>Milvus 场景&amp;配置</strong></li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/13d2758355df4cb1bdbe295e49781a28.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272241220.png" />   
     </p>
 <p>对于Milvus我们做了一些简单的配置：</p>
 <ol>
@@ -315,7 +315,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>TF serving 与 Milvus 结合</strong></li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2441ebd845dd48e79ed8ea5072aa7618.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272241272.png" />   
     </p>
 <ul>
 <li>TF serving 静态编译 GRPC，Protobuf</li>
@@ -336,7 +336,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>结合以上三个需求，我们做了方案二。</p>
 <p><strong>方案二</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d4b25c9b047a4b8282006627e8f34f7e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272241726.png" />   
     </p>
 <p>如上图所示，在原来的基础上，除了 DNN 部分是原生的 Tensorflow 之外，我们把 ANN 也放到了 Tensorflow 的 Runtime 中。</p>
 <p>如果都在计算图中的话，剩下的一些其他逻辑，例如重排序，对于算法人员而言整体就比较简单了。除了一些业务指标之外，也可以用简单的树模型根据用户的 Feature 做一次再重排序。而且如果都集中到 Tensorflow 里边，对外接口也是一致的，对于整个技术栈，贴合度也会更高一些。</p>
@@ -353,7 +353,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>方案二结构</strong></li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6582e967ac594428b13d435876031d5e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272241885.png" />   
     </p>
 <p>方案二使用 HNSW OP 创建计算图，升级部署与纯 TF Serving 一致。</p>
 <p>RunPredict有的逻辑都放在了 Tensorflow Runtime 中，这也符合 Tensorflow Serving 设计的初衷，因为它更多的是处理 RPC 请求与模型管理的工作。</p>
@@ -366,7 +366,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>模型升级</strong></li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/51f17f92a44543edb8b1e66f2a7a1614.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272241937.png" />   
     </p>
 <p>整体的模型升级部分与 Tensorflow 一样，是热升级的模式。</p>
 <p>比如这个 Tensorflow 有两个版本 Version1 跟 Version2，然后大家都在请求 Version2。这个时候如果触发一次升级，容器会分先后，大家都会去加载 Version3，整体都加载完之后，就可以都切到 Version3了。通过热升级的方式，整个模型易于管理。</p>
@@ -377,7 +377,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/41bf08e72d4647fe887393d976465fe5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272241947.png" />   
     </p>
 <p>作为一个基础的 AI 平台，为用户提供的服务不止是 Serving，也会提供训练与模型管理方面的工作，整体 Serving 的工作流主要分为4个部分。</p>
 <p>首先用户上传训练好的模型，接着触发创建索引的任务，这个任务基于方案一或方案二会产生不同的索引。如果是 Milvus 则会创建 Milvus 的索引，如果是定制的 OP，会把这个图转换成HNSW OP 的图，然后把创建好的索引或转换好的图上传到网络存储上。</p>
@@ -386,17 +386,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>HNSW OP 性能测试</strong></li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3d37c1ed03ce43eeafa14e3c5f198cde.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272241235.png" />   
     </p>
 <ul>
 <li><strong>HNSW OP 性能测试（纯 ANN）</strong></li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2375cee96d3341d6bf5cc26c96d10b6e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272241422.png" />   
     </p>
 <p>如果是对 YouTubeNet 做 Serving，把前面的 DNN 去掉，就变成一个纯召回服务。基于这种情况，我们去测了 sift 模型，测下来准确率为95.35%。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/90a1933c6f7047bfb9a41cbf1c2614e4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272241483.png" />   
     </p>
 <p>上图是单次</p>
 
@@ -524,6 +524,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -557,10 +561,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -939,6 +939,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

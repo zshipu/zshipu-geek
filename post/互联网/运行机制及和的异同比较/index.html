@@ -213,16 +213,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>其实从另外一个角度更好理解 XLNet 的初衷和做法，我觉得这个估计是 XLNet 作者真正的思考出发点，是啥呢？就是说自回归语言模型有个缺点，要么从左到右，要么从右到左，尽管可以类似 ELMO 两个都做，然后再拼接的方式。但是跟 Bert 比，效果明显不足够好（这里面有 RNN 弱于 Transformer 的因素，也有双向语言模型怎么做的因素）。那么，能不能类似 Bert 那样，比较充分地在自回归语言模型中，引入双向语言模型呢？因为 Bert 已经证明了这是非常关键的一点。这一点，想法简单，但是看上去貌似不太好做，因为从左向右的语言模型，如果我们当前根据上文，要预测某个单词 Ti ，那么看上去它没法看到下文的内容。具体怎么做才能让这个模型：看上去仍然是从左向右的输入和预测模式，但是其实内部已经引入了当前单词的下文信息呢？XLNet 在模型方面的主要贡献其实是在这里。</p>
 <p>那么 XLNet 是怎么做到这一点的呢？其实思路也比较简洁，可以这么思考：XLNet 仍然遵循两阶段的过程，第一个阶段是语言模型预训练阶段；第二阶段是任务数据 Fine-tuning 阶段。它主要希望改动第一个阶段，就是说不像 Bert 那种带 Mask 符号的 Denoising-autoencoder 的模式，而是采用自回归 LM 的模式。就是说，看上去输入句子 X 仍然是自左向右的输入，看到 Ti 单词的上文 Context_before ，来预测 Ti 这个单词。但是又希望在 Context_before 里，不仅仅看到上文单词，也能看到 Ti 单词后面的下文 Context_after 里的下文单词，这样的话，Bert 里面预训练阶段引入的 Mask 符号就不需要了，于是在预训练阶段，看上去是个标准的从左向右过程，Fine-tuning 当然也是这个过程，于是两个环节就统一起来。当然，这是目标。剩下是怎么做到这一点的问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/354d2c5634864e2dabb2f59a91f461a5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281858866.webp" />   
     </p>
 <p>那么，怎么能够在单词 Ti 的上文中 Contenxt_before 中揉入下文 Context_after 的内容呢？你可以想想。XLNet 是这么做的，在预训练阶段，引入 Permutation Language Model 的训练目标。什么意思呢？就是说，比如包含单词 Ti 的当前输入的句子 X ，由顺序的几个单词构成，比如 x1,x2,x3,x4 四个单词顺序构成。我们假设，其中，要预测的单词 Ti 是 x3 ，位置在 Position 3 ，要想让它能够在上文 Context_before 中，也就是 Position 1 或者 Position 2 的位置看到 Position 4 的单词 x4 。可以这么做：假设我们固定住 x3 所在位置，就是它仍然在 Position 3 ，之后随机排列组合句子中的4个单词，在随机排列组合后的各种可能里，再选择一部分作为模型预训练的输入 X 。比如随机排列组合后，抽取出 x4,x2，x3,x1 这一个排列组合作为模型的输入 X 。于是，x3 就能同时看到上文 x2 ，以及下文 x4 的内容了。这就是 XLNet 的基本思想，所以说，看了这个就可以理解上面讲的它的初衷了吧：看上去仍然是个自回归的从左到右的语言模型，但是其实通过对句子中单词排列组合，把一部分 Ti 下文的单词排到 Ti 的上文位置中，于是，就看到了上文和下文，但是形式上看上去仍然是从左到右在预测后一个单词。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f46add8f916142a2ae3a0fed468aab06.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281858970.webp" />   
     </p>
 <p>当然，上面讲的仍然是基本思想。难点其实在于具体怎么做才能实现上述思想。首先，需要强调一点，尽管上面讲的是把句子 X 的单词排列组合后，再随机抽取例子作为输入，但是，实际上你是不能这么做的，因为 Fine-tuning 阶段你不可能也去排列组合原始输入。所以，就必须让预训练阶段的输入部分，看上去仍然是 x1,x2,x3,x4 这个输入顺序，但是可以在 Transformer 部分做些工作，来达成我们希望的目标。具体而言，XLNet 采取了 Attention 掩码的机制，你可以理解为，当前的输入句子是 X ，要预测的单词 Ti 是第 i 个单词，前面1到 i-1 个单词，在输入部分观察，并没发生变化，该是谁还是谁。但是在 Transformer 内部，通过 Attention 掩码，从 X 的输入单词里面，也就是 Ti 的上文和下文单词中，随机选择 i-1 个，放到 Ti 的上文位置中，把其它单词的输入通过 Attention 掩码隐藏掉，于是就能够达成我们期望的目标（当然这个所谓放到 Ti 的上文位置，只是一种形象的说法，其实在内部，就是通过 Attention Mask ，把其它没有被选到的单词 Mask 掉，不让它们在预测单词 Ti 的时候发生作用，如此而已。看着就类似于把这些被选中的单词放到了上文 Context_before 的位置了）。具体实现的时候，XLNet 是用“双流自注意力模型”实现的，细节可以参考论文，但是基本思想就如上所述，双流自注意力机制只是实现这个思想的具体方式，理论上，你可以想出其它具体实现方式来实现这个基本思想，也能达成让Ti看到下文单词的目标。</p>
 <p>这里简单说下“双流自注意力机制”，一个是内容流自注意力，其实就是标准的 Transformer 的计算过程；主要是引入了 Query 流自注意力，这个是干嘛的呢？其实就是用来代替 Bert 的那个 [Mask] 标记的，因为 XLNet 希望抛掉 [Mask] 标记符号，但是比如知道上文单词 x1,x2 ，要预测单词 x3 ，此时在 x3 对应位置的 Transformer 最高层去预测这个单词，但是输入侧不能看到要预测的单词 x3 ，Bert 其实是直接引入 [Mask] 标记来覆盖掉单词 x3 的内容的，等于说 [Mask] 是个通用的占位符号。而 XLNet 因为要抛掉 [Mask] 标记，但是又不能看到 x3 的输入，于是 Query 流，就直接忽略掉 x3 输入了，只保留这个位置信息，用参数 w 来代表位置的 embedding 编码。其实 XLNet 只是扔了表面的 [Mask] 占位符号，内部还是引入 Query 流来忽略掉被 Mask 的这个单词。和 Bert 比，只是实现方式不同而已。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/367d5c3a125140ee855dc3c514c1a528.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281859131.webp" />   
     </p>
 <p>上面说的 Attention 掩码，我估计你还是没了解它的意思，我再用例子解释一下。Attention Mask 的机制，核心就是说，尽管当前输入看上去仍然是 x1-&gt;x2-&gt;x3-&gt;x4 ，但是我们已经改成随机排列组合的另外一个顺序 x3-&gt;x2-&gt;x4-&gt;x1 了，如果用这个例子用来从左到右训练 LM ，意味着当预测 x2 的时候，它只能看到上文 x3 ；当预测 x4 的时候，只能看到上文 x1 和 x2 ，以此类推……这样，比如对于 x2 来说，就看到了下文 x3 了。这种在输入侧维持表面的 X 句子单词顺序，但是其实在 Transformer 内部，看到的已经是被重新排列组合后的顺序，是通过 Attention 掩码来实现的。如上图所示，输入看上去仍然是 x1,x2,x3,x4 ，可以通过不同的掩码矩阵，让当前单词 Xi 只能看到被排列组合后的顺序 x3-&gt;x2-&gt;x4-&gt;x1 中自己前面的单词。这样就在内部改成了被预测单词同时看到上下文单词，但是输入侧看上去仍然维持原先的单词顺序了。关键要看明白上图右侧那个掩码矩阵，我相信很多人刚开始没看明白，因为我刚开始也没看明白，因为没有标出掩码矩阵的单词坐标，它的坐标是1-2-3-4，就是表面那个 X 的单词顺序，通过掩码矩阵，就能改成你想要的排列组合，并让当前单词看到它该看到的所谓上文，其实是掺杂了上文和下文的内容。这是 attention mask 来实现排列组合的背后的意思。</p>
 <p>上面讲的 Permutation Language Model 是 XLNet 的主要理论创新，所以介绍的比较多，从模型角度讲，这个创新还是挺有意思的，因为它开启了自回归语言模型如何引入下文的一个思路，相信对于后续工作会有启发。当然，XLNet 不仅仅做了这些，它还引入了其它的因素，也算是一个当前有效技术的集成体。感觉 XLNet 就是 Bert、GPT 2.0 和 Transformer XL 的综合体变身，首先，它通过 PLM 预训练目标，吸收了 Bert 的双向语言模型；然后，GPT2.0 的核心其实是更多更高质量的预训练数据，这个明显也被 XLNet 吸收进来了；再然后，Transformer XL 的主要思想也被吸收进来，它的主要目标是解决 Transformer 对于长文档 NLP 应用不够友好的问题。</p>
@@ -242,29 +242,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们把实验分成几个部分来分析。</p>
 <p>首先，给人最大的印象是：XLNet 对于阅读理解类任务，相对 Bert ，性能有极大幅度地提升。下面是论文报道的实验结果：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/75fee3b87bff4ff7a043f5778eb6e22c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281859351.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/42ea9efa71d24d30967969e2c0acd69e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281859418.webp" />   
     </p>
 <p>其中，RACE 和 SQuAD 2.0 是文档长度较长的阅读理解任务，任务难度也相对高。可以看出，在这两个任务中，XLNet 相对 Bert_Large ，确实有大幅性能提升 ( Race 提升13.5%，SQuAD 2.0 F1 指标提升8.6 ) 。在 Squad1.1 上提升尽管稍微小些，F1 提升3.9%，但是因为基准高，所以提升也比较明显。</p>
 <p>说 XLNet 在阅读理解，尤其是长文档的阅读理解中，性能大幅超过 Bert ，这个是没疑问的。但是，因为 XLNet 融入了上文说的三个因素，所以不确定每个因素在其中起的作用有多大，而对于长文档，Transformer XL 的引入肯定起了比较大的作用，Bert 天然在这种类型任务中有缺点，其它两类因素的作用不清楚。感觉这里应该增加一个基准，就是 Bert 用与 XLNet 相同大小的预训练数据做，这样抹平数据量差异，更好比较模型差异带来的效果差异。当然，我觉得即使是这样，XLNet 应该仍然是比 Bert 效果好的，只是可能不会差距这么大，因为 XLNet 的长文档优势肯定会起作用。</p>
 <p>下面我们看下其它类型的 NLP 任务。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9c573356e6214343b1e5958be143d9d9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281859675.webp" />   
     </p>
 <p>GLUE 是个综合的 NLP 任务集合，包含各种类型的任务，因为 ensemble 模式里面包含了各种花式的 trick ，所以重点看上面一组实验，这里比较单纯。从实验数据看，XLNet 相对 Bert 也有性能提升，当然不像阅读理解提升那么大，而且性能提升比较大的集中在 RTE ，MNLI 和 COLA 数据集合，其它任务提升效果还好。而我一直觉得，RTE 在 GLUE 里，是个神奇的存在，如果没有它，很多论文的效果可能没法看，这个是闲话，先不讲了，后面我会单说。</p>
 <p>当然，仍然不确定这种性能提升主要来自于 XLNet 的哪个因素，或者哪几个因素各自的贡献，尤其是如果 Bert 加大预训练数据规模后，两者性能差异有多大。感觉这里 Transformer XL 的因素可能发挥的作用不会太大，其它两个因素在起作用，但是作用未知，这里感觉应该补充其它实验。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cfa8e3de2f4840858b67a9acf61fb870.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281859820.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6a4f508421574bab9c145a46085740d5.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281859030.webp" />   
     </p>
 <p>上面是文本分类任务和信息检索任务，可以看出，相对 Bert，XLNet 效果有提升，但是幅度不算大。仍然是上面的考虑，起作用的三个因素，到底哪个发挥多大作用，从数据方面看不太出来。</p>
 <p>下面一组实验可以仔细分析一下，这组实验是排除掉上述第三个数据规模因素的实验的对比，就是说 XLNet 用的是和 Bert 相同规模的预训练数据，所以与 Bert 对比更具备模型方面的可比较性，而没有数据规模的影响。实验结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d2971a2fbcb644d7acd64b7e265ee712.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281859176.webp" />   
     </p>
 <p>如果仔细分析实验数据，实验结果说明：</p>
 <p>因为和 Bert 比较，XLNet 使用相同的预训练数据。所以两者的性能差异来自于：Permutation Language Model 预训练目标以及 Transformer XL 的长文档因素。而从中可以看出，DAE+Transformer XL 体现的是长文档因素的差异，和 Bert 比，Race 提升1个点，SQuAD F1 提升3个点，MNLI 提升0.5个点，SST-2 性能稍微下降。这是 Transformer XL 因素解决长文档因素带来的收益，很明显，长文档阅读理解任务提升比较明显，其它任务提升不太明显。</p>
@@ -400,6 +400,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -433,10 +437,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -815,6 +815,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

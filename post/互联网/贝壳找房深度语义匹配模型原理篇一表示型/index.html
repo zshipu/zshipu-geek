@@ -226,7 +226,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>而换个角度，从模型的本质来看可以分为两种类型： <strong>表示型和交互型</strong>。表示型的模型会在最后一层对待匹配的两个句子进行相似度计算，交互型模型会尽早的让两个句子交互，充分应用交互特征。本次为大家介绍几种表示型的匹配算法。</p>
 <p>表示型的模型更侧重于对表示层的构建，其基本模型结构如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-e7b2459fccc04d2cb73e16a5bfc82ed9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281840220.webp" />   
     </p>
 <p>表示型匹配模型的特点是：</p>
 <ul>
@@ -238,7 +238,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="21-dssm">2.1 DSSM</h3>
 <p>DSSM 的全称是 Deep Structured Semantic Models，是匹配模型的鼻祖。原文传送门： <code>https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/cikm2013_DSSM_fullversion.pdf</code>，这篇 paper2013 年由微软 Redmond 研究院发表，短小但是精炼。下图为 DSSM 的整体网络结构</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-417e6c3ab35d44c2956410cd393aa259.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281840183.webp" />   
     </p>
 <h4 id="211-输入层及-word-hash">2.1.1 输入层及 word hash</h4>
 <p>输入层做的事情是把句子映射到一个向量空间里并输入到深度神经网络（Deep Neural Networks，DNN）中，这里英文和中文的处理方式有很大的不同。</p>
@@ -251,22 +251,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h4 id="213-匹配层">2.1.3 匹配层</h4>
 <p>通过表示层得到了一些 128 维的特征向量，在匹配层采用 cosine 距离(即余弦相似度) 来表示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-508cb005f29443909e5a62090c392f7d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281840341.webp" />   
     </p>
 <p>通过 softmax 函数可以把 Query 与正样本 Doc 的语义相似性转化为一个后验概率：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ef2406a87ac24b17bb8f584a37a65d83.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281840168.webp" />   
     </p>
 <p>在训练阶段，通过极大似然估计，最小化损失函数为：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-643156af33d44df39126874254c5fa8d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281840079.webp" />   
     </p>
 <h4 id="214-模型优缺点分析">2.1.4 模型优缺点分析</h4>
 <p>DSSM 的优点在于能够快速的计算多个 query 和 Doc 对之间的语义相似度；相对于词向量的方式，它采用有监督的方法，准确度要高很多，同时单个词或单个字处理不依赖切词的正确与否。缺点是在词向量表示时采用词袋模型，不考虑词语的位置信息，这对语义理解是一个大的损失。此外，DSSM 是弱监督模型，因为引擎的点击曝光日志里 Query 和 Title 的语义信息比较弱，从这种非常弱的信号里提取出语义的相似性或者差别，那就需要有海量的训练样本，因此训练成本会比较高。</p>
 <h3 id="22-变种-1-cdssm">2.2 变种 1: CDSSM</h3>
 <p>针对 DSSM 词袋模型丢失上下文信息的缺点，CDSSM（convolutional latent semantic model）2014 年由微软提出，又叫 CLSM。CNN-DSSM 与 DSSM 的区别主要在于输入层和表示层， 与 DSSM 相比，该算法相比原始 DSSM 将近会有 10% 的效果提升。原文传送门 <code>https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/cikm2014_cdssm_final.pdf</code></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-6c9332147fcf46ee9973e965f6369578.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281840804.webp" />   
     </p>
 <h4 id="221-输入层">2.2.1 输入层</h4>
 <p><strong>（1）英文：</strong> 除了 DSSM 用到的 letter-trigram，CDSSM 也用了滑动窗口策略。word-trigram 其实就是一个包含了上下文信息的滑动窗口，对窗口里的每个词进行 letter-trigram，将三个向量 concat 起来，最终映射到一个 9 万维的向量空间里。</p>
@@ -282,13 +282,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="23-变种-2--lstm-dssm">2.3 变种 2 : LSTM-DSSM</h3>
 <p>针对 CDSSM 无法捕获较远距离上下文特征的缺点，有人提出了用 LSTM-DSSM（Long-Short-Term Memory）来解决该问题。原文传送门 <code>https://arxiv.org/pdf/1412.6629.pdf</code>。这篇文章是对 DSSM 模型的修改，相比于 CDSSM 更简单，毕竟全连接网络是最简单的神经网络，替换一下模型就能提升效果。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-38065cba84f84814b4788cade0b1d24e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281840784.webp" />   
     </p>
 <p>该模型与 DSSM 的本质区别其实就是把 DSSM 里的全连接改成 LSTM。这里的输入层个人感觉也不需要做 word hashing，直接把每个单词映射到一个 word representation，就是 embedding，然后把整个句子送入 LSTM 并训练，拿出最后输出的状态作为隐语义向量，有了这个最后的语义向量后就和 DSSM 模型一样，进行相似度度量，softmax 计算概率等等。</p>
 <h3 id="24-变种-3-mv-dssm">2.4 变种 3: MV-DSSM</h3>
 <p>MV 为 Multi-View，一般可以理解为多视角的 DSSM，原文传送门 <code>https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/frp1159-songA.pdf</code>，该文章 2016 年由微软发表，并将其用于用户推荐。这个工作同样是对 DSSM 的改进，与 CDSSM 和 LSTM-DSSM 不同的是，它没有改变网络结构，而是从信息源入手解决这个问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-c55eefe3ed694c8dbada35e13b980418.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281840943.webp" />   
     </p>
 <p>放在我们的场景可以这样理解 multi-view: 比如我们的经纪人，可能在 app 上产生了带看信息，也可能在 link 上问了房源修改的问题。不同的信息源都对同一个经纪人进行了一些刻画，所以综合各种信息源可以描述出经纪人画像，然后进行推荐。MV-LSTM 的核心思想是把经纪人的特征与不同的信息源统一到一个相同的语义空间，通过 Cosine 距离表征相关性。这里的每一个信息源与经纪人的匹配都是一个独立的 DSSM 模型，但是共享一个 user 模型。</p>
 <h3 id="那么问题来了">那么问题来了</h3>
@@ -302,12 +302,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="25-arc-i">2.5 ARC-I</h3>
 <p>ARC-I, ARC-II 模型是 2014 年华为诺亚方舟实验室提出，前者是表示型匹配，后者是交互型匹配（将在下期讲到），原文传送门： <code>https://papers.nips.cc/paper/5550-convolutional-neural-network-architectures-for-matching-natural-language-sentences.pdf</code>.该模型相比于 DSSM，最大特点是通过逐层构图和合并充分表达句子的词序信息，并且匹配计算公式采用了带参数的计算公式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-cfe7cd3c4dce472aa8b4521d7bc43366.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281840946.webp" />   
     </p>
 <h4 id="251-基于-cnn-的句子建模">2.5.1 基于 CNN 的句子建模</h4>
 <p>本文基于 CNN 为句子建模，对于长度较短的句子作补 0 处理，卷积的计算和传统的 CNN 卷积计算无异，可参考上文的 CDSSM。卷积的作用是从句子中提取出局部的语义组合信息，pooling 的作用是对多种语义组合进行选择，找出置信度高的特征组合。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-81b4106e84234d0e90de03da56665a73.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281840896.webp" />   
     </p>
 <h4 id="252-句子匹配">2.5.2 句子匹配</h4>
 <p>从图中可以看出，两个句子分别进行特征提取，得到两个相同且固定长度的向量，向量为句子经过建模后抽象得来的特征信息，然后将这两个向量作为一个多层感知机(MLP)的输入，最后计算匹配的分数。</p>
@@ -437,6 +437,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -470,10 +474,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -852,6 +852,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

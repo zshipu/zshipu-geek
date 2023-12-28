@@ -219,7 +219,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在搜索场景中，由于用户搜索词Query和检索文本Document之间存在大量表述不一的情况，在文本检索框架下，此类文本不匹配导致的漏召回问题严重影响着用户的体验。对这类问题业界一般有两种方案：用户端拓展用户的查询词——即查询改写，或Document端拓展文档关键词——即Document标签。本文主要介绍前一种解决漏召回的方案：查询改写（Query Rewriting，或称为查询扩展Query Expansion）。查询改写的应用方式是对原始Query拓展出与用户需求关联度高的改写词，多个改写词与用户搜索词一起做检索，从而用更好的表述，帮用户搜到更多符合需求的商户、商品和服务。</p>
 <p>在美团搜索的技术架构下，查询改写控制召回语法中的文本，命名实体识别（Named Entity Recognition，简称NER）^{[1]} 控制召回语法中的检索域，意图识别控制召回的相关性以及各业务的分流和产品形态，这是最为核心的三个查询理解信号。查询改写策略在美团搜索的全部流量上生效，除扩展用户搜索词外，在整个美团搜索技术架构中作为基础语义理解信号，从索引扩展、排序特征、前端高亮等多方面影响着用户体验。对搜索召回结果中的无结果率、召回结果数以及搜索点击率等指标，也有着直接且显著的影响。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/71a357aaaea64abcb6393f5fef8cda5e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705526.png" />   
     </p>
 <p>图1 查询改写信号在美团搜索上的使用</p>
 <p>本文会介绍美团搜索场景下查询改写这一任务上的迭代经验，内容主要分为三个部分。第一部分会对查询改写任务在美团搜索场景下的挑战进行简单的介绍；第二部分会介绍查询改写任务上整体技术栈建设的实践经验第三部分是总结与展望。目前，业界在文本召回策略方面公开的分享较少，希望本文能对从事搜索、广告、推荐中召回相关工作的同学有所启发或者帮助。</p>
@@ -233,13 +233,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>其他漏召回问题：部分的多字少字、纠错等问题，如“房屋扫”对应“家政保洁”的需求；理论上查询改写可以通过增加改写词解决所有漏召回问题，诸如“冬日四件套”包括“冰糖葫芦、烤地瓜、炒栗子、热奶茶”这类有时效性的网红概念，也可以通过改写进行解决。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6742abe6a6114fa68e40ae94c7ff8f0d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705108.png" />   
     </p>
 <p>图2 查询改写在美团App搜索上应用的例子</p>
 <h3 id="22-美团搜索场景下查询改写信号的难点和挑战">2.2 美团搜索场景下查询改写信号的难点和挑战</h3>
 <p>搜索是在用户搜索词以及供给两方面约束下尽可能提高用户触达效率以及商业化指标，而美团的搜索场景增加了“地域”第三个约束。具体的行业对比如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f94db23929ff4a59a636b6718cdd0f68.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705311.png" />   
      图3 美团搜索场景在与其他搜索场景的异同点</p>
 <p>通过对比行业内搜索场景可以发现，美团的搜索场景下用户需求和服务商家大多是面向本地，而生活服务领域业务非常细碎，相对用户对生活服务某个领域的需求而言，本地化供给相对较少。</p>
 <p>与此同时，美团搜索还聚合了多种履约形式的结果，搜索结果中会有团购、外卖、买菜、优选等业务的自然结果聚块，以及在本地相关业务均无结果时的推荐结果聚块。在有限的曝光位置下，每个自然结果聚块的不相关的结果会挤占其他聚块的收益，因此不能依赖排序解决相关性问题。这就要求美团搜索场景的查询改写在多个业务场景下要强相关且高效率，算法层面需要解决覆盖问题、准确率问题以及多业务问题。以该要求为出发点，在具体算法迭代时查询改写还面临以下两方面挑战：</p>
@@ -258,7 +258,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="3-技术选型">3. 技术选型</h2>
 <p>下图4总结了目前查询改写迭代的技术框架以及对应解决的问题。我们在各个子核心模块如离线候选挖掘算法探索、语义关系判别模型、向量化召回、在线生成改写词有较为深入的探索。除信号本身迭代，在信号的使用上也通过改写分级信号加入排序、召回相关性等做联动取得了不错的线上收益。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b14e872f0e934707a9ea257fadc72370.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705579.png" />   
     </p>
 <p>图4 查询改写技术迭代框架</p>
 <p>下面，我们将从离线到在线全面的介绍查询改写任务下的各模块技术的迭代。</p>
@@ -272,7 +272,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>词对齐：</strong> 词对齐借鉴了翻译的思想，具体方法是将Query召回的商户标题去除了商户名部分后剩余的部分做为平行语料，设计一些对齐策略如字对齐（包含相同的字）、拼音对齐（相同拼音）、结构对齐（分词后词位置相同）。该方法的缺点是强依赖于现有搜索的效果。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0129da3af6414469b6a7f2c2856fe4b7.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705994.png" />   
     </p>
 <p>图5 查询改写词对齐挖掘方法示意图</p>
 <ul>
@@ -283,7 +283,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>图方法如经典的协同过滤以及Graph Embedding等，在推荐场景中通过利用用户和Document的关系构建图结构来推荐更相似的Document。在搜索场景下用户的搜索Query以及平台的Document通过点击、下单等方式同样也可以建模成图结构。在美团搜索的使用场景下，我们对构图方式做了如下两个改进：① Query和Document之间的边权重使用Query点击Document的点击次数和点击率进行Wilson平滑的结果，而不只是Query点击Document的次数，从而提高相关性；② 在二部图中，将用户在Session中自行改写的Query也视为Document节点，与点击的Document标题一起进行构图，从而提高挖掘的数据量。</p>
 <p>我们早期用SimRank++算法^{[2]} 验证了构图方式两个优化点的可行性，SimRank++算法是一种同构信息网络中的相似度量算法，它的思想是：如果两个用户相似，则与这两个用户相关联的物品也类似；如果两个物品类似，则与这两个物品相关联的用户也类似。该算法的优点是可以使用Spark进行大规模全局优化，并且边权重可以根据需要调整。优化构图后人工评测SimRank++优化前后查询改写数据量提升了约30%，同时准确率从72%提升到83%。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/52575b888284418f98e8cfdd6bbd6101.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705397.png" />   
     </p>
 <p>图6 改进构图方法的图方法挖掘</p>
 <p>后续，我们用相同的思路尝试了其他图神经网络模型（GNN）。DeepWalk^{[3]} 在构造Sentence上下文采用随机游走的方法。随机游走一般是将Query之间的关系建立成图，通过从一个点随机游走，建立起多条路径，每条路径上的Query组成一个句子，再使用上下文相关原理训练Query的Embedding。随机游走的优点就是关系具有传递性，和Query共现不同，可以将间接关系的Query建立联系。少量的数据经过游走能够产生够多的训练数据。例如在Session1中用户先搜索Query1后改为Query2再查询，在Session2中用户先搜索Query2后改为Query3再查询，共现的方法无法直接建立Query1和Query3的关联关系，而随机游走能够很好地解决。在改写词挖掘任务中，基于图的方法相较于直接从搜索日志挖掘词对的方法，挖掘的效率和准确率均有所提升。</p>
@@ -294,7 +294,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>通过用户Session构建改写序列^{[6]} ：通过一个Session序列作为上下文训练Embedding表征Query（即图7c）。该方法的优点是有效的利用了用户自行换词的限制条件，挖掘覆盖率和准确率都相对更高。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/72786fa3a1d449478658a7813e78456f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705840.png" />   
     </p>
 <p>图7 词向量相似词挖掘中上下文的构造方法</p>
 <p>设计不同的上下文结构得到Embedding后，为了进一步提高准确率后续的基本的步骤是：① 训练语料通过分词后，利用fastText训练Query的词向量，fastText训练时考虑了字级别的Ngram特征，可以将未登录Query的字、词Embedding进行简单求和或求平均，解决OOV（Out-Of-Vocabulary）的问题；② 在目标词表中，用词向量表示该词；③ 利用LSH，查找向量cosine相似度高于一定阈值候选词，或使用DSSM双塔模型^{[7]} ，通过有监督训练提高精度；④ XGBoost结合特征工程进一步过滤。</p>
@@ -302,7 +302,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>BERT计算语义相似度是通过句间关系下游任务完成的，方法是用特殊字符将两个句子连接成一个整体做分类，带来的问题是使用时需要两两组合造成大量冗余计算，因此不适合做语义相似度搜索或无监督聚类任务。Sentence-BERT借鉴了孪生网络模型的框架，将不同的句子输入到两个参数共享的BERT模型中，获取到每个句子的表征向量，该向量可以用于语义相似度计算，也可以用于无监督的聚类任务。</p>
 <p>我们实践的方法基本与Sentence-BERT思想大致相同，使用下图中左图的方法构造有监督的改写对训练数据，用右图的方法在不同意图类型的历史搜索Query进行向量计算。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5b23eed4262e45a8b561b823bb957973.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705330.png" />   
     </p>
 <p>图8 Sentence-BERT训练和预测结构示意图</p>
 <p>相比于前面的方法，双塔结构BERT的方法捕捉语义的能力更强，并且有监督训练的方式结合一些模型结构上的调整，能够减少各类漂移严重的Case。此外Sentence-BERT不依赖统计特征和平行语料，在任何业务上均可以比较方便的迁移和Fine-Tuning，对一些冷启动的业务场景非常友好。在此基础上利用Faiss^{[11]} 向量检索方法构建离线检索流程，能够支持在亿级别候选池中高效检索，通过该方法构建的改写候选能达到千万甚至亿级别数据量，且实测准确率较高。近几年的对比学习等方法在文本表示领域不断刷新榜单，从向量构建和向量交互方式等方面均可做持续的探索。</p>
@@ -313,7 +313,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在BERT提出之初，我们用挖掘数据和少量人工标注数据在美团场景语料预训练的MT-BERT^{[12]}做句间关系任务的两阶段Tuning。而在实践中发现在现有挖掘数据上训练得到的模型在某些Case区分度不高，如我们之前提到的“大提琴”→“小提琴”以及“葡萄酒”→“葡萄”这类字面编辑距离不大的Case。因此如何构建高质量的正负例数据是逼近BERT在查询改写任务性能上限的关键。</p>
 <p>我们首先尝试的是一种协同训练的方法，协同训练是一种半监督的方法，它关注的问题是如何在有标记数据较少时利用大量的未标记数据来改善模型性能。考虑到离线挖掘数据噪音较大，我们探索了NMT（Nature Machine Translation）和MT-BERT协同训练的方法，达到同时提高数据质量和模型质量的效果，整体系统的框架图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/37b9113d967e46d99a012b919be4a29d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705727.png" />   
     </p>
 <p>图9 NMT-BERT协同训练流程图</p>
 <p>整个协同训练的流程是：</p>
@@ -344,7 +344,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>\tilde{e} = arg \underset{e \in e^*}{\,max\,}p(e|f) = arg \underset{e \in e^*}{\,max\,}p(e|f) \frac{p(f|e)p(e)}{p(f)} = arg \underset{e \in e^*}{\,max\,}p(f|e)p(e)</p>
 <p>其中得到的两个概率p(f|e)即为概率转移模型，p(e)为语言模型。由此将改写模型拆分为两部分，结合已有的千万级别平行语料得到词对齐候选，分别训练Decode模型（概率转移模型）和语言模型。在实际的构建过程中针对遇到的Case，对模型的细节做了一些定制优化：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9cd49d4b6f6949f8b337029bcffe400d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705280.png" />   
     </p>
 <p>图10 SMT改写流程示意图</p>
 <ul>
@@ -364,7 +364,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>强化学习的过程是一个智能体（Agent）采取行动（Action）从而改变自己的状态（State）获得奖励（Reward）与环境（Environment）发生交互的循环过程。我们希望借助强化学习的思想，将预训练的NMT改写模型作为Agent，在强化学习迭代的过程中其生成的改写（Action）通过搜索系统（Environment）产生最终的曝光和点击（Reward）来指导NMT优化模型参数（State）。</p>
 <p>经过进一步调研，我们参考了Google QA系统^{[21]} 以及知乎的工作^{[22]} ，即通过强化学习的方法，把搜索系统当做一个Environment，改写模型当做Agent，从而将大搜的结果质量考虑进来。但由于美团场景下的排序与位置、用户等排序因素强相关，将整个大搜作为Environment将改写词召回向前排序的反馈机制不可借鉴，并且请求在线排序会导致训练速度慢等一系列工程问题。结合NMT实际的表现，考虑优先保障生成改写的语义相似度，使用大搜召回日志结合BERT语义判别模型做Environment，目标为原词改写词在搜索系统交互中的商户集合的交叉度和自然语义相似度。最终整体的框架图如下所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cc11216c7d594b8a8628662468328b81.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281705026.png" />   
     </p>
 <p>图11 强化学习NMT训练流程和NMT模型结构图</p>
 <p>下面详细介绍算法模块设计和流程：</p>
@@ -393,7 +393,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>首先对这类Case做归纳总结，认为模糊改写要解决的问题是：用户有明确商户意图时，因文本不匹配，或NER切分错误导致无结果、漏召回问题，这类Case用户意图明确但Query表述模糊。例如：搜索“九匠和牛烧肉”未召回POI“九匠精酿烤肉”、搜索“宁波莱斯小火车”未召回POI“宁波火车来斯主题公园”。这类问题混合了多种文本变体，难以在现有结构化召回框架内解决。</p>
 <p>确定问题的边界后，总结这类Case有以下特点：（1）Query是多变的，但商户名召回池是有限且确定的；（2）Query和商户名文本长度较短，非常适合向量化召回算法；（3）可以摆脱现有布尔检索召回框架的限制，避免简单文本匹配导致漏召回。因此我们制定了以向量召回为基础的模糊改写流程：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/05e0861dbb0946a7824c66a9df2b87e4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706360.png" />   
     </p>
 <p>图12 向量召回技术架构示意图</p>
 <p>下面会着重介绍模糊改写的核心模型以及线上服务处理流程两部分。</p>
@@ -404,7 +404,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>向量Pooling：** 根据BERT模型各层越远离下游任务泛化能力越强的特性，经过多次实验验证使用倒数第二层向量做Avg Pooling后输出的结果有更高的准确率和召回率。</p>
 <p><strong>Negative Sampling：</strong> Facebook在论文《Embedding-based Retrieval in Facebook Search》^{[23]} 中强调了负样本分布的问题。我们在负采样上有三部分：Random Negatives、Batch Negatives、Hard Sample Negatives，并增加了一组超参来调整三者的比例。Random Negatives 越多，召回商户质量较高但相关性会有所下降；Batch Negatives参考了SimCSE的做法，增加后相关性有所提升；Hard Sample Negatives是通过规则筛选了一批商户名文本上很相似的不同商户，以及加入错误的改写、纠错对，以较低的比例加入每一轮的训练中，进一步提升相关性表达。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5e7bd87a56934abfbcd7c6268ebf6f4b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706848.png" />   
     </p>
 <p>图13 向量召回双塔模型训练数据构造示意图</p>
 <p><strong>Loss函数：</strong> Loss选用了Binary Cross-Entropy的Pointwise Loss函数，原因是对于有标准商户名Label的情况下，模型预测改写商户名“绝对正确”的性能好于Pairwise预测“相对正确”的改写商户名。在实际的对比实验结果中也体现了这一点。</p>
@@ -425,7 +425,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><strong>在线服务可运维</strong> ：在线服务方面支持快速的业务接入、在线AB实验和干预等。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1a8b7c72c1f84e0790817a386c4934d8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281706435.png" />   
     </p>
 <p>图14 查询改写平台技术框架图</p>
 <h2 id="4-总结与展望">4. 总结与展望</h2>
@@ -579,6 +579,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -612,10 +616,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -994,6 +994,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

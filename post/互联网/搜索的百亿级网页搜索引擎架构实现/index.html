@@ -239,20 +239,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="基础检索">基础检索</h3>
 <p>一个用户请求过来之后，整个搜索引擎的工作流程大致如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/97ad5ade927842a7a266c7e46e11dc1c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272018553.png" />   
     </p>
 <p>首先用切词组件做分词，把 query 分成多个 word，然后多个 word 会从我们的倒排索引里面获取倒排拉链，在倒排拉链的基础上，会做求交计算来拿到所有命中的 doc list。拿到 doc list 之后，我们希望能够把优质的网页反馈给用户，这时候我们还需要做 rank 计算。rank 计算就是拿倒排里面的一些位置索引信息，包括在正排里面拿一些 rank 的属性特征信息做打分，最终会把分数比较高的 Top N 结果反馈用户。当然在前端 web 页面展示的时候，需要从正排中提取摘要信息，展示给用户。这就是整个的检索过程。</p>
 <h3 id="基础索引">基础索引</h3>
 <p>整个检索过程涉及到两个库。第一个是正排索引，另一个是倒排索引，我这里针对这两个库给大家做一个简单的介绍。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4327323e1c4642d28b7d647b24eb6451.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272018456.png" />   
     </p>
 <p>什么是正排索引？我们从互联网上抓取的网页包含很多信息，包括网页头信息、标题、正文、标签等。我们首先从网页中把文章的正文以及文章相关的特征提取出来，当然也输入一些挖掘的信息，然后做一些分词处理。这个过程，我们是把整个的网页生成了两部分数据，第一部分就是属性，所谓属性就是针对这些网站的一些特征，比如说网站分类信息、网站 rank 相关信息等。第二个是针对的正文的分词的结果。</p>
 <p>整个的正排索引，就是以 doc 为 key，以属性和 word 列表为 value 的一种结构。因为用户在检索时是以 word 为 key 来做检索的，我们希望能够把正排索引转化成一种结构，来适应用户的检索，所以我们把正排索引转化成了以 word 为 key，以 doclist 为 value 的一种结构，这个结构能够给用户提供高效的检索。这就是我们所谓的倒排索引。</p>
 <h3 id="检索模型">检索模型</h3>
 <p>上面简单地介绍了搜索引擎的工作过程及基本概念，那下面我们讲一下，站在用户检索的角度来说，如何来设计一个搜索引擎，它的检索模型是什么样的？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b272f8306806462ab6af7b9c9b566a5a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272018463.png" />   
     </p>
 <h4 id="1-query-分析">1 query 分析</h4>
 <p>首先要做的就是针对用户输入的 query 进行 query 分析。query 分析基本包涵三点：确定检索的粒度、Term 属性分析、Query 需求分析。</p>
@@ -265,10 +265,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>Query 需求分析</strong></p>
 <p>针对 query 本身我们要分析用户的意图是什么？当然也包括一些时效性的特征。举个例子，比如说“非诚勿扰”这个词，它有电影也有综艺节目。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ebeccc58e5ff4a84aae7d81730f8be44.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272018753.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/41881209748948cd89730a42d67fc0b5.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272018245.png" />   
     </p>
 <p>如果说能够分析出用户本身他是想看电影还是看综艺节目，我们就会给用户反馈一个更优质的结果，来满足用户的需求。</p>
 <p>query 分析这里我主要做了一个简单的介绍，query 分析涉及到的一些算法的东西，可能以后有机会再具体分享，这里先不做介绍。</p>
@@ -290,7 +290,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="02-百亿级网页计算关键技术">02 百亿级网页计算关键技术</h2>
 <p>下面我介绍一下 360 搜索这种百亿级网页的搜索引擎的关键技术。我这里主要介绍离线建库和在线检索两个核心模块。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/df05175cd59d4355b6a0f5e11f7c9aa1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272018114.png" />   
     </p>
 <h3 id="离线建库和在线检索">离线建库和在线检索</h3>
 <h4 id="1-离线建库">1 离线建库</h4>
@@ -310,7 +310,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="架构">架构</h3>
 <p>我会通过下面这个图给大家大概讲解一下搜索引擎整体架构的流程。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d0f4b16ca6534d39817d56bd21e62bc4.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272018535.png" />   
     </p>
 <p>首先我们先从官网上抓取网页，抓取的网页会存到基于 Hbase 的网页库里。这个是一个万亿量级的网页库，下一步要做的工作是质量筛选，然后我们会把通过质量筛选的网页放到我们的索引网页库中，所有的建库，包括 rank 计算，以及所有与搜索引擎相关的部分都是依赖于下边的网页索引库进行的。我们在建索引的时候，会做一个分片处理，分片的机制采用了区间划分。那么区间划分基本上我们就是用 md5 作为 Key，本身 md5 是 64 位的整数，按照这 64 位整数的范围作为一个区间划分。从 url 转换上 md5 它本身是均匀分布的，那我们分片按照这个区间划分也会是均匀的，实际上我们划分的各个索引节点的量级也是均等的。进行分片之后，我们会针对每个分片基于 Map-reduce 来跑，生成索引，索引主要包括上面讲的正排索引和倒排索引。然后会把索引推送到下面的在线服务推荐，每个在线服务推荐负责一个索引库。这里可以看到，我们根据网页的类型对索引库也做了一个划分，比如说重要网页索引库和普通网页索引库。</p>
 <p>还有一个问题，就是我们每天的新增的网站，超过我们实时的网页怎么办？这种情况我们会走另外一个流程，在网页抓取过来之后，也会有一个质量筛选，这个质量筛选有 2 个流程，第一个是实时计算，通过我们刚才讲到的 Storm 集群，包括我们目前公司内部的 Titan 集群，进行实时计算来生成实时性的索引。第二个是我们会把每天更新的这些数据做批量计算，基于 Map-reduce 生成一个相互索引，这样的话在时间上能够覆盖到所有的时间点。</p>
@@ -320,13 +320,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我先讲一下网页索引组织模式，也就是正排索引和倒排索引是怎么组织的。</p>
 <h3 id="正排索引">正排索引</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3b414573a5794f5db33a84419579f746.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272018754.png" />   
     </p>
 <p>我们要用正排索引，首先要考虑的第一个问题，就是如何支持独立更新？为什么要做独立更新，是因为我们 rank 的同学在做任何数据挖掘，包括一些特征计算的时候，每天都有新的迭代出现，这样的话他就需要正排索引能够支持这种天级的更新，甚至支持小时级的更新。所以我们希望正排索引能够设计得足够简单，也足够独立。我们这块所有的设计依赖的主要是每个索引库的 url 列表。url 列表中它的位置就代表 doc id，数据属性的存储会按照固定长度的数据块存放在数据文件中。数据块的下方位置就是它对应的 doc id 信息。这样在更新和查找的过程中，我们只需要知道它的 doc id，就很容易找到它所在的位置。这样的好处第一是容易生成索引文件；第二个是可以按照自己的要求进行更新。</p>
 <p>我们还要考虑另外一个问题，就是有一些算法资源挖出来的特征，并不是包含了所有的信息。比如说有一些团购网站、美食介绍网站里面，会有一些位置信息，但这些是稀疏的信息，不可能按照这种固定长度，每个 url 都会分配一个数据块，这样会造成大量的资源浪费。所以我们这里会针对这种稀疏的属性做一个变长的数据块，但是它在结构上发生了变化，它有一个头信息。头信息主要是用来存储它在数据文件里面的位置信息，整个头信息和 url 列表是一 一对应的，本身它里面存的就是属性信息，这样的话我们再通过他的 doc id 直接找到他的偏移，然后通过偏移很容易找到它的属性。</p>
 <h3 id="倒排索引">倒排索引</h3>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/19e7a333d1fd4d4982d9f83926991e71.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272018247.png" />   
     </p>
 <p>倒排索引我们也需要考虑两个问题，第一个问题，从正排索引转化为倒排，数据量会剧增，因为我们面向的是一个 word 对应的 doc list，doc list 重复度非常高，这样的话我们就需要针对倒排索引进行一个压缩。</p>
 <p>压缩的话我们采用的原则基本是压缩比例越多越好；解压时越快越好。这就需要对整个倒排表做一个结构化的设计。我们采取的做法是把整个倒排表划分成多个块，针对每一个块通过一些压缩算法做压缩。整个倒排表划分成块之后，检索的时候，也需要按照这种块的模式来进行解压，所以只要解压到的块能够满足用户的需求，那下面的块就不用再解压了，这样的话就能减少解压的成本。</p>
@@ -335,7 +335,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="求交模型">求交模型</h3>
 <p>我们下面讲一下，在检索的过程中，求交计算是怎么做的？</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6f2b241c9f954a57ac2c01cf8259bec9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272018397.png" />   
     </p>
 <p>求交是检索一个非常核心的模块，也是对检索性能提出非常大要求的一个模块。我简单地举一个例子来给大家讲一下整个求交模块的设计。</p>
 <p>比如用户 query 是由三个词来组成的，在求交过程中，首先要从这三个 word 中选出拉链最短的一个 word。因为用最短的拉链去和其他拉链求交，会减少求交次数。</p>
@@ -468,6 +468,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -501,10 +505,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -883,6 +883,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

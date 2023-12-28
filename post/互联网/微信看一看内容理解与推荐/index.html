@@ -238,7 +238,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>结合微信用户的内容消费需求，以业务目标为导向，我们的推荐系统从基于属性召回、到协同&amp;社交召回、再到深度模型召回进行了演进，深度模型涵盖了序列模型、双塔模型、混合模型、图模型，最终形成了多种召回并列、多路模型共同作用的看一看内容召回系统。如果把推荐系统中工程服务比作骨骼，那么推荐模型可以比作肌肉，还需要内容理解作为血液，纵向贯穿整个推荐系统，从内容库、到召回、再到排序和画像，源源不断的提升系统的推荐精度，本文将着重介绍看一看内容理解平台及应用。</p>
 <p>看一看接入了非常多合作方的数据作为内容源。由于接入数据源较多，各家数据从内容、质量、品类等差异性比较大。看一看平台方会对数据做“归一化”操作，然后应用于推荐系统线上部分。内容理解定义：对接各种外部图文等内容，对接入内容做业务级内容多维基础理解，同时进行外部标签与自有标签体系对齐，完成应用级内容打标；反馈至下游应用方：用户需求系统，召回策略，召回模型，排序/混排等使用；同时，在业务数据滚动与迭代中修正数据刻画精度与效果，逐步贴合与提升业务线效果；我们将内容画像定义为两个大维度：通过内容本身来理解内容，通过行为反馈来理解内容。前者主要针对内容抽取静态属性标签；后者，通过行为积累的后验数据，统计，或模型预估内容的知识，倾向性，投放目标，以及抽象表达。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0d3f4af0d6464b8c986bba6857242dea.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271908030.png" />   
     </p>
 <p>内容画像定义</p>
 <p>内容理解主要包括文本理解、多媒体理解、内容倾向性、投放目标预估，主要应用在内容试探效率提升，推荐分发模型的特征泛化，多场景的内容库构建，推荐相关性召回和语义排序以及封面图优选创意，旨在提升精选、在看、看一看+核心业务指标。同时，我们在工程同学的大力支持下也将内容理解技术服务化/工具化，一方面支持业务快速扩展，另一方面对外部门提供内容理解支持。</p>
@@ -249,52 +249,52 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>● 2.1.1 LSTM</strong></p>
 <p>在自然语言处理领域中，文本分类任务相较于文本抽取和摘要等任务更容易获得大量标注数据。因此在文本分类领域中深度学习相较于传统方法更容易获得比较好的效果。前期我们采用了自然语言处理中常用的LSTM算法进行了准召率的摸底试验。但LSTM具有训练、预测环节无法并行等缺点，伴随着推荐内容的体量增大，限制了迭代的效率。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c0106d926d0b4822add0c0a0d6229584.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271908611.webp" />   
     </p>
 <p>● <strong>2.1.2 TextCNN</strong></p>
 <p>与LSTM相比，TextCNN使用了卷积 + 最大池化这两个在图像领域非常成功的组合，以训练速度快，效果好等优点一段时间内在工业界具有广泛的应用。其中每个卷积核在整个句子长度上滑动，得到n个激活值，然后最大池化层在每一个卷积核输出的特征值列向量取最大值来供后级分类器作为分类的依据。但同时池化层也丢失了结构信息，因此很难去发现文本中的转折关系等复杂模式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/61bde459063847b78c5810208814db43.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271908395.webp" />   
     </p>
 <p>● <strong>2.1.3fasttext</strong></p>
 <p>为解决LSTM模型优化慢的问题，我们采用了实现较快且效率较高的浅层模型fasttext。它的优点也非常明显，在文本分类任务中，fastText往往能取得和深度网络相媲美的精度，却在训练时间上比深度网络快许多数量级。</p>
 <p>其中x1,x2,&hellip;,xN-1,xNx1,x2,&hellip;,xN-1,xN表示一个文本中的n-gram向量，每个特征是词向量的平均值。与cbow模型相似，此处用全部的n-gram去预测指定类别。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2ba6bacd6a2a41d995a8d7bbaf6b9318.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271908995.webp" />   
     </p>
 <p>● <strong>2.1.4 BERT</strong></p>
 <p>BERT在多项NLP任务中创下了优异的成绩，因此我们将文本分类算法优化至BERT finetune模型里，解决通用文本表示训练成本高等问题，在PreTrain Model（BERT-Base, Chinese）的基础上，通过推荐的特性数据进行finetune，得到基于BERT的finetune模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/36da7fb1254443c598951866cfc6dca9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909647.webp" />   
     </p>
 <p>● <strong>2.1.5 ensemble model</strong></p>
 <p>在已有的上述模型基础之上，我们对各已有模型以及合作团队的模型，进行了ensemble model优化，并对原始内容输入进行了词扩展补全等内容扩充特征工程，更近一步的增强了模型的鲁棒性，并针对不同场景的特性进行组合。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4b7c13b36cda424e88fa3f50c4d9dce4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909256.webp" />   
     </p>
 <h3 id="22-推荐文本标签"><strong>2.2 推荐文本标签</strong></h3>
 <p>在推荐中，标签被定义为能够代表文章语义的最重要的关键词，并且适合用于用户需求和item profile的匹配项，相比于分类和topic，是更细粒度的语义。标签可以认为是推荐系统的“血液”，存在于推荐系统各个环节，内容画像维度、用户需求维度、召回模型特征、排序模型特征、多样性打散等等。跟随业务的快速发展，我们也从早期简单的无监督算法过渡到有监督，最后到深度模型。</p>
 <p>● <strong>2.2.1 TF IDF</strong></p>
 <p>前期为了快速支持业务，我们使用无监督投入产出比很高的方式，计算文档中每个token的TFIDF值，然后取top作为文档的tag。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0176471c27b84cdbbb0d6a6d34961913.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909108.webp" />   
     </p>
 <p>其中ni,j表示tokeni在文档j中出现的个数，|D|表示语料中文章个数，
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c8a9c7204459480186ee0c5a1be92f3c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909543.webp" />   
      表示包含tokeni的文档个数。某一特定文件内的高词语频率，以及该词语在整个文件集合中的低文件频率，可以产生出高权重的tf-idf。因此，tf-idf倾向于过滤掉常见的词语，保留重要的词语。TFIDF优点是基于统计方式，易于实现，缺点是未考虑词与词、词和文档之间的关系。</p>
 <p>● <strong>2.2.2 基于doc和tag语义排序</strong></p>
 <p>为了解决TFIDF存在的问题，考虑文档和token之间的关系，我们使用token与文章的LDA语义相关性排序，从而筛选出有意义的、满足文章主题信息的Tag，提高Tag的准确率。主要做法是用已有的topicModel inference 文章的topic分布和候选token的topic分布，然后计算文章topic分布和token topic分布的cos相似度，选取top token作为tag。后来将LDA升级到word2vec embeddding再到doc2vedc，效果上有提升。但该类方法可以考虑到文档和token之间的相关性，但是还是未考虑token之间的相关性，仍然是无监督方法，优化空间小且很多badcase不可控。</p>
 <p>● <strong>2.2.3 TextRank</strong></p>
 <p>TextRank由PageRank演变而来。PageRank用于Google的网页排名，通过互联网中的超链接关系来确定一个网页的排名，其公式是通过一种有向图和投票的思想来设计的，如下。直观来理解就是说网页Vi的rank值完全取决于指向它的网页，这些网页的数量越多，Vi的rank值越大，这些网页所指向的别的网页的数量越多，就代表Vi对于它们而言重要程度越低，则Vi的rank值就越小。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8e3d088d0a3a4a8dbc579d7b56adf498.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909195.webp" />   
     </p>
 <p>对于文章中的关键词提取也是类似的。我们将每个词语看成是网页，然后预先设置一个大小为m的窗口，从头遍历这篇文章，在同一个窗口中的任意两个词之间都连一条边，通常情况下，这里我们使用无向无权边(textrank的作者通过实验表明无向图的效果较好)。画出图过后，我们对每个词Vi赋予一个初值S0(Vi)，然后按照公式进行迭代计算直至收敛即可。最终我们选择rank值的topN作为我们的Tag。相比于TFIDF，TextRank考虑了词与词、词与文章之间的相关性，但是TextRank没有利用整个语料的信息，不适合短文本抽取，且计算复杂度比较高。</p>
 <p>● <strong>2.2.4 CRF</strong></p>
 <p>以上是无监督的方法的尝试，后来随着训练数据的积累，我们切换到了有监督模型上，tag抽取是一种典型的序列标注任务。我们尝试了经典的CRF（条件随机场）模型，特征包括字+词性+分词边界+特征词+词库，词库包括人名，地名，机构，影视，小说，音乐，医疗，网络舆情热词等词库。特征收集好之后需要配置特征模版，特征模版需要配置同一个特征不同位置组合，同一个位置不同特征组合，不同位置不同特征组合，特征模版70+。虽然CRF相比无监督方式效果比较好，但是特征工程复杂，面向新的数据源需要大量工作调节特征。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0d3f20b058b6428b9a996236b10a8918.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909752.webp" />   
     </p>
 <p><strong>特征举例：</strong></p>
 <p>▶️ 如果当前词词性=名词 且 是否词库=1 且 标签=1，我们让t1=1否则t1=0，如果权重λ1越大，模型越倾向把词库中的词当成tag</p>
@@ -307,31 +307,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>避免复杂的特征工程，但存在解释性差的问题。</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ee8a53192b704288ad32e49506236019.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909442.webp" />   
     </p>
 <p>● <strong>2.2.6 深度模型升级</strong></p>
 <p>在经典的LSTM-CRF基础上，我们进行了模型的升级，模型整体结构变为Deep And Wide 结构，在原有的基础上增加 Wide部分，用于保持输入的低阶表示，增强模型的“记忆”能力，此处验证了TFIDF/postion/POS特征，只有TFIDF特征有效，在深度部分增加了self-attention层，学习token之间重要程度，与最终目标一致，self-attention的计算方法如下。其中Value是双向LSTM的输出， Query和Key相同，Key是不同于value的参数矩阵，大小是#corpus_uniq_tokens * attention_key_dim</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f82e8aafee5c45e5af5215e9e430ed8e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909197.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1b1396c134d54c2f8b11f32682cffb99.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909361.webp" />   
     </p>
 <p>后续将尝试wide部分引入更多知识，比如词库特征。</p>
 <h3 id="23-推荐entity识别">2.3 推荐entity识别</h3>
 <p>● <strong>2.3.1基于实体库</strong></p>
 <p>构建推荐系统初期，为了快速实现，我们基于实体库+AC匹配的方式进行实体识别，实体库使用CRF进行新实体发现，频率大于一定的实体再由人工审核进入实体库，这种方式往往忽略了上下文语境，容易引入badcase，对于新实体，识别并线上生效有所延迟。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6fcfde1a790842b0a8208debc2424687.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909023.webp" />   
     </p>
 <p>● <strong>2.3.2 序列标注模型</strong></p>
 <p>我们将推荐实体识别算法从匹配升级到BiLSTM-CRF with Attention架构的多类别实体联合识别模型。模型主要采用字、词、词性三种特征，在BiLSTM层与CRF层间引入multi-head self-attention层，在多个不同子空间捕获上下文相关信息，筛选不同类别实体的重要特征，增强特征对实体类别分辨能力，进而提升模型识别效果。最后使用CRF进行标签序列建模，利用全局信息，将标签转移矩阵作为标签序列的先验知识，避免结果中不合理的标签序列。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1cf6543d27ba48429f0d077c0831beed.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909858.webp" />   
     </p>
 <p>近期，我们又将实体识别算法升级到了BERT，解决训练数据难以获取导致的精度不高的问题，目前支持的实体类型包含人名、组织、地名、车、游戏、视频、书籍、音乐、食品、旅游景点、化妆品/服饰、疾病/养生、古董古玩、军事共14类实体。在PreTrain Model（BERT-Base, Chinese）的基础上，通过多类型实体标注数据进行finetune，得到支持多实体的实体识别模型。同时我们还尝试了BERT和LSTM-CRF的组合结构，目前来看，BERT效果最优。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/2e4d82e900764bd5abd240e5d3e226d2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909621.webp" />   
     </p>
 <p>Rec-NER多模型对比</p>
 <h3 id="24-标签映射"><strong>2.4 标签映射</strong></h3>
@@ -345,7 +345,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>通过知识图谱推理来得到内外部标签的关系；</li>
 </ol>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/95951dc0b7974071afdb35ce74906ed8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909656.webp" />   
     </p>
 <p><strong>Tag2Tag示例：</strong></p>
 <p>外部视频：印度的自制椰子钓鱼装置，还真的有几把刷子！</p>
@@ -355,19 +355,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>● <strong>2.4.2 Context2Tag</strong></p>
 <p>基于Tag2Tag的方式，由于没有考虑到context信息，如标题、类目，容易产生歧义，导致badcase出现，所以更好的思路是利用双塔模型来建模，将外部标题和外部tag，统一编码到左端，看一看Tag编码到右端，利用深度语义匹配进行Tag映射。训练时使用看一看标题和Tag构造训练数据，看一看标题放在左端，将看一看Tag拆成两部分，N-1个放在左端，剩下一个放在右端。特征使用字、分词特征，能从看一看数据泛化到外部数据。预测时首先将内部tag embedding部署到knn服务中，然后对于外部文章和tag，用左端前馈生成文章表示，然后去knn服务中召回最相关的内部tag。其中，引入title attention net来计算外部标签重要度，代替对外部标签avg pool，上述case中，使得“捕鱼”权重更大，更容易找到与核心tag相关的内部tag。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c84077a8da6a4faa91bb7dc3bba12b60.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909489.webp" />   
     </p>
 <h3 id="25-标签聚合"><strong>2.5 标签聚合</strong></h3>
 <p>● <strong>2.5.1 topic</strong></p>
 <p>我们使用lightlda构建了1千/1万/10万不同维度的topic模型，来解决分类和tag语义粒度跨度太大问题，同时我们还区分长期topic和时效topic，时效topic用于快速发现热点事件以及提升其分发效率。我们构建了面向新闻的实时topic理解模型，支持小时级全量topic和分钟级增量topic理解，能够快速捕捉热点及进行跟进，模型流程如下。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/81b262bae9334fd2b1137b78eebc9aff.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909316.webp" />   
     </p>
 <p>面向新闻的实时topic理解</p>
 <p>● <strong>2.5.2Tag Cluster</strong></p>
 <p>由于单一Tag拉取文章容易漂移，我们对Tag进行聚合形成更具象的语义内容。比如{王XX，马XX，离婚}，用户感兴趣的不是王XX或马XX，而是王XX离婚事件。具体的Tag聚合方案，首先我们对文章Tag进行频繁项挖掘，并对频繁项进行层次聚类得到相近的语义内容。然后对类簇内Tag进行上位词挖掘与排序，构建类簇“title”。为了保证类簇的长期稳定标识，我们用类簇上位词的md5作为类簇ID。推荐方案类似Topic，分别为用户需求和文章打标Tag cluster ID，然后根据用户兴趣类簇ID拉取对应类簇内文章。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://mmbiz.qpic.cn/mmbiz_jpg/0jZVszE9o7YoBvEmNclgDYPxYSaWnDbFCLoA52JrPLLShwGJre9aMrOeWX6BXsj1WRDALJdQqBXPwdkZniclMtg/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909277.webp" />   
     </p>
 <h3 id="26-标签排序"><strong>2.6 标签排序</strong></h3>
 <p>有了文本标签、文本entity、多媒体标签、映射标签及人工标签后，我们构建了标签排序模型。目前推荐标签排序中文本建模采用自研的双向lstm变种模型，由于方法依赖大量样本，同时自动构建的样本质量较低，所以改为基于BERT的方式。将标题和标签作为sentence pair输入给BERT模型，使用CLS作为最终的排序分。主要优化点：</p>
@@ -376,16 +376,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>字符紧密度向量：针对识别结果的边界不准确和字符预训练模型的不足，引入基于图模型和词库预训练得到字符紧密度表示；</p>
 <p>全局结构信息：模型引入全局结构信息，比如字符紧密度，设计不同的输入方式和结构。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://mmbiz.qpic.cn/mmbiz_png/0jZVszE9o7agmHgXvEkSicmUYEhzJyBpByviaicVUMFeia9PFRnSMprsLrJLj7LnRIm770AWgsSMpGCalEdsLyvoNg/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909243.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f6f5411b20f9407ab49d557d6a32aeab.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909770.webp" />   
     </p>
 <p>基于BERT的标签排序模型</p>
 <h3 id="27-关系图谱"><strong>2.7 关系图谱</strong></h3>
 <p>知识图谱，是结构化的语义知识库，用于迅速描述物理世界中的概念及其相互关系，通过将数据粒度从document级别降到data级别，聚合大量知识，从而实现知识的快速响应和推理。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e346f972ecbf4500909262a8e4282d67.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909633.webp" />   
     </p>
 <p>在看一看系统内，内容画像会将原关系信息整合，并构建业务可应用的关系知识体系；知识图谱已提供服务：看一看推理型推荐逻辑，看一看画像系统，看一看排序特征等；除此之外，业务中积累的关系数据，可用于构建知识的关系网，在此基础上输出知识表示，抽象后的知识图谱可以作为语义理解的载体，应用于任何具有文本搜索，识别，推荐的场景；</p>
 <p>知识图谱的基本单位，便是“实体(E) - 关系(R) - 实体(E)”构成的三元组，这也是知识图谱的核心。</p>
@@ -435,14 +435,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>图像分类是对于一张静态图片给定它属于什么样的类别。对于视频来说，增加了时间上的维度，其包含的语义信息更加丰富。根据时长，一般会把视频划分成长视频（长达几十分钟到数小时）和短小视频（几秒到几分钟）。由于长视频包含的内容信息太多，很难直接做分类。通常说的视频分类是指对短小视频进行内容层面上的分类。学术界相近的任务如动作识别，其目标就是把一个短视频划分到具体的某个行为动作。</p>
 <p>在微信看一看+中，视频分类是指赋予某个视频唯一主题类别，一般包括二级或三级，二级分类从属于一级分类，所有短、小视频有且只有一个分类。例如：下面例子的分类为：搞笑，表演秀。一级分类为搞笑，二级分类为表演秀，二级分类从属于一级分类。比如，搞笑一级分类，其二级分类包括：搞笑段子、搞笑表演秀、搞笑糗事、搞笑其他。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/930538c832cf4747ac45367284bdb64e.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909619.webp" />   
     </p>
 <p>视频分类示例</p>
 <p>● <strong>3.1.2视频分类算法</strong></p>
 <p>视频分类算法在学术界经过了长时间的发展。得益于近些年深度学习的快速发展和机器性能的大幅提升，视频分类主流算法已经从传统手工设计特征变成端到端学习的方法。最简单的方法是，用2D CNN抽取视频里面每一帧的特征，然后将所有帧的特征平均池化到一起变成视频特征进行分类[Karpathy et al., 2014]。这种方法带来的问题是，视频包含的帧数非常多，每一帧都抽特征会有非常大的计算开销，并且平均池化没有捕捉到视频的时序变化信息。</p>
 <p>在此基础上，有一系列的算法来解决这两个问题，其中代表作有TSN[Wang et al.,2016]，用基于片段采样的方法来解决稠密抽帧计算开销大的问题；有用NetVLAD[Miech et al., 2017]等用来聚合时序上多帧的信息。更直接方法是使用3D CNN进行视频分类，比如I3D[Carreira and Zisserman, 2017]将Inception里面的2d-conv直接展开成3d-conv来处理整个视频，Non-Local[Wang et al., 2018]将self-attention加入到3D ResNet里面学习时空的全局信息，SlowFast[Feichtenhofer et al., 2019]引入slow和fast两个不同时间分辨率的分支来学习视频的静态和动态变化。在微信看一看+的视频分类中，我们尝试了多种2D模型和SlowFast-ResNet50等模型，考虑到计算代价和模型性能的平衡，我们选择了2D的TSN-ResNet50为基础模型，并且引入了自研的video shuffle模块[Ma et al., 2019]和NetVLAD模块，来提升性能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bf84bae6c96f4c699439b96b3d277de9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909412.webp" />   
     </p>
 <p>视频分类里的 Video Shuffle 操作</p>
 <p>整个视频分类的pipeline可以分为以下几步:</p>
@@ -456,7 +456,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>● <strong>3.2.1视频标签概念</strong></p>
 <p>上文介绍了视频分类，是给短视频一个确切的单一类别。而视频标签是对视频不同维度的描述，一般有多个。以图 8 为例，该短视频一共打了 11 个标签，描述了该视频不同维度的信息。比如加字幕是视频的质量维度，新型冠状病毒是描述整个视频内容在讲什么，新闻现场描述的是场景，民生新闻描述的是类型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8da831a707714068821db90c9fd14980.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909881.webp" />   
     </p>
 <p>视频标签示例</p>
 <p>● <strong>3.2.2 视频标签算法</strong></p>
@@ -464,31 +464,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>▶️ 视频多标签模块</p>
 <p>视频多标签预测模型由提取视频画面特征的骨干网络、可学习的时序池化层、考虑上下文的非线性网络单元门和以多标签分类为目标的分类器组成，具体结构如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6bfb41c318e644ab90d4cf0cff1ae871.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909684.webp" />   
     </p>
 <p>视频多标签算法结构</p>
 <p>骨干网络采用的卷积神经网络结构是残差网络ResNet50，这是在学术界和工业界均有广泛应用的网络结构，其中引入的恒等近路连接结构有效解决了深层网络模型难以训练的问题，能在大大增加网络深度的同时获得高精准度。时序池化层通过学习得到的参数将视频输入得到的多帧画面特征图组成一个单独表达，将每幅特征图与码本聚类中心的差值通过attention和activation层做累加，再通过全连接层得到整个视频的降维描述特征向量。其后该特征向量被送入Context Gating层[Miech et al., 2017]，捕捉其特征关联信息并重新调整权重，最后再接入多标签分类器。训练采用的视频标签数据基于人工标注的视频标签对生成，选取标注数据中的高频标签，并根据标签维度筛除部分视觉不可识别标签，组成标签词汇表。</p>
 <p>训练过程中通过加入对低频次标签数据进行过采样等平衡数据的方法，提升低频标签的召回率。同时模型采用Partial Multilable Loss损失函数进行训练，有效解决了数据标注不完备带来的部分标签缺失的问题。模型预测标签时，则先通过Sigmoid层获得每个标签的预测分数，再结合标签层级依赖关系通过Hierarchical Softmax层[Mohammed et al., 2018]对标签预测分数进行修正，选取分数超过阈值的标签作为最后的预测结果。该多标签模型可以对于任意视频输出与视频内容相关的高精度、多样化、全面的标签。</p>
 <p>▶️ 明星人脸识别模块</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/db37032a7bea4cdda2eee0d182e5c0df.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909469.webp" />   
     </p>
 <p>明星识别流程图</p>
 <p>明星脸识别模块包含人脸检测，人脸关键点检测，人脸对齐，人脸特征，人脸聚类，人脸质量，人脸搜索和投票几个模块。</p>
 <p>1.检测部分使用 RetinaFace [Deng et al., 2019]，RetinaFace 是 Single-stage 的人脸检测方法，能保证检测的速度，并且采用 FPN+Context Module 的方式，提升对小人脸的召回和整体检测精度。另外，加入关键点回归分支一并训练。Multi-Task 的训练方式使得人脸定位和关键点回归相互促进。最后使得检测精度达到 State-of-the-art。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/77d2c6201d344b71a570a76aa411e738.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909180.webp" />   
     </p>
 <p>RetinaFace 人脸检测模块</p>
 <p>2.在获得人脸框后，通过 Mobilenet V2 对人脸关键点进行精细化的检测，我们在 Mobilenet V2 中加入了 SE-layer，提升关键点的精度。通过关键点将人脸对齐到统一的模板，并送入 Face Embedding 模块提取每个人脸的特征。</p>
 <p>3.Face Embedding 模块，我们采用的是 ResNet-50 的经典网络，加上 SE-layer。我们通过对 AdaCos [Zhang et al., 2019] 算法进行改进，针对不同场景的人脸数据和样本难易程度，自适应的调整 Scale 和 Margin 参数，加速训练，同时，使模型收敛到最优点。</p>
 <p>4.在获得整个视频人脸特征后，对所有人脸进行聚类，并选优。通过 C-FAN [Gong et al., 2019] 算法对人脸进行选优。C-FAN 算法本意是为了对人脸集的特征进行融合的算法。我们在实验过程中发现，训练后的网络对不同质量的人脸，能给出不同指标。通过该指标，我们能对人脸进行选优。通过 C-FAN 我们能选出正脸，清晰的人脸，用于后续的识别。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/65d0a285b7584166bc6f631883c5df4b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909913.webp" />   
     </p>
 <p>C-FAN 算法原理</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3f3a459eca1b4126992902a8e2255fcb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909698.webp" />   
     </p>
 <p>人脸质量效果图</p>
 <p>5.同前一步的聚类和选优，我们获得视频里每个人物的优质人脸，并进入人脸识别阶段。识别阶段，我们创造性的采用 2 次搜索的方式来提高准确率。其中第 1 次搜索，使用视频人脸检索库内的种子 ID。具体来说，对于库内每个 ID，其所有图片的特征求平均，作为这个 ID 的种子特征。第 1 次搜索，对于某个视频人脸，在种子人脸库内搜索得到 Top K 个种子 ID，Top K 取 50，从而初步确定 ID 的检索范围。第 2 次搜索，使用视频人脸，在第 1 次搜索得到的 TopK ID 的所有图片里面进行检索。并通过投票确定得分最高的 ID，作为该模块的输出。</p>
@@ -503,19 +503,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>人 <strong>脸模态</strong>：短、小视频场景的一大特点是以人为中心，人物是视频内容中非常重要的部分。因此，我们将视频中人脸 Embeddding 部分融合进视频 Embedding。具体做法见 2.2.2.2 节明星人脸识别模块对应的介绍，在此不赘述。实践中发现，加入人脸 Embedding 后，可以找到同一个人的不同视频。</p>
 <p>\<em>\</em> OCR 模态**：视频中有丰富的文本信息，我们首先用 OCR 算法识别出视频中的 OCR 文字，之后训练文本模型，得到视频中 OCR 的 Embedding。识别 OCR 见第 2.4 节，在此不赘述。文本模型使用 BERT [Devlin et al, 2019] 进行训练。BERT 基于双向的 Transformer 结构，在预训练阶段捕获词语和句子级别的表示。BERT 在 2018 年发表时，通过预训练和微调在 11 项 NLP 任务中获得突出性能。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/257e043ca8ef44579b26fb4406ab8a6b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909557.webp" />   
     </p>
 <p>BERT 训练过程图</p>
 <p>\<em>\</em> 音频模态**：我们使用 VGGish 提取音频的 Embedding特征 [Abu-El-Haija et al, 2016]。VGGish 是从 AudioSet 数据集训练得到的音频模型，其产生 128 维的 Embedding 特征。VGGish 的网络结构类似于 VGGNet 的配置 A，有 11 层带权重的层。区别在于：(1). 输入是 96 × 64 大小的音频中得到的对数梅尔谱。(2). 去除最后一组卷积和汇合组，因此，相比于原来 VGG 模型的五组卷积，VGGish 只有四组。(3). 最后的全连接层由 1000 改为 128，这个的 128 维特征输出作为音频 Embedding。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6cea2702cf8b487c8392352228b97daf.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909509.webp" />   
     </p>
 <p>图 16：音频模态中使用的对数梅尔谱（Log Mel Spectrum）</p>
 <p>关于特征融合部分，特征融合常用的有以下几种方式：直接拼接（Concatenation）、乘积（包括内积和外积）、加权平均、Bi-Interaction 等。这里我们采用最直接的拼接方法。</p>
 <p><strong>3.3.2.2 度量学习</strong></p>
 <p>度量学习有两大类基本思路。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3e8ef32bacd941e6bf916e124d37aa96.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909205.webp" />   
     </p>
 <p>图 17：度量学习训练流程</p>
 <p>一种思路是基于 Contrastive Loss 或 Triplet Loss。其基本思想是：两个具有同样类别的视频，它们在 Embedding 空间里距离很近。两个具有不同类别的视频，他们在 Embedding 空间里距离很远。Triplet Loss [Schroff et al., 2015] 是三元组输入，我们希望 Anchor 与负样本直接的距离，以一定间隔（Margin）大于与正样本之间的距离。使用 Triplet Loss 通常会配合 OHEM（Online Hard Example Mining）[Shrivastava et al., 2016] 等训练技巧。但是面对千万级别的视频数据量，使用 Triplet Loss 会产生很庞大的训练开销，收敛会比较慢。</p>
@@ -527,21 +527,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>短、小视频内容十分热门，每天都会产生大量的新增视频。而这些新增视频中，一部分是用户上传的原创视频内容，另一部分是搬运平台已有的内容。搬运会导致平台中同时存在内容一样的视频，这对视频原作者是很大的打击。即使内容完全一样，但视频帧率、分辨率仍有差异，依靠视频文件 MD5SUM 无法进行判断。</p>
 <p>通过视频 Embeding，可以帮助平台发现内容相同的视频，从而可以帮助平台进行去重，保留帧率、分辨率较高的视频。打击搬运，避免了对用户重复推荐同一视频。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d6c8ee7e62b9466d888e60793a117259.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909982.webp" />   
     </p>
 <p>视频 Embedding 用于视频去重</p>
 <p>▶️ <strong>3.3.3.3 视频标签</strong></p>
 <p>在第 3.2 节介绍了视频标签预测算法。在短、小视频场景下，该算法会面临一些挑战。比如，短、小视频内容更新快、流行期短，算法需要具备快速扩展识别新标签的能力。另一方面，短、小视频内容以人为中心，内容相对比较主观，传统计算机视觉算法（如分类、检测等）难以突破。</p>
 <p>利用视频 Embedding 也可以进行视频标签预测。具体过程如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6cb1521fb5e64c44b456733d5730d947.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271909816.webp" />   
     </p>
 <p>视频 Embedding 用于视频标签预测流程</p>
 <p><strong>1.提取待预测的视频（Query）的 Embedding 特征</strong>。除了待预测视频外，我们已经有了很多的历史有标注视频（DB），我们提取这些标注视频的特征，构建千万视频量级的特征库；</p>
 <p><strong>2.最近邻检索</strong>。对 Query 视频的 Embedding 在 DB 的 Embedding 特征库中进行最近邻检索，找到 Query 视频的相似视频；</p>
 <p><strong>3.利用找到的相似视频的标注的标签</strong>，投票对 Query 视频进行预测。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f2b9f54a9ad945e0b267c21775078808.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910579.webp" />   
     </p>
 <p>视频有搜索版标签、无搜索版标签结果对比</p>
 <p>从上图可以看出，利用了视频 Embedding 进行标签预测（有搜索版标签）后，标签数量和精细程度有明显提升。</p>
@@ -551,34 +551,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>采用帧间二次差分法做镜头分割。具体做法如下：</p>
 <p>设表示第 n 帧在点 (i, j) 上 c 通道（）的值，那么两帧图像和在点 (i, j) 上的差异度定义为</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3fc9f3d1a46145448121c9d415deae0d.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910442.png" />   
     </p>
 <p>定义</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/651855e37c9a4a2dad50cdd668c2070d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910998.webp" />   
     </p>
 <p>归一化后的差异度为</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/33ad2d05c63e495bbc46738e56790d18.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910522.webp" />   
     </p>
 <p>在区间 (0, 1) 内选择一个阈值来判定两帧图像在点 (i, j) 上差别是否大，记为 C，则</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1f2082111fe04ca79c344b08eee3c343.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910314.webp" />   
     </p>
 <p>那么两帧图像整体上的差异度就是</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/945cf514acb8400394b102aae5c915d4.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910969.webp" />   
     </p>
 <p>设定一个阈值 T，当
 
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/715c9ce5252c45f0b66fb5f2a585988d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910523.webp" />   
      时，从第 n + 1 帧切分镜头。</p>
 <p>● <strong>3.4.2关键帧采样</strong></p>
 <p>关键帧采样的目的是为了估算特定文本在镜头中出现的时长，从而节省处理时间。假设一个镜头中有 N 帧图像，从中均匀采样 F 帧，并识别这 F 帧中的文本，假设某文本在 C 帧中都出现了，那么该文本在镜头中出现的时长就估算为。文本的时间信息将在后处理阶段用到。</p>
 <p>● <strong>3.4.3 文本检测</strong></p>
 <p>采用 PSENet 做文本检测，网络的整体结构图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/df8c1b8bbdc847e59c19802d3da3154b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910325.webp" />   
     </p>
 <p>PSENet 网络结构</p>
 <p>PSENet 主要有两大优势：第一，对文本块做像素级别的分割，定位更准；第二，可检测任意形状的文本块，并不局限于矩形文本块。</p>
@@ -586,31 +586,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>如上图所示，PSENet 采用 FPN 作为主干网络，图片 I 经过 FPN 得到四个 Feature Map，即P2、P3、P4 和 P5；然后经过函数 C 得到用于预测分割图的 Feature Map F。基于 F 预测的分割图有多个，对应着不同的覆盖程度，其中 S1 的覆盖度最低，Sn 的覆盖度最高。</p>
 <p>基于不同覆盖程度的分割图，通过 Scale Expansion 算法逐渐生成完整、精细的分割图，其过程如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/86ec22f225814dd99263ba44c8f66240.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910991.webp" />   
     </p>
 <p>PSENet 生成完整、精细的分割图过程</p>
 <p>其中 CC 表示计算连通域，EX 表示执行 Scale Expansion 算法，子图 (g) 展示了扩展的过程，如果出现冲突区域，按照先到先得的策略分配标签；算法详情参考下图。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/067796fcf09248b2a837ae3f7572e302.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910643.webp" />   
     </p>
 <p>Scale Expansion 算法过程</p>
 <p>● <strong>3.4.4 文本识别</strong></p>
 <p>采用 Seq2Seq + Multi-head Attention 做文本识别，网络的整体结构图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/17a12aad16dc4bd48a4a240329c8a862.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910441.webp" />   
     </p>
 <p>文本识别网络结构</p>
 <p>整个网络从下到上共分为四部分：特征提取网络、Encoder、Multi-head Attention mechanism 和 Decoder。</p>
 <p>特征提取网络是基于 EfficientNet 改进的，网络的详细结构参考下表：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/434c6413772c4187a5bf71ef63af5fef.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910098.webp" />   
     </p>
 <p>表 28：特征提取网络结构</p>
 <p>Encoder 是一个 BiRNN，输入序列，然后计算每个时刻的隐状态。该网络其实由两层 LSTM 构成，每层 128 个隐状态；第一层从左向右处理输入序列，并产生正向隐状态，第二层从右向左处理输入序列，并产生反向隐状态，那么在时刻 j 的最终隐状态就是。</p>
 <p>Decoder 也是一个 LSTM 模型，该模型基于 Encoder 的隐状态生成输出序列。</p>
 <p>引入 Attention 机制是为了让 Decoder 在生成一个文字的时候能够在输入序列中定位到最相关的信息，也就是说 Attention 机制其实是一种对齐模型（Alignment Model），它通过打分来评估 i号输出与 j 号输入间的匹配程度。但传统的 Attention 机制存在一个问题，当输入序列的长度、尺度或分辨率发生变化时，这种 Attention 方法就会发生定位错误，进而引起误识别；而 Multi-head Attention 可以很好地解决这个问题。Multi-head Attention 的基本思想是使用多个 Attention 模块分别聚焦图像的不同部位，然后再将这些不同模块的结果整合起来，从而达到更加准确聚焦单个文字的目的。其结构如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/26be39cf851d46a2b75a96e2296f1d62.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910079.webp" />   
     </p>
 <p>图 29：Multi-head attention 网络结构</p>
 <p>● <strong>3.4.5 后处理及主题提取</strong></p>
@@ -621,7 +621,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>4.主题生成</strong>。按照从前到后、从上到下的顺序拼接剩余的文本以生成主题。</p>
 <p><strong>3.5 视频封面图和 GIF</strong></p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/23f824c0a885476ab9c7ac01c7a769ba.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910576.webp" />   
     </p>
 <p>图 30：视频封面图算法流程</p>
 <p>● <strong>3.5.1K-Means 聚类</strong></p>
@@ -635,7 +635,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>● <strong>3.5.5 排序</strong></p>
 <p>经过上面的打分，我们返回美学得分最高的 Top-K 帧。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a5d85acac2b3415fb9c024e2de8a7edc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910305.webp" />   
     </p>
 <p>美学打分示例</p>
 <p>● <strong>3.5.6视频 GIF 生成</strong></p>
@@ -644,68 +644,68 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>对于外部内容，例如UGC等，需要系统给予内容一定量的曝光，目的是挖掘其中的优质内容，召回和排序模型学习到优质内容之后会进行正常的分发，这就是内容试探过程。然而试探流量有限，新内容过多，如何预估内容试探的优先级是一个重要的问题。我们基于内容投放目标模型对新内容打分，优质分高的内容曝光优先级越高，并且针对不同的场景使用不同的投放目标，比如小程序使用分享率、精选视频流使用vv、精选主TL使用点击率，从而提升系统挖掘爆款的能力。</p>
 <p>我们以曝光充分内容的后验分（点击率、分享率、带vv等）和内容倾向性（性别倾向、年龄倾向等）为训练目标，预估未充分曝光内容的投放倾向，发现大多数的内容缺乏置信的后验信息，尤其对于外部新内容，例如UGC，基本无曝光，而这些其中是蕴含很多优质item的，需要我们发掘可能的优质内容，并试探出来。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/31f971350b2b4776b9a0db29bc1e8904.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910171.webp" />   
     </p>
 <h3 id="41-目标"><strong>4.1 目标</strong></h3>
 <p>我们要解决的问题就是给定item，预估试探等级。目标就是减少投放目标预估的点击率与实际投放点击率的差距。评价使用MAE，hitrate5%，hitrate。分类模型是从语义到语义的映射，点击率模型是从user叉乘item到行为的映射，而我们要构建的模型是从语义到行为的映射，这里如何减少映射空间的GAP是难点。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7c234dcefa374606a5fe7850f58b6064.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910702.webp" />   
     </p>
 <h3 id="42-模型演进"><strong>4.2 模型演进</strong></h3>
 <p>● <strong>4.2.1DNN</strong></p>
 <p>起初我们使用DNN快速构建模型，特征包括：1.文本属性 (标题、类目、主题、Tag等) 2.图像属性 (封面图、OCR) 3.固定属性 (发布时效、视频时长、是否优质) 4.发布者属性: 1.ID信息 (ID、媒体等级) 2.文本属性 (名称、类目)。除此之外，我们还引入cnn对标题和ocr text做理解，使用resnet对视频封面做理解。最终通过self attention将多路channel进行融合，最终输出投放目标。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/71f7e28bf14f4a79985325e5b8129a3a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910473.webp" />   
     </p>
 <p>另外由于tag的稀疏性，我们初始化tag embedding使用word2vec无监督训练出来的向量。</p>
 <p>样本构造上，初期我们的目标就是后验的分，比如分享率，但发现大部分内容的分享率都很低，导致我们模型过于拟合低分享内容，对于高分享内容的预估不准，我们根据目标调整了样本，即以高分享内容为正例，采样低分享内容，这样模型能够更好的区分出高分享内容。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a0daa1e517a244e5be0d894dd35d5488.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910368.webp" />   
     </p>
 <p>item ctr分布</p>
 <p>● <strong>4.2.2 PNN</strong></p>
 <p>我们发现，DNN模型对于交叉特征学习的不够充分，比如小品长视频分享率高于小品短视频，我们的模型基本区分不出来。原因是DNN是隐性特征交叉，bit-wise特征相加，特征之间是or的关系，不能很好表达特征交叉，而且bit-wise丢失特征field边界。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a2fb0e579f0c49f8b28baf4119d14419.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910947.webp" />   
     </p>
 <p>因此我们在网络中引入特征and关系，即特征相乘，加入vector-wise，保留特征field信息。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/715de00998544fbcbb9e14dc0e59e2e8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910449.webp" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f2fc59a0c76242aa8c0cebcc8429fabb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910048.webp" />   
     </p>
 <p>基于PNN的投放目标预估模型</p>
 <p>网络中特征filed使用PNN做特征交叉，PNN属于wide stack deep结构，即wide网络接deep网络，认为embedding输入到MLP之后学习的隐式交叉特征并不充分，提出了一种product layer的思想，即基于乘法的运算来体现特征交叉的DNN网络结构。分为IPNN和OPNN，特征向量运算时分别对应内积和外积，我们使用内积操作。Z部分直接平移embedding层，保留先前学习隐式高阶特征的网络结构，p层是PNN的亮点，特征交叉矩阵P是对称矩阵，所以采用了矩阵分解来进行加速。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/f4c8e9e8a20c4c0e9f2603b57abffbe1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910846.webp" />   
     </p>
 <p>● <strong>4.2.3DeepFM</strong></p>
 <p>PNN完成了从隐式高阶特征到隐式高阶特征+显式低阶特征的升级，但是显式低阶特征依然经过高阶变换，我们引入DeepFM来解决这个问题，即显式低阶特征与隐式高阶特征形成wide and deep结构。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dcb790782f2c4795b85036ec3c9288dc.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910334.webp" />   
     </p>
 <p>基于DeepFM的投放目标预估模型</p>
 <p>● <strong>4.2.4xDeepFM</strong></p>
 <p>DeepFM解决了二阶特征交叉，我们想增加多阶，进一步特征对文章的理解能力，但是遇到了组合爆炸问题。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a7b7c89935f3412a84366c56dff3a451.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910944.webp" />   
     </p>
 <p>这里我们引入xDeepFm来解决，xDeepFm采用高阶复用低阶结果的方式，减少计算量。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e4ed08732fe9423591d8f17bcfbcdcfc.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910772.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b2d55de0a7904bad9649932c63fbaa5f.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910288.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0f774efb1ec345da974a6bc8f9ad28b3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910971.webp" />   
     </p>
 <h2 id="内容理解在推荐上的应用"><strong>内容理解在推荐上的应用</strong></h2>
 <h3 id="51-全链路特征"><strong>5.1 全链路特征</strong></h3>
 <p>标签和embedding主要应用在内容库构建，模型特征上（召回，粗排，精排，混排）。通过ItemKV和索引AB的方式推送给推荐系统中各个模型使用，这样使得内容理解直接作用于线上推荐系统，验证和发挥内容理解价值。未来ItemK会支持内容理解的AB实验，支持内容理解的离线优化策略。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/08b9fc609fd142c585b84069fc978355.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910689.webp" />   
     </p>
 <p>推荐系统中的特征实验通路</p>
 <h3 id="52-内容试探">5.2 内容试探</h3>
@@ -713,7 +713,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="53-优质内容库构建"><strong>5.3 优质内容库构建</strong></h3>
 <p>通过改变模型的目标，我们得到了内容倾向性模型。针对不同推荐场景，投放目标预估支持不同的目标。结合内容投放目标和内容倾向性，我们针对不同场景和人群，构建不同的内容库，比如针对老年人小程序，我们使用内容分享率和年龄倾向性来构建老年人库。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0deb7fde84cb46d8b92390c5dab93207.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271910283.webp" />   
     </p>
 <p>● <strong>老年人库</strong>：比如我们目前正在优化的看一看小程序，主要面向老年人群体，内容就是通过年龄倾向性预估挖掘得到的，以年龄分布作为目标，以充分曝光的item为训练数据，训练内容年龄倾向性模型，然后预测没有后验行为的内容，挖掘老年人倾向的内容。</p>
 <p>● <strong>小程序高分享库</strong>：在小程序场景，DAU主要靠高分享内容的不断分享获得的，所以分享率是最核心的指标。我们以分享率为投放目标，训练分享率投放目标预估模型，对老年人倾向内容进行分享率预估，挖掘高分享老年人内容库，提升小程序分享率，进而提升小程序DAU。</p>
@@ -852,6 +852,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -885,10 +889,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -1267,6 +1267,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

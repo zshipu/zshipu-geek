@@ -208,13 +208,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         
         <div class="post-content">
             <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/01749417e91e45129a007eed222fa95d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272017942.webp" />   
     </p>
 <h1 id="搜索引擎如何工作"><strong>搜索引擎如何工作？</strong></h1>
 <p>信息检索已经发展的非常成熟了，应该所有人都不陌生。我有幸这几年接触过并且实际做过一些搜索引擎开发的工作，特此总结并分享给大家。实际上，一个成熟的搜索引擎是想当复杂的，比如百度的，就分nginx，vui，us，as，bs，da&hellip;..等等这些模块，当然这些简写的字母大家也不必了解，只要知道它确实复杂就可以。</p>
 <p>今天我所讲的是一个简化版的搜索引擎，简化到只涉及到倒排建立和拉取。虽然简单，但是它是整个搜索引擎的最核心组件。一个最简单的搜索引擎如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cb7c6f1d1ca34b71b71e42220db04f0b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272017895.webp" />   
     </p>
 <ul>
 <li>
@@ -234,7 +234,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>对几亿甚至几十亿几百亿规模的文档集合建立倒排索引并不是一件很轻松的事情，它将面对着IO以及CPU计算的双重瓶颈，需要根据实际情况找到最优方法，接下来介绍两种不同的建立倒排的方式。</p>
 <h2 id="单遍内存型"><strong>单遍内存型</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8614eb7c859c456598a4bf5c7328a518.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272017718.webp" />   
     </p>
 <p>内存中维护每个词对应的文档编号列表，当一个词对应的buffer满时，把内存中的数据flush到磁盘上，这样每个词对应一个文件。最后按照词编号由小到大的合并所有文件，得到最终的倒排索引。</p>
 <ul>
@@ -247,7 +247,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <h2 id="多路并归型"><strong>多路并归型</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/6b3a07475c9141ac9e78244b785be850.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272017689.webp" />   
     </p>
 <p>步骤如下：</p>
 <ul>
@@ -273,7 +273,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="索引切分"><strong>索引切分</strong></h2>
 <p>考虑到在海量文档下，倒排索引非常大，单台机器无法在内存中装下全部索引，所以有必要把索引进行切分，使得每一个索引服务只对文档中一部分的内容进行拉取、计算。常见的有两种可选择的方式。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7f9a25034eef4ecdb3b6befc57a95545.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272017720.webp" />   
     </p>
 <h4 id="按文档编号切">按文档编号切</h4>
 <p>按照文档编号把文档分成几个小的集合，对每个小的文档集合单独建立索引。在这种方式建立索引上进行查询时，merge需要把查询请求下发到所有的后端indexer服务（因为每个index都有可能存在包含查询词的文档），indexer服务的计算量比较大。但是它也有一个优点：每个词的倒排拉链的长度可控。</p>
@@ -310,7 +310,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>很多搜索引擎都注重时效性搜索，比如对于时下刚刚发生的某件热门事件，需要搜索引擎能够第一时间搜索到该热门事件的页面，这该如何做到呢？由于建立一次全量文档倒排的时间基本都是按天计，如果不设计一些实时增量索引，那么根本满足不了时效性的检索。下面介绍增量索引，可以解决时效性搜索问题。</p>
 <h4 id="倒排索引双buffer设计方案">倒排索引双buffer设计方案</h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3b95e5c3cd9a419bbe1b73dee4ee5abe.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272017569.webp" />   
     </p>
 <p>增量步骤：</p>
 <ul>
@@ -330,12 +330,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>这样可以保证实时的动态更新，但是它的缺点也很明显：必须使用2倍索引大小的内存，机器成本比较高，实际中更常用的是下面一种方案。</p>
 <h4 id="增量索引服务双buffer方案">增量索引服务+双buffer方案</h4>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/baf4d14008014638a5ca34b5621968b2.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272017406.webp" />   
     </p>
 <p>全量索引服务用来查询截止到某一个日期的全部文档，增量索引服务使用双buffer设计方案查询最近一段时间（可能是小时级或者分钟级）内实时更新的文档内容，然后定期（每天、每周、每月一次）把最近一段时间更新的文档追加在全量索引中。这样做的好处就在于只有少量近期更新文档的查询需要使用双倍内存，机器成本降低。需要注意的一点是，用这种方式建立增量索引时，必须更新全局word的df信息，对于发现的新词还需为其添加全局唯一id，这些信息统统要更新到线上正在运行的全量索引服务。</p>
 <h2 id="利用hadoop并行建立倒排索引"><strong>利用Hadoop并行建立倒排索引</strong></h2>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/25e26d97e3a7479cbcb3eee29d7d971f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272017068.webp" />   
     </p>
 <p>对于超大规模的文档集合，可以使用Hadoop建立倒排索引。</p>
 <ul>
@@ -470,6 +470,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -503,10 +507,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -885,6 +885,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

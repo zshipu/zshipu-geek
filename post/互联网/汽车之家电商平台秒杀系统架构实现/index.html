@@ -242,7 +242,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>整个秒杀系统基于架构的 <strong>合适原则、简单原则、演化原则</strong> 三原则来设计，通过了解业界秒杀系统的架构以及结合业务现状制定改造计划，分阶段执行。2020年4月份上线以来已经承担70余场次的秒杀活动，最高12场秒杀活动同时开启。</p>
 <p>系统整体架构图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7b0cab6252874c679acf0aeb4e3b1a9b.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272115192.png" />   
     </p>
 <p>秒杀开始前运营人员需要在秒杀管理后台创建一场秒杀活动，设置是否需要预约、预约的开始和结束时间、以及秒杀的开始结束时间。当秒杀活动的预约开始后商品变为不可购买状态，用户只能对商品进行预约。用户预约后，会有定时任务调用风控中心的接口获取用户当前风控相关信息。</p>
 <p>预约结束后秒杀开始前，定时任务会将一些已知道的风控信息、预约名单、商品信息和活动信息预热到缓存里。当下单请求或者秒杀请求提交到网关层的时候，先会根据商品id查询出当前的商品是否有秒杀活动信息，以及活动的开始时间和结束时间。如果是商品参与了秒杀则进行风控相关的校验，预约名单校验，用户行为校验，用户QPS限流的校验，如果都通过则请求缓存对缓存里的库存进行预减缓存库存的操作，如果预减成功则提交请求应用层的订单中心生成秒杀订单。</p>
@@ -250,14 +250,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>业界的秒杀模型大致分为两种类型：同步秒杀模型和异步秒杀模型。</p>
 <p>同步秒杀模型即抢购后不能立即知道抢购结果，在抢购结果等待页通过轮询后台接口或者与后台的长链接来获取秒杀结果。异步秒杀模型核心思想是利用MQ的削峰，将用户的请求峰值摊平到应用层可以接受的范围。这种模型适合无预约场景，秒杀库存量大，单次秒杀活动订单量大的场景比如直播带货。这种秒杀模型的缺点就是如果用户异步等待时间过长的话会给没有抢到的用户一种有猫腻的感觉，用户体验会差一些。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/af1efdca3d5d4568abc83a023f6a20b1.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272115507.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/049a2149f24d4000938be382db3dfe45.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272115929.png" />   
     </p>
 <p>同步秒杀模型即抢购立刻知道抢购结果，用户体验会好一些。适用于秒杀库存量少，商品价值高，通常需要结合预约、风控系统来完成。业界典型的案例京东、苏宁抢购茅台。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/46c61301c5bf4a238c3401680c4e30ab.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272115257.png" />   
     </p>
 <p>随着云原生架构在之家范围内普及和深入使用，应用的扩容不再需要运维人员和开发人员来手工操作配置，可以在秒级内完成。上秒杀开始前对应用进行扩容，秒杀结束后对应用进行缩减。相信未来更多的秒杀系统会使用同步秒杀模型。</p>
 <h3 id="库存扣减设计">库存扣减设计</h3>
@@ -276,7 +276,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 id="分层限流">分层限流</h3>
 <p>盯过秒杀流量监控的话，会发现它不是一条蜿蜒而起的曲线，而是一条挺拔的直线，这是因为秒杀请求高度集中于某一特定的时间点。这样一来就会造成一个特别高的零点峰值，而对资源的消耗也几乎是瞬时的。但是库存又很少，所以我们需要分层限流，将尽可能少的请求拦截到应用层之前。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/48ffb0441a8948b3b4bc88ea2987b3f8.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272115909.png" />   
     </p>
 <h3 id="扣减库存">扣减库存</h3>
 <p>下单减库存在数据一致性上，主要就是保证大并发请求时数据库中的库存字段值不能为负数，一般我们有多种解决方案：一种是在应用程序中通过事务来判断，即保证减后库存不能为负数，否则就回滚；另一种办法是直接设置数据库的字段数据为无符号整数，这样减后库存字段值小于零时会直接执行SQL语句来报错；再有一种就是使用CASE WHEN判断语句，例如这样的SQL语句：</p>
@@ -293,13 +293,13 @@ Start transactionupdate stock set num=num-? where sku_id=?and num&gt;=0;insert c
 <h3 id="缓存高可用">缓存高可用</h3>
 <p>秒杀是一个读多写少的场景，使用redis做缓存再合适不过；在上面提到的分层限流中，大多数都是通过使用缓存来实现，缓存的高可用性将影响到整个系统的高可用性。秒杀场景下，单个 Redis 实例在内存和CPU利用率上往往会显得捉襟见肘，这时候需要高可用redis集群来保证系统的可用性和扩展性。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-ff4bd2557a2747feb2ada1eb98c595de.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272115865.png" />   
     </p>
 <h3 id="热点隔离">热点隔离</h3>
 <p>在前面讲到的OpenResty+Redis架构中，服务里有一步是查询商品的缓存库存，秒杀单个商品，很容易造成单个商品的Redis热点key，为了解决这一问题，我们采取的库存分片设计。通过将秒杀商品的库存进行“分割”存储来提升Redis的读写并发量。</p>
 <p>例如，原来的秒杀商品的id为10001，库存为10件，在Redis中的存储为(10001, 2)，我们将原有的库存分割为5份，则每份的库存为2件，此时，我们在Redis中存储的信息为(100010, 2)，(100011, 2)，(100012, 2)，(100013, 2)，(10001_4, 2)。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/image-bc57e593903443d898a17d58f1c4d5b3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272115971.png" />   
     </p>
 <p>在codis集群中，Codis 将所有的 key 默认划分为 1024 个槽位(slot)，它首先对客户端传过来的 key 进 行 crc32 运算计算哈希值，再将 hash 后的整数值对 1024 这个整数进行取模得到一个余 数，这个余数就是对应 key 的槽位。每个槽位都会唯一映射到后面的多个 Redis 实例之一，Codis 会在内存维护槽位和Redis 实例的映射关系。这样有了上面 key 对应的槽位，那么它应该转发到codis组就很明确了。通过hash key进行分槽存储，将同一库存的key分散到不同的codis组里，可以有效的平衡整个集群中各组的访问量。</p>
 <h3 id="熔断">熔断</h3>
@@ -455,6 +455,10 @@ Start transactionupdate stock set num=num-? where sku_id=?and num&gt;=0;insert c
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -488,10 +492,6 @@ Start transactionupdate stock set num=num-? where sku_id=?and num&gt;=0;insert c
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -870,6 +870,8 @@ Start transactionupdate stock set num=num-? where sku_id=?and num&gt;=0;insert c
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -197,30 +197,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>我们这里的现阶段，不是指的今时今日，而是阿里刚刚公开此算法的时间，大概就是去年的三四月份吧。</p>
 <p>业界常用的CTR预估算法的不足如下表所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/9cd63a7387ac4dd59ac13792b2be5110.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272002862.png" />   
     </p>
 <p><strong>那么挑战来了，如何设计算法从大规模数据中挖掘出具有推广性的非线性模式？</strong></p>
 <p><strong>MLR算法</strong></p>
 <p>2011-2012年期间，阿里妈妈资深专家盖坤创新性地提出了MLR(mixed logistic regression)算法，引领了广告领域CTR预估算法的全新升级。MLR算法创新地提出并实现了直接在原始空间学习特征之间的非线性关系，基于数据自动发掘可推广的模式，相比于人工来说效率和精度均有了大幅提升。</p>
 <p>MLR可以看做是对LR的一个自然推广，它采用分而治之的思路，用分片线性的模式来拟合高维空间的非线性分类面，其形式化表达如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/44e1864520fb4df895637d9d1f1242c3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272002447.png" />   
     </p>
 <p>其中u是聚类参数，决定了空间的划分，w是分类参数，决定空间内的预测。这里面超参数分片数m可以较好地平衡模型的拟合与推广能力。当m=1时MLR就退化为普通的LR，m越大模型的拟合能力越强，但是模型参数规模随m线性增长，相应所需的训练样本也随之增长。因此实际应用中m需要根据实际情况进行选择。例如，在阿里的场景中，m一般选择为12。下图中MLR模型用4个分片可以完美地拟合出数据中的菱形分类面。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/e79893ebf5434a6d91a9042798edb924.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272002453.png" />   
     </p>
 <p>在实际中，MLR算法常用的形式如下，使用softmax作为分片函数：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/325378417981486fb4cbc75905da8df9.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272002964.png" />   
     </p>
 <p>在这种情况下，MLR模型可以看作是一个FOE model：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/c324adb8fe7740408e113c94de8042e3.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272002378.png" />   
     </p>
 <p>关于损失函数的设计，阿里采用了 neg-likelihood loss function以及L1，L2正则，形式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/c33788fec50447848d8f4d2eba13012a.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272002215.png" />   
     </p>
 <p>由于加入了正则项，MLR算法变的不再是平滑的凸函数，梯度下降法不再适用，因此模型参数的更新使用LBFGS和OWLQN的结合，具体的优化细节大家可以参考论文( <a href="https://zshipu.com/t?url=https%3A%2F%2Farxiv.org%2Fpdf%2F1704.05194.pdf">https://arxiv.org/pdf/1704.05194.pdf</a>).</p>
 <p>MLR算法适合于工业级的大规模稀疏数据场景问题，如广告CTR预估。背后的优势体现在两个方面：</p>
@@ -231,7 +231,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>代码的github地址为： <a href="https://zshipu.com/t?url=https%3A%2F%2Fgithub.com%2Fprincewen%2Ftensorflow_practice%2Ftree%2Fmaster%2Frecommendation%2FBasic-MLR-Demo">https://github.com/princewen/tensorflow_practice/tree/master/recommendation/Basic-MLR-Demo</a></p>
 <p>所使用的数据下载地址为： <a href="https://zshipu.com/t?url=http%3A%2F%2Farchive.ics.uci.edu%2Fml%2Fdatasets%2FAdult">http://archive.ics.uci.edu/ml/datasets/Adult</a>，该数据是一个二分类的数据，所预测的任务是判断一个人是否能够一年挣到50K的钱，数据介绍如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/4742a77f958f4e31820513eb3f0b4f84.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272002451.png" />   
     </p>
 <p><strong>数据处理</strong></p>
 <p>数据中存在连续特征和离散特征，所以我们先要对数据进行一个简单的处理，处理包括将离散特征转换为one-hot以及对连续特征进行标准化。有一个需要注意的地方，训练集和测试集中离散特征出现的个数可能不一样，因此需要先将数据合并，然后转换成one-hot，最后再分开，代码如下。</p>
@@ -294,10 +294,10 @@ train_op = tf.train.FtrlOptimizer(learning_rate).minimize(cost)
 <p><strong>实验结果</strong></p>
 <p>本文对比了在当前给出的数据集下，m=5，10，15，25 以及lr算法的效果，结果如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/7e0bba9d4f1a45d696bc1ee7a704dc32.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272002630.png" />   
     </p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/file/2019/1/a660c97c01fd4a0b955f6f79cddeae3c.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272002832.png" />   
     </p>
 <p>可以看到，lr的效果是最好的，随着m的增加，模型的效果越来越差。当然，这并不能说明mlr效果不如lr好，只是我们的数据实在是太少�</p>
 
@@ -427,6 +427,10 @@ train_op = tf.train.FtrlOptimizer(learning_rate).minimize(cost)
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -460,10 +464,6 @@ train_op = tf.train.FtrlOptimizer(learning_rate).minimize(cost)
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -842,6 +842,8 @@ train_op = tf.train.FtrlOptimizer(learning_rate).minimize(cost)
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -217,7 +217,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在上文讲过，推荐的逻辑是从整个大的内容池过滤出最符合当下用户的内容，那么 <strong>如何标识哪些内容已经被用户消费过</strong> 这个问题，至关重要。</p>
 <p>最典型的场景莫过于， <strong>重复推荐</strong> 。我甚至能够想象用户多次刷到重复内容的绝望场景:&ldquo;不会吧不会吧，这个视频我刚已经点过赞了，又来，up这波要赞简直丧心病狂啊&rdquo;</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1aa9d9d7333e4509a7da7f2c0bc90bc3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271951651.webp" />   
     </p>
 <p>同理在电商推荐场景也类似，用户已经点击过没有明显消费兴趣的，假如还重复推荐的话，本质上是对流量和广告的一种浪费(都是白花花的钱)</p>
 <h2 id="11-如何定义内容重复">1.1 如何定义内容重复</h2>
@@ -238,7 +238,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>以 用户id + item_id 为 key, map里查找下是否存在即可。时间复杂度 O(1)。单机内存存不下，也可以存储在redis 上。方便快捷，批量item_id也只要mget一下即可。</p>
 <p>当然，每次用户曝光记录都以user_id + item_id的方式作为key，挺浪费存储的，可以直接使用 redis 的hash结果。每个userid作为key,value 是 用户曝光过的item_id 为key的 hashmap。大概结构如下</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bb76f51505074a35b0ffda56d41e47f3.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271952273.webp" />   
     </p>
 <p>看着没啥毛病，但是我们深究一下。假设 用户id 和 item_id 都是长度为10的字符串，平均每个用户曝光过200个item(很多用户闲着无聊，一个下午都能刷几百条小视频)。整个平台算5000万用户好了。</p>
 <p>redis 存储空间大小(key +value大小): 忽略hashmap负载因子等其他因素</p>
@@ -248,7 +248,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>在 2.1 方案中，大部分的空间都花在存储曝光的item_id 文本上。为了进一步优化性能和存储，在曝光去重业务中，我们更加关心的是存在与否，具体存在哪些值其实并不重要(想要排查用户的曝光item也可以通过session服务获取，session服务后续也会介绍到)。</p>
 <p>联想到海量数据处理中，常用的手法是使用bitmap 位技术。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b5c04f23027c416e8dd10ba67931994c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271952013.webp" />   
     </p>
 <p>给定1个byte(有8个bit),一共可以存储8个数字。若第5个bit 为1 。则数字4存在。</p>
 <p>使用bitmap的好处，是可以将itemid的长度，从10byte 降低为 1个 bit，存储空间可以极大降低。</p>
@@ -262,7 +262,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>所以，应该如何综合考量 <strong>冲突率与存储长度之间的权衡</strong> 呢？</p>
 <p>布隆过滤器应运而生。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1870c7e1093c43febe1017145be3c27f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271952519.webp" />   
     </p>
 <p>布隆过滤为了降低hash碰撞，引入了多个hash函数。插入元素时，字符串经过k次hash函数计算(可以是不同hash函数),将映射到bitmap相应位置的bit位置为1。查询时同样需要k个位置的bit 为1，元素才算存在。</p>
 <p>但由于hash函数有碰撞，因此有一定概率，多个元素，算出来的k个bit位完全相同，这也就是布隆过滤器的 <strong>误判率</strong></p>
@@ -278,7 +278,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>布隆过滤器参数推导工具:在线推导工具^[1]^</p>
 <p>可以设定 在 <strong>5个</strong> 哈希函数，误判率为0.1%,存储itemid <strong>1万个</strong> 的情况下，bitmap的空间是多少</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/cc122228e1474df796b4449150470253.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271952488.webp" />   
     </p>
 <p>单个参数也不是越大越好，也可以辅助右边曲线图进行判断，某个参数达到一定阈值，增益就会变小。</p>
 <p>使用bloomfilter 后，存储1万条的itemid去重，相比redis存储key的方式，存储占用大小前后对比(假设都存1万条itemid情况下)</p>
@@ -288,11 +288,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>但是随着产品发展，用户体验内容越来越多，bloomfilter 中存储itemid个数也会越来越多(bit位设置为1)。</p>
 <p>而bitmap的大小是初始化时就固定的，一旦写入个数越来越多，超过我们的初始容量值时，误判率就会越来越高，在这种情况下，可以认为布隆过滤器“写满了”，不再适用了。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/c59b2e731be940fda3dc69818f52b3d1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271952443.webp" />   
     </p>
 <p>针对bloomfilter 写满的情况，一般情况下是使用多个分片进行切换。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e494cb0e4abe4f369a368023d00de15f.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271952072.webp" />   
     </p>
 <p>比如每个用户可以保存3片布隆过滤器。使用 currentIndex 记录当前写入哪个分片，比如 0 分片写满，则currentIndex改为1，新增写入1分片。存在与否需要判断 0~currentIndex 之间的所有分片。</p>
 <p><strong>假如所有分片都写满呢？</strong> 总不能无限增加分片的吧？</p>
@@ -302,7 +302,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ol>
 <p>整体流程如下:</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/bd402d07ccd2416387203f7af8974dad.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271952799.webp" />   
     </p>
 <h2 id="4-灵魂诘问2-还能进一步节约存储吗">4. 灵魂诘问2-还能进一步节约存储吗？</h2>
 <p>接上小节[3.2bloom写满淘汰](#3.1 写满了怎么办？),我们为了不降低误判率，使用多片bloomfilter进行切换和淘汰。</p>
@@ -318,12 +318,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>上面说了，大部分用户的轨迹都是 新用户-&gt;浅度用户-&gt;中度用户-&gt;重度用户-&gt;忠实狂热粉。</p>
 <p>那么我的去重系统能不能也按照用户的使用习惯，自己慢慢进化，而不是一上来就用最高最强的配置。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ffa72d9c6e09490fb87d34c3e9932514.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271952655.webp" />   
     </p>
 <h3 id="421-同构自适应法">4.2.1 <strong>&ldquo;同构自适应法&rdquo;</strong></h3>
 <p>同样的，按照新用户的使用深度，我们的布隆过滤器也从小布隆增长到大布隆。针对这种结构相同，布隆过滤器的大小不同，我取了个蹩脚的名字: 同构自适应法。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d5a908ae133b43efacd81376b4cd1214.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312271952253.webp" />   
     </p>
 <p>同样的可以设置每个用户有3个分片。用户刚来的时候，初始化1个100容量的bloomfilter(bitmap占约216B)。第一片写满后可以升级为 1000容量的(bitmap占约2.1KB),第二片写满后可以升级为 10000容量的(bitmap占比为21.1KB)。三片都写满后，以后每次初始化就是1万的容量。依次淘汰最老的分片。使用这种做法，能够节约多少存储呢？</p>
 <p>假设我�</p>
@@ -452,6 +452,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -485,10 +489,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -867,6 +867,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

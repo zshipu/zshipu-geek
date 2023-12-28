@@ -231,13 +231,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="1-广告主和媒体的博弈问题"><strong>1. 广告主和媒体的博弈问题</strong></h2>
 <p>我前面提到广告点击率（CTR）预估是典型的机器学习应用场景，但为什么需要CTR预估呢，为了解释清楚这个问题，需要先了解效果广告的机制。效果广告要的是直接转化率，这一点跟品牌广告不同，品牌广告主要打品牌知名度，比如汽车广告，房产广告等，广告主不指望用户看完这个广告之后立刻去买一辆车子或者房子，而是先让用户熟悉这个品牌。而效果广告则希望用户看完广告之后立刻去成交，例如淘宝上的商品搜索广告，百度搜索广告等，都以转化为目的。效果广告的主要博弈方是广告主和媒体方，扩展一下也包含了广告平台、用户等参与方，但为了简化问题我们只考虑最主要的部分，双方的利益如下图所示。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/87076fc71d69482b8feb5ce418d1b25b.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647778.webp" />   
     </p>
 <p>广告主最关注ROI，希望用最低的成本拿到自己的目标用户，底线是不能长期做亏本生意。媒体方则希望提高点击率（按点击率计费时，点击越多收入越多）、通过竞争提升单次点击价格，关注的是流量变现价值的最大化。这两方的诉求目标是矛盾的，解决办法是引入经济学的拍卖机制，然后用计算机程序来实现自动竞价，把经济学和计算机科学结合起来解决这个博弈问题，下面详细介绍一下。</p>
 <h2 id="2-gfp-vs-gsp"><strong>2. GFP vs GSP</strong></h2>
 <p>大家应该在电视里面看过拍卖的场景，比如拍卖某个古董时，从低价开始喊，然后不断加价，直到没人再加为止，这时候锤子一敲就成交了，这个模式叫做英式拍卖，这种公开叫价的形式叫明拍。还有一种叫暗拍，情况类似于每个竞买人把自己的价格写好，等全部交上去后按价格的高低排序，价格最高者得。如果是第一价格模式则按第一价格支付，按第二价格模式则出价最高的人按照第二名的价格支付。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/348deca2d61844dbad6a3866f6a3c3ef.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647552.webp" />   
     </p>
 <p><strong>GFP（Generalized First Price）广义第一价格模式</strong></p>
 <p>早期的互联网产品，比如Yahoo和MSN采用的是GFP，广告主针对某个关键词出价，价高者得且按自己的出价支付。早期百度的竞价排名也是类似的规则。但这种模式最大的问题是系统收入非常不稳定，竞买人需要频繁修改出价以拿到流量或者希望以更低的价格拿到流量。</p>
@@ -254,17 +254,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>在这过程中，CTR预估扮演着非常关键的桥梁作用。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d28b8afa0f324934a692952e231196a8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647180.webp" />   
     </p>
 <h1 id="3-浅层学习ctr预估模型优化"><strong>3 浅层学习CTR预估模型优化</strong></h1>
 <p>业界早期阶段，在2012年以前，几乎主流公司都使用LR模型来预估CTR。LR有很多优点，比如简单、易于并行化、可解释性强。比较适合处理广告场景高维、稀疏的数据。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/eff66a506e6a45f3a51319acdc920458.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647086.webp" />   
     </p>
 <p>（利用sigmoid函数映射点击概率）</p>
 <p>云音乐广告系统最初采用的是LR模型，至今也还作为基线在跑着。后来尝试了FM，以及LR+GBDT，FM+GBDT，如下图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ee46ce878cb04a4eabdee5cdde0296f8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647903.webp" />   
     </p>
 <p>LR模型阶段打下了很多基础，做了很多数据和特征工程的事情，避免Garbage in, garbage out，争取达到效果的上限。</p>
 <h2 id="1-数据采样"><strong>1. 数据采样</strong></h2>
@@ -289,7 +289,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>（1）尝试FM</strong></p>
 <p>FM引入了隐向量，为每一个特征学习一个隐权重向量。在做特征交叉时，使用两个特征隐向量的内积作为交叉特征的权重。与直接特征组合（用POLY2模型的方式）需要该组合的所有特征同时存在才更新参数不同，对训练数据中没有出现的组合FM也能够学到。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/3aaa7ea130454b1ba9c83ddd9cf1f47a.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647807.webp" />   
     </p>
 <p>举例来说：用直接特征组合时，只有当广告主为“潭州教育”且“用户年龄为20岁”时才会更新该组合特征的参数（否则其中一个为0，则相乘后也为0），但这种组合太稀疏，基本上训练不充分。</p>
 <p>FM由于使用两个特征向量的内积来表示权重，比如广告主（潭州教育）的特征向量为v_i，年龄为20岁的特征向量为v_j，权重w=向量积&lt;v_i,v_j&gt;，只要出现了广告主（潭州教育）或年龄为20岁的样本，都可以共享更新相应的特征向量。解决了稀疏特征组合的问题。FM的不足是只有二阶特征组合，非线性表达能力依然不足。</p>
@@ -302,7 +302,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li>GBDT每个样本最终落在了每一颗子树叶子上的0/1矩阵，即特征向量，对特征做了深层交叉。可以理解为对样本进行了降维、聚类操作，提取了有效的信息，提供了更好的记忆力。</li>
 </ul>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/10c9b8ecb9424aa280894bb746b802f1.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647131.webp" />   
     </p>
 <p>LR+GBDT模型相比基线LR模型，AUC绝对值提升1.03%，相对提升1.71%，效果非常显著。线上CTR和eCPM提升稳定，符合全流量标准。</p>
 <p>之后我们又尝试了FM+GBDT，但效果不如LR+GBDT。浅层学习阶段，最终LR+GBDT胜出，成为了效果最好的模型。我们的推测原因是：弱个性化场景下需要有深度记忆功能。LR处理了稀疏特征记忆能力，GBDT处理好了深度组合特征以及连续特征的记忆能力，这正是我们音频流量广告场景（结合我们的广告主特点）所适合的。我们这个思路会持续到深度学习阶段。</p>
@@ -317,13 +317,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 id="5-深度模型演进和优化"><strong>5 深度模型演进和优化</strong></h1>
 <p>深度模型的引入，一方面是由于业界已经有很多公司成功把深度学习应用到了CTR预估，并取得了效果；其实更重要的原因是延续LR+GBDT的优化思路，需要持续做，上面提到了用LR处理稀疏特征记忆，用GBDT处理深度组合特征和连续特征记忆，自然会想到Wide&amp;Deep模型，即使用Wide的记忆能力，以及Deep的泛化能力。我们从Wide&amp;Deep切入深度学习，并且做了很多尝试。如图：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/99ac6cf29c754409ae3af4572bca0ede.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647092.webp" />   
     </p>
 <p>Wide&amp;Deep、DeepFM、DCN都没有全流量，第一个全流量的深度模型是DCN+Wide，目前（2020年10月）正在跑的是DICN+Wide。下面介绍一下这些模型的特点和问题，以及做的优化工作。</p>
 <h2 id="1-widedeep"><strong>1. Wide&amp;Deep</strong></h2>
 <p>在讲Wide&amp;Deep之前，我先讲一下业界早期尝试将深度学习应用于广告CTR预估的情况。业界早期的时候，使用的是纯DNN模型（MLP），但无论怎么优化都很难超越LR+GBDT，主要原因是广告场景有大量的长尾稀疏数据，DNN采用Embedding的方式训练不出来，后来尝试了很多方法把DNN和LR以及其它浅层模型融合起来，融合之后的效果才超过了LR，比如采用LR训练后的权重参数，或者进一步将FM的隐向量作为Embedding输入等。Wide&amp;Deep就是在这种情况下作为一种融合方案之一，由Google在2016年发布出来的。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b5f2d11a961b4eb0a5dc81d0b3ada117.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647795.webp" />   
     </p>
 <p>W&amp;D通过将浅层模型和深层模型联合训练，融合了浅层模型的记忆能力和深层模型的泛化能力。通过Wide侧较好地解决了长尾数据的拟合，弥补了纯DNN的不足。</p>
 <p>不过理论归理论，有没有效果还要看实际场景，我们最开始W&amp;D的效果始终没有赶上LR，后来做了一些特征优化，比如连续特征同时做离散化处理，用全连接代替Wide和Deep融合时直接相加，最后的效果只是与LR模型打平。</p>
@@ -332,54 +332,54 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2 id="2-deepfm"><strong>2. DeepFM</strong></h2>
 <p>本来顺着上面的思路应该优化Deep侧，但由于根据以往的经验，DeepFM模型的效果可能还不错，我们还尝试了DeepFM模型。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/9734e5e28b734f92b78d6620f560b5cb.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647628.webp" />   
     </p>
 <p>优化了特征、正则项、模型层数和embedding size等调优，最终效果与基线LR的AUC相差千分位，依然不好，与浅层模型时单独尝试FM的效果表现一致，这坚定了我们往优化Deep侧的方向去尝试。</p>
 <h2 id="3-dcn"><strong>3. DCN</strong></h2>
 <p>DCN的引入主要是为了解决纯DNN没有特征显式交叉的问题，它在Wide&amp;Deep的基础上，把Wide侧改成了Cross Network，示意如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d16a175f416c4c94be696ad1349176f8.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281647291.webp" />   
     </p>
 <p>该模型的核心是Cross Network，设计用来高效地进行特征交叉，公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/1e7b41c4a9ed4dcf8f085c2968ec0651.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281648237.webp" />   
     </p>
 <p>xl表示第l层的cross layer输出，wl是参数，bl是偏置，都是列向量。其实是应用了残差网络的思想，如下图所示：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/dbf28973d6334c2a819748d7506497f9.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281648085.webp" />   
     </p>
 <p>这样模型就能够高效地学习到高阶的非线性特征组合了。DCN的效果：离线AUC比LR高0.69%，线上eCPM提升幅度稳定达到3%，达到了上线标准。</p>
 <p>我们观察到的现象是当特征显性高阶交叉时效果就会更好，与LR采用GBDT组合特征时效果会更好的表现是一致的。应该是挖掘出了音乐场景下深层次的关系。后来我们还在DCN上面引入了Attention机制，也取得了一定的效果。</p>
 <h2 id="4-dcinwide"><strong>4. DCIN+Wide</strong></h2>
 <p>顺着前面的优化思路，DCN已经解决了特征深度交叉，以及泛化的功能，DIN解决了用户短期兴趣问题，这些解决的都是头部数据的问题，这些数据有一定的量来训练，而广告场景的长尾数据问题依然没有解决。因此我们很自然地把Wide侧增加了进去，模型示意图如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/513f33bf42754b598d64a94883fa5046.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281648921.webp" />   
     </p>
 <p>Wide的加入，使得长尾数据的记忆能力得到了一定的加强，线下AUC和线上效果都有一定的提升，虽然提升量不算太大，但为人工特征工程提供了可能。这是我们现在的线上模型（2020年10月）。</p>
 <p>下面介绍一些我们对深度模型做的优化点。</p>
 <h2 id="5-激活函数的优化"><strong>5. 激活函数的优化</strong></h2>
 <p>在优化DeepFM的过程中，最初Deep模型的隐藏层激活函数用的是ReLU，但我们发现Deep侧不起作用，进一步发现隐藏层的很多输出为0。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/30045ec264104e26b109e006e8721d4d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281648768.webp" />   
     </p>
 <p>从ReLU函数的定义可以知道，负梯度时该ReLU单元会被置为0，这是它单侧抑制的能力。但由于我们的数据特点，ReLU的这个特点变成了局限，在训练过程中导致大量神经元不可逆死亡，进而使大量参数无法更新，从而训练过程失败。</p>
 <p>后来我们把激活函数换成了PReLU，公式如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/a66831f77da143d996721e24cd2119a0.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281648483.webp" />   
     </p>
 <p>当x小于0时，用了一个很小的正数a实现一个斜率为a的线性函数ax，这样既实现了单侧抑制功能，又不至于导致大量神经元不可逆死亡。a可以作为网络中的参数通过训练更新。当a=0时，PReLU退化成ReLU；如果a是一个固定值，则PReLU退化成Leaky ReLU（LReLU）。BP更新a时，采用的是带动量的更新方式：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/4155c99b6c7a4bfc8522303623ef952d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281648122.webp" />   
     </p>
 <p>ReLU和PreLU的函数曲线图对比如下：</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/46c1d2085f6c4137989f014062f0a50d.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281648752.webp" />   
     </p>
 <p>采用PReLU作为激活函数之后，解决了神经元死亡的问题，AUC提升了千分之五。</p>
 <h2 id="6-递减学习率和batch-size的优化"><strong>6. 递减学习率和Batch size的优化</strong></h2>
 <p>我们使用adam优化器，学习率初始值设置为 a，之后每n步降低0.96，AUC提升了千分之二。我们的Batch size设置为10000，比起很多公司的CTR场景设置来说偏大，主要是由于我们很多场景的CTR是千分位，需要考虑每个batch里有一定数据的正样本。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/b43cb219f981429981ed4ca991624801.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281648442.webp" />   
     </p>
 <p>从上图看到，太高的学习率会导致不收敛或者震荡，太低的学习率则收敛速度太慢，递降的学习率一开始比较大可以让模型快速收敛，后面逐步减少则可以精确收敛。</p>
 <h2 id="7-缺失值处理"><strong>7. 缺失值处理</strong></h2>
@@ -511,6 +511,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -544,10 +548,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -926,6 +926,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     

@@ -217,49 +217,49 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><strong>挑战4：</strong> 特征工程如何进行。在拿到日志原文之后，我们需要确定从日志中应该拿哪些信息，如何采集这些信息，并且以程序可以理解的方式将这些特征表达出来，最终和拒绝原因关联起来，即特征的选择、提取、表达和应用。</p>
 <p><strong>挑战5：</strong> 如何还原query现场。在线系统为了保证可用性，关键模块上都会有重查。在定位拒绝时，需要还原出完整的调度树，这样才能看到由根节点出发到叶子节点各条路径失败的原因，不然可能会得到矛盾的结果。如下图所示，A-1、B-1和B-2节点都发生了重查，当拼接错误时（C模块的实例挂到了错误的B模块节点下），B-1（或B-2）的错误状态和挂在它之下的C模块的日志状态可能是矛盾的，无法得出正确的定位结论。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7bfdb2dad2cd474baea53673a55c8edd.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272316916.png" />   
     </p>
 <p><strong>挑战6：</strong> 如何对拒绝特征进行深度挖掘。自动定位难以定位到根因，更精确的定位依赖人工参与的继续分析。分析工具需要能从各种拒绝中找到聚集特征并以一定的优先顺序展示给用户，为根因定位或者止损提供更多线索。query中可以提取的信息包括query的查询词（word），发送query的client端ip，query的语种或者处理query的机器所在的物理机房等。比如，当发现系统拒绝都和某个ip的攻击流量有关时，可以对该ip进行封禁止损。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/04d3ee83f846431eb13d6fd7ceb76338.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272316080.webp" />   
     </p>
 <p><strong>挑战7：</strong> 级联故障如何感知。当某个模块故障引起拒绝时，可能会产生级联的次生故障，表现为拒绝直接原因多样化。下图展示了 一种典型的级联故障：E异常后B对C发起了大量重查，首查叠加重查流量彻底把D压垮，最后A对B也开始发起大量重查。拒绝的流量在个个模块都有可能命中限流策略，表现为不同的拒绝原因。因此，在产生故障时，依赖某一个时间点的拒绝统计信息可能会掩盖引起拒绝的根因。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/0760fcc75aa54a5babaf261e9a06a418.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272316771.webp" />   
     </p>
 <p><strong>挑战8：</strong> 如何定位未知故障。故障是偶发的，我们进行拒绝原因划分的时候所使用的划分集合，无法完整体现系统可能出现的拒绝原因。对于未知故障或者未被纳入到拒绝定位规则中的拒绝，我们需要有手段“制造”故障，发现未知或者未采集到的故障。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/160120ed4b61499797b7b8524d6696ec.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272316803.png" />   
     </p>
 <p>下面，将依次介绍我们是如何解决这8个问题的。</p>
 <h4 id="411-索引镜像技术"><strong>4.1.1 索引镜像技术</strong></h4>
 <p>为了实现日志的快速检索，日志索引由在线采集模块提取后，除了推送本机建立索引之外，还将定位需要的子集主动推送至旁路索引模块，该模块会以日志对应的queryID为key写入内存介质的全量索引存储中。这里的索引支持多列稀疏存储，相同queryID的多条日志location可以追加写入。这样，单条拒绝query的location信息可以已O(1)的时间复杂度拿到，接下来并行地到目标机器上捞取日志，并将其写入持久化的故障日志存储中。最后对这些日志进行特征提取并分析拒绝原因。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/55ce2268743146898710709137320926.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272316826.png" />   
     </p>
 <h4 id="412-流式分析"><strong>4.1.2 流式分析</strong></h4>
 <p>为了解决问题2，我们借鉴了流式分析的理念。无论是分析模块收到了拒绝信号还是增量的拒绝日志信号，都触发一次拒绝原因的分析，并更新结论。这里有2个关键点：一是分析自动触发，线上只要发生拒绝，拒绝分析就开始工作。二是增量更新，只要某个拒绝query的日志有更新，就重新触发故障原因分析。对于入口模块，在线采集端会根据其日志中的指定字段判断是否是拒绝，并将这个信号连同索引一起推送到旁路索引模块。旁路索引模块在收到该信号后会立即通知分析中心对这个queryID进行分析，因此分析流程可以在拒绝报警发出之前触发，最大化故障定位止损效率。当旁路索引模块向分析模块触发完一次分析请求后，会将这个queryID记录到全量索引存储的pvlost表中，当后续有非入口模块日志的索引到达时，旁路索引模块拿该索引中的queryID到这个表中查找，即可判断是否是需要触发增量分析。增量分析会合并所有已知日志，并更新分析结论。</p>
 <h4 id="413-完备labelset"><strong>4.1.3 完备labelset</strong></h4>
 <p>在入口模块接收到用户query后，该query会经多个模块的处理。每个模块都有读取、解析请求包，请求后端，处理后端返回结果，以及最后的打包发送流程。在这个抽象层级上，请求处理各个步骤的划分是足够明确的，并且都可能出现失败而引起query在该模块的拒绝。所以，我们对这个处理过程中可能失败的原因进行了枚举，构建了单模块故障原因完备模板，将该模版应用到所有的必查模块就构成了故障原因的完备集合。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5142e59aa7e04a05a31ef957e95dfc9e.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272316048.png" />   
     </p>
 <h4 id="414-特征工程"><strong>4.1.4 特征工程</strong></h4>
 <p>在确定了完备labelset（拒绝原因）之后，我们需要在程序中实现自动的特征提取、表达，并和拒绝原因建立映射。不同模块的业务日志差异很大，为了解决特征的提取问题，我们实现规则提取引擎，输入为日志原文和提取规则，输出为采集到的特征。特征的类型主要有2种：指定内容是否存在、值是多少。在提取出特征之后，我们使用一个向量表示各个特征的取值，当向量中某些特征的取值满足指定的条件（等于、在指定范围等）时，就给出对应的拒绝原因。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/de44996f3e734d5d85cce8d5b5361c43.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272316647.png" />   
     </p>
 <h4 id="415-单query现场还原"><strong>4.1.5 单query现场还原</strong></h4>
 <p>日志分析模块拿到的日志只是相互独立的节点，进行query现场还原后才能开始分析。从入口模块开始，搜索系统的各个模块会把自己的span_id，以及所调度的多个后端的span_id打印出来，依据这些信息即可还原调度现场。需要注意的是，模块发起的首查和重查是有先后顺序的，通过对一个节点的孩子节点的span_id进行排序，即可还原这种调度上的先后次序。在还原调度树之后，将调度树由根节点到叶子节点路径上的所有异常日志汇总，从中拿到所有的特征并和规则列表进行比对，即可得到该路径（调用链）的拒绝原因。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/31e121d63c414243874980a00d98fc33.png" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272316066.png" />   
     </p>
 <h4 id="416-智能rank算法"><strong>4.1.6 智能rank算法</strong></h4>
 <p>问题6的难点在于：在一批query所有维度的特征中，找到有明显聚集性的一个（一组）维度。这可以进一步表示为：在不同维度之间进行排序，找到排名最考前的维度，而排序的依据就是该维度内部取值是否有高度的聚集性。为了解决这个问题，我们借用了熵的概念——当拒绝的query在某个维度上取值聚集越强时，它的熵就会越低。在构建排序模型时，我们对不同维度的取值进行了变换，确保不同维度可比，并加入了人工经验确定维度权重。这样就可以在出现拒绝时，按照顺序给出拒绝query在不同维度的聚集性，帮助定位根因或制定止损策略。</p>
 <h4 id="417-时间线分析机制"><strong>4.1.7 时间线分析机制</strong></h4>
 <p>为了准确感知到拒绝的演化过程，我们实现了timeline机制。收到拒绝报警后，该工具会自动从巨浪获取拒绝信息，按照秒级粒度进行拒绝原因数量统计，并进行二维展示，如下图所示。在该展示结果上，可以看到不同秒级时间各种拒绝的数量，以及不同拒绝原因随时间的变化趋势，帮助我们定位根因。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/36cf85591aec403cb55f4858fd983151.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312272316400.webp" />   
     </p>
 <h4 id="418-混沌工程技术"><strong>4.1.8 混沌工程技术</strong></h4>
 <p>问了解决问题8，我们引入了混沌工程的技术。混沌工程提供了向在线服务精确注入各种故障的能力，这样就可以拿到丰富且带标记的样本补充到定位知识库中。这样不仅解决了日志样本问题，还可提升对未知故障的预测能力，从“亡羊补牢”进化到“未雨绸缪”，防患于未然。</p>
@@ -392,6 +392,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="widget-list">
     
     <li>
+        <a href="https://geek.zshipu.com/post/ux/%E6%89%8B%E6%9C%BA%E5%9E%8B%E5%8F%B7/" title="UX 设计：手机型号和尺寸">UX 设计：手机型号和尺寸</a>
+    </li>
+    
+    <li>
         <a href="https://geek.zshipu.com/post/java/JavaScript-%E5%8E%8B%E7%BC%A9-Java-%E8%A7%A3%E5%8E%8B%E7%BC%A9/" title="JavaScript 中压缩数据，然后在 Java 中解压缩">JavaScript 中压缩数据，然后在 Java 中解压缩</a>
     </li>
     
@@ -425,10 +429,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     
     <li>
         <a href="https://geek.zshipu.com/post/bi/flink/2071-%E7%AC%AC36%E8%AE%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B6%88%E6%81%AF%E4%BA%8B%E4%BB%B6/" title="Flink系列-第36讲：自定义消息事件">Flink系列-第36讲：自定义消息事件</a>
-    </li>
-    
-    <li>
-        <a href="https://geek.zshipu.com/post/bi/flink/2070-%E7%AC%AC35%E8%AE%B2%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C-Flink-CEP-%E7%AE%80%E4%BB%8B/" title="Flink系列-第35讲：项目背景和 Flink CEP 简介">Flink系列-第35讲：项目背景和 Flink CEP 简介</a>
     </li>
     
 </ul>
@@ -807,6 +807,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <a href="https://geek.zshipu.com/tags/TurboSearch/">TurboSearch</a>
     
     <a href="https://geek.zshipu.com/tags/Typora/">Typora</a>
+    
+    <a href="https://geek.zshipu.com/tags/UX/">UX</a>
     
     <a href="https://geek.zshipu.com/tags/WebRTC/">WebRTC</a>
     
