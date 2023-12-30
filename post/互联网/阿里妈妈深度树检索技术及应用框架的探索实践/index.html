@@ -256,7 +256,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>那么面对这样的现状，下一代模型，我们要如何发展？答案是：更先进的模型、更先进（高效）的索引。</p>
 <p>**▌****深度树检索 ( TDM ) 的设计原理和具体实现 **</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/68f3ffbc47df43469ce6307d00670cf7.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312290906458.webp" />   
     </p>
 <p>应用先进模型，我们自然想到了深度学习模型，但它的引入会带来额外的问题：</p>
 <p>① 深度学习的单点计算消耗 T 较大，在性能有界的情况下，我们的计算次数 N 不能过大；</p>
@@ -270,7 +270,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>④ 如何构建和优化树索引结构?</p>
 <p>接下来，我们会以淘宝的商品推荐为例，做一个关于 TDM 设计和实现的详细介绍，来帮助大家理解。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/ec5b63c79094499cb21d906b8955c622.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312290907854.webp" />   
     </p>
 <p>如何做高效检索？不失一般性，假定我们的树是一棵完全二叉树，全部叶子节点代表全部商品，中间节点代表某种意义上的粗粒度聚合（例如“iPhone”是商品，作为叶子，“手机”是该商品的类别，作为父节点；但是这里需要说明，在通常的 TDM 树中，我们并不要求中间节点一定存在具体物理意义）。</p>
 <p>树上如何做高效检索呢？我们采用了 BeamSearch 这种方式，自顶向下，做快速剪枝。</p>
@@ -286,7 +286,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p>以右图举例：如果 Item8 和 Item6 是叶子层最优 Top2，那么根据我们之前的描述，SN4 和 SN3 是 SN 层的最优 Top2。</p>
 <p>因此，最大堆树的定义是 BeamSearch 有效的充分条件。所以我们可以从根节点递归向下，逐层挑选 TopK，然后扩展至叶子层。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/7dd8a6b1cbb34256adfb39c75368015c.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312290907443.webp" />   
     </p>
 <p>我们如何学习最大堆树的模型？BeamSearch 检索本质上要求具备对每一层进行 TopK 排序的能力。我们的做法是：构建符合这样性质的样本，让样本牵引模型学习，去逼近最大堆。</p>
 <ul>
@@ -300,7 +300,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 <p>我们认为绿色代表正样本，红色代表负样本，如果用户对 Item6 节点有访问，那我们认为用户对 Item6 节点是一个正兴趣，我们在当前的叶子层做随机的负采样，那么上一层怎么做呢？正样本上溯路径的祖先仍然为正样本，然后每一层再做负采样，所以这样就固定出来每一层的正负样本，这样整个树的样本都已经固定完毕。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/e9bf236525b54718995290e3974c4556.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312290907859.webp" />   
     </p>
 <p>有了正负样本，我们就可以用任意复杂模型去拟合 label。可以看到这样模式的优点：</p>
 <p>我们刚刚一直在提要用先进模型或者深度模型，这里发现最大堆树的训练模式和检索阶段的效率保证了可以基于在线检索的性能约束（上界）来决定可以用多复杂的模型达到最高的检索效果。</p>
@@ -327,7 +327,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </p>
 <p>TDM 在 AmazonBooks 和 TaobaoUserBehavior 两个公开数据集上进行了测试。相对于基线的 ItemCF 和 Youtube 内积模型，TDM 的提升非常显著。我们也对 TDM 各种优化做了单项拆分分析，Attention、HierarchicalRep. 和联合学习的效果如之前所说，其中三者的联合效果达到了1+1+1&gt;3。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/19d08b990ced4236b06154f056102a18.webp" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312290907671.webp" />   
     </p>
 <p>回到最初的图中，我们再次发现：检索技术是模型能力和索引效能的融合。</p>
 <p>从这个角度，大家思考一下，TDM 为什么可以解决这个融合呢？我们实现了对更先进模型，即深度学习模型的融合；其次，我们实现了更先进索引，采用了树结构来做索引，有别于常用的倒排索引，并且我们的树结构是一个与模型适配且联合学习的树。</p>

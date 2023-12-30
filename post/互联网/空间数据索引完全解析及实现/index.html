@@ -455,7 +455,7 @@ public class MBR{
      ￼</p>
 <p>采用分裂算法（下面会进行介绍）对结点（或者说区域）P2进行合理地分裂。使其分裂成P1（包含A，B）和P5（包含k，w）两个结点。并且需要向上传递这种分裂。由于分裂之后原来根结点「P1，P2，P3，P4」变成了「P1，P2，P3，P，P5」，因此根结点的孩子数由4变成5，超过了阶数m=4.所以根结点要（采用我们的分裂算法）进行分裂，分裂成Q1（包含P1，P5，P2）和Q2（包含P3，P4）两个结点，由于此时分裂已经传递到根结点，所以生成新的根结点记录Q1，Q2。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/5ae2167569d54e06937ceac941db3d27.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312290903222.jpeg" />   
      ￼</p>
 <h4 id="如何合理地分裂到两个组">如何合理地分裂到两个组</h4>
 <p>
@@ -465,7 +465,7 @@ public class MBR{
 <p>挑选种子有多个方法，这里Quadratic（二次方）方案，对于所有条目中的每一对E1和E2，计算可以包裹着E1，E2的最小限定框J=MBR(E1, E2) ，然后计算增量d= J-E1-E2.计算结束后选择d最大的一对（即增量最大）。（这里为什么要这样呢：之所以要挑选d最大的一对，是因为如果d较大，说明挑选出来的两对条目基于对角线离得比较远，这样的好处就是分裂后的两个分组可以尽量不重叠）</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/8776d2de5494478ebe8f6b9a443eae13.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312290903202.jpeg" />   
      ￼</p>
 <p>
         <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312281622935.jpeg" />   
@@ -474,7 +474,7 @@ public class MBR{
 <p>挑选出seed1和seed2之后，就将剩下的要分配的分裂条目分个这两个seed使它们各称为一个组。而这个分配的原则就是离谁比较“近”就和谁一组。这里的“近”指的是任何一个条目MBB&ndash;E和seed1，seed2分别计算可以包裹着E和seed1的最小限定框J1=MBR(E，seed1)， 可以包裹着E和seed2的最小限定框J2=MBR(E，seed2)。再分别计算增量d1=J1-E-seed1，d2=J2-E-seed2。d1，d2哪个小就说明哪个“近”。</p>
 </blockquote>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/159d9b7ed84747bb84aae38d6967c6d0.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312290903250.jpeg" />   
      ￼</p>
 <p>（-_-）!!!所以分裂的具体情况还是很复杂的，真想不懂这些大神怎么会想得到这些。除了上述Quadratic的分裂算法之外还有其他的分裂算法，如下图中间图，但是分裂的效果都不如R*树（R树的改进版）的算法好。</p>
 <p>
@@ -509,11 +509,11 @@ public class MBR{
 <p>R树删除记录过程中的CondenseTree操作是不同于B树的。我们知道，B树删除过程中，如果出现结点的记录数少于半满（即下溢）的情况，则直接把这些记录与其他叶子的记录“融合”，也就是说两个相邻结点合并。然而R树却是直接重新插入。</p>
 <p>具体的例子</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/477497fcf4cd486788432e4657c24abb.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312290903600.jpeg" />   
      ￼</p>
 <p>假设结点最大条目数为4，最小条目数为2。在这张图中，我们的目标是删除记录c。首先使用FindLeaf操作找到c所处在的叶子结点的位置——R11。当c从R11删除时，R11就只有一条记录了，少于最小条目数2，出现下溢，此时要调用CondenseTree操作。这样，c被删除，R11剩余的条目——指向记录d的指针——被插入链表Q。然后向更高一层的结点进行此操作。这样R12会被插入链表中。原理是一样的，在这里就不再赘述。</p>
 <p>
-        <img class="mx-auto" alt="" src="https://img.6aiq.com/e/d16b609692fc45b393cb511dbf863db1.jpeg" />   
+        <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/zshipu/imagesv2@main/2023/202312290903498.jpeg" />   
      ￼</p>
 <p>有一点需要解释的是，我们发现这个删除操作向上传递之后，根结点的条目R1也被插入了Q中，这样根结点只剩下了R2。别着急，重新插入操作会有效的解决这个问题。我们插入R3，R12，d至它原来所处的层。这样，我们发现根结点只有一个条目了，此时根据Inert中的操作，我们把这个根结点删除，它的孩子结点，即R5，R6，R7，R3所在的结点被置为根结点。至此，删除操作结束。</p>
 <h4 id="另一个例子再次理解删除">另一个例子再次理解删除</h4>
